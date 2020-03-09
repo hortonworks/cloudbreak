@@ -15,16 +15,19 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
-import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.network.v1.AzureRegistrationTypeResolver;
 
 @Component
 public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConverter {
 
+    private final AzureRegistrationTypeResolver azureRegistrationTypeResolver;
+
     public AzureEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter,
-            SubnetTypeConverter subnetTypeConverter) {
+            SubnetTypeConverter subnetTypeConverter, AzureRegistrationTypeResolver azureRegistrationTypeResolver) {
         super(environmentViewConverter, subnetTypeConverter);
+        this.azureRegistrationTypeResolver = azureRegistrationTypeResolver;
     }
 
     @Override
@@ -66,26 +69,17 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
         AzureNetwork azureNetwork = (AzureNetwork) network;
         return builder.withAzure(
-                AzureParams.AzureParamsBuilder
-                    .anAzureParams()
-                    .withNetworkId(azureNetwork.getNetworkId())
-                    .withResourceGroupName(azureNetwork.getResourceGroupName())
-                    .withNoPublicIp(azureNetwork.getNoPublicIp())
-                    .build())
+                AzureParams.builder()
+                        .withNetworkId(azureNetwork.getNetworkId())
+                        .withResourceGroupName(azureNetwork.getResourceGroupName())
+                        .withNoPublicIp(azureNetwork.getNoPublicIp())
+                        .build())
                 .build();
     }
 
     @Override
     void setRegistrationType(BaseNetwork result, NetworkDto networkDto) {
-        if (isExistingNetworkSpecified(networkDto)) {
-            result.setRegistrationType(RegistrationType.EXISTING);
-        } else {
-            result.setRegistrationType(RegistrationType.CREATE_NEW);
-        }
-    }
-
-    private boolean isExistingNetworkSpecified(NetworkDto networkDto) {
-        return networkDto.getAzure() != null && networkDto.getAzure().getNetworkId() != null && networkDto.getAzure().getResourceGroupName() != null;
+        result.setRegistrationType(azureRegistrationTypeResolver.getRegistrationType(networkDto));
     }
 
     @Override

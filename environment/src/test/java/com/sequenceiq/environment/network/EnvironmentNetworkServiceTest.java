@@ -208,7 +208,7 @@ class EnvironmentNetworkServiceTest {
                 .withLocationDto(LocationDto.builder().withName("us-west-1").build())
                 .withNetwork(NetworkDto.builder()
                         .withName("net-1")
-                        .withAzure(AzureParams.AzureParamsBuilder.anAzureParams()
+                        .withAzure(AzureParams.builder()
                                 .withResourceGroupName(resourceGroup)
                                 .build())
                         .build())

@@ -1,14 +1,17 @@
-package com.sequenceiq.environment.environment.v1;
+package com.sequenceiq.environment.environment.v1.cli.aws;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import com.cloudera.cdp.environments.model.CreateAWSEnvironmentRequest;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -20,18 +23,19 @@ import com.sequenceiq.environment.api.v1.environment.model.request.LocationReque
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 
 class EnvironmentRequestToCreateAWSEnvironmentRequestConverterTest {
 
-    private EnvironmentRequestToCreateAWSEnvironmentRequestConverter underTest;
+    private final EnvironmentValidatorService environmentValidatorService = Mockito.mock(EnvironmentValidatorService.class);
 
-    @BeforeEach
-    void setUp() {
-        underTest = new EnvironmentRequestToCreateAWSEnvironmentRequestConverter();
-    }
+    private final EnvironmentRequestToCreateAWSEnvironmentRequestConverter underTest
+            = new EnvironmentRequestToCreateAWSEnvironmentRequestConverter(environmentValidatorService);
 
     @Test
     void convert() {
+        when(environmentValidatorService.validateAwsEnvironmentRequest(any())).thenReturn(ValidationResult.empty());
+
         EnvironmentRequest request = getEnvironmentRequest();
         CreateAWSEnvironmentRequest result = underTest.convert(request);
         assertEquals(request.getAuthentication().getPublicKey(), result.getAuthentication().getPublicKey());

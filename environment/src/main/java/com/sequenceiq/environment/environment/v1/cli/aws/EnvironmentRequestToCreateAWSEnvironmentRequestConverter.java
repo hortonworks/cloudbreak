@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.v1;
+package com.sequenceiq.environment.environment.v1.cli.aws;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
@@ -11,17 +11,34 @@ import com.cloudera.cdp.environments.model.AuthenticationRequest;
 import com.cloudera.cdp.environments.model.AwsLogStorageRequest;
 import com.cloudera.cdp.environments.model.CreateAWSEnvironmentRequest;
 import com.cloudera.cdp.environments.model.SecurityAccessRequest;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.environment.v1.cli.EnvironmentRequestToCliRequestConverter;
+import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 
 @Component
-public class EnvironmentRequestToCreateAWSEnvironmentRequestConverter {
+public class EnvironmentRequestToCreateAWSEnvironmentRequestConverter implements EnvironmentRequestToCliRequestConverter {
+
+    private final EnvironmentValidatorService environmentValidatorService;
+
+    public EnvironmentRequestToCreateAWSEnvironmentRequestConverter(EnvironmentValidatorService environmentValidatorService) {
+        this.environmentValidatorService = environmentValidatorService;
+    }
+
+    @Override
+    public CloudPlatform supportedPlatform() {
+        return CloudPlatform.AWS;
+    }
 
     public CreateAWSEnvironmentRequest convert(EnvironmentRequest source) {
+        validateRequest(source);
         CreateAWSEnvironmentRequest environmentRequest = new CreateAWSEnvironmentRequest();
         environmentRequest.setAuthentication(environmentAuthenticationRequestToAuthenticationRequest(source.getAuthentication()));
         environmentRequest.setCredentialName(source.getCredentialName());
@@ -35,6 +52,13 @@ public class EnvironmentRequestToCreateAWSEnvironmentRequestConverter {
         environmentRequest.setSubnetIds(getSubnetIds(source));
         environmentRequest.setVpcId(getVpcId(source));
         return environmentRequest;
+    }
+
+    private void validateRequest(EnvironmentRequest source) {
+        ValidationResult validationResult = environmentValidatorService.validateAwsEnvironmentRequest(source);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
     }
 
     private AuthenticationRequest environmentAuthenticationRequestToAuthenticationRequest(EnvironmentAuthenticationRequest source) {

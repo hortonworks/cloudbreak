@@ -1,4 +1,4 @@
-package com.sequenceiq.distrox.v1.distrox.converter;
+package com.sequenceiq.distrox.v1.distrox.converter.cli.distrox;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
 import com.cloudera.cdp.datahub.model.AttachedVolumeRequest;
@@ -18,40 +16,41 @@ import com.cloudera.cdp.datahub.model.DatahubResourceTagRequest;
 import com.cloudera.cdp.datahub.model.ImageRequest;
 import com.cloudera.cdp.datahub.model.InstanceGroupRequest;
 import com.cloudera.cdp.datahub.model.VolumeEncryptionRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.EncryptionParametersV4Base;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.EncryptionParametersV1Base;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.VolumeV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 
 @Component
-public class StackRequestToCreateAWSClusterRequestConverter {
+public class DistroXV1RequestToCreateAWSClusterRequestConverter implements DistroXV1RequestToCliRequestConverter {
 
-    @Inject
-    private EnvironmentClientService environmentClientService;
+    @Override
+    public CloudPlatform supportedPlatform() {
+        return CloudPlatform.AWS;
+    }
 
-    public CreateAWSClusterRequest convert(StackV4Request source) {
+    @Override
+    public CreateAWSClusterRequest convert(DistroXV1Request source) {
         CreateAWSClusterRequest request = new CreateAWSClusterRequest();
         request.setClusterName(source.getName());
         request.setClusterTemplateName(source.getCluster().getBlueprintName());
-        request.setEnvironmentName(getEnvironmentName(source.getEnvironmentCrn()));
+        request.setEnvironmentName(source.getEnvironmentName());
         request.setImage(convertImageRequest(source.getImage()));
         request.setInstanceGroups(convertInstanceGroups(source.getInstanceGroups()));
-        request.setSubnetId(source.getNetwork().getAws().getSubnetId());
+        if (source.getNetwork() != null && source.getNetwork().getAws() != null) {
+            request.setSubnetId(source.getNetwork().getAws().getSubnetId());
+        }
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         return request;
     }
 
-    private String getEnvironmentName(String environmentCrn) {
-        return environmentClientService.getByCrn(environmentCrn).getName();
-    }
-
-    private List<InstanceGroupRequest> convertInstanceGroups(List<InstanceGroupV4Request> source) {
+    private List<InstanceGroupRequest> convertInstanceGroups(Set<InstanceGroupV1Request> source) {
         List<InstanceGroupRequest> instanceGroups = new ArrayList<>();
         doIfNotNull(source, s -> s.forEach(ig -> {
             InstanceGroupRequest instanceGroup = new InstanceGroupRequest();
@@ -69,7 +68,7 @@ public class StackRequestToCreateAWSClusterRequestConverter {
         return instanceGroups;
     }
 
-    private List<AttachedVolumeRequest> convertAttachedVolumeConfiguration(Set<VolumeV4Request> source) {
+    private List<AttachedVolumeRequest> convertAttachedVolumeConfiguration(Set<VolumeV1Request> source) {
         List<AttachedVolumeRequest> attachedVolumes = new ArrayList<>();
         source.forEach(volume -> {
             AttachedVolumeRequest attachedVolume = new AttachedVolumeRequest();
@@ -81,10 +80,10 @@ public class StackRequestToCreateAWSClusterRequestConverter {
         return attachedVolumes;
     }
 
-    private VolumeEncryptionRequest convertVolumeEncryption(InstanceTemplateV4Request source) {
+    private VolumeEncryptionRequest convertVolumeEncryption(InstanceTemplateV1Request source) {
         EncryptionType encryptionType = Optional.ofNullable(source.getAws())
-                .map(AwsInstanceTemplateV4Parameters::getEncryption)
-                .map(EncryptionParametersV4Base::getType)
+                .map(AwsInstanceTemplateV1Parameters::getEncryption)
+                .map(EncryptionParametersV1Base::getType)
                 .orElse(EncryptionType.NONE);
         VolumeEncryptionRequest encryptionRequest = new VolumeEncryptionRequest();
         encryptionRequest.setEnableEncryption(EncryptionType.NONE != encryptionType);
@@ -94,16 +93,16 @@ public class StackRequestToCreateAWSClusterRequestConverter {
         return encryptionRequest;
     }
 
-    private ImageRequest convertImageRequest(ImageSettingsV4Request source) {
+    private ImageRequest convertImageRequest(DistroXImageV1Request source) {
         ImageRequest imageRequest = new ImageRequest();
         imageRequest.setId(source.getId());
         imageRequest.setCatalogName(source.getCatalog());
         return imageRequest;
     }
 
-    private List<DatahubResourceTagRequest> getTags(TagsV4Request source) {
+    private List<DatahubResourceTagRequest> getTags(TagsV1Request source) {
         List<DatahubResourceTagRequest> tags = new ArrayList<>();
-        doIfNotNull(getIfNotNull(source, TagsV4Request::getUserDefined), userDefinedTags ->
+        doIfNotNull(getIfNotNull(source, TagsV1Request::getUserDefined), userDefinedTags ->
                 userDefinedTags.forEach((k, v) -> {
                     DatahubResourceTagRequest tag = new DatahubResourceTagRequest();
                     tag.setKey(k);

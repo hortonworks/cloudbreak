@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.validation;
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
@@ -11,7 +10,6 @@ import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
 
-import com.sequenceiq.environment.environment.EnvironmentStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +27,9 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
@@ -103,22 +101,15 @@ public class EnvironmentValidatorService {
         return resultBuilder.build();
     }
 
-    public ValidationResult validateAwsEnvironmentRequest(EnvironmentRequest environmentRequest, String cloudPlatform) {
+    public ValidationResult validateAwsEnvironmentRequest(EnvironmentRequest environmentRequest) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        resultBuilder.ifError(() -> !CloudPlatform.AWS.name().equalsIgnoreCase(cloudPlatform),
+        resultBuilder.ifError(() -> !CloudPlatform.AWS.name().equalsIgnoreCase(environmentRequest.getCloudPlatform()),
                 "Environment request is not for AWS.");
 
         resultBuilder.ifError(() -> StringUtils.isBlank(Optional.ofNullable(environmentRequest.getAws())
                 .map(AwsEnvironmentParameters::getS3guard)
                 .map(S3GuardRequestParameters::getDynamoDbTableName)
                 .orElse(null)), "S3Guard Dynamo DB table name is not found in environment request.");
-        return resultBuilder.build();
-    }
-
-    public ValidationResult validateAwsEnvironmentRequest(EnvironmentDto environmentDto) {
-        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        resultBuilder.ifError(() -> !AWS.name().equalsIgnoreCase(environmentDto.getCloudPlatform()),
-                "Environment is not in AWS.");
         return resultBuilder.build();
     }
 

@@ -122,7 +122,7 @@ class NetworkCreationRequestFactoryTest {
         builder.withNetwork(NetworkDto.builder()
                 .withId(NETWORK_ID)
                 .withNetworkCidr(NETWORK_CIDR)
-                .withAzure(AzureParams.AzureParamsBuilder.anAzureParams()
+                .withAzure(AzureParams.builder()
                         .withNoPublicIp(true)
                         .build())
                 .build());

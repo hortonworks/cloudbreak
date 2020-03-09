@@ -1,0 +1,40 @@
+package com.sequenceiq.environment.environment.v1.cli;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+
+@Component
+public class DelegatingCliEnvironmentRequestConverter {
+
+    private final List<EnvironmentRequestToCliRequestConverter> requestConverters;
+
+    private final List<EnvironmentDtoToCliRequestConverter> dtoConverters;
+
+    public DelegatingCliEnvironmentRequestConverter(List<EnvironmentRequestToCliRequestConverter> requestConverters,
+            List<EnvironmentDtoToCliRequestConverter> dtoConverters) {
+        this.requestConverters = requestConverters;
+        this.dtoConverters = dtoConverters;
+    }
+
+    public Object convertRequest(EnvironmentRequest source) {
+        return requestConverters.stream()
+                .filter(c -> c.supportedPlatform().name().equals(source.getCloudPlatform()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException("No converter found for cloud platform: " + source.getCloudPlatform()))
+                .convert(source);
+    }
+
+    public Object convertDto(EnvironmentDto source) {
+        return dtoConverters.stream()
+                .filter(c -> c.supportedPlatform().name().equals(source.getCloudPlatform()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException("No converter found for cloud platform: " + source.getCloudPlatform()))
+                .convert(source);
+    }
+
+}

@@ -1,4 +1,4 @@
-package com.sequenceiq.distrox.v1.distrox.converter;
+package com.sequenceiq.distrox.v1.distrox.converter.cli.distrox;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,7 +11,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.cloudera.cdp.datahub.model.CreateAWSClusterRequest;
@@ -36,16 +35,11 @@ class DistroXV1RequestToCreateAWSClusterRequestConverterTest {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    private DistroXV1RequestToCreateAWSClusterRequestConverter underTest;
-
-    @BeforeEach
-    void setUp() {
-        underTest = new DistroXV1RequestToCreateAWSClusterRequestConverter();
-    }
+    private DistroXV1RequestToCreateAWSClusterRequestConverter underTest = new DistroXV1RequestToCreateAWSClusterRequestConverter();
 
     @Test
     void convert() {
-        DistroXV1Request request = getDistroXV1Requeast();
+        DistroXV1Request request = getDistroXV1Request();
         CreateAWSClusterRequest result = underTest.convert(request);
         assertEquals(request.getName(), result.getClusterName());
         assertEquals(request.getCluster().getBlueprintName(), result.getClusterTemplateName());
@@ -59,7 +53,7 @@ class DistroXV1RequestToCreateAWSClusterRequestConverterTest {
         assertInstanceGroups(request.getInstanceGroups(), result.getInstanceGroups());
     }
 
-    private DistroXV1Request getDistroXV1Requeast() {
+    private DistroXV1Request getDistroXV1Request() {
         DistroXV1Request request = new DistroXV1Request();
         request.setName("sdxName");
         DistroXClusterV1Request distroxCluster = new DistroXClusterV1Request();
@@ -124,8 +118,8 @@ class DistroXV1RequestToCreateAWSClusterRequestConverterTest {
     private void assertInstanceGroup(InstanceGroupV1Request expected, InstanceGroupRequest igRequest) {
         expected.getTemplate().getAttachedVolumes().forEach(av -> assertThat(igRequest.getAttachedVolumeConfiguration().stream()
                 .anyMatch(igr -> Objects.equals(av.getCount(), igr.getVolumeCount())
-                && Objects.equals(av.getSize(), igr.getVolumeSize())
-                && Objects.equals(av.getType(), igr.getVolumeType())))
+                        && Objects.equals(av.getSize(), igr.getVolumeSize())
+                        && Objects.equals(av.getType(), igr.getVolumeType())))
                 .isTrue());
         assertThat(igRequest.getInstanceGroupType()).isEqualTo(expected.getType().name());
         assertThat(igRequest.getInstanceType()).isEqualTo(expected.getTemplate().getInstanceType());

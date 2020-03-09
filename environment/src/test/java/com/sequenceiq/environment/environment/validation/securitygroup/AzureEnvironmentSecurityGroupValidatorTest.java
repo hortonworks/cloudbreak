@@ -154,8 +154,7 @@ public class AzureEnvironmentSecurityGroupValidatorTest {
     }
 
     private AzureParams getAzureParams(boolean noPublicIp) {
-        return AzureParams.AzureParamsBuilder
-                .anAzureParams()
+        return AzureParams.builder()
                 .withNetworkId("aNetworkId")
                 .withResourceGroupName("aResourceGroupId")
                 .withNoPublicIp(noPublicIp)

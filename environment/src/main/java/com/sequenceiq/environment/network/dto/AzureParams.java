@@ -41,31 +41,31 @@ public class AzureParams {
                 '}';
     }
 
-    public static final class AzureParamsBuilder {
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
         private String networkId;
 
         private String resourceGroupName;
 
         private boolean noPublicIp;
 
-        private AzureParamsBuilder() {
+        private Builder() {
         }
 
-        public static AzureParamsBuilder anAzureParams() {
-            return new AzureParamsBuilder();
-        }
-
-        public AzureParamsBuilder withNetworkId(String networkId) {
+        public Builder withNetworkId(String networkId) {
             this.networkId = networkId;
             return this;
         }
 
-        public AzureParamsBuilder withResourceGroupName(String resourceGroupName) {
+        public Builder withResourceGroupName(String resourceGroupName) {
             this.resourceGroupName = resourceGroupName;
             return this;
         }
 
-        public AzureParamsBuilder withNoPublicIp(boolean noPublicIp) {
+        public Builder withNoPublicIp(boolean noPublicIp) {
             this.noPublicIp = noPublicIp;
             return this;
         }
