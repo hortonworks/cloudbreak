@@ -10,8 +10,10 @@ base:
              - match: grain
              - freeipa.primary-install
              - freeipa.common-install
+             - freeipa.backups
 
            'roles:freeipa_replica':
              - match: grain
              - freeipa.replica-install
              - freeipa.common-install
+             - freeipa.backups

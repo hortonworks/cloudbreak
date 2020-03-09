@@ -1,0 +1,6 @@
+{%- from 'freeipa/settings.sls' import freeipa with context -%}
+#!/bin/bash
+if [ ! -f /tmp/freeipa_backup_hourly_bypass ]; then
+    /usr/local/bin/freeipa_backup -t DATA -f "{{freeipa.hostname}}/hourly/$(date -I)"
+fi
+

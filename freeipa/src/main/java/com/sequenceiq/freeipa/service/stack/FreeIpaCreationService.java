@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
@@ -43,6 +44,8 @@ import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.freeipa.backup.BackupClusterType;
+import com.sequenceiq.freeipa.service.freeipa.backup.cloud.CloudBackupFolderResolverService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.util.CrnService;
@@ -98,6 +101,9 @@ public class FreeIpaCreationService {
     private CloudStorageFolderResolverService cloudStorageFolderResolverService;
 
     @Inject
+    private CloudBackupFolderResolverService cloudBackupFolderResolverService;
+
+    @Inject
     private SecurityConfigService securityConfigService;
 
     @Value("${info.app.version:}")
@@ -111,11 +117,21 @@ public class FreeIpaCreationService {
         stack.setAppVersion(appVersion);
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack, credential);
 
-
         Telemetry telemetry = stack.getTelemetry();
         cloudStorageFolderResolverService.updateStorageLocation(telemetry,
                 FluentClusterType.FREEIPA.value(), stack.getName(), stack.getResourceCrn());
+
         stack.setTelemetry(telemetry);
+
+        Backup backup = stack.getBackup();
+        cloudBackupFolderResolverService.updateStorageLocation(backup,
+                BackupClusterType.FREEIPA.value(), stack.getName(), stack.getResourceCrn());
+        if (backup != null) {
+            backup.setHourlyEnabled(true);
+            backup.setInitialFullEnabled(true);
+            backup.setMonthlyFullEnabled(true);
+            stack.setBackup(backup);
+        }
 
         fillInstanceMetadata(stack);
 

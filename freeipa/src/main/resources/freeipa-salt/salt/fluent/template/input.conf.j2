@@ -106,6 +106,14 @@
   tag {{providerPrefix}}.nginx_error
   read_from_head true
 </source>
+<source>
+  @type tail
+  format none
+  path /var/log/ipabackup.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ipabackup.log.pos
+  tag {{providerPrefix}}.ipa_backup
+  read_from_head true
+</source>
 </worker>
 {% else %}
 # DATABUS inputs are disabled
