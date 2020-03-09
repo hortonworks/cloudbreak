@@ -1,5 +1,8 @@
 package com.sequenceiq.environment.environment.service.sdx;
 
+import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.RUNNING;
+import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.STOPPED;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +25,7 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.environment.environment.poller.SdxPollerProvider;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @Service
 public class SdxPollerService {
@@ -48,17 +52,17 @@ public class SdxPollerService {
     }
 
     public void startAttachedDatalake(Long envId, String environmentName) {
-        executeSdxOperationAndStartPolling(envId, environmentName, sdxService::startByCrn, sdxPollerProvider::startSdxClustersPoller);
+        executeSdxOperationAndStartPolling(envId, environmentName, RUNNING, sdxService::startByCrn, sdxPollerProvider::startSdxClustersPoller);
     }
 
     public void stopAttachedDatalakeClusters(Long envId, String environmentName) {
-        executeSdxOperationAndStartPolling(envId, environmentName, sdxService::stopByCrn, sdxPollerProvider::stopSdxClustersPoller);
+        executeSdxOperationAndStartPolling(envId, environmentName, STOPPED, sdxService::stopByCrn, sdxPollerProvider::stopSdxClustersPoller);
     }
 
-    private void executeSdxOperationAndStartPolling(Long envId, String environmentName, Consumer<String> sdxOperation,
+    private void executeSdxOperationAndStartPolling(Long envId, String environmentName, SdxClusterStatusResponse skipStatus, Consumer<String> sdxOperation,
             BiFunction<Long, List<String>, AttemptMaker<Void>> attemptMakerFactory) {
         try {
-            List<String> sdxCrns = getExecuteSdxOperationsAndGetCrns(environmentName, sdxOperation);
+            List<String> sdxCrns = getExecuteSdxOperationsAndGetCrns(environmentName, sdxOperation, skipStatus);
             if (CollectionUtils.isNotEmpty(sdxCrns)) {
                 Polling.stopAfterAttempt(attempt)
                         .stopIfException(true)
@@ -78,12 +82,17 @@ public class SdxPollerService {
         }
     }
 
-    private List<String> getExecuteSdxOperationsAndGetCrns(String environmentName, Consumer<String> sdxOperation) {
+    private List<String> getExecuteSdxOperationsAndGetCrns(String environmentName, Consumer<String> sdxOperation, SdxClusterStatusResponse skipStatus) {
         Collection<SdxClusterResponse> attachedSdxClusters = getAttachedDatalakeClusters(environmentName);
         return attachedSdxClusters.stream()
                 .map(response -> {
                     String crn = response.getCrn();
-                    sdxOperation.accept(crn);
+                    if (response.getStatus() != skipStatus) {
+                        LOGGER.info("The env operation is executed, the status of sdx is {} but the skip status is {}", response.getStatus(), skipStatus);
+                        sdxOperation.accept(crn);
+                    } else {
+                        LOGGER.info("The env operation is skipped because of the status of sdx in the proper state: {}", skipStatus);
+                    }
                     return crn;
                 })
                 .collect(Collectors.toList());
