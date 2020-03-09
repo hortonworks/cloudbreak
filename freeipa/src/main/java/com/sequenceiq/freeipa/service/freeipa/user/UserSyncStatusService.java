@@ -20,6 +20,10 @@ public class UserSyncStatusService {
         return userSyncStatusRepository.save(userSyncStatus);
     }
 
+    public UserSyncStatus findByStack(Stack stack) {
+        return userSyncStatusRepository.getByStack(stack).orElse(null);
+    }
+
     public UserSyncStatus getOrCreateForStack(Stack stack) {
         return userSyncStatusRepository.getByStack(stack).orElseGet(() -> {
             UserSyncStatus userSyncStatus = new UserSyncStatus();

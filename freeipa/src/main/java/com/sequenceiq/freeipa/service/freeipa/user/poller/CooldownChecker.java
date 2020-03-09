@@ -18,8 +18,9 @@ class CooldownChecker {
 
     public boolean isCooldownExpired(UserSyncStatus userSyncStatus, Instant cooldownThresholdTime) {
         boolean cool = userSyncStatus == null ||
-                userSyncStatus.getLastFullSyncStartTime() == null ||
-                Instant.ofEpochMilli(userSyncStatus.getLastFullSyncStartTime()).isBefore(cooldownThresholdTime);
+                userSyncStatus.getLastRequestedFullSync() == null ||
+                userSyncStatus.getLastRequestedFullSync().getStartTime() == null ||
+                Instant.ofEpochMilli(userSyncStatus.getLastRequestedFullSync().getStartTime()).isBefore(cooldownThresholdTime);
         if (LOGGER.isDebugEnabled()) {
             Stack stack = userSyncStatus.getStack();
             LOGGER.debug("Synchronization to Environment {} in Account {} {} been run since {}", stack.getEnvironmentCrn(),

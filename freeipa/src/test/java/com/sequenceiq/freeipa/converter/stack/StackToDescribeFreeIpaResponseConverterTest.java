@@ -17,17 +17,20 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSetti
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.usersync.UserSyncStatusResponse;
 import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationToStackAuthenticationResponseConverter;
 import com.sequenceiq.freeipa.converter.freeipa.FreeIpaToFreeIpaServerResponseConverter;
 import com.sequenceiq.freeipa.converter.image.ImageToImageSettingsResponseConverter;
 import com.sequenceiq.freeipa.converter.instance.InstanceGroupToInstanceGroupResponseConverter;
 import com.sequenceiq.freeipa.converter.network.NetworkToNetworkResponseConverter;
 import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
+import com.sequenceiq.freeipa.converter.usersync.UserSyncStatusToUserSyncStatusResponseConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.entity.UserSyncStatus;
 
 @ExtendWith(MockitoExtension.class)
 class StackToDescribeFreeIpaResponseConverterTest {
@@ -49,6 +52,8 @@ class StackToDescribeFreeIpaResponseConverterTest {
     private static final FreeIpaServerResponse FREE_IPA_SERVER_RESPONSE = new FreeIpaServerResponse();
 
     private static final List<InstanceGroupResponse> INSTANCE_GROUP_RESPONSES = List.of(new InstanceGroupResponse());
+
+    private static final UserSyncStatusResponse USERSYNC_STATUS_RESPONSE = new UserSyncStatusResponse();
 
     private static final Status STATUS = Status.AVAILABLE;
 
@@ -79,17 +84,22 @@ class StackToDescribeFreeIpaResponseConverterTest {
     @Mock
     private TelemetryConverter telemetryConverter;
 
+    @Mock
+    private UserSyncStatusToUserSyncStatusResponseConverter userSyncStatusConverter;
+
     @Test
     void convert() {
         Stack stack = createStack();
         Image image = new Image();
         FreeIpa freeIpa = new FreeIpa();
+        UserSyncStatus userSyncStatus = new UserSyncStatus();
         when(authenticationResponseConverter.convert(stack.getStackAuthentication())).thenReturn(STACK_AUTHENTICATION_RESPONSE);
         when(imageSettingsResponseConverter.convert(image)).thenReturn(IMAGE_SETTINGS_RESPONSE);
         when(freeIpaServerResponseConverter.convert(freeIpa)).thenReturn(FREE_IPA_SERVER_RESPONSE);
         when(instanceGroupConverter.convert(stack.getInstanceGroups())).thenReturn(INSTANCE_GROUP_RESPONSES);
+        when(userSyncStatusConverter.convert(userSyncStatus)).thenReturn(USERSYNC_STATUS_RESPONSE);
 
-        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa);
+        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, userSyncStatus);
 
         assertThat(result)
                 .returns(NAME, DescribeFreeIpaResponse::getName)
@@ -105,8 +115,9 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .returns(STATUS_REASON, DescribeFreeIpaResponse::getStatusReason)
                 .returns(STATUS_STRING, DescribeFreeIpaResponse::getStatusString)
                 // TODO decorateFreeIpaServerResponseWithIps
-                .returns(APP_VERSION, DescribeFreeIpaResponse::getAppVersion);
+                .returns(APP_VERSION, DescribeFreeIpaResponse::getAppVersion)
                 // TODO decorateWithCloudStorgeAndTelemetry
+                .returns(USERSYNC_STATUS_RESPONSE, DescribeFreeIpaResponse::getUserSyncStatus);
     }
 
     private Stack createStack() {

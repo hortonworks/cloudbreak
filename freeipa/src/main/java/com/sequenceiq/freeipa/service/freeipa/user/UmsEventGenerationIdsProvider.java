@@ -26,7 +26,7 @@ public class UmsEventGenerationIdsProvider {
     enum EventMapping {
         LAST_ROLE_ASSIGNMENT_EVENT_ID("lastRoleAssignmentEventId", GetEventGenerationIdsResponse::getLastRoleAssignmentEventId),
         LAST_RESOURCE_ROLE_ASSIGNMENT_EVENT_ID("lastResourceRoleAssignmentEventId", GetEventGenerationIdsResponse::getLastResourceRoleAssignmentEventId),
-        LAST_GROUP_MEMBERHSIP_CHANGED_EVENT_ID("lastGroupMembershipChangedEventId", GetEventGenerationIdsResponse::getLastGroupMembershipChangedEventId),
+        LAST_GROUP_MEMBERSHIP_CHANGED_EVENT_ID("lastGroupMembershipChangedEventId", GetEventGenerationIdsResponse::getLastGroupMembershipChangedEventId),
         LAST_ACTOR_DELETED_EVENT_ID("lastActorDeletedEventId", GetEventGenerationIdsResponse::getLastActorDeletedEventId),
         LAST_ACTOR_WORKLOAD_CREDENTIALS_CHANGED_EVENT_ID("lastActorWorkloadCredentialsChangedEventId",
                 GetEventGenerationIdsResponse::getLastActorWorkloadCredentialsChangedEventId);

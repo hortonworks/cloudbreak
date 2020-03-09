@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -119,10 +118,9 @@ public class UserSyncService {
         if (operation.getStatus() == OperationState.RUNNING) {
             boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
             if (fullSync) {
-                long currentTime = Instant.now().toEpochMilli();
                 stacks.forEach(stack -> {
                     UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
-                    userSyncStatus.setLastFullSyncStartTime(currentTime);
+                    userSyncStatus.setLastRequestedFullSync(operation);
                     userSyncStatusService.save(userSyncStatus);
                 });
             }
@@ -160,7 +158,8 @@ public class UserSyncService {
 
             Map<String, Future<SyncStatusDetail>> statusFutures = stacks.stream()
                     .collect(Collectors.toMap(Stack::getEnvironmentCrn,
-                            stack -> asyncSynchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), umsEventGenerationIds, fullSync)));
+                            stack -> asyncSynchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), umsEventGenerationIds,
+                                    fullSync, operationId, accountId)));
 
             statusFutures.forEach((envCrn, statusFuture) -> {
                 try {
@@ -191,13 +190,14 @@ public class UserSyncService {
     }
 
     private Future<SyncStatusDetail> asyncSynchronizeStack(Stack stack, UmsUsersState umsUsersState, UmsEventGenerationIds umsEventGenerationIds,
-            boolean fullSync) {
+            boolean fullSync, String operationId, String accountId) {
         return asyncTaskExecutor.submit(() -> {
             SyncStatusDetail statusDetail = internalSynchronizeStack(stack, umsUsersState, fullSync);
             if (fullSync && statusDetail.getStatus() == SynchronizationStatus.COMPLETED) {
                 UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
                 userSyncStatus.setUmsEventGenerationIds(new Json(umsEventGenerationIds));
-                userSyncStatus.setLastFullSyncEndTime(Instant.now().toEpochMilli());
+
+                userSyncStatus.setLastSuccessfulFullSync(operationService.getOperationForAccountIdAndOperationId(accountId, operationId));
                 userSyncStatusService.save(userSyncStatus);
             }
             return statusDetail;

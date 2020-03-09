@@ -28,9 +28,11 @@ public class UserSyncStatus implements AccountIdAwareResource {
     @Column(columnDefinition = "TEXT")
     private Json umsEventGenerationIds;
 
-    private Long lastFullSyncStartTime;
+    @OneToOne
+    private Operation lastRequestedFullSync;
 
-    private Long lastFullSyncEndTime;
+    @OneToOne
+    private Operation lastSuccessfulFullSync;
 
     public UserSyncStatus() {
     }
@@ -63,20 +65,20 @@ public class UserSyncStatus implements AccountIdAwareResource {
         this.umsEventGenerationIds = umsEventGenerationIds;
     }
 
-    public Long getLastFullSyncStartTime() {
-        return lastFullSyncStartTime;
+    public Operation getLastRequestedFullSync() {
+        return lastRequestedFullSync;
     }
 
-    public void setLastFullSyncStartTime(Long lastFullSyncStartTime) {
-        this.lastFullSyncStartTime = lastFullSyncStartTime;
+    public void setLastRequestedFullSync(Operation lastRequestedFullSync) {
+        this.lastRequestedFullSync = lastRequestedFullSync;
     }
 
-    public Long getLastFullSyncEndTime() {
-        return lastFullSyncEndTime;
+    public Operation getLastSuccessfulFullSync() {
+        return lastSuccessfulFullSync;
     }
 
-    public void setLastFullSyncEndTime(Long lastFullSyncEndTime) {
-        this.lastFullSyncEndTime = lastFullSyncEndTime;
+    public void setLastSuccessfulFullSync(Operation lastSuccessfulFullSync) {
+        this.lastSuccessfulFullSync = lastSuccessfulFullSync;
     }
 
     @Override
