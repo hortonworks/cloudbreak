@@ -18,10 +18,10 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 @Transactional(TxType.REQUIRED)
 public interface UserRepository extends CrudRepository<User, Long> {
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.tenant t LEFT JOIN FETCH u.userPreferences WHERE u.userId = :userId AND t.name = :tenantName")
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.tenant t WHERE u.userId = :userId AND t.name = :tenantName")
     Optional<User> findByTenantNameAndUserId(@Param("tenantName") String tenantName, @Param("userId") String userId);
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.tenant t LEFT JOIN FETCH u.userPreferences WHERE u.tenant = :tenant")
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.tenant t WHERE u.tenant = :tenant")
     Set<User> findAllByTenant(@Param("tenant") Tenant tenant);
 
     Set<User> findByUserIdIn(Set<String> userIds);
