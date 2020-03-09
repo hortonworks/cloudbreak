@@ -19,7 +19,7 @@ public class PreWarmParcelParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(PreWarmParcelParser.class);
 
     public Optional<ClouderaManagerProduct> parseProductFromParcel(List<String> parcel) {
-        Optional<String> url = parcel.stream().filter(parcelPart -> parcelPart.endsWith("/parcel") || parcelPart.endsWith("/parcels"))
+        Optional<String> url = parcel.stream().filter(parcelPart -> parcelPart.startsWith("http://") || parcelPart.startsWith("https://"))
                 .findFirst();
         Optional<String> nameAndVersion = parcel.stream().filter(parcelPart -> parcelPart.endsWith(".parcel"))
                 .findFirst();
