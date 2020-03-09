@@ -81,6 +81,7 @@ public class FreeIpaHealthDetailsService {
             response.addNodeHealthDetailsFreeIpaResponses(nodeResponse);
             nodeResponse.setName(master.getDiscoveryFQDN());
             nodeResponse.setStatus(InstanceStatus.UNREACHABLE);
+            nodeResponse.addIssue("Node is not responding.");
         }
         updateResponseWithInstanceIds(response, stack);
         return response;
