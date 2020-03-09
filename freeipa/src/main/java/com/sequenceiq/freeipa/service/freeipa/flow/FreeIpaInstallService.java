@@ -22,27 +22,23 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
-import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.AltusAnonymizationRulesService;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
-import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
-import com.sequenceiq.freeipa.service.stack.NetworkService;
+import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigService;
+import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Service
 public class FreeIpaInstallService {
@@ -59,13 +55,7 @@ public class FreeIpaInstallService {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
     private StackService stackService;
-
-    @Inject
-    private FreeIpaService freeIpaService;
 
     @Inject
     private FluentConfigService fluentConfigService;
@@ -80,13 +70,7 @@ public class FreeIpaInstallService {
     private AltusMachineUserService altusMachineUserService;
 
     @Inject
-    private NetworkService networkService;
-
-    @Inject
-    private ReverseDnsZoneCalculator reverseDnsZoneCalculator;
-
-    @Inject
-    private FreeIpaClientFactory freeIpaClientFactory;
+    private FreeIpaConfigService freeIpaConfigService;
 
     public void installFreeIpa(Long stackId) throws CloudbreakOrchestratorException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -96,31 +80,19 @@ public class FreeIpaInstallService {
                 .map(im -> new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
                         im.getInstanceGroup().getTemplate().getInstanceType(), im.getDiscoveryFQDN(), "testGroup"))
                 .collect(Collectors.toSet());
-        FreeIpa freeIpa = freeIpaService.findByStack(stack);
 
         if (allNodes.isEmpty()) {
             String errorMessage = "There are no nodes to install with FreeIPA.";
             LOGGER.error(errorMessage);
             throw new CloudbreakOrchestratorFailedException(errorMessage);
         }
+
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
 
         SaltConfig saltConfig = new SaltConfig();
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
-        Set<Object> hosts = allNodes.stream().map(n ->
-                Map.of("ip", n.getPrivateIp(),
-                        "fqdn", n.getHostname()))
-                .collect(Collectors.toSet());
-        Map<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(stack);
-        String reverseZones = reverseDnsZoneCalculator.reverseDnsZoneForCidrs(subnetWithCidr.values());
-        Map<String, Object> freeipaPillar = Map.of("realm", freeIpa.getDomain().toUpperCase(),
-                "domain", freeIpa.getDomain(),
-                "password", freeIpa.getAdminPassword(),
-                "reverseZones", reverseZones,
-                "hosts", hosts,
-                "admin_user", freeIpaClientFactory.getAdminUser(),
-                "freeipa_to_replicate", primaryGatewayConfig.getHostname());
-        servicePillarConfig.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", Collections.singletonMap("freeipa", freeipaPillar)));
+        FreeIpaConfigView freeIpaConfigView = freeIpaConfigService.createFreeIpaConfigs(stack, allNodes);
+        servicePillarConfig.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", Collections.singletonMap("freeipa", freeIpaConfigView.toMap())));
         decoratePillarsWithTelemetryConfigs(stack, servicePillarConfig);
         hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
         hostOrchestrator.installFreeIPA(primaryGatewayConfig, gatewayConfigs, allNodes, new StackBasedExitCriteriaModel(stackId));

@@ -1,0 +1,115 @@
+#!/bin/bash
+# Name: freeipa_backup.sh
+# Description: Backup FreeIPA and Upload backup to provided Cloud Location
+################################################################
+
+
+CONFIG_FILE=/etc/freeipa_backup.conf
+
+# Config Defaults
+typeset -A config # init array
+config=( # set default values in config array
+    [backup_location]=""
+    [backup_platform]="LOCAL"
+    [azure_instance_msi]=""
+    [logfile]="/var/log/ipabackup.log"
+    [backup_path]="/var/lib/ipa/backup/"
+)
+
+# Override defaults with config file
+if [ -f $CONFIG_FILE ]; then
+    while read line
+    do
+        if echo $line | grep -F = &>/dev/null
+        then
+            varname=$(echo "$line" | cut -d '=' -f 1)
+            config[$varname]=$(echo "$line" | cut -d '=' -f 2-)
+        fi
+    done < $CONFIG_FILE
+fi
+
+while getopts "t:f:" OPTION; do
+    case $OPTION in
+    t  )
+        TYPE=$OPTARG
+        [[ ! $TYPE =~ FULL|DATA ]] && {
+            echo "Incorrect options provided"
+            exit 1
+        }
+        ;;
+    f  )
+        FOLDER=$OPTARG;;
+    \? ) echo "Unknown option: -$OPTARG" >&2; exit 1;;
+    :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
+    *  ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+    esac
+done
+
+if ((OPTIND == 1))
+then
+    echo "No options specified"
+    exit 1
+fi
+
+if [ -z "$TYPE" ] || [ -z "$FOLDER" ];
+then
+    echo "A type (-t) and a folder -f must be defined" >&2
+    exit 1
+fi
+
+
+LOGFILE="${config[logfile]}"
+DATE_FOLDER="$(date -I)"
+BACKUP_PATH_POSTFIX="${FOLDER}/"
+
+BACKUP_OPTIONS=""
+if [ "$TYPE" = "FULL" ]; then
+    BACKUP_OPTIONS="-q"
+elif [ "$TYPE" = "DATA" ]; then
+    BACKUP_OPTIONS="-q --data --online"
+fi
+
+doLog(){
+    type_of_msg=$(echo $*|cut -d" " -f1)
+    msg=$(echo "$*"|cut -d" " -f2-)
+    [[ $type_of_msg == DEBUG ]] && [[ $do_print_debug_msgs -ne 1 ]] && return
+    [[ $type_of_msg == INFO ]] && type_of_msg="INFO " # one space for aligning
+    [[ $type_of_msg == WARN ]] && type_of_msg="WARN " # as well
+
+    # print to the terminal if we have one
+    test -t 1 && echo "`date "+%Y-%m-%dT%H:%M:%SZ"` $type_of_msg ""$msg"
+    echo "`date "+%Y-%m-%dT%H:%M:%SZ"` $type_of_msg ""$msg" >> $LOGFILE
+}
+
+error_exit()
+{
+    doLog "ERROR $1"
+	exit 1
+}
+
+remove_local_backups() {
+    doLog "INFO Removing local backup copies"
+    find ${config[backup_path]} -name ipa-* -type d  -print0 | xargs -0 /usr/bin/rm -vrf >> $LOGFILE 2>&1 || error_exit "Unable to remove local backup copies"
+}
+
+doLog "INFO Running ${TYPE} IPA backup."
+
+# Perform a backup
+/sbin/ipa-backup $BACKUP_OPTIONS >> $LOGFILE 2>&1 || error_exit "ipa-backup failed! Aborting!"
+
+BACKUP_LOCATION="${config[backup_location]}/${BACKUP_PATH_POSTFIX}"
+doLog "DEBUG Uploading backup to ${BACKUP_LOCATION} on ${config[backup_platform]}"
+
+if [ "${config[backup_platform]}" = "AWS" ]; then
+    doLog "INFO Syncing backups to AWS S3"
+    /usr/bin/aws s3 sync --sse AES256 --no-progress ${config[backup_path]} ${BACKUP_LOCATION} >> $LOGFILE 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
+    remove_local_backups
+elif [ "${config[backup_platform]}" = "AZURE" ]; then
+    doLog "INFO  Syncing backups to Azure Blog Storage"
+    /bin/keyctl new_session >> $LOGFILE 2>&1 || error_exit "Unable to setup keyring session"
+    /usr/local/bin/azcopy login --identity --identity-resource-id "${config[azure_instance_msi]}" >> $LOGFILE 2>&1 || error_exit "Unable to login to Azure!"
+    /usr/local/bin/azcopy sync ${config[backup_path]} ${BACKUP_LOCATION} >> $LOGFILE 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
+    remove_local_backups
+fi
+
+doLog "INFO Backup completed."

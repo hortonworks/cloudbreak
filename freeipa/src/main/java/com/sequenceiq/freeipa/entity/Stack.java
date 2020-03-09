@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.freeipa.api.model.Backup;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environmentcrn", "terminated"}))
@@ -93,6 +94,10 @@ public class Stack {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json telemetry;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json backup;
 
     @OneToOne(cascade = {CascadeType.ALL}, optional = false)
     private Network network;
@@ -254,6 +259,19 @@ public class Stack {
     public void setTelemetry(Telemetry telemetry) {
         if (telemetry != null) {
             this.telemetry = new Json(telemetry);
+        }
+    }
+
+    public Backup getBackup() {
+        if (backup != null && backup.getValue() != null) {
+            return JsonUtil.readValueOpt(backup.getValue(), Backup.class).orElse(null);
+        }
+        return null;
+    }
+
+    public void setBackup(Backup backup) {
+        if (backup != null) {
+            this.backup = new Json(backup);
         }
     }
 

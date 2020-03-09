@@ -42,6 +42,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.Placement
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationRequestToStackAuthenticationConverter;
+import com.sequenceiq.freeipa.converter.backup.BackupConverter;
 import com.sequenceiq.freeipa.converter.instance.InstanceGroupRequestToInstanceGroupConverter;
 import com.sequenceiq.freeipa.converter.network.NetworkRequestToNetworkConverter;
 import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
@@ -71,6 +72,9 @@ public class CreateFreeIpaRequestToStackConverter {
 
     @Inject
     private TelemetryConverter telemetryConverter;
+
+    @Inject
+    private BackupConverter backupConverter;
 
     @Inject
     private CrnService crnService;
@@ -114,6 +118,7 @@ public class CreateFreeIpaRequestToStackConverter {
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
         stack.setTelemetry(telemetryConverter.convert(source.getTelemetry()));
+        stack.setBackup(backupConverter.convert(source.getTelemetry()));
         decorateStackWithTunnelAndCcm(stack, source);
         updateOwnerRelatedFields(source, accountId, userFuture, userCrn, stack);
         extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack);
