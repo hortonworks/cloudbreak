@@ -11,10 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
 
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -29,8 +26,8 @@ import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.network.v1.AzureRegistrationTypeResolver;
 
-@ExtendWith(MockitoExtension.class)
 class AzureEnvironmentNetworkConverterTest {
 
     private static final String LOCATION = "eu-west";
@@ -65,20 +62,18 @@ class AzureEnvironmentNetworkConverterTest {
 
     private static final String RESOURCE_GROUP_NAME = "resourceGroup";
 
-    @Mock
-    private EnvironmentViewConverter environmentViewConverter;
+    private final EnvironmentViewConverter environmentViewConverter = Mockito.mock(EnvironmentViewConverter.class);
 
-    @Mock
-    private SubnetTypeConverter subnetTypeConverter;
+    private final SubnetTypeConverter subnetTypeConverter = Mockito.mock(SubnetTypeConverter.class);
 
-    @InjectMocks
-    private AzureEnvironmentNetworkConverter underTest;
+    private final AzureEnvironmentNetworkConverter underTest = new AzureEnvironmentNetworkConverter(environmentViewConverter,
+            subnetTypeConverter, new AzureRegistrationTypeResolver());
 
     @Test
     void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {
         Environment environment = createEnvironment();
         NetworkDto networkDto = NetworkDto.builder()
-                .withAzure(AzureParams.AzureParamsBuilder.anAzureParams()
+                .withAzure(AzureParams.builder()
                         .withNetworkId(NETWORK_ID)
                         .withResourceGroupName(RESOURCE_GROUP_NAME)
                         .withNoPublicIp(true)

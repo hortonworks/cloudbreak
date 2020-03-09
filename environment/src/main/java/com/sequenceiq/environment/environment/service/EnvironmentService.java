@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.cdp.environments.model.CreateAWSEnvironmentRequest;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -27,7 +26,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -37,8 +35,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
-import com.sequenceiq.environment.environment.v1.EnvironmentDtoToCreateAWSEnvironmentRequestConverter;
-import com.sequenceiq.environment.environment.v1.EnvironmentRequestToCreateAWSEnvironmentRequestConverter;
+import com.sequenceiq.environment.environment.v1.cli.DelegatingCliEnvironmentRequestConverter;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
@@ -60,23 +57,19 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
-    private final EnvironmentRequestToCreateAWSEnvironmentRequestConverter environmentRequestToCreateAWSEnvironmentRequestConverter;
-
-    private final EnvironmentDtoToCreateAWSEnvironmentRequestConverter environmentDtoToCreateAWSEnvironmentRequestConverter;
+    private final DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter;
 
     public EnvironmentService(
             EnvironmentValidatorService validatorService,
             EnvironmentRepository environmentRepository,
             PlatformParameterService platformParameterService,
             EnvironmentDtoConverter environmentDtoConverter,
-            EnvironmentRequestToCreateAWSEnvironmentRequestConverter environmentRequestToCreateAWSEnvironmentRequestConverter,
-            EnvironmentDtoToCreateAWSEnvironmentRequestConverter environmentDtoToCreateAWSEnvironmentRequestConverter) {
+            DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.platformParameterService = platformParameterService;
         this.environmentDtoConverter = environmentDtoConverter;
-        this.environmentRequestToCreateAWSEnvironmentRequestConverter = environmentRequestToCreateAWSEnvironmentRequestConverter;
-        this.environmentDtoToCreateAWSEnvironmentRequestConverter = environmentDtoToCreateAWSEnvironmentRequestConverter;
+        this.delegatingCliEnvironmentRequestConverter = delegatingCliEnvironmentRequestConverter;
     }
 
     public Environment save(Environment environment) {
@@ -187,20 +180,13 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
     }
 
-    public CreateAWSEnvironmentRequest getCreateAWSEnvironmentForCli(EnvironmentRequest environmentRequest, String cloudPlatform) {
-        ValidationResult validationResult = validatorService.validateAwsEnvironmentRequest(environmentRequest, cloudPlatform);
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
-        }
-        return environmentRequestToCreateAWSEnvironmentRequestConverter.convert(environmentRequest);
+    public Object getCreateEnvironmentForCli(EnvironmentRequest environmentRequest, String cloudPlatform) {
+        environmentRequest.setCloudPlatform(cloudPlatform);
+        return delegatingCliEnvironmentRequestConverter.convertRequest(environmentRequest);
     }
 
-    public CreateAWSEnvironmentRequest getCreateAWSEnvironmentForCli(EnvironmentDto environmentDto) {
-        ValidationResult validationResult = validatorService.validateAwsEnvironmentRequest(environmentDto);
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
-        }
-        return environmentDtoToCreateAWSEnvironmentRequestConverter.convert(environmentDto);
+    public Object getCreateEnvironmentForCli(EnvironmentDto environmentDto) {
+        return delegatingCliEnvironmentRequestConverter.convertDto(environmentDto);
     }
 
     Optional<Environment> findByNameAndAccountIdAndArchivedIsFalse(String name, String accountId) {

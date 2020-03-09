@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.v1;
+package com.sequenceiq.environment.environment.v1.cli.aws;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
@@ -11,16 +11,23 @@ import com.cloudera.cdp.environments.model.AuthenticationRequest;
 import com.cloudera.cdp.environments.model.AwsLogStorageRequest;
 import com.cloudera.cdp.environments.model.CreateAWSEnvironmentRequest;
 import com.cloudera.cdp.environments.model.SecurityAccessRequest;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
+import com.sequenceiq.environment.environment.v1.cli.EnvironmentDtoToCliRequestConverter;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 
 @Component
-public class EnvironmentDtoToCreateAWSEnvironmentRequestConverter {
+public class EnvironmentDtoToCreateAWSEnvironmentRequestConverter implements EnvironmentDtoToCliRequestConverter {
+
+    @Override
+    public CloudPlatform supportedPlatform() {
+        return CloudPlatform.AWS;
+    }
 
     public CreateAWSEnvironmentRequest convert(EnvironmentDto source) {
         CreateAWSEnvironmentRequest environmentRequest = new CreateAWSEnvironmentRequest();

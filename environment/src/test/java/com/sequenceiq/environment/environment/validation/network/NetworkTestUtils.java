@@ -51,17 +51,16 @@ public class NetworkTestUtils {
     }
 
     public static AzureParams getAzureParams(boolean noPublicIp, boolean withNetworkId, boolean withResourceGroupName) {
-        AzureParams.AzureParamsBuilder azureParamsBuilder = AzureParams.AzureParamsBuilder
-                .anAzureParams();
+        AzureParams.Builder builder = AzureParams.builder();
         if (withNetworkId) {
-            azureParamsBuilder
+            builder
                     .withNetworkId("aNetworkId");
         }
         if (withResourceGroupName) {
-            azureParamsBuilder
+            builder
                     .withResourceGroupName("aResourceGroupId");
         }
-        return azureParamsBuilder
+        return builder
                 .withNoPublicIp(noPublicIp)
                 .build();
     }

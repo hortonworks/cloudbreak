@@ -74,8 +74,7 @@ class AzureEnvironmentNetworkValidatorTest {
     @Test
     void testValidateDuringFlowWhenTheAzureNetworkParamsContainsRequiredFields() {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        AzureParams azureParams = AzureParams.AzureParamsBuilder
-                .anAzureParams()
+        AzureParams azureParams = AzureParams.builder()
                 .withNetworkId("aNetworkId")
                 .withResourceGroupName("aResourceGroupId")
                 .build();

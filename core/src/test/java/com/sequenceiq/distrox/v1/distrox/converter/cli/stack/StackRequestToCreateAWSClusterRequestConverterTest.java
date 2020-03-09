@@ -1,4 +1,4 @@
-package com.sequenceiq.distrox.v1.distrox.converter;
+package com.sequenceiq.distrox.v1.distrox.converter.cli.stack;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,15 +1,15 @@
-package com.sequenceiq.environment.environment.v1;
+package com.sequenceiq.environment.environment.v1.cli.azure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.cloudera.cdp.environments.model.CreateAWSEnvironmentRequest;
+import com.cloudera.cdp.environments.model.CreateAzureEnvironmentRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -17,41 +17,50 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
-import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParameters;
-import com.sequenceiq.environment.network.dto.AwsParams;
+import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
+import com.sequenceiq.environment.network.v1.AzureRegistrationTypeResolver;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
-class EnvironmentDtoToCreateAWSEnvironmentRequestConverterTest {
+class EnvironmentDtoToCreateAzureEnvironmentRequestConverterTest {
 
-    private EnvironmentDtoToCreateAWSEnvironmentRequestConverter underTest;
+    private final AzureRegistrationTypeResolver azureRegistrationTypeResolver = new AzureRegistrationTypeResolver();
 
-    @BeforeEach
-    void setUp() {
-        underTest = new EnvironmentDtoToCreateAWSEnvironmentRequestConverter();
-    }
+    private final EnvironmentDtoToCreateAzureEnvironmentRequestConverter underTest
+            = new EnvironmentDtoToCreateAzureEnvironmentRequestConverter(azureRegistrationTypeResolver);
 
     @Test
-    void convert() {
+    void convertWithExistingNetwork() {
         EnvironmentDto environmentDto = getEnvironmentDto();
-        CreateAWSEnvironmentRequest result = underTest.convert(environmentDto);
-        assertEquals(environmentDto.getAuthentication().getPublicKey(), result.getAuthentication().getPublicKey());
-        assertEquals(environmentDto.getAuthentication().getPublicKeyId(), result.getAuthentication().getPublicKeyId());
+        CreateAzureEnvironmentRequest result = underTest.convert(environmentDto);
         assertEquals(environmentDto.getCredential().getName(), result.getCredentialName());
         assertEquals(environmentDto.getDescription(), result.getDescription());
         assertEquals(environmentDto.getName(), result.getEnvironmentName());
         assertEquals(environmentDto.getTelemetry().getLogging().getStorageLocation(), result.getLogStorage().getStorageLocationBase());
-        assertEquals(environmentDto.getTelemetry().getLogging().getS3().getInstanceProfile(), result.getLogStorage().getInstanceProfile());
-        assertEquals(environmentDto.getNetwork().getNetworkCidr(), result.getNetworkCidr());
+        assertEquals(environmentDto.getTelemetry().getLogging().getAdlsGen2().getManagedIdentity(), result.getLogStorage().getManagedIdentity());
         assertEquals(environmentDto.getLocation().getName(), result.getRegion());
-        assertEquals(environmentDto.getParameters().getAwsParametersDto().getS3GuardTableName(), result.getS3GuardTableName());
         assertEquals(environmentDto.getSecurityAccess().getCidr(), result.getSecurityAccess().getCidr());
         assertEquals(environmentDto.getSecurityAccess().getDefaultSecurityGroupId(), result.getSecurityAccess().getDefaultSecurityGroupId());
         assertEquals(environmentDto.getSecurityAccess().getSecurityGroupIdForKnox(), result.getSecurityAccess().getSecurityGroupIdForKnox());
-        assertThat(result.getSubnetIds()).hasSameElementsAs(environmentDto.getNetwork().getSubnetIds());
-        assertEquals(environmentDto.getNetwork().getAws().getVpcId(), result.getVpcId());
+        assertEquals(environmentDto.getNetwork().getAzure().getResourceGroupName(), result.getExistingNetworkParams().getResourceGroupName());
+        assertThat(result.getExistingNetworkParams().getSubnetIds()).hasSameElementsAs(environmentDto.getNetwork().getSubnetIds());
+    }
 
+    @Test
+    void convertWithNewNetwork() {
+        EnvironmentDto environmentDto = getEnvironmentDto();
+        environmentDto.getNetwork().getAzure().setNetworkId(null);
+        CreateAzureEnvironmentRequest result = underTest.convert(environmentDto);
+        assertEquals(environmentDto.getCredential().getName(), result.getCredentialName());
+        assertEquals(environmentDto.getDescription(), result.getDescription());
+        assertEquals(environmentDto.getName(), result.getEnvironmentName());
+        assertEquals(environmentDto.getTelemetry().getLogging().getStorageLocation(), result.getLogStorage().getStorageLocationBase());
+        assertEquals(environmentDto.getTelemetry().getLogging().getAdlsGen2().getManagedIdentity(), result.getLogStorage().getManagedIdentity());
+        assertEquals(environmentDto.getLocation().getName(), result.getRegion());
+        assertEquals(environmentDto.getSecurityAccess().getCidr(), result.getSecurityAccess().getCidr());
+        assertEquals(environmentDto.getSecurityAccess().getDefaultSecurityGroupId(), result.getSecurityAccess().getDefaultSecurityGroupId());
+        assertEquals(environmentDto.getSecurityAccess().getSecurityGroupIdForKnox(), result.getSecurityAccess().getSecurityGroupIdForKnox());
+        assertEquals(environmentDto.getNetwork().getNetworkCidr(), result.getNewNetworkParams().getNetworkCidr());
     }
 
     private EnvironmentDto getEnvironmentDto() {
@@ -69,17 +78,19 @@ class EnvironmentDtoToCreateAWSEnvironmentRequestConverterTest {
         EnvironmentTelemetry telemetry = new EnvironmentTelemetry();
         EnvironmentLogging logging = new EnvironmentLogging();
         logging.setStorageLocation("storageLocation");
-        S3CloudStorageParameters s3 = new S3CloudStorageParameters();
-        s3.setInstanceProfile("instanceProfile");
-        logging.setS3(s3);
+        AdlsGen2CloudStorageV1Parameters adls = new AdlsGen2CloudStorageV1Parameters();
+        adls.setManagedIdentity("ManagedIdentity");
+        logging.setAdlsGen2(adls);
         telemetry.setLogging(logging);
         environmentDto.setTelemetry(telemetry);
-        AwsParams awsNetwork = new AwsParams();
-        awsNetwork.setVpcId("vpcId");
+        AzureParams azureParams = new AzureParams();
+        azureParams.setNoPublicIp(true);
+        azureParams.setResourceGroupName("ResourceGroupName");
+        azureParams.setNetworkId("NetworkId");
         Map<String, CloudSubnet> subnets = Map.of("subnet1", new CloudSubnet(), "subnet2", new CloudSubnet());
         NetworkDto network = NetworkDto.builder()
                 .withNetworkCidr("networkCidr")
-                .withAws(awsNetwork)
+                .withAzure(azureParams)
                 .withSubnetMetas(subnets)
                 .build();
         environmentDto.setNetwork(network);
@@ -87,11 +98,7 @@ class EnvironmentDtoToCreateAWSEnvironmentRequestConverterTest {
                 .withName("region")
                 .build();
         environmentDto.setLocation(location);
-        AwsParametersDto awsParams = AwsParametersDto.builder()
-                .withDynamoDbTableName("dynamoTable")
-                .build();
         ParametersDto params = ParametersDto.builder()
-                .withAwsParameters(awsParams)
                 .build();
         environmentDto.setParameters(params);
         SecurityAccessDto securityAccess = SecurityAccessDto.builder()
@@ -102,4 +109,5 @@ class EnvironmentDtoToCreateAWSEnvironmentRequestConverterTest {
         environmentDto.setSecurityAccess(securityAccess);
         return environmentDto;
     }
+
 }
