@@ -33,7 +33,7 @@ dependencies {
   compile group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   compile group: 'com.google.code.findbugs',              name: 'annotations',                    version: '3.0.1'
 
-  compile group: 'com.github.ben-manes.caffeine',         name: 'caffeine',                       version: '2.7.0'
+  compile group: 'com.github.ben-manes.caffeine',         name: 'caffeine',                       version: caffeineVersion
   compile group: 'org.glassfish.jersey.core',             name: 'jersey-client',                  version: jerseyCoreVersion
   compile group: 'org.glassfish.jersey.media',            name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
   compile group: 'org.glassfish.jersey.ext',              name: 'jersey-proxy-client',            version: jerseyCoreVersion
