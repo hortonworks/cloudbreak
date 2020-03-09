@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.config.CmConfigService;
 import com.sequenceiq.cloudbreak.cm.database.DatabaseProperties;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
@@ -76,10 +77,7 @@ public class ClouderaManagerMgmtSetupService {
     private DatabaseCommon databaseCommon;
 
     @Inject
-    private CmMgmtServiceConfigLocationService cmMgmtServiceConfigLocationService;
-
-    @Inject
-    private CmMgmtServiceLogConfigService cmMgmtServiceLogConfigService;
+    private CmConfigService cmConfigService;
 
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
@@ -122,8 +120,7 @@ public class ClouderaManagerMgmtSetupService {
                 mgmtRoles.addItemsItem(apiRole);
             }
         }
-        cmMgmtServiceConfigLocationService.setConfigLocations(stack, mgmtRoles);
-        cmMgmtServiceLogConfigService.setLogConfig(mgmtRoles);
+        cmConfigService.setConfigs(stack, mgmtRoles);
         telemetryService.setupTelemetryRole(stack, apiClient, cmHostRef, mgmtRoles, telemetry);
         createMgmtRoles(mgmtRolesResourceApi, mgmtRoles);
         telemetryService.updateTelemetryConfigs(stack, apiClient, telemetry, sdxContextName, sdxStackCrn);
