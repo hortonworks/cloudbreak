@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.api.swagger.AllHostsResourceApi;
 import com.cloudera.api.swagger.AuthRolesResourceApi;
 import com.cloudera.api.swagger.CdpResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -79,6 +80,9 @@ public class ClouderaManagerApiFactory {
     @Inject
     private Function<ApiClient, MgmtRoleConfigGroupsResourceApi> mgmtRoleConfigGroupsResourceApiFactory;
 
+    @Inject
+    private Function<ApiClient, AllHostsResourceApi> allHostsResourceApiFactory;
+
     public ClouderaManagerResourceApi getClouderaManagerResourceApi(ApiClient apiClient) {
         return clouderaManagerResourceApiFactory.apply(apiClient);
     }
@@ -145,5 +149,9 @@ public class ClouderaManagerApiFactory {
 
     public MgmtRoleConfigGroupsResourceApi getMgmtRoleConfigGroupsResourceApi(ApiClient apiClient) {
         return mgmtRoleConfigGroupsResourceApiFactory.apply(apiClient);
+    }
+
+    public AllHostsResourceApi getAllHostsResourceApi(ApiClient apiClient) {
+        return allHostsResourceApiFactory.apply(apiClient);
     }
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm;
+package com.sequenceiq.cloudbreak.cm.config;
 
 import java.util.Objects;
 
@@ -6,32 +6,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.cloudera.api.swagger.model.ApiConfig;
-import com.cloudera.api.swagger.model.ApiConfigList;
-import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Service
-class CmMgmtServiceLogConfigService {
+class CmMgmtServiceLogConfigService extends AbstractCmConfigService {
 
     private static final String MAX_LOG_BACKUP_INDEX = "max_log_backup_index";
 
     private static final String VALUE = "1";
 
-    void setLogConfig(ApiRoleList apiRoleList) {
+    @Override
+    void setConfigs(Stack stack, ApiRoleList apiRoleList) {
         if (Objects.nonNull(apiRoleList) && !CollectionUtils.isEmpty(apiRoleList.getItems())) {
             apiRoleList.getItems().forEach(apiRole -> {
                 setConfig(apiRole, createApiConfig());
             });
-        }
-    }
-
-    private void setConfig(ApiRole apiRole, ApiConfig apiConfig) {
-        if (apiRole.getConfig() == null || apiRole.getConfig().getItems() == null) {
-            ApiConfigList apiConfigList = new ApiConfigList();
-            apiConfigList.addItemsItem(apiConfig);
-            apiRole.setConfig(apiConfigList);
-        } else {
-            apiRole.getConfig().getItems().add(apiConfig);
         }
     }
 

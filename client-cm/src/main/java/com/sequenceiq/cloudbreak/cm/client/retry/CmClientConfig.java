@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
+import com.cloudera.api.swagger.AllHostsResourceApi;
 import com.cloudera.api.swagger.AuthRolesResourceApi;
 import com.cloudera.api.swagger.CdpResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -115,6 +116,11 @@ public class CmClientConfig {
         return this::mgmtRoleConfigGroupsResourceApi;
     }
 
+    @Bean
+    public Function<ApiClient, AllHostsResourceApi> allHostsResourceApiFactory() {
+        return this::allHostsResourceApi;
+    }
+
     // prototype bean declarations:
 
     @Bean
@@ -217,5 +223,11 @@ public class CmClientConfig {
     @Scope(value = "prototype")
     public MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi(ApiClient apiClient) {
         return new MgmtRoleConfigGroupsResourceApi(apiClient);
+    }
+
+    @Bean
+    @Scope(value = "prototype")
+    public AllHostsResourceApi allHostsResourceApi(ApiClient apiClient) {
+        return new AllHostsResourceApi(apiClient);
     }
 }
