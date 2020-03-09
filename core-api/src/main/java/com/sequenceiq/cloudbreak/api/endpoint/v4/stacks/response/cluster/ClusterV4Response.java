@@ -112,6 +112,9 @@ public class ClusterV4Response implements JsonEntity {
     @ApiModelProperty(StackModelDescription.SERVER_URL)
     private String serverUrl;
 
+    @ApiModelProperty(ClusterModelDescription.REDBEAMS_DB_SERVER_CRN)
+    private String databaseServerCrn;
+
     public Long getId() {
         return id;
     }
@@ -326,5 +329,13 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setServerFqdn(String serverFqdn) {
         this.serverFqdn = serverFqdn;
+    }
+
+    public String getDatabaseServerCrn() {
+        return databaseServerCrn;
+    }
+
+    public void setDatabaseServerCrn(String databaseServerCrn) {
+        this.databaseServerCrn = databaseServerCrn;
     }
 }

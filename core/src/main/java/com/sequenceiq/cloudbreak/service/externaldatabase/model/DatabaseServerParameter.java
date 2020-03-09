@@ -4,7 +4,7 @@ public class DatabaseServerParameter {
 
     private final boolean highlyAvailable;
 
-    public DatabaseServerParameter(Builder builder) {
+    private DatabaseServerParameter(Builder builder) {
         this.highlyAvailable = builder.highlyAvailable;
     }
 

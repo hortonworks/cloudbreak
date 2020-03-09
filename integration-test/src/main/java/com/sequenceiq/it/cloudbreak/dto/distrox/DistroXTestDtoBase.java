@@ -18,6 +18,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.externaldatabase.DistroXExternalDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
@@ -190,6 +191,12 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         getRequest().setInstanceGroups(Stream.of(keys)
                 .map(this::getInstanceGroupV1Request)
                 .collect(Collectors.toSet()));
+        return this;
+    }
+
+    public DistroXTestDtoBase<T> withExternalDatabase(String key) {
+        DistroXExternalDatabaseTestDto externalDatabaseDto = getTestContext().get(key);
+        getRequest().setExternalDatabase(externalDatabaseDto.getRequest());
         return this;
     }
 }

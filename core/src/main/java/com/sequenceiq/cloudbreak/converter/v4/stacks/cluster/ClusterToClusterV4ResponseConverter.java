@@ -1,5 +1,24 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
+import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
+import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
@@ -19,23 +38,6 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
-import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Component
 public class ClusterToClusterV4ResponseConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterV4Response> {
@@ -93,6 +95,7 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setServerIp(stackUtil.extractClusterManagerIp(source.getStack()));
         clusterResponse.setServerFqdn(source.getFqdn());
         clusterResponse.setServerUrl(serviceEndpointCollector.getManagerServerUrl(source, managerAddress));
+        clusterResponse.setDatabaseServerCrn(source.getDatabaseServerCrn());
         return clusterResponse;
     }
 
