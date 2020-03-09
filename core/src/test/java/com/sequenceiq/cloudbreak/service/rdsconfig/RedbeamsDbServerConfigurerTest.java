@@ -117,6 +117,7 @@ public class RedbeamsDbServerConfigurerTest {
     @Test
     public void isRemoteDatabaseNeeded() {
         Cluster testCluster = TestUtil.cluster();
+        testCluster.setDatabaseServerCrn(null);
         assertFalse(underTest.isRemoteDatabaseNeeded(testCluster));
     }
 }

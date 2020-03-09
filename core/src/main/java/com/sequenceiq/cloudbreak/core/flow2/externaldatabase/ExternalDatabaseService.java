@@ -40,7 +40,7 @@ public class ExternalDatabaseService {
 
     private final ClusterRepository clusterRepository;
 
-    private final  Map<CloudPlatform, DatabaseStackConfig> dbConfigs;
+    private final Map<CloudPlatform, DatabaseStackConfig> dbConfigs;
 
     private final Map<CloudPlatform, DatabaseServerParameterDecorator> parameterDecoratorMap;
 

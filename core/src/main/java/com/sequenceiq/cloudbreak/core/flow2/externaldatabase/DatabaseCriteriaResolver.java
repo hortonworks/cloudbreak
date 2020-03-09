@@ -35,7 +35,7 @@ class DatabaseCriteriaResolver {
     }
 
     private String getDatabaseOperationFailedResultMessage(Cluster cluster, DatabaseServerV4Response rdsStatus) {
-        return "Database operation failed " + cluster.getName() + " statusReason: " + rdsStatus.getStatusReason();
+        return String.format("Database operation failed on %s, statusReason: %s", cluster.getName(), rdsStatus.getStatusReason());
     }
 
 }
