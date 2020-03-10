@@ -34,8 +34,11 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListM
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
@@ -691,4 +694,29 @@ public class UmsClient {
                 .build());
     }
 
+    /**
+     * Wraps calls to ListWorkloadAdministrationGroups with an Account ID.
+     *
+     * @param requestId          the request ID for the request
+     * @param accountId          the account ID
+     * @return the list of workload administration groups
+     */
+    public List<WorkloadAdministrationGroup> listWorkloadAdministrationGroups(String requestId, String accountId) {
+        checkNotNull(requestId);
+        checkNotNull(accountId);
+
+        List<WorkloadAdministrationGroup> wags = new ArrayList<>();
+
+        ListWorkloadAdministrationGroupsRequest.Builder requestBuilder = ListWorkloadAdministrationGroupsRequest.newBuilder()
+                .setAccountId(accountId)
+                .setPageSize(umsClientConfig.getListWorkloadAdministrationGroupsPageSize());
+
+        ListWorkloadAdministrationGroupsResponse response;
+        do {
+            response = newStub(requestId).listWorkloadAdministrationGroups(requestBuilder.build());
+            wags.addAll(response.getWorkloadAdministrationGroupList());
+            requestBuilder.setPageToken(response.getNextPageToken());
+        } while (response.hasNextPageToken());
+        return wags;
+    }
 }
