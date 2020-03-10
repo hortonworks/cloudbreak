@@ -481,16 +481,16 @@
       "dependencies": ["ZOOKEEPER", "HDFS", "HBASE"]
     },
     {
-      "name": "PROFILER_MANAGER",
-      "displayName": "Profiler Manager",
+      "name": "QUEUEMANAGER",
+      "displayName": "Queue Manager",
       "components": [
         {
-          "name": "PROFILER_ADMIN_AGENT",
+          "name": "QUEUEMANAGER_WEBAPP",
           "groups": ["master"],
           "base" : true
         },
         {
-          "name": "PROFILER_METRICS_AGENT",
+          "name": "QUEUEMANAGER_STORE",
           "groups": ["master"],
           "base" : true
         }

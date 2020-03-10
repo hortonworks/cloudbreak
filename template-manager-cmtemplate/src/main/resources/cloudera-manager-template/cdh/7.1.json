@@ -111,6 +111,10 @@
     {
       "name": "PROFILER_SCHEDULER",
       "version": "2.0.3"
+    },
+    {
+      "name": "QUEUEMANAGER",
+      "version": "3.1.1"
     }
   ],
   "version": "7.1.0",
