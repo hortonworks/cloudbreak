@@ -110,7 +110,7 @@ class SubnetIdProviderTest {
     }
 
     @Test
-    void testProvideShouldReturnAnySubnetWhenResultIsEmptyAndNoError1() {
+    void testProvideShouldReturnAnySubnetWhenResultIsNotEmptyAndNoErrorButAtLeastTwoSubnetComesBackAsResult() {
         List<CloudSubnet> subnets = List.of(
                 new CloudSubnet("id-1", "name-1"),
                 new CloudSubnet("id-2", "name-2")
