@@ -24,9 +24,11 @@ import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.MetricAlert;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
+import com.sequenceiq.periscope.repository.LoadAlertRepository;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
 import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
@@ -49,6 +51,9 @@ public class AlertService {
 
     @Inject
     private TimeAlertRepository timeAlertRepository;
+
+    @Inject
+    private LoadAlertRepository loadAlertRepository;
 
     @Inject
     private PrometheusAlertRepository prometheusAlertRepository;
@@ -169,6 +174,11 @@ public class AlertService {
         } catch (RuntimeException ignored) {
             LOGGER.info("Could not found Prometheus alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
         }
+        try {
+            return findLoadAlertByCluster(clusterId, alertId);
+        } catch (RuntimeException ignored) {
+            LOGGER.info("Could not found Load alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
+        }
 
         throw new NotFoundException(String.format("Could not found alert with id: '%s', for cluster: '%s'!", alertId, clusterId));
     }
@@ -182,6 +192,8 @@ public class AlertService {
             res = timeAlertRepository.save((TimeAlert) alert);
         } else if (alert instanceof PrometheusAlert) {
             res = prometheusAlertRepository.save((PrometheusAlert) alert);
+        } else if (alert instanceof LoadAlert) {
+            res = loadAlertRepository.save((LoadAlert) alert);
         }
         return res;
     }
@@ -279,5 +291,69 @@ public class AlertService {
         } catch (Exception ignored) {
             LOGGER.info("Cannot add '{}' to the cluster", alertName);
         }
+    }
+
+    public LoadAlert createLoadAlert(Long clusterId, LoadAlert loadAlert) {
+        Cluster cluster = clusterService.findById(clusterId);
+        loadAlert.setCluster(cluster);
+        loadAlert = (LoadAlert) save(loadAlert);
+        cluster.addLoadAlert(loadAlert);
+        clusterService.save(cluster);
+        return loadAlert;
+    }
+
+    public void createOrUpdateLoadAlerts(Long clusterId, Set<LoadAlert> loadAlerts) {
+        for (LoadAlert loadAlert : loadAlerts) {
+            if (loadAlert.getId() == null) {
+                createLoadAlert(clusterId, loadAlert);
+            } else {
+                updateLoadAlert(clusterId, loadAlert.getId(), loadAlert);
+            }
+        }
+    }
+
+    public void createOrUpdateTimeAlerts(Long clusterId, Set<TimeAlert> timeAlerts) {
+        for (TimeAlert timeAlert : timeAlerts) {
+            if (timeAlert.getId() == null) {
+                createTimeAlert(clusterId, timeAlert);
+            } else {
+                updateTimeAlert(clusterId, timeAlert.getId(), timeAlert);
+            }
+        }
+    }
+
+    public LoadAlert updateLoadAlert(Long clusterId, Long alertId, LoadAlert loadAlert) {
+        LoadAlert alert = loadAlertRepository.findByCluster(alertId, clusterId);
+        alert.setName(loadAlert.getName());
+        alert.setDescription(loadAlert.getDescription());
+        alert.setScalingPolicy(loadAlert.getScalingPolicy());
+        return loadAlertRepository.save(alert);
+    }
+
+    public LoadAlert findLoadAlertByCluster(Long clusterId, Long alertId) {
+        return loadAlertRepository.findByCluster(alertId, clusterId);
+    }
+
+    public void deleteLoadAlert(Long clusterId, Long alertId) {
+        LoadAlert loadAlert = loadAlertRepository.findByCluster(alertId, clusterId);
+        Cluster cluster = clusterService.findById(clusterId);
+        cluster.setLoadAlerts(removeLoadAlert(cluster, alertId));
+        loadAlertRepository.delete(loadAlert);
+        clusterService.save(cluster);
+    }
+
+    public Set<LoadAlert> removeLoadAlert(Cluster cluster, Long alertId) {
+        return cluster.getLoadAlerts().stream().filter(a -> !a.getId().equals(alertId)).collect(Collectors.toSet());
+    }
+
+    public Set<LoadAlert> getLoadAlertsForClusterHostGroup(Long clusterId, String hostGroup) {
+        Cluster cluster = clusterService.findById(clusterId);
+        return cluster.getLoadAlerts().stream()
+                .filter(a -> a.getScalingPolicy().getHostGroup().equals(hostGroup)).collect(Collectors.toSet());
+    }
+
+    public Set<LoadAlert> getLoadAlerts(Long clusterId) {
+        Cluster cluster = clusterService.findById(clusterId);
+        return cluster.getLoadAlerts();
     }
 }

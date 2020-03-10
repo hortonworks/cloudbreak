@@ -156,7 +156,8 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
         }
         ClusterManager clusterManager =
                 new ClusterManager(host, gatewayPort, stack.getUserNamePath(), stack.getPasswordPath(), ClusterManagerVariant.CLOUDERA_MANAGER);
-        return new MonitoredStack(clusterManager, stack.getStackCrn(), stack.getStackId(), securityConfig, stack.getTunnel());
+        return new MonitoredStack(clusterManager, stack.getName(), stack.getStackCrn(), stack.getStackType(),
+                stack.getStackId(), securityConfig, stack.getTunnel());
     }
 
     private void cmHealthCheck(MonitoredStack monitoredStack) {

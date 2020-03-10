@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -66,9 +67,11 @@ public class ClusterService {
 
     public Cluster create(Cluster cluster, ClusterPertain clusterPertain, MonitoredStack stack, ClusterState clusterState) {
         cluster.setClusterPertain(clusterPertain);
+        cluster.setStackName(stack.getStackName());
         cluster.setClusterManager(stack.getClusterManager());
         cluster.setStackCrn(stack.getStackCrn());
         cluster.setStackId(stack.getStackId());
+        cluster.setStackType(stack.getStackType());
         cluster.setTunnel(stack.getTunnel());
         if (clusterState != null) {
             cluster.setState(clusterState);
@@ -92,6 +95,7 @@ public class ClusterService {
         ClusterState newState = clusterState != null ? clusterState : cluster.getState();
         cluster.setState(newState);
         cluster.setAutoscalingEnabled(enableAutoscaling);
+        cluster.setStackName(stack.getStackName());
         cluster.update(stack);
         SecurityConfig sSecConf = stack.getSecurityConfig();
         if (sSecConf != null) {
@@ -117,8 +121,20 @@ public class ClusterService {
         return clusterRepository.findByUserId(user.getUserId());
     }
 
+    public List<Cluster> findDistroXByUser(CloudbreakUser user) {
+        return clusterRepository.findByUserIdAndStackType(user.getUserId(), StackType.WORKLOAD);
+    }
+
     public Cluster findOneByStackId(Long stackId) {
         return clusterRepository.findByStackId(stackId);
+    }
+
+    public Cluster findOneByStackCrn(String stackCrn) {
+        return  clusterRepository.findByStackCrn(stackCrn);
+    }
+
+    public Cluster findOneByStackName(String stackName) {
+        return  clusterRepository.findByStackName(stackName);
     }
 
     public Cluster save(Cluster cluster) {
@@ -216,5 +232,12 @@ public class ClusterService {
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(RUNNING, true, periscopeNodeConfig.getId()));
         metricService.submit(MetricType.CLUSTER_STATE_SUSPENDED,
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(SUSPENDED, true, periscopeNodeConfig.getId()));
+    }
+
+    public void deleteAlertsForCluster(Long clusterId) {
+        Cluster cluster = findById(clusterId);
+        cluster.getLoadAlerts().clear();
+        cluster.getTimeAlerts().clear();
+        save(cluster);
     }
 }

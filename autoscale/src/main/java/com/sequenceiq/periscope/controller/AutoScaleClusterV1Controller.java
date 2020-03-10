@@ -10,6 +10,8 @@ import com.sequenceiq.periscope.api.endpoint.v1.AutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.StateJson;
+import com.sequenceiq.periscope.converter.ClusterConverter;
+import com.sequenceiq.periscope.domain.Cluster;
 
 @Component
 public class AutoScaleClusterV1Controller implements AutoScaleClusterV1Endpoint {
@@ -17,14 +19,17 @@ public class AutoScaleClusterV1Controller implements AutoScaleClusterV1Endpoint 
     @Inject
     private AutoScaleClusterCommonService autoScaleClusterCommonService;
 
+    @Inject
+    private ClusterConverter clusterConverter;
+
     @Override
     public List<AutoscaleClusterResponse> getClusters() {
-        return autoScaleClusterCommonService.getClusters();
+        return clusterConverter.convertAllToJson(autoScaleClusterCommonService.getClusters());
     }
 
     @Override
     public AutoscaleClusterResponse getCluster(Long clusterId) {
-        return autoScaleClusterCommonService.getCluster(clusterId);
+        return createClusterJsonResponse(autoScaleClusterCommonService.getCluster(clusterId));
     }
 
     @Override
@@ -34,11 +39,16 @@ public class AutoScaleClusterV1Controller implements AutoScaleClusterV1Endpoint 
 
     @Override
     public AutoscaleClusterResponse setState(Long clusterId, StateJson stateJson) {
-        return autoScaleClusterCommonService.setState(clusterId, stateJson);
+        return createClusterJsonResponse(autoScaleClusterCommonService.setState(clusterId, stateJson));
     }
 
     @Override
     public AutoscaleClusterResponse setAutoscaleState(Long clusterId, AutoscaleClusterState autoscaleState) {
-        return autoScaleClusterCommonService.setAutoscaleState(clusterId, autoscaleState);
+        return createClusterJsonResponse(autoScaleClusterCommonService.setAutoscaleState(clusterId, autoscaleState));
     }
+
+    private AutoscaleClusterResponse createClusterJsonResponse(Cluster cluster) {
+        return clusterConverter.convert(cluster);
+    }
+
 }

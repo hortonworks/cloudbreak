@@ -1,41 +1,22 @@
 package com.sequenceiq.periscope.api.model;
 
 import com.sequenceiq.periscope.doc.ApiDescription.BaseAlertJsonProperties;
-import com.sequenceiq.periscope.doc.ApiDescription.TimeAlertJsonProperties;
+import com.sequenceiq.periscope.doc.ApiDescription.LoadAlertJsonProperties;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class TimeAlertResponse extends AbstractAlertJson {
+public class LoadAlertResponse extends AbstractAlertJson {
 
     @ApiModelProperty(BaseAlertJsonProperties.ID)
     private Long id;
 
-    @ApiModelProperty(TimeAlertJsonProperties.TIMEZONE)
-    private String timeZone;
-
-    @ApiModelProperty(TimeAlertJsonProperties.CRON)
-    private String cron;
-
     @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
     private ScalingPolicyResponse scalingPolicy;
 
-    public String getTimeZone() {
-        return timeZone;
-    }
-
-    public void setTimeZone(String timeZone) {
-        this.timeZone = timeZone;
-    }
-
-    public String getCron() {
-        return cron;
-    }
-
-    public void setCron(String cron) {
-        this.cron = cron;
-    }
+    @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION)
+    private LoadAlertConfigurationResponse loadAlertConfiguration;
 
     public Long getId() {
         return id;
@@ -51,5 +32,13 @@ public class TimeAlertResponse extends AbstractAlertJson {
 
     public void setScalingPolicy(ScalingPolicyResponse scalingPolicy) {
         this.scalingPolicy = scalingPolicy;
+    }
+
+    public LoadAlertConfigurationResponse getLoadAlertConfiguration() {
+        return loadAlertConfiguration;
+    }
+
+    public void setLoadAlertConfiguration(LoadAlertConfigurationResponse loadAlertConfiguration) {
+        this.loadAlertConfiguration = loadAlertConfiguration;
     }
 }

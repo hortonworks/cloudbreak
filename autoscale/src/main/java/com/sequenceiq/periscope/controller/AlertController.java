@@ -8,11 +8,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.endpoint.v1.AlertEndpoint;
 import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
+import com.sequenceiq.periscope.api.model.AlertType;
+import com.sequenceiq.periscope.api.model.LoadAlertRequest;
+import com.sequenceiq.periscope.api.model.LoadAlertResponse;
 import com.sequenceiq.periscope.api.model.MetricAlertRequest;
 import com.sequenceiq.periscope.api.model.MetricAlertResponse;
 import com.sequenceiq.periscope.api.model.PrometheusAlertRequest;
@@ -20,17 +25,22 @@ import com.sequenceiq.periscope.api.model.PrometheusAlertResponse;
 import com.sequenceiq.periscope.api.model.TimeAlertRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertResponse;
 import com.sequenceiq.periscope.api.model.TimeAlertValidationRequest;
+import com.sequenceiq.periscope.converter.LoadAlertRequestConverter;
+import com.sequenceiq.periscope.converter.LoadAlertResponseConverter;
 import com.sequenceiq.periscope.converter.MetricAlertRequestConverter;
 import com.sequenceiq.periscope.converter.MetricAlertResponseConverter;
 import com.sequenceiq.periscope.converter.PrometheusAlertRequestConverter;
 import com.sequenceiq.periscope.converter.PrometheusAlertResponseConverter;
 import com.sequenceiq.periscope.converter.TimeAlertRequestConverter;
 import com.sequenceiq.periscope.converter.TimeAlertResponseConverter;
+import com.sequenceiq.periscope.domain.BaseAlert;
+import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.MetricAlert;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.service.AlertService;
 import com.sequenceiq.periscope.service.DateService;
+import com.sequenceiq.periscope.service.NotFoundException;
 
 @Component
 public class AlertController implements AlertEndpoint {
@@ -55,6 +65,12 @@ public class AlertController implements AlertEndpoint {
 
     @Inject
     private PrometheusAlertResponseConverter prometheusAlertResponseConverter;
+
+    @Inject
+    private LoadAlertRequestConverter loadAlertRequestConverter;
+
+    @Inject
+    private LoadAlertResponseConverter loadAlertResponseConverter;
 
     @Inject
     private DateService dateService;
@@ -95,6 +111,7 @@ public class AlertController implements AlertEndpoint {
     @Override
     public TimeAlertResponse updateTimeAlert(Long clusterId, Long alertId, TimeAlertRequest json)
             throws ParseException {
+        validateAlertForUpdate(clusterId, alertId, AlertType.TIME);
         TimeAlert timeAlert = validateTimeAlert(json);
         return createTimeAlertResponse(alertService.updateTimeAlert(clusterId, alertId, timeAlert));
     }
@@ -144,8 +161,41 @@ public class AlertController implements AlertEndpoint {
         return alertService.getPrometheusAlertDefinitions();
     }
 
+    @Override
+    public LoadAlertResponse createLoadAlert(Long clusterId, @Valid LoadAlertRequest json) throws ParseException {
+        String hostGroup = json.getScalingPolicy().getHostGroup();
+        if (!alertService.getLoadAlertsForClusterHostGroup(clusterId, hostGroup).isEmpty()) {
+            throw new BadRequestException(String.format("LoadAlert is already defined for cluster %s, HostGroup", clusterId, hostGroup));
+        }
+        LoadAlert loadAlert = loadAlertRequestConverter.convert(json);
+        return createLoadAlertResponse(alertService.createLoadAlert(clusterId, loadAlert));
+    }
+
+    @Override
+    public LoadAlertResponse updateLoadAlert(Long clusterId, Long alertId, @Valid LoadAlertRequest json) throws ParseException {
+        validateAlertForUpdate(clusterId, alertId, AlertType.LOAD);
+        LoadAlert loadAlert = loadAlertRequestConverter.convert(json);
+        return createLoadAlertResponse(alertService.updateLoadAlert(clusterId, alertId, loadAlert));
+    }
+
+    @Override
+    public List<LoadAlertResponse> getLoadAlerts(Long clusterId) {
+        return alertService.getLoadAlerts(clusterId).stream()
+                .map(this::createLoadAlertResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteLoadAlert(Long clusterId, Long alertId) {
+        alertService.deleteLoadAlert(clusterId, alertId);
+    }
+
+    private LoadAlertResponse createLoadAlertResponse(LoadAlert loadAlert) {
+        return loadAlertResponseConverter.convert(loadAlert);
+    }
+
     private TimeAlert validateTimeAlert(TimeAlertRequest json) throws ParseException {
         TimeAlert alert = timeAlertRequestConverter.convert(json);
+        dateService.validateTimeZone(alert.getTimeZone());
         dateService.getCronExpression(alert.getCron());
         return alert;
     }
@@ -174,5 +224,29 @@ public class AlertController implements AlertEndpoint {
 
     private PrometheusAlertResponse createPrometheusAlertResponse(PrometheusAlert alarm) {
         return prometheusAlertResponseConverter.convert(alarm);
+    }
+
+    private void validateAlertForUpdate(Long clusterId, Long alertId, AlertType alertType) {
+        BaseAlert alert;
+        switch (alertType) {
+            case LOAD:
+                alert = alertService.findLoadAlertByCluster(clusterId, alertId);
+                break;
+            case TIME:
+                alert = alertService.findTimeAlertByCluster(clusterId, alertId);
+                break;
+            case METRIC:
+                alert = alertService.findMetricAlertByCluster(clusterId, alertId);
+                break;
+            case PROMETHEUS:
+                alert = alertService.findPrometheusAlertByCluster(clusterId, alertId);
+                break;
+            default:
+                alert = null;
+
+        }
+        if (alert == null) {
+            throw new NotFoundException(String.format("Could not find %s alert with id: '%s', for cluster: '%s'", alertType, alertId, clusterId));
+        }
     }
 }

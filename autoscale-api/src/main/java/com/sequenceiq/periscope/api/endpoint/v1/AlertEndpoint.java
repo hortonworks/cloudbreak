@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.api.endpoint.v1;
 
 import static com.sequenceiq.periscope.doc.ApiDescription.ALERT_DESCRIPTION;
+import static com.sequenceiq.periscope.doc.ApiDescription.AlertNotes.LOAD_BASED_NOTES;
 import static com.sequenceiq.periscope.doc.ApiDescription.AlertNotes.METRIC_BASED_NOTES;
 import static com.sequenceiq.periscope.doc.ApiDescription.AlertNotes.PROMETHEUS_BASED_NOTES;
 import static com.sequenceiq.periscope.doc.ApiDescription.AlertNotes.TIME_BASED_NOTES;
@@ -22,6 +23,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
+import com.sequenceiq.periscope.api.model.LoadAlertRequest;
+import com.sequenceiq.periscope.api.model.LoadAlertResponse;
 import com.sequenceiq.periscope.api.model.MetricAlertRequest;
 import com.sequenceiq.periscope.api.model.MetricAlertResponse;
 import com.sequenceiq.periscope.api.model.PrometheusAlertRequest;
@@ -132,4 +135,28 @@ public interface AlertEndpoint {
     @ApiOperation(value = AlertOpDescription.METRIC_BASED_DEFINITIONS, produces = MediaType.APPLICATION_JSON, notes = PROMETHEUS_BASED_DEFINITIONS)
     List<AlertRuleDefinitionEntry> getPrometheusDefinitions(@PathParam("clusterId") Long clusterId);
 
+    @POST
+    @Path("load")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = AlertOpDescription.LOAD_BASED_POST, produces = MediaType.APPLICATION_JSON, notes = LOAD_BASED_NOTES)
+    LoadAlertResponse createLoadAlert(@PathParam("clusterId") Long clusterId, @Valid LoadAlertRequest json) throws ParseException;
+
+    @PUT
+    @Path("load/{alertId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = AlertOpDescription.LOAD_BASED_PUT, produces = MediaType.APPLICATION_JSON, notes = LOAD_BASED_NOTES)
+    LoadAlertResponse updateLoadAlert(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId, @Valid LoadAlertRequest json)
+            throws ParseException;
+
+    @GET
+    @Path("load")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = AlertOpDescription.LOAD_BASED_GET, produces = MediaType.APPLICATION_JSON, notes = LOAD_BASED_NOTES)
+    List<LoadAlertResponse> getLoadAlerts(@PathParam("clusterId") Long clusterId);
+
+    @DELETE
+    @Path("load/{alertId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = AlertOpDescription.LOAD_BASED_DELETE, produces = MediaType.APPLICATION_JSON, notes = LOAD_BASED_NOTES)
+    void deleteLoadAlert(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId);
 }
