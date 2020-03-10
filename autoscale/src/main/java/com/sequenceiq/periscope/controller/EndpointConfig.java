@@ -91,6 +91,7 @@ public class EndpointConfig extends ResourceConfig {
         register(AlertController.class);
         register(AutoScaleClusterV1Controller.class);
         register(AutoScaleClusterV2Controller.class);
+        register(DistroXAutoScaleClusterV1Controller.class);
         register(ConfigurationController.class);
         register(HistoryController.class);
         register(PolicyController.class);
