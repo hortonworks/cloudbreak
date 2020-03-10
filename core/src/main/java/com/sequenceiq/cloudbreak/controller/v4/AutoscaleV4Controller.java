@@ -10,11 +10,14 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.ChangedNodesReportV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureReportV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
@@ -31,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -60,6 +64,9 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     private StackCommonService stackCommonService;
 
     @Inject
+    private ClusterOperationService clusterOperationService;
+
+    @Inject
     private WorkspaceService workspaceService;
 
     @Inject
@@ -67,6 +74,9 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
     private ClusterProxyService clusterProxyService;
+
+    @Value("${cb.changednodesreport.disabled:true}")
+    private boolean changedNodedReportDisabled;
 
     @Override
     public void putStack(@ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
@@ -91,6 +101,19 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     public AutoscaleStackV4Responses getAllForAutoscale() {
         Set<AutoscaleStackV4Response> allForAutoscale = stackCommonService.getAllForAutoscale();
         return new AutoscaleStackV4Responses(new ArrayList<>(allForAutoscale));
+    }
+
+    @Override
+    public void failureReport(@ResourceCrn String crn, FailureReportV4Request failureReport) {
+        clusterOperationService.reportHealthChange(crn, Set.copyOf(failureReport.getFailedNodes()), Set.of());
+    }
+
+    @Override
+    public void changedNodesReport(@ResourceCrn String crn, ChangedNodesReportV4Request changedNodesReport) {
+        if (!changedNodedReportDisabled) {
+            clusterOperationService.reportHealthChange(crn, Set.copyOf(changedNodesReport.getNewFailedNodes()),
+                    Set.copyOf(changedNodesReport.getNewHealthyNodes()));
+        }
     }
 
     @Override

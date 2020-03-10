@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.tag;
 
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -20,7 +17,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 
 @ExtendWith(MockitoExtension.class)
-class TagTemplateProcaessorTest {
+class TagTemplateProcessorTest {
 
     private static final String ACCOUNT_ID = "anAccountId";
 
@@ -30,15 +27,13 @@ class TagTemplateProcaessorTest {
 
     private static final String USER_CRN = "aUserCrn";
 
-    @Mock
-    private Clock clock;
-
     @InjectMocks
     private TagTemplateProcessor underTest;
 
     @BeforeEach
     void setUp() {
-        when(clock.getCurrentTimeMillis()).thenReturn(1582010084000L);
+        Clock clock = new Clock();
+        ReflectionTestUtils.setField(underTest, "clock", clock);
     }
 
     @Test

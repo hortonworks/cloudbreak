@@ -2,7 +2,6 @@ package com.sequenceiq.flow.core.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +13,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.Lists;
@@ -28,9 +26,6 @@ public class Flow2ConfigTest {
     @InjectMocks
     private Flow2Config underTest;
 
-    @Mock
-    private List<FlowConfiguration<?>> flowConfigs;
-
     @Before
     public void setUp() {
         underTest = new Flow2Config();
@@ -42,8 +37,8 @@ public class Flow2ConfigTest {
         List<FlowConfiguration<?>> flowConfigs = new ArrayList<>();
         flowConfigs.add(new HelloWorldFlowConfig());
         flowConfigs.add(new TestFlowConfig());
-        given(this.flowConfigs.iterator()).willReturn(flowConfigs.iterator());
-        Map<String, FlowConfiguration<?>> flowConfigMap = underTest.flowConfigurationMap();
+
+        Map<String, FlowConfiguration<?>> flowConfigMap = underTest.flowConfigurationMap(flowConfigs);
         assertEquals("Not all flow type appeared in map!", countEvents(flowConfigs), flowConfigMap.size());
     }
 
@@ -53,10 +48,9 @@ public class Flow2ConfigTest {
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
         flowConfigs.add(helloWorldFlowConfig);
         flowConfigs.add(helloWorldFlowConfig);
-        given(this.flowConfigs.iterator()).willReturn(flowConfigs.iterator());
         thrown.expect(UnsupportedOperationException.class);
         thrown.expectMessage("Event already registered: " + HelloWorldEvent.HELLOWORLD_TRIGGER_EVENT.event());
-        underTest.flowConfigurationMap();
+        underTest.flowConfigurationMap(flowConfigs);
     }
 
     @Test

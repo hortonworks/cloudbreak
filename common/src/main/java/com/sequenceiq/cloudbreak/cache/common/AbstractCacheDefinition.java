@@ -13,6 +13,7 @@ public abstract class AbstractCacheDefinition implements CacheDefinition {
     @Override
     public final Cache cacheConfiguration() {
         Caffeine<Object, Object> builder = Caffeine.newBuilder()
+                .recordStats()
                 .maximumSize(getMaxEntries())
                 .expireAfterWrite(getTimeToLiveSeconds(), TimeUnit.SECONDS);
         return new CaffeineCache(getName(), builder.build());

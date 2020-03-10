@@ -240,6 +240,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(environmentResponse.getCredential()).thenReturn(credentialResponse);
         when(environmentResponse.getAdminGroupName()).thenReturn(ADMIN_GROUP_NAME);
         when(environmentResponse.getIdBrokerMappingSource()).thenReturn(IdBrokerMappingSource.MOCK);
+        when(environmentResponse.getCrn()).thenReturn(TEST_ENVIRONMENT_CRN);
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(credentialClientService.getByName(TEST_CREDENTIAL_NAME)).thenReturn(credential);

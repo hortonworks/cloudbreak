@@ -103,6 +103,14 @@
     {
       "name": "PHOENIX",
       "version": "5.0.0"
+    },
+    {
+      "name": "PROFILER_MANAGER",
+      "version": "2.0.3"
+    },
+    {
+      "name": "PROFILER_SCHEDULER",
+      "version": "2.0.3"
     }
   ],
   "version": "7.1.0",
