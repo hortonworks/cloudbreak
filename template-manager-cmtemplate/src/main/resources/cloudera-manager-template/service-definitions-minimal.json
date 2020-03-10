@@ -498,23 +498,6 @@
       "dependencies": ["ZOOKEEPER", "HDFS", "HBASE"]
     },
     {
-      "name": "PROFILER_MANAGER",
-      "displayName": "Profiler Manager",
-      "components": [
-        {
-          "name": "PROFILER_ADMIN_AGENT",
-          "groups": ["master"],
-          "base" : true
-        },
-        {
-          "name": "PROFILER_METRICS_AGENT",
-          "groups": ["master"],
-          "base" : true
-        }
-      ],
-      "dependencies": ["ZOOKEEPER", "HDFS", "HBASE"]
-    },
-    {
       "name": "PROFILER_SCHEDULER",
       "displayName": "Profiler Scheduler",
       "components": [
