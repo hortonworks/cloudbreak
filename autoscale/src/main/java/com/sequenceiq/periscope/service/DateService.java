@@ -68,4 +68,14 @@ public final class DateService {
             throw new ParseException(ex.getMessage(), 0);
         }
     }
+
+    public void validateTimeZone(String timeZone) throws ParseException {
+        try {
+            if (timeZone != null) {
+                ZoneId.of(timeZone);
+            }
+        } catch (Exception ex) {
+            throw new ParseException(ex.getMessage(), 0);
+        }
+    }
 }

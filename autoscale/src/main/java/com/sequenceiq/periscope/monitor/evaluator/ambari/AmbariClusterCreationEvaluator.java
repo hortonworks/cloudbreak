@@ -137,7 +137,8 @@ public class AmbariClusterCreationEvaluator extends ClusterCreationEvaluator {
             securityConfig = securityConfigService.getSecurityConfig(clusterId);
         }
         ClusterManager clusterManager = new ClusterManager(host, gatewayPort, stack.getUserNamePath(), stack.getPasswordPath(), ClusterManagerVariant.AMBARI);
-        return new MonitoredStack(clusterManager, stack.getStackCrn(), stack.getStackId(), securityConfig, stack.getTunnel());
+        return new MonitoredStack(clusterManager, stack.getName(), stack.getStackCrn(), stack.getStackType(),
+                stack.getStackId(), securityConfig, stack.getTunnel());
     }
 
     private void ambariHealthCheck(MonitoredStack ambariStack) {

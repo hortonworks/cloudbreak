@@ -24,9 +24,11 @@ import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.MetricAlert;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
+import com.sequenceiq.periscope.repository.LoadAlertRepository;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
 import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
@@ -49,6 +51,9 @@ public class AlertService {
 
     @Inject
     private TimeAlertRepository timeAlertRepository;
+
+    @Inject
+    private LoadAlertRepository loadAlertRepository;
 
     @Inject
     private PrometheusAlertRepository prometheusAlertRepository;
@@ -127,12 +132,18 @@ public class AlertService {
         return timeAlertRepository.findByCluster(alertId, clusterId);
     }
 
-    public TimeAlert updateTimeAlert(Long clusterId, Long alertId, TimeAlert timeAlert) {
+    public TimeAlert updateTimeAlert(Long clusterId, Long alertId, TimeAlert timeAlertForUpdate) {
         TimeAlert alert = timeAlertRepository.findByCluster(alertId, clusterId);
-        alert.setDescription(timeAlert.getDescription());
-        alert.setCron(timeAlert.getCron());
-        alert.setTimeZone(timeAlert.getTimeZone());
-        alert.setName(timeAlert.getName());
+        alert.setDescription(timeAlertForUpdate.getDescription());
+        alert.setCron(timeAlertForUpdate.getCron());
+        alert.setTimeZone(timeAlertForUpdate.getTimeZone());
+        alert.setName(timeAlertForUpdate.getName());
+        if (timeAlertForUpdate.getScalingPolicy() != null) {
+            alert.getScalingPolicy().setName(timeAlertForUpdate.getScalingPolicy().getName());
+            alert.getScalingPolicy().setAdjustmentType(timeAlertForUpdate.getScalingPolicy().getAdjustmentType());
+            alert.getScalingPolicy().setScalingAdjustment(timeAlertForUpdate.getScalingPolicy().getScalingAdjustment());
+            alert.getScalingPolicy().setHostGroup(timeAlertForUpdate.getScalingPolicy().getHostGroup());
+        }
         return timeAlertRepository.save(alert);
     }
 
@@ -169,6 +180,11 @@ public class AlertService {
         } catch (RuntimeException ignored) {
             LOGGER.info("Could not found Prometheus alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
         }
+        try {
+            return findLoadAlertByCluster(clusterId, alertId);
+        } catch (RuntimeException ignored) {
+            LOGGER.info("Could not found Load alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
+        }
 
         throw new NotFoundException(String.format("Could not found alert with id: '%s', for cluster: '%s'!", alertId, clusterId));
     }
@@ -182,6 +198,8 @@ public class AlertService {
             res = timeAlertRepository.save((TimeAlert) alert);
         } else if (alert instanceof PrometheusAlert) {
             res = prometheusAlertRepository.save((PrometheusAlert) alert);
+        } else if (alert instanceof LoadAlert) {
+            res = loadAlertRepository.save((LoadAlert) alert);
         }
         return res;
     }
@@ -279,5 +297,54 @@ public class AlertService {
         } catch (Exception ignored) {
             LOGGER.info("Cannot add '{}' to the cluster", alertName);
         }
+    }
+
+    public LoadAlert createLoadAlert(Long clusterId, LoadAlert loadAlert) {
+        Cluster cluster = clusterService.findById(clusterId);
+        loadAlert.setCluster(cluster);
+        loadAlert = (LoadAlert) save(loadAlert);
+        cluster.addLoadAlert(loadAlert);
+        clusterService.save(cluster);
+        return loadAlert;
+    }
+
+    public LoadAlert updateLoadAlert(Long clusterId, Long alertId, LoadAlert loadAlertForUpdate) {
+        LoadAlert alert = loadAlertRepository.findByCluster(alertId, clusterId);
+        alert.setName(loadAlertForUpdate.getName());
+        alert.setDescription(loadAlertForUpdate.getDescription());
+        if (loadAlertForUpdate.getScalingPolicy() != null) {
+            alert.getScalingPolicy().setName(loadAlertForUpdate.getScalingPolicy().getName());
+            alert.getScalingPolicy().setAdjustmentType(loadAlertForUpdate.getScalingPolicy().getAdjustmentType());
+            alert.getScalingPolicy().setScalingAdjustment(loadAlertForUpdate.getScalingPolicy().getScalingAdjustment());
+            alert.getScalingPolicy().setHostGroup(loadAlertForUpdate.getScalingPolicy().getHostGroup());
+        }
+        return loadAlertRepository.save(alert);
+    }
+
+    public LoadAlert findLoadAlertByCluster(Long clusterId, Long alertId) {
+        return loadAlertRepository.findByCluster(alertId, clusterId);
+    }
+
+    public void deleteLoadAlert(Long clusterId, Long alertId) {
+        LoadAlert loadAlert = loadAlertRepository.findByCluster(alertId, clusterId);
+        Cluster cluster = clusterService.findById(clusterId);
+        cluster.setLoadAlerts(removeLoadAlert(cluster, alertId));
+        loadAlertRepository.delete(loadAlert);
+        clusterService.save(cluster);
+    }
+
+    public Set<LoadAlert> removeLoadAlert(Cluster cluster, Long alertId) {
+        return cluster.getLoadAlerts().stream().filter(a -> !a.getId().equals(alertId)).collect(Collectors.toSet());
+    }
+
+    public Set<LoadAlert> getLoadAlertsForClusterHostGroup(Long clusterId, String hostGroup) {
+        Cluster cluster = clusterService.findById(clusterId);
+        return cluster.getLoadAlerts().stream()
+                .filter(a -> a.getScalingPolicy().getHostGroup().equals(hostGroup)).collect(Collectors.toSet());
+    }
+
+    public Set<LoadAlert> getLoadAlerts(Long clusterId) {
+        Cluster cluster = clusterService.findById(clusterId);
+        return cluster.getLoadAlerts();
     }
 }

@@ -125,6 +125,7 @@ public class ModelDescriptions {
     public static class StackModelDescription {
         public static final String TENANANT = "name of the tenant";
         public static final String CRN = "the unique crn of the resource";
+        public static final String TYPE = "the typeof the resource";
         public static final String WORKSPACE_ID = "id of the workspace";
         public static final String USER_ID = "id of the user";
         public static final String STACK_ID = "id of the stack";
