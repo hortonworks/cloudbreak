@@ -139,6 +139,10 @@
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
             <param>
+                <name>spark3historyui.acl</name>
+                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
+            <param>
                 <name>webhbase.acl</name>
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
@@ -475,6 +479,17 @@
         <role>SPARKHISTORYUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['SPARK_YARN_HISTORY_SERVER'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['SPARKHISTORYUI'] }}/</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'SPARK3_YARN_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SPARK3HISTORYUI' in exposed -%}
+    <service>
+        <role>SPARK3HISTORYUI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['SPARK3_YARN_HISTORY_SERVER'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SPARK3HISTORYUI'] }}/</url>
         {%- endfor %}
     </service>
     {%- endif %}
