@@ -11,10 +11,17 @@ public class RequestLogging {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestLogging.class);
 
-    public <T> T logging(Supplier<T> callback, String requestName) {
+    public <T> T logResponseTime(Supplier<T> callback, String requestName) {
         long start = System.currentTimeMillis();
-        T o = callback.get();
-        LOGGER.debug("Ambari '{}' finished in {} ms", requestName, System.currentTimeMillis() - start);
-        return o;
+        T response;
+        try {
+            response = callback.get();
+        } catch (Exception ex) {
+            LOGGER.error("Request '{}', Exception: ", requestName, ex);
+            throw ex;
+        } finally {
+            LOGGER.info("Request '{}' finished in '{}' ms.", requestName, System.currentTimeMillis() - start);
+        }
+        return response;
     }
 }
