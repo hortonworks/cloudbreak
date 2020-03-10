@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.projection.HostGroupRepairView;
+import com.sequenceiq.cloudbreak.domain.projection.InstanceMetaDataGroupView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -127,6 +128,9 @@ public class ClusterOperationServiceTest {
     @Mock
     private UpdateHostsValidator updateHostsValidator;
 
+    @Mock
+    private InstanceMetaDataGroupView instanceMetaDataGroupView;
+
     private Cluster cluster;
 
     private Stack stack;
@@ -172,17 +176,19 @@ public class ClusterOperationServiceTest {
         when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("auto recovery").thenReturn("failed node");
 
         InstanceMetaData host1 = getHost("host1", "master", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
-        when(instanceMetaDataService.findHostInStack(eq(stack.getId()), eq("host1"))).thenReturn(Optional.of(host1));
+        InstanceMetaDataGroupView host1View = getInstanceMetaDataGroupView("master", InstanceGroupType.GATEWAY);
+        when(instanceMetaDataService.findInstanceGroupViewInClusterByName(eq(stack.getId()), eq("host1"))).thenReturn(Optional.of(host1View));
 
         InstanceMetaData host2 = getHost("host2", "group2", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
-        when(instanceMetaDataService.findHostInStack(eq(stack.getId()), eq("host2"))).thenReturn(Optional.of(host2));
+        InstanceMetaDataGroupView host2View = getInstanceMetaDataGroupView("group2", InstanceGroupType.GATEWAY);
+        when(instanceMetaDataService.findInstanceGroupViewInClusterByName(eq(stack.getId()), eq("host2"))).thenReturn(Optional.of(host2View));
 
         HostGroupRepairView hostGroup = getHostGroup(host1, RecoveryMode.AUTO);
         when(hostGroupService.getRepairViewByClusterIdAndName(stack.getCluster().getId(), host1.getInstanceGroup().getGroupName()))
                 .thenReturn(Optional.of(hostGroup));
         when(hostGroupService.getRepairViewByClusterIdAndName(stack.getCluster().getId(), host2.getInstanceGroup().getGroupName()))
                 .thenReturn(Optional.of(getHostGroup(host2, RecoveryMode.MANUAL)));
-        when(instanceMetaDataService.findNotTerminatedForStack(eq(stack.getId()))).thenReturn(new HashSet<>(Arrays.asList(host1, host2)));
+        when(instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(eq(stack.getId()))).thenReturn(new HashSet<>(Arrays.asList(host1, host2)));
 
         underTest.reportHealthChange(STACK_CRN, Set.of("host1", "host2"), Set.of());
 
@@ -205,9 +211,10 @@ public class ClusterOperationServiceTest {
     public void shouldNotTriggerSync() {
         String hostFQDN = "host2Name.stopped";
         InstanceMetaData instanceMd = getHost(hostFQDN, "master", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
+        InstanceMetaDataGroupView instanceMdView = getInstanceMetaDataGroupView("master", InstanceGroupType.GATEWAY);
         when(hostGroupService.getRepairViewByClusterIdAndName(stack.getCluster().getId(), instanceMd.getInstanceGroup().getGroupName()))
                 .thenReturn(Optional.of(getHostGroup(instanceMd, RecoveryMode.MANUAL)));
-        when(instanceMetaDataService.findHostInStack(eq(stack.getId()), eq(hostFQDN))).thenReturn(Optional.of(instanceMd));
+        when(instanceMetaDataService.findInstanceGroupViewInClusterByName(eq(stack.getId()), eq(hostFQDN))).thenReturn(Optional.of(instanceMdView));
 
         when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
         when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("failed node");
@@ -225,7 +232,8 @@ public class ClusterOperationServiceTest {
 
         when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
         InstanceMetaData host1 = getHost("host1", "master", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
-        when(instanceMetaDataService.findHostInStack(eq(stack.getId()), eq("host1"))).thenReturn(Optional.of(host1));
+        InstanceMetaDataGroupView host1View = getInstanceMetaDataGroupView("master", InstanceGroupType.GATEWAY);
+        when(instanceMetaDataService.findInstanceGroupViewInClusterByName(eq(stack.getId()), eq("host1"))).thenReturn(Optional.of(host1View));
         when(hostGroupService.getRepairViewByClusterIdAndName(stack.getCluster().getId(), host1.getInstanceGroup().getGroupName()))
                 .thenReturn(Optional.of(getHostGroup(host1, RecoveryMode.AUTO)));
 
@@ -245,7 +253,7 @@ public class ClusterOperationServiceTest {
 
         InstanceMetaData host1 = getHost("host1", "master", InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.GATEWAY);
 
-        when(instanceMetaDataService.findNotTerminatedForStack(eq(stack.getId()))).thenReturn(new HashSet<>(Arrays.asList(host1)));
+        when(instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(eq(stack.getId()))).thenReturn(new HashSet<>(Arrays.asList(host1)));
 
         when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("recovery detected");
 
@@ -274,6 +282,10 @@ public class ClusterOperationServiceTest {
         return new HostGroupRepairViewImpl(instanceMetaData.getInstanceGroupName(), recoveryMode);
     }
 
+    private InstanceMetaDataGroupView getInstanceMetaDataGroupView(String groupName, InstanceGroupType type) {
+        return new InstanceMetaDataGroupViewImpl(groupName, type);
+    }
+
     private static class HostGroupRepairViewImpl implements HostGroupRepairView {
 
         private RecoveryMode recoveryMode;
@@ -293,6 +305,28 @@ public class ClusterOperationServiceTest {
         @Override
         public String getName() {
             return name;
+        }
+    }
+
+    private static class InstanceMetaDataGroupViewImpl implements InstanceMetaDataGroupView {
+
+        private final String groupName;
+
+        private final InstanceGroupType type;
+
+        InstanceMetaDataGroupViewImpl(String groupName, InstanceGroupType type) {
+            this.groupName = groupName;
+            this.type = type;
+        }
+
+        @Override
+        public String getGroupName() {
+            return groupName;
+        }
+
+        @Override
+        public InstanceGroupType getInstanceGroupType() {
+            return type;
         }
     }
 }

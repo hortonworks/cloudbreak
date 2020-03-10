@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.domain.projection.InstanceMetaDataGroupView;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -126,12 +127,24 @@ public class InstanceMetaDataService {
         return repository.findNotTerminatedForStack(stackId);
     }
 
+    public Set<InstanceMetaData> findNotTerminatedForStackWithoutInstanceGroups(Long stackId) {
+        return repository.findNotTerminatedForStackWithoutInstanceGroups(stackId);
+    }
+
     public Optional<InstanceMetaData> findByStackIdAndInstanceId(Long stackId, String instanceId) {
         return repository.findByStackIdAndInstanceId(stackId, instanceId);
     }
 
     public Optional<InstanceMetaData> findHostInStack(Long stackId, String hostName) {
         return repository.findHostInStack(stackId, hostName);
+    }
+
+    public Optional<InstanceMetaDataGroupView> findInstanceGroupViewInClusterByName(Long stackId, String hostName) {
+        return repository.findInstanceGroupViewInClusterByName(stackId, hostName);
+    }
+
+    public Optional<InstanceMetaData> findHostInStackWithoutInstanceGroup(Long stackId, String hostName) {
+        return repository.findHostInStackWithoutInstanceGroup(stackId, hostName);
     }
 
     public Set<InstanceMetaData> findUnusedHostsInInstanceGroup(Long instanceGroupId) {
