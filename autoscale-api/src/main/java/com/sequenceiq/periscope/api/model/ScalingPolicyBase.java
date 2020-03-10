@@ -1,6 +1,9 @@
 package com.sequenceiq.periscope.api.model;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.sequenceiq.periscope.api.endpoint.validator.ValidScalingPolicy;
 import com.sequenceiq.periscope.doc.ApiDescription.ScalingPolicyJsonProperties;
@@ -16,6 +19,7 @@ public class ScalingPolicyBase implements Json {
     private String name;
 
     @ApiModelProperty(ScalingPolicyJsonProperties.ADJUSTMENTTYPE)
+    @NotNull
     private AdjustmentType adjustmentType;
 
     @ApiModelProperty(ScalingPolicyJsonProperties.SCALINGADJUSTMENT)
@@ -25,6 +29,8 @@ public class ScalingPolicyBase implements Json {
     private long alertId;
 
     @ApiModelProperty(ScalingPolicyJsonProperties.HOSTGROUP)
+    @NotEmpty
+    @Size(max = 250)
     private String hostGroup;
 
     public long getAlertId() {

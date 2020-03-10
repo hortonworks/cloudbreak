@@ -7,60 +7,39 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
+import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.LoadAlertResponse;
-import com.sequenceiq.periscope.api.model.MetricAlertResponse;
-import com.sequenceiq.periscope.api.model.PrometheusAlertResponse;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertResponse;
 import com.sequenceiq.periscope.domain.Cluster;
 
 @Component
-public class ClusterConverter extends AbstractConverter<AutoscaleClusterResponse, Cluster> {
-
-    @Inject
-    private MetricAlertResponseConverter metricAlertResponseConverter;
+public class DistroXClusterResponseConverter extends AbstractConverter<DistroXAutoscaleClusterResponse, Cluster> {
 
     @Inject
     private TimeAlertResponseConverter timeAlertResponseConverter;
 
     @Inject
-    private PrometheusAlertResponseConverter prometheusAlertResponseConverter;
-
-    @Inject
     private LoadAlertResponseConverter loadAlertResponseConverter;
 
-    @Inject
-    private SecretService secretService;
-
     @Override
-    public AutoscaleClusterResponse convert(Cluster source) {
-        AutoscaleClusterResponse json = new AutoscaleClusterResponse(
-                source.getHost(),
-                source.getPort(),
-                secretService.get(source.getClusterManagerUser()),
+    public DistroXAutoscaleClusterResponse convert(Cluster source) {
+        DistroXAutoscaleClusterResponse json = new DistroXAutoscaleClusterResponse(
                 source.getStackCrn(),
+                source.getStackName(),
                 source.isAutoscalingEnabled(),
                 source.getId(),
-                source.getState().name());
+                source.getState());
 
-        if (!source.getMetricAlerts().isEmpty()) {
-            List<MetricAlertResponse> metricAlerts =
-                    metricAlertResponseConverter.convertAllToJson(new ArrayList<>(source.getMetricAlerts()));
-            json.setMetricAlerts(metricAlerts);
-        }
+        json.setStackType(source.getStackType());
+        json.setStackCrn(source.getStackCrn());
+        json.setStackName(source.getStackName());
+        json.setAutoScalingMode(source.getAutoscalingMode());
 
         if (!source.getTimeAlerts().isEmpty()) {
             List<TimeAlertResponse> timeAlertRequests =
                     timeAlertResponseConverter.convertAllToJson(new ArrayList<>(source.getTimeAlerts()));
             json.setTimeAlerts(timeAlertRequests);
-        }
-
-        if (!source.getPrometheusAlerts().isEmpty()) {
-            List<PrometheusAlertResponse> prometheusAlertRequests =
-                    prometheusAlertResponseConverter.convertAllToJson(new ArrayList<>(source.getPrometheusAlerts()));
-            json.setPrometheusAlerts(prometheusAlertRequests);
         }
 
         if (!source.getLoadAlerts().isEmpty()) {
@@ -73,5 +52,4 @@ public class ClusterConverter extends AbstractConverter<AutoscaleClusterResponse
 
         return json;
     }
-
 }

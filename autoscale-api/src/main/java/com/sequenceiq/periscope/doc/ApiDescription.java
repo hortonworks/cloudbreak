@@ -21,6 +21,11 @@ public class ApiDescription {
         public static final String TIME_BASED_DELETE = "delete alert which time based";
         public static final String TIME_BASED_CRON = "cron expression validation";
 
+        public static final String LOAD_BASED_POST = "create alert which is load based";
+        public static final String LOAD_BASED_PUT = "modify alert which is load based";
+        public static final String LOAD_BASED_GET = "retrieve alert which is load based";
+        public static final String LOAD_BASED_DELETE = "delete alert which is load based";
+
         public static final String PROMETHEUS_BASED_POST = "create alert which prometheus based";
         public static final String PROMETHEUS_BASED_PUT = "modify alert which prometheus based";
         public static final String PROMETHEUS_BASED_GET = "retrieve alert which prometheus based";
@@ -36,6 +41,7 @@ public class ApiDescription {
                 + "nevertheless these thresholds can be configured, changed or altered in Ambari. In order to change the default threshold for a metric "
                 + "please go to Ambari UI and select the Alerts tab and the metric. The values can be changed in the Threshold section. ";
         public static final String PROMETHEUS_BASED_NOTES = "Prometheus based alerts are using Prometheus under the hood. ";
+        public static final String LOAD_BASED_NOTES = "Load based alerts are based on the load observed in the cluster ";
     }
 
     public static class ConfigurationOpDescription {
@@ -83,12 +89,16 @@ public class ApiDescription {
         public static final String CLUSTER_DELETE = "delete cluster";
         public static final String CLUSTER_SET_STATE = "set cluster state";
         public static final String CLUSTER_SET_AUTOSCALE_STATE = "set cluster's autoscale feature state";
+        public static final String CLUSTER_DELETE_ALERTS = "delete a cluster's alerts";
     }
 
     public static class ClusterNotes {
         public static final String NOTES = "Ambari cluster.";
     }
 
+    public static class DistroXClusterNotes {
+        public static final String NOTES = "DataHub cluster.";
+    }
     public static class ClusterJsonsProperties {
         public static final String WORKSPACE_ID = "Workspace id";
         public static final String HOST = "Ambari server host address";
@@ -99,11 +109,18 @@ public class ApiDescription {
         public static final String ENABLE_AUTOSCALING = "Enable or Disable the Autoscaling feature set on the underlying Periscope cluster";
         public static final String AUTOSCALING_ENABLED = "Indicate that the Autoscaling feature set is Enabled or Disabled";
         public static final String ID = "Id of the cluster";
+        public static final String STACK_NAME = "Name of stack in Cloudbreak";
+        public static final String STACK_TYPE = "Type of stack in Cloudbreak";
         public static final String STATE = "State of the cluster";
         public static final String METRIC_ALERTS = "Metric based alerts of the cluster";
         public static final String TIME_ALERTS = "Time based alerts of the cluster";
         public static final String PROMETHEUS_ALERTS = "Prometheus based alerts of the cluster";
+        public static final String LOAD_ALERTS = "Load based alerts of the cluster";
         public static final String SCALING_CONFIGURATION = "Scaling configuration for the cluster";
+    }
+
+    public static class DistroXClusterJsonsProperties {
+        public static final String DISTROX_SCALING_MODE = "Scaling Types supported for distrox clusters";
     }
 
     public static class ScalingConfigurationJsonProperties {
@@ -146,6 +163,12 @@ public class ApiDescription {
         public static final String THRESHOLD = "Threshold of the alert in percent";
         public static final String ALERTSTATE = "State of the alert";
         public static final String ALERTOPERATOR = "Operator of the alert's query.";
+    }
+
+    public static class LoadAlertJsonProperties {
+        public static final String LOAD_ALERT_CONFIGURATION_MIN_RESOUCE_VALUE = "The lower bound for the resource";
+        public static final String LOAD_ALERT_CONFIGURATION_MAX_RESOUCE_VALUE = "The upper bound for the resource";
+        public static final String LOAD_ALERT_CONFIGURATION = "Configuration of Load Alert";
     }
 
     public static class BaseAlertJsonProperties {
