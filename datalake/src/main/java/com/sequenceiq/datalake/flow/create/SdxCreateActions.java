@@ -17,7 +17,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -167,7 +166,7 @@ public class SdxCreateActions {
             @Override
             protected void doExecute(SdxContext context, StackCreationSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        ResourceEvent.SDX_CLUSTER_CREATED, "Datalake is running", payload.getResourceId());
+                        "Datalake is running", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_CREATION_FINISHED, sdxCluster);
                 jobService.schedule(context.getSdxId(), SdxClusterJobAdapter.class);
                 sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
@@ -198,7 +197,7 @@ public class SdxCreateActions {
                     statusReason = exception.getMessage();
                 }
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.PROVISIONING_FAILED,
-                        ResourceEvent.SDX_CLUSTER_CREATION_FAILED, statusReason, payload.getResourceId());
+                        statusReason, payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_CREATION_FAILED, sdxCluster);
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }
