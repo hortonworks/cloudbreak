@@ -3,5 +3,6 @@ package com.sequenceiq.periscope.api.model;
 public enum AdjustmentType {
     NODE_COUNT,
     PERCENTAGE,
-    EXACT
+    EXACT,
+    LOAD_BASED
 }

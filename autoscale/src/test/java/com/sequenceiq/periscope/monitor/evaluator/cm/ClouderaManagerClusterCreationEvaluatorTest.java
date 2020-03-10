@@ -180,7 +180,7 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
 
         verify(clusterService).findOneByStackId(STACK_ID);
         verify(clusterService).validateClusterUniqueness(any());
-        verify(clusterService).create(any(MonitoredStack.class), eq(RUNNING), captor.capture());
+        verify(clusterService).create(any(MonitoredStack.class), eq(PENDING), captor.capture());
         ClusterPertain clusterPertain = captor.getValue();
         assertThat(clusterPertain.getTenant(), is("TENANT"));
         assertThat(clusterPertain.getWorkspaceId(), is(10L));
@@ -199,7 +199,7 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
         when(evaluatorContext.getData()).thenReturn(stack);
         when(securityConfigService.getSecurityConfig(anyLong())).thenReturn(new SecurityConfig());
         when(clusterService.findOneByStackId(anyLong())).thenReturn(cluster);
-        when(requestLogging.logging(any(), any())).thenReturn(healthy);
+        when(requestLogging.logResponseTime(any(), any())).thenReturn(healthy);
         if (cluster != null) {
             when(historyService.createEntry(any(), anyString(), anyInt(), any(Cluster.class))).thenReturn(history);
         }

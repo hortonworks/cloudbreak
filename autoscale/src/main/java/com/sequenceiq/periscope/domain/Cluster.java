@@ -18,20 +18,17 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.converter.db.StackTypeAttributeConverter;
 import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.monitor.Monitored;
+import com.sequenceiq.periscope.monitor.evaluator.ScalingConstants;
 
 @Entity
 public class Cluster implements Monitored, Clustered {
-
-    private static final int DEFAULT_MIN_SIZE = 2;
-
-    private static final int DEFAULT_MAX_SIZE = 100;
-
-    private static final int DEFAULT_COOLDOWN = 30;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "cluster_generator")
@@ -51,32 +48,45 @@ public class Cluster implements Monitored, Clustered {
     @Enumerated(EnumType.STRING)
     private ClusterState state = ClusterState.PENDING;
 
-    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<MetricAlert> metricAlerts = new HashSet<>();
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<TimeAlert> timeAlerts = new HashSet<>();
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<LoadAlert> loadAlerts = new HashSet<>();
+
+    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<PrometheusAlert> prometheusAlerts = new HashSet<>();
 
     @Column(name = "min_size")
-    private int minSize = DEFAULT_MIN_SIZE;
+    private Integer minSize = ScalingConstants.DEFAULT_CLUSTER_MIN_SIZE;
 
     @Column(name = "max_size")
-    private int maxSize = DEFAULT_MAX_SIZE;
+    private Integer maxSize = ScalingConstants.DEFAULT_CLUSTER_MAX_SIZE;
 
     @Column(name = "cooldown")
-    private int coolDown = DEFAULT_COOLDOWN;
+    private Integer coolDown = ScalingConstants.DEFAULT_CLUSTER_COOLDOWN_MINS;
 
     @Column(name = "cb_stack_crn")
     private String stackCrn;
+
+    @Column(name = "cb_stack_name")
+    private String stackName;
+
+    @Column(name = "cloud_platform")
+    private String cloudPlatform;
+
+    @Column(name = "cb_stack_type")
+    @Convert(converter = StackTypeAttributeConverter.class)
+    private StackType stackType = StackType.TEMPLATE;
 
     @Column(name = "last_scaling_activity")
     private volatile long lastScalingActivity;
 
     @Column(name = "autoscaling_enabled")
-    private boolean autoscalingEnabled;
+    private Boolean autoscalingEnabled = false;
 
     private String periscopeNodeId;
 
@@ -177,27 +187,27 @@ public class Cluster implements Monitored, Clustered {
         this.timeAlerts = timeAlerts;
     }
 
-    public int getMinSize() {
+    public Integer getMinSize() {
         return minSize;
     }
 
-    public void setMinSize(int minSize) {
+    public void setMinSize(Integer minSize) {
         this.minSize = minSize;
     }
 
-    public int getMaxSize() {
+    public Integer getMaxSize() {
         return maxSize;
     }
 
-    public void setMaxSize(int maxSize) {
+    public void setMaxSize(Integer maxSize) {
         this.maxSize = maxSize;
     }
 
-    public int getCoolDown() {
+    public Integer getCoolDown() {
         return coolDown;
     }
 
-    public void setCoolDown(int coolDown) {
+    public void setCoolDown(Integer coolDown) {
         this.coolDown = coolDown;
     }
 
@@ -241,6 +251,10 @@ public class Cluster implements Monitored, Clustered {
         timeAlerts.add(alert);
     }
 
+    public void addLoadAlert(LoadAlert alert) {
+        loadAlerts.add(alert);
+    }
+
     public Set<PrometheusAlert> getPrometheusAlerts() {
         return prometheusAlerts;
     }
@@ -253,11 +267,11 @@ public class Cluster implements Monitored, Clustered {
         prometheusAlerts.add(alert);
     }
 
-    public boolean isAutoscalingEnabled() {
+    public Boolean isAutoscalingEnabled() {
         return autoscalingEnabled;
     }
 
-    public void setAutoscalingEnabled(boolean autoscalingEnabled) {
+    public void setAutoscalingEnabled(Boolean autoscalingEnabled) {
         this.autoscalingEnabled = autoscalingEnabled;
     }
 
@@ -271,6 +285,22 @@ public class Cluster implements Monitored, Clustered {
 
     public long getLastEvaluated() {
         return lastEvaluated;
+    }
+
+    public String getStackName() {
+        return stackName;
+    }
+
+    public void setStackName(String stackName) {
+        this.stackName = stackName;
+    }
+
+    public StackType getStackType() {
+        return stackType;
+    }
+
+    public void setStackType(StackType stackType) {
+        this.stackType = stackType;
     }
 
     @Override
@@ -289,6 +319,26 @@ public class Cluster implements Monitored, Clustered {
 
     public void setTunnel(Tunnel tunnel) {
         this.tunnel = tunnel;
+    }
+
+    public Set<LoadAlert> getLoadAlerts() {
+        return loadAlerts;
+    }
+
+    public void setLoadAlerts(Set<LoadAlert> loadAlerts) {
+        this.loadAlerts = loadAlerts;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
+    public Boolean getAutoscalingEnabled() {
+        return autoscalingEnabled;
     }
 }
 

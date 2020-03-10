@@ -5,7 +5,7 @@ import com.sequenceiq.periscope.doc.ApiDescription.ClusterAutoscaleState;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
+@ApiModel("AutoscaleState")
 public class AutoscaleClusterState {
 
     @ApiModelProperty(ClusterAutoscaleState.ENABLE_AUTOSCALING)
