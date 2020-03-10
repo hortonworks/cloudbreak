@@ -161,6 +161,7 @@ public class SdxRepairTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstanceStatus(testDto, client, IDBROKER.getName(), InstanceStatus.STOPPED);
                 })
                 .when(sdxTestClient.repair(), key(sdx))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
@@ -178,13 +179,8 @@ public class SdxRepairTests extends BasicSdxTests {
                 .validate();
     }
 
-    /**
-     * This test case is disabled right now, because of [CB-4176 [Repair] Data Lake Cluster repair fails for master node when stopped from AWS].
-     *
-     * @param testContext   Stores and shares test objects through test execution between individual test cases.
-     *
-     * The 'disabled' tag on method name and the '@Test(dataProvider = TEST_CONTEXT)' annotation should be restored in case of resume this test case.
-     */
+    @Ignore("This should be re-enabled once CB-4176 is fixed")
+    @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
             when = "recovery called on the MASTER host group, where the EC2 instance had been stopped",
@@ -232,14 +228,8 @@ public class SdxRepairTests extends BasicSdxTests {
                 .validate();
     }
 
-    /**
-     * This test case is disabled right now, because of [CB-3674 Can’t repair master when idbroker is stopped].
-     *
-     * @param testContext Stores and shares test objects through test execution between individual test cases.
-     * @throws IOException Throws in case of recipe file stream cannot be written to or closed.
-     *
-     * The 'disabled' tag on method name and the '@Test(dataProvider = TEST_CONTEXT)' annotation should be restored in case of resume this test case.
-     */
+    @Ignore("This should be re-enabled once CB-3674 is fixed")
+    @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
             when = "recovery called on the IDBROKER and MASTER host group, where the EC2 instance had been stopped",

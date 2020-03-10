@@ -15,8 +15,8 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.PowerState;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
-import com.sequenceiq.it.cloudbreak.util.azure.AzureInstanceActionExecutor;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
+import com.sequenceiq.it.cloudbreak.util.azure.AzureInstanceActionExecutor;
 
 import rx.schedulers.Schedulers;
 
@@ -33,7 +33,8 @@ public class AzureClientActions {
     public List<String> listInstanceVolumeIds(List<String> instanceIds) {
         List<String> diskIds = new ArrayList<>();
         instanceIds.forEach(i -> {
-            VirtualMachine vm = azure.virtualMachines().getById(i);
+            String resourceGroup = i.replaceFirst("..$", "");
+            VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, i);
             diskIds.addAll(vm.dataDisks().values().stream().map(HasId::id).collect(Collectors.toList()));
         });
         return diskIds;
@@ -65,22 +66,18 @@ public class AzureClientActions {
         AzureInstanceActionExecutor.builder()
                 .onInstances(instanceIds)
                 .withInstanceAction(id -> {
-                            VirtualMachine vm = azure.virtualMachines().getById(id);
-                            LOGGER.debug("Before stop: vm {} power state is {}", id, vm.powerState());
-                            return azure.virtualMachines().powerOffAsync(vm.resourceGroupName(), vm.name())
-                                    .doOnError(throwable -> LOGGER.debug("Error when stopping instance {}: {}", id, throwable))
-                                    .subscribeOn(Schedulers.io());
-                        }
-                )
-                .withInstanceStatusCheck(id -> {
-                            VirtualMachine vm = azure.virtualMachines().getById(id);
-                            LOGGER.debug("After stop: vm {} power state is {}", id, vm.powerState());
+                    String resourceGroup = id.replaceFirst("..$", "");
+                    VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
+                    LOGGER.debug("Before stop: vm {} power state is {}", id, vm.powerState());
+                    return azure.virtualMachines().powerOffAsync(vm.resourceGroupName(), vm.name())
+                            .doOnError(throwable -> LOGGER.debug("Error when stopping instance {}: {}", id, throwable))
+                            .subscribeOn(Schedulers.io());
+                }).withInstanceStatusCheck(id -> {
+                    String resourceGroup = id.replaceFirst("..$", "");
+                    VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
+                    LOGGER.debug("After stop: vm {} power state is {}", id, vm.powerState());
                             return PowerState.STOPPED.equals(vm.powerState());
-                        }
-                )
-                .withTimeout(10, TimeUnit.MINUTES)
-                .build()
-                .execute();
+                }).withTimeout(10, TimeUnit.MINUTES).build().execute();
         LOGGER.debug("Stopping of instances finished succesfully");
     }
 }

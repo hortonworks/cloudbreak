@@ -19,7 +19,7 @@ public class SdxRepairInternalAction implements Action<SdxInternalTestDto, SdxCl
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, format(" Starting repair on SDX: %s " + testDto.getName()));
+        Log.when(LOGGER, format(" Starting repair on SDX: %s ", testDto.getName()));
         Log.whenJson(LOGGER, " SDX repair request: ", testDto.getSdxRepairRequest());
         FlowIdentifier flowIdentifier = client.getSdxClient()
                 .sdxEndpoint()
