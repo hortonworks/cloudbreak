@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.service;
 
+import static java.lang.String.format;
+
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -59,13 +61,20 @@ public final class DateService {
         String[] splits = cron.split("\\s+");
         if (splits.length < MINIMAL_CRON_SEGMENT_LENGTH && splits.length > MINIMAL_USER_DEFINED_CRON_SEGMENT_LENGTH) {
             for (int i = splits.length; i < MINIMAL_CRON_SEGMENT_LENGTH; i++) {
-                cron = i == DAY_OF_WEEK_FIELD ? String.format("%s ?", cron) : String.format("%s *", cron);
+                cron = i == DAY_OF_WEEK_FIELD ? format("%s ?", cron) : format("%s *", cron);
             }
         }
         try {
             return new CronSequenceGenerator(cron);
         } catch (Exception ex) {
             throw new ParseException(ex.getMessage(), 0);
+        }
+    }
+
+    public void validateCronExpression(String cron) throws ParseException {
+        String[] splits = cron.split("\\s+");
+        if (splits.length != MINIMAL_CRON_SEGMENT_LENGTH) {
+            throw new ParseException(format("Invalid length of cron expression, expected %s but found %s", MINIMAL_CRON_SEGMENT_LENGTH, splits.length), 0);
         }
     }
 }
