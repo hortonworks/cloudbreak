@@ -392,15 +392,15 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         try {
             ApiClient rootClient = clouderaManagerApiClientProvider.getRootClient(stack.getGatewayPort(), user, password, clientConfig);
             CdpResourceApi cdpResourceApi = clouderaManagerApiFactory.getCdpResourceApi(rootClient);
-            LOGGER.debug("Get remote context from SDX cluster: {}", stack.getName());
+            LOGGER.debug("Get remote context from Datalake cluster: {}", stack.getName());
             ApiRemoteDataContext remoteDataContext = cdpResourceApi.getRemoteContextByCluster(stack.getName());
             return JsonUtil.writeValueAsString(remoteDataContext);
         } catch (ApiException | ClouderaManagerClientInitException e) {
-            LOGGER.info("Error while getting remote context of SDX cluster: {}", stack.getName(), e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+            LOGGER.info("Error while getting remote context of Datalake cluster: {}", stack.getName(), e);
+            throw new ClouderaManagerOperationFailedException("Error while getting remote context of Datalake cluster", e);
         } catch (JsonProcessingException e) {
             LOGGER.info("Failed to serialize remote context.", e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+            throw new ClouderaManagerOperationFailedException("Failed to serialize remote context.", e);
         }
     }
 
