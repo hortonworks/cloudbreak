@@ -525,6 +525,23 @@
         }
       ],
       "dependencies": ["ZOOKEEPER", "HDFS", "HBASE"]
+    },
+    {
+      "name": "QUEUEMANAGER",
+      "displayName": "Queue Manager",
+      "components": [
+        {
+          "name": "QUEUEMANAGER_WEBAPP",
+          "groups": ["master"],
+          "base" : true
+        },
+        {
+          "name": "QUEUEMANAGER_STORE",
+          "groups": ["master"],
+          "base" : true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER", "HDFS", "HBASE"]
     }
   ]
 }
