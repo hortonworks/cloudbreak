@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
+import com.sequenceiq.cloudbreak.domain.projection.InstanceMetaDataGroupView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -291,38 +292,59 @@ public class ClusterOperationService {
         }
     }
 
+    public void reportHealthChange(Stack stack, Set<String> failedNodes, Set<String> newHealthyNodes) {
+        if (!Sets.intersection(failedNodes, newHealthyNodes).isEmpty()) {
+            throw new BadRequestException("Failed nodes " + failedNodes + " and healthy nodes " + newHealthyNodes + " should not have common items.");
+        }
+        if (failedNodes.isEmpty() && newHealthyNodes.isEmpty()) {
+            return;
+        }
+        try {
+            transactionService.required(() -> {
+                if (stack != null && !stack.getStatus().isInProgress()) {
+                    handleHealthChange(failedNodes, newHealthyNodes, stack);
+                } else {
+                    LOGGER.debug("Stack [{}] status is {}, thus we do not handle failure report.", stack.getName(), stack.getStatus());
+                }
+                return null;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
     private void handleHealthChange(Set<String> failedNodes, Set<String> newHealthyNodes, Stack stack) {
         Cluster cluster = stack.getCluster();
         Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
-        Map<String, InstanceMetaData> autoRecoveryMetadata = new HashMap<>();
-        Map<String, InstanceMetaData> failedMetaData = new HashMap<>();
+        Set<String> autoRecoveryHostnames = new HashSet<>();
+        Set<String> failedHostnames = new HashSet<>();
         for (String failedNode : failedNodes) {
-            instanceMetaDataService.findHostInStack(stack.getId(), failedNode).ifPresentOrElse(instanceMetaData -> {
-                hostGroupService.getRepairViewByClusterIdAndName(cluster.getId(), instanceMetaData.getInstanceGroupName()).ifPresent(hostGroup -> {
+            instanceMetaDataService.findInstanceGroupViewInClusterByName(stack.getId(), failedNode).ifPresentOrElse(instanceMetaData -> {
+                hostGroupService.getRepairViewByClusterIdAndName(cluster.getId(), instanceMetaData.getGroupName()).ifPresent(hostGroup -> {
                     if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
                         validateRepair(stack, instanceMetaData);
-                        prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryMetadata, failedNode, instanceMetaData, hostGroup.getName());
+                        prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryHostnames, failedNode, hostGroup.getName());
                     } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
-                        failedMetaData.put(failedNode, instanceMetaData);
+                        failedHostnames.add(failedNode);
                     }
                 });
             }, () -> LOGGER.error("No metadata information for the node: " + failedNode));
         }
-        handleChangedHosts(cluster, newHealthyNodes, autoRecoveryNodesMap, autoRecoveryMetadata, failedMetaData);
+        handleChangedHosts(cluster, newHealthyNodes, autoRecoveryNodesMap, autoRecoveryHostnames, failedHostnames);
     }
 
     private void handleChangedHosts(Cluster cluster, Set<String> newHealthyNodes,
-            Map<String, List<String>> autoRecoveryNodesMap, Map<String, InstanceMetaData> autoRecoveryHostMetadata,
-            Map<String, InstanceMetaData> failedHostMetadata) {
+            Map<String, List<String>> autoRecoveryNodesMap, Set<String> autoRecoveryHostnames,
+            Set<String> failedHostnames) {
         try {
             boolean hasAutoRecoverableNodes = !autoRecoveryNodesMap.isEmpty();
             if (hasAutoRecoverableNodes) {
                 flowManager.triggerClusterRepairFlow(cluster.getStack().getId(), autoRecoveryNodesMap, false);
-                updateChangedHosts(cluster, autoRecoveryHostMetadata.keySet(), Set.of(SERVICES_HEALTHY), InstanceStatus.WAITING_FOR_REPAIR,
+                updateChangedHosts(cluster, autoRecoveryHostnames, Set.of(SERVICES_HEALTHY), InstanceStatus.WAITING_FOR_REPAIR,
                         CLUSTER_AUTORECOVERY_REQUESTED);
             }
-            if (!failedHostMetadata.isEmpty()) {
-                updateChangedHosts(cluster, failedHostMetadata.keySet(), Set.of(SERVICES_HEALTHY, SERVICES_RUNNING), SERVICES_UNHEALTHY,
+            if (!failedHostnames.isEmpty()) {
+                updateChangedHosts(cluster, failedHostnames, Set.of(SERVICES_HEALTHY, SERVICES_RUNNING), SERVICES_UNHEALTHY,
                         CLUSTER_FAILED_NODES_REPORTED);
             }
             if (!newHealthyNodes.isEmpty()) {
@@ -337,7 +359,8 @@ public class ClusterOperationService {
     private void updateChangedHosts(Cluster cluster, Set<String> hostNames, Set<InstanceStatus> expectedState,
             InstanceStatus newState, ResourceEvent resourceEvent) throws TransactionService.TransactionExecutionException {
         String recoveryMessage = cloudbreakMessagesService.getMessage(resourceEvent.getMessage(), hostNames);
-        Set<InstanceMetaData> notTerminatedInstanceMetaDatasForStack = instanceMetaDataService.findNotTerminatedForStack(cluster.getStack().getId());
+        Set<InstanceMetaData> notTerminatedInstanceMetaDatasForStack = instanceMetaDataService
+                .findNotTerminatedForStackWithoutInstanceGroups(cluster.getStack().getId());
         Collection<InstanceMetaData> changedHosts = new HashSet<>();
         transactionService.required(() -> {
             for (InstanceMetaData host : notTerminatedInstanceMetaDatasForStack) {
@@ -362,21 +385,20 @@ public class ClusterOperationService {
         });
     }
 
-    private void validateRepair(Stack stack, InstanceMetaData instanceMetaData) {
+    private void validateRepair(Stack stack, InstanceMetaDataGroupView instanceMetaData) {
         if (isGateway(instanceMetaData) && clusterService.withEmbeddedClusterManagerDB(stack.getCluster())) {
             throw new BadRequestException("Cluster manager server failure with embedded database cannot be repaired!");
         }
     }
 
-    private boolean isGateway(InstanceMetaData instanceMetaData) {
-        return instanceMetaData.getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY;
+    private boolean isGateway(InstanceMetaDataGroupView instanceMetaData) {
+        return instanceMetaData.getInstanceGroupType() == InstanceGroupType.GATEWAY;
     }
 
     private void prepareForAutoRecovery(Stack stack,
             Map<String, List<String>> autoRecoveryNodesMap,
-            Map<String, InstanceMetaData> autoRecoveryHostMetadata,
+            Set<String> autoRecoveryHostnames,
             String failedNode,
-            InstanceMetaData hostMetadata,
             String hostGroupName) {
         List<String> nodeList = autoRecoveryNodesMap.get(hostGroupName);
         if (nodeList == null) {
@@ -385,7 +407,7 @@ public class ClusterOperationService {
             autoRecoveryNodesMap.put(hostGroupName, nodeList);
         }
         nodeList.add(failedNode);
-        autoRecoveryHostMetadata.put(failedNode, hostMetadata);
+        autoRecoveryHostnames.add(failedNode);
     }
 
     private FlowIdentifier sync(Stack stack) {

@@ -30,4 +30,9 @@ public interface InstanceGroupRepository extends DisabledBaseRepository<Instance
 
     Set<InstanceGroup> findByStackId(@Param("stackId") Long stackId);
 
+    @Query("SELECT i.instanceGroup " +
+            "FROM InstanceMetaData i " +
+            "WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
+    Optional<InstanceGroup> findInstanceGroupInStackByHostName(@Param("stackId") Long stackId, @Param("hostName") String hostName);
+
 }
