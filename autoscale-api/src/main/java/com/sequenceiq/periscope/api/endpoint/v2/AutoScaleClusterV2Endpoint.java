@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/v2/clusters")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v2/clusters", description = CLUSTERS_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Api(hidden = true, value = "/v2/clusters", description = CLUSTERS_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface AutoScaleClusterV2Endpoint {
 
     @GET
