@@ -12,7 +12,6 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitRequest;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitSuccessEvent;
@@ -72,7 +71,6 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
     }
 
     private void setEnvCreatedStatus(Long datalakeId) {
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.ENVIRONMENT_CREATED,
-                ResourceEvent.SDX_ENVIRONMENT_FINISHED, "Environment created", datalakeId);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.ENVIRONMENT_CREATED, "Environment created", datalakeId);
     }
 }

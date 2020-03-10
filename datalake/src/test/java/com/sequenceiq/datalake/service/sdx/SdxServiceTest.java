@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_CLUSTER_DELETION_STARTED;
 import static com.sequenceiq.common.api.type.InstanceGroupType.CORE;
 import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
@@ -45,7 +44,6 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -198,8 +196,7 @@ class SdxServiceTest {
         assertEquals("envir", capturedSdx.getEnvName());
         assertEquals("hortonworks", capturedSdx.getAccountId());
         assertEquals(USER_CRN, capturedSdx.getInitiatorUserCrn());
-        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED,
-                ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake requested", createdSdxCluster);
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Datalake requested", createdSdxCluster);
 
         assertEquals(1L, capturedSdx.getCreated());
         assertFalse(capturedSdx.isCreateDatabase());
@@ -310,8 +307,7 @@ class SdxServiceTest {
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED,
-                        SDX_CLUSTER_DELETION_STARTED, "Datalake deletion requested", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
     }
 
     @Test

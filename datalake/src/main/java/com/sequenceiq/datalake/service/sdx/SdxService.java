@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -190,8 +189,7 @@ public class SdxService implements ResourceIdProvider {
         MDCBuilder.buildMdcContext(sdxCluster);
 
         sdxCluster = sdxClusterRepository.save(sdxCluster);
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED,
-                ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake requested", sdxCluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Datalake requested", sdxCluster);
 
         LOGGER.info("trigger SDX creation: {}", sdxCluster);
         sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
@@ -410,8 +408,7 @@ public class SdxService implements ResourceIdProvider {
         checkIfSdxIsDeletable(sdxCluster);
         MDCBuilder.buildMdcContext(sdxCluster);
         sdxClusterRepository.save(sdxCluster);
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED,
-                ResourceEvent.SDX_CLUSTER_DELETION_STARTED, "Datalake deletion requested", sdxCluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
         sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId(), forced);
         sdxReactorFlowManager.cancelRunningFlows(sdxCluster.getId());
         LOGGER.info("SDX delete triggered: {}", sdxCluster.getClusterName());
