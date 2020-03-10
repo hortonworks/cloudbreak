@@ -27,6 +27,7 @@ public class AutoscaleStackToAutoscaleStackResponseJsonConverter extends Abstrac
         result.setCreated(source.getCreated());
         result.setStatus(source.getStackStatus());
         result.setStackCrn(source.getCrn());
+        result.setStackType(source.getType());
         result.setTunnel(source.getTunnel());
 
         if (source.getClusterStatus() != null) {

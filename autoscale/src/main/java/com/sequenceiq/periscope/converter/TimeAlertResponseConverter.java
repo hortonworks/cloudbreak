@@ -11,20 +11,7 @@ import com.sequenceiq.periscope.domain.TimeAlert;
 public class TimeAlertResponseConverter extends AbstractConverter<TimeAlertResponse, TimeAlert> {
 
     @Inject
-    private ScalingPolicyRequestConverter scalingPolicyRequestConverter;
-
-    @Override
-    public TimeAlert convert(TimeAlertResponse source) {
-        TimeAlert alarm = new TimeAlert();
-        alarm.setName(source.getAlertName());
-        alarm.setDescription(source.getDescription());
-        alarm.setCron(source.getCron());
-        alarm.setTimeZone(source.getTimeZone());
-        if (source.getScalingPolicy() != null) {
-            alarm.setScalingPolicy(scalingPolicyRequestConverter.convert(source.getScalingPolicy()));
-        }
-        return alarm;
-    }
+    private ScalingPolicyResponseConverter scalingPolicyResponseConverter;
 
     @Override
     public TimeAlertResponse convert(TimeAlert source) {
@@ -34,9 +21,8 @@ public class TimeAlertResponseConverter extends AbstractConverter<TimeAlertRespo
         json.setCron(source.getCron());
         json.setTimeZone(source.getTimeZone());
         json.setDescription(source.getDescription());
-        json.setScalingPolicyId(source.getScalingPolicyId());
         if (source.getScalingPolicy() != null) {
-            json.setScalingPolicy(scalingPolicyRequestConverter.convert(source.getScalingPolicy()));
+            json.setScalingPolicy(scalingPolicyResponseConverter.convert(source.getScalingPolicy()));
         }
         return json;
     }

@@ -18,9 +18,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.converter.db.StackTypeAttributeConverter;
 import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.monitor.Monitored;
 
@@ -58,25 +60,35 @@ public class Cluster implements Monitored, Clustered {
     private Set<TimeAlert> timeAlerts = new HashSet<>();
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<LoadAlert> loadAlerts = new HashSet<>();
+
+    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<PrometheusAlert> prometheusAlerts = new HashSet<>();
 
     @Column(name = "min_size")
-    private int minSize = DEFAULT_MIN_SIZE;
+    private Integer minSize = DEFAULT_MIN_SIZE;
 
     @Column(name = "max_size")
-    private int maxSize = DEFAULT_MAX_SIZE;
+    private Integer maxSize = DEFAULT_MAX_SIZE;
 
     @Column(name = "cooldown")
-    private int coolDown = DEFAULT_COOLDOWN;
+    private Integer coolDown = DEFAULT_COOLDOWN;
 
     @Column(name = "cb_stack_crn")
     private String stackCrn;
+
+    @Column(name = "cb_stack_name")
+    private String stackName;
+
+    @Column(name = "cb_stack_type")
+    @Convert(converter = StackTypeAttributeConverter.class)
+    private StackType stackType = StackType.TEMPLATE;
 
     @Column(name = "last_scaling_activity")
     private volatile long lastScalingActivity;
 
     @Column(name = "autoscaling_enabled")
-    private boolean autoscalingEnabled;
+    private Boolean autoscalingEnabled = false;
 
     private String periscopeNodeId;
 
@@ -177,27 +189,27 @@ public class Cluster implements Monitored, Clustered {
         this.timeAlerts = timeAlerts;
     }
 
-    public int getMinSize() {
+    public Integer getMinSize() {
         return minSize;
     }
 
-    public void setMinSize(int minSize) {
+    public void setMinSize(Integer minSize) {
         this.minSize = minSize;
     }
 
-    public int getMaxSize() {
+    public Integer getMaxSize() {
         return maxSize;
     }
 
-    public void setMaxSize(int maxSize) {
+    public void setMaxSize(Integer maxSize) {
         this.maxSize = maxSize;
     }
 
-    public int getCoolDown() {
+    public Integer getCoolDown() {
         return coolDown;
     }
 
-    public void setCoolDown(int coolDown) {
+    public void setCoolDown(Integer coolDown) {
         this.coolDown = coolDown;
     }
 
@@ -241,6 +253,10 @@ public class Cluster implements Monitored, Clustered {
         timeAlerts.add(alert);
     }
 
+    public void addLoadAlert(LoadAlert alert) {
+        loadAlerts.add(alert);
+    }
+
     public Set<PrometheusAlert> getPrometheusAlerts() {
         return prometheusAlerts;
     }
@@ -253,11 +269,11 @@ public class Cluster implements Monitored, Clustered {
         prometheusAlerts.add(alert);
     }
 
-    public boolean isAutoscalingEnabled() {
+    public Boolean isAutoscalingEnabled() {
         return autoscalingEnabled;
     }
 
-    public void setAutoscalingEnabled(boolean autoscalingEnabled) {
+    public void setAutoscalingEnabled(Boolean autoscalingEnabled) {
         this.autoscalingEnabled = autoscalingEnabled;
     }
 
@@ -271,6 +287,22 @@ public class Cluster implements Monitored, Clustered {
 
     public long getLastEvaluated() {
         return lastEvaluated;
+    }
+
+    public String getStackName() {
+        return stackName;
+    }
+
+    public void setStackName(String stackName) {
+        this.stackName = stackName;
+    }
+
+    public StackType getStackType() {
+        return stackType;
+    }
+
+    public void setStackType(StackType stackType) {
+        this.stackType = stackType;
     }
 
     @Override
@@ -289,6 +321,14 @@ public class Cluster implements Monitored, Clustered {
 
     public void setTunnel(Tunnel tunnel) {
         this.tunnel = tunnel;
+    }
+
+    public Set<LoadAlert> getLoadAlerts() {
+        return loadAlerts;
+    }
+
+    public void setLoadAlerts(Set<LoadAlert> loadAlerts) {
+        this.loadAlerts = loadAlerts;
     }
 }
 
