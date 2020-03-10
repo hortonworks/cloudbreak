@@ -60,11 +60,16 @@ public class UmsUsersStateProvider {
             Map<String, FmsGroup> crnToFmsGroup = grpcUmsClient.listGroups(actorCrn, accountId, List.of(), requestIdOptional).stream()
                     .collect(Collectors.toMap(Group::getCrn, this::umsGroupToGroup));
 
+            Set<FmsGroup> wags = grpcUmsClient.listWorkloadAdministrationGroups(IAM_INTERNAL_ACTOR_CRN, accountId, requestIdOptional).stream()
+                    .map(wag -> nameToGroup(wag.getWorkloadAdministrationGroupName()))
+                    .collect(Collectors.toSet());
+
             environmentCrns.stream().forEach(environmentCrn -> {
                 UmsUsersState.Builder umsUsersStateBuilder = new UmsUsersState.Builder();
                 UsersState.Builder usersStateBuilder = new UsersState.Builder();
 
                 crnToFmsGroup.values().stream().forEach(usersStateBuilder::addGroup);
+                wags.stream().forEach(usersStateBuilder::addGroup);
 
                 // add internal usersync group for each environment
                 FmsGroup internalUserSyncGroup = new FmsGroup();

@@ -121,6 +121,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String CDP_FREEIPA_HA = "CDP_FREEIPA_HA";
 
+    private static final String MOCK_RESOURCE = "mock_resource";
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -627,6 +629,22 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     public void deleteWorkloadAdministrationGroupName(UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request,
             StreamObserver<UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
         mockGroupManagementService.deleteWorkloadAdministrationGroupName(request, responseObserver);
+    }
+
+    @Override
+    public void listWorkloadAdministrationGroups(UserManagementProto.ListWorkloadAdministrationGroupsRequest request,
+            StreamObserver<UserManagementProto.ListWorkloadAdministrationGroupsResponse> responseObserver) {
+        mockCrnService.ensureInternalActor();
+        responseObserver.onNext(UserManagementProto.ListWorkloadAdministrationGroupsResponse.newBuilder()
+                .addWorkloadAdministrationGroup(
+                        UserManagementProto.WorkloadAdministrationGroup.newBuilder()
+                                .setWorkloadAdministrationGroupName(mockGroupManagementService.generateVirtualGroupName(ENV_ACCESS_RIGHT))
+                                .setRightName(ENV_ACCESS_RIGHT)
+                                .setResource(MOCK_RESOURCE)
+                                .build()
+                )
+                .build());
+        responseObserver.onCompleted();
     }
 
     private UserManagementProto.ResourceAssignee createResourceAssignee(String resourceCrn) {
