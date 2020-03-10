@@ -17,7 +17,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -162,8 +161,7 @@ public class SdxStopActions {
             @Override
             protected void doExecute(SdxContext context, SdxStopSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("SDX stop finalized: {}", payload.getResourceId());
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, ResourceEvent.SDX_STOP_FINISHED, "Datalake is stopped",
-                        payload.getResourceId());
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Datalake is stopped", payload.getResourceId());
                 sendEvent(context, SDX_STOP_FINALIZED_EVENT.event(), payload);
             }
 
@@ -192,7 +190,7 @@ public class SdxStopActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, ResourceEvent.SDX_STOP_FAILED, statusReason, payload.getResourceId());
+                sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, statusReason, payload.getResourceId());
                 sendEvent(context, SDX_STOP_FAILED_HANDLED_EVENT.event(), payload);
             }
 

@@ -91,6 +91,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 doExecute(flowContext, payload, variables);
                 variables.put(FLOW_START_TIME, System.currentTimeMillis());
             } catch (Exception ex) {
+//                throw new RuntimeException("shit happened again! :D");
                 LOGGER.error("Error during execution of " + getClass().getName(), ex);
                 if (failureEvent != null) {
                     sendEvent(flowParameters, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex), Map.of());

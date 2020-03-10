@@ -38,7 +38,8 @@ public abstract class ExceptionCatcherEventHandler<T extends Payload> implements
             }
         } catch (Exception e) {
             LOGGER.error("Something unexpected happened in handler {}", handlerName, e);
-            eventBus.notify(defaultFailureEvent(event.getData().getResourceId(), e).selector(), new Event<>(event.getHeaders(), event));
+            throw new RuntimeException(e);
+//            eventBus.notify(defaultFailureEvent(event.getData().getResourceId(), e).selector(), new Event<>(event.getHeaders(), event));
         }
     }
 

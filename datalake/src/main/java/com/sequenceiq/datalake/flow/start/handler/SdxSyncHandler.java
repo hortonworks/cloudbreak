@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow.start.handler;
 
 import static com.sequenceiq.datalake.flow.start.handler.SdxStartWaitHandler.DURATION_IN_MINUTES;
+import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
 
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +32,7 @@ import com.sequenceiq.datalake.flow.start.event.SdxSyncSuccessEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxSyncWaitRequest;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -109,7 +111,8 @@ public class SdxSyncHandler extends ExceptionCatcherEventHandler<SdxSyncWaitRequ
                 LOGGER.info("Sync polling cancelled in inmemory store, id: " + sdxCluster.getId());
                 return AttemptResults.breakFor("Sync polling cancelled in inmemory store, id: " + sdxCluster.getId());
             }
-            if (cloudbreakFlowService.isLastKnownFlowRunning(sdxCluster)) {
+            FlowState flowState = cloudbreakFlowService.getLastKnownFlowState(sdxCluster);
+            if (RUNNING.equals(flowState)) {
                 LOGGER.info("Sync polling will continue, cluster has an active flow in Cloudbreak, id: " + sdxCluster.getId());
                 return AttemptResults.justContinue();
             } else {
