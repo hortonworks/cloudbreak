@@ -130,6 +130,10 @@ class SubnetIdProviderTest {
                         "AZ-a", new CloudSubnet("id-1", "name-1"),
                         "AZ-b", new CloudSubnet("id-2", "name-2")
                 ))
+                .withCbSubnets(Map.of(
+                        "AZ-a", new CloudSubnet("id-1", "name-1"),
+                        "AZ-b", new CloudSubnet("id-2", "name-2")
+                ))
                 .build();
 
         String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
