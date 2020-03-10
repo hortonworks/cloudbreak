@@ -112,7 +112,7 @@ public class AlertController implements AlertEndpoint {
 
     @Override
     public Boolean validateCronExpression(Long clusterId, TimeAlertValidationRequest json) throws ParseException {
-        dateService.getCronExpression(json.getCronExpression());
+        dateService.validateCronExpression(json.getCronExpression());
         return true;
     }
 
@@ -146,7 +146,7 @@ public class AlertController implements AlertEndpoint {
 
     private TimeAlert validateTimeAlert(TimeAlertRequest json) throws ParseException {
         TimeAlert alert = timeAlertRequestConverter.convert(json);
-        dateService.getCronExpression(alert.getCron());
+        dateService.validateCronExpression(alert.getCron());
         return alert;
     }
 
