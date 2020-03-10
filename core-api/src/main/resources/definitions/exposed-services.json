@@ -155,6 +155,20 @@
       "visibleForDatahub": true
     },
     {
+      "name": "SPARK3_HISTORY_SERVER",
+      "displayName": "Spark 3 History Server",
+      "serviceName": "SPARK3_YARN_HISTORY_SERVER",
+      "knoxService": "SPARK3HISTORYUI",
+      "knoxUrl": "/spark3history/",
+      "ssoSupported": true,
+      "port": 18089,
+      "tlsPort": 18489,
+      "apiOnly": false,
+      "apiIncluded": false,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
+    },
+    {
       "name": "ZEPPELIN",
       "displayName": "Zeppelin",
       "serviceName": "ZEPPELIN_SERVER",

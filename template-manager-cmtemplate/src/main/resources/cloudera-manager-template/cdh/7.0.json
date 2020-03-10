@@ -95,6 +95,14 @@
     {
       "name": "PROFILER_SCHEDULER",
       "version": "2.0.3"
+    },
+    {
+      "name": "SPARK3_ON_YARN",
+      "version": "3.0.0"
+    },
+    {
+      "name": "SPARK3",
+      "version": "3.0.0"
     }
   ],
   "version": "7.0.0",

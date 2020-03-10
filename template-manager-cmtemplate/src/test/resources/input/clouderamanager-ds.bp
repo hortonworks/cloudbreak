@@ -131,6 +131,22 @@
       ]
     },
     {
+       "refName": "spark3_on_yarn",
+       "serviceType": "SPARK3_ON_YARN",
+       "roleConfigGroups": [
+         {
+            "refName": "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK3_YARN_HISTORY_SERVER",
+            "base": true
+         },
+         {
+           "refName": "spark3_on_yarn-GATEWAY-BASE",
+           "roleType": "GATEWAY",
+           "base": true
+          }
+       ]
+    },
+    {
       "refName": "hive",
       "serviceType": "HIVE",
       "roleConfigGroups": [
