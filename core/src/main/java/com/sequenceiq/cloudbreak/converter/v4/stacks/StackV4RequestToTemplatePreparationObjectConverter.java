@@ -1,20 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
-import static java.util.stream.Collectors.toList;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
@@ -69,6 +54,18 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Component
 public class StackV4RequestToTemplatePreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV4Request, TemplatePreparationObject> {
@@ -148,8 +145,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             if (gateway != null) {
                 gatewaySignKey = gateway.getSignKey();
             }
-            String envCrnForVirtualGroups = getEnvironmentCrnForVirtualGroups(environment);
-            VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(envCrnForVirtualGroups, ldapConfig != null ? ldapConfig.getAdminGroup() : "");
+            VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(source.getEnvironmentCrn(), ldapConfig != null ? ldapConfig.getAdminGroup() : "");
 
             Builder builder = Builder.builder()
                     .withCloudPlatform(source.getCloudPlatform())
@@ -218,14 +214,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
 
     private KerberosConfig getKerberosConfig(StackV4Request source) {
         return kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null);
-    }
-
-    private String getEnvironmentCrnForVirtualGroups(DetailedEnvironmentResponse environment) {
-        String envCrnForVirtualGroups = environment.getCrn();
-        if (StringUtils.isNoneEmpty(environment.getParentEnvironmentCrn())) {
-            envCrnForVirtualGroups = environment.getParentEnvironmentCrn();
-        }
-        return envCrnForVirtualGroups;
     }
 
     private void decorateBuilderWithPlacement(StackV4Request source, Builder builder) {

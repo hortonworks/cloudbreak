@@ -101,8 +101,7 @@ public class EnvironmentCreationService {
         }
 
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
-        String environmentCrnForVirtualGroups = getEnvironmentCrnForVirtualGroups(environment);
-        if (!createVirtualGroups(creationDto, environmentCrnForVirtualGroups)) {
+        if (!createVirtualGroups(creationDto, environment.getResourceCrn())) {
             // To keep backward compatibility, if somebody passes the group name, then we shall just use it
             environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
         }
@@ -133,14 +132,6 @@ public class EnvironmentCreationService {
         environment.setCloudPlatform(credential.getCloudPlatform());
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
         return environment;
-    }
-
-    private String getEnvironmentCrnForVirtualGroups(Environment environment) {
-        String environmentCrnForVirtualGroups = environment.getResourceCrn();
-        if (Objects.nonNull(environment.getParentEnvironment())) {
-            environmentCrnForVirtualGroups = environment.getParentEnvironment().getResourceCrn();
-        }
-        return environmentCrnForVirtualGroups;
     }
 
     private boolean createVirtualGroups(EnvironmentCreationDto creationDto, String envCrn) {
