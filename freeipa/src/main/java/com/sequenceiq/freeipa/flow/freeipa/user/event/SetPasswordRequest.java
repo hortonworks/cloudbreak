@@ -9,14 +9,17 @@ public class SetPasswordRequest extends FreeIpaClientRequest<SetPasswordResult> 
 
     private final String username;
 
+    private final String userCrn;
+
     private final String password;
 
     private final Optional<Instant> expirationInstant;
 
-    public SetPasswordRequest(Long stackId, String environment, String username, String password, Optional<Instant> expirationInstant) {
+    public SetPasswordRequest(Long stackId, String environment, String username, String userCrn, String password, Optional<Instant> expirationInstant) {
         super(stackId);
         this.environment = environment;
         this.username = username;
+        this.userCrn = userCrn;
         this.password = password;
         this.expirationInstant = expirationInstant;
     }
@@ -27,6 +30,10 @@ public class SetPasswordRequest extends FreeIpaClientRequest<SetPasswordResult> 
 
     public String getUsername() {
         return username;
+    }
+
+    public String getUserCrn() {
+        return userCrn;
     }
 
     public String getPassword() {
@@ -43,6 +50,7 @@ public class SetPasswordRequest extends FreeIpaClientRequest<SetPasswordResult> 
                 + "stackId='" + getResourceId() + '\''
                 + "environment='" + environment + '\''
                 + "username='" + username + '\''
+                + "userCrn='" + userCrn + '\''
                 + "expirationInstant=" + expirationInstant
                 + '}';
     }

@@ -104,7 +104,7 @@ public class PasswordService {
 
             List<SetPasswordRequest> requests = new ArrayList<>();
             for (Stack stack : stacks) {
-                requests.add(triggerSetPassword(stack, stack.getEnvironmentCrn(), userId, password, expirationInstant));
+                requests.add(triggerSetPassword(stack, stack.getEnvironmentCrn(), userId, userCrn, password, expirationInstant));
             }
 
             List<SuccessDetails> success = new ArrayList<>();
@@ -162,8 +162,9 @@ public class PasswordService {
         }
     }
 
-    private SetPasswordRequest triggerSetPassword(Stack stack, String environment, String username, String password, Optional<Instant> expirationInstant) {
-        SetPasswordRequest request = new SetPasswordRequest(stack.getId(), environment, username, password, expirationInstant);
+    private SetPasswordRequest triggerSetPassword(Stack stack, String environment, String username, String userCrn,
+        String password, Optional<Instant> expirationInstant) {
+        SetPasswordRequest request = new SetPasswordRequest(stack.getId(), environment, username, userCrn, password, expirationInstant);
         freeIpaFlowManager.notify(request);
         return request;
     }
