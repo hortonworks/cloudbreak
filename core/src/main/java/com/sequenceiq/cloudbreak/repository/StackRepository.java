@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
@@ -131,6 +132,19 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.id as id, s.name as name, s.stackStatus as status FROM Stack s "
             + "WHERE s.stackStatus.status IN :statuses AND (s.type is not 'TEMPLATE' OR s.type is null)")
     List<StackStatusView> findByStatuses(@Param("statuses") List<Status> statuses);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT s.id as id, "
+            + "s.resourceCrn as crn, "
+            + "ss.status as status, "
+            + "ss.statusReason as statusReason, "
+            + "c.status as clusterStatus, "
+            + "c.statusReason as clusterStatusReason "
+            + "FROM Stack s "
+            + "LEFT JOIN s.cluster c "
+            + "LEFT JOIN s.stackStatus ss "
+            + "WHERE s.resourceCrn = :crn")
+    Optional<StackClusterStatusView> getStatusByCrn(@Param("crn") String crn);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s.id as id, "
