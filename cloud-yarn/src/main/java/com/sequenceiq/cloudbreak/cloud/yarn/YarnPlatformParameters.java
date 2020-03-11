@@ -85,7 +85,7 @@ public class YarnPlatformParameters implements PlatformParameters {
 
     @Override
     public boolean isAutoTlsSupported() {
-        return true;
+        return false;
     }
 
     @Override

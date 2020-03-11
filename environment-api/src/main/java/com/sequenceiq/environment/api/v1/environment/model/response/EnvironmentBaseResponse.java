@@ -85,6 +85,9 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.PARENT_ENVIRONMENT_NAME)
     private String parentEnvironmentName;
 
+    @ApiModelProperty(EnvironmentModelDescription.PARENT_ENVIRONMENT_CLOUD_PLATFORM)
+    private String parentEnvironmentCloudPlatform;
+
     public String getCrn() {
         return crn;
     }
@@ -275,5 +278,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setParentEnvironmentName(String parentEnvironmentName) {
         this.parentEnvironmentName = parentEnvironmentName;
+    }
+
+    public String getParentEnvironmentCloudPlatform() {
+        return parentEnvironmentCloudPlatform;
+    }
+
+    public void setParentEnvironmentCloudPlatform(String parentEnvironmentCloudPlatform) {
+        this.parentEnvironmentCloudPlatform = parentEnvironmentCloudPlatform;
     }
 }

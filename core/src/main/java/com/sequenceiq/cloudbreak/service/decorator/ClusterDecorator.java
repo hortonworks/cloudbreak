@@ -53,12 +53,12 @@ public class ClusterDecorator {
 
     @Measure(ClusterDecorator.class)
     public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterV4Request request, Blueprint blueprint, User user, Workspace workspace,
-            @Nonnull Stack stack) {
+            @Nonnull Stack stack, String parentEnvironmentCloudPlatform) {
         prepareBlueprint(cluster, request, workspace, stack, Optional.ofNullable(blueprint), user);
         prepareClusterManagerVariant(cluster);
         validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
-        prepareAutoTlsFlag(cluster, request, stack);
+        prepareAutoTlsFlag(cluster, request, stack, parentEnvironmentCloudPlatform);
         cluster = sharedServiceConfigProvider.configureCluster(cluster, user, workspace);
         return cluster;
     }
@@ -92,12 +92,13 @@ public class ClusterDecorator {
                         rdsConfigService.getByNameForWorkspace(confName, stack.getWorkspace()))));
     }
 
-    private void prepareAutoTlsFlag(Cluster cluster, ClusterV4Request request, Stack stack) {
+    private void prepareAutoTlsFlag(Cluster cluster, ClusterV4Request request, Stack stack, String parentEnvironmentCloudPlatform) {
+        String cloudPlatform = Optional.ofNullable(parentEnvironmentCloudPlatform).orElse(stack.getCloudPlatform());
         cluster.setAutoTlsEnabled(Optional.ofNullable(request.getCm())
                 .map(ClouderaManagerV4Request::getEnableAutoTls)
                 .orElseGet(() -> {
                     CloudConnector<Object> connector = cloudPlatformConnectors.get(
-                            Platform.platform(stack.cloudPlatform()), Variant.variant(stack.getPlatformVariant()));
+                            Platform.platform(cloudPlatform), Variant.variant(stack.getPlatformVariant()));
                     PlatformParameters platformParameters = connector.parameters();
                     return platformParameters.isAutoTlsSupported();
                 }));

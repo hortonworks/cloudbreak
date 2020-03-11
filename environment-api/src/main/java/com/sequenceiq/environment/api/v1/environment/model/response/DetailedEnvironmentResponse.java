@@ -81,6 +81,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String parentEnvironmentName;
 
+        private String parentEnvironmentCloudPlatform;
+
         private Builder() {
         }
 
@@ -213,6 +215,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withParentEnvironmentCloudPlatform(String parentEnvironmentCloudPlatform) {
+            this.parentEnvironmentCloudPlatform = parentEnvironmentCloudPlatform;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -240,6 +247,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setTags(tag);
             detailedEnvironmentResponse.setParentEnvironmentCrn(parentEnvironmentCrn);
             detailedEnvironmentResponse.setParentEnvironmentName(parentEnvironmentName);
+            detailedEnvironmentResponse.setParentEnvironmentCloudPlatform(parentEnvironmentCloudPlatform);
             return detailedEnvironmentResponse;
         }
     }
