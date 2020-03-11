@@ -97,7 +97,8 @@ public class EnvironmentDtoConverter {
                 environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform())).convertToDto(network)));
         doIfNotNull(environment.getParentEnvironment(), parentEnvironment -> builder
                 .withParentEnvironmentCrn(parentEnvironment.getResourceCrn())
-                .withParentEnvironmentName(parentEnvironment.getName()));
+                .withParentEnvironmentName(parentEnvironment.getName())
+                .withParentEnvironmentCloudPlatform(parentEnvironment.getCloudPlatform()));
         return builder.build();
     }
 
