@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.config;
 
+import static com.sequenceiq.cloudbreak.cm.util.ConfigUtils.addConfig;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -11,14 +13,14 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Service
-class CmMgmtYarnConfigService extends AbstractCmConfigService {
+class CmMgmtYarnConfigService implements CmConfigServiceDelegate {
 
     static final List<String> SUPPRESSION_NAMES = List.of("process_swap_memory_thresholds");
 
     static final String SUPPRESSION_VALUE = "{\"critical\":\"never\",\"warning\":\"never\"}";
 
     @Override
-    void setConfigs(Stack stack, ApiRoleList apiRoleList) {
+    public void setConfigs(Stack stack, ApiRoleList apiRoleList) {
         if (CloudPlatform.YARN.equalsIgnoreCase(stack.getCloudPlatform())) {
             apiRoleList.getItems().forEach(this::addSuppressionConfigs);
         }
@@ -31,7 +33,7 @@ class CmMgmtYarnConfigService extends AbstractCmConfigService {
             apiConfig.setValue(SUPPRESSION_VALUE);
             apiConfig.setSensitive(false);
 
-            setConfig(hostMonitor, apiConfig);
+            addConfig(hostMonitor, apiConfig);
         });
     }
 }
