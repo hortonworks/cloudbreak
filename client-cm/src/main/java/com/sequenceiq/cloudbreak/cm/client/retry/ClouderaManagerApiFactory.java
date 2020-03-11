@@ -23,6 +23,7 @@ import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.RoleCommandsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
+import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.UsersResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 
@@ -82,6 +83,9 @@ public class ClouderaManagerApiFactory {
 
     @Inject
     private Function<ApiClient, AllHostsResourceApi> allHostsResourceApiFactory;
+
+    @Inject
+    private Function<ApiClient, ToolsResourceApi> toolsResourceApiFactory;
 
     public ClouderaManagerResourceApi getClouderaManagerResourceApi(ApiClient apiClient) {
         return clouderaManagerResourceApiFactory.apply(apiClient);
@@ -153,5 +157,9 @@ public class ClouderaManagerApiFactory {
 
     public AllHostsResourceApi getAllHostsResourceApi(ApiClient apiClient) {
         return allHostsResourceApiFactory.apply(apiClient);
+    }
+
+    public ToolsResourceApi getToolsResourceApi(ApiClient client) {
+        return toolsResourceApiFactory.apply(client);
     }
 }
