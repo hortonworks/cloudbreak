@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,8 +15,11 @@ import com.sequenceiq.flow.core.FlowEvent;
 
 @Configuration
 public class Flow2Config {
+    @Resource
+    private List<FlowConfiguration<?>> flowConfigs;
+
     @Bean
-    public Map<String, FlowConfiguration<?>> flowConfigurationMap(List<FlowConfiguration<?>> flowConfigs) {
+    public Map<String, FlowConfiguration<?>> flowConfigurationMap() {
         Map<String, FlowConfiguration<?>> flowConfigMap = new HashMap<>();
         for (FlowConfiguration<?> flowConfig : flowConfigs) {
             for (FlowEvent event : flowConfig.getInitEvents()) {

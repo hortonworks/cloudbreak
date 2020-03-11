@@ -1,22 +1,5 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
-import static com.sequenceiq.cloudbreak.util.Benchmark.mutliCheckedMeasure;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
@@ -39,7 +22,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.util.Benchmark.MultiCheckedSupplier;
@@ -48,6 +31,21 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static com.sequenceiq.cloudbreak.util.Benchmark.mutliCheckedMeasure;
 
 @Service
 public class ClusterCreationSetupService {
@@ -67,7 +65,7 @@ public class ClusterCreationSetupService {
     private ClusterDecorator clusterDecorator;
 
     @Inject
-    private ClusterOperationService clusterOperationService;
+    private ClusterService clusterService;
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
@@ -154,7 +152,7 @@ public class ClusterCreationSetupService {
                     return Collections.emptyList();
                 }, LOGGER, "Cluster components saved in {} ms for stack {}", stackName);
 
-        return clusterOperationService.create(stack, cluster, components, user);
+        return clusterService.create(stack, cluster, components, user);
     }
 
     private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack) {

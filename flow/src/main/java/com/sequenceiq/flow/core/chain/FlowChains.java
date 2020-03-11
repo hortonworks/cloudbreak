@@ -44,14 +44,12 @@ public class FlowChains {
     }
 
     public void removeFlowChain(String flowChainId) {
-        LOGGER.debug("Remove FlowChain: [{}]", flowChainId);
         if (flowChainId != null) {
             flowChainMap.remove(flowChainId);
         }
     }
 
     public void removeFullFlowChain(String flowChainId) {
-        LOGGER.debug("Remove FullFlowChain: [{}]", flowChainId);
         removeFlowChain(flowChainId);
         String parentFlowChainId;
         while ((parentFlowChainId = flowChainParentMap.remove(flowChainId)) != null) {
