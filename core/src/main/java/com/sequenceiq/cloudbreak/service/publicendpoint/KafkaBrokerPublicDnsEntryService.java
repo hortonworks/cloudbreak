@@ -34,16 +34,16 @@ public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManageme
     @Inject
     private ComponentLocatorService componentLocatorService;
 
-    public Map<String, String> register(Stack stack) {
-        return doActionOnStack(stack, null, this::doRegister);
+    public Map<String, String> createOrUpdate(Stack stack) {
+        return doActionOnStack(stack, null, this::createOrUpdateDnsEntries);
     }
 
     public Map<String, String> deregister(Stack stack) {
         return doActionOnStack(stack, null, this::doDeregister);
     }
 
-    public Map<String, String> register(Stack stack, Map<String, String> candidateAddressesByFqdn) {
-        return doActionOnStack(stack, candidateAddressesByFqdn, this::doRegister);
+    public Map<String, String> createOrUpdateCandidates(Stack stack, Map<String, String> candidateAddressesByFqdn) {
+        return doActionOnStack(stack, candidateAddressesByFqdn, this::createOrUpdateDnsEntries);
     }
 
     public Map<String, String> deregister(Stack stack, Map<String, String> candidateAddressesByFqdn) {
@@ -57,7 +57,7 @@ public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManageme
 
         Map<String, String> result = new HashMap<>();
         //TODO include indicator flag in the condition
-        if (stack.getCluster() != null && isCertGenerationEnabled()) {
+        if (stack.getCluster() != null && manageCertificateAndDnsInPem()) {
             LOGGER.info("Modifying DNS entries for Kafka Brokers on stack '{}'", stack.getName());
             Cluster cluster = stack.getCluster();
             Map<String, String> ipsByFqdn = getBrokerIpsByFqdn(stack, cluster);
@@ -85,7 +85,7 @@ public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManageme
                 .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getPublicIpWrapper));
     }
 
-    private Map<String, String> doRegister(Map<String, String> ipsByFqdn, String environmentCrn) {
+    private Map<String, String> createOrUpdateDnsEntries(Map<String, String> ipsByFqdn, String environmentCrn) {
         LOGGER.info("Register DNS entries for Kafka brokers for FQDNs: '{}'", String.join(",", ipsByFqdn.keySet()));
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -94,7 +94,7 @@ public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManageme
         return ipsByFqdn
                 .entrySet()
                 .stream()
-                .filter(entry -> getDnsManagementService().createDnsEntryWithIp(userCrn, accountId,
+                .filter(entry -> getDnsManagementService().createOrUpdateDnsEntryWithIp(userCrn, accountId,
                         getShortHostname(entry.getKey()), environment.getName(), false, List.of(entry.getValue())))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
