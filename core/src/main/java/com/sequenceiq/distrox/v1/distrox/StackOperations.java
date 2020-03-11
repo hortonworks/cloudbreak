@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
@@ -246,8 +247,8 @@ public class StackOperations implements ResourceBasedCrnProvider {
     }
 
     public StackStatusV4Response getStatus(@NotNull String crn) {
-        Stack stack = stackService.getByCrn(crn);
-        return converterUtil.convert(stack, StackStatusV4Response.class);
+        StackClusterStatusView stackStatusView = stackService.getStatusByCrn(crn);
+        return converterUtil.convert(stackStatusView, StackStatusV4Response.class);
     }
 
     public FlowIdentifier putPassword(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
