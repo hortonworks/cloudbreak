@@ -30,7 +30,9 @@ public abstract class OperationAcceptor {
 
         for (Operation o : runningOperations) {
             if (o.getId() < operation.getId() && doOperationsConflict(operation, o)) {
-                rejectionReasons.add(String.format(CONFLICT_REASON, o.getOperationId(), o.getUserList(), o.getEnvironmentList()));
+                rejectionReasons.add(String.format(CONFLICT_REASON, o.getOperationId(),
+                        o.getUserList().isEmpty() ? "[all users]" : o.getUserList(),
+                        o.getEnvironmentList().isEmpty() ? "[all environments]" : o.getEnvironmentList()));
             }
         }
 
