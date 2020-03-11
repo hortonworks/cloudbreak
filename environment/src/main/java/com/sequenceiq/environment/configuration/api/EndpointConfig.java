@@ -15,6 +15,7 @@ import com.sequenceiq.environment.environment.v1.EnvironmentController;
 import com.sequenceiq.environment.platformresource.v1.PlatformResourceController;
 import com.sequenceiq.environment.proxy.v1.controller.ProxyController;
 import com.sequenceiq.environment.tags.v1.controller.AccountTagController;
+import com.sequenceiq.environment.telemetry.v1.controller.AccountTelemetryController;
 import com.sequenceiq.environment.util.v1.UtilController;
 import com.sequenceiq.flow.controller.FlowController;
 
@@ -31,6 +32,7 @@ public class EndpointConfig extends ResourceConfig {
     private static final List<Class<?>> CONTROLLERS = List.of(
             CredentialV1Controller.class,
             AccountTagController.class,
+            AccountTelemetryController.class,
             ProxyController.class,
             EnvironmentController.class,
             PlatformResourceController.class,

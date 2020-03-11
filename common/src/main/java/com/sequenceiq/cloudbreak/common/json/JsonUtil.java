@@ -76,6 +76,14 @@ public class JsonUtil {
         }
     }
 
+    public static <T> Optional<T> jsonToTypeOpt(String content, TypeReference<T> typeReference) {
+        try {
+            return Optional.of(MAPPER.readValue(content, typeReference));
+        } catch (IOException e) {
+            return Optional.empty();
+        }
+    }
+
     public static String writeValueAsString(Object object) throws JsonProcessingException {
         return MAPPER.writeValueAsString(object);
     }

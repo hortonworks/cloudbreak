@@ -161,6 +161,7 @@ public class Crn {
         DATALAKE("datalake", NON_ADMIN_SERVICE),
         DEX("dex", NON_ADMIN_SERVICE),
         ACCOUNTTAG("accounttag", NON_ADMIN_SERVICE),
+        ACCOUNTTELEMETRY("accounttelemetry", NON_ADMIN_SERVICE),
         ML("ml", NON_ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
@@ -317,7 +318,8 @@ public class Crn {
         RECIPE("recipe"),
         FREEIPA("freeipa"),
         DATALAKE("datalake"),
-        ACCOUNT_TAG("accountTag");
+        ACCOUNT_TAG("accountTag"),
+        ACCOUNT_TELEMETRY("accountTelemetry");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
 

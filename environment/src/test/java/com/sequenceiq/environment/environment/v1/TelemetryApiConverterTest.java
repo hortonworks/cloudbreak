@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -52,7 +53,7 @@ public class TelemetryApiConverterTest {
         fr.addWorkloadAnalytics(true);
         telemetryRequest.setFeatures(fr);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features());
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
@@ -65,7 +66,7 @@ public class TelemetryApiConverterTest {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features());
         // THEN
         assertNull(result.getFeatures());
     }
@@ -77,7 +78,7 @@ public class TelemetryApiConverterTest {
         FeaturesRequest fr = new FeaturesRequest();
         telemetryRequest.setFeatures(fr);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features());
         // THEN
         assertNull(result.getFeatures().getWorkloadAnalytics());
     }
@@ -90,7 +91,7 @@ public class TelemetryApiConverterTest {
         fr.addWorkloadAnalytics(true);
         telemetryRequest.setFeatures(fr);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features());
         // THEN
         assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
     }
@@ -103,7 +104,7 @@ public class TelemetryApiConverterTest {
         fr.addWorkloadAnalytics(false);
         telemetryRequest.setFeatures(fr);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest);
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features());
         // THEN
         assertFalse(result.getFeatures().getWorkloadAnalytics().isEnabled());
     }

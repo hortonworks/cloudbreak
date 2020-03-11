@@ -70,6 +70,7 @@ import com.sequenceiq.environment.network.dto.YarnParams;
 import com.sequenceiq.environment.network.service.SubnetIdProvider;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 
 @Component
 public class EnvironmentApiConverter {
@@ -93,6 +94,8 @@ public class EnvironmentApiConverter {
 
     private final TelemetryApiConverter telemetryApiConverter;
 
+    private final AccountTelemetryService accountTelemetryService;
+
     private final TunnelConverter tunnelConverter;
 
     private final SubnetIdProvider subnetIdProvider;
@@ -104,6 +107,7 @@ public class EnvironmentApiConverter {
             CredentialViewConverter credentialViewConverter,
             TelemetryApiConverter telemetryApiConverter,
             TunnelConverter tunnelConverter,
+            AccountTelemetryService accountTelemetryService,
             CredentialService credentialService,
             SubnetIdProvider subnetIdProvider,
             FreeIpaConverter freeIpaConverter) {
@@ -111,6 +115,7 @@ public class EnvironmentApiConverter {
         this.credentialConverter = credentialConverter;
         this.credentialViewConverter = credentialViewConverter;
         this.telemetryApiConverter = telemetryApiConverter;
+        this.accountTelemetryService = accountTelemetryService;
         this.tunnelConverter = tunnelConverter;
         this.credentialService = credentialService;
         this.subnetIdProvider = subnetIdProvider;
@@ -129,7 +134,8 @@ public class EnvironmentApiConverter {
                 .withCreated(System.currentTimeMillis())
                 .withFreeIpaCreation(attachedFreeIpaRequestToDto(request.getFreeIpa()))
                 .withLocation(locationRequestToDto(request.getLocation()))
-                .withTelemetry(telemetryApiConverter.convert(request.getTelemetry()))
+                .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
+                        accountTelemetryService.getOrDefault(accountId).getFeatures()))
                 .withRegions(request.getRegions())
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
                 .withAdminGroupName(request.getAdminGroupName())
@@ -407,15 +413,17 @@ public class EnvironmentApiConverter {
     }
 
     public EnvironmentEditDto initEditDto(EnvironmentEditRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentEditDto.EnvironmentEditDtoBuilder builder = EnvironmentEditDto.builder()
                 .withDescription(request.getDescription())
-                .withAccountId(ThreadBasedUserCrnProvider.getAccountId())
+                .withAccountId(accountId)
                 .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
                 .withCloudStorageValidation(request.getCloudStorageValidation())
                 .withAdminGroupName(request.getAdminGroupName());
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
-        NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry())));
+        NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
+                accountTelemetryService.getOrDefault(accountId).getFeatures())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
         NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams)));
         return builder.build();

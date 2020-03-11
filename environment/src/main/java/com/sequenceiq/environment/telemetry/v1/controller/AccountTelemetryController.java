@@ -1,0 +1,92 @@
+package com.sequenceiq.environment.telemetry.v1.controller;
+
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.springframework.stereotype.Controller;
+
+import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
+import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
+import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
+import com.sequenceiq.environment.api.v1.telemetry.endpoint.AccountTelemetryEndpoint;
+import com.sequenceiq.environment.api.v1.telemetry.model.request.AccountTelemetryRequest;
+import com.sequenceiq.environment.api.v1.telemetry.model.request.TestAnonymizationRulesRequest;
+import com.sequenceiq.environment.api.v1.telemetry.model.response.AccountTelemetryResponse;
+import com.sequenceiq.environment.api.v1.telemetry.model.response.TestAnonymizationRulesResponse;
+import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
+import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
+import com.sequenceiq.environment.telemetry.v1.converter.AccountTelemetryConverter;
+import com.sequenceiq.notification.NotificationController;
+
+@Controller
+@AuthorizationResource(type = AuthorizationResourceType.ENVIRONMENT)
+@Transactional(Transactional.TxType.NEVER)
+public class AccountTelemetryController extends NotificationController implements AccountTelemetryEndpoint {
+
+    private final AccountTelemetryService accountTelemetryService;
+
+    private final AccountTelemetryConverter accountTelemetryConverter;
+
+    public AccountTelemetryController(AccountTelemetryService accountTelemetryService,
+            AccountTelemetryConverter accountTelemetryConverter) {
+        this.accountTelemetryService = accountTelemetryService;
+        this.accountTelemetryConverter = accountTelemetryConverter;
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    public AccountTelemetryResponse get() {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return accountTelemetryConverter.convert(accountTelemetryService.getOrDefault(accountId));
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public AccountTelemetryResponse update(AccountTelemetryRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        AccountTelemetry telemetry = accountTelemetryConverter.convert(request);
+        return accountTelemetryConverter.convert(accountTelemetryService.create(telemetry, accountId));
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    public AccountTelemetryResponse getDefault() {
+        return accountTelemetryConverter.convert(accountTelemetryService.createDefaultAccuontTelemetry());
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    public FeaturesResponse listFeatures() {
+        AccountTelemetryResponse response = get();
+        return response.getFeatures();
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public FeaturesResponse updateFeatures(FeaturesRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return accountTelemetryConverter.convertFeatures(
+                accountTelemetryService.updateFeatures(
+                        accountId, accountTelemetryConverter.convertFeatures(request)));
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    public List<AnonymizationRule> listRules() {
+        AccountTelemetryResponse response = get();
+        return response.getRules();
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public TestAnonymizationRulesResponse testRulePattern(TestAnonymizationRulesRequest request) {
+        // TODO: test patterns in the request
+        return new TestAnonymizationRulesResponse();
+    }
+}
