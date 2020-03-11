@@ -19,7 +19,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class ClouderaManagerV4Request implements JsonEntity {
-
     @Valid
     @ApiModelProperty(ClusterModelDescription.CM_REPO_DETAILS)
     private ClouderaManagerRepositoryV4Request repository;

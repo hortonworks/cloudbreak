@@ -75,6 +75,8 @@ public class EnvironmentDto implements Payload {
 
     private String parentEnvironmentName;
 
+    private String parentEnvironmentCloudPlatform;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -308,6 +310,14 @@ public class EnvironmentDto implements Payload {
         this.parentEnvironmentName = parentEnvironmentName;
     }
 
+    public String getParentEnvironmentCloudPlatform() {
+        return parentEnvironmentCloudPlatform;
+    }
+
+    public void setParentEnvironmentCloudPlatform(String parentEnvironmentCloudPlatform) {
+        this.parentEnvironmentCloudPlatform = parentEnvironmentCloudPlatform;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentDto{"
@@ -378,6 +388,8 @@ public class EnvironmentDto implements Payload {
         private String parentEnvironmentCrn;
 
         private String parentEnvironmentName;
+
+        private String parentEnvironmentCloudPlatform;
 
         private Builder() {
         }
@@ -522,6 +534,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withParentEnvironmentCloudPlatform(String parentEnvironmentCloudPlatform) {
+            this.parentEnvironmentCloudPlatform = parentEnvironmentCloudPlatform;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -552,6 +569,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setTags(tags);
             environmentDto.setParentEnvironmentCrn(parentEnvironmentCrn);
             environmentDto.setParentEnvironmentName(parentEnvironmentName);
+            environmentDto.setParentEnvironmentCloudPlatform(parentEnvironmentCloudPlatform);
             return environmentDto;
         }
     }
