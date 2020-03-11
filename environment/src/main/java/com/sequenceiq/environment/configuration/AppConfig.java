@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -24,6 +25,7 @@ import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersC
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
 
 @Configuration
+@EnableRetry
 public class AppConfig {
 
     @Inject
