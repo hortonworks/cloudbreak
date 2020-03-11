@@ -3,14 +3,12 @@ package com.sequenceiq.cloudbreak.workspace.model;
 import java.io.Serializable;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -38,9 +36,6 @@ public class User implements TenantAwareResource, Serializable {
 
     @ManyToOne
     private Tenant tenant;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private UserPreferences userPreferences;
 
     public Long getId() {
         return id;
@@ -80,14 +75,6 @@ public class User implements TenantAwareResource, Serializable {
 
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
-    }
-
-    public UserPreferences getUserPreferences() {
-        return userPreferences;
-    }
-
-    public void setUserPreferences(UserPreferences userPreferences) {
-        this.userPreferences = userPreferences;
     }
 
     @Override
