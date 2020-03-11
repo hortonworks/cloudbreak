@@ -13,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -23,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -41,7 +41,7 @@ public class StackOperationServiceTest {
     private ReactorFlowManager flowManager;
 
     @Mock
-    private CommonPermissionCheckingUtils permissionCheckingUtils;
+    private PermissionCheckingUtils permissionCheckingUtils;
 
     @Mock
     private StackUpdater stackUpdater;

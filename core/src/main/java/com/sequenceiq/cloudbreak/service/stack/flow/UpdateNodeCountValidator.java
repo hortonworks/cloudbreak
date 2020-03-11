@@ -10,9 +10,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -24,6 +23,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDownscaleValidatorService;
+import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @Component
@@ -36,7 +36,7 @@ public class UpdateNodeCountValidator {
     private StackDownscaleValidatorService downscaleValidatorService;
 
     @Inject
-    private CommonPermissionCheckingUtils permissionCheckingUtils;
+    private PermissionCheckingUtils permissionCheckingUtils;
 
     public void validataHostMetadataStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
@@ -121,7 +121,7 @@ public class UpdateNodeCountValidator {
     }
 
     public InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceType.DATAHUB, AuthorizationResourceAction.WRITE, user.getUserCrn());
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
                 .orElseThrow(() -> new NotFoundException(format("Metadata for instance %s has not found.", instanceId)));
         downscaleValidatorService.checkInstanceIsTheClusterManagerServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());

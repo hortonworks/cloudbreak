@@ -14,4 +14,7 @@ public interface UserSyncStatusRepository extends CrudRepository<UserSyncStatus,
 
     Optional<UserSyncStatus> getByStack(Stack stack);
 
+    @Override
+    @CheckPermission(action = ResourceAction.READ)
+    <S extends UserSyncStatus> S save(S entity);
 }
