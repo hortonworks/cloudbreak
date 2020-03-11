@@ -13,9 +13,9 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 @Service
 class CmMgmtYarnConfigService extends AbstractCmConfigService {
 
-    private static final List<String> SUPPRESSION_NAMES = List.of("process_swap_memory_thresholds");
+    static final List<String> SUPPRESSION_NAMES = List.of("process_swap_memory_thresholds");
 
-    private static final String SUPPRESSION_VALUE = "{\"critical\":\"never\",\"warning\":\"never\"}";
+    static final String SUPPRESSION_VALUE = "{\"critical\":\"never\",\"warning\":\"never\"}";
 
     @Override
     void setConfigs(Stack stack, ApiRoleList apiRoleList) {
