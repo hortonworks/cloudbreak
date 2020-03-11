@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -75,6 +76,8 @@ public class StackCreatorServiceTest {
     private static final String BLUEPRINT_NAME = "BLUEPRINT_NAME";
 
     private static final String STACK_VERSION = "STACK_VERSION";
+
+    private static final ImageSettingsV4Request IMAGE_REQUEST = new ImageSettingsV4Request();
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -268,25 +271,47 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testShouldUseBaseCMImageWithNoCmRequest() {
+    public void testShouldUseBaseImageShouldReturnFalseWhenCmRequestAndImageAreNotPresent() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
 
-        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request);
+        boolean actual = underTest.shouldUseBaseCMImage(clusterV4Request, null);
 
-        assertFalse(base);
+        assertFalse(actual);
     }
 
     @Test
-    public void testShouldUseBaseCMImageWithCmRepo() {
+    public void testShouldUseBaseImageShouldReturnFalseWhenNoCmRequestAndTheImageIsPresent() {
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+
+        boolean actual = underTest.shouldUseBaseCMImage(clusterV4Request, IMAGE_REQUEST);
+
+        assertFalse(actual);
+    }
+
+    @Test
+    public void testShouldUseBaseShouldReturnTrueWithCMImageWithCmRepoAndImageIsNotPresent() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         ClouderaManagerRepositoryV4Request cmRepoRequest = new ClouderaManagerRepositoryV4Request();
         cmRequest.setRepository(cmRepoRequest);
         clusterV4Request.setCm(cmRequest);
 
-        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request);
+        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request, null);
 
         assertTrue(base);
+    }
+
+    @Test
+    public void testShouldUseBaseShouldReturnFalseWithCMImageWithCmRepoAndImageIsPresent() {
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
+        ClouderaManagerRepositoryV4Request cmRepoRequest = new ClouderaManagerRepositoryV4Request();
+        cmRequest.setRepository(cmRepoRequest);
+        clusterV4Request.setCm(cmRequest);
+
+        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request, IMAGE_REQUEST);
+
+        assertFalse(base);
     }
 
     @Test
@@ -301,7 +326,7 @@ public class StackCreatorServiceTest {
         cmRequest.setProducts(List.of(cdpRequest));
         clusterV4Request.setCm(cmRequest);
 
-        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request);
+        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request, null);
 
         assertTrue(base);
     }
@@ -320,7 +345,7 @@ public class StackCreatorServiceTest {
         cmRequest.setRepository(cmRepoRequest);
         clusterV4Request.setCm(cmRequest);
 
-        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request);
+        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request, null);
 
         assertTrue(base);
     }
