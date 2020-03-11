@@ -28,6 +28,7 @@ import com.cloudera.api.swagger.CdpResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
+import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCluster;
@@ -143,12 +144,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public void waitForServer() throws CloudbreakException, ClusterClientInitException {
-        ApiClient client = null;
-        try {
-            client = clouderaManagerApiClientProvider.getDefaultClient(stack.getGatewayPort(), clientConfig, ClouderaManagerApiClientProvider.API_V_31);
-        } catch (ClouderaManagerClientInitException e) {
-            throw new ClusterClientInitException(e);
-        }
+        ApiClient client = createApiClient();
         PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, client);
         if (isSuccess(pollingResult)) {
             LOGGER.debug("Cloudera Manager server has successfully started! Polling result: {}", pollingResult);
@@ -158,6 +154,30 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.debug("Could not start Cloudera Manager. polling result: {}", pollingResult);
             throw new CloudbreakException(String.format("Could not start Cloudera Manager. polling result: '%s'", pollingResult));
         }
+    }
+
+    private ApiClient createApiClient() throws ClusterClientInitException {
+        ApiClient client = null;
+        try {
+            client = clouderaManagerApiClientProvider.getDefaultClient(stack.getGatewayPort(), clientConfig, ClouderaManagerApiClientProvider.API_V_31);
+            ToolsResourceApi toolsResourceApi = new ToolsResourceApi(client);
+            toolsResourceApi.echo("TEST");
+            LOGGER.debug("Cloudera Manager already running, old admin user's password has not been changed yet.");
+            return client;
+        } catch (ClouderaManagerClientInitException e) {
+            throw new ClusterClientInitException(e);
+        } catch (ApiException e) {
+            return returnClientBasedOnApiError(client, e);
+        }
+    }
+
+    private ApiClient returnClientBasedOnApiError(ApiClient client, ApiException e) {
+        if (org.springframework.http.HttpStatus.UNAUTHORIZED.value() == e.getCode()) {
+            LOGGER.debug("Cloudera Manager already running, old admin user's password has been changed.");
+            return apiClient;
+        }
+        LOGGER.debug("Cloudera Manager is not running yet.", e);
+        return client;
     }
 
     @Override
