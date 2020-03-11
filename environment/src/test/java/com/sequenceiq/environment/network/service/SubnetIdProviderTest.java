@@ -141,6 +141,26 @@ class SubnetIdProviderTest {
         Assertions.assertNotNull(actual);
     }
 
+    @Test
+    void testProvideShouldReturnAnySubnetWhenResultIsNotEmptyAndNoErrorButAtLeastTwoSubnetComesBackAsResult() {
+        List<CloudSubnet> subnets = List.of(
+                new CloudSubnet("id-1", "name-1"),
+                new CloudSubnet("id-2", "name-2")
+        );
+
+        setupConnectorWithSelectionResult(subnets);
+        NetworkDto networkDto = NetworkDto.builder()
+                .withSubnetMetas(Map.of(
+                        "AZ-a", new CloudSubnet("id-1", "name-1"),
+                        "AZ-b", new CloudSubnet("id-2", "name-2")
+                ))
+                .build();
+
+        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+
+        Assertions.assertNotNull(actual);
+    }
+
     private NetworkConnector setupConnectorWithSelectionResult(List<CloudSubnet> selectedSubnets) {
         return setupConnector(null, selectedSubnets);
     }

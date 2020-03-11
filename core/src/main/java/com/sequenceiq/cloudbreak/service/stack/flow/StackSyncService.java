@@ -175,7 +175,7 @@ public class StackSyncService {
 
     private void syncStoppedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
         instanceStateCounts.put(InstanceSyncState.STOPPED, instanceStateCounts.get(InstanceSyncState.STOPPED) + 1);
-        if (!instance.isTerminated()) {
+        if (!instance.isTerminated() && instance.getInstanceStatus() != InstanceStatus.STOPPED) {
             LOGGER.debug("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
             instance.setInstanceStatus(InstanceStatus.STOPPED);
             instanceMetaDataService.save(instance);
@@ -196,7 +196,7 @@ public class StackSyncService {
     }
 
     private void syncDeletedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
-        if (!instance.isTerminated()) {
+        if (!instance.isTerminated() || !instance.isDeletedOnProvider()) {
             if (instance.getInstanceId() == null) {
                 instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
                 LOGGER.debug("Instance with private id '{}' don't have instanceId, setting its state to DELETED.",
@@ -216,7 +216,7 @@ public class StackSyncService {
     }
 
     private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, boolean stackStatusUpdateEnabled) {
-        Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
+        Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(stack.getId());
         if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0 && stack.getStatus() != AVAILABLE) {
             updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.AVAILABLE, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);

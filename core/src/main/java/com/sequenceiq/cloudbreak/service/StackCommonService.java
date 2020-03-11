@@ -276,12 +276,6 @@ public class StackCommonService {
         return stackOperationService.removeInstance(stack, workspaceId, instanceId, forced, user);
     }
 
-    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, List<String> instanceIds, boolean forced) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        return stackOperationService.removeInstances(stack, workspaceId, instanceIds, forced, user);
-    }
-
     public FlowIdentifier changeImageInWorkspace(NameOrCrn nameOrCrn, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, organziationId);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());

@@ -1,5 +1,8 @@
 package com.sequenceiq.datalake.service.sdx.stop;
 
+import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
+import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
+
 import java.util.Collections;
 
 import javax.inject.Inject;
@@ -23,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -31,6 +33,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.FreeipaService;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -78,8 +81,7 @@ public class SdxStopService {
         try {
             LOGGER.info("Triggering stop flow for cluster {}", sdxCluster.getClusterName());
             FlowIdentifier flowIdentifier = stackV4Endpoint.putStop(0L, sdxCluster.getClusterName());
-            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, ResourceEvent.SDX_STOP_STARTED, "Datalake stop in progress",
-                    sdxCluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, "Datalake stop in progress", sdxCluster);
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
@@ -108,11 +110,14 @@ public class SdxStopService {
             if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
                 LOGGER.info("Stop polling cancelled in inmemory store, id: " + sdxCluster.getId());
                 return AttemptResults.breakFor("Stop polling cancelled in inmemory store, id: " + sdxCluster.getId());
-            } else if (cloudbreakFlowService.isLastKnownFlowRunning(sdxCluster)) {
-                LOGGER.info("Stop polling will continue, cluster has an active flow in Cloudbreak, id: {}", sdxCluster.getId());
-                return AttemptResults.justContinue();
             } else {
-                return getStackResponseAttemptResult(sdxCluster);
+                FlowState flowState = cloudbreakFlowService.getLastKnownFlowState(sdxCluster);
+                if (RUNNING.equals(flowState)) {
+                    LOGGER.info("Stop polling will continue, cluster has an active flow in Cloudbreak, id: {}", sdxCluster.getId());
+                    return AttemptResults.justContinue();
+                } else {
+                    return getStackResponseAttemptResult(sdxCluster, flowState);
+                }
             }
         } catch (NotFoundException e) {
             LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
@@ -120,7 +125,7 @@ public class SdxStopService {
         }
     }
 
-    private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster) throws JsonProcessingException {
+    private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster, FlowState flowState) throws JsonProcessingException {
         StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();
@@ -142,7 +147,12 @@ public class SdxStopService {
                 return AttemptResults.breakFor("SDX stop failed '" + sdxCluster.getClusterName() + "', cluster is in inconsistency state: "
                         + cluster.getStatus());
             } else {
-                return AttemptResults.justContinue();
+                if (FINISHED.equals(flowState)) {
+                    LOGGER.info("Flow finished, but stack hasn't stopped: {}", sdxCluster.getClusterName());
+                    return AttemptResults.breakFor("SDX stop failed '" + sdxCluster.getClusterName() + "', stack is in improper state");
+                } else {
+                    return AttemptResults.justContinue();
+                }
             }
         }
     }

@@ -47,8 +47,7 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
     private static final List<String> ALLOWED_PARALLEL_FLOWS = List.of(
             ClusterTerminationEvent.TERMINATION_EVENT.event(),
             START_EXTERNAL_DATABASE_TERMINATION_EVENT.event(),
-            ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event(),
-            TERMINATION_EVENT.event());
+            ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event());
 
     private static final List<Class<? extends FlowConfiguration<?>>> RESTARTABLE_FLOWS = Arrays.asList(
             StackCreationFlowConfig.class,

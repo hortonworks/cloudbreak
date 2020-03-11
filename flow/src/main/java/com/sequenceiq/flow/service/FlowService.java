@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.BadRequestException;
@@ -37,9 +38,20 @@ public class FlowService {
     @Inject
     private FlowChainLogService flowChainLogService;
 
+    @Resource
+    private List<String> failHandledEvents;
+
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
+
+    private Set<FlowChainLog> getRelatedFlowChainLogs(List<FlowChainLog> sourceFlowChains) {
+        Optional<FlowChainLog> flowChainWithParent = sourceFlowChains.stream()
+                .filter(flowChainLog -> StringUtils.isNotBlank(flowChainLog.getParentFlowChainId())).findFirst();
+        FlowChainLog lastFlowChain = sourceFlowChains.stream().sorted(Comparator.comparing(FlowChainLog::getCreated).reversed()).findFirst().get();
+        FlowChainLog inputFlowChain = flowChainWithParent.isPresent() ? flowChainWithParent.get() : lastFlowChain;
+        return flowChainLogService.collectRelatedFlowChains(inputFlowChain);
+    }
 
     public FlowLogResponse getLastFlowById(String flowId) {
         LOGGER.info("Getting last flow log by flow id {}", flowId);
@@ -89,8 +101,15 @@ public class FlowService {
         if (!flowChains.isEmpty()) {
             LOGGER.info("Checking if there is an active flow based on flow chain id {}", chainId);
             Set<FlowChainLog> relatedChains = getRelatedFlowChainLogs(flowChains);
-            List<String> relatedChainIds = relatedChains.stream().map(flowChainLog -> flowChainLog.getFlowChainId()).collect(Collectors.toList());
+            List<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(Collectors.toList());
             List<FlowLog> relatedFlowLogs = flowLogDBService.getFlowLogsByChainIds(relatedChainIds);
+            Optional<FlowLog> lastFlowLog = relatedFlowLogs.stream().max(Comparator.comparing(FlowLog::getCreated));
+            if (lastFlowLog.isPresent()) {
+                if (failHandledEvents.contains(lastFlowLog.get().getNextEvent())) {
+                    flowCheckResponse.setHasActiveFlow(false);
+                    return flowCheckResponse;
+                }
+            }
             flowCheckResponse.setHasActiveFlow(flowChainLogService.checkIfAnyFlowChainHasEventInQueue(relatedChains) ||
                     flowLogDBService.hasPendingFlowEvent(relatedFlowLogs));
             return flowCheckResponse;
@@ -106,13 +125,5 @@ public class FlowService {
         flowCheckResponse.setFlowId(flowId);
         flowCheckResponse.setHasActiveFlow(flowLogDBService.hasPendingFlowEvent(allByFlowIdOrderByCreatedDesc));
         return flowCheckResponse;
-    }
-
-    private Set<FlowChainLog> getRelatedFlowChainLogs(List<FlowChainLog> sourceFlowChains) {
-        Optional<FlowChainLog> flowChainWithParent = sourceFlowChains.stream()
-                .filter(flowChainLog -> StringUtils.isNotBlank(flowChainLog.getParentFlowChainId())).findFirst();
-        FlowChainLog lastFlowChain = sourceFlowChains.stream().sorted(Comparator.comparing(FlowChainLog::getCreated).reversed()).findFirst().get();
-        FlowChainLog inputFlowChain = flowChainWithParent.isPresent() ? flowChainWithParent.get() : lastFlowChain;
-        return flowChainLogService.collectRelatedFlowChains(inputFlowChain);
     }
 }

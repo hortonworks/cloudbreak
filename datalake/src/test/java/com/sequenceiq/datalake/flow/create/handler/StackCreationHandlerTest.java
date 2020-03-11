@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.flow.create.handler;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STACK_CREATION_FINISHED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -73,7 +72,7 @@ class StackCreationHandlerTest {
         Assertions.assertEquals(StackCreationSuccessEvent.class, event.getData().getClass());
         Assertions.assertEquals(stackId, ((StackCreationSuccessEvent) event.getData()).getResourceId());
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(STACK_CREATION_FINISHED,
-                SDX_CLUSTER_PROVISION_FINISHED, "Datalake stack created", (Long) stackId);
+                "Datalake stack created", (Long) stackId);
     }
 
     @Test

@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -169,8 +168,7 @@ public class SdxDeleteActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_FAILED,
-                        ResourceEvent.SDX_CLUSTER_DELETION_FAILED, statusReason, payload.getResourceId());
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_FAILED, statusReason, payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_DELETION_FAILED, sdxCluster);
                 sendEvent(context, SDX_DELETE_FAILED_HANDLED_EVENT.event(), payload);
             }
