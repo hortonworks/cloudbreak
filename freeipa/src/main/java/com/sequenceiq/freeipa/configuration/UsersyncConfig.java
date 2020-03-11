@@ -1,12 +1,16 @@
 package com.sequenceiq.freeipa.configuration;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.sequenceiq.cloudbreak.concurrent.CompositeTaskDecorator;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
+import com.sequenceiq.cloudbreak.concurrent.ActorCrnTaskDecorator;
 
 @Configuration
 public class UsersyncConfig {
@@ -25,7 +29,9 @@ public class UsersyncConfig {
         executor.setCorePoolSize(usersyncCorePoolSize);
         executor.setQueueCapacity(usersyncQueueCapacity);
         executor.setThreadNamePrefix("usersyncExecutor-");
-        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
+        executor.setTaskDecorator(
+                new CompositeTaskDecorator(
+                        List.of(new MDCCleanerTaskDecorator(), new ActorCrnTaskDecorator())));
         executor.initialize();
         return executor;
     }
