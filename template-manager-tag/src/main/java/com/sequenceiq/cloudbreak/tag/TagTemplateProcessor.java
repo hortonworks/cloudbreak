@@ -50,7 +50,7 @@ public class TagTemplateProcessor {
         templateModelContext.put(HandleBarModelKey.RESOURCE_CRN.modelKey(), model.getResourceCrn());
         templateModelContext.put(HandleBarModelKey.USER_CRN.modelKey(), model.getUserCrn());
         templateModelContext.put(HandleBarModelKey.USER_NAME.modelKey(), model.getUserName());
-        templateModelContext.put(HandleBarModelKey.TIME.modelKey(), String.valueOf(clock.getCurrentTimeMillis()));
+        templateModelContext.put(HandleBarModelKey.TIME.modelKey(), String.valueOf(clock.getCurrentInstant().getEpochSecond()));
         return templateModelContext;
     }
 }

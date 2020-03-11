@@ -134,6 +134,7 @@ public class FlowLogDBService implements FlowLogService {
                 .filter(flowlog -> flowlog.getCreated() < olderThan)
                 .findFirst().ifPresent(flowLog -> {
             try {
+                LOGGER.info("Cancel flow [{}] for resource [{}] because it's too old", flowLog.getFlowId(), resourceId);
                 cancel(resourceId, flowLog.getFlowId());
             } catch (TransactionExecutionException e) {
                 LOGGER.error("Can't cancel termination flow: {}", flowLog.getFlowId(), e);
@@ -219,6 +220,10 @@ public class FlowLogDBService implements FlowLogService {
 
     public List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long id) {
         return flowLogRepository.findAllByResourceIdOrderByCreatedDesc(id);
+    }
+
+    public List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long id) {
+        return flowLogRepository.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(id);
     }
 
     public List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId) {

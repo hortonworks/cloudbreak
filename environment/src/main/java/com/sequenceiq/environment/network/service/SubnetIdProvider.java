@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.network.service;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.inject.Inject;
 
@@ -35,7 +36,7 @@ public class SubnetIdProvider {
                 .networkConnector()
                 .selectSubnets(new ArrayList<>(network.getCbSubnets().values()), SubnetSelectionParameters.builder().withTunnel(tunnel).build());
         CloudSubnet selectedSubnet = subnetSelectionResult.hasResult()
-                ? subnetSelectionResult.getResult().get(0)
+                ? subnetSelectionResult.getResult().get(new Random().nextInt(subnetSelectionResult.getResult().size()))
                 : fallback(network);
         return selectedSubnet.getId();
     }

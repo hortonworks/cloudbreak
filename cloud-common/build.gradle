@@ -40,7 +40,6 @@ dependencies {
     compile group: 'org.springframework.boot',              name: 'spring-boot-starter-freemarker', version: springBootVersion
     compile group: 'org.springframework.boot',              name: 'spring-boot-starter-jersey',     version: springBootVersion
     compile group: 'org.springframework.security',          name: 'spring-security-jwt',            version: '1.0.8.RELEASE'
-    compile group: 'org.springframework.boot',              name: 'spring-boot-starter-actuator',   version: springBootVersion
     compile group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
     compile (group: 'org.springframework.vault',            name: 'spring-vault-core',              version: '2.1.0.RELEASE') {
         exclude group: 'org.springframework'

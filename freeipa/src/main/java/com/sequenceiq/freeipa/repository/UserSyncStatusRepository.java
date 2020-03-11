@@ -13,4 +13,5 @@ import com.sequenceiq.freeipa.entity.UserSyncStatus;
 public interface UserSyncStatusRepository extends CrudRepository<UserSyncStatus, Long> {
 
     Optional<UserSyncStatus> getByStack(Stack stack);
+
 }
