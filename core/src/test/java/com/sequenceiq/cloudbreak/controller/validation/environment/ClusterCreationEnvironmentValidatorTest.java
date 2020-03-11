@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,7 +30,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -352,6 +355,28 @@ class ClusterCreationEnvironmentValidatorTest {
         assertTrue(actualResult.hasError());
         assertEquals(1, actualResult.getErrors().size());
         assertTrue(actualResult.getErrors().contains("FreeIPA is not available in your environment!"));
+    }
+
+    @Test
+    void testAutoTlsByParentEnvironmentCloudPlatform() {
+        // GIVEN
+        Stack stack = getStack();
+        ClusterV4Request clusterRequest = new ClusterV4Request();
+        ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
+        cmRequest.setEnableAutoTls(true);
+        clusterRequest.setCm(cmRequest);
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
+        environment.setParentEnvironmentCloudPlatform(CloudPlatform.YARN.name());
+
+        ArgumentCaptor<Platform> argumentCaptor = ArgumentCaptor.forClass(Platform.class);
+        when(cloudPlatformConnectors.get(argumentCaptor.capture(), any())).thenReturn(connector);
+        when(platformParameters.isAutoTlsSupported()).thenReturn(true);
+        KerberosConfig kerberosConfig = KerberosConfigBuilder.aKerberosConfig().withType(KerberosType.ACTIVE_DIRECTORY).build();
+        when(kerberosConfigService.get(any(), any())).thenReturn(Optional.of(kerberosConfig));
+        // WHEN
+        underTest.validate(clusterRequest, stack, environment);
+        // THEN
+        assertEquals(environment.getParentEnvironmentCloudPlatform(), argumentCaptor.getValue().value());
     }
 
     private DetailedEnvironmentResponse getEnvironmentResponse() {
