@@ -32,7 +32,7 @@ public class BasePublicEndpointManagementService {
     @Inject
     private CertificateCreationService certificateCreationService;
 
-    public boolean isCertGenerationEnabled() {
+    public boolean manageCertificateAndDnsInPem() {
         return certGenerationEnabled;
     }
 
@@ -42,10 +42,6 @@ public class BasePublicEndpointManagementService {
 
     public EnvironmentBasedDomainNameProvider getDomainNameProvider() {
         return domainNameProvider;
-    }
-
-    public GrpcUmsClient getGrpcUmsClient() {
-        return grpcUmsClient;
     }
 
     public CertificateCreationService getCertificateCreationService() {

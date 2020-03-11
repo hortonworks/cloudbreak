@@ -21,12 +21,12 @@ public class DnsManagementService {
     @Inject
     private GrpcClusterDnsClient grpcClusterDnsClient;
 
-    public boolean createDnsEntryWithIp(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard, List<String> ips) {
+    public boolean createOrUpdateDnsEntryWithIp(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard, List<String> ips) {
         String ipsAsString = String.join(",", ips);
         try {
             LOGGER.info("Creating DNS entry with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString);
             Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
-            grpcClusterDnsClient.createDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips, requestIdOptional);
+            grpcClusterDnsClient.createOrUpdateDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips, requestIdOptional);
             LOGGER.info("DNS entry has been created with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString);
             return true;
         } catch (Exception e) {

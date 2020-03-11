@@ -25,7 +25,7 @@ public class ClusterPublicEndpointManagementService {
     public boolean provision(Stack stack) {
         boolean certGenerationWasSuccessful = false;
         certGenerationWasSuccessful = gatewayPublicEndpointManagementService.generateCertAndSaveForStackAndUpdateDnsEntry(stack);
-        kafkaBrokerPublicDnsEntryService.register(stack);
+        kafkaBrokerPublicDnsEntryService.createOrUpdate(stack);
         return certGenerationWasSuccessful;
     }
 
@@ -36,7 +36,7 @@ public class ClusterPublicEndpointManagementService {
 
     public Map<String, String> upscale(Stack stack, Map<String, String> newAddressesByFqdn) {
         changeGatewayAddress(stack, newAddressesByFqdn);
-        return kafkaBrokerPublicDnsEntryService.register(stack, newAddressesByFqdn);
+        return kafkaBrokerPublicDnsEntryService.createOrUpdateCandidates(stack, newAddressesByFqdn);
     }
 
     public Map<String, String> downscale(Stack stack, Map<String, String> downscaledAddressesByFqdn) {
@@ -45,7 +45,7 @@ public class ClusterPublicEndpointManagementService {
 
     public boolean changeGateway(Stack stack, String newGatewayIp) {
         String result = null;
-        if (gatewayPublicEndpointManagementService.isCertGenerationEnabled()) {
+        if (gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem()) {
             result = gatewayPublicEndpointManagementService.updateDnsEntry(stack, newGatewayIp);
         }
         return StringUtils.isNoneEmpty(result);
@@ -57,6 +57,14 @@ public class ClusterPublicEndpointManagementService {
             result = gatewayPublicEndpointManagementService.renewCertificate(stack);
         }
         return result;
+    }
+
+    public void start(Stack stack) {
+        if (gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem()) {
+            LOGGER.info("Updating DNS entries of a restarted cluster: '{}'", stack.getName());
+            gatewayPublicEndpointManagementService.updateDnsEntry(stack, null);
+            kafkaBrokerPublicDnsEntryService.createOrUpdate(stack);
+        }
     }
 
     private void changeGatewayAddress(Stack stack, Map<String, String> newAddressesByFqdn) {
