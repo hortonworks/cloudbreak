@@ -1,21 +1,12 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,22 +21,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
-import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
-import com.sequenceiq.freeipa.entity.Operation;
-import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
-import com.sequenceiq.freeipa.service.operation.OperationService;
-import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 class UserSyncServiceTest {
@@ -65,21 +47,10 @@ class UserSyncServiceTest {
     private static final String MACHINE_USER_CRN = "crn:cdp:iam:us-west-1:"
             + ACCOUNT_ID + ":machineUser:" + UUID.randomUUID().toString();
 
-    private static final String INTERNAL_USER_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
-
     private static final int MAX_SUBJECTS_PER_REQUEST = 10;
 
     @Mock
-    StackService stackService;
-
-    @Mock
-    OperationService operationService;
-
-    @Mock
     FreeIpaUsersStateProvider freeIpaUsersStateProvider;
-
-    @Mock
-    UserSyncStatusService userSyncStatusService;
 
     @InjectMocks
     UserSyncService underTest;
@@ -186,34 +157,6 @@ class UserSyncServiceTest {
                 throw new RuntimeException(e);
             }
         });
-    }
-
-    @Test
-    void testAsyncSynchronizeUsersUsesInternalCrn() {
-        Stack stack = mock(Stack.class);
-        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(stackService.getMultipleByEnvironmentCrnAndAccountId(anySet(), anyString())).thenReturn(List.of(stack));
-        Operation operation = mock(Operation.class);
-        when(operation.getStatus()).thenReturn(OperationState.RUNNING);
-        when(operation.getOperationId()).thenReturn("operationId");
-        when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
-                .thenReturn(operation);
-        UserSyncStatus userSyncStatus = mock(UserSyncStatus.class);
-        when(userSyncStatusService.getOrCreateForStack(any(Stack.class))).thenReturn(userSyncStatus);
-        when(userSyncStatusService.save(userSyncStatus)).thenReturn(userSyncStatus);
-
-        UserSyncService spyService = spy(underTest);
-
-        doAnswer(invocation -> {
-            assertEquals(INTERNAL_USER_CRN, ThreadBasedUserCrnProvider.getUserCrn());
-            return null;
-        })
-                .when(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), anySet(), anySet(), anyBoolean());
-
-        spyService.synchronizeUsers("accountId", "actorCrn",
-                Set.of(), Set.of(), Set.of());
-
-        verify(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), anySet(), anySet(), anyBoolean());
     }
 
     private Multimap<String, String> setupGroupMapping(int numGroups, int numPerGroup) {
