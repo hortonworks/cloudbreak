@@ -33,6 +33,12 @@ class CmMgmtServiceConfigLocationService extends AbstractCmConfigService {
         }
     }
 
+    private Optional<ApiRole> getApiRole(String roleName, ApiRoleList apiRoleList) {
+        return apiRoleList.getItems().stream()
+                .filter(apiRole -> apiRole.getName().equals(roleName))
+                .findFirst();
+    }
+
     private ApiConfig createApiConfig(String name, String configDir, int numberOfVolumes) {
         ApiConfig apiConfig = new ApiConfig();
         apiConfig.setName(name);

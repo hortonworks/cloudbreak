@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm;
+package com.sequenceiq.cloudbreak.cm.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -43,7 +43,7 @@ public class CmMgmtServiceConfigLocationServiceTest {
         Stack stack = createStack();
         ApiRoleList apiRoleList = createApiRoleListWithoutConfig();
 
-        underTest.setConfigLocations(stack, apiRoleList);
+        underTest.setConfigs(stack, apiRoleList);
 
         assertEquals(VOLUME_PREFIX + "cloudera-scm-eventserver", getApiConfig(EVENTSERVER, "eventserver_index_dir", apiRoleList).getValue());
         assertEquals(VOLUME_PREFIX + "cloudera-host-monitor", getApiConfig(HOSTMONITOR, "firehose_storage_dir", apiRoleList).getValue());
@@ -56,7 +56,7 @@ public class CmMgmtServiceConfigLocationServiceTest {
         Stack stack = createStack();
         ApiRoleList apiRoleList = createApiRoleListWithOtherConfig();
 
-        underTest.setConfigLocations(stack, apiRoleList);
+        underTest.setConfigs(stack, apiRoleList);
 
         assertEquals(VOLUME_PREFIX + "cloudera-scm-eventserver", getApiConfig(EVENTSERVER, "eventserver_index_dir", apiRoleList).getValue());
         assertEquals(VOLUME_PREFIX + "cloudera-host-monitor", getApiConfig(HOSTMONITOR, "firehose_storage_dir", apiRoleList).getValue());
@@ -71,7 +71,7 @@ public class CmMgmtServiceConfigLocationServiceTest {
         stack.setPlatformVariant(CloudConstants.AWS);
         ApiRoleList apiRoleList = createApiRoleListWithoutConfig();
 
-        underTest.setConfigLocations(stack, apiRoleList);
+        underTest.setConfigs(stack, apiRoleList);
 
         assertNull(apiRoleList.getItems().stream().filter(apiRole -> apiRole.getName().equals(EVENTSERVER)).findFirst().get().getConfig());
         assertNull(apiRoleList.getItems().stream().filter(apiRole -> apiRole.getName().equals(HOSTMONITOR)).findFirst().get().getConfig());
