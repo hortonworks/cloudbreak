@@ -40,7 +40,10 @@ public class InstanceGroupRequest extends InstanceGroupBase {
     @Override
     public String toString() {
         return super.toString() + "InstanceGroupRequest{"
-                + "instanceTemplate=" + instanceTemplate
+                + "instanceGroupName=" + getName()
+                + ", nodeCount=" + getNodeCount()
+                + ", type=" + getType()
+                + ", instanceTemplate=" + instanceTemplate
                 + ", securityGroup=" + securityGroup
                 + '}';
     }
