@@ -1,6 +1,8 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
+import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +36,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
@@ -89,8 +92,7 @@ public class SdxRepairService {
             LOGGER.info("Triggering repair flow for cluster {} with hostgroups {}", sdxCluster.getClusterName(), repairRequest.getHostGroupNames());
             FlowIdentifier flowIdentifier = stackV4Endpoint.repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
-            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, ResourceEvent.SDX_REPAIR_STARTED,
-                    "Datalake repair in progress", sdxCluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", sdxCluster);
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (ClientErrorException e) {
@@ -134,11 +136,12 @@ public class SdxRepairService {
                 LOGGER.info("Repair polling cancelled in inmemory store, id: " + sdxCluster.getId());
                 return AttemptResults.breakFor("Repair polling cancelled in inmemory store, id: " + sdxCluster.getId());
             }
-            if (cloudbreakFlowService.isLastKnownFlowRunning(sdxCluster)) {
+            FlowState flowState = cloudbreakFlowService.getLastKnownFlowState(sdxCluster);
+            if (RUNNING.equals(flowState)) {
                 LOGGER.info("Repair polling will continue, cluster has an active flow in Cloudbreak, id: " + sdxCluster.getId());
                 return AttemptResults.justContinue();
             } else {
-                return getStackResponseAttemptResult(sdxCluster);
+                return getStackResponseAttemptResult(sdxCluster, flowState);
             }
         } catch (NotFoundException e) {
             LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
@@ -146,7 +149,7 @@ public class SdxRepairService {
         }
     }
 
-    private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster) throws JsonProcessingException {
+    private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster, FlowState flowState) throws JsonProcessingException {
         StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();
@@ -161,7 +164,12 @@ public class SdxRepairService {
                         stackV4Response.getCluster().getStatus());
                 return sdxRepairFailed(sdxCluster, stackV4Response.getCluster().getStatusReason());
             } else {
-                return AttemptResults.justContinue();
+                if (FINISHED.equals(flowState)) {
+                    LOGGER.info("Flow finished, but stack hasn't repaired: {}", sdxCluster.getClusterName());
+                    return sdxRepairFailed(sdxCluster, "stack is in improper state");
+                } else {
+                    return AttemptResults.justContinue();
+                }
             }
         }
     }

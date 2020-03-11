@@ -18,7 +18,6 @@ import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -94,8 +93,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
     }
 
     private void setRdsCreatedStatus(SdxCluster cluster) {
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATED,
-                ResourceEvent.SDX_RDS_CREATION_FINISHED, "Sdx external database created", cluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATED, "Sdx external database created", cluster);
     }
 
     private void validForDatabaseCreation(Long sdxId, DetailedEnvironmentResponse env) {

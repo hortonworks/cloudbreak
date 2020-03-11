@@ -312,8 +312,8 @@ public class ClusterOperationService {
     }
 
     private void handleChangedHosts(Cluster cluster, Set<String> newHealthyNodes,
-            Map<String, List<String>> autoRecoveryNodesMap, Map<String, InstanceMetaData> autoRecoveryHostMetadata,
-            Map<String, InstanceMetaData> failedHostMetadata) {
+                                    Map<String, List<String>> autoRecoveryNodesMap, Map<String, InstanceMetaData> autoRecoveryHostMetadata,
+                                    Map<String, InstanceMetaData> failedHostMetadata) {
         try {
             boolean hasAutoRecoverableNodes = !autoRecoveryNodesMap.isEmpty();
             if (hasAutoRecoverableNodes) {
@@ -335,7 +335,7 @@ public class ClusterOperationService {
     }
 
     private void updateChangedHosts(Cluster cluster, Set<String> hostNames, Set<InstanceStatus> expectedState,
-            InstanceStatus newState, ResourceEvent resourceEvent) throws TransactionService.TransactionExecutionException {
+                                    InstanceStatus newState, ResourceEvent resourceEvent) throws TransactionService.TransactionExecutionException {
         String recoveryMessage = cloudbreakMessagesService.getMessage(resourceEvent.getMessage(), hostNames);
         Set<InstanceMetaData> notTerminatedInstanceMetaDatasForStack = instanceMetaDataService.findNotTerminatedForStack(cluster.getStack().getId());
         Collection<InstanceMetaData> changedHosts = new HashSet<>();
@@ -373,11 +373,11 @@ public class ClusterOperationService {
     }
 
     private void prepareForAutoRecovery(Stack stack,
-            Map<String, List<String>> autoRecoveryNodesMap,
-            Map<String, InstanceMetaData> autoRecoveryHostMetadata,
-            String failedNode,
-            InstanceMetaData hostMetadata,
-            String hostGroupName) {
+                                        Map<String, List<String>> autoRecoveryNodesMap,
+                                        Map<String, InstanceMetaData> autoRecoveryHostMetadata,
+                                        String failedNode,
+                                        InstanceMetaData hostMetadata,
+                                        String hostGroupName) {
         List<String> nodeList = autoRecoveryNodesMap.get(hostGroupName);
         if (nodeList == null) {
             updateHostsValidator.validateComponentsCategory(stack, hostGroupName);

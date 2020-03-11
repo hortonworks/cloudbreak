@@ -169,6 +169,12 @@ public class StackCommonService {
         return put(stack, updateStackJson);
     }
 
+    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, List<String> instanceIds, boolean forced) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        return stackOperationService.removeInstances(stack, workspaceId, instanceIds, forced, user);
+    }
+
     public FlowIdentifier putStartInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         return putStartInWorkspace(stack);
@@ -274,12 +280,6 @@ public class StackCommonService {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         return stackOperationService.removeInstance(stack, workspaceId, instanceId, forced, user);
-    }
-
-    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, List<String> instanceIds, boolean forced) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        return stackOperationService.removeInstances(stack, workspaceId, instanceIds, forced, user);
     }
 
     public FlowIdentifier changeImageInWorkspace(NameOrCrn nameOrCrn, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {

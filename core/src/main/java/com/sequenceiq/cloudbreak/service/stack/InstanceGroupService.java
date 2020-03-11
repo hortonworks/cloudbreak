@@ -53,6 +53,10 @@ public class InstanceGroupService {
         return repository.findOneWithInstanceMetadataByGroupNameInStack(stackId, groupName);
     }
 
+    public Optional<InstanceGroup> findInstanceGroupInStackByHostName(Long stackId, String hostName) {
+        return repository.findInstanceGroupInStackByHostName(stackId, hostName);
+    }
+
     public InstanceGroup save(InstanceGroup instanceGroup) {
         return repository.save(instanceGroup);
     }

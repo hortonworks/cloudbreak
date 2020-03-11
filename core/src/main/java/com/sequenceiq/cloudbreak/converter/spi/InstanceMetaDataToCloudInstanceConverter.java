@@ -30,7 +30,7 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
     @Override
     public CloudInstance convert(InstanceMetaData metaDataEnity) {
         InstanceGroup group = metaDataEnity.getInstanceGroup();
-        Template template = metaDataEnity.getInstanceGroup().getTemplate();
+        Template template = group.getTemplate();
         StackAuthentication stackAuthentication = group.getStack().getStackAuthentication();
         InstanceStatus status = getInstanceStatus(metaDataEnity);
         String imageId = instanceMetadataToImageIdConverter.convert(metaDataEnity);

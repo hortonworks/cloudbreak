@@ -143,7 +143,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void reportHealthAndSyncInstances(Stack stack, Collection<InstanceMetaData> runningInstances, Collection<InstanceMetaData> failedInstances,
-            Set<String> newHealtyHostNames, InstanceSyncState defaultState) {
+        Set<String> newHealtyHostNames, InstanceSyncState defaultState) {
         Set<String> newFailedNodeNames = failedInstances.stream()
                 .filter(i -> !Set.of(SERVICES_UNHEALTHY, STOPPED).contains(i.getInstanceStatus()))
                 .map(InstanceMetaData::getDiscoveryFQDN)
@@ -168,7 +168,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void syncInstances(Stack stack, Collection<InstanceMetaData> runningInstances,
-            Collection<InstanceMetaData> instanceMetaData, InstanceSyncState defaultState) {
+        Collection<InstanceMetaData> instanceMetaData, InstanceSyncState defaultState) {
         List<CloudVmInstanceStatus> instanceStatuses = queryInstanceStatuses(stack, instanceMetaData);
         LOGGER.debug("Cluster '{}' state check on provider, instances: {}", stack.getId(), instanceStatuses);
         syncService.autoSync(stack, runningInstances, instanceStatuses, true, defaultState);
@@ -192,7 +192,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private Set<InstanceMetaData> getFailedInstancesInstanceMetadata(Stack stack, Map<HostName, ClusterManagerState> hostStatuses,
-            Set<InstanceMetaData> runningInstances) {
+        Set<InstanceMetaData> runningInstances) {
         Set<String> failedHosts = hostStatuses.entrySet().stream()
                 .filter(e -> e.getValue().getClusterManagerStatus() == ClusterManagerState.ClusterManagerStatus.UNHEALTHY)
                 .map(Map.Entry::getKey)
@@ -226,7 +226,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private List<CloudVmInstanceStatus> getCloudVmInstanceStatuses(List<CloudInstance> cloudInstances,
-            CloudContext cloudContext, CloudCredential cloudCredential) {
+        CloudContext cloudContext, CloudCredential cloudCredential) {
         List<CloudVmInstanceStatus> instanceStatuses = Collections.emptyList();
         try {
             instanceStatuses = instanceStateQuery.getCloudVmInstanceStatuses(cloudCredential, cloudContext, cloudInstances);

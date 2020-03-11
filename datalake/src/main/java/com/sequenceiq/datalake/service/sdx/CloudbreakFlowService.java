@@ -28,26 +28,51 @@ public class CloudbreakFlowService {
     @Inject
     private SdxClusterRepository sdxClusterRepository;
 
-    public boolean isLastKnownFlowRunning(SdxCluster sdxCluster) {
+    public void getAndSaveLastCloudbreakFlowChainId(SdxCluster sdxCluster) {
+        FlowLogResponse lastFlowByResourceName = flowEndpoint.getLastFlowByResourceName(sdxCluster.getClusterName());
+        LOGGER.info("Found last flow from Cloudbreak, flowId: {} created: {} nextEvent:{} resourceId: {} stateStatus: {}",
+                lastFlowByResourceName.getFlowId(),
+                lastFlowByResourceName.getCreated(),
+                lastFlowByResourceName.getNextEvent(),
+                lastFlowByResourceName.getResourceId(),
+                lastFlowByResourceName.getStateStatus());
+        sdxCluster.setLastCbFlowChainId(lastFlowByResourceName.getFlowChainId());
+        sdxClusterRepository.save(sdxCluster);
+    }
+
+    public FlowState getLastKnownFlowState(SdxCluster sdxCluster) {
         try {
             if (sdxCluster.getLastCbFlowChainId() != null) {
                 LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW_CHAIN, sdxCluster.getLastCbFlowChainId());
                 Boolean hasActiveFlow = flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()).getHasActiveFlow();
                 logCbFlowChainStatus(sdxCluster, hasActiveFlow);
-                return hasActiveFlow;
+                return getFlowState(hasActiveFlow);
             } else if (sdxCluster.getLastCbFlowId() != null) {
                 LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW, sdxCluster.getLastCbFlowId());
                 Boolean hasActiveFlow = flowEndpoint.hasFlowRunningByFlowId(sdxCluster.getLastCbFlowId()).getHasActiveFlow();
                 logCbFlowStatus(sdxCluster, hasActiveFlow);
-                return hasActiveFlow;
+                return getFlowState(hasActiveFlow);
             }
+            return FlowState.UNKNOWN;
         } catch (NotFoundException e) {
-            LOGGER.error("Flow id or flow chain id not found in CB: {}, so there is no active flow!", e.getMessage());
+            LOGGER.error("Flow chain id or resource {} not found in CB: {}, so there is no active flow!", sdxCluster.getClusterName(), e.getMessage());
+            return FlowState.UNKNOWN;
         } catch (Exception e) {
-            LOGGER.error("Exception occured during checking if there is a flow in CB: {}", e.getMessage());
-            return true;
+            LOGGER.error("Exception occured during checking if there is a flow for cluster {} in CB: {}", sdxCluster.getClusterName(), e.getMessage());
+            return FlowState.UNKNOWN;
         }
-        return false;
+    }
+
+    private FlowState getFlowState(Boolean hasActiveFlow) {
+        if (hasActiveFlow) {
+            return FlowState.RUNNING;
+        } else {
+            return FlowState.FINISHED;
+        }
+    }
+
+    public enum FlowState {
+        RUNNING, FINISHED, UNKNOWN
     }
 
     public void saveLastCloudbreakFlowChainId(SdxCluster sdxCluster, FlowIdentifier flowIdentifier) {

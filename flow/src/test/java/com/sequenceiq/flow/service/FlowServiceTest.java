@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
@@ -52,6 +53,9 @@ public class FlowServiceTest {
 
     @Mock
     private ConversionService conversionService;
+
+    @Mock
+    private List<String> failHandledEvents;
 
     @InjectMocks
     private FlowService underTest;

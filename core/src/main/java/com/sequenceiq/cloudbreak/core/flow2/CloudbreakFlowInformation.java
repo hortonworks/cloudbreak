@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.UNKNOWN;
-import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationEvent.START_EXTERNAL_DATABASE_TERMINATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.TERMINATION_EVENT;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +22,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminati
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade.ClusterUpgradeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationFlowConfig;
@@ -46,9 +45,8 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
 
     private static final List<String> ALLOWED_PARALLEL_FLOWS = List.of(
             ClusterTerminationEvent.TERMINATION_EVENT.event(),
-            START_EXTERNAL_DATABASE_TERMINATION_EVENT.event(),
-            ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event(),
-            TERMINATION_EVENT.event());
+            ExternalDatabaseTerminationEvent.START_EXTERNAL_DATABASE_TERMINATION_EVENT.event(),
+            ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event());
 
     private static final List<Class<? extends FlowConfiguration<?>>> RESTARTABLE_FLOWS = Arrays.asList(
             StackCreationFlowConfig.class,

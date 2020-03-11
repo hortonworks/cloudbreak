@@ -165,8 +165,7 @@ public class SdxRepairActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_FAILED,
-                        ResourceEvent.SDX_REPAIR_FAILED, statusReason, payload.getResourceId());
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_FAILED, statusReason, payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_REPAIR_FAILED, sdxCluster);
                 sendEvent(context, SDX_REPAIR_FAILED_HANDLED_EVENT.event(), payload);
             }

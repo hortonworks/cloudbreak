@@ -1,7 +1,10 @@
 package com.sequenceiq.flow.reactor.config;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.reactor.handler.ConsumerNotFoundHandler;
@@ -48,6 +52,61 @@ public class EventBusConfig {
     @Lazy
     private FlowLogDBService flowLogDBService;
 
+    private void handleFlowFail(Throwable throwable) {
+        try {
+            String flowId = getFlowIdFromHeaders(throwable);
+            if (flowId == null) {
+                flowId = getFlowIdFromMDC();
+            }
+            if (flowId != null) {
+                LOGGER.error("Unhandled exception happened in flow {}, lets cancel it", flowId, throwable);
+                flowLogDBService.getLastFlowLog(flowId).ifPresent(flowLog -> {
+                    flowLogDBService.updateLastFlowLogStatus(flowLog, true);
+                    applicationFlowInformation.handleFlowFail(flowLog);
+                });
+            } else {
+                LOGGER.error("We were not able to guess flowId on thread: {}", generateStackTrace());
+            }
+        } catch (Exception e) {
+            LOGGER.error("can't handle flow fail", e);
+        }
+    }
+
+    private String generateStackTrace() {
+        return String.join("\n\t", Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString)
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
+    }
+
+    private String getFlowIdFromMDC() {
+        String flowId;
+        LOGGER.info("FlowId parse failed from headers.. let's try to get it from MDC context");
+        flowId = MDCBuilder.getMdcContextMap().get("flowId");
+        return flowId;
+    }
+
+    private String getFlowIdFromHeaders(Throwable throwable) {
+        try {
+            if (throwable.getCause() instanceof Exceptions.ValueCause) {
+                if (((Exceptions.ValueCause) throwable.getCause()).getValue() instanceof Event) {
+                    Event event = (Event) ((Exceptions.ValueCause) throwable.getCause()).getValue();
+                    LOGGER.info("Failed event: {}", event);
+                    Event.Headers headers = event.getHeaders();
+                    if (headers != null) {
+                        LOGGER.info("Failed event headers: {}", headers);
+                        if (headers.get("FLOW_ID") != null) {
+                            return headers.get("FLOW_ID").toString();
+                        }
+                    } else {
+                        LOGGER.info("Headers is null object for the event {}", event);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Something wrong happened when we tried to get flowId from headers", e);
+        }
+        return null;
+    }
+
     @Bean
     public Timer timer(Environment env) {
         return env.getTimer();
@@ -70,33 +129,6 @@ public class EventBusConfig {
                 })
                 .consumerNotFoundHandler(new ConsumerNotFoundHandler())
                 .get();
-    }
-
-    private void handleFlowFail(Throwable throwable) {
-        if (throwable.getCause() instanceof Exceptions.ValueCause) {
-            try {
-                if (((Exceptions.ValueCause) throwable.getCause()).getValue() instanceof Event) {
-                    Event event = (Event) ((Exceptions.ValueCause) throwable.getCause()).getValue();
-                    LOGGER.info("Failed event: {}", event);
-                    Event.Headers headers = event.getHeaders();
-                    if (headers != null) {
-                        LOGGER.info("Failed event headers: {}", headers);
-                        if (headers.get("FLOW_ID") != null) {
-                            String flowId = headers.get("FLOW_ID").toString();
-                            LOGGER.error("Unhandled exception happened in flow {}, lets cancel it", flowId, throwable);
-                            flowLogDBService.getLastFlowLog(flowId).ifPresent(flowLog -> {
-                                flowLogDBService.updateLastFlowLogStatus(flowLog, true);
-                                applicationFlowInformation.handleFlowFail(flowLog);
-                            });
-                        }
-                    } else {
-                        LOGGER.info("Headers is null object for the event {}", event);
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.error("can't handle flow fail", e);
-            }
-        }
     }
 
     @Bean("eventBusThreadPoolExecutor")
