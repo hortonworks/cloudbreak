@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm;
+package com.sequenceiq.cloudbreak.cm.config;
 
 import java.util.List;
 import java.util.Optional;
@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.model.ApiConfig;
-import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -14,9 +13,10 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
 @Service
-class CmMgmtServiceConfigLocationService {
+class CmMgmtServiceConfigLocationService extends AbstractCmConfigService {
 
-    void setConfigLocations(Stack stack, ApiRoleList apiRoleList) {
+    @Override
+    void setConfigs(Stack stack, ApiRoleList apiRoleList) {
         List<Resource> attachedDisks = stack.getDiskResources();
         if (!attachedDisks.isEmpty()) {
             Optional<ApiRole> eventServer = getApiRole("EVENTSERVER", apiRoleList);
@@ -31,21 +31,12 @@ class CmMgmtServiceConfigLocationService {
             Optional<ApiRole> serviceMonitor = getApiRole("SERVICEMONITOR", apiRoleList);
             serviceMonitor.ifPresent(apiRole -> setConfig(apiRole, createApiConfig("firehose_storage_dir", "cloudera-service-monitor", attachedDisks.size())));
         }
-
     }
 
     private Optional<ApiRole> getApiRole(String roleName, ApiRoleList apiRoleList) {
-        return apiRoleList.getItems().stream().filter(apiRole -> apiRole.getName().equals(roleName)).findFirst();
-    }
-
-    private void setConfig(ApiRole apiRole, ApiConfig apiConfig) {
-        if (apiRole.getConfig() == null) {
-            ApiConfigList apiConfigList = new ApiConfigList();
-            apiConfigList.addItemsItem(apiConfig);
-            apiRole.setConfig(apiConfigList);
-        } else {
-            apiRole.getConfig().getItems().add(apiConfig);
-        }
+        return apiRoleList.getItems().stream()
+                .filter(apiRole -> apiRole.getName().equals(roleName))
+                .findFirst();
     }
 
     private ApiConfig createApiConfig(String name, String configDir, int numberOfVolumes) {
