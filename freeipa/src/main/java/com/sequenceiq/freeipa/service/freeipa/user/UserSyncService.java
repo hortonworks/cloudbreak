@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.freeipa.client.FreeIpaCapabilities;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,6 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
@@ -268,14 +268,12 @@ public class UserSyncService {
 
     private void processUsersWorkloadCredentials(
             String environmentCrn, UmsUsersState umsUsersState, FreeIpaClient freeIpaClient) throws IOException, FreeIpaClientException {
-        Config config = freeIpaClient.getConfig();
-        if (config.getIpauserobjectclasses() == null || !config.getIpauserobjectclasses().contains(Config.CDP_USER_ATTRIBUTE)) {
-            LOGGER.debug("Doesn't seems like having config attribute, no credentials sync required for env:{}", environmentCrn);
+        if (!FreeIpaCapabilities.hasSetPasswordHashSupport(freeIpaClient.getConfig())) {
+            LOGGER.debug("IPA doesn't have password hash support, no credentials sync required for env:{}", environmentCrn);
             return;
         }
 
-        // found the attribute, password sync can be performed
-        LOGGER.debug("Having config attribute, going for credentials sync");
+        LOGGER.debug("IPA has password hash support, going for credentials sync");
 
         // Should sync for all users and not just diff. At present there is no way to identify that there is a change in password for a user
         UsersState usersState = umsUsersState.getUsersState();

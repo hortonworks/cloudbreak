@@ -10,9 +10,6 @@ import com.sequenceiq.freeipa.client.deserializer.ListFlatteningDeserializer;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Config {
 
-    // users for password setting in FreeIPA Plugin
-    public static final String CDP_USER_ATTRIBUTE = "cdpUserAttr";
-
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private Integer ipamaxusernamelength;
 

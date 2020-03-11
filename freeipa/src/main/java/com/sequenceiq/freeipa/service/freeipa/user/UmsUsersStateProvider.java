@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static java.util.Objects.requireNonNull;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
@@ -45,6 +42,9 @@ public class UmsUsersStateProvider {
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
+
+    @Inject
+    private UmsCredentialProvider umsCredentialProvider;
 
     public Map<String, UmsUsersState> getEnvToUmsUsersStateMap(String accountId, String actorCrn, Set<String> environmentCrns,
             Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
@@ -133,16 +133,6 @@ public class UmsUsersStateProvider {
         }
     }
 
-    private WorkloadCredential getCredentials(String userCrn, Optional<String> requestId) {
-        GetActorWorkloadCredentialsResponse response = grpcUmsClient.getActorWorkloadCredentials(INTERNAL_ACTOR_CRN, userCrn, requestId);
-        String hashedPassword = response.getPasswordHash();
-        List<ActorKerberosKey> keys = response.getKerberosKeysList();
-        long expirationDate = response.getPasswordHashExpirationDate();
-        Optional<Instant> expirationInstant = expirationDate == 0 ? Optional.empty() : Optional.of(Instant.ofEpochMilli(expirationDate));
-
-        return new WorkloadCredential(hashedPassword, keys, expirationInstant);
-    }
-
     @SuppressWarnings("ParameterNumber")
     private void handleUser(UmsUsersState.Builder umsUsersStateBuilder, UsersState.Builder usersStateBuilder, Map<String, FmsGroup> crnToFmsGroup,
             String memberCrn, FmsUser fmsUser, EnvironmentAccessRights environmentAccessRights, Optional<String> requestId) {
@@ -156,7 +146,7 @@ public class UmsUsersStateProvider {
                 List<String> groupCrnsForMember = grpcUmsClient.listGroupsForMember(INTERNAL_ACTOR_CRN, accountId, memberCrn, requestId);
                 ListWorkloadAdministrationGroupsForMemberResponse workloadAdministrationGroupsForUser =
                         grpcUmsClient.listWorkloadAdministrationGroupsForMember(INTERNAL_ACTOR_CRN, memberCrn, requestId);
-                WorkloadCredential workloadCredential = getCredentials(memberCrn, requestId);
+                WorkloadCredential workloadCredential = umsCredentialProvider.getCredentials(memberCrn, requestId);
 
                 groupCrnsForMember.forEach(gcrn -> {
                     FmsGroup group = crnToFmsGroup.get(gcrn);
