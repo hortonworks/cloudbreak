@@ -8,7 +8,6 @@ import java.net.URL;
 import java.security.Security;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -32,7 +31,6 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -74,11 +72,11 @@ public class FreeIpaClientBuilder {
 
     private final String pass;
 
-    private final String realm;
-
     private final SSLContext sslContext;
 
     private final int port;
+
+    private final String hostname;
 
     private final HttpClientConfig clientConfig;
 
@@ -86,13 +84,13 @@ public class FreeIpaClientBuilder {
 
     private Map<String, String> additionalHeaders;
 
-    public FreeIpaClientBuilder(String user, String pass, String realm, HttpClientConfig clientConfig, int port, String basePath,
+    public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, String hostname, int port, String basePath,
             Map<String, String> additionalHeaders, JsonRpcClient.RequestListener rpcRequestListener) throws Exception {
         this.user = user;
         this.pass = pass;
-        this.realm = realm;
         this.clientConfig = clientConfig;
         this.port = port;
+        this.hostname = hostname;
 
         if (clientConfig.hasSSLConfigs()) {
             this.sslContext =
@@ -115,36 +113,30 @@ public class FreeIpaClientBuilder {
         this.rpcRequestListener = rpcRequestListener;
     }
 
-    public FreeIpaClientBuilder(String user, String pass, String realm,
-            HttpClientConfig clientConfig, int port) throws Exception {
-        this(user, pass, realm, clientConfig, port, DEFAULT_BASE_PATH, Map.of(), null);
+    public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, int port, String hostname) throws Exception {
+        this(user, pass, clientConfig, hostname, port, DEFAULT_BASE_PATH, Map.of(), null);
     }
 
-    public FreeIpaClient buildWithPing() throws URISyntaxException, FreeIpaClientException, IOException {
-        List<BasicHeader> defaultHeaders = additionalHeaders.entrySet().stream()
-                .map(entry -> new BasicHeader(entry.getKey(), entry.getValue())).collect(Collectors.toList());
-        try (CloseableHttpClient client = HttpClientBuilder
-                .create()
-                .useSystemProperties()
-                .setConnectionManager(connectionManager)
-                .setConnectionManagerShared(true)
-                .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(TEST_CONNECTION_READ_TIMEOUT_MILLIS).build())
-                .setDefaultHeaders(defaultHeaders)
-                .setDefaultSocketConfig(
-                        SocketConfig.custom()
-                                .setSoTimeout(SO_TIMEOUT)
-                                .setTcpNoDelay(true)
-                                .build())
-                .build()) {
-            URI target = getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/login_password").toURI();
-            LOGGER.debug("Ping at target: {}", target);
-            client.execute(new HttpHead(target));
-            LOGGER.debug("Freeipa is reachable");
+    public FreeIpaClient build(boolean withPing) throws URISyntaxException, FreeIpaClientException, IOException {
+        if (withPing) {
+            try (CloseableHttpClient client = HttpClientBuilder
+                    .create()
+                    .useSystemProperties()
+                    .setConnectionManager(connectionManager)
+                    .setConnectionManagerShared(true)
+                    .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(TEST_CONNECTION_READ_TIMEOUT_MILLIS).build())
+                    .setDefaultSocketConfig(
+                            SocketConfig.custom()
+                                    .setSoTimeout(SO_TIMEOUT)
+                                    .setTcpNoDelay(true)
+                                    .build())
+                    .build()) {
+                URI target = getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/login_password").toURI();
+                LOGGER.debug("Ping at target: {}", target);
+                client.execute(new HttpHead(target));
+                LOGGER.debug("Freeipa is reachable");
+            }
         }
-        return build();
-    }
-
-    public FreeIpaClient build() throws URISyntaxException, FreeIpaClientException, IOException {
         String sessionCookie = connect(user, pass, clientConfig.getApiAddress(), port);
 
         Map<String, String> headers = ImmutableMap.<String, String>builder()
@@ -162,7 +154,7 @@ public class FreeIpaClientBuilder {
         jsonRpcHttpClient.setHostNameVerifier(hostnameVerifier());
         jsonRpcHttpClient.setReadTimeoutMillis(READ_TIMEOUT_MILLIS);
         jsonRpcHttpClient.setRequestListener(rpcRequestListener);
-        return new FreeIpaClient(jsonRpcHttpClient);
+        return new FreeIpaClient(jsonRpcHttpClient, clientConfig.getApiAddress(), hostname);
     }
 
     private String connect(String user, String pass, String apiAddress, int port)
@@ -199,19 +191,12 @@ public class FreeIpaClientBuilder {
                 throw new FreeIpaClientException(String.format("Encountered unexpected response from "
                         + "FreeIPA; details:%n%n"
                         + "code: %s%n"
-                        + "headers: %s", response.getStatusLine().getStatusCode(), response.getAllHeaders()));
+                        + "headers: %s", response.getStatusLine().getStatusCode(), response.getAllHeaders()),
+                        response.getStatusLine().getStatusCode());
             }
         }
         Cookie sessionCookie = cookieStore.getCookies().stream().filter(cookie -> "ipa_session".equalsIgnoreCase(cookie.getName())).findFirst().get();
         return sessionCookie.getValue();
-    }
-
-    private String getUser(String user, String realm) {
-        if (StringUtils.isBlank(realm) && !user.contains("@")) {
-            throw new IllegalArgumentException("Realm is required to open a "
-                    + "connection to the FreeIPA instance");
-        }
-        return user.contains("@") ? user : user + '@' + realm;
     }
 
     private SSLContext setupSSLContext(String clientCert, String clientKey, String serverCert) throws Exception {

@@ -36,7 +36,7 @@ public class FreeipaChecker {
             FreeIpaClient freeIpaClient = checkedMeasure(() -> freeIpaClientFactory.getFreeIpaClientForStackWithPing(stack), LOGGER,
                     ":::Auto sync::: freeipa client is created in {}ms");
             String hostname = getPrimaryHostname(checkableInstances);
-            return checkedMeasure(() -> freeIpaClient.serverConnCheck(hostname, hostname), LOGGER,
+            return checkedMeasure(() -> freeIpaClient.serverConnCheck(freeIpaClient.getApiAddress(), hostname), LOGGER,
                     ":::Auto sync::: freeipa server_conncheck ran in {}ms");
         }, LOGGER, ":::Auto sync::: freeipa server status is checked in {}ms");
     }
