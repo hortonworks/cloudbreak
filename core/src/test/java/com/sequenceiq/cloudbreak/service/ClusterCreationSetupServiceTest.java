@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -78,7 +78,7 @@ public class ClusterCreationSetupServiceTest {
     private StackMatrixService stackMatrixService;
 
     @Mock
-    private ClusterOperationService clusterOperationService;
+    private ClusterService clusterService;
 
     @Mock
     private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
@@ -135,6 +135,7 @@ public class ClusterCreationSetupServiceTest {
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         stackMatrixV4Response.setCdh(Collections.singletonMap(CDH_VERSION, null));
         when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4Response);
+        when(clusterService.save(any(Cluster.class))).thenReturn(cluster);
         when(clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(any(), any(), any(), any(), any())).
                 thenReturn(new ArrayList<>());
     }

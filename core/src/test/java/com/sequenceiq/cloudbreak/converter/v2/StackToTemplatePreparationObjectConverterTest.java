@@ -254,7 +254,6 @@ public class StackToTemplatePreparationObjectConverterTest {
                 .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
                 .withCredential(new CredentialResponse())
                 .withAdminGroupName(ADMIN_GROUP_NAME)
-                .withCrn(TestConstants.CRN)
                 .build();
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(credentialConverter.convert(any(CredentialResponse.class))).thenReturn(credential);

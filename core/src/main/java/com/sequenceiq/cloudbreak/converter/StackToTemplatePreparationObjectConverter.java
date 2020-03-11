@@ -12,7 +12,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -162,8 +161,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             if (gateway != null) {
                 gatewaySignKey = gateway.getSignKey();
             }
-            String envCrnForVirtualGroups = getEnvironmentCrnForVirtualGroups(environment);
-            VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(envCrnForVirtualGroups, ldapView.map(LdapView::getAdminGroup).orElse(""));
+            VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(source.getEnvironmentCrn(), ldapView.map(LdapView::getAdminGroup).orElse(""));
 
             boolean internalTenant = entitlementService.internalTenant(source.getCreator().getUserCrn(), source.getCreator().getTenant().getName());
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
@@ -214,14 +212,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             userDefinedTags = source.getTags().get(StackTags.class).getUserDefinedTags();
         }
         return userDefinedTags;
-    }
-
-    private String getEnvironmentCrnForVirtualGroups(DetailedEnvironmentResponse environment) {
-        String envCrnForVirtualGroups = environment.getCrn();
-        if (StringUtils.isNoneEmpty(environment.getParentEnvironmentCrn())) {
-            envCrnForVirtualGroups = environment.getParentEnvironmentCrn();
-        }
-        return envCrnForVirtualGroups;
     }
 
     private Optional<DatalakeResources> getDataLakeResource(Stack source) {

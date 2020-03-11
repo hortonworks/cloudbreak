@@ -19,6 +19,7 @@ public interface UserProfileRepository extends CrudRepository<UserProfile, Long>
     @Query("SELECT b FROM UserProfile b "
             + "LEFT JOIN FETCH b.user u "
             + "LEFT JOIN FETCH u.tenant "
+            + "LEFT JOIN FETCH u.userPreferences "
             + "WHERE u.id= :userId")
     Optional<UserProfile> findOneByUser(@Param("userId") Long userId);
 

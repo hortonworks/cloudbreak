@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED;
@@ -36,7 +36,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -46,6 +48,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.projection.HostGroupRepairView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -57,8 +60,6 @@ import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -68,7 +69,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
-public class ClusterOperationServiceTest {
+public class ClusterServiceTest {
 
     private static final long STACK_ID = 1;
 
@@ -110,7 +111,7 @@ public class ClusterOperationServiceTest {
     private InstanceMetaDataService instanceMetaDataService;
 
     @InjectMocks
-    private ClusterOperationService underTest;
+    private ClusterService underTest;
 
     @Mock
     private ClusterApi clusterApi;
@@ -120,12 +121,6 @@ public class ClusterOperationServiceTest {
 
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
-
-    @Mock
-    private ClusterService clusterService;
-
-    @Mock
-    private UpdateHostsValidator updateHostsValidator;
 
     private Cluster cluster;
 
@@ -169,6 +164,11 @@ public class ClusterOperationServiceTest {
 
         when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
 
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
+        when(rdsConfigService.findByClusterIdAndType(CLUSTER_ID, DatabaseType.CLOUDERA_MANAGER)).thenReturn(rdsConfig);
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
         when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("auto recovery").thenReturn("failed node");
 
         InstanceMetaData host1 = getHost("host1", "master", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
@@ -177,9 +177,8 @@ public class ClusterOperationServiceTest {
         InstanceMetaData host2 = getHost("host2", "group2", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
         when(instanceMetaDataService.findHostInStack(eq(stack.getId()), eq("host2"))).thenReturn(Optional.of(host2));
 
-        HostGroupRepairView hostGroup = getHostGroup(host1, RecoveryMode.AUTO);
         when(hostGroupService.getRepairViewByClusterIdAndName(stack.getCluster().getId(), host1.getInstanceGroup().getGroupName()))
-                .thenReturn(Optional.of(hostGroup));
+                .thenReturn(Optional.of(getHostGroup(host1, RecoveryMode.AUTO)));
         when(hostGroupService.getRepairViewByClusterIdAndName(stack.getCluster().getId(), host2.getInstanceGroup().getGroupName()))
                 .thenReturn(Optional.of(getHostGroup(host2, RecoveryMode.MANUAL)));
         when(instanceMetaDataService.findNotTerminatedForStack(eq(stack.getId()))).thenReturn(new HashSet<>(Arrays.asList(host1, host2)));
@@ -198,7 +197,6 @@ public class ClusterOperationServiceTest {
                 Set.of("host2"));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(STACK_ID, "RECOVERY",
                 CLUSTER_FAILED_NODES_REPORTED, List.of("host2"));
-        verify(updateHostsValidator, times(1)).validateComponentsCategory(stack, hostGroup.getName());
     }
 
     @Test
@@ -229,6 +227,11 @@ public class ClusterOperationServiceTest {
         when(hostGroupService.getRepairViewByClusterIdAndName(stack.getCluster().getId(), host1.getInstanceGroup().getGroupName()))
                 .thenReturn(Optional.of(getHostGroup(host1, RecoveryMode.AUTO)));
 
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
+        when(rdsConfigService.findByClusterIdAndType(CLUSTER_ID, DatabaseType.CLOUDERA_MANAGER)).thenReturn(rdsConfig);
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
         doThrow(new FlowsAlreadyRunningException("Flow in action")).when(flowManager).triggerClusterRepairFlow(anyLong(), anyMap(), anyBoolean());
 
         assertThrows(FlowsAlreadyRunningException.class, () -> {

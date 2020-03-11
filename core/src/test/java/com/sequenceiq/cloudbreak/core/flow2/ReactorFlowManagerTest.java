@@ -3,8 +3,9 @@ package com.sequenceiq.cloudbreak.core.flow2;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,31 +20,32 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.task.AsyncTaskExecutor;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
-import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.service.FlowCancelService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
-import com.sequenceiq.cloudbreak.core.flow2.service.TerminationTriggerService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 
+import reactor.bus.Event;
+import reactor.bus.EventBus;
+import reactor.core.dispatch.ThreadPoolExecutorDispatcher;
 import reactor.rx.Promise;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,19 +56,22 @@ public class ReactorFlowManagerTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:tenantName:user:userName";
 
     @Mock
+    private EventBus reactor;
+
+    @Mock
+    private EventBusStatisticReporter reactorReporter;
+
+    @Mock
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
+
+    @Mock
     private StackService stackService;
 
     @Mock
-    private ReactorNotifier reactorNotifier;
+    private AuthenticatedUserService authenticatedUserService;
 
     @Mock
-    private AsyncTaskExecutor asyncTaskExecutor;
-
-    @Mock
-    private TerminationTriggerService terminationTriggerService;
-
-    @Mock
-    private FlowCancelService flowCancelService;
+    private KerberosConfigService kerberosConfigService;
 
     private Stack stack;
 
@@ -75,15 +80,16 @@ public class ReactorFlowManagerTest {
 
     @Before
     public void setUp() {
-        reset(reactorNotifier);
+        reset(reactor);
+        reset(eventFactory);
+        when(reactor.notify((Object) anyObject(), any(Event.class))).thenReturn(new EventBus(new ThreadPoolExecutorDispatcher(1, 1)));
+        Acceptable acceptable = new TestAcceptable();
         stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
+        when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
-        when(asyncTaskExecutor.submit(captor.capture())).then(invocation -> {
-            captor.getValue().run();
-            return null;
-        });
+        when(eventFactory.createEventWithErrHandler(any(), any())).thenReturn(new Event<>(acceptable));
+        when(authenticatedUserService.getUserCrn()).thenReturn("usercrn");
     }
 
     @Test
@@ -102,6 +108,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerClusterStop(STACK_ID);
         underTest.triggerClusterStart(STACK_ID);
         underTest.triggerTermination(STACK_ID, false);
+        underTest.triggerTermination(STACK_ID, false);
         underTest.triggerStackUpscale(STACK_ID, instanceGroupAdjustment, true);
         underTest.triggerStackDownscale(STACK_ID, instanceGroupAdjustment);
         underTest.triggerStackRemoveInstance(STACK_ID, "hostgroup", 5L);
@@ -117,7 +124,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerClusterCredentialReplace(STACK_ID, "admin", "admin1");
         underTest.triggerClusterCredentialUpdate(STACK_ID, "admin1");
         underTest.triggerClusterTermination(stack, false, USER_CRN);
-        underTest.triggerClusterTermination(stack, true, USER_CRN);
+        underTest.triggerClusterTermination(stack, false, USER_CRN);
+        underTest.triggerClusterUpgrade(STACK_ID);
         underTest.triggerManualRepairFlow(STACK_ID);
         underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
         underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true);
@@ -126,67 +134,85 @@ public class ReactorFlowManagerTest {
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
         underTest.triggerClusterCertificationRenewal(STACK_ID);
 
-        int count = 0;
+        // Not start from 0 because flow cancellations
+        int count = 6;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
             if (method.getName().startsWith("trigger")) {
                 count++;
             }
         }
-        // -3: 2 notifyWithoutCheck, 1 terminationTriggerService, 1 triggerStackRemoveInstance internal
-        verify(reactorNotifier, times(count - 4)).notify(anyLong(), anyString(), any(Acceptable.class));
-        verify(reactorNotifier, times(2)).notifyWithoutCheck(anyLong(), anyString(), any(Acceptable.class));
-        verify(terminationTriggerService, times(1)).triggerTermination(stack, true);
-        verify(terminationTriggerService, times(1)).triggerTermination(stack, false);
+        verify(reactor, times(count)).notify((Object) anyObject(), any(Event.class));
     }
 
     @Test
-    public void testClusterTerminationNotForced() {
+    public void testClusterTerminationOnlyNotSecuredCluster() {
         underTest.triggerClusterTermination(stack, false, USER_CRN);
 
-        verify(terminationTriggerService, times(1)).triggerTermination(stack, false);
+        verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
 
     @Test
-    public void testClusterTerminationForced() {
-        underTest.triggerClusterTermination(stack, true, USER_CRN);
+    public void testClusterTerminationOnlySecuredCluster() {
+        Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+        stack.setEnvironmentCrn("env");
+        when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
+        when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env", stack.getName())).thenReturn(true);
 
-        verify(terminationTriggerService, times(1)).triggerTermination(stack, true);
+        underTest.triggerClusterTermination(stack, false, USER_CRN);
+
+        verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
 
     @Test
-    public void testTriggerUpscaleWithoutClusterEvent() {
-        InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
-        instanceGroupAdjustment.setInstanceGroup("ig");
-        instanceGroupAdjustment.setScalingAdjustment(3);
+    public void testClusterTerminationNotSecuredClusterAndStack() {
+        underTest.triggerClusterTermination(stack, false, USER_CRN);
 
-        underTest.triggerStackUpscale(stack.getId(), instanceGroupAdjustment, false);
-
-        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
-        verify(reactorNotifier, times(1)).notify(eq(stack.getId()), eq(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT), captor.capture());
-        StackAndClusterUpscaleTriggerEvent event = (StackAndClusterUpscaleTriggerEvent) captor.getValue();
-        assertEquals(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.selector());
-        assertEquals(stack.getId(), event.getResourceId());
-        assertEquals(instanceGroupAdjustment.getInstanceGroup(), event.getInstanceGroup());
-        assertEquals(instanceGroupAdjustment.getScalingAdjustment(), event.getAdjustment());
-        assertEquals(ScalingType.UPSCALE_ONLY_STACK, event.getScalingType());
+        verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
 
     @Test
-    public void testTriggerUpscaleWithClusterEvent() {
-        InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
-        instanceGroupAdjustment.setInstanceGroup("ig");
-        instanceGroupAdjustment.setScalingAdjustment(3);
+    public void testClusterTerminationSecuredClusterAndStack() {
+        Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+        stack.setEnvironmentCrn("env");
+        when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
+        when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env", stack.getName())).thenReturn(true);
 
-        underTest.triggerStackUpscale(stack.getId(), instanceGroupAdjustment, true);
+        underTest.triggerClusterTermination(stack, false, USER_CRN);
 
-        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
-        verify(reactorNotifier, times(1)).notify(eq(stack.getId()), eq(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT), captor.capture());
-        StackAndClusterUpscaleTriggerEvent event = (StackAndClusterUpscaleTriggerEvent) captor.getValue();
-        assertEquals(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.selector());
-        assertEquals(stack.getId(), event.getResourceId());
-        assertEquals(instanceGroupAdjustment.getInstanceGroup(), event.getInstanceGroup());
-        assertEquals(instanceGroupAdjustment.getScalingAdjustment(), event.getAdjustment());
-        assertEquals(ScalingType.UPSCALE_TOGETHER, event.getScalingType());
+        verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
+    }
+
+    @Test
+    public void testClusterTerminationShouldTriggerStackTerminationWhenKerberosConfigCouldNotBeGot() {
+        Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+        stack.setEnvironmentCrn("env");
+        when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
+        when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env", stack.getName()))
+                .thenThrow(new CloudbreakServiceException("FreeIPA Internal server error...."));
+
+        underTest.triggerClusterTermination(stack, false, USER_CRN);
+
+        verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
+    }
+
+    @Test
+    public void testClusterUpscaleInMaintenanceMode() {
+        Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+        stack.getCluster().setStatus(Status.MAINTENANCE_MODE_ENABLED);
+        when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
+
+        InstanceGroupAdjustmentV4Request instGroupAdjustment = new InstanceGroupAdjustmentV4Request();
+        try {
+            underTest.triggerStackUpscale(1L, instGroupAdjustment, false);
+        } catch (CloudbreakApiException e) {
+            assertEquals("Operation not allowed in maintenance mode.", e.getMessage());
+        }
+
+        verify(reactor, never()).notify(eq(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT), any(Event.class));
     }
 
     @Test
@@ -196,25 +222,14 @@ public class ReactorFlowManagerTest {
         String imageCatalogName = "imageCatalogName";
         String imageCatalogUrl = "imageCatalogUrl";
         underTest.triggerStackImageUpdate(stackId, imageID, imageCatalogName, imageCatalogUrl);
-        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
-        verify(reactorNotifier).notify(eq(stackId), eq(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT), captor.capture());
-        StackImageUpdateTriggerEvent event = (StackImageUpdateTriggerEvent) captor.getValue();
-        assertEquals(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT, event.selector());
-        assertEquals(stack.getId(), event.getResourceId());
-        assertEquals(imageCatalogName, event.getImageCatalogName());
-        assertEquals(imageID, event.getNewImageId());
-        assertEquals(imageCatalogUrl, event.getImageCatalogUrl());
+        verify(reactor).notify(eq(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT), any(Event.class));
     }
 
     @Test
     public void testTriggerMaintenanceModeValidationFlow() {
         long stackId = 1L;
         underTest.triggerMaintenanceModeValidationFlow(stackId);
-        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
-        verify(reactorNotifier).notify(eq(stackId), eq(FlowChainTriggers.CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT), captor.capture());
-        MaintenanceModeValidationTriggerEvent event = (MaintenanceModeValidationTriggerEvent) captor.getValue();
-        assertEquals(stack.getId(), event.getResourceId());
-        assertEquals(FlowChainTriggers.CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT, event.selector());
+        verify(reactor).notify(eq(FlowChainTriggers.CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT), any(Event.class));
     }
 
     private static class TestAcceptable implements Acceptable {

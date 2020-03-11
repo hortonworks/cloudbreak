@@ -155,12 +155,11 @@ class EnvironmentCreationServiceTest {
     @Test
     void testCreate() {
         ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
-        String environmentCrn = "crn";
         final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withCreator(CRN)
                 .withAccountId(ACCOUNT_ID)
-                .withCrn(environmentCrn)
+                .withCrn("crn")
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(parametersDto)
                 .withLocation(LocationDto.builder()
@@ -192,7 +191,6 @@ class EnvironmentCreationServiceTest {
         verify(environmentService, times(2)).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
-        verify(virtualGroupService, times(1)).createVirtualGroups(anyString(), eq(environmentCrn));
         verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
     }
 
@@ -222,8 +220,6 @@ class EnvironmentCreationServiceTest {
         parentEnvironment.setName(ENVIRONMENT_NAME);
         parentEnvironment.setId(2L);
         parentEnvironment.setAccountId(ACCOUNT_ID);
-        String parentEnvironmentResourceCrn = "ParentEnvironmentResourceCrn";
-        parentEnvironment.setResourceCrn(parentEnvironmentResourceCrn);
 
         Credential credential = new Credential();
         credential.setCloudPlatform("platform");
@@ -248,7 +244,6 @@ class EnvironmentCreationServiceTest {
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
-        verify(virtualGroupService, times(1)).createVirtualGroups(anyString(), eq(parentEnvironmentResourceCrn));
         assertEquals(environmentArgumentCaptor.getValue().getParentEnvironment(), parentEnvironment);
     }
 

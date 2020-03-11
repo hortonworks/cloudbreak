@@ -78,7 +78,7 @@ public class AzureNetworkConnector implements NetworkConnector {
         Deployment templateDeployment;
         ResourceGroup resourceGroup;
         try {
-            Map<String, String> tags = Collections.unmodifiableMap(networkRequest.getTags());
+            Map<String, String> tags = Collections.emptyMap();
             resourceGroup = azureClient.createResourceGroup(envName, networkRequest.getRegion().value(), tags);
             templateDeployment = azureClient.createTemplateDeployment(resourceGroup.name(), networkRequest.getStackName(), template, "");
         } catch (CloudException e) {
