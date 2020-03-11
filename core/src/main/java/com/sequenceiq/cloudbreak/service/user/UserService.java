@@ -17,17 +17,18 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.auth.security.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.tenant.TenantService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.UserRepository;
@@ -50,6 +51,9 @@ public class UserService extends InternalUserModifier {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private UserPreferencesService userPreferencesService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -154,7 +158,13 @@ public class UserService extends InternalUserModifier {
                 }
                 user.setTenant(tenant);
 
-                return userRepository.save(user);
+                user = userRepository.save(user);
+
+                UserPreferences userPreferences = new UserPreferences(null, user);
+                userPreferences = userPreferencesService.save(userPreferences);
+                user.setUserPreferences(userPreferences);
+                user = userRepository.save(user);
+                return user;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
