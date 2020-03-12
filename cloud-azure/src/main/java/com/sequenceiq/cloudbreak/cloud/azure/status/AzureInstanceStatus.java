@@ -11,10 +11,8 @@ public class AzureInstanceStatus {
     public static InstanceStatus get(PowerState powerState) {
         if (PowerState.RUNNING.equals(powerState)) {
             return InstanceStatus.STARTED;
-        } else if (PowerState.STOPPED.equals(powerState)) {
-            return InstanceStatus.STOPPED;
         } else if (PowerState.DEALLOCATED.equals(powerState)) {
-            return InstanceStatus.TERMINATED;
+            return InstanceStatus.STOPPED;
         } else {
             return InstanceStatus.IN_PROGRESS;
         }

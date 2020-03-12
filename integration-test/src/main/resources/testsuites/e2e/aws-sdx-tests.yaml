@@ -1,5 +1,5 @@
-name: "sdx-repair-tests"
+name: "aws-sdx-tests"
 tests:
-  - name: "sdx e2e repair tests"
+  - name: "aws sdx e2e tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
