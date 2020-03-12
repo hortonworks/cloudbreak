@@ -1,5 +1,20 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -12,19 +27,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public abstract class AbstractRdsConfigProvider {
 
@@ -125,7 +127,7 @@ public abstract class AbstractRdsConfigProvider {
      * @param  stack   stack for naming purposes
      * @param  cluster cluster to associate database with
      * @param  dbName  database name
-     * @param  dbUser  database user
+     * @param  dbUserName  database user
      * @param  dbPort  port for database connections (through gateway)
      * @return         RDSConfig object for database
      */
@@ -134,8 +136,8 @@ public abstract class AbstractRdsConfigProvider {
         rdsConfig.setName(getRdsType().name() + '_' + stack.getName() + stack.getId());
         rdsConfig.setConnectionUserName(dbUserName);
         rdsConfig.setConnectionPassword(PasswordUtil.generatePassword());
-        String primaryGatewayIp = stack.getPrimaryGatewayInstance().getPrivateIp();
-        rdsConfig.setConnectionURL(String.format("jdbc:postgresql://%s:%s/%s", primaryGatewayIp, dbPort, dbName));
+        String databaseHost = stack.getPrimaryGatewayInstance().getDiscoveryFQDN();
+        rdsConfig.setConnectionURL(String.format("jdbc:postgresql://%s:%s/%s", databaseHost, dbPort, dbName));
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         rdsConfig.setType(getRdsType().name());
         rdsConfig.setConnectionDriver(DatabaseVendor.POSTGRES.connectionDriver());
