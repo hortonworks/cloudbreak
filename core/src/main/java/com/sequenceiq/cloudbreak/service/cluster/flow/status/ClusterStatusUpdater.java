@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @Component
 public class ClusterStatusUpdater {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterStatusUpdater.class);
 
     @Inject
@@ -50,7 +51,7 @@ public class ClusterStatusUpdater {
             String blueprintName = cluster.getBlueprint().getStackName();
             ClusterStatusResult clusterStatusResult =
                     clusterApiConnectors.getConnector(stack).clusterStatusService().getStatus(StringUtils.isNotBlank(blueprintName));
-            LOGGER.debug("Ambari cluster status: [{}] Status reason: [{}]", clusterStatusResult.getClusterStatus(), clusterStatusResult.getStatusReason());
+            LOGGER.debug("Cluster status: [{}] Status reason: [{}]", clusterStatusResult.getClusterStatus(), clusterStatusResult.getStatusReason());
             updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatusResult);
         }
     }

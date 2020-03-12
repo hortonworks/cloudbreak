@@ -6,11 +6,11 @@ import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
-abstract class AbstractCmConfigService {
+interface CmConfigServiceDelegate {
 
-    abstract void setConfigs(Stack stack, ApiRoleList apiRoleList);
+    void setConfigs(Stack stack, ApiRoleList apiRoleList);
 
-    protected void setConfig(ApiRole apiRole, ApiConfig apiConfig) {
+    default void addConfig(ApiRole apiRole, ApiConfig apiConfig) {
         if (apiRole.getConfig() == null || apiRole.getConfig().getItems() == null) {
             ApiConfigList apiConfigList = new ApiConfigList();
             apiConfigList.addItemsItem(apiConfig);

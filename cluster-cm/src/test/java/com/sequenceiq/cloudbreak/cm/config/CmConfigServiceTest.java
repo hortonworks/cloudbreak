@@ -17,10 +17,10 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 class CmConfigServiceTest {
 
     @Mock
-    private AbstractCmConfigService service1;
+    private CmConfigServiceDelegate service1;
 
     @Mock
-    private AbstractCmConfigService service2;
+    private CmConfigServiceDelegate service2;
 
     private CmConfigService underTest;
 

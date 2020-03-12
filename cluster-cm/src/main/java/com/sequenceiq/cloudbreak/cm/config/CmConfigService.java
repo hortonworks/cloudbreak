@@ -10,13 +10,13 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 @Service
 public class CmConfigService {
 
-    private List<AbstractCmConfigService> configServices;
+    private List<CmConfigServiceDelegate> delegates;
 
-    public CmConfigService(List<AbstractCmConfigService> configServices) {
-        this.configServices = configServices;
+    public CmConfigService(List<CmConfigServiceDelegate> delegates) {
+        this.delegates = delegates;
     }
 
     public void setConfigs(Stack stack, ApiRoleList apiRoleList) {
-        configServices.forEach(configService -> configService.setConfigs(stack, apiRoleList));
+        delegates.forEach(configService -> configService.setConfigs(stack, apiRoleList));
     }
 }
