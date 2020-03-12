@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -218,9 +217,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             }
             installCluster(cluster, apiClusterTemplate, clouderaManagerResourceApi, prewarmed);
             clouderaManagerMgmtLaunchService.startManagementServices(stack, apiClient);
-            if (CloudPlatform.YARN.equalsIgnoreCase(stack.getCloudPlatform())) {
-                clouderaManagerYarnSetupService.suppressWarnings(stack, apiClient);
-            }
+            clouderaManagerYarnSetupService.suppressWarnings(stack, apiClient);
             configureKerberos(kerberosConfig, clouderaManagerRepoDetails);
             clouderaManagerConfigService.setCdpEnvironmentIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_0_2, apiClient, clientConfig);
         } catch (CancellationException cancellationException) {

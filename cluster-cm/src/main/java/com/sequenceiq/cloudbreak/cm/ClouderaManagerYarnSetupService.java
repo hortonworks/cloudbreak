@@ -19,6 +19,7 @@ import com.cloudera.api.swagger.model.ApiRoleList;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Service
@@ -26,25 +27,28 @@ public class ClouderaManagerYarnSetupService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerYarnSetupService.class);
 
-    private static final List<String> YARN_ALL_HOSTS_SUPPRESSION_NAMES = List.of("host_memswap_thresholds", "host_clock_offset_thresholds");
+    private static final List<String> ALL_HOSTS_SUPPRESSION_NAMES = List.of("host_memswap_thresholds", "host_clock_offset_thresholds");
 
-    private static final List<String> YARN_SERVICE_ROLE_SUPPRESSION_NAMES = List.of("process_swap_memory_thresholds");
+    private static final List<String> SERVICE_ROLE_SUPPRESSION_NAMES = List.of("process_swap_memory_thresholds");
 
-    private static final String YARN_SUPPRESSION_VALUE = "{\"critical\":\"never\",\"warning\":\"never\"}";
+    private static final String SUPPRESSION_VALUE = "{\"critical\":\"never\",\"warning\":\"never\"}";
 
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
-    public void suppressWarnings(Stack stack, ApiClient apiClient) {
+    void suppressWarnings(Stack stack, ApiClient apiClient) {
+        if (!CloudPlatform.YARN.equalsIgnoreCase(stack.getCloudPlatform())) {
+            return;
+        }
         try {
             long start = System.currentTimeMillis();
 
-            ApiConfigList allHostsApiConfigList = getSuppressionApiConfigList(YARN_ALL_HOSTS_SUPPRESSION_NAMES);
+            ApiConfigList allHostsApiConfigList = getSuppressionApiConfigList(ALL_HOSTS_SUPPRESSION_NAMES);
             clouderaManagerApiFactory.getAllHostsResourceApi(apiClient)
                     .updateConfig("Suppress Yarn warnings for all hosts", allHostsApiConfigList);
 
             String clusterName = stack.getCluster().getName();
-            ApiConfigList serviceRoleApiConfigList = getSuppressionApiConfigList(YARN_SERVICE_ROLE_SUPPRESSION_NAMES);
+            ApiConfigList serviceRoleApiConfigList = getSuppressionApiConfigList(SERVICE_ROLE_SUPPRESSION_NAMES);
             RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(apiClient);
             ApiServiceList apiServiceList = clouderaManagerApiFactory.getServicesResourceApi(apiClient)
                     .readServices(clusterName, null);
@@ -79,7 +83,7 @@ public class ClouderaManagerYarnSetupService {
         suppressionNames.forEach(suppression -> {
             ApiConfig apiConfig = new ApiConfig();
             apiConfig.setName(suppression);
-            apiConfig.setValue(YARN_SUPPRESSION_VALUE);
+            apiConfig.setValue(SUPPRESSION_VALUE);
             apiConfig.setSensitive(false);
 
             apiConfigList.addItemsItem(apiConfig);

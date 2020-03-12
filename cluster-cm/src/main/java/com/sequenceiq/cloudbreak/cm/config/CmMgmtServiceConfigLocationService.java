@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cm.config;
 
-import static com.sequenceiq.cloudbreak.cm.util.ConfigUtils.addConfig;
-
 import java.util.List;
 import java.util.Optional;
 
