@@ -178,8 +178,9 @@ public class ProvisionerService {
                                     LOGGER.info("Cluster creation failed {}", stackV4Response.getCluster().getName());
                                     return sdxCreationFailed(sdxCluster, stackV4Response.getCluster().getStatusReason());
                                 } else {
-                                    if (FINISHED.equals(flowState))  {
-                                        LOGGER.info("Stack is in improper state: {}", stackV4Response.getCluster().getName());
+                                    if (FINISHED.equals(flowState)) {
+                                        LOGGER.warn("Stack is in improper state! FlowState: {}, stackV4Response: {}",
+                                                flowState, JsonUtil.writeValueAsStringSilent(stackV4Response));
                                         return sdxCreationFailed(sdxCluster, "cluster is not in proper state");
                                     } else {
                                         return AttemptResults.justContinue();
