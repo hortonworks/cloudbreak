@@ -119,7 +119,6 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "WHERE s.resourceCrn = :crn")
     Optional<StackClusterStatusView> getStatusByCrn(@Param("crn") String crn);
 
-    @CheckPermissionsByReturnValue
     @Query("SELECT s.id as id, "
             + "s.name as name, "
             + "s.gatewayPort as gatewayPort, "
