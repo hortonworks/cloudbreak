@@ -214,6 +214,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getId()).thenReturn(STACK_ID);
         when(cluster.getId()).thenReturn(CLUSTER_ID);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         return stack;
     }
 
@@ -266,7 +267,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
             if (!failedCoreNodes.isEmpty()) {
                 failedNodes.put("hostGroup-core", failedCoreNodes);
             }
-            return new ClusterRepairTriggerEvent(stack, failedNodes, false);
+            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, false);
         }
     }
 }

@@ -106,14 +106,14 @@ public class ClouderaManagerClusterStatusServiceTest {
     public void detectsStoppedClouderaManager() throws ApiException {
         cmIsNotReachable();
 
-        assertEquals(ClusterStatus.AMBARISERVER_NOT_RUNNING, subject.getStatus(true).getClusterStatus());
+        assertEquals(ClusterStatus.CLUSTERMANAGER_NOT_RUNNING, subject.getStatus(true).getClusterStatus());
     }
 
     @Test
     public void reportsClouderaManagerRunningWhenClusterNotPresent() throws ApiException {
         cmIsReachable();
 
-        assertEquals(ClusterStatus.AMBARISERVER_RUNNING, subject.getStatus(false).getClusterStatus());
+        assertEquals(ClusterStatus.CLUSTERMANAGER_RUNNING, subject.getStatus(false).getClusterStatus());
     }
 
     @Test

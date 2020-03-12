@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
-import com.sequenceiq.cloudbreak.service.upgrade.StackUpgradeService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
@@ -91,7 +91,7 @@ public class StackOperations implements ResourceBasedCrnProvider {
     private UpgradeService upgradeService;
 
     @Inject
-    private StackUpgradeService stackUpgradeService;
+    private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -186,32 +186,39 @@ public class StackOperations implements ResourceBasedCrnProvider {
         return stackCommonService.repairCluster(workspaceId, nameOrCrn, clusterRepairRequest);
     }
 
-    public FlowIdentifier upgradeCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+    public FlowIdentifier upgradeClusterOs(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        LOGGER.debug("Starting to upgrade OS: " + nameOrCrn);
         if (nameOrCrn.hasName()) {
-            return upgradeService.upgradeByStackName(workspaceId, nameOrCrn.getName());
+            return upgradeService.upgradeOsByStackName(workspaceId, nameOrCrn.getName());
         } else {
             LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
             throw new BadRequestException("Please provide a stack name for upgrade");
         }
     }
 
-    public UpgradeOptionV4Response checkForUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+    public UpgradeOptionV4Response checkForOsUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         if (nameOrCrn.hasName()) {
-            return upgradeService.getUpgradeOptionByStackNameOrCrn(workspaceId, nameOrCrn, user);
+            return upgradeService.getUpgradeOsOptionByStackNameOrCrn(workspaceId, nameOrCrn, user);
         } else {
             LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
             throw new BadRequestException("Please provide a stack name for upgrade");
         }
     }
 
-    public void upgradeStack(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String imageId) {
-        LOGGER.debug("Staring to upgrade cluster: " + nameOrCrn);
+    public FlowIdentifier upgradeCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String imageId) {
+        LOGGER.debug("Starting to upgrade cluster: " + nameOrCrn);
+        if (nameOrCrn.hasName()) {
+            return upgradeService.upgradeCluster(workspaceId, nameOrCrn.getName(), imageId);
+        } else {
+            LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
+            throw new BadRequestException("Please provide a stack name for upgrade");
+        }
     }
 
-    public UpgradeOptionsV4Response checkForStackUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+    public UpgradeOptionsV4Response checkForClusterUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         if (nameOrCrn.hasName()) {
-            return stackUpgradeService.checkForUpgradesByName(workspaceId, nameOrCrn.getName());
+            return clusterUpgradeAvailabilityService.checkForUpgradesByName(workspaceId, nameOrCrn.getName());
         } else {
             LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
             throw new BadRequestException("Please provide a stack name for upgrade");

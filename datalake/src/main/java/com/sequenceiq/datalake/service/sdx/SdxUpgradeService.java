@@ -110,7 +110,7 @@ public class SdxUpgradeService {
             StackV4Response stackV4Response = stackV4Endpoint.get(0L, cluster.get().getClusterName(), Set.of());
             return stackV4Response.getImage().getId();
         } else {
-            throw new NotFoundException("Not found cluster with id" + id);
+            throw new NotFoundException("Cluster not found with id" + id);
         }
     }
 
@@ -124,7 +124,7 @@ public class SdxUpgradeService {
             FlowIdentifier flowIdentifier = stackV4Endpoint.upgradeCluster(0L, cluster.get().getClusterName());
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster.get(), flowIdentifier);
         } else {
-            throw new NotFoundException("Not found cluster with id" + id);
+            throw new NotFoundException("Cluster not found with id" + id);
         }
     }
 

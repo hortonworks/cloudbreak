@@ -160,7 +160,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private boolean isClusterManagerRunning(Stack stack, ClusterApi connector) {
         return !stack.isStopped()
                 && !stack.isStackInDeletionOrFailedPhase()
-                && !queryClusterStatus(connector).getClusterStatus().equals(ClusterStatus.AMBARISERVER_NOT_RUNNING);
+                && !queryClusterStatus(connector).getClusterStatus().equals(ClusterStatus.CLUSTERMANAGER_NOT_RUNNING);
     }
 
     private void syncInstances(Stack stack, Collection<InstanceMetaData> instanceMetaData, InstanceSyncState defaultState) {

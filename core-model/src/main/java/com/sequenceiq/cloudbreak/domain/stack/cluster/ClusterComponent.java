@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster;
 
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -14,6 +16,9 @@ import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.SequenceGenerator;
 
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -23,6 +28,8 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
         attributeNodes = @NamedAttributeNode(value = "cluster", subgraph = "rdsConfig"),
         subgraphs = @NamedSubgraph(name = "rdsConfig", attributeNodes = @NamedAttributeNode("rdsConfigs")))
 @Entity
+@Audited
+@AuditTable("component_history")
 public class ClusterComponent implements ProvisionEntity {
 
     @Id
@@ -41,6 +48,7 @@ public class ClusterComponent implements ProvisionEntity {
     private Json attributes;
 
     @ManyToOne
+    @Audited(targetAuditMode = NOT_AUDITED)
     private Cluster cluster;
 
     public ClusterComponent() {

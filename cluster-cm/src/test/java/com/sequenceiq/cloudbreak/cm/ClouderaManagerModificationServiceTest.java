@@ -11,7 +11,10 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +30,7 @@ import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
+import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -45,10 +49,13 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.cm.util.TestUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
@@ -97,16 +104,22 @@ class ClouderaManagerModificationServiceTest {
     private ClouderaManagerResourceApi clouderaManagerResourceApi;
 
     @Mock
+    private ServicesResourceApi servicesResourceApi;
+
+    @Mock
+    private ParcelResourceApi parcelResourceApi;
+
+    @Mock
     private ClusterComponentConfigProvider clusterComponentProvider;
 
     @Mock
     private ClouderaManagerRepo clouderaManagerRepo;
 
     @Mock
-    private ServicesResourceApi servicesResourceApi;
+    private ClouderaManagerRoleRefreshService clouderaManagerRoleRefreshService;
 
     @Mock
-    private ClouderaManagerRoleRefreshService clouderaManagerRoleRefreshService;
+    private ApiClient client;
 
     private Cluster cluster;
 
@@ -256,6 +269,37 @@ class ClouderaManagerModificationServiceTest {
 
         assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
+    }
+
+    @Test
+    void testUpgradeClusterComponentIsNotPresent() {
+        Set<ClusterComponent> clusterComponents = TestUtil.clusterComponentSet(cluster);
+        Set<ClusterComponent> clusterComponentsNoCDH
+                = clusterComponents.stream().filter(clusterComponent -> !clusterComponent.getName().equals("CDH")).collect(Collectors.toSet());
+
+        cluster.setComponents(clusterComponentsNoCDH);
+        NotFoundException exception = assertThrows(NotFoundException.class,() -> underTest.upgradeClusterRuntime(clusterComponentsNoCDH));
+        Assertions.assertEquals("Runtime component not found!", exception.getMessage());
+    }
+
+
+    @Test
+    void testUpgradeCluster() throws CloudbreakException, ApiException {
+        TestUtil.clusterComponents(cluster);
+
+//        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
+//        when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
+//        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+//        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+//
+//        BigDecimal startDownloadCommandId = new BigDecimal(200);
+//        when(parcelResourceApi.startDownloadCommand(eq(stack.getName()), eq(TestUtil.CDH), eq(TestUtil.CDH_VERSION))).thenReturn(new ApiCommand().id(startDownloadCommandId));
+//        PollingResult applyTemplatePollingResult = PollingResult.SUCCESS;
+//        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDownload(eq(stack), eq(apiClientMock), eq(startDownloadCommandId), any(ParcelResource.class)))
+//                .thenReturn(applyTemplatePollingResult);
+//        underTest.upgradeClusterRuntime(cluster.getComponents());
+//
+//        verify(parcelResourceApi, times(1)).startDownloadCommand(cluster.getName(), "CDH", TestUtil.CDH_VERSION);
     }
 
     @Test

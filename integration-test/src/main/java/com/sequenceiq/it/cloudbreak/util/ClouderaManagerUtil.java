@@ -79,7 +79,7 @@ public class ClouderaManagerUtil {
                 throw new TestFailException("Requested user details are not valid " + userDetails);
             }
         } catch (Exception e) {
-            LOGGER.error("Can't get users' list at: %s or test user is not valid with %s", cmClient.getBasePath(), userDetails);
+            LOGGER.error(String.format("Can't get users' list at: %s or test user is not valid with %s", cmClient.getBasePath(), userDetails));
             throw new TestFailException("Can't get users' list at: " + cmClient.getBasePath() + " or test user is not valid with " + userDetails);
         }
         return stackTestDto;

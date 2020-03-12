@@ -71,7 +71,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private RepairConfig createRepairConfig(ClusterRepairTriggerEvent event) {
         RepairConfig repairConfig = new RepairConfig();
-        Stack stack = event.getStack();
+        Stack stack = stackService.getByIdWithListsInTransaction(event.getStackId());
         for (Entry<String, List<String>> failedNodes : event.getFailedNodesMap().entrySet()) {
             String hostGroupName = failedNodes.getKey();
             List<String> hostNames = failedNodes.getValue();
@@ -102,7 +102,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             Repair repair = repairConfig.getSinglePrimaryGateway().get();
             flowTriggers.add(stackDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
             flowTriggers.add(fullUpscaleEvent(event, repair.getHostGroupName(), repair.getHostNames(), true,
-                    isKerberosSecured(event.getStack())));
+                    isKerberosSecured(event.getStackId())));
         } else if (repairConfig.isChangePGW()) {
             flowTriggers.add(changePrimaryGatewayEvent(event));
         }
@@ -121,13 +121,14 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private StackDownscaleTriggerEvent stackDownscaleEvent(ClusterRepairTriggerEvent event, String groupName, List<String> hostNames) {
-        Stack stack = event.getStack();
+        Stack stack = stackService.getByIdWithListsInTransaction(event.getStackId());
         Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), new HashSet<>(hostNames));
         return new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), groupName, privateIdsForHostNames, event.accepted());
     }
 
     private ClusterAndStackDownscaleTriggerEvent fullDownscaleEvent(ClusterRepairTriggerEvent event, String hostGroupName, List<String> hostNames) {
-        Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(event.getStack().getInstanceMetaDataAsList(), hostNames);
+        Stack stack = stackService.getByIdWithListsInTransaction(event.getStackId());
+        Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), hostNames);
         return new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(),
                 hostGroupName, Sets.newHashSet(privateIdsForHostNames), ScalingType.DOWNSCALE_TOGETHER, event.accepted(),
                 new ClusterDownscaleDetails(true, true));
@@ -150,7 +151,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private StackAndClusterUpscaleTriggerEvent fullUpscaleEvent(ClusterRepairTriggerEvent event, String hostGroupName, List<String> hostNames,
                                                                 boolean singlePrimaryGateway, boolean kerberosSecured) {
-        Stack stack = event.getStack();
+        Stack stack = stackService.getByIdWithListsInTransaction(event.getStackId());
         boolean singleNodeCluster = clusterService.isSingleNode(stack);
         ClusterManagerType cmType = ClusterManagerType.CLOUDERA_MANAGER;
         return new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(), hostGroupName,
@@ -158,7 +159,8 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 kerberosSecured, event.accepted(), singleNodeCluster, cmType);
     }
 
-    private boolean isKerberosSecured(Stack stack) {
+    private boolean isKerberosSecured(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         return kerberosConfigService.isKerberosConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName());
     }
 

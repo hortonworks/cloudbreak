@@ -37,6 +37,8 @@ public class FlowChainTriggers {
 
     public static final String RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT = "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT";
 
+    public static final String DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT = "DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

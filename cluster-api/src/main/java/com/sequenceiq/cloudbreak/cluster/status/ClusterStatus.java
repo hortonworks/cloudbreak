@@ -6,8 +6,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 
 public enum ClusterStatus {
     UNKNOWN(null, null, "Error happened during the communication with the Cluster Manager"),
-    AMBARISERVER_NOT_RUNNING(null, null, "The Cluster Manager server is not running."),
-    AMBARISERVER_RUNNING(Status.AVAILABLE, null, "The Cluster Manager server is running."),
+    CLUSTERMANAGER_NOT_RUNNING(null, null, "The Cluster Manager server is not running."),
+    CLUSTERMANAGER_RUNNING(Status.AVAILABLE, null, "The Cluster Manager server is running."),
     INSTALLING(Status.AVAILABLE, null, "The Cluster Manager server is running, services are being installed... [%s]"),
     INSTALLED(Status.AVAILABLE, Status.STOPPED, "Services are installed but not running."),
     INSTALL_FAILED(Status.AVAILABLE, null, "The Cluster Manager server is running, but service installation has failed. [%s]"),

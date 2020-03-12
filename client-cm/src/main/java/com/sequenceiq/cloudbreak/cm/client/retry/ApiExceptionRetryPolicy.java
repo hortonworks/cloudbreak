@@ -13,7 +13,7 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiExceptionRetryPolicy.class);
 
-    private static final int RETRY_LIMIT = 5;
+    private static final int RETRY_LIMIT = 15;
 
     @Override
     public boolean canRetry(RetryContext context) {
@@ -24,7 +24,14 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
         if (lastThrowable instanceof ApiException) {
             if (context.getRetryCount() <= RETRY_LIMIT) {
                 int code = ApiException.class.cast(lastThrowable).getCode();
-                return code == HttpStatus.INTERNAL_SERVER_ERROR.value();
+                HttpStatus httpStatus = HttpStatus.valueOf(code);
+                boolean httpStatus5xxServerError = httpStatus.is5xxServerError();
+                LOGGER.warn("{} Exception occurred during CM API call, retryable: {} ({}/{})",
+                        code,
+                        httpStatus5xxServerError,
+                        context.getRetryCount(),
+                        RETRY_LIMIT);
+                return httpStatus5xxServerError;
             } else {
                 return false;
             }
