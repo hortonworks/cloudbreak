@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrche
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
-import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
@@ -243,10 +242,6 @@ public class StackService implements ResourceIdProvider {
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
-    }
-
-    public StackClusterStatusView getStatusByCrn(String crn) {
-        return stackRepository.getStatusByCrn(crn).orElseThrow(notFound("stack", crn));
     }
 
     @PreAuthorize("hasRole('AUTOSCALE')")
