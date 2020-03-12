@@ -45,6 +45,7 @@ public class ResourceNamePermissionChecker implements PermissionChecker<CheckPer
         String resourceName = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, ResourceName.class, String.class);
         String resourceCrn = resourceBasedCrnProviderMap.get(resourceType).getResourceCrnByResourceName(resourceName);
         AuthorizationResourceAction action = methodAnnotation.action();
+        checkActionType(resourceType, action);
         commonPermissionCheckingUtils.checkPermissionForUserOnResource(resourceType, action, userCrn, resourceCrn);
         return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
@@ -52,5 +53,10 @@ public class ResourceNamePermissionChecker implements PermissionChecker<CheckPer
     @Override
     public Class<CheckPermissionByResourceName> supportedAnnotation() {
         return CheckPermissionByResourceName.class;
+    }
+
+    @Override
+    public AuthorizationResourceAction.ActionType actionType() {
+        return AuthorizationResourceAction.ActionType.RESOURCE_DEPENDENT;
     }
 }

@@ -53,4 +53,9 @@ public class EnvironmentNamePermissionChecker implements PermissionChecker<Check
     public Class<CheckPermissionByEnvironmentName> supportedAnnotation() {
         return CheckPermissionByEnvironmentName.class;
     }
+
+    @Override
+    public AuthorizationResourceAction.ActionType actionType() {
+        return AuthorizationResourceAction.ActionType.RESOURCE_DEPENDENT;
+    }
 }

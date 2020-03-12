@@ -30,7 +30,7 @@ public class InternalCrnModifier {
         String userCrnString = ThreadBasedUserCrnProvider.getUserCrn();
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
         if (userCrnString != null && InternalCrnBuilder.isInternalCrn(userCrnString)) {
-            Optional<Object> resourceCrn = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class);
+            Optional<Object> resourceCrn = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, TenantAwareParam.class);
             if (resourceCrn.isPresent() && resourceCrn.get() instanceof String
                     && Crn.isCrn((String) resourceCrn.get())) {
                 String accountId = Crn.fromString((String) resourceCrn.get()).getAccountId();

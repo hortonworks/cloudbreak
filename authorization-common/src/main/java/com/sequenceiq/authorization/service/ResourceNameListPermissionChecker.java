@@ -48,6 +48,7 @@ public class ResourceNameListPermissionChecker implements PermissionChecker<Chec
                 .getParameter(proceedingJoinPoint, methodSignature, ResourceNameList.class, Collection.class);
         List<String> resourceCrnList = resourceBasedCrnProviderMap.get(resourceType).getResourceCrnListByResourceNameList(Lists.newArrayList(resourceNames));
         AuthorizationResourceAction action = methodAnnotation.action();
+        checkActionType(resourceType, action);
         commonPermissionCheckingUtils.checkPermissionForUserOnResources(resourceType, action, userCrn, resourceCrnList);
         return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
@@ -55,5 +56,10 @@ public class ResourceNameListPermissionChecker implements PermissionChecker<Chec
     @Override
     public Class<CheckPermissionByResourceNameList> supportedAnnotation() {
         return CheckPermissionByResourceNameList.class;
+    }
+
+    @Override
+    public AuthorizationResourceAction.ActionType actionType() {
+        return AuthorizationResourceAction.ActionType.RESOURCE_DEPENDENT;
     }
 }

@@ -31,6 +31,7 @@ public class ResourceCrnListPermissionChecker implements PermissionChecker<Check
         Collection<String> resourceCrns = commonPermissionCheckingUtils
                 .getParameter(proceedingJoinPoint, methodSignature, ResourceCrnList.class, Collection.class);
         AuthorizationResourceAction action = methodAnnotation.action();
+        checkActionType(resourceType, action);
         commonPermissionCheckingUtils.checkPermissionForUserOnResources(resourceType, action, userCrn, resourceCrns);
         return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
@@ -38,5 +39,10 @@ public class ResourceCrnListPermissionChecker implements PermissionChecker<Check
     @Override
     public Class<CheckPermissionByResourceCrnList> supportedAnnotation() {
         return CheckPermissionByResourceCrnList.class;
+    }
+
+    @Override
+    public AuthorizationResourceAction.ActionType actionType() {
+        return AuthorizationResourceAction.ActionType.RESOURCE_DEPENDENT;
     }
 }

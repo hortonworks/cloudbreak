@@ -14,9 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Joiner;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.RightUtils;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -31,9 +33,7 @@ public class UmsAuthorizationService {
 
     public void checkRightOfUser(String userCrn, AuthorizationResourceType resourceType, AuthorizationResourceAction action) {
         String right = RightUtils.getRight(resourceType, action);
-        String unauthorizedMessage = String.format("You have no right to perform %s. This requires one of these roles: %s. "
-                        + "You can request access through IAM service from an administrator.",
-                right, "PowerUser");
+        String unauthorizedMessage = String.format("You have no right to perform %s in account %s.", right, Crn.fromString(userCrn).getAccountId());
         checkRightOfUser(userCrn, resourceType, action, unauthorizedMessage);
     }
 
@@ -63,18 +63,14 @@ public class UmsAuthorizationService {
     public void checkRightOfUserOnResource(String userCrn, AuthorizationResourceType resource,
             AuthorizationResourceAction action, String resourceCrn) {
         String right = RightUtils.getRight(resource, action);
-        String unauthorizedMessage = String.format("You have no right to perform %s. This requires one of these roles: %s. "
-                        + "You can request access through IAM service from an administrator.",
-                right, "PowerUser");
+        String unauthorizedMessage = String.format("You have no right to perform %s on resource %s.", right, resourceCrn);
         checkRightOfUserOnResource(userCrn, resource, action, resourceCrn, unauthorizedMessage);
     }
 
     public void checkRightOfUserOnResources(String userCrn, AuthorizationResourceType resource,
             AuthorizationResourceAction action, Collection<String> resourceCrns) {
         String right = RightUtils.getRight(resource, action);
-        String unauthorizedMessage = String.format("You have no right to perform %s. This requires one of these roles: %s. "
-                        + "You can request access through IAM service from an administrator.",
-                right, "PowerUser");
+        String unauthorizedMessage = String.format("You have no right to perform %s on resources [%s]", right, Joiner.on(",").join(resourceCrns));
         checkRightOfUserOnResources(userCrn, resource, action, resourceCrns, unauthorizedMessage);
     }
 

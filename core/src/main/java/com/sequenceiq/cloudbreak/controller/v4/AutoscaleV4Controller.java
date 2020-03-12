@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
-import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
@@ -69,13 +69,13 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     private ClusterProxyService clusterProxyService;
 
     @Override
-    public void putStack(@ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
+    public void putStack(@TenantAwareParam String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
         setupIdentityForAutoscale(crn, userId);
         stackCommonService.putInDefaultWorkspace(crn, updateRequest);
     }
 
     @Override
-    public void putCluster(@ResourceCrn String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
+    public void putCluster(@TenantAwareParam String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
         setupIdentityForAutoscale(crn, userId);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
@@ -99,7 +99,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    public StackStatusV4Response getStatusByCrn(@ResourceCrn String crn) {
+    public StackStatusV4Response getStatusByCrn(@TenantAwareParam String crn) {
         return stackOperations.getStatus(crn);
     }
 
@@ -118,7 +118,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    public CertificateV4Response getCertificate(@ResourceCrn String crn) {
+    public CertificateV4Response getCertificate(@TenantAwareParam String crn) {
         return stackCommonService.getCertificate(crn);
     }
 

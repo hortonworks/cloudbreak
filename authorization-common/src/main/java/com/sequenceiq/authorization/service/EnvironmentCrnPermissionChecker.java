@@ -53,4 +53,9 @@ public class EnvironmentCrnPermissionChecker implements PermissionChecker<CheckP
     public Class<CheckPermissionByEnvironmentCrn> supportedAnnotation() {
         return CheckPermissionByEnvironmentCrn.class;
     }
+
+    @Override
+    public AuthorizationResourceAction.ActionType actionType() {
+        return AuthorizationResourceAction.ActionType.RESOURCE_DEPENDENT;
+    }
 }

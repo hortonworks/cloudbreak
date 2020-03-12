@@ -13,7 +13,7 @@ import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
-import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
@@ -39,7 +39,8 @@ public class KerberosConfigV1Controller extends NotificationController implement
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public DescribeKerberosConfigResponse getForCluster(@NotEmpty @ResourceCrn String environmentCrn, @NotEmpty String clusterName) throws Exception {
+    public DescribeKerberosConfigResponse getForCluster(@NotEmpty @TenantAwareParam String environmentCrn,
+            @NotEmpty String clusterName) throws Exception {
         String accountId = crnService.getCurrentAccountId();
         return kerberosConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
     }

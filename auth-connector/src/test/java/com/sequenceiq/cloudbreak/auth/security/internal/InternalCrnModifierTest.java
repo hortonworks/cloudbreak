@@ -94,7 +94,7 @@ public class InternalCrnModifierTest {
 
     @Test
     public void testModificationIfUserCrnIsInternalButThereIsNoResourceCrnParameter() {
-        when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());
+        when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.empty());
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
         when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
@@ -113,7 +113,7 @@ public class InternalCrnModifierTest {
 
     @Test
     public void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotString() {
-        when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of(2));
+        when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of(2));
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
         when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
@@ -132,7 +132,7 @@ public class InternalCrnModifierTest {
 
     @Test
     public void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotCrn() {
-        when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of("not_crn"));
+        when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of("not_crn"));
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
         when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
@@ -151,7 +151,7 @@ public class InternalCrnModifierTest {
 
     @Test
     public void testModificationIfUserCrnIsInternal() {
-        when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.of(STACK_CRN));
+        when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of(STACK_CRN));
         doNothing().when(internalUserModifier).persistModifiedInternalUser(any());
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
