@@ -94,10 +94,7 @@ public class TerminationService {
         try {
             freeIpaCleanupService.cleanup(stack, false, null, null);
         } catch (Exception e) {
-            LOGGER.error("Failed to cleanup", e);
-            if (!forcedTermination) {
-                throw e;
-            }
+            LOGGER.warn("FreeIPA cleanup has failed during termination finalization, ignoring error", e);
         }
     }
 
