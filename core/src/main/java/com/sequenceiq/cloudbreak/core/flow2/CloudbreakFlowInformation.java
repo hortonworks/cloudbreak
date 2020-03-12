@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTrigge
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -46,6 +47,7 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
     private static final List<String> ALLOWED_PARALLEL_FLOWS = List.of(
             ClusterTerminationEvent.TERMINATION_EVENT.event(),
             ExternalDatabaseTerminationEvent.START_EXTERNAL_DATABASE_TERMINATION_EVENT.event(),
+            StackTerminationEvent.TERMINATION_EVENT.event(),
             ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event());
 
     private static final List<Class<? extends FlowConfiguration<?>>> RESTARTABLE_FLOWS = Arrays.asList(
