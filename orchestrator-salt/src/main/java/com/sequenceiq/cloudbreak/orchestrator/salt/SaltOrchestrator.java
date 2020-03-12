@@ -510,8 +510,30 @@ public class SaltOrchestrator implements HostOrchestrator {
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
     public void upgradeClusterManager(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltConfig pillarConfig,
-            ExitCriteriaModel exitCriteriaModel) {
-        LOGGER.debug("Upgrade of cluster manager is not implemented, yet");
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
+            for (Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
+                OrchestratorBootstrap pillarSave = new PillarSave(sc, Sets.newHashSet(gatewayConfig.getPrivateAddress()), propertiesEntry.getValue());
+                Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitCriteriaModel);
+                saltPillarRunner.call();
+            }
+
+            // add 'manager_upgrade' role to all nodes
+            Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "roles", "manager_upgrade"),
+                    exitCriteriaModel, exitCriteria);
+
+            Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+            saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, exitCriteria);
+            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, true);
+
+            // remove 'manager_upgrade' role from all nodes
+            saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "roles", "manager_upgrade"),
+                    exitCriteriaModel, exitCriteria);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during Cloudera Manager upgrade", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
     }
 
     @Override

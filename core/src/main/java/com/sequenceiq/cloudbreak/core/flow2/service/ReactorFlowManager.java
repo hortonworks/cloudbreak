@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTrigge
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DatalakeClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTr
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -160,6 +162,11 @@ public class ReactorFlowManager {
         reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
+    public FlowIdentifier triggerDatalakeClusterUpgrade(Long stackId, StatedImage targetImage) {
+        String selector = FlowChainTriggers.DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, new DatalakeClusterUpgradeTriggerEvent(selector, stackId, targetImage));
+    }
+
     public FlowIdentifier triggerClusterCredentialReplace(Long stackId, String userName, String password) {
         String selector = CLUSTER_CREDENTIALCHANGE_EVENT.event();
         ClusterCredentialChangeTriggerEvent event = ClusterCredentialChangeTriggerEvent.replaceUserEvent(selector, stackId, userName, password);
@@ -230,7 +237,7 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, boolean removeOnly) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stack, failedNodesMap, removeOnly));
+                new ClusterRepairTriggerEvent(stack.getId(), failedNodesMap, removeOnly));
     }
 
     public FlowIdentifier triggerStackImageUpdate(Long stackId, String newImageId, String imageCatalogName, String imageCatalogUrl) {

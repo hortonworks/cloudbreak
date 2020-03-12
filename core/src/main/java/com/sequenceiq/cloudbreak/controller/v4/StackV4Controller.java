@@ -109,12 +109,12 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public FlowIdentifier upgradeCluster(Long workspaceId, String name) {
-        return stackOperations.upgradeCluster(NameOrCrn.ofName(name), workspaceId);
+        return stackOperations.upgradeClusterOs(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
     public UpgradeOptionV4Response checkForUpgrade(Long workspaceId, String name) {
-        return stackOperations.checkForUpgrade(NameOrCrn.ofName(name), workspaceId);
+        return stackOperations.checkForOsUpgrade(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
@@ -174,11 +174,11 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public UpgradeOptionsV4Response checkForStackUpgradeByName(Long workspaceId, String name) {
-        return stackOperations.checkForStackUpgrade(NameOrCrn.ofName(name), workspaceId);
+        return stackOperations.checkForClusterUpgrade(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
-    public void upgradeStackByName(Long workspaceId, String name, String imageId) {
-        stackOperations.upgradeStack(NameOrCrn.ofName(name), workspaceId, imageId);
+    public FlowIdentifier upgradeStackByName(Long workspaceId, String name, String imageId) {
+        return stackOperations.upgradeCluster(NameOrCrn.ofName(name), workspaceId, imageId);
     }
 }

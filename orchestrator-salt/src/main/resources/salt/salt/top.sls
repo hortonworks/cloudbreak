@@ -18,6 +18,14 @@ base:
     - match: compound
     - sssd.ipa
 
+  'G@roles:manager_upgrade and G@roles:manager_server':
+    - match: compound
+    - cloudera.manager.upgrade
+
+  'G@roles:manager_upgrade and G@roles:manager_agent':
+    - match: compound
+    - cloudera.agent.upgrade
+
   'G@roles:manager_server':
     - postgresql
     - cloudera.csd

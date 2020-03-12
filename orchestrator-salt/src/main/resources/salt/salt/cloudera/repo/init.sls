@@ -1,8 +1,8 @@
 {% if grains['os_family'] == 'RedHat' %}
 
-/etc/yum.repos.d/cloudera-manager.repo:
+/etc/yum.repos.d/clustermanager.repo:
   file.managed:
-    - source: salt://cloudera/repo/cloudera-manager.repo
+    - source: salt://cloudera/repo/clustermanager.repo
     - template: jinja
 
 {% elif grains['os_family'] == 'Debian' %}

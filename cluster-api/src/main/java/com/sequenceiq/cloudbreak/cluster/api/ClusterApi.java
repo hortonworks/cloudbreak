@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -57,6 +58,10 @@ public interface ClusterApi {
 
     default List<String> upscaleCluster(HostGroup hostGroup, Collection<InstanceMetaData> metas) throws CloudbreakException {
         return clusterModificationService().upscaleCluster(hostGroup, metas);
+    }
+
+    default void upgradeClusterRuntime(Set<ClusterComponent> components) throws CloudbreakException {
+        clusterModificationService().upgradeClusterRuntime(components);
     }
 
     default void stopCluster() throws CloudbreakException {

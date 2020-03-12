@@ -213,7 +213,7 @@ public class StackStatusCheckerJobTest {
     @Test
     public void testInstanceSyncCMRunning() throws JobExecutionException {
         setupForCM();
-        when(clusterStatusResult.getClusterStatus()).thenReturn(ClusterStatus.AMBARISERVER_RUNNING);
+        when(clusterStatusResult.getClusterStatus()).thenReturn(ClusterStatus.CLUSTERMANAGER_RUNNING);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         underTest.executeInternal(jobExecutionContext);

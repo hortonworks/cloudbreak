@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
+import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerApplyHostTemplateListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDecommissionHostListenerTask;
@@ -27,6 +28,9 @@ import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStartupListenerT
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStopListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStopManagementServiceListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerTemplateInstallationChecker;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerUpgradeParcelDistributeListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerUpgradeParcelDownloadListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerUpgradeRuntimeListenerTask;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
@@ -140,6 +144,24 @@ public class ClouderaManagerPollingServiceProvider {
         LOGGER.debug("Waiting for Cloudera Manager to restart services. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
                 new ClouderaManagerRestartServicesListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
+    }
+
+    public PollingResult startPollingCdpRuntimeUpgrade(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+        LOGGER.debug("Waiting for Cloudera Manager to upgrade CDP Runtime services. [Server address: {}]", stack.getClusterManagerIp());
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerUpgradeRuntimeListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
+    }
+
+    public PollingResult startPollingCdpRuntimeParcelDownload(Stack stack, ApiClient apiClient, BigDecimal commandId, ParcelResource parcelResource) {
+        LOGGER.debug("Waiting for Cloudera Manager to download CDP Runtime Parcel. [Server address: {}]", stack.getClusterManagerIp());
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerUpgradeParcelDownloadListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService, parcelResource));
+    }
+
+    public PollingResult startPollingCdpRuntimeParcelDistribute(Stack stack, ApiClient apiClient, BigDecimal commandId, ParcelResource parcelResource) {
+        LOGGER.debug("Waiting for Cloudera Manager to download CDP Runtime Parcel. [Server address: {}]", stack.getClusterManagerIp());
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
+                new ClouderaManagerUpgradeParcelDistributeListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService, parcelResource));
     }
 
     public PollingResult startPollingCmGenerateCredentials(Stack stack, ApiClient apiClient, BigDecimal commandId) {
