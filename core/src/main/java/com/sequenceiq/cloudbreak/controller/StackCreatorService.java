@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -362,6 +361,11 @@ public class StackCreatorService {
         }
     }
 
+    boolean shouldUseBaseCMImage(ClusterV4Request clusterRequest) {
+        ClouderaManagerV4Request cmRequest = clusterRequest.getCm();
+        return (cmRequest != null && !CollectionUtils.isEmpty(cmRequest.getProducts())) || (cmRequest != null && cmRequest.getRepository() != null);
+    }
+
     private Stack prepareSharedServiceIfNeed(Stack stack) {
         if (stack.getDatalakeResourceId() != null) {
             return sharedServiceConfigProvider.prepareDatalakeConfigs(stack);
@@ -404,7 +408,7 @@ public class StackCreatorService {
         if (clusterRequest == null) {
             return null;
         }
-        boolean shouldUseBaseCMImage = shouldUseBaseCMImage(clusterRequest, stackRequest.getImage());
+        boolean shouldUseBaseCMImage = shouldUseBaseCMImage(clusterRequest);
         boolean baseImageEnabled = imageCatalogService.baseImageEnabled();
         Map<String, String> mdcContext = MDCBuilder.getMdcContextMap();
         return executorService.submit(() -> {
@@ -423,15 +427,6 @@ public class StackCreatorService {
             MDCBuilder.cleanupMdc();
             return statedImage;
         });
-    }
-
-    boolean shouldUseBaseCMImage(ClusterV4Request clusterRequest, ImageSettingsV4Request imageRequest) {
-        ClouderaManagerV4Request cmRequest = clusterRequest.getCm();
-        return hasCmParcelInfo(cmRequest) && imageRequest == null;
-    }
-
-    private boolean hasCmParcelInfo(ClouderaManagerV4Request cmRequest) {
-        return (cmRequest != null && !CollectionUtils.isEmpty(cmRequest.getProducts())) || (cmRequest != null && cmRequest.getRepository() != null);
     }
 
     private StatedImage getImageCatalog(Future<StatedImage> imgFromCatalogFuture) {
