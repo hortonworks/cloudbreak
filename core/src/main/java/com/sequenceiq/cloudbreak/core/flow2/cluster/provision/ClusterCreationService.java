@@ -22,6 +22,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -61,6 +63,9 @@ public class ClusterCreationService {
 
     @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
+
+    @Inject
+    private TransactionService transactionService;
 
     public void bootstrappingMachines(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.BOOTSTRAPPING_MACHINES);
@@ -117,10 +122,16 @@ public class ClusterCreationService {
     }
 
     public void clusterInstallationFinished(StackView stackView) {
-        String clusterManagerIp = stackUtil.extractClusterManagerIp(stackView);
-        clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
-        stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster creation finished.");
-        flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_BUILT, clusterManagerIp);
+        try {
+            transactionService.required(() -> {
+                String clusterManagerIp = stackUtil.extractClusterManagerIp(stackView);
+                clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
+                stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster creation finished.");
+                flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_BUILT, clusterManagerIp);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     public void handleClusterCreationFailure(StackView stackView, Exception exception) {
