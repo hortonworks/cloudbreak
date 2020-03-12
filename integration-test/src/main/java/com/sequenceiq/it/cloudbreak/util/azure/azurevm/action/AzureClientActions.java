@@ -44,21 +44,17 @@ public class AzureClientActions {
         AzureInstanceActionExecutor.builder()
                 .onInstances(instanceIds)
                 .withInstanceAction(id -> {
-                            LOGGER.debug("Deleting vm {}", id);
-                            return azure.virtualMachines().deleteByIdAsync(id)
-                                    .doOnError(throwable -> LOGGER.debug("Error when stopping instance {}: {}", id, throwable))
-                                    .subscribeOn(Schedulers.io());
-                        }
-                )
-                .withInstanceStatusCheck(id -> {
-                            VirtualMachine vm = azure.virtualMachines().getById(id);
-                            LOGGER.debug("After stop: vm {} is {} (expected null)", id, vm);
-                            return vm == null;
-                        }
-                )
-                .withTimeout(10, TimeUnit.MINUTES)
-                .build()
-                .execute();
+                    String resourceGroup = id.replaceFirst("..$", "");
+                    LOGGER.debug("Deleting vm {}", id);
+                    return azure.virtualMachines().deleteByResourceGroupAsync(resourceGroup, id)
+                            .doOnError(throwable -> LOGGER.debug("Error when stopping instance {}: {}", id, throwable))
+                            .subscribeOn(Schedulers.io());
+                }).withInstanceStatusCheck(id -> {
+                    String resourceGroup = id.replaceFirst("..$", "");
+                    VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
+                    LOGGER.debug("After stop: vm {} is {} (expected null)", id, vm);
+                    return vm == null;
+                }).withTimeout(10, TimeUnit.MINUTES).build().execute();
         LOGGER.debug("Deleting instances finished succesfully");
     }
 
