@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -41,4 +42,6 @@ public interface ClusterModificationService {
     void cleanupCluster(Telemetry telemetry) throws CloudbreakException;
 
     void restartAll() throws CloudbreakException;
+
+    void upgradeClusterRuntime(Set<ClusterComponent> components) throws CloudbreakException;
 }

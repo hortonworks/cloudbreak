@@ -252,6 +252,6 @@ public interface StackV4Endpoint {
     @Path("{name}/stack_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = STACK_UPGRADE, nickname = "upgradeStackByName")
-    void upgradeStackByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, String imageId);
+    FlowIdentifier upgradeStackByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, String imageId);
 
 }

@@ -29,9 +29,9 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
-public class StackUpgradeService {
+public class ClusterUpgradeAvailabilityService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackUpgradeService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeAvailabilityService.class);
 
     @Inject
     private StackService stackService;

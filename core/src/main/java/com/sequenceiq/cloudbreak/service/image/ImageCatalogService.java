@@ -279,7 +279,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             image = getImage(imageId, images);
         }
         if (image.isEmpty()) {
-            throw new CloudbreakImageNotFoundException(String.format("Could not find any image with id: '%s'.", imageId));
+            throw new CloudbreakImageNotFoundException(String.format("Could not find any image with id: '%s' in catalog:. '%s'", imageId, catalogName));
         }
         return statedImage(image.get(), catalogUrl, catalogName);
     }

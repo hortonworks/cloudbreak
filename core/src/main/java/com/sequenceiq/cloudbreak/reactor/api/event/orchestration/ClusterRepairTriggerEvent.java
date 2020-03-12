@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class ClusterRepairTriggerEvent extends StackEvent {
@@ -12,13 +11,13 @@ public class ClusterRepairTriggerEvent extends StackEvent {
 
     private final boolean removeOnly;
 
-    private final Stack stack;
+    private final Long stackId;
 
-    public ClusterRepairTriggerEvent(Stack stack, Map<String, List<String>> failedNodesMap, boolean removeOnly) {
-        super(stack.getId());
+    public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, boolean removeOnly) {
+        super(stackId);
         this.failedNodesMap = failedNodesMap;
         this.removeOnly = removeOnly;
-        this.stack = stack;
+        this.stackId = stackId;
     }
 
     public Map<String, List<String>> getFailedNodesMap() {
@@ -29,7 +28,7 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         return removeOnly;
     }
 
-    public Stack getStack() {
-        return stack;
+    public Long getStackId() {
+        return stackId;
     }
 }

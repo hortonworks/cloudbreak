@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -85,7 +86,10 @@ public class UpgradeService {
     @Inject
     private TransactionService transactionService;
 
-    public UpgradeOptionV4Response getUpgradeOptionByStackNameOrCrn(Long workspaceId, NameOrCrn nameOrCrn, User user) {
+    @Inject
+    private ReactorFlowManager flowManager;
+
+    public UpgradeOptionV4Response getUpgradeOsOptionByStackNameOrCrn(Long workspaceId, NameOrCrn nameOrCrn, User user) {
         try {
             return transactionService.required(() -> {
                 Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
@@ -104,7 +108,7 @@ public class UpgradeService {
         }
     }
 
-    public FlowIdentifier upgradeByStackName(Long workspaceId, String stackName) {
+    public FlowIdentifier upgradeOsByStackName(Long workspaceId, String stackName) {
         try {
             return transactionService.required(() -> {
                 Optional<Stack> stack = stackService.findStackByNameAndWorkspaceId(stackName, workspaceId);
@@ -116,6 +120,33 @@ public class UpgradeService {
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public FlowIdentifier upgradeCluster(Long workspaceId, String stackName, String imageId)  {
+        Optional<Stack> stackOptional = stackService.findStackByNameAndWorkspaceId(stackName, workspaceId);
+        if (stackOptional.isPresent()) {
+            Stack stack = stackOptional.get();
+            StatedImage targetImage = updateImageComponents(imageId, stack);
+            return flowManager.triggerDatalakeClusterUpgrade(stack.getId(), targetImage);
+        } else {
+            throw notFoundException("Stack", stackName);
+        }
+    }
+
+    private StatedImage updateImageComponents(String imageId, Stack stack) {
+        String stackName = stack.getName();
+        Long stackId = stack.getId();
+        try {
+            Image currentImage = componentConfigProviderService.getImage(stackId);
+            StatedImage targetStatedImage =
+                    imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), imageId);
+            imageService.updateComponentsByStackId(stack, targetStatedImage);
+            return targetStatedImage;
+
+        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+            LOGGER.warn(String.format("Image was not found for stack %s", stackName));
+            throw notFoundException("Image", imageId);
         }
     }
 

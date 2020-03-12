@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionsV4Response;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Component
 public class SdxStackUpgradeService {
@@ -30,7 +31,7 @@ public class SdxStackUpgradeService {
     }
 
     public void upgradeStackByName(String name, String imageId) {
-        stackV4Endpoint.upgradeStackByName(WORKSPACE_ID, name, imageId);
+        FlowIdentifier flowIdentifier = stackV4Endpoint.upgradeStackByName(WORKSPACE_ID, name, imageId);
     }
 
     public void upgradeStackByCrn(String crn, String imageId, String userCrn) {

@@ -50,7 +50,7 @@ public class StackUpgradeServiceTest {
     private static final String CURRENT_IMAGE_ID = "16ad7759-83b1-42aa-aadf-0e3a6e7b5444";
 
     @InjectMocks
-    private StackUpgradeService underTest;
+    private ClusterUpgradeAvailabilityService underTest;
 
     @Mock
     private StackService stackService;

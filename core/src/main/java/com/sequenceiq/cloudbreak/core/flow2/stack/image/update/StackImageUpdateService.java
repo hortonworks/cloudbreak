@@ -1,5 +1,16 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
@@ -22,15 +33,6 @@ import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
 @Service
 public class StackImageUpdateService {
@@ -101,7 +103,7 @@ public class StackImageUpdateService {
                 throw new OperationException(message);
             }
 
-            if (!isStackMatchIfPrewarmed(stack, newImage)) {
+            if (!isStackMatchIfPrewarmed(newImage)) {
                 String message = "Stack versions don't match on prewarmed image with cluster's";
                 LOGGER.debug(message);
                 throw new OperationException(message);
@@ -148,7 +150,7 @@ public class StackImageUpdateService {
         return compare >= 0;
     }
 
-    public boolean isStackMatchIfPrewarmed(Stack stack, StatedImage image) {
+    public boolean isStackMatchIfPrewarmed(StatedImage image) {
         if (image.getImage().getStackDetails() != null) {
             try {
                 StackType imageStackType = imageService.determineStackType(image.getImage().getStackDetails());
@@ -187,13 +189,13 @@ public class StackImageUpdateService {
             try {
                 Image currentImage = getCurrentImage(stack);
                 StatedImage newImage = getNewImage(newImageId, imageCatalogName, imageCatalogUrl, currentImage);
-                return isCloudPlatformMatches(stack, newImage) && isOsVersionsMatch(currentImage, newImage) && isStackMatchIfPrewarmed(stack, newImage)
+                return isCloudPlatformMatches(stack, newImage) && isOsVersionsMatch(currentImage, newImage) && isStackMatchIfPrewarmed(newImage)
                         && checkPackageVersions(stack, newImage).getStatus() == EventStatus.OK;
             } catch (CloudbreakImageNotFoundException e) {
                 LOGGER.debug("Cloudbreak Image not found", e);
                 return false;
             } catch (CloudbreakImageCatalogException e) {
-                LOGGER.debug("Cloudbreak Image Catalog error", e);
+                LOGGER.debug("Cloudbreak Image catalog error", e);
                 return false;
             }
         }

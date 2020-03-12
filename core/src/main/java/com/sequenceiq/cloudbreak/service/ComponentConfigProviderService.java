@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -37,6 +36,10 @@ public class ComponentConfigProviderService {
 
     public Set<Component> getAllComponentsByStackIdAndType(Long stackId, Set<ComponentType> componentTypes) {
         return componentRepository.findComponentByStackIdWithType(stackId, componentTypes);
+    }
+
+    public Set<Component> getComponentsByStackId(Long stackId) {
+        return componentRepository.findComponentByStackId(stackId);
     }
 
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
@@ -96,14 +99,14 @@ public class ComponentConfigProviderService {
         return ret;
     }
 
-    public List<Component> store(List<Component> components) {
+    public Iterable<Component> store(Iterable<Component> components) {
         componentRepository.saveAll(components);
         LOGGER.debug("Components saved: {}", components);
         return components;
     }
 
     public void deleteComponentsForStack(Long stackId) {
-        Set<Component> componentsByStackId = componentRepository.findComponentByStackId(stackId);
+        Set<Component> componentsByStackId = getComponentsByStackId(stackId);
         if (!componentsByStackId.isEmpty()) {
             LOGGER.debug("Components({}) are going to be deleted for stack: {}", componentsByStackId.size(), stackId);
             componentRepository.deleteAll(componentsByStackId);

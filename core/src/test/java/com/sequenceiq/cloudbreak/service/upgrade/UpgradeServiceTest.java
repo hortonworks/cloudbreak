@@ -119,7 +119,11 @@ public class UpgradeServiceTest {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
                 Result.success(new HashMap<>());
         when(clusterRepairService.repairWithDryRun(1L)).thenReturn(repairStartResult);
-        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setBaseUrl("cm-base-url");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(1L)).thenReturn(clouderaManagerRepo);
+
+        UpgradeOptionV4Response result = underTest.getUpgradeOsOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
 
         verify(stackService).findStackByNameOrCrnAndWorkspaceId(eq(ofName), eq(WORKSPACE_ID));
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
@@ -144,7 +148,7 @@ public class UpgradeServiceTest {
                 Result.success(new HashMap<>());
         when(clusterRepairService.repairWithDryRun(1L)).thenReturn(repairStartResult);
 
-        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
+        UpgradeOptionV4Response result = underTest.getUpgradeOsOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
 
         verify(stackService).findStackByNameOrCrnAndWorkspaceId(ofName, WORKSPACE_ID);
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
@@ -170,7 +174,7 @@ public class UpgradeServiceTest {
                         "No external Database")));
         when(clusterRepairService.repairWithDryRun(1L)).thenReturn(repairStartResult);
 
-        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
+        UpgradeOptionV4Response result = underTest.getUpgradeOsOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
 
         verify(stackService).findStackByNameOrCrnAndWorkspaceId(ofName, WORKSPACE_ID);
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
@@ -195,7 +199,7 @@ public class UpgradeServiceTest {
         stackViewV4Response.setStatus(Status.AVAILABLE);
         when(distroXV1Endpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses(Set.of(stackViewV4Response)));
 
-        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
+        UpgradeOptionV4Response result = underTest.getUpgradeOsOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
 
         verify(stackService).findStackByNameOrCrnAndWorkspaceId(ofName, WORKSPACE_ID);
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
@@ -225,7 +229,7 @@ public class UpgradeServiceTest {
         stackViewV4Response.setCluster(clusterViewV4Response);
         when(distroXV1Endpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses(Set.of(stackViewV4Response)));
 
-        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
+        UpgradeOptionV4Response result = underTest.getUpgradeOsOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
 
         verify(stackService).findStackByNameOrCrnAndWorkspaceId(ofName, WORKSPACE_ID);
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
@@ -262,7 +266,7 @@ public class UpgradeServiceTest {
         datahubStack3.setStatus(Status.STOPPED);
         when(distroXV1Endpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses(Set.of(datahubStack1, datahubStack2, datahubStack3)));
 
-        UpgradeOptionV4Response result = underTest.getUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
+        UpgradeOptionV4Response result = underTest.getUpgradeOsOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
 
         verify(stackService).findStackByNameOrCrnAndWorkspaceId(ofName, WORKSPACE_ID);
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));

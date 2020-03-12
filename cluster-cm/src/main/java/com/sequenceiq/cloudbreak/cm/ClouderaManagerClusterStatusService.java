@@ -206,11 +206,11 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     @Override
     public ClusterStatusResult getStatus(boolean blueprintPresent) {
         if (!isClusterManagerRunning()) {
-            return ClusterStatusResult.of(ClusterStatus.AMBARISERVER_NOT_RUNNING);
+            return ClusterStatusResult.of(ClusterStatus.CLUSTERMANAGER_NOT_RUNNING);
         } else if (blueprintPresent) {
             return determineClusterStatus(stack);
         } else {
-            return ClusterStatusResult.of(ClusterStatus.AMBARISERVER_RUNNING);
+            return ClusterStatusResult.of(ClusterStatus.CLUSTERMANAGER_RUNNING);
         }
     }
 

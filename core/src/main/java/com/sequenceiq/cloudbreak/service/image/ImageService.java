@@ -4,12 +4,12 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -36,8 +35,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -47,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
@@ -62,6 +62,9 @@ public class ImageService {
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
     private ImageCatalogService imageCatalogService;
@@ -89,23 +92,62 @@ public class ImageService {
     @Measure(ImageService.class)
     public void create(Stack stack, String platformString, StatedImage imgFromCatalog)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        try {
-            String region = stack.getRegion();
 
-            LOGGER.debug("Determined image from catalog: {}", imgFromCatalog);
+        String region = stack.getRegion();
+        LOGGER.debug("Determined image from catalog: {}", imgFromCatalog);
+        String imageName = determineImageName(platformString, region, imgFromCatalog.getImage());
+        LOGGER.debug("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
+                platformString, region, imageName, imgFromCatalog.getImageCatalogUrl());
 
-            String imageName = determineImageName(platformString, region, imgFromCatalog.getImage());
-            LOGGER.debug("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
-                    platformString, region, imageName, imgFromCatalog.getImageCatalogUrl());
+        Set<Component> components = getComponents(stack, Map.of(), imgFromCatalog.getImage(), imageName,
+                imgFromCatalog.getImageCatalogUrl(),
+                imgFromCatalog.getImageCatalogName(),
+                imgFromCatalog.getImage().getUuid());
+        componentConfigProviderService.store(components);
+    }
 
-            List<Component> components = getComponents(stack, Map.of(), imgFromCatalog.getImage(), imageName,
-                    imgFromCatalog.getImageCatalogUrl(),
-                    imgFromCatalog.getImageCatalogName(),
-                    imgFromCatalog.getImage().getUuid());
-            componentConfigProviderService.store(components);
-        } catch (JsonProcessingException e) {
-            throw new CloudbreakServiceException("Failed to create json", e);
-        }
+    public void updateComponentsByStackId(Stack stack, StatedImage targetImage)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        String imageName = determineImageName(stack.cloudPlatform(), stack.getRegion(), targetImage.getImage());
+        Set<Component> components = componentConfigProviderService.getComponentsByStackId(stack.getId());
+        Set<Component> targetComponents = getComponents(stack, Map.of(), targetImage.getImage(), imageName,
+                targetImage.getImageCatalogUrl(),
+                targetImage.getImageCatalogName(),
+                targetImage.getImage().getUuid());
+        components.forEach(
+                component -> {
+                    Optional<Component> matching = targetComponents.stream().
+                            filter(
+                                    targetComponent -> targetComponent.getComponentType().equals(component.getComponentType()) &&
+                                    targetComponent.getName().equals(component.getName()) &&
+                                    targetComponent.getStack().getId().equals(component.getStack().getId())
+                            )
+                            .findFirst();
+                    matching.ifPresent(value -> value.setId(component.getId()));
+                });
+        componentConfigProviderService.store(targetComponents);
+
+        updateClusterComponentsByStackId(stack, targetComponents);
+
+        LOGGER.info("Updated components:" + targetComponents);
+    }
+
+    private void updateClusterComponentsByStackId(Stack stack, Set<Component> targetComponents) {
+        Set<ClusterComponent> clusterComponents = clusterComponentConfigProvider.getComponentsByClusterId(stack.getCluster().getId());
+        targetComponents.forEach(
+                component -> {
+                    Optional<ClusterComponent> matching = clusterComponents.stream().
+                            filter(
+                                    clusterComponent -> clusterComponent.getComponentType().equals(component.getComponentType()) &&
+                                            (clusterComponent.getName().equals(component.getName())  ||
+                                                    (StackType.CDH.name().equals(clusterComponent.getName()) &&
+                                                    StackType.CDH.getComponentType().name().equals(component.getName()))) &&
+                                            clusterComponent.getCluster().getId().equals(component.getStack().getCluster().getId())
+                            )
+                            .findFirst();
+                    matching.ifPresent(value -> value.setAttributes(component.getAttributes()));
+                });
+        clusterComponentConfigProvider.store(clusterComponents);
     }
 
     //CHECKSTYLE:OFF
@@ -220,10 +262,10 @@ public class ImageService {
                 .findFirst();
     }
 
-    private List<Component> getComponents(Stack stack, Map<InstanceGroupType, String> userData,
+    private Set<Component> getComponents(Stack stack, Map<InstanceGroupType, String> userData,
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog,
-            String imageName, String imageCatalogUrl, String imageCatalogName, String imageId) throws JsonProcessingException, CloudbreakImageCatalogException {
-        List<Component> components = new ArrayList<>();
+            String imageName, String imageCatalogUrl, String imageCatalogName, String imageId) throws CloudbreakImageCatalogException {
+        Set<Component> components = new HashSet<>();
         Image image = new Image(imageName, userData, imgFromCatalog.getOs(), imgFromCatalog.getOsType(), imageCatalogUrl, imageCatalogName, imageId,
                 imgFromCatalog.getPackageVersions());
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
@@ -242,7 +284,7 @@ public class ImageService {
         return components;
     }
 
-    private Component getStackComponent(Stack stack, StackDetails stackDetails, StackType stackType, String osType) throws JsonProcessingException {
+    private Component getStackComponent(Stack stack, StackDetails stackDetails, StackType stackType, String osType) {
         ComponentType componentType = stackType.getComponentType();
         if (CDH_PRODUCT_DETAILS.equals(componentType)) {
             ClouderaManagerProduct product = createProductRepo(stackDetails, osType);
@@ -254,11 +296,11 @@ public class ImageService {
     }
 
     private Component getClusterManagerComponent(Stack stack, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog, StackType stackType)
-            throws JsonProcessingException, CloudbreakImageCatalogException {
+            throws CloudbreakImageCatalogException {
         if (imgFromCatalog.getRepo() != null) {
             if (StackType.CDH.equals(stackType)) {
                 ClouderaManagerRepo clouderaManagerRepo = conversionService.convert(imgFromCatalog, ClouderaManagerRepo.class);
-                if (clouderaManagerRepo.getBaseUrl() == null) {
+                if (Objects.isNull(clouderaManagerRepo) || clouderaManagerRepo.getBaseUrl() == null) {
                     throw new CloudbreakImageCatalogException(
                             String.format("Cloudera Manager repo was not found in image for os: '%s'.", imgFromCatalog.getOsType()));
                 }
