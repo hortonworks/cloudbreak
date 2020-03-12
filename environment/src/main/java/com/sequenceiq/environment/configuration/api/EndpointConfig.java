@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
+import com.sequenceiq.environment.credential.v1.EnvironmentCredentialV1Controller;
 import com.sequenceiq.environment.environment.v1.EnvironmentController;
 import com.sequenceiq.environment.platformresource.v1.PlatformResourceController;
 import com.sequenceiq.environment.proxy.v1.controller.ProxyController;
@@ -35,7 +36,8 @@ public class EndpointConfig extends ResourceConfig {
             EnvironmentController.class,
             PlatformResourceController.class,
             UtilController.class,
-            FlowController.class);
+            FlowController.class,
+            EnvironmentCredentialV1Controller.class);
 
     private final String applicationVersion;
 

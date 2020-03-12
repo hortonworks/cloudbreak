@@ -1,19 +1,10 @@
 package com.sequenceiq.redbeams.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
-import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
-import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialResponseParameters;
-import com.sequenceiq.redbeams.dto.Credential;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +12,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.retry.support.RetryTemplate;
+
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.environment.api.v1.credential.endpoint.EnvironmentCredentialEndpoint;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialResponseParameters;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.redbeams.dto.Credential;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class CredentialServiceTest {
 
@@ -39,7 +39,7 @@ public class CredentialServiceTest {
     private RetryTemplate cbRetryTemplate = new RetryTemplate();
 
     @Mock
-    private CredentialEndpoint credentialEndpoint;
+    private EnvironmentCredentialEndpoint environmentCredentialEndpoint;
 
     @Mock
     private SecretService secretService;
@@ -63,7 +63,7 @@ public class CredentialServiceTest {
         credentialResponse.setCrn(CRN);
         credentialResponse.setName(NAME);
         credentialResponse.setAttributes(secretResponse);
-        when(credentialEndpoint.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(credentialResponse);
+        when(environmentCredentialEndpoint.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(credentialResponse);
 
         Credential credential = underTest.getCredentialByEnvCrn(ENVIRONMENT_CRN);
 
@@ -82,7 +82,7 @@ public class CredentialServiceTest {
         AzureCredentialResponseParameters azureResponse = new AzureCredentialResponseParameters();
         azureResponse.setSubscriptionId(SUBSCRIPTION_ID);
         credentialResponse.setAzure(azureResponse);
-        when(credentialEndpoint.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(credentialResponse);
+        when(environmentCredentialEndpoint.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(credentialResponse);
 
         Credential credential = underTest.getCredentialByEnvCrn(ENVIRONMENT_CRN);
 

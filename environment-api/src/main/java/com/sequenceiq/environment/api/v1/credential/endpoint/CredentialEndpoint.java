@@ -52,20 +52,6 @@ public interface CredentialEndpoint {
     CredentialResponse getByName(@PathParam("name") String credentialName);
 
     @GET
-    @Path("environment/crn/{environmentCrn}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.GET_BY_ENVIRONMENT_CRN, produces = MediaType.APPLICATION_JSON,
-            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getCredentialByEnvironmentCrnV1", httpMethod = "GET")
-    CredentialResponse getByEnvironmentCrn(@PathParam("environmentCrn") String environmentCrn);
-
-    @GET
-    @Path("environment/name/{environmentName}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CredentialOpDescription.GET_BY_ENVIRONMENT_NAME, produces = MediaType.APPLICATION_JSON,
-            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getCredentialByEnvironmentNameV1", httpMethod = "GET")
-    CredentialResponse getByEnvironmentName(@PathParam("environmentName") String environmentName);
-
-    @GET
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON,

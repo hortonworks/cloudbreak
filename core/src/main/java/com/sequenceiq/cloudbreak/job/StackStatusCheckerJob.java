@@ -241,7 +241,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private CloudCredential getCloudCredential(String environmentCrn) {
         return cloudCredentialConverter.convert(
                 credentialConverter.convert(
-                        environmentInternalCrnClient.withInternalCrn().credentialV1Endpoint().getByEnvironmentCrn(environmentCrn)
+                        environmentInternalCrnClient.withInternalCrn().environmentCredentialV1Endpoint().getByEnvironmentCrn(environmentCrn)
                 )
         );
     }

@@ -73,22 +73,6 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public CredentialResponse getByEnvironmentCrn(@ResourceCrn String environmentCrn) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        Credential credential = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
-        return credentialConverter.convert(credential);
-    }
-
-    @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public CredentialResponse getByEnvironmentName(String environmentName) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        Credential credential = credentialService.getByEnvironmentNameAndAccountId(environmentName, accountId);
-        return credentialConverter.convert(credential);
-    }
-
-    @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public CredentialResponse getByResourceCrn(@ResourceCrn String credentialCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return credentialConverter.convert(credentialService.getByCrnForAccountId(credentialCrn, accountId));

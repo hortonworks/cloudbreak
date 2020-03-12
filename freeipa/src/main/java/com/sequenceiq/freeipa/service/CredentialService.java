@@ -7,11 +7,11 @@ import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
+import com.sequenceiq.environment.api.v1.credential.endpoint.EnvironmentCredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.freeipa.dto.Credential;
 
@@ -19,7 +19,7 @@ import com.sequenceiq.freeipa.dto.Credential;
 public class CredentialService {
 
     @Inject
-    private CredentialEndpoint credentialEndpoint;
+    private EnvironmentCredentialEndpoint environmentCredentialEndpoint;
 
     @Inject
     private SecretService secretService;
@@ -30,7 +30,7 @@ public class CredentialService {
     public Credential getCredentialByEnvCrn(String envCrn) {
         CredentialResponse credentialResponse = null;
         try {
-            credentialResponse = credentialEndpoint.getByEnvironmentCrn(envCrn);
+            credentialResponse = environmentCredentialEndpoint.getByEnvironmentCrn(envCrn);
         } catch (ClientErrorException e) {
             try (Response response = e.getResponse()) {
                 if (Response.Status.NOT_FOUND.getStatusCode() == response.getStatus()) {

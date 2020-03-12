@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
+import com.sequenceiq.environment.api.v1.credential.endpoint.EnvironmentCredentialEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
@@ -47,6 +48,12 @@ public class EnvironmentApiClientConfig {
     @ConditionalOnBean(name = "environmentApiClientWebTarget")
     CredentialEndpoint credentialEndpoint(WebTarget environmentApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(environmentApiClientWebTarget, CredentialEndpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "environmentApiClientWebTarget")
+    EnvironmentCredentialEndpoint environmentCredentialEndpoint(WebTarget environmentApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(environmentApiClientWebTarget, EnvironmentCredentialEndpoint.class);
     }
 
     @Bean

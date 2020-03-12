@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
+import com.sequenceiq.environment.api.v1.credential.endpoint.EnvironmentCredentialEndpoint;
 import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -118,7 +118,7 @@ public class StackStatusCheckerJobTest {
     private EnvironmentServiceCrnEndpoints environmentServiceCrnEndpoints;
 
     @Mock
-    private CredentialEndpoint credentialEndpoint;
+    private EnvironmentCredentialEndpoint environmentCredentialEndpoint;
 
     @Mock
     private CloudInstance cloudInstance;
@@ -164,7 +164,7 @@ public class StackStatusCheckerJobTest {
         when(stack.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(1L);
         when(environmentInternalCrnClient.withInternalCrn()).thenReturn(environmentServiceCrnEndpoints);
-        when(environmentServiceCrnEndpoints.credentialV1Endpoint()).thenReturn(credentialEndpoint);
+        when(environmentServiceCrnEndpoints.environmentCredentialV1Endpoint()).thenReturn(environmentCredentialEndpoint);
         when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
     }
 
@@ -195,7 +195,7 @@ public class StackStatusCheckerJobTest {
         when(stack.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(1L);
         when(environmentInternalCrnClient.withInternalCrn()).thenReturn(environmentServiceCrnEndpoints);
-        when(environmentServiceCrnEndpoints.credentialV1Endpoint()).thenReturn(credentialEndpoint);
+        when(environmentServiceCrnEndpoints.environmentCredentialV1Endpoint()).thenReturn(environmentCredentialEndpoint);
         when(clusterStatusService.getStatus(anyBoolean())).thenReturn(clusterStatusResult);
         when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
         when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.SERVICES_HEALTHY);

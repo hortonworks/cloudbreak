@@ -1,16 +1,18 @@
 package com.sequenceiq.cloudbreak.service.environment.credential;
 
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
-import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import javax.inject.Inject;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.environment.api.v1.credential.endpoint.EnvironmentCredentialEndpoint;
+import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
 @Service
 public class CredentialClientService {
@@ -19,6 +21,9 @@ public class CredentialClientService {
 
     @Inject
     private CredentialEndpoint credentialEndpoint;
+
+    @Inject
+    private EnvironmentCredentialEndpoint environmentCredentialEndpoint;
 
     @Inject
     private CredentialConverter credentialConverter;
@@ -49,7 +54,7 @@ public class CredentialClientService {
         try {
             //TODO CloudPlatfrom needs to be part of the response
             //TODO Revise paramaters because most of them should be a secret
-            CredentialResponse credentialResponse = credentialEndpoint.getByEnvironmentCrn(envCrn);
+            CredentialResponse credentialResponse = environmentCredentialEndpoint.getByEnvironmentCrn(envCrn);
             return credentialConverter.convert(credentialResponse);
         } catch (WebApplicationException | IllegalStateException e) {
             String message = String.format("Failed to GET Credential by environment crn: %s, due to: '%s' ", envCrn, e.getMessage());

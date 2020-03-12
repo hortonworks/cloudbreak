@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
+import com.sequenceiq.environment.api.v1.credential.endpoint.EnvironmentCredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.redbeams.dto.Credential;
 
@@ -14,7 +14,7 @@ import com.sequenceiq.redbeams.dto.Credential;
 public class CredentialService {
 
     @Inject
-    private CredentialEndpoint credentialEndpoint;
+    private EnvironmentCredentialEndpoint environmentCredentialEndpoint;
 
     @Inject
     private SecretService secretService;
@@ -26,7 +26,7 @@ public class CredentialService {
      * @return environment credential
      */
     public Credential getCredentialByEnvCrn(String envCrn) {
-        CredentialResponse credentialResponse = credentialEndpoint.getByEnvironmentCrn(envCrn);
+        CredentialResponse credentialResponse = environmentCredentialEndpoint.getByEnvironmentCrn(envCrn);
 
         SecretResponse secretResponse = credentialResponse.getAttributes();
         String attributes = secretService.getByResponse(secretResponse);
