@@ -159,10 +159,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             Set<String> ips = hostsToRemove.values().stream().map(InstanceMetaData::getPrivateIp).filter(StringUtils::isNotBlank).collect(Collectors.toSet());
             freeIpaCleanupService.cleanup(stack, true, hostsToRemove.keySet(), ips);
         } catch (FreeIpaOperationFailedException e) {
-            LOGGER.error("Failed to cleanup FreeIPA", e);
-            if (!forced) {
-                throw e;
-            }
+            LOGGER.warn("FreeIPA cleanup has failed during decommission, ignoring error", e);
         }
     }
 
