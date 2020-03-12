@@ -4,6 +4,7 @@ import static com.sequenceiq.it.cloudbreak.CloudbreakTest.CLOUDBREAK_SERVER_ROOT
 import static com.sequenceiq.it.cloudbreak.mock.ITResponse.FREEIPA_IMAGE_CATALOG;
 import static com.sequenceiq.it.cloudbreak.mock.ITResponse.IMAGE_CATALOG;
 import static com.sequenceiq.it.cloudbreak.mock.ITResponse.IMAGE_CATALOG_PREWARMED;
+import static com.sequenceiq.it.cloudbreak.mock.ITResponse.IMAGE_CATALOG_UPGRADE;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,10 +47,12 @@ public class ImageCatalogMockServerSetup {
         String jsonPreparedICResponse = patchCbVersion(responseFromJsonFile("imagecatalog/catalog.json"), testParameter);
         String jsonFreeIPACatalogResponse = responseFromJsonFile("imagecatalog/freeipa.json");
         String jsonPreparedPrewarmICResponse = patchCbVersion(responseFromJsonFile("imagecatalog/catalog-with-prewarmed.json"), testParameter);
+        String upgradeImageCatalog = patchCbVersion(responseFromJsonFile("imagecatalog/catalog-with-for-upgrade.json"), testParameter);
 
         startImageCatalog(IMAGE_CATALOG, jsonPreparedICResponse);
         startImageCatalog(FREEIPA_IMAGE_CATALOG, jsonFreeIPACatalogResponse);
         startImageCatalog(IMAGE_CATALOG_PREWARMED, jsonPreparedPrewarmICResponse);
+        startImageCatalog(IMAGE_CATALOG_UPGRADE, upgradeImageCatalog);
     }
 
     private String getCloudbreakUnderTestVersion(String cbServerAddress) {
@@ -95,6 +98,10 @@ public class ImageCatalogMockServerSetup {
 
     public String getPreWarmedImageCatalogUrl() {
         return String.join("", sparkServer.getEndpoint(), IMAGE_CATALOG_PREWARMED);
+    }
+
+    public String getUpgradeImageCatalogUrl() {
+        return String.join("", sparkServer.getEndpoint(), IMAGE_CATALOG_UPGRADE);
     }
 
     public SparkServer getSparkServer() {

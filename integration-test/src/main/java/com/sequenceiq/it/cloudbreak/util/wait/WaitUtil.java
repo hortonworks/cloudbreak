@@ -30,6 +30,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIp
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIPAClient;
+import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -38,6 +39,9 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.WaitResult;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -102,6 +106,46 @@ public class WaitUtil {
             LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, environmentCrn, currentStatus);
         } else {
             LOGGER.info("{} are in desired status(es) {}", environmentCrn, currentStatus);
+        }
+        return waitResult;
+    }
+
+    private WaitResult waitForStatuses(RedbeamsClient redbeamsClient, String crn,
+            Status desiredStatus) {
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        Status currentStatus = Status.CREATE_IN_PROGRESS;
+
+        long startTime = System.currentTimeMillis();
+        int retryCount = 0;
+        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < maxRetry) {
+            LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {}, ellapsed {}ms ...", desiredStatus, crn, currentStatus,
+                    System.currentTimeMillis() - startTime);
+
+            sleep(pollingInterval);
+            DatabaseServerV4Endpoint databaseServerEndpoint = redbeamsClient.getEndpoints().databaseServerV4Endpoint();
+            try {
+                Optional<Status> statusResult = Optional.ofNullable(databaseServerEndpoint.getByCrn(crn).getStatus());
+                Status currStatus = Status.DELETE_COMPLETED;
+                if (statusResult.isPresent()) {
+                    currStatus = statusResult.get();
+                }
+                currentStatus = currStatus;
+            } catch (NotFoundException notFoundException) {
+                LOGGER.info("Stack not found: {}", crn);
+                currentStatus = Status.DELETE_COMPLETED;
+                break;
+            }
+            retryCount++;
+        }
+
+        if (currentStatus.name().contains("FAILED") || (Status.UNKNOWN != desiredStatus && Status.UNKNOWN == currentStatus)) {
+            waitResult = WaitResult.FAILED;
+            LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, crn, currentStatus);
+        } else if (retryCount == maxRetry) {
+            waitResult = WaitResult.TIMEOUT;
+            LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, crn, currentStatus);
+        } else {
+            LOGGER.info("{} are in desired status(es) {}", crn, currentStatus);
         }
         return waitResult;
     }
@@ -222,6 +266,10 @@ public class WaitUtil {
         return waitResult;
     }
 
+    private boolean checkFailedStatuses(Status currentStatus) {
+        return currentStatus.name().contains("FAILED") || currentStatus == Status.DELETE_COMPLETED;
+    }
+
     private boolean checkFailedStatuses(SdxClusterStatusResponse currentStatus) {
         return currentStatus.name().contains("FAILED") || currentStatus == DELETED;
     }
@@ -232,6 +280,31 @@ public class WaitUtil {
 
     private boolean checkFailedStatuses(EnvironmentStatus currentStatus) {
         return currentStatus.isFailed() || currentStatus == EnvironmentStatus.ARCHIVED;
+    }
+
+    public Map<String, String> waitAndCheckStatuses(RedbeamsClient redbeamsClient, String crn,
+            Status desiredStatus, long pollingInterval) {
+        Map<String, String> errors = new HashMap<>();
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
+            waitResult = waitForStatuses(redbeamsClient, crn, desiredStatus);
+        }
+        if (waitResult == WaitResult.FAILED) {
+            StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
+            DatabaseServerV4Response databaseServerResponse = redbeamsClient.getEndpoints().databaseServerV4Endpoint().getByCrn(crn);
+            if (databaseServerResponse != null && databaseServerResponse.getStatus() != null) {
+                builder.append("statusReason: ").append(databaseServerResponse.getStatusReason());
+            }
+            throw new RuntimeException(builder.toString());
+        } else if (waitResult == WaitResult.TIMEOUT) {
+            throw new RuntimeException("Timeout happened");
+        } else if (Status.DELETE_COMPLETED != desiredStatus) {
+            DatabaseServerV4Response databaseServerResponse = redbeamsClient.getEndpoints().databaseServerV4Endpoint().getByCrn(crn);
+            if (databaseServerResponse != null) {
+                errors = Map.of("status", databaseServerResponse.getStatus().name());
+            }
+        }
+        return errors;
     }
 
     public Map<String, String> waitAndCheckStatuses(FreeIPAClient freeIPAClient, String name,

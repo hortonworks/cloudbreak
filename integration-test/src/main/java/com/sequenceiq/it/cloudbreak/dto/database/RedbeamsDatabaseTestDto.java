@@ -19,21 +19,8 @@ public class RedbeamsDatabaseTestDto extends DeletableRedbeamsTestDto<DatabaseV4
 
     public static final String DATABASE = "DATABASE";
 
-    RedbeamsDatabaseTestDto(String newId) {
-        super(newId);
-        setRequest(new DatabaseV4Request());
-    }
-
-    RedbeamsDatabaseTestDto() {
-        this(DATABASE);
-    }
-
     public RedbeamsDatabaseTestDto(TestContext testContext) {
         super(new DatabaseV4Request(), testContext);
-    }
-
-    public RedbeamsDatabaseTestDto(DatabaseV4Request request, TestContext testContext) {
-        super(request, testContext);
     }
 
     @Override

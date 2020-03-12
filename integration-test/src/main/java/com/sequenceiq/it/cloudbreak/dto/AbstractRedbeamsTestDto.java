@@ -15,10 +15,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 
 public abstract class AbstractRedbeamsTestDto<R, S, T extends CloudbreakTestDto> extends AbstractTestDto<R, S, T, RedbeamsClient> {
 
-    protected AbstractRedbeamsTestDto(String newId) {
-        super(newId);
-    }
-
     protected AbstractRedbeamsTestDto(R request, TestContext testContext) {
         super(request, testContext);
     }
