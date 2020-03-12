@@ -6,7 +6,6 @@ import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -42,6 +41,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -93,7 +93,7 @@ public class SdxService implements ResourceIdProvider {
     private CloudStorageManifester cloudStorageManifester;
 
     @Inject
-    private Map<CDPConfigKey, StackV4Request> cdpStackRequests;
+    private CDPConfigService cdpConfigService;
 
     @Value("${sdx.default.runtime:7.1.0}")
     private String defaultRuntime;
@@ -200,7 +200,8 @@ public class SdxService implements ResourceIdProvider {
     private StackV4Request getStackRequest(SdxClusterRequest sdxClusterRequest, StackV4Request internalStackV4Request, CloudPlatform cloudPlatform,
             String runtimeVersion) {
         if (internalStackV4Request == null) {
-            StackV4Request stackRequest = cdpStackRequests.get(new CDPConfigKey(cloudPlatform, sdxClusterRequest.getClusterShape(), runtimeVersion));
+            StackV4Request stackRequest = cdpConfigService.getConfigForKey(
+                    new CDPConfigKey(cloudPlatform, sdxClusterRequest.getClusterShape(), runtimeVersion));
             if (stackRequest == null) {
                 LOGGER.error("Can't find template for cloudplatform: {}, shape {}, cdp version: {}", cloudPlatform, sdxClusterRequest.getClusterShape(),
                         runtimeVersion);
@@ -211,10 +212,6 @@ public class SdxService implements ResourceIdProvider {
         } else {
             return internalStackV4Request;
         }
-    }
-
-    public List<String> getDatalakeVersions() {
-        return cdpStackRequests.keySet().stream().map(CDPConfigKey::getRuntimeVersion).distinct().collect(Collectors.toList());
     }
 
     private String getRuntime(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request) {
