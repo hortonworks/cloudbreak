@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFl
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
@@ -375,6 +376,11 @@ public class OfflineStateGenerator {
         @Override
         public List<StackStatusView> findByStatuses(List<Status> statuses) {
             return null;
+        }
+
+        @Override
+        public Optional<StackClusterStatusView> getStatusByCrn(String crn) {
+            return Optional.empty();
         }
 
         @Override
