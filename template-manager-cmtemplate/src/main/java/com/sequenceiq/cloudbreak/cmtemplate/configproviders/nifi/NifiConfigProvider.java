@@ -24,6 +24,9 @@ public class NifiConfigProvider implements CmTemplateComponentConfigProvider {
     @Inject
     private VirtualGroupService virtualGroupService;
 
+    @Inject
+    private RangerAutoCompleteConfigProvider rangerAutoCompleteConfigProvider;
+
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configList = new ArrayList<>();
@@ -33,6 +36,7 @@ public class NifiConfigProvider implements CmTemplateComponentConfigProvider {
             VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
             String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.NIFI_ADMIN.getRight());
             configList.add(config("nifi.initial.admin.groups", adminGroup));
+            rangerAutoCompleteConfigProvider.extendServiceConfigs(source, configList);
         }
         return configList;
     }
