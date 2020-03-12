@@ -1,0 +1,157 @@
+{
+  "images": {
+    "cdh-images": [
+      {
+        "created": 1583391600,
+        "date": "2020-03-06",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "aaa778fc-7f17-4535-9021-515351df3691",
+        "package-versions": {
+          "cm": "7.1.0",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "7.1.0"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922354/cdh/7.x/parcels/",
+              "repoid": "CDH-7.1.0",
+              "repository-version": "7.1.0-1.cdh7.1.0.p0.1922354"
+            },
+            "util": null
+          },
+          "version": "7.1.0",
+          "build-number": "1922354"
+        },
+        "repo": {
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922616/cm7/7.1.0/redhat7/yum/"
+        },
+        "version": "7.1.0",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-118/tars/parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-118-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-118/tars/parcel"
+          ],
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-50-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-50/tars/dataplane_profilers"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-50-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-50/tars/dataplane_profilers"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-176/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-118/tars/parcel/SCHEMAREGISTRY-0.8.1.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-118/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-50/tars/dataplane_profilers/PROFILER_MANAGER-2.0.3.2.0.3.0-50.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-50/tars/dataplane_profilers/PROFILER_SCHEDULER-2.0.3.2.0.3.0-50.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-176/tars/parcel/NIFI-1.11.1.2.0.0.0-176.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-176/tars/parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-176/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
+        ]
+      },
+      {
+        "created": 1583877600,
+        "date": "2020-03-10",
+        "description": "Official Cloudbreak image Upgrade Target",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "bbbeadd2-5B95-4EC9-B300-13dc43208b64",
+        "package-versions": {
+          "cm": "7.1.0",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "7.1.0"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922354/cdh/7.x/parcels/",
+              "repoid": "CDH-7.1.0",
+              "repository-version": "7.1.0-1.cdh7.1.0.p0.1922354"
+            },
+            "util": null
+          },
+          "version": "7.1.0",
+          "build-number": "1922354"
+        },
+        "repo": {
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922616/cm7/7.1.0/redhat7/yum/"
+        },
+        "version": "7.1.0",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-118/tars/parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-118-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-118/tars/parcel"
+          ],
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-50-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-50/tars/dataplane_profilers"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-50-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-50/tars/dataplane_profilers"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-176/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-118/tars/parcel/SCHEMAREGISTRY-0.8.1.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-118/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-50/tars/dataplane_profilers/PROFILER_MANAGER-2.0.3.2.0.3.0-50.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-50/tars/dataplane_profilers/PROFILER_SCHEDULER-2.0.3.2.0.3.0-50.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-176/tars/parcel/NIFI-1.11.1.2.0.0.0-176.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-176/tars/parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-176/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
+        ]
+      }
+    ],
+    "hdf-images": [],
+    "base-images": []
+  },
+  "versions": {
+    "cloudbreak": [
+      {
+        "images": [
+          "aaa778fc-7f17-4535-9021-515351df3691",
+          "bbbeadd2-5B95-4EC9-B300-13dc43208b64"
+        ],
+        "defaults": [
+          "aaa778fc-7f17-4535-9021-515351df3691",
+          "bbbeadd2-5B95-4EC9-B300-13dc43208b64"
+        ],
+        "versions": [
+          "CB_VERSION"
+        ]
+      }
+    ]
+  }
+}

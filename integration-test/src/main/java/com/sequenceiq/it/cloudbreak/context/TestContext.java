@@ -41,6 +41,7 @@ import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -640,6 +641,45 @@ public abstract class TestContext implements ApplicationContextAware {
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
+                Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
+                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
+            }
+            exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
+        }
+        return entity;
+    }
+
+    public RedbeamsDatabaseServerTestDto await(RedbeamsDatabaseServerTestDto entity, com.sequenceiq.redbeams.api.model.common.Status desiredStatuses,
+            RunningParameter runningParameter) {
+        return await(entity, desiredStatuses, runningParameter, -1);
+    }
+
+    public RedbeamsDatabaseServerTestDto await(RedbeamsDatabaseServerTestDto entity, com.sequenceiq.redbeams.api.model.common.Status desiredStatuses,
+            RunningParameter runningParameter, long pollingInterval) {
+        checkShutdown();
+
+        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+            Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
+            return entity;
+        }
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        RedbeamsDatabaseServerTestDto awaitEntity = get(key);
+        Log.await(LOGGER, String.format("%s for %s", key, desiredStatuses));
+        try {
+            if (awaitEntity == null) {
+                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
+            }
+
+            RedbeamsClient redbeamsClient = getMicroserviceClient(RedbeamsClient.class, getWho(runningParameter).getAccessKey());
+            String redbeamsCrn = entity.getResponse().getResourceCrn();
+            statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(redbeamsClient, redbeamsCrn, desiredStatuses, pollingInterval));
+            if (!desiredStatuses.equals(com.sequenceiq.redbeams.api.model.common.Status.DELETE_COMPLETED)) {
+                awaitEntity.refresh(getTestContext(), (CloudbreakClient) null);
+            }
+        } catch (Exception e) {
+            if (runningParameter.isLogError()) {
+                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}",
+                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName(), e);
                 Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
                         entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }

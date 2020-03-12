@@ -41,6 +41,7 @@ public class DistroXTest extends ImageValidatorE2ETest {
                     distrox.getResponse();
                     return distrox;
                 })
+                .when(distroXTestClient.get())
                 .validate();
     }
 

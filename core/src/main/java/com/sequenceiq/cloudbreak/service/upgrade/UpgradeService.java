@@ -231,8 +231,7 @@ public class UpgradeService {
     }
 
     private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> getImageFilter(Image image, Stack stack) {
-        return packageVersionFilter(image.getPackageVersions())
-                .and(parcelFilter(stack));
+        return packageVersionFilter(image.getPackageVersions()).and(parcelFilter(stack));
     }
 
     private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> packageVersionFilter(Map<String, String> packageVersions) {
@@ -249,6 +248,7 @@ public class UpgradeService {
         Set<String> originalClusterComponentUrls = clusterComponentConfigProvider.getClouderaManagerProductDetails(stack.getCluster().getId())
                 .stream()
                 .map(ClouderaManagerProduct::getParcel)
+                .filter(url -> url.endsWith("parcel"))
                 .collect(toSet());
         originalClusterComponentUrls.add(clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId()).getBaseUrl());
         return imageFromCatalog -> {
@@ -261,8 +261,7 @@ public class UpgradeService {
                         .collect(toSet());
                 newClusterComponentUrls.add(imageFromCatalog.getStackDetails().getRepo().getStack().get(imageFromCatalog.getOsType()));
                 newClusterComponentUrls.add(imageFromCatalog.getRepo().get(imageFromCatalog.getOsType()));
-                return newClusterComponentUrls
-                        .equals(originalClusterComponentUrls);
+                return newClusterComponentUrls.containsAll(originalClusterComponentUrls);
             }
         };
     }

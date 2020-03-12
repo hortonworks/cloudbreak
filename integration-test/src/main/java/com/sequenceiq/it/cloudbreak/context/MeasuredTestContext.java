@@ -16,6 +16,7 @@ import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -217,6 +218,12 @@ public class MeasuredTestContext extends MockedTestContext {
 
     @Override
     public SdxInternalTestDto await(SdxInternalTestDto entity, SdxClusterStatusResponse desiredStatuses,
+            RunningParameter runningParameter, long pollingInterval) {
+        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
+    }
+
+    @Override
+    public RedbeamsDatabaseServerTestDto await(RedbeamsDatabaseServerTestDto entity, com.sequenceiq.redbeams.api.model.common.Status desiredStatuses,
             RunningParameter runningParameter, long pollingInterval) {
         return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
     }
