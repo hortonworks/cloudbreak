@@ -13,23 +13,23 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
 @Service
-class CmMgmtServiceConfigLocationService extends AbstractCmConfigService {
+class CmMgmtServiceConfigLocationService implements CmConfigServiceDelegate {
 
     @Override
-    void setConfigs(Stack stack, ApiRoleList apiRoleList) {
+    public void setConfigs(Stack stack, ApiRoleList apiRoleList) {
         List<Resource> attachedDisks = stack.getDiskResources();
         if (!attachedDisks.isEmpty()) {
             Optional<ApiRole> eventServer = getApiRole("EVENTSERVER", apiRoleList);
-            eventServer.ifPresent(apiRole -> setConfig(apiRole, createApiConfig("eventserver_index_dir", "cloudera-scm-eventserver", attachedDisks.size())));
+            eventServer.ifPresent(apiRole -> addConfig(apiRole, createApiConfig("eventserver_index_dir", "cloudera-scm-eventserver", attachedDisks.size())));
 
             Optional<ApiRole> hostMonitor = getApiRole("HOSTMONITOR", apiRoleList);
-            hostMonitor.ifPresent(apiRole -> setConfig(apiRole, createApiConfig("firehose_storage_dir", "cloudera-host-monitor", attachedDisks.size())));
+            hostMonitor.ifPresent(apiRole -> addConfig(apiRole, createApiConfig("firehose_storage_dir", "cloudera-host-monitor", attachedDisks.size())));
 
             Optional<ApiRole> reportsManager = getApiRole("REPORTSMANAGER", apiRoleList);
-            reportsManager.ifPresent(apiRole -> setConfig(apiRole, createApiConfig("headlamp_scratch_dir", "cloudera-scm-headlamp", attachedDisks.size())));
+            reportsManager.ifPresent(apiRole -> addConfig(apiRole, createApiConfig("headlamp_scratch_dir", "cloudera-scm-headlamp", attachedDisks.size())));
 
             Optional<ApiRole> serviceMonitor = getApiRole("SERVICEMONITOR", apiRoleList);
-            serviceMonitor.ifPresent(apiRole -> setConfig(apiRole, createApiConfig("firehose_storage_dir", "cloudera-service-monitor", attachedDisks.size())));
+            serviceMonitor.ifPresent(apiRole -> addConfig(apiRole, createApiConfig("firehose_storage_dir", "cloudera-service-monitor", attachedDisks.size())));
         }
     }
 
