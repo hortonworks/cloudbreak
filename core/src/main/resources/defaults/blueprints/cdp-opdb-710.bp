@@ -52,7 +52,7 @@
             "configs": [
               {
                 "name": "dfs_datanode_max_locked_memory",
-                "value": "2147483648"
+                "value": "0"
               }
             ]
           },
@@ -115,7 +115,7 @@
             "configs": [
               {
                 "name": "hbase_regionserver_java_heapsize",
-                "value": "7516192768"
+                "value": "6979321856"
               },
               {
                 "name": "hbase_bucketcache_ioengine",
@@ -131,7 +131,7 @@
               },
               {
                 "name": "hbase_bucketcache_size",
-                "value": "8192"
+                "value": "6656"
               },
               {
                 "name": "hbase_regionserver_handler_count",
@@ -179,6 +179,42 @@
             "roleType": "KNOX_GATEWAY"
           }
         ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "base": true
+          },
+          {
+            "refName": "yarn-NODEMANAGER-BASE",
+            "roleType": "NODEMANAGER",
+            "configs": [
+              {
+                "name": "node_manager_java_heapsize",
+                "value": "536870912"
+              },
+              {
+                "name": "yarn_nodemanager_resource_memory_mb",
+                "value": "3584"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "base": true
+          },
+          {
+            "refName": "yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
       }
     ],
     "hostTemplates": [
@@ -188,7 +224,8 @@
         "roleConfigGroupsRefNames": [
           "hbase-GATEWAY-BASE",
           "hdfs-GATEWAY-BASE",
-          "knox-KNOX-GATEWAY-BASE"
+          "knox-KNOX-GATEWAY-BASE",
+          "yarn-GATEWAY-BASE"
         ]
       },
       {
@@ -201,6 +238,7 @@
           "hdfs-GATEWAY-BASE",
           "hdfs-JOURNALNODE-BASE",
           "hdfs-NAMENODE-BASE",
+          "yarn-GATEWAY-BASE",
           "zookeeper-SERVER-BASE"
         ]
       },
@@ -211,6 +249,9 @@
           "hbase-GATEWAY-BASE",
           "hdfs-GATEWAY-BASE",
           "hdfs-JOURNALNODE-BASE",
+          "yarn-JOBHISTORY-BASE",
+          "yarn-RESOURCEMANAGER-BASE",
+          "yarn-GATEWAY-BASE",
           "zookeeper-SERVER-BASE"
         ]
       },
@@ -222,7 +263,9 @@
           "hbase-REGIONSERVER-BASE",
           "hdfs-DATANODE-BASE",
           "hdfs-GATEWAY-BASE",
-          "phoenix-PHOENIX_QUERY_SERVER-BASE"
+          "phoenix-PHOENIX_QUERY_SERVER-BASE",
+          "yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER-BASE"
         ]
       }
     ]
