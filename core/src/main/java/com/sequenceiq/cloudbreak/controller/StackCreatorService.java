@@ -255,7 +255,7 @@ public class StackCreatorService {
 
                 try {
                     LOGGER.info("Create cluster enity in the database with name {}.", stackName);
-                    createClusterIfNeed(user, stackRequest, newStack, stackName, blueprint, environment.getParentEnvironmentCloudPlatform());
+                    createClusterIfNeed(user, stackRequest, newStack, stackName, blueprint);
                 } catch (CloudbreakImageNotFoundException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
@@ -370,10 +370,10 @@ public class StackCreatorService {
     }
 
     private void createClusterIfNeed(User user, StackV4Request stackRequest, Stack stack, String stackName,
-            Blueprint blueprint, String parentEnvironmentCloudPlatform) throws CloudbreakImageNotFoundException, IOException, TransactionExecutionException {
+            Blueprint blueprint) throws CloudbreakImageNotFoundException, IOException, TransactionExecutionException {
         if (stackRequest.getCluster() != null) {
             long start = System.currentTimeMillis();
-            Cluster cluster = clusterCreationService.prepare(stackRequest.getCluster(), stack, blueprint, user, parentEnvironmentCloudPlatform);
+            Cluster cluster = clusterCreationService.prepare(stackRequest.getCluster(), stack, blueprint, user);
             LOGGER.debug("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             stack.setCluster(cluster);
         }

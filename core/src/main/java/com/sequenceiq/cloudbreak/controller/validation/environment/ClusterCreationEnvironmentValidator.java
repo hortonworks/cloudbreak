@@ -51,23 +51,18 @@ public class ClusterCreationEnvironmentValidator {
                 .displayNameToRegion(stack.getRegion());
         String displayName = cloudPlatformConnectors.getDefault(platform(stack.cloudPlatform()))
                 .regionToDisplayName(stack.getRegion());
-        String parentEnvironmentCloudPlatform = null;
-        if (environment != null) {
-            parentEnvironmentCloudPlatform = environment.getParentEnvironmentCloudPlatform();
-            if (!CollectionUtils.isEmpty(environment.getRegions().getNames())
-                    && environment.getRegions()
-                    .getNames()
-                    .stream()
-                    .noneMatch(region -> region.equals(regionName) || region.equals(displayName))) {
-                resultBuilder.error(String.format("[%s] region is not enabled in [%s] environment. Enabled regions: [%s]", stack.getRegion(),
-                        environment.getName(), environment.getRegions().getNames().stream().sorted().collect(Collectors.joining(","))));
-            }
+        if (environment != null && !CollectionUtils.isEmpty(environment.getRegions().getNames())
+                && environment.getRegions()
+                .getNames()
+                .stream()
+                .noneMatch(region -> region.equals(regionName) || region.equals(displayName))) {
+            resultBuilder.error(String.format("[%s] region is not enabled in [%s] environment. Enabled regions: [%s]", stack.getRegion(),
+                    environment.getName(), environment.getRegions().getNames().stream().sorted().collect(Collectors.joining(","))));
         }
-
         Long workspaceId = stack.getWorkspace().getId();
         validateRdsConfigNames(clusterRequest.getDatabases(), resultBuilder, workspaceId);
         validateProxyConfig(clusterRequest.getProxyConfigCrn(), resultBuilder);
-        validateAutoTls(clusterRequest, stack, resultBuilder, parentEnvironmentCloudPlatform);
+        validateAutoTls(clusterRequest, stack, resultBuilder);
         return resultBuilder.build();
     }
 
@@ -95,12 +90,8 @@ public class ClusterCreationEnvironmentValidator {
         }
     }
 
-    private void validateAutoTls(
-            ClusterV4Request clusterRequest,
-            Stack stack,
-            ValidationResultBuilder resultBuilder,
-            String parentEnvironmentCloudPlatform) {
-        boolean platformAutoTls = isAutoTlsSupportedByCloudPlatform(stack, parentEnvironmentCloudPlatform);
+    private void validateAutoTls(ClusterV4Request clusterRequest, Stack stack, ValidationResultBuilder resultBuilder) {
+        boolean platformAutoTls = isAutoTlsSupportedByCloudPlatform(stack);
         Optional<Boolean> requestedAutoTlsOptional = ofNullable(clusterRequest.getCm())
                 .map(ClouderaManagerV4Request::getEnableAutoTls);
         boolean effectiveAutoTls = platformAutoTls;
@@ -119,9 +110,8 @@ public class ClusterCreationEnvironmentValidator {
         }
     }
 
-    private boolean isAutoTlsSupportedByCloudPlatform(Stack stack, String parentEnvironmentCloudPlatform) {
-        String cloudPlatform = Optional.ofNullable(parentEnvironmentCloudPlatform).orElse(stack.getCloudPlatform());
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(platform(cloudPlatform), Variant.variant(stack.getPlatformVariant()));
+    private boolean isAutoTlsSupportedByCloudPlatform(Stack stack) {
+        CloudConnector<Object> connector = cloudPlatformConnectors.get(platform(stack.cloudPlatform()), Variant.variant(stack.getPlatformVariant()));
         PlatformParameters platformParameters = connector.parameters();
         return platformParameters.isAutoTlsSupported();
     }

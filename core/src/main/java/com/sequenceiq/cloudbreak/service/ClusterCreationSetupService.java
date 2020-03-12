@@ -111,12 +111,7 @@ public class ClusterCreationSetupService {
         }
     }
 
-    public Cluster prepare(
-            ClusterV4Request request,
-            Stack stack,
-            Blueprint blueprint,
-            User user,
-            String parentEnvironmentCloudPlatform) throws IOException,
+    public Cluster prepare(ClusterV4Request request, Stack stack, Blueprint blueprint, User user) throws IOException,
             CloudbreakImageNotFoundException, TransactionExecutionException {
         String stackName = stack.getName();
         Cluster clusterStub = stack.getCluster();
@@ -131,7 +126,7 @@ public class ClusterCreationSetupService {
         clusterStub.setStack(stack);
         clusterStub.setWorkspace(stack.getWorkspace());
 
-        Cluster cluster = clusterDecorator.decorate(clusterStub, request, blueprint, user, stack.getWorkspace(), stack, parentEnvironmentCloudPlatform);
+        Cluster cluster = clusterDecorator.decorate(clusterStub, request, blueprint, user, stack.getWorkspace(), stack);
 
         decorateStackWithCustomDomainIfAdOrIpaJoinable(stack);
 

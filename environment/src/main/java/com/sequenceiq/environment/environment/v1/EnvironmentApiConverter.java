@@ -308,8 +308,7 @@ public class EnvironmentApiConverter {
                 .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
                 .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn())
-                .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
-                .withParentEnvironmentCloudPlatform(environmentDto.getParentEnvironmentCloudPlatform());
+                .withParentEnvironmentName(environmentDto.getParentEnvironmentName());
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network ->
                 builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel())));
