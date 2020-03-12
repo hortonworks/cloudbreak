@@ -45,7 +45,7 @@ public class ResourceCrnListPermissionCheckerTest {
 
             @Override
             public AuthorizationResourceAction action() {
-                return AuthorizationResourceAction.WRITE;
+                return AuthorizationResourceAction.RD_WRITE;
             }
 
             @Override
@@ -59,6 +59,6 @@ public class ResourceCrnListPermissionCheckerTest {
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceCrnList.class), eq(Collection.class));
         verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), any(), anyString());
         verify(commonPermissionCheckingUtils).checkPermissionForUserOnResources(eq(AuthorizationResourceType.CREDENTIAL),
-                eq(AuthorizationResourceAction.WRITE), eq(USER_CRN), any());
+                eq(AuthorizationResourceAction.RD_WRITE), eq(USER_CRN), any());
     }
 }

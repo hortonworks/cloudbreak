@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util.base;
 
-import com.sequenceiq.authorization.RightsConstants;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 public enum RightV4 {
-    DISTROX_READ(RightsConstants.DATAHUB_RESOURCE, RightsConstants.READ_ACTION),
-    DISTROX_WRITE(RightsConstants.DATAHUB_RESOURCE, RightsConstants.WRITE_ACTION),
-    SDX_READ(RightsConstants.DATALAKE_RESOURCE, RightsConstants.READ_ACTION),
-    SDX_WRITE(RightsConstants.DATALAKE_RESOURCE, RightsConstants.WRITE_ACTION),
-    ENVIRONMENT_READ(RightsConstants.ENVIRONMENT_RESOURCE, RightsConstants.READ_ACTION),
-    ENVIRONMENT_WRITE(RightsConstants.ENVIRONMENT_RESOURCE, RightsConstants.WRITE_ACTION);
+    DISTROX_READ(AuthorizationResourceType.DATAHUB.getResource(), AuthorizationResourceAction.READ.getAction()),
+    DISTROX_WRITE(AuthorizationResourceType.DATAHUB.getResource(), AuthorizationResourceAction.WRITE.getAction()),
+    SDX_READ(AuthorizationResourceType.DATALAKE.getResource(), AuthorizationResourceAction.READ.getAction()),
+    SDX_WRITE(AuthorizationResourceType.DATALAKE.getResource(), AuthorizationResourceAction.WRITE.getAction()),
+    ENVIRONMENT_READ(AuthorizationResourceType.ENVIRONMENT.getResource(), AuthorizationResourceAction.READ.getAction()),
+    ENVIRONMENT_WRITE(AuthorizationResourceType.ENVIRONMENT.getResource(), AuthorizationResourceAction.WRITE.getAction());
 
     private String resource;
 

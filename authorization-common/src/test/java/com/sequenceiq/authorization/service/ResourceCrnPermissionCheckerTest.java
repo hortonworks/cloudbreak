@@ -18,9 +18,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceCrnPermissionCheckerTest {
@@ -43,7 +43,7 @@ public class ResourceCrnPermissionCheckerTest {
 
             @Override
             public AuthorizationResourceAction action() {
-                return AuthorizationResourceAction.WRITE;
+                return AuthorizationResourceAction.RD_WRITE;
             }
 
             @Override
@@ -57,6 +57,6 @@ public class ResourceCrnPermissionCheckerTest {
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceCrn.class), eq(String.class));
         verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), any(), anyString());
         verify(commonPermissionCheckingUtils)
-                .checkPermissionForUserOnResource(eq(AuthorizationResourceType.CREDENTIAL), eq(AuthorizationResourceAction.WRITE), eq(USER_CRN), anyString());
+                .checkPermissionForUserOnResource(eq(AuthorizationResourceType.CREDENTIAL), eq(AuthorizationResourceAction.RD_WRITE), eq(USER_CRN), anyString());
     }
 }

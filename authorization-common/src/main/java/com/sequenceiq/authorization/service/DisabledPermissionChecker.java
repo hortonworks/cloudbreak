@@ -9,6 +9,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @Component
@@ -26,5 +27,10 @@ public class DisabledPermissionChecker implements PermissionChecker<DisableCheck
     @Override
     public Class<DisableCheckPermissions> supportedAnnotation() {
         return DisableCheckPermissions.class;
+    }
+
+    @Override
+    public AuthorizationResourceAction.ActionType actionType() {
+        return AuthorizationResourceAction.ActionType.RESOURCE_INDEPENDENT;
     }
 }

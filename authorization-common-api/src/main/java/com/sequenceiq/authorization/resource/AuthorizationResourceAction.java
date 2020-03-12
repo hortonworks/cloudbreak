@@ -5,28 +5,40 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.authorization.RightsConstants;
-
 public enum AuthorizationResourceAction {
-    READ(RightsConstants.READ_ACTION),
-    WRITE(RightsConstants.WRITE_ACTION),
-    ACCESS_ENVIRONMENT(RightsConstants.ACCESS_ENVIRONMENT_ACTION),
-    ADMIN_FREEIPA(RightsConstants.ADMIN_FREEIPA_ACTION),
-    CREATE(RightsConstants.CREATE_ACTION);
+    READ("read", ActionType.RESOURCE_INDEPENDENT),
+    WRITE("write", ActionType.RESOURCE_INDEPENDENT),
+    RD_READ("rdRead", ActionType.RESOURCE_DEPENDENT),
+    RD_WRITE("rdWrite", ActionType.RESOURCE_DEPENDENT),
+    ACCESS_ENVIRONMENT("accessEnvironment", ActionType.RESOURCE_DEPENDENT),
+    ADMIN_FREEIPA("adminFreeIPA", ActionType.RESOURCE_DEPENDENT),
+    CREATE("create", ActionType.RESOURCE_INDEPENDENT);
 
-    private String authorizationName;
+    private final String action;
 
-    AuthorizationResourceAction(String authorizationName) {
-        this.authorizationName = authorizationName;
+    private final ActionType actionType;
+
+    AuthorizationResourceAction(String action, ActionType actionType) {
+        this.action = action;
+        this.actionType = actionType;
     }
 
-    public String getAuthorizationName() {
-        return authorizationName;
+    public String getAction() {
+        return action;
+    }
+
+    public ActionType getActionType() {
+        return actionType;
     }
 
     public static Optional<AuthorizationResourceAction> getByName(String name) {
         return Arrays.stream(AuthorizationResourceAction.values())
-                .filter(resource -> StringUtils.equals(resource.getAuthorizationName(), name))
+                .filter(resource -> StringUtils.equals(resource.getAction(), name))
                 .findAny();
+    }
+
+    public enum ActionType {
+        RESOURCE_DEPENDENT,
+        RESOURCE_INDEPENDENT;
     }
 }

@@ -46,11 +46,7 @@ public class ResourceObjectPermissionChecker implements PermissionChecker<CheckP
     @Override
     public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
-        // first check the API related resource and method relacted action
-        CheckPermissionByResourceObject methodAnnotation = (CheckPermissionByResourceObject) rawMethodAnnotation;
-        AuthorizationResourceAction action = methodAnnotation.action();
-        commonPermissionCheckingUtils.checkPermissionForUser(resourceType, action, userCrn);
-        // then check fields of resourceObject
+        // check fields of resourceObject
         Object resourceObject = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, ResourceObject.class, Object.class);
         checkPermissionOnResourceObjectFields(userCrn, resourceObject);
         return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
@@ -70,6 +66,7 @@ public class ResourceObjectPermissionChecker implements PermissionChecker<CheckP
                         ? resourceBasedCrnProviderMap.get(resourceObjectField.type()).getResourceCrnByResourceName(resourceNameOrCrn)
                         : resourceNameOrCrn;
                 AuthorizationResourceAction action = resourceObjectField.action();
+                checkActionType(resourceObjectField.type(), action);
                 commonPermissionCheckingUtils.checkPermissionForUserOnResource(resourceObjectField.type(), action, userCrn, resourceCrn);
             } catch (AccessDeniedException e) {
                 LOGGER.error("Error happened while traversing the resource object: ", e);
@@ -84,5 +81,10 @@ public class ResourceObjectPermissionChecker implements PermissionChecker<CheckP
     @Override
     public Class<CheckPermissionByResourceObject> supportedAnnotation() {
         return CheckPermissionByResourceObject.class;
+    }
+
+    @Override
+    public AuthorizationResourceAction.ActionType actionType() {
+        return AuthorizationResourceAction.ActionType.RESOURCE_DEPENDENT;
     }
 }

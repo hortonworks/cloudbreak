@@ -11,7 +11,7 @@ import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
-import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
@@ -39,7 +39,7 @@ public class LdapConfigV1Controller extends NotificationController implements Ld
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public DescribeLdapConfigResponse getForCluster(@ResourceCrn String environmentCrn, String clusterName) throws FreeIpaClientException {
+    public DescribeLdapConfigResponse getForCluster(@TenantAwareParam String environmentCrn, String clusterName) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
         return ldapConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
     }

@@ -27,6 +27,7 @@ public class DefaultPermissionChecker implements PermissionChecker<CheckPermissi
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
         CheckPermissionByAccount methodAnnotation = (CheckPermissionByAccount) rawMethodAnnotation;
         AuthorizationResourceAction action = methodAnnotation.action();
+        checkActionType(resource, action);
         commonPermissionCheckingUtils.checkPermissionForUser(resource, action, userCrn);
         return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
@@ -34,5 +35,10 @@ public class DefaultPermissionChecker implements PermissionChecker<CheckPermissi
     @Override
     public Class<CheckPermissionByAccount> supportedAnnotation() {
         return CheckPermissionByAccount.class;
+    }
+
+    @Override
+    public AuthorizationResourceAction.ActionType actionType() {
+        return AuthorizationResourceAction.ActionType.RESOURCE_INDEPENDENT;
     }
 }

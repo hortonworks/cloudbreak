@@ -17,7 +17,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
-import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
@@ -106,7 +106,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public DetailedEnvironmentResponse getByCrn(@ResourceCrn String crn) {
+    public DetailedEnvironmentResponse getByCrn(@TenantAwareParam String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         return environmentApiConverter.dtoToDetailedResponse(environmentDto);
@@ -123,7 +123,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
-    public SimpleEnvironmentResponse deleteByCrn(@ResourceCrn String crn, boolean forced) {
+    public SimpleEnvironmentResponse deleteByCrn(@TenantAwareParam String crn, boolean forced) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         EnvironmentDto environmentDto = environmentDeletionService.deleteByCrnAndAccountId(crn, accountId, actualUserCrn, forced);
@@ -204,7 +204,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
-    public void postStartByCrn(@ResourceCrn String crn) {
+    public void postStartByCrn(@TenantAwareParam String crn) {
         environmentStartService.startByCrn(crn);
     }
 
@@ -216,7 +216,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
-    public void postStopByCrn(@ResourceCrn String crn) {
+    public void postStopByCrn(@TenantAwareParam String crn) {
         environmentStopService.stopByCrn(crn);
     }
 
@@ -230,7 +230,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public Object getCreateEnvironmentForCliByCrn(@ResourceCrn String crn) {
+    public Object getCreateEnvironmentForCliByCrn(@TenantAwareParam String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         return environmentService.getCreateEnvironmentForCli(environmentDto);
