@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -17,6 +18,7 @@ import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.projection.StackAuthenticationView;
 
 @Transactional(TxType.REQUIRED)
 @AuthorizationResourceType(resource = AuthorizationResource.ENVIRONMENT)
@@ -35,6 +37,13 @@ public interface InstanceMetaDataRepository extends BaseCrudRepository<InstanceM
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceId = :instanceId AND i.instanceGroup.stack.id= :stackId")
     InstanceMetaData findByInstanceId(@Param("stackId") Long stackId, @Param("instanceId") String instanceId);
+
+    @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT s.id as stackId, s.stackAuthentication as stackAuthentication FROM InstanceMetaData i " +
+            "LEFT JOIN i.instanceGroup ig " +
+            "LEFT JOIN ig.stack s " +
+            "WHERE i.id = :instanceId")
+    Optional<StackAuthenticationView> getStackAuthenticationViewByInstanceMetaDataId(@Param("instanceId") Long id);
 
     @CheckPermission(action = ResourceAction.READ)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
