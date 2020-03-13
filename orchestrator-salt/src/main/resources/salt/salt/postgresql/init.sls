@@ -83,7 +83,6 @@ init-services-db:
 
 restart-pgsql-if-reconfigured:
   service.running:
-    - enable: True
     - name: postgresql
     - watch:
       - cmd: configure-listen-address
