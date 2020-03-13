@@ -5,16 +5,11 @@ import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetB
 import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetBuilder.AZ_B;
 import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetBuilder.AZ_C;
 import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetBuilder.AZ_D;
-import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -33,7 +28,7 @@ public class SubnetSelectorServiceTest {
         List<CloudSubnet> cloudSubnets = new SubnetBuilder()
                 .build();
 
-        Map<String, CloudSubnet> privateSubnetsPerAz = subnetSelectorService.collectOnePrivateSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> privateSubnetsPerAz = subnetSelectorService.collectPrivateSubnets(cloudSubnets);
 
         assertTrue(privateSubnetsPerAz.isEmpty());
     }
@@ -46,9 +41,9 @@ public class SubnetSelectorServiceTest {
                 .withPrivateSubnet(AZ_C)
                 .build();
 
-        Map<String, CloudSubnet> privateSubnetsPerAz = subnetSelectorService.collectOnePrivateSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> privateSubnetsPerAz = subnetSelectorService.collectPrivateSubnets(cloudSubnets);
 
-        assertThat(privateSubnetsPerAz.values(), hasSize(3));
+        assertThat(privateSubnetsPerAz, hasSize(3));
     }
 
     @Test
@@ -60,9 +55,9 @@ public class SubnetSelectorServiceTest {
                 .withPrivateSubnet(AZ_D)
                 .build();
 
-        Map<String, CloudSubnet> privateSubnetsPerAz = subnetSelectorService.collectOnePrivateSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> privateSubnetsPerAz = subnetSelectorService.collectPrivateSubnets(cloudSubnets);
 
-        assertThat(privateSubnetsPerAz.values(), hasSize(3));
+        assertThat(privateSubnetsPerAz, hasSize(4));
     }
 
     @Test
@@ -72,10 +67,9 @@ public class SubnetSelectorServiceTest {
                 .withPrivateSubnet(AZ_A)
                 .build();
 
-        Map<String, CloudSubnet> privateSubnetsPerAz = subnetSelectorService.collectOnePrivateSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> privateSubnetsPerAz = subnetSelectorService.collectPrivateSubnets(cloudSubnets);
 
-        assertThat(privateSubnetsPerAz.values(), hasSize(1));
-        assertTrue(privateSubnetsPerAz.containsKey(AZ_A));
+        assertThat(privateSubnetsPerAz, hasSize(2));
     }
 
     @Test
@@ -85,10 +79,10 @@ public class SubnetSelectorServiceTest {
                 .withPublicSubnet(AZ_B)
                 .build();
 
-        Map<String, CloudSubnet> privateSubnetsPerAz = subnetSelectorService.collectOnePrivateSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> privateSubnetsPerAz = subnetSelectorService.collectPrivateSubnets(cloudSubnets);
 
-        assertThat(privateSubnetsPerAz.values(), hasSize(1));
-        assertTrue(privateSubnetsPerAz.containsKey(AZ_A));
+        assertThat(privateSubnetsPerAz, hasSize(1));
+        assertTrue(getSubnetByAz(privateSubnetsPerAz, AZ_A).isPresent());
     }
 
     @Test
@@ -98,7 +92,7 @@ public class SubnetSelectorServiceTest {
                 .withPublicSubnet(AZ_B)
                 .build();
 
-        Map<String, CloudSubnet> privateSubnetsPerAz = subnetSelectorService.collectOnePrivateSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> privateSubnetsPerAz = subnetSelectorService.collectPrivateSubnets(cloudSubnets);
 
         assertTrue(privateSubnetsPerAz.isEmpty());
     }
@@ -108,7 +102,7 @@ public class SubnetSelectorServiceTest {
         List<CloudSubnet> cloudSubnets = new SubnetBuilder()
                 .build();
 
-        Map<String, CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectOnePublicSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectPublicSubnets(cloudSubnets);
 
         assertTrue(publicSubnetsPerAz.isEmpty());
     }
@@ -121,9 +115,9 @@ public class SubnetSelectorServiceTest {
                 .withPublicSubnet(AZ_C)
                 .build();
 
-        Map<String, CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectOnePublicSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectPublicSubnets(cloudSubnets);
 
-        assertThat(publicSubnetsPerAz.values(), hasSize(3));
+        assertThat(publicSubnetsPerAz, hasSize(3));
     }
 
     @Test
@@ -135,9 +129,9 @@ public class SubnetSelectorServiceTest {
                 .withPublicSubnet(AZ_D)
                 .build();
 
-        Map<String, CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectOnePublicSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectPublicSubnets(cloudSubnets);
 
-        assertThat(publicSubnetsPerAz.values(), hasSize(3));
+        assertThat(publicSubnetsPerAz, hasSize(4));
     }
 
     @Test
@@ -147,10 +141,9 @@ public class SubnetSelectorServiceTest {
                 .withPublicSubnet(AZ_A)
                 .build();
 
-        Map<String, CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectOnePublicSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectPublicSubnets(cloudSubnets);
 
-        assertThat(publicSubnetsPerAz.values(), hasSize(1));
-        assertTrue(publicSubnetsPerAz.containsKey(AZ_A));
+        assertThat(publicSubnetsPerAz, hasSize(2));
     }
 
     @Test
@@ -160,10 +153,10 @@ public class SubnetSelectorServiceTest {
                 .withPrivateSubnet(AZ_B)
                 .build();
 
-        Map<String, CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectOnePublicSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectPublicSubnets(cloudSubnets);
 
-        assertThat(publicSubnetsPerAz.values(), hasSize(1));
-        assertTrue(publicSubnetsPerAz.containsKey(AZ_A));
+        assertThat(publicSubnetsPerAz, hasSize(1));
+        assertTrue(getSubnetByAz(publicSubnetsPerAz, AZ_A).isPresent());
     }
 
     @Test
@@ -173,7 +166,7 @@ public class SubnetSelectorServiceTest {
                 .withPrivateSubnet(AZ_B)
                 .build();
 
-        Map<String, CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectOnePublicSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectPublicSubnets(cloudSubnets);
 
         assertTrue(publicSubnetsPerAz.isEmpty());
     }
@@ -184,151 +177,12 @@ public class SubnetSelectorServiceTest {
                 .withPublicSubnetNoPublicIp(AZ_A)
                 .build();
 
-        Map<String, CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectOnePublicSubnetPerAz(cloudSubnets, 3);
+        List<CloudSubnet> publicSubnetsPerAz = subnetSelectorService.collectPublicSubnets(cloudSubnets);
 
         assertTrue(publicSubnetsPerAz.isEmpty());
     }
 
-    @Test
-    public void testGetOnePrivateSubnetWhenEmptyThenReturnsOptionalEmpty() {
-        List<CloudSubnet> cloudSubnets = new SubnetBuilder()
-                .build();
-
-        Optional<CloudSubnet> foundSubnet = subnetSelectorService.getOnePrivateSubnet(cloudSubnets);
-
-        assertTrue(foundSubnet.isEmpty());
-    }
-
-    @Test
-    public void testGetOnePrivateSubnetWhenPrivateThenReturnsTheSubnet() {
-        List<CloudSubnet> cloudSubnets = new SubnetBuilder()
-                .withPrivateSubnet()
-                .build();
-
-        Optional<CloudSubnet> foundSubnet = subnetSelectorService.getOnePrivateSubnet(cloudSubnets);
-
-        assertTrue(foundSubnet.isPresent());
-    }
-
-    @Test
-    public void testGetOnePrivateSubnetWhenPublicThenReturnsOptionalEmpty() {
-        List<CloudSubnet> cloudSubnets = new SubnetBuilder()
-                .withPublicSubnet()
-                .build();
-
-        Optional<CloudSubnet> foundSubnet = subnetSelectorService.getOnePrivateSubnet(cloudSubnets);
-
-        assertTrue(foundSubnet.isEmpty());
-    }
-
-    @Test
-    public void testGetOnePrivateSubnetWhenPublicAndPrivateThenReturnsThePrivateSubnet() {
-        List<CloudSubnet> cloudSubnets = new SubnetBuilder()
-                .withPublicSubnet()
-                .withPrivateSubnet()
-                .build();
-
-        Optional<CloudSubnet> foundSubnet = subnetSelectorService.getOnePrivateSubnet(cloudSubnets);
-
-        assertTrue(foundSubnet.isPresent());
-        assertTrue(foundSubnet.get().isPrivateSubnet());
-    }
-
-    @Test
-    public void testGetOnePublicSubnetWhenEmptyThenReturnsOptionalEmpty() {
-        List<CloudSubnet> cloudSubnets = new SubnetBuilder()
-                .build();
-
-        Optional<CloudSubnet> foundSubnet = subnetSelectorService.getOnePublicSubnet(cloudSubnets);
-
-        assertTrue(foundSubnet.isEmpty());
-    }
-
-    @Test
-    public void testGetOnePublicSubnetWhenPublicThenReturnsOptionalOfTheSubnet() {
-        List<CloudSubnet> cloudSubnets = new SubnetBuilder()
-                .withPublicSubnet()
-                .build();
-
-        Optional<CloudSubnet> foundSubnet = subnetSelectorService.getOnePublicSubnet(cloudSubnets);
-
-        assertTrue(foundSubnet.isPresent());
-    }
-
-    @Test
-    public void testGetOnePublicSubnetWhenPrivateThenReturnsOptionalEmpty() {
-        List<CloudSubnet> cloudSubnets = new SubnetBuilder()
-                .withPrivateSubnet()
-                .build();
-
-        Optional<CloudSubnet> foundSubnet = subnetSelectorService.getOnePublicSubnet(cloudSubnets);
-
-        assertTrue(foundSubnet.isEmpty());
-    }
-
-    @Test
-    public void testGetOnePublicSubnetWhenPublicWithNoPublicIpThenReturnsOptionalEmpty() {
-        List<CloudSubnet> cloudSubnets = new SubnetBuilder()
-                .withPublicSubnetNoPublicIp()
-                .build();
-
-        Optional<CloudSubnet> foundSubnet = subnetSelectorService.getOnePublicSubnet(cloudSubnets);
-
-        assertTrue(foundSubnet.isEmpty());
-    }
-
-    @Test
-    public void testGetOnePublicSubnetWhenPublicAndPrivateThenReturnsOptionalOfPublicSubnet() {
-        List<CloudSubnet> cloudSubnets = new SubnetBuilder()
-                .withPublicSubnet()
-                .withPrivateSubnet()
-                .build();
-
-        Optional<CloudSubnet> foundSubnet = subnetSelectorService.getOnePublicSubnet(cloudSubnets);
-
-        assertTrue(foundSubnet.isPresent());
-        assertFalse(foundSubnet.get().isPrivateSubnet());
-    }
-
-    @Test
-    public void testCollectSubnetsOfMissingAzWhenTwoDifferentAzsThenReturnsBothAzs() {
-        Map<String, CloudSubnet> subnetPerAz1 = getSubnetsPerAZ(List.of(AZ_A));
-        Map<String, CloudSubnet> subnetPerAz2 = getSubnetsPerAZ(List.of(AZ_B));
-
-        Map<String, CloudSubnet> subnets = subnetSelectorService.collectSubnetsOfMissingAz(subnetPerAz1, subnetPerAz2, 2);
-
-        assertEquals(2, subnets.size());
-    }
-
-    @Test
-    public void testCollectSubnetsOfMissingAzWhenSameAzIsAddedThenKeepsSubnetAlreadyPresent() {
-        Map<String, CloudSubnet> subnetPerAz1 = getSubnetsPerAZ(List.of(AZ_A));
-        Map<String, CloudSubnet> subnetPerAz2 = getSubnetsPerAZ(List.of(AZ_A, AZ_A));
-
-        Map<String, CloudSubnet> subnets = subnetSelectorService.collectSubnetsOfMissingAz(subnetPerAz1, subnetPerAz2, 2);
-
-        assertEquals(1, subnets.size());
-        assertEquals("subnet-1", subnets.get(AZ_A).getId());
-    }
-
-    @Test
-    public void testCollectSubnetsOfMissingAzWhenMoreSubnetsThanMaxThenNoSubnetsWithNewAzAdded() {
-        Map<String, CloudSubnet> subnetPerAz1 = getSubnetsPerAZ(List.of(AZ_A, AZ_B));
-        Map<String, CloudSubnet> subnetPerAz2 = getSubnetsPerAZ(List.of(AZ_C));
-
-        Map<String, CloudSubnet> subnets = subnetSelectorService.collectSubnetsOfMissingAz(subnetPerAz1, subnetPerAz2, 2);
-
-        assertEquals(2, subnets.size());
-        assertTrue(subnets.containsKey(AZ_A));
-        assertTrue(subnets.containsKey(AZ_B));
-    }
-
-    private Map<String, CloudSubnet> getSubnetsPerAZ(List<String> azs) {
-        Map<String, CloudSubnet> subnetsPerAz = new HashMap<>();
-        int subnetId = 1;
-        for (String az : azs) {
-            subnetsPerAz.putIfAbsent(az, new CloudSubnet("subnet-" + subnetId, "", az, "", true, false, false, PUBLIC));
-        }
-        return subnetsPerAz;
+    private Optional<CloudSubnet> getSubnetByAz(List<CloudSubnet> cloudSubnets, String az) {
+        return cloudSubnets.stream().filter(e -> e.getAvailabilityZone().equals(az)).findFirst();
     }
 }

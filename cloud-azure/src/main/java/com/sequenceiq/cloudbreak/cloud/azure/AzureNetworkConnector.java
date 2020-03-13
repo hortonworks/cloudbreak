@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,13 +33,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
-import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
 @Service
 public class AzureNetworkConnector implements NetworkConnector {
@@ -158,7 +159,7 @@ public class AzureNetworkConnector implements NetworkConnector {
     }
 
     @Override
-    public SubnetSelectionResult selectSubnets(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
+    public SubnetSelectionResult chooseSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
         return azureSubnetSelectorService.select(subnetMetas, subnetSelectionParameters);
     }
 

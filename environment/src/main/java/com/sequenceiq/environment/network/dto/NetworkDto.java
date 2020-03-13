@@ -1,6 +1,9 @@
 package com.sequenceiq.environment.network.dto;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -105,7 +108,7 @@ public class NetworkDto {
     }
 
     public Set<String> getSubnetIds() {
-        return subnetMetas.keySet();
+        return subnetMetas != null ? subnetMetas.keySet() : new HashSet<>();
     }
 
     public String getNetworkCidr() {
@@ -122,6 +125,10 @@ public class NetworkDto {
 
     public Map<String, CloudSubnet> getCbSubnets() {
         return cbSubnets;
+    }
+
+    public Collection<CloudSubnet> getCbSubnetValues() {
+        return cbSubnets != null ? cbSubnets.values() : new ArrayList<>();
     }
 
     public Map<String, CloudSubnet> getDwxSubnets() {

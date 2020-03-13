@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResource
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -22,9 +23,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -32,6 +36,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -42,16 +47,22 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Vpc;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategy;
+import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategyType;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
@@ -60,6 +71,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.common.api.type.Tunnel;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsNetworkConnectorTest {
@@ -125,6 +137,18 @@ public class AwsNetworkConnectorTest {
 
     @Mock
     private AwsTaggingService awsTaggingService;
+
+    @Mock
+    private Map<SubnetFilterStrategyType, SubnetFilterStrategy> subnetFilterStrategyMap;
+
+    @Mock
+    private SubnetFilterStrategy subnetFilterStrategy;
+
+    @Before
+    public void before() {
+        ReflectionTestUtils.setField(underTest, "minSubnetCountInDifferentAz", 2);
+        ReflectionTestUtils.setField(underTest, "maxSubnetCountInDifferentAz", 3);
+    }
 
     @Test
     public void testPlatformShouldReturnAwsPlatform() {
@@ -307,6 +331,151 @@ public class AwsNetworkConnectorTest {
 
         String result = underTest.getNetworkCidr(network, credential);
         assertEquals(cidrBlock1, result);
+    }
+
+    @Test
+    public void testSubnetSelectionWhenHaRequiredAnd2DifferentAZDeclaredShouldReturn2DifferentAz() {
+        List<CloudSubnet> cloudSubnets = Lists.newArrayList(
+                getSubnet("a1", 1),
+                getSubnet("a1", 2),
+                getSubnet("a2", 3),
+                getSubnet("a2", 4));
+
+        prepareMock(cloudSubnets);
+
+        SubnetSelectionParameters subnetSelectionParameters = SubnetSelectionParameters
+                .builder()
+                .withPreferPrivateIfExist()
+                .withTunnel(Tunnel.CCM)
+                .withHa(true)
+                .build();
+        SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
+        Assert.assertTrue(result.getResult().size() == 2);
+        Assert.assertTrue(result.getResult().size() == collectUniqueAzs(result).size());
+
+    }
+
+    @Test
+    public void testSubnetSelectionWhenHaRequiredAnd1DifferentAZDeclaredShouldReturnError() {
+        List<CloudSubnet> cloudSubnets = Lists.newArrayList(
+                getSubnet("a1", 1),
+                getSubnet("a1", 2),
+                getSubnet("a1", 3),
+                getSubnet("a1", 4));
+
+        prepareMock(cloudSubnets);
+
+        SubnetSelectionParameters subnetSelectionParameters = SubnetSelectionParameters
+                .builder()
+                .withPreferPrivateIfExist()
+                .withTunnel(Tunnel.CCM)
+                .withHa(true)
+                .build();
+
+        SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
+        Assert.assertTrue(result.hasError());
+    }
+
+    @Test
+    public void testSubnetSelectionWhenHaRequiredAnd4DifferentAZDeclaredShouldReturn3DifferentAz() {
+        List<CloudSubnet> cloudSubnets = Lists.newArrayList(
+                getSubnet("a1", 1),
+                getSubnet("a2", 2),
+                getSubnet("a3", 3),
+                getSubnet("a4", 4));
+
+        prepareMock(cloudSubnets);
+
+        SubnetSelectionParameters subnetSelectionParameters = SubnetSelectionParameters
+                .builder()
+                .withPreferPrivateIfExist()
+                .withTunnel(Tunnel.CCM)
+                .withHa(true)
+                .build();
+
+        SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
+        Assert.assertTrue(result.getResult().size() == 3);
+        Assert.assertTrue(result.getResult().size() == collectUniqueAzs(result).size());
+    }
+
+    public Set<String> collectUniqueAzs(SubnetSelectionResult result) {
+        return result.getResult().stream().map(e -> e.getAvailabilityZone()).collect(Collectors.toSet());
+    }
+
+    @Test
+    public void testSubnetSelectionWhenNonHaRequiredAnd2DifferentAZDeclaredShouldReturn1Az() {
+        List<CloudSubnet> cloudSubnets = Lists.newArrayList(
+                getSubnet("a1", 1),
+                getSubnet("a1", 2),
+                getSubnet("a2", 3),
+                getSubnet("a2", 4));
+
+        prepareMock(cloudSubnets);
+
+        SubnetSelectionParameters subnetSelectionParameters = SubnetSelectionParameters
+                .builder()
+                .withPreferPrivateIfExist()
+                .withTunnel(Tunnel.CCM)
+                .withHa(false)
+                .build();
+
+        SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
+        Assert.assertTrue(result.getResult().size() == 1);
+    }
+
+    public void prepareMock(List<CloudSubnet> cloudSubnets) {
+        Map<SubnetFilterStrategyType, SubnetFilterStrategy> subnetFilterStrategyMap = new HashMap<>();
+        subnetFilterStrategyMap.put(SubnetFilterStrategyType.MULTIPLE_PREFER_PRIVATE, subnetFilterStrategy);
+        subnetFilterStrategyMap.put(SubnetFilterStrategyType.MULTIPLE_PREFER_PUBLIC, subnetFilterStrategy);
+        when(subnetFilterStrategy.filter(any(), anyInt())).thenReturn(new SubnetSelectionResult(cloudSubnets));
+        ReflectionTestUtils.setField(underTest, "subnetFilterStrategyMap", subnetFilterStrategyMap);
+    }
+
+    @Test
+    public void testSubnetSelectionWhenNonHaRequiredAnd1DifferentAZDeclaredShouldReturnOneSubnet() {
+        List<CloudSubnet> cloudSubnets = Lists.newArrayList(
+                getSubnet("a1", 1),
+                getSubnet("a1", 2),
+                getSubnet("a1", 3),
+                getSubnet("a1", 4));
+
+        prepareMock(cloudSubnets);
+
+        SubnetSelectionParameters subnetSelectionParameters = SubnetSelectionParameters
+                .builder()
+                .withPreferPrivateIfExist()
+                .withTunnel(Tunnel.CCM)
+                .withHa(false)
+                .build();
+
+        SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
+        Assert.assertTrue(result.getResult().size() == 1);
+    }
+
+    @Test
+    public void testSubnetSelectionWhenNonHaRequiredAnd4DifferentAZDeclaredShouldReturn1Az() {
+        List<CloudSubnet> cloudSubnets = Lists.newArrayList(
+                getSubnet("a1", 1),
+                getSubnet("a2", 2),
+                getSubnet("a3", 3),
+                getSubnet("a4", 4));
+
+        prepareMock(cloudSubnets);
+
+        SubnetSelectionParameters subnetSelectionParameters = SubnetSelectionParameters
+                .builder()
+                .withPreferPrivateIfExist()
+                .withTunnel(Tunnel.CCM)
+                .withHa(false)
+                .build();
+
+        SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
+        Assert.assertTrue(result.getResult().size() == 1);
+    }
+
+    private CloudSubnet getSubnet(String az, int index) {
+        String nextSubnetId = "subnet-" + index;
+        return new CloudSubnet(nextSubnetId, "", az, "", true, false, false, PUBLIC);
     }
 
     private DescribeVpcsResult describeVpcsResult(String... cidrBlocks) {

@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetSelectorStrategy;
+import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategy;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
-import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetSelectorStrategyType;
+import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategyType;
 
 @Configuration
 public class AwsConfig {
@@ -39,7 +39,7 @@ public class AwsConfig {
     private String valueValidator;
 
     @Inject
-    private List<SubnetSelectorStrategy> subnetSelectorStrategies;
+    private List<SubnetFilterStrategy> subnetSelectorStrategies;
 
     @Bean(name = "AwsTagSpecification")
     public TagSpecification getTagSpecification() {
@@ -47,11 +47,11 @@ public class AwsConfig {
     }
 
     @Bean
-    public Map<SubnetSelectorStrategyType, SubnetSelectorStrategy> subnetSelectorStrategies() {
-        ImmutableMap.Builder<SubnetSelectorStrategyType, SubnetSelectorStrategy> builder = new ImmutableMap.Builder<>();
+    public Map<SubnetFilterStrategyType, SubnetFilterStrategy> subnetSelectorStrategies() {
+        ImmutableMap.Builder<SubnetFilterStrategyType, SubnetFilterStrategy> builder = new ImmutableMap.Builder<>();
 
-        for (SubnetSelectorStrategy subnetSelectorStrategy : subnetSelectorStrategies) {
-            builder.put(subnetSelectorStrategy.getType(), subnetSelectorStrategy);
+        for (SubnetFilterStrategy subnetFilterStrategy : subnetSelectorStrategies) {
+            builder.put(subnetFilterStrategy.getType(), subnetFilterStrategy);
         }
         return builder.build();
     }

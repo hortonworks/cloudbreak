@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.subnet.selector;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,21 +17,17 @@ public class AzureSubnetSelectorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureSubnetSelectorService.class);
 
-    public SubnetSelectionResult select(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
+    public SubnetSelectionResult select(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
         Optional<String> errorMessage = quickValidate(subnetMetas, subnetSelectionParameters);
         if (errorMessage.isPresent()) {
             LOGGER.debug("{}", errorMessage.get());
             return new SubnetSelectionResult(errorMessage.get());
         }
-
-        List<CloudSubnet> selectedSubnets = subnetSelectionParameters.isForDatabase()
-                ? new ArrayList<>(subnetMetas)
-                : List.of(subnetMetas.get(0));
-        LOGGER.debug("Azure selected subnets: '{}'", String.join(", ", selectedSubnets.stream().toString()));
-        return new SubnetSelectionResult(selectedSubnets);
+        LOGGER.debug("Azure selected subnets: '{}'", String.join(", ", subnetMetas.stream().toString()));
+        return new SubnetSelectionResult(subnetMetas.stream().collect(Collectors.toList()));
     }
 
-    private Optional<String> quickValidate(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
+    private Optional<String> quickValidate(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
         if (subnetMetas == null || subnetMetas.isEmpty()) {
             return Optional.of("Azure subnet selection: there are no subnets to choose from.");
         }

@@ -82,8 +82,8 @@ public class SubnetChooserServiceTest {
         underTest.chooseSubnets(subnets, CloudPlatform.AWS, new DBStack());
 
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
-        verify(networkConnector).selectSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
-        assertTrue(subnetSelectionParametersCaptor.getValue().isForDatabase());
+        verify(networkConnector).chooseSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
+        assertTrue(subnetSelectionParametersCaptor.getValue().isPreferPrivateIfExist());
         assertTrue(subnetSelectionParametersCaptor.getValue().isHa());
     }
 
@@ -97,8 +97,8 @@ public class SubnetChooserServiceTest {
         underTest.chooseSubnets(subnets, CloudPlatform.AWS, dbStack);
 
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
-        verify(networkConnector).selectSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
-        assertTrue(subnetSelectionParametersCaptor.getValue().isForDatabase());
+        verify(networkConnector).chooseSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
+        assertTrue(subnetSelectionParametersCaptor.getValue().isPreferPrivateIfExist());
         assertFalse(subnetSelectionParametersCaptor.getValue().isHa());
     }
 
@@ -112,8 +112,8 @@ public class SubnetChooserServiceTest {
         underTest.chooseSubnets(subnets, CloudPlatform.AWS, dbStack);
 
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
-        verify(networkConnector).selectSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
-        assertTrue(subnetSelectionParametersCaptor.getValue().isForDatabase());
+        verify(networkConnector).chooseSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
+        assertTrue(subnetSelectionParametersCaptor.getValue().isPreferPrivateIfExist());
         assertTrue(subnetSelectionParametersCaptor.getValue().isHa());
     }
 
@@ -139,7 +139,7 @@ public class SubnetChooserServiceTest {
         SubnetSelectionResult subnetSelectionResult = StringUtils.isEmpty(errorMessage)
                 ? new SubnetSelectionResult(List.of())
                 : new SubnetSelectionResult(errorMessage);
-        when(networkConnector.selectSubnets(any(), any())).thenReturn(subnetSelectionResult);
+        when(networkConnector.chooseSubnets(any(), any())).thenReturn(subnetSelectionResult);
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         return networkConnector;
