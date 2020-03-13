@@ -79,6 +79,8 @@ init-services-db:
       - cmd: configure-listen-address
       - cmd: configure-max-connections
 
+{% if metadata.platform != 'YARN' %}  # FIXME (BUG-92637): must be disabled for YCloud
+
 restart-pgsql-if-reconfigured:
   service.running:
     - enable: True
@@ -87,5 +89,17 @@ restart-pgsql-if-reconfigured:
       - cmd: configure-listen-address
       - cmd: configure-max-connections
       - cmd: init-services-db
+
+{% else %}
+
+restart-postgresql:
+  cmd.run:
+    - name: netstat -tlpn |grep -q "0 0.0.0.0:5432" && service postgresql reload || service postgresql restart && while ! netstat -tlpn |grep -i "0 0.0.0.0:5432" &> /dev/null; do echo "waiting for postgres"; sleep 1; done
+    - watch:
+      - cmd: configure-listen-address
+      - cmd: configure-max-connections
+      - cmd: init-services-db
+
+{% endif %}
 
 {% endif %}
