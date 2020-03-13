@@ -127,6 +127,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String CDP_FREEIPA_HA = "CDP_FREEIPA_HA";
 
+    private static final String CDP_CLOUD_STORAGE_VALIDATION = "CDP_CLOUD_STORAGE_VALIDATION";
+
     private static final String MOCK_RESOURCE = "mock_resource";
 
     @Inject
@@ -164,6 +166,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Value("${auth.mock.freeipa.ha.enable}")
     private boolean enableFreeIpaHa;
+
+    @Value("${auth.mock.cloudstoragevalidation.enable}")
+    private boolean enableCloudStorageValidation;
 
     private String cbLicense;
 
@@ -387,6 +392,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         }
         if (enableFreeIpaHa) {
             builder.addEntitlements(createEntitlement(CDP_FREEIPA_HA));
+        }
+        if (enableCloudStorageValidation) {
+            builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

@@ -82,7 +82,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     private IdBrokerMappingSource idBrokerMappingSource = IdBrokerMappingSource.IDBMMS;
 
     @ApiModelProperty(EnvironmentModelDescription.CLOUD_STORAGE_VALIDATION)
-    private CloudStorageValidation cloudStorageValidation = CloudStorageValidation.DISABLED;
+    private CloudStorageValidation cloudStorageValidation = CloudStorageValidation.ENABLED;
 
     @ApiModelProperty(EnvironmentModelDescription.ADMIN_GROUP_NAME)
     private String adminGroupName;
