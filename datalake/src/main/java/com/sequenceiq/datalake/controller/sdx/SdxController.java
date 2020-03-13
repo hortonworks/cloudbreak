@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
+import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
@@ -62,6 +63,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxStopService sdxStopService;
+
+    @Inject
+    private CDPConfigService cdpConfigService;
 
     @Inject
     private SdxMetricService metricService;
@@ -259,7 +263,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public List<String> versions() {
-        return sdxService.getDatalakeVersions();
+        return cdpConfigService.getDatalakeVersions();
     }
 
     @Override

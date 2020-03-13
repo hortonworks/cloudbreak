@@ -13,6 +13,7 @@ import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -27,6 +28,7 @@ import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHa
 @Configuration
 @EnableAsync
 @EnableScheduling
+@EnableRetry
 public class AppConfig implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);

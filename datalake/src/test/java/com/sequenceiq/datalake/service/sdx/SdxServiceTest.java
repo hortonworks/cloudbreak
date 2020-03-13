@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -121,7 +122,7 @@ class SdxServiceTest {
     private CloudStorageLocationValidator cloudStorageLocationValidator;
 
     @Mock
-    private Map<CDPConfigKey, StackV4Request> cdpStackRequests;
+    private CDPConfigService cdpConfigService;
 
     @InjectMocks
     private SdxService underTest;
@@ -174,7 +175,7 @@ class SdxServiceTest {
     @Test
     void testCreateNOTInternalSdxClusterFromLightDutyTemplateShouldTriggerSdxCreationFlow() throws IOException {
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
-        when(cdpStackRequests.get(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         Map<String, String> tags = new HashMap<>();
@@ -229,7 +230,7 @@ class SdxServiceTest {
     @Test
     void testCreateNOTInternalSdxClusterFromLightDutyTemplateWhenLocationSpecifiedWithSlashShouldCreateAndSettedUpBaseLocationWithOUTSlash() throws IOException {
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
-        when(cdpStackRequests.get(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         sdxClusterRequest.setEnvironment("envir");
@@ -253,7 +254,7 @@ class SdxServiceTest {
     @Test
     void testCreateNOTInternalSdxClusterFromLightDutyTemplateWhenBaseLocationSpecifiedShouldCreateStackRequestWithSettedUpBaseLocation() throws IOException {
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
-        when(cdpStackRequests.get(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         //doNothing().when(cloudStorageLocationValidator.validate("s3a://some/dir", ));
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
