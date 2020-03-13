@@ -76,7 +76,8 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         }
         String endpointName = getEndpointNameForStack(stack);
         LOGGER.info("Creating DNS entry with endpoint name: '{}', environment name: '{}' and gateway IP: '{}'", endpointName, environment.getName(), gatewayIp);
-        boolean success = getDnsManagementService().createOrUpdateDnsEntryWithIp(userCrn, accountId, endpointName, environment.getName(), false, List.of(gatewayIp));
+        List<String> ips = List.of(gatewayIp);
+        boolean success = getDnsManagementService().createOrUpdateDnsEntryWithIp(userCrn, accountId, endpointName, environment.getName(), false, ips);
         if (success) {
             try {
                 String fullQualifiedDomainName = getDomainNameProvider()

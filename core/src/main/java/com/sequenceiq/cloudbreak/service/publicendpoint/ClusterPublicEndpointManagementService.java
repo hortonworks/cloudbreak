@@ -61,10 +61,18 @@ public class ClusterPublicEndpointManagementService {
 
     public void start(Stack stack) {
         if (gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem()) {
-            LOGGER.info("Updating DNS entries of a restarted cluster: '{}'", stack.getName());
-            gatewayPublicEndpointManagementService.updateDnsEntry(stack, null);
-            kafkaBrokerPublicDnsEntryService.createOrUpdate(stack);
+            try {
+                LOGGER.info("Updating DNS entries of a restarted cluster: '{}'", stack.getName());
+                gatewayPublicEndpointManagementService.updateDnsEntry(stack, null);
+                kafkaBrokerPublicDnsEntryService.createOrUpdate(stack);
+            } catch (Exception ex) {
+                LOGGER.warn("Failed to update DNS entries of cluster in Public Endpoint Management service:", ex);
+            }
         }
+    }
+
+    public boolean manageCertificateAndDnsInPem() {
+        return gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem();
     }
 
     private void changeGatewayAddress(Stack stack, Map<String, String> newAddressesByFqdn) {
