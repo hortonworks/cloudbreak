@@ -32,6 +32,12 @@ public class UserSyncStatus implements AccountIdAwareResource {
 
     private Long lastFullSyncEndTime;
 
+    @OneToOne
+    private Operation lastStartedFullSync;
+
+    @OneToOne
+    private Operation lastSuccessfulFullSync;
+
     public UserSyncStatus() {
     }
 
@@ -63,20 +69,56 @@ public class UserSyncStatus implements AccountIdAwareResource {
         this.umsEventGenerationIds = umsEventGenerationIds;
     }
 
+    /**
+     * Gets the last full sync start time.
+     * @deprecated information returned is redundant with {@link #getLastRequestedFullSync()}
+     */
+    @Deprecated
     public Long getLastFullSyncStartTime() {
         return lastFullSyncStartTime;
     }
 
+    /**
+     * Sets the last full sync start time.
+     * @deprecated information set is redundant with {@link #setLastRequestedFullSync(Operation)}
+     */
+    @Deprecated
     public void setLastFullSyncStartTime(Long lastFullSyncStartTime) {
         this.lastFullSyncStartTime = lastFullSyncStartTime;
     }
 
+    /**
+     * Sets the last full sync end time.
+     * @deprecated information returned is redundant with {@link #getLastSuccessfulFullSync()}
+     */
+    @Deprecated
     public Long getLastFullSyncEndTime() {
         return lastFullSyncEndTime;
     }
 
+    /**
+     * Sets the last full sync end time.
+     * @deprecated information set is redundant with {@link #setLastSuccessfulFullSync(Operation)}
+     */
+    @Deprecated
     public void setLastFullSyncEndTime(Long lastFullSyncEndTime) {
         this.lastFullSyncEndTime = lastFullSyncEndTime;
+    }
+
+    public Operation getLastStartedFullSync() {
+        return lastStartedFullSync;
+    }
+
+    public void setLastStartedFullSync(Operation lastStartedFullSync) {
+        this.lastStartedFullSync = lastStartedFullSync;
+    }
+
+    public Operation getLastSuccessfulFullSync() {
+        return lastSuccessfulFullSync;
+    }
+
+    public void setLastSuccessfulFullSync(Operation lastSuccessfulFullSync) {
+        this.lastSuccessfulFullSync = lastSuccessfulFullSync;
     }
 
     @Override
