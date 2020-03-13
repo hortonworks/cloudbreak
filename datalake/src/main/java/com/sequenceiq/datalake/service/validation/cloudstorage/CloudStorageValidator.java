@@ -5,12 +5,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.Credential;
@@ -21,24 +26,38 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 @Component
 public class CloudStorageValidator {
 
+    private static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudStorageValidator.class);
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+
+    private final EntitlementService entitlementService;
 
     private final SecretService secretService;
 
     private final CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint;
 
     public CloudStorageValidator(CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
-            SecretService secretService, CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint) {
+            EntitlementService entitlementService, SecretService secretService,
+            CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint) {
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
+        this.entitlementService = entitlementService;
         this.secretService = secretService;
         this.cloudProviderServicesV4Endpoint = cloudProviderServicesV4Endpoint;
     }
 
-    public void validate(CloudStorageRequest cloudStorageRequest, DetailedEnvironmentResponse environment) {
+    public void validate(CloudStorageRequest cloudStorageRequest, DetailedEnvironmentResponse environment,
+            ValidationResult.ValidationResultBuilder validationResultBuilder) {
         if (CloudStorageValidation.DISABLED.equals(environment.getCloudStorageValidation())) {
             LOGGER.info("Due to cloud storage validation not being enabled, not validating cloudStorageRequest: {}",
+                    JsonUtil.writeValueAsStringSilent(cloudStorageRequest));
+            return;
+        }
+
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        if (!entitlementService.cloudStorageValidationEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+            LOGGER.info("Cloud storage validation entitlement is missing, not validating cloudStorageRequest: {}",
                     JsonUtil.writeValueAsStringSilent(cloudStorageRequest));
             return;
         }
@@ -57,6 +76,7 @@ public class CloudStorageValidator {
                     JsonUtil.writeValueAsStringSilent(response));
 
             if (ResponseStatus.ERROR.equals(response.getStatus())) {
+                validationResultBuilder.error(response.getError());
                 throw new BadRequestException(response.getError());
             }
         }

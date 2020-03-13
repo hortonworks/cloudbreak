@@ -44,6 +44,10 @@ public class EntitlementService {
         return isEntitlementRegistered(actorCrn, accountId, "CDP_FMS_CLUSTER_PROXY");
     }
 
+    public boolean cloudStorageValidationEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, "CDP_CLOUD_STORAGE_VALIDATION");
+    }
+
     public List<String> getEntitlements(String actorCrn, String accountId) {
         return getAccount(actorCrn, accountId).getEntitlementsList()
                 .stream()

@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
@@ -119,7 +120,7 @@ public class StackRequestManifester {
             setupClusterRequest(stackRequest);
             prepareTelemetryForStack(stackRequest, environment, sdxCluster);
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
-            cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment);
+            cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment, new ValidationResult.ValidationResultBuilder());
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse JSON to stack request");
