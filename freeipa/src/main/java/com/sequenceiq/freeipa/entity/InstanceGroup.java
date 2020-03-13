@@ -10,6 +10,7 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -47,7 +48,7 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
     @Enumerated(EnumType.STRING)
     private InstanceGroupType instanceGroupType = InstanceGroupType.MASTER;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Stack stack;
 
     @OneToMany(mappedBy = "instanceGroup", cascade = CascadeType.ALL, orphanRemoval = true)
