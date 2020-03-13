@@ -36,7 +36,7 @@ public class ResourceCrnListPermissionCheckerTest {
     private ResourceCrnListPermissionChecker underTest;
 
     @Test
-    public void setCheckPermissions() {
+    public void testCheckPermissions() {
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
         doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResources(any(), any(), anyString(), any());
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(Lists.newArrayList(USER_CRN, USER_CRN));

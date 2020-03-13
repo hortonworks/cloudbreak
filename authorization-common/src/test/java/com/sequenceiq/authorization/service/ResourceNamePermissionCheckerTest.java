@@ -43,7 +43,7 @@ public class ResourceNamePermissionCheckerTest {
     private ResourceNamePermissionChecker underTest;
 
     @Test
-    public void setCheckPermissions() {
+    public void testCheckPermissions() {
         resourceBasedCrnProviders.add(resourceBasedCrnProvider);
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
         doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), any(), anyString(), anyString());
@@ -64,7 +64,7 @@ public class ResourceNamePermissionCheckerTest {
             }
         };
 
-        underTest.populateResourceBasedCrnProviderMapMap();
+        underTest.populateResourceBasedCrnProviderMap();
         underTest.checkPermissions(rawMethodAnnotation, AuthorizationResourceType.CREDENTIAL, USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());

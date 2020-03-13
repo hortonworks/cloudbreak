@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByEnvironmentCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByEnvironmentName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
@@ -23,7 +25,7 @@ public class PermissionCheckerService extends AbstractPermissionCheckerService {
     private static final List<Class<? extends Annotation>> POSSIBLE_METHOD_ANNOTATIONS =
             List.of(CheckPermissionByResourceCrn.class, CheckPermissionByResourceName.class, CheckPermissionByAccount.class,
                     DisableCheckPermissions.class, CheckPermissionByResourceCrnList.class, CheckPermissionByResourceNameList.class,
-                    CheckPermissionByResourceObject.class);
+                    CheckPermissionByResourceObject.class, CheckPermissionByEnvironmentCrn.class, CheckPermissionByEnvironmentName.class);
 
     @Override
     protected List<Class<? extends Annotation>> getPossibleMethodAnnotations() {
