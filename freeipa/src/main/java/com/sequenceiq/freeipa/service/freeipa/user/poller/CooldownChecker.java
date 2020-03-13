@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.user.poller;
 
+import static java.util.Objects.requireNonNull;
+
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
@@ -17,9 +19,15 @@ class CooldownChecker {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
 
     public boolean isCooldownExpired(UserSyncStatus userSyncStatus, Instant cooldownThresholdTime) {
-        boolean cool = userSyncStatus == null ||
-                userSyncStatus.getLastFullSyncStartTime() == null ||
-                Instant.ofEpochMilli(userSyncStatus.getLastFullSyncStartTime()).isBefore(cooldownThresholdTime);
+        requireNonNull(userSyncStatus, "userSyncStatus is null");
+        boolean cool;
+        if (userSyncStatus.getLastStartedFullSync() != null) {
+            cool = Instant.ofEpochMilli(userSyncStatus.getLastStartedFullSync().getStartTime()).isBefore(cooldownThresholdTime);
+        } else if (userSyncStatus.getLastFullSyncStartTime() != null) {
+            cool = Instant.ofEpochMilli(userSyncStatus.getLastFullSyncStartTime()).isBefore(cooldownThresholdTime);
+        } else {
+            cool = true;
+        }
         if (LOGGER.isDebugEnabled()) {
             Stack stack = userSyncStatus.getStack();
             LOGGER.debug("Synchronization to Environment {} in Account {} {} been run since {}", stack.getEnvironmentCrn(),
