@@ -1,7 +1,6 @@
 package com.sequenceiq.authorization.service;
 
 import java.lang.annotation.Annotation;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,16 +14,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
-import com.sequenceiq.authorization.annotation.ResourceNameList;
+import com.sequenceiq.authorization.annotation.CheckPermissionByEnvironmentCrn;
+import com.sequenceiq.authorization.annotation.EnvironmentCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @Component
-public class ResourceNameListPermissionChecker implements PermissionChecker<CheckPermissionByResourceNameList> {
+public class EnvironmentCrnPermissionChecker implements PermissionChecker<CheckPermissionByEnvironmentCrn> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceNameListPermissionChecker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCrnPermissionChecker.class);
 
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
@@ -43,17 +41,16 @@ public class ResourceNameListPermissionChecker implements PermissionChecker<Chec
     @Override
     public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
-        CheckPermissionByResourceNameList methodAnnotation = (CheckPermissionByResourceNameList) rawMethodAnnotation;
-        Collection<String> resourceNames = commonPermissionCheckingUtils
-                .getParameter(proceedingJoinPoint, methodSignature, ResourceNameList.class, Collection.class);
-        List<String> resourceCrnList = resourceBasedCrnProviderMap.get(resourceType).getResourceCrnListByResourceNameList(Lists.newArrayList(resourceNames));
+        CheckPermissionByEnvironmentCrn methodAnnotation = (CheckPermissionByEnvironmentCrn) rawMethodAnnotation;
+        String environmentCrn = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, EnvironmentCrn.class, String.class);
+        String resourceCrn = resourceBasedCrnProviderMap.get(resourceType).getResourceCrnByEnvironmentCrn(environmentCrn);
         AuthorizationResourceAction action = methodAnnotation.action();
-        commonPermissionCheckingUtils.checkPermissionForUserOnResources(resourceType, action, userCrn, resourceCrnList);
+        commonPermissionCheckingUtils.checkPermissionForUserOnResource(resourceType, action, userCrn, resourceCrn);
         return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
 
     @Override
-    public Class<CheckPermissionByResourceNameList> supportedAnnotation() {
-        return CheckPermissionByResourceNameList.class;
+    public Class<CheckPermissionByEnvironmentCrn> supportedAnnotation() {
+        return CheckPermissionByEnvironmentCrn.class;
     }
 }

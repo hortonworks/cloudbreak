@@ -30,7 +30,7 @@ public class DisabledPermissionCheckerTest {
     private DisabledPermissionChecker underTest;
 
     @Test
-    public void setCheckPermissions() {
+    public void testCheckPermissions() {
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
 
         DisableCheckPermissions rawMethodAnnotation = new DisableCheckPermissions() {

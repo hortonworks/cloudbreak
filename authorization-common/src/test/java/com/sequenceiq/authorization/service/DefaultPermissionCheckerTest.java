@@ -33,7 +33,7 @@ public class DefaultPermissionCheckerTest {
     private DefaultPermissionChecker underTest;
 
     @Test
-    public void setCheckPermissions() {
+    public void testCheckPermissions() {
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
         doNothing().when(commonPermissionCheckingUtils).checkPermissionForUser(any(), any(), anyString());
 

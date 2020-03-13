@@ -38,7 +38,7 @@ public class ResourceObjectPermissionChecker implements PermissionChecker<CheckP
     private final Map<AuthorizationResourceType, ResourceBasedCrnProvider> resourceBasedCrnProviderMap = new HashMap<>();
 
     @PostConstruct
-    public void populateResourceBasedCrnProviderMapMap() {
+    public void populateResourceBasedCrnProviderMap() {
         resourceBasedCrnProviders.forEach(resourceBasedCrnProvider ->
                 resourceBasedCrnProviderMap.put(resourceBasedCrnProvider.getResourceType(), resourceBasedCrnProvider));
     }
