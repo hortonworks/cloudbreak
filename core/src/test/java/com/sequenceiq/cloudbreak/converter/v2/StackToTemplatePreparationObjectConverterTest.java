@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -74,6 +75,7 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConver
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -216,6 +218,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private AccountTagClientService accountTagClientService;
 
+    @Mock
+    private ResourceService resourceService;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
@@ -263,6 +268,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(ldapConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
         when(clusterService.getById(anyLong())).thenReturn(cluster);
         when(exposedServiceCollector.getAllKnoxExposed()).thenReturn(Set.of());
+        when(resourceService.getAllByStackId(anyLong())).thenReturn(Collections.EMPTY_LIST);
     }
 
     @Test
@@ -291,16 +297,16 @@ public class StackToTemplatePreparationObjectConverterTest {
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""),
-                configQueryEntries)).thenReturn(expected);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, Collections.EMPTY_LIST,
+                new Json(""), configQueryEntries)).thenReturn(expected);
         when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertTrue(result.getFileSystemConfigurationView().isPresent());
         assertEquals(expected, result.getFileSystemConfigurationView().get());
-        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(clusterServiceFileSystem, stackMock,
-                new Json(""), configQueryEntries);
+        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(clusterServiceFileSystem,
+                stackMock, Collections.EMPTY_LIST, new Json(""), configQueryEntries);
     }
 
     @Test
@@ -309,14 +315,14 @@ public class StackToTemplatePreparationObjectConverterTest {
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         when(sourceCluster.getFileSystem()).thenReturn(null);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""),
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, Collections.EMPTY_LIST, new Json(""),
                 new ConfigQueryEntries())).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertFalse(result.getFileSystemConfigurationView().isPresent());
-        verify(fileSystemConfigurationProvider, times(0)).fileSystemConfiguration(clusterServiceFileSystem, stackMock,
-                new Json(""), new ConfigQueryEntries());
+        verify(fileSystemConfigurationProvider, times(0)).fileSystemConfiguration(clusterServiceFileSystem,
+                stackMock, Collections.EMPTY_LIST, new Json(""), new ConfigQueryEntries());
     }
 
     @Test
@@ -330,7 +336,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
         when(stackMock.getEnvironmentCrn()).thenReturn("envCredentialCRN");
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""),
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, Collections.EMPTY_LIST, new Json(""),
                 configQueryEntries)).thenThrow(invokedException);
         when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
 
