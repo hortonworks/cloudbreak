@@ -1,7 +1,7 @@
 {%- from 'sssd/settings.sls' import ipa with context %}
 {%- from 'metadata/settings.sls' import metadata with context %}
 
-{% if metadata.platform == 'YARN'and not metadata.cluster_in_childenvironment %}
+{% if metadata.platform == 'YARN' and not metadata.cluster_in_childenvironment %}
 {%- if "manager_server" in grains.get('roles', []) %}
 
 create_remove_cm_sa_script:
