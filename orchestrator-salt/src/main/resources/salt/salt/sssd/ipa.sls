@@ -27,7 +27,7 @@ join_ipa:
           {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
           --no-sshd --no-ssh \
           {%- endif %}
-          --password "{{salt['pillar.get']('sssd-ipa:password')}}" --unattended --force-join --ssh-trust-dns --no-ntp --unattended'
+          --password "{{salt['pillar.get']('sssd-ipa:password')}}" --unattended --force-join --ssh-trust-dns --no-ntp'
 {% endif %}
     - unless: echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa env
     - runas: root
@@ -35,7 +35,7 @@ join_ipa:
     - env:
         - PW: "{{salt['pillar.get']('sssd-ipa:password')}}"
 
-{% if metadata.platform == 'YARN'and not metadata.cluster_in_childenvironment %}
+{% if metadata.platform == 'YARN' and not metadata.cluster_in_childenvironment %}
 dns_remove_script:
   file.managed:
     - source: salt://sssd/ycloud/dns_cleanup.sh
@@ -117,7 +117,7 @@ update_hostname_command:
 include:
     - sssd.ssh
 
-{% if metadata.platform == 'YARN'and not metadata.cluster_in_childenvironment %}
+{% if metadata.platform == 'YARN' and not metadata.cluster_in_childenvironment %}
 {%- if "manager_server" in grains.get('roles', []) %}
 
 create_cm_keytab_generation_script:

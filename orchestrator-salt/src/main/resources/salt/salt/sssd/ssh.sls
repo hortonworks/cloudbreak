@@ -1,14 +1,12 @@
 {%- from 'metadata/settings.sls' import metadata with context %}
 
 {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" not in grains.get('roles', []) %}
-{% if metadata.platform != 'YARN' %}
 restart-sshd-if-reconfigured:
   service.running:
     - enable: True
     - name: sshd
     - watch:
       - file: /etc/ssh/sshd_config
-{% endif %}
 
 enable_password_ssh_auth:
   file.replace:
