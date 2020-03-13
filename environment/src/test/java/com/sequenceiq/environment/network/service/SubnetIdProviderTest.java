@@ -57,8 +57,9 @@ class SubnetIdProviderTest {
 
         assertEquals("id", provide);
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
-        verify(networkConnector).selectSubnets(any(), subnetSelectionParametersCaptor.capture());
-        assertFalse(subnetSelectionParametersCaptor.getValue().isForDatabase());
+
+        verify(networkConnector).chooseSubnets(any(), subnetSelectionParametersCaptor.capture());
+        assertFalse(subnetSelectionParametersCaptor.getValue().isPreferPrivateIfExist());
         assertFalse(subnetSelectionParametersCaptor.getValue().isHa());
         assertEquals(tunnel, subnetSelectionParametersCaptor.getValue().getTunnel());
     }
@@ -174,7 +175,7 @@ class SubnetIdProviderTest {
         SubnetSelectionResult subnetSelectionResult = StringUtils.isEmpty(errorMessage)
                 ? new SubnetSelectionResult(selectedSubnets)
                 : new SubnetSelectionResult(errorMessage);
-        when(networkConnector.selectSubnets(any(), any()))
+        when(networkConnector.chooseSubnets(any(), any()))
                 .thenReturn(subnetSelectionResult);
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);

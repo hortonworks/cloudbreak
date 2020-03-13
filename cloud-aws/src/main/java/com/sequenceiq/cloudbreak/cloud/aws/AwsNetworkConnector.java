@@ -22,6 +22,7 @@ import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
@@ -37,10 +38,11 @@ import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Vpc;
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
+import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
-import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetSelectorStrategy;
+import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategy;
+import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategyType;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
@@ -50,24 +52,29 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
-import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetSelectorStrategyType;
 
 @Service
-public class AwsNetworkConnector implements NetworkConnector {
+public class AwsNetworkConnector extends DefaultNetworkConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNetworkConnector.class);
 
     private static final String CREATED_VPC = "CreatedVpc";
 
     private static final int NOT_FOUND = 400;
+
+    @Value("${cb.aws.subnet.ha.different.az.min:2}")
+    private int minSubnetCountInDifferentAz;
+
+    @Value("${cb.aws.subnet.ha123.different.az.max:3}")
+    private int maxSubnetCountInDifferentAz;
 
     @Inject
     private AwsNetworkCfTemplateProvider awsNetworkCfTemplateProvider;
@@ -94,7 +101,7 @@ public class AwsNetworkConnector implements NetworkConnector {
     private AwsTaggingService awsTaggingService;
 
     @Inject
-    private Map<SubnetSelectorStrategyType, SubnetSelectorStrategy> subnetSelectorStrategyMap;
+    private Map<SubnetFilterStrategyType, SubnetFilterStrategy> subnetFilterStrategyMap;
 
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
@@ -136,16 +143,23 @@ public class AwsNetworkConnector implements NetworkConnector {
     }
 
     @Override
-    public SubnetSelectionResult selectSubnets(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
-        boolean preferPrivate = subnetSelectionParameters.isForDatabase() || subnetSelectionParameters.getTunnel().useCcm();
+    public SubnetSelectionResult filterSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
+        boolean preferPrivate = subnetSelectionParameters.isPreferPrivateIfExist() || subnetSelectionParameters.getTunnel().useCcm();
 
-        SubnetSelectorStrategyType subnetSelectorStrategyType;
-        if (subnetSelectionParameters.isHa()) {
-            subnetSelectorStrategyType = preferPrivate ? SubnetSelectorStrategyType.MULTIPLE_PREFER_PRIVATE : SubnetSelectorStrategyType.MULTIPLE_PREFER_PUBLIC;
-        } else {
-            subnetSelectorStrategyType = preferPrivate ? SubnetSelectorStrategyType.SINGLE_PREFER_PRIVATE : SubnetSelectorStrategyType.SINGLE_PREFER_PUBLIC;
-        }
-        return subnetSelectorStrategyMap.get(subnetSelectorStrategyType).select(subnetMetas);
+        SubnetFilterStrategyType subnetSelectorStrategyType = preferPrivate ?
+                SubnetFilterStrategyType.MULTIPLE_PREFER_PRIVATE : SubnetFilterStrategyType.MULTIPLE_PREFER_PUBLIC;
+        int azCount = subnetSelectionParameters.isHa() ? subnetCountInDifferentAzMin() : 1;
+        return subnetFilterStrategyMap.get(subnetSelectorStrategyType).filter(subnetMetas, azCount);
+    }
+
+    @Override
+    public int subnetCountInDifferentAzMin() {
+        return minSubnetCountInDifferentAz;
+    }
+
+    @Override
+    public int subnetCountInDifferentAzMax() {
+        return maxSubnetCountInDifferentAz;
     }
 
     private boolean networkDoesNotExist(AmazonServiceException e) {

@@ -1,15 +1,12 @@
 package com.sequenceiq.environment.network.service;
 
-import java.util.ArrayList;
-import java.util.Random;
-
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -40,11 +37,15 @@ public class SubnetIdProvider {
             LOGGER.warn("Network connector is null for '{}' cloud platform, returning null", cloudPlatform.name());
             return null;
         }
+        SubnetSelectionParameters subnetSelectionParameters = SubnetSelectionParameters
+                .builder()
+                .withTunnel(tunnel)
+                .build();
 
         SubnetSelectionResult subnetSelectionResult = networkConnector
-                .selectSubnets(new ArrayList<>(network.getCbSubnets().values()), SubnetSelectionParameters.builder().withTunnel(tunnel).build());
+                .chooseSubnets(network.getCbSubnetValues(), subnetSelectionParameters);
         CloudSubnet selectedSubnet = subnetSelectionResult.hasResult()
-                ? subnetSelectionResult.getResult().get(new Random().nextInt(subnetSelectionResult.getResult().size()))
+                ? subnetSelectionResult.getResult().get(0)
                 : fallback(network);
         return selectedSubnet.getId();
     }

@@ -37,7 +37,7 @@ public class SubnetListerService {
             case AWS:
             case MOCK:
                 // IDs in metas are fine as is
-                return new ArrayList<>(environmentNetworkResponse.getSubnetMetas().values());
+                return new ArrayList<>(environmentNetworkResponse.getCbSubnets().values());
             case AZURE:
                 // IDs in metas must be expanded to full resource IDs
                 String subscriptionId = getAzureSubscriptionId(environmentResponse.getCrn());

@@ -2,8 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.mock;
 
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
@@ -11,21 +12,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
+import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
-import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
 @Service
-public class MockNetworkConnector implements NetworkConnector {
+public class MockNetworkConnector extends DefaultNetworkConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockNetworkConnector.class);
 
@@ -61,13 +62,23 @@ public class MockNetworkConnector implements NetworkConnector {
     }
 
     @Override
-    public SubnetSelectionResult selectSubnets(List<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
+    public SubnetSelectionResult filterSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
         if (subnetMetas == null || subnetMetas.isEmpty()) {
             String message = "Mock subnet selection: there are no subnets to choose from";
             LOGGER.debug(message);
             throw new BadRequestException(message);
         }
-        return new SubnetSelectionResult(subnetMetas);
+        return new SubnetSelectionResult(subnetMetas.stream().collect(Collectors.toList()));
+    }
+
+    @Override
+    public int subnetCountInDifferentAzMin() {
+        return 1;
+    }
+
+    @Override
+    public int subnetCountInDifferentAzMax() {
+        return 1;
     }
 
     @Override

@@ -287,7 +287,7 @@ public class AzureNetworkConnectorTest {
     }
 
     public void testSelectSubnetsThenSubnetSelectorIsCalled() {
-        underTest.selectSubnets(List.of(), SubnetSelectionParameters.builder().build());
+        underTest.chooseSubnets(List.of(), SubnetSelectionParameters.builder().build());
 
         verify(azureSubnetSelectorService).select(anyList(), any());
     }

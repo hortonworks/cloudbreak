@@ -62,14 +62,18 @@ public class AzureSubnetSelectorServiceTest {
 
         SubnetSelectionResult subnetSelectionResult = underTest.select(subnets, SubnetSelectionParameters.builder().build());
 
-        assertEquals(1, subnetSelectionResult.getResult().size());
+        assertEquals(2, subnetSelectionResult.getResult().size());
     }
 
     @Test
     public void testselectWhenDatabaseThreeSubnetsThenAllAreReturned() {
         List<CloudSubnet> subnets = new SubnetBuilder().withPrivateSubnet().withPrivateSubnet().withPrivateSubnet().build();
 
-        SubnetSelectionResult subnetSelectionResult = underTest.select(subnets, SubnetSelectionParameters.builder().withForDatabase().build());
+        SubnetSelectionResult subnetSelectionResult = underTest.select(subnets,
+                SubnetSelectionParameters
+                        .builder()
+                        .withPreferPrivateIfExist()
+                        .build());
 
         assertEquals(3, subnetSelectionResult.getResult().size());
         List<String> selectedSubnetIds = subnetSelectionResult.getResult().stream().map(CloudSubnet::getId).collect(Collectors.toList());

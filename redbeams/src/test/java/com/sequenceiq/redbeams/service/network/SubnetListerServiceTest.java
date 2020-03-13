@@ -78,6 +78,7 @@ public class SubnetListerServiceTest {
     @Test
     public void testListSubnetsAws() {
         when(environmentNetworkResponse.getSubnetMetas()).thenReturn(subnets);
+        when(environmentNetworkResponse.getCbSubnets()).thenReturn(subnets);
         credential = new Credential(CREDENTIAL_CRN, CREDENTIAL_NAME, CREDENTIAL_ATTRIBUTES);
         when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_CRN)).thenReturn(credential);
 

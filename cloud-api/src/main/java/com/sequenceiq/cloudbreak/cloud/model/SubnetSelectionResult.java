@@ -34,4 +34,12 @@ public class SubnetSelectionResult {
     public String getErrorMessage() {
         return errorMessage;
     }
+
+    @Override
+    public String toString() {
+        return "SubnetSelectionResult{" +
+                "result=" + result +
+                ", errorMessage='" + errorMessage + '\'' +
+                '}';
+    }
 }
