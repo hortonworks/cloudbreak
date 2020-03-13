@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 
 @Prototype
 public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, ClusterV4Response, ClusterTestDto> {
@@ -55,6 +56,12 @@ public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, 
     public ClusterTestDto withClouderaManager(String key) {
         ClouderaManagerTestDto clouderaManager = getTestContext().get(key);
         return withClouderaManager(clouderaManager);
+    }
+
+    public ClusterTestDto withExternalDatabaseCrn() {
+        RedbeamsDatabaseServerTestDto database = getTestContext().get(RedbeamsDatabaseServerTestDto.class);
+        getRequest().setDatabaseServerCrn(database.getResponse().getResourceCrn());
+        return this;
     }
 
     public ClusterTestDto withClouderaManager(ClouderaManagerTestDto clouderaManagerTestDto) {

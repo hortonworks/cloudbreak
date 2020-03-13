@@ -2,31 +2,45 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.assertion.datalake.SdxUpgradeTestAssertion;
+import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
+import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseServerTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
-import com.sequenceiq.it.util.ResourceUtil;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
+import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class MockSdxTests extends AbstractIntegrationTest {
+public class MockSdxUpgradeTests extends AbstractIntegrationTest {
 
     private static final String TEMPLATE_JSON = "classpath:/templates/sdx-cluster-template.json";
+
+    @Inject
+    private WaitUtil waitUtil;
+
+    @Inject
+    private RedbeamsDatabaseServerTestClient redbeamsDatabaseServerTestClient;
+
+    @Inject
+    private ImageCatalogTestClient imageCatalogTestClient;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -34,119 +48,29 @@ public class MockSdxTests extends AbstractIntegrationTest {
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createDefaultEnvironmentWithNetwork(testContext);
-        createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "a valid SDX Internal Create request is sent",
-            then = "SDX should be available AND deletable"
-    )
-    public void testDefaultSDXCanBeCreatedThenDeletedSuccessfully(MockedTestContext testContext) throws IOException {
-        String sdxInternal = resourcePropertyProvider().getName();
-        String stack = resourcePropertyProvider().getName();
-        String envKey = "sdxEnvKey";
-        String clouderaManager = "cm";
-        String cluster = "cmcluster";
-        String networkKey = "someNetwork";
-
-        testContext
-                .given(networkKey, EnvironmentNetworkTestDto.class)
-                .withMock(new EnvironmentNetworkMockParams())
-                .given(envKey, EnvironmentTestDto.class)
-                .withNetwork(networkKey)
-                .withCreateFreeIpa(Boolean.FALSE)
-                .withName(resourcePropertyProvider().getEnvironmentName())
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .given(clouderaManager, ClouderaManagerTestDto.class)
-                .given(cluster, ClusterTestDto.class)
-                .withClouderaManager(clouderaManager)
-                .given(stack, StackTestDto.class).withCluster(cluster)
-                .withGatewayPort(testContext.getSparkServer().getPort())
-                .given(sdxInternal, SdxInternalTestDto.class)
-                .withStackRequest(stack, cluster)
-                .withEnvironmentKey(key(envKey))
-                .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.RUNNING)
-                .then((tc, testDto, client) -> sdxTestClient.deleteInternal().action(tc, testDto, client))
-                .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.DELETED)
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running Cloudbreak",
-            when = "a valid SDX Internal Create request is sent with Cluster Template",
-            then = "SDX should be available AND deletable"
-    )
-    public void testSDXFromTemplateCanBeCreatedThenDeletedSuccessfully(MockedTestContext testContext) throws IOException {
-        String sdxInternal = resourcePropertyProvider().getName();
-        String stack = resourcePropertyProvider().getName();
-        String clouderaManager = "cm";
-        String cluster = "cmcluster";
-        String networkKey = "someOtherNetwork";
-        String envKey = "sdxEnvKey";
-
-        testContext
-                .given(networkKey, EnvironmentNetworkTestDto.class)
-                .withMock(new EnvironmentNetworkMockParams())
-                .given(envKey, EnvironmentTestDto.class)
-                .withNetwork(networkKey)
-                .withCreateFreeIpa(Boolean.FALSE)
-                .withName(resourcePropertyProvider().getEnvironmentName())
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .given(clouderaManager, ClouderaManagerTestDto.class)
-                .given(cluster, ClusterTestDto.class)
-                .withClouderaManager(clouderaManager)
-                .given(stack, StackTestDto.class).withCluster(cluster)
-                .withGatewayPort(testContext.getSparkServer().getPort())
-                .given(sdxInternal, SdxInternalTestDto.class)
-                .withTemplate(ResourceUtil.readResourceAsJson(applicationContext, TEMPLATE_JSON))
-                .withEnvironmentKey(key(envKey))
-                .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.RUNNING)
-                .then((tc, testDto, client) -> sdxTestClient.deleteInternal().action(tc, testDto, client))
-                .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.DELETED)
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running Cloudbreak",
             when = "start an sdx cluster",
-            then = "SDX should be available"
+            then = "Upgrade criteria is not met"
     )
-    public void testSdxStopStart(MockedTestContext testContext) throws IOException {
-        createSdx(testContext)
-                .when(sdxTestClient.stopInternal())
-                .awaitForFlow(key(resourcePropertyProvider().getName()))
-                .await(SdxClusterStatusResponse.STOPPED)
-                .when(sdxTestClient.startInternal())
-                .awaitForFlow(key(resourcePropertyProvider().getName()))
-                .await(SdxClusterStatusResponse.RUNNING)
-                .validate();
-    }
-
-    private SdxInternalTestDto createSdx(MockedTestContext testContext) {
+    public void testSdxUpgradeCriteriaNotMetTest(MockedTestContext testContext) {
+        String upgradeImageCatalogName = resourcePropertyProvider().getName();
+        createImageCatalogForUpgrade(testContext, upgradeImageCatalogName);
         String sdxInternal = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";
+        String imageSettings = "imageSettingsUpgrade";
         String networkKey = "someOtherNetwork";
         String envKey = "sdxEnvKey";
-        return testContext
+        testContext
                 .given(networkKey, EnvironmentNetworkTestDto.class)
                 .withMock(new EnvironmentNetworkMockParams())
-                .given(envKey, EnvironmentTestDto.class)
+                .given(EnvironmentTestDto.class)
                 .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
@@ -155,13 +79,78 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                 .withClouderaManager(clouderaManager)
-                .given(stack, StackTestDto.class).withCluster(cluster)
+                .given(imageSettings, ImageSettingsTestDto.class)
+                .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
+                .withImageCatalog(upgradeImageCatalogName)
+                .given(stack, StackTestDto.class)
+                .withCluster(cluster)
+                .withImageSettings(imageSettings)
                 .withGatewayPort(testContext.getSparkServer().getPort())
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withStackRequest(stack, cluster)
-                .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.RUNNING);
+                .await(SdxClusterStatusResponse.RUNNING)
+                .then(SdxUpgradeTestAssertion
+                        .validateReasonContains("Repair is only supported when single node Cloudera Manager state stored in external Database."))
+                .then(SdxUpgradeTestAssertion.validateReasonContains("Cloudera Manager server failure with embedded Database cannot be repaired!"))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running CloudSdxInternalTestDtobreak",
+            when = "start an sdx cluster",
+            then = "Upgrade option should be presented"
+    )
+    public void testSdxUpgradeSuccessful(MockedTestContext testContext) {
+        String upgradeImageCatalogName = resourcePropertyProvider().getName();
+        createImageCatalogForUpgrade(testContext, upgradeImageCatalogName);
+        String sdxInternal = resourcePropertyProvider().getName();
+        String stack = resourcePropertyProvider().getName();
+        String clouderaManager = "cm";
+        String cluster = "cmcluster";
+        String imageSettings = "imageSettingsUpgrade";
+        String networkKey = "someOtherNetwork";
+        testContext
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
+                .given(EnvironmentTestDto.class)
+                .withNetwork(networkKey)
+                .withCreateFreeIpa(Boolean.FALSE)
+                .withName(resourcePropertyProvider().getEnvironmentName())
+                .when(getEnvironmentTestClient().create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(RedbeamsDatabaseServerTestDto.class)
+                .withEnvironmentCrn(testContext.get(EnvironmentTestDto.class).getResponse().getCrn())
+                .when(redbeamsDatabaseServerTestClient.createV4())
+                .await(Status.AVAILABLE)
+                .given(clouderaManager, ClouderaManagerTestDto.class)
+                .given(cluster, ClusterTestDto.class)
+                .withClouderaManager(clouderaManager)
+                .withExternalDatabaseCrn()
+                .given(imageSettings, ImageSettingsTestDto.class)
+                .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
+                .withImageCatalog(upgradeImageCatalogName)
+                .given(stack, StackTestDto.class)
+                .withCluster(cluster)
+                .withImageSettings(imageSettings)
+                .withGatewayPort(testContext.getSparkServer().getPort())
+                .given(sdxInternal, SdxInternalTestDto.class)
+                .withStackRequest(stack, cluster)
+                .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .awaitForFlow(key(sdxInternal))
+                .await(SdxClusterStatusResponse.RUNNING)
+                .then(SdxUpgradeTestAssertion.validateSucessfulUpgrade())
+                .validate();
+    }
+
+    protected ImageCatalogTestDto createImageCatalogForUpgrade(TestContext testContext, String name) {
+        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
+        return testContext
+                .given(ImageCatalogTestDto.class)
+                .withName(name)
+                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getUpgradeImageCatalogUrl())
+                .when(imageCatalogTestClient.createV4(), key(name));
     }
 }
