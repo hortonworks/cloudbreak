@@ -108,10 +108,10 @@ restore_systemctl:
     - mode: 755
     - force: True
 
-update_hostname_command:
-  cmd.run:
-    - name: hostname "$(hostname -f)"
-    - runas: root
+dns_resolution_fix:
+  file.append:
+    - name: /etc/resolv.conf
+    - text: "domain {{ salt['pillar.get']('hosts')[metadata.server_address]['domain'] }}"
 {% endif %}
 
 include:

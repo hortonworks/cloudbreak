@@ -29,6 +29,8 @@ public abstract class ITResponse implements Route {
 
     public static final String IMAGE_CATALOG_PREWARMED = "/imagecatalogwithprewarmed";
 
+    public static final String IMAGE_CATALOG_UPGRADE = "/imagecatalogupgrade";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ITResponse.class);
 
     private static final String MOCKRESPONSE = "/mockresponse/";

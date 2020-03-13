@@ -7,10 +7,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 public abstract class DeletableRedbeamsTestDto<R, S, T extends CloudbreakTestDto, Z> extends AbstractRedbeamsTestDto<R, S, T>
         implements Purgable<Z, RedbeamsClient> {
 
-    protected DeletableRedbeamsTestDto(String newId) {
-        super(newId);
-    }
-
     protected DeletableRedbeamsTestDto(R request, TestContext testContext) {
         super(request, testContext);
     }
