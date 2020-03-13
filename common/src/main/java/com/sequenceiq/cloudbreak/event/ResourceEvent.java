@@ -187,6 +187,7 @@ public enum ResourceEvent {
     CLUSTER_CHANGED_CREDENTIAL("cluster.changed.credential"),
     CLUSTER_CREATE_FAILED("cluster.create.failed"),
     CLUSTER_STARTING("cluster.starting"),
+    CLUSTER_DNS_ENTRY_UPDATE_FINISHED("cluster.dns.update.finished"),
     CLUSTER_STARTED("cluster.started"),
     CLUSTER_START_FAILED("cluster.start.failed"),
     CLUSTER_CHANGE_CREDENTIAL_FAILED("cluster.change.credentail.failed"),

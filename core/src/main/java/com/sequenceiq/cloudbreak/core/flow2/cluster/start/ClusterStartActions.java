@@ -15,12 +15,14 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DnsUpdateFinished;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 
 @Configuration
@@ -30,11 +32,28 @@ public class ClusterStartActions {
     @Inject
     private ClusterStartService clusterStartService;
 
-    @Bean(name = "CLUSTER_STARTING_STATE")
-    public Action<?, ?> startingCluster() {
+    @Bean(name = "UPDATING_DNS_IN_PEM_STATE")
+    public Action<?, ?> updateClusterDnsEntriesInPem() {
         return new AbstractClusterAction<>(StackEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = getStackService().getByIdWithListsInTransaction(payload.getResourceId());
+                clusterStartService.updateDnsEntriesInPem(stack);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new DnsUpdateFinished(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_STARTING_STATE")
+    public Action<?, ?> startingCluster() {
+        return new AbstractClusterAction<>(DnsUpdateFinished.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, DnsUpdateFinished payload, Map<Object, Object> variables) {
                 clusterStartService.startingCluster(context.getStack());
                 sendEvent(context);
             }
