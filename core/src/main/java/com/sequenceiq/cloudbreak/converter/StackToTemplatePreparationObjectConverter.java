@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -52,6 +53,7 @@ import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
@@ -138,6 +140,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     @Inject
     private AccountTagClientService accountTagClientService;
+
+    @Inject
+    private ResourceService resourceService;
 
     @Override
     public TemplatePreparationObject convert(Stack source) {
@@ -234,8 +239,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private BaseFileSystemConfigurationsView getFileSystemConfigurationView(Credential credential, Stack source, FileSystem fileSystem) throws IOException {
         BaseFileSystemConfigurationsView fileSystemConfigurationView = null;
         if (source.getCluster().getFileSystem() != null) {
-            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credential.getAttributes(),
-                    cmCloudStorageConfigProvider.getConfigQueryEntries());
+            Collection<Resource> stackResources = resourceService.getAllByStackId(source.getId());
+            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, stackResources,
+                    credential.getAttributes(), cmCloudStorageConfigProvider.getConfigQueryEntries());
         }
         return fileSystemConfigurationView;
     }
