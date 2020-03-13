@@ -64,6 +64,8 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String DEFAULT_TOPOLOGY = "cdp-proxy";
 
+    private static final String GATEWAY_CM_AUTO_DISCOVERY_ENABLED = "gateway_auto_discovery_enabled";
+
     @Inject
     private VirtualGroupService virtualGroupService;
 
@@ -83,6 +85,7 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
                 config.add(config(KNOX_MASTER_SECRET, masterSecret));
                 config.add(config(GATEWAY_DEFAULT_TOPOLOGY_NAME, topologyName));
                 config.add(config(GATEWAY_ADMIN_GROUPS, adminGroup));
+                config.add(config(GATEWAY_CM_AUTO_DISCOVERY_ENABLED, "false"));
                 if (gateway != null) {
                     config.add(config(GATEWAY_PATH, gateway.getPath()));
                     config.add(config(SIGNING_KEYSTORE_NAME, SIGNING_JKS));
