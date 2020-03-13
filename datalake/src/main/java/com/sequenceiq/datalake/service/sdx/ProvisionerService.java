@@ -7,6 +7,7 @@ import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowStat
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.model.StatusKind;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -39,6 +41,8 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 
 @Service
 public class ProvisionerService {
+
+    public static final int DELETE_FAILED_RETRY_COUNT = 3;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionerService.class);
 
@@ -59,6 +63,18 @@ public class ProvisionerService {
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    private AttemptResult<StackV4Response> sdxCreationFailed(SdxCluster sdxCluster, String statusReason) {
+        LOGGER.info("SDX creation failed, statusReason: " + statusReason);
+        return AttemptResults.breakFor("SDX creation failed '" + sdxCluster.getClusterName() + "', " + statusReason);
+    }
+
+    private boolean stackAndClusterAvailable(StackV4Response stackV4Response, ClusterV4Response cluster) {
+        return stackV4Response.getStatus().isAvailable()
+                && cluster != null
+                && cluster.getStatus() != null
+                && cluster.getStatus().isAvailable();
+    }
 
     public void startStackDeletion(Long id, boolean forced) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
@@ -83,6 +99,7 @@ public class ProvisionerService {
 
     public void waitCloudbreakClusterDeletion(Long id, PollingConfig pollingConfig) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
+            AtomicInteger deleteFailedCount = new AtomicInteger();
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
@@ -93,10 +110,33 @@ public class ProvisionerService {
                             LOGGER.info("Stack status of SDX {} by response from cloudbreak: {}", sdxCluster.getClusterName(),
                                     stackV4Response.getStatus().name());
                             LOGGER.debug("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
+                            ClusterV4Response cluster = stackV4Response.getCluster();
+                            if (cluster != null) {
+                                if (StatusKind.PROGRESS.equals(cluster.getStatus().getStatusKind())) {
+                                    return AttemptResults.justContinue();
+                                }
+                                if (Status.DELETE_FAILED.equals(cluster.getStatus())) {
+                                    // it's a hack, until we implement a nice non-async terminate which can return with flowid..
+                                    // if it is implemented, please remove this
+                                    if (deleteFailedCount.getAndIncrement() > DELETE_FAILED_RETRY_COUNT) {
+                                        return AttemptResults.breakFor(
+                                                "Cluster deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
+                                        );
+                                    } else {
+                                        return AttemptResults.justContinue();
+                                    }
+                                }
+                            }
                             if (Status.DELETE_FAILED.equals(stackV4Response.getStatus())) {
-                                return AttemptResults.breakFor(
-                                        "Stack deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
-                                );
+                                // it's a hack, until we implement a nice non-async terminate which can return with flowid..
+                                // if it is implemented, please remove this
+                                if (deleteFailedCount.getAndIncrement() > DELETE_FAILED_RETRY_COUNT) {
+                                    return AttemptResults.breakFor(
+                                            "Stack deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
+                                    );
+                                } else {
+                                    return AttemptResults.justContinue();
+                                }
                             } else {
                                 return AttemptResults.justContinue();
                             }
@@ -198,15 +238,4 @@ public class ProvisionerService {
         });
     }
 
-    private AttemptResult<StackV4Response> sdxCreationFailed(SdxCluster sdxCluster, String statusReason) {
-        LOGGER.info("SDX creation failed, statusReason: " + statusReason);
-        return AttemptResults.breakFor("SDX creation failed '" + sdxCluster.getClusterName() + "', " + statusReason);
-    }
-
-    private boolean stackAndClusterAvailable(StackV4Response stackV4Response, ClusterV4Response cluster) {
-        return stackV4Response.getStatus().isAvailable()
-                && cluster != null
-                && cluster.getStatus() != null
-                && cluster.getStatus().isAvailable();
-    }
 }
