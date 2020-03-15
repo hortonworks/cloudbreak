@@ -161,6 +161,7 @@ public class KnoxGatewayConfigProviderTest {
                         config("gateway_default_topology_name",
                             gateway.getTopologies().iterator().next().getTopologyName()),
                         config("gateway_knox_admin_groups", ""),
+                        config("gateway_auto_discovery_enabled", "false"),
                         config("gateway_path", gateway.getPath()),
                         config("gateway_signing_keystore_name", "signing.jks"),
                         config("gateway_signing_keystore_type", "JKS"),
@@ -191,7 +192,8 @@ public class KnoxGatewayConfigProviderTest {
                 List.of(
                         config("gateway_master_secret", gcc.getPassword()),
                         config("gateway_default_topology_name", "cdp-proxy"),
-                        config("gateway_knox_admin_groups", "")
+                        config("gateway_knox_admin_groups", ""),
+                        config("gateway_auto_discovery_enabled", "false")
                 ),
                 underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
         );
@@ -224,6 +226,7 @@ public class KnoxGatewayConfigProviderTest {
                 config("gateway_master_secret", gateway.getKnoxMasterSecret()),
                 config("gateway_default_topology_name", "cdp-proxy"),
                 config("gateway_knox_admin_groups", "knox_admins"),
+                config("gateway_auto_discovery_enabled", "false"),
                 config("gateway_path", gateway.getPath()),
                 config("gateway_signing_keystore_name", "signing.jks"),
                 config("gateway_signing_keystore_type", "JKS"),
