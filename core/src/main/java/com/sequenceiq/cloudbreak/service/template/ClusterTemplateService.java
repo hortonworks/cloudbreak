@@ -319,12 +319,20 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return clusterTemplate;
     }
 
+    @Override
+    public ClusterTemplate getByNameForWorkspaceId(String name, Long workspaceId) {
+        var template = super.getByNameForWorkspaceId(name, workspaceId);
+        LOGGER.debug("Cluster template has acquired by name ({})", name);
+        return template;
+    }
+
     public ClusterTemplate getByCrn(String crn, Long workspaceId) {
         Optional<ClusterTemplate> clusterTemplateOptional = clusterTemplateRepository.getByCrnForWorkspaceId(crn, workspaceId);
         if (clusterTemplateOptional.isEmpty()) {
             throw new BadRequestException(
                     format("cluster template does not exist with crn '%s' in workspace %s", crn, workspaceId));
         }
+        LOGGER.debug("Cluster template has acquired by crn ({})", crn);
         return clusterTemplateOptional.get();
     }
 
