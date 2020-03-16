@@ -200,11 +200,11 @@ public interface SdxEndpoint {
     @Path("{name}/stack_upgrade/image/{image}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "upgrades the datalake stack by name", nickname = "upgradeStackByName")
-    void upgradeStackByName(@PathParam("name") String name,  @PathParam("image") String imageId);
+    FlowIdentifier upgradeStackByName(@PathParam("name") String name,  @PathParam("image") String imageId);
 
     @POST
     @Path("/crn/{crn}/stack_upgrade/image/{image}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "upgrades the datalake stack by crn", nickname = "upgradeStackByCrn")
-    void upgradeStackByCrn(@PathParam("crn") String crn, @PathParam("image") String imageId);
+    FlowIdentifier upgradeStackByCrn(@PathParam("crn") String crn, @PathParam("image") String imageId);
 }

@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
@@ -104,6 +106,21 @@ public class SdxUpgradeService {
         }
     }
 
+    public void upgradeStack(Long id, String imageId) {
+        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found the cluster with id: " + id));
+        sdxStatusService.setStatusForDatalakeAndNotify(
+                DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS,
+                "Upgrading datalake stack",
+                sdxCluster);
+        try {
+            FlowIdentifier flowIdentifier = stackV4Endpoint.upgradeStackByName(0L, sdxCluster.getClusterName(), imageId);
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
+        } catch (WebApplicationException e) {
+            String message = String.format("Stack upgrade failed on cluster: [%d]. Message: [%s]", id, e.getMessage());
+            throw new CloudbreakApiException(message);
+        }
+    }
+
     public String getImageId(Long id) {
         Optional<SdxCluster> cluster = sdxClusterRepository.findById(id);
         if (cluster.isPresent()) {
@@ -112,6 +129,12 @@ public class SdxUpgradeService {
         } else {
             throw new NotFoundException("Cluster not found with id" + id);
         }
+    }
+
+    public String getCurrentImageCatalogName(Long id) {
+        SdxCluster cluster = sdxClusterRepository.findById(id).orElseThrow(notFound("Cluster", id));
+        StackV4Response stackV4Response = stackV4Endpoint.get(0L, cluster.getClusterName(), Set.of());
+        return stackV4Response.getImage().getCatalogName();
     }
 
     public void upgrade(Long id) {
@@ -129,14 +152,11 @@ public class SdxUpgradeService {
     }
 
     public void waitCloudbreakFlow(Long id, PollingConfig pollingConfig, String pollingMessage) {
-        sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
-            Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                    .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
-                    .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
-                    .run(() -> checkClusterStatusDuringUpgrade(sdxCluster, pollingMessage));
-        }, () -> {
-            throw notFound("SDX cluster", id).get();
-        });
+        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
+        Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
+                .run(() -> checkClusterStatusDuringUpgrade(sdxCluster, pollingMessage));
     }
 
     private void validateUpgradeOption(UpgradeOptionV4Response upgradeOptionV4Response) {

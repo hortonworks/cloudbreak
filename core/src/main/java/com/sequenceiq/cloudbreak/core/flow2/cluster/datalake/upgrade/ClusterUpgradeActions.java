@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatalakeClusterUpgradeTriggerEvent;
@@ -70,7 +71,7 @@ public class ClusterUpgradeActions {
 
             @Override
             protected Object getFailurePayload(DatalakeClusterUpgradeTriggerEvent payload, Optional<ClusterUpgradeContext> flowContext, Exception ex) {
-                return ClusterUpgradeFailedEvent.from(payload, ex);
+                return ClusterUpgradeFailedEvent.from(payload, ex, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED);
             }
         };
     }
@@ -100,7 +101,7 @@ public class ClusterUpgradeActions {
 
             @Override
             protected Object getFailurePayload(ClusterManagerUpgradeSuccess payload, Optional<ClusterUpgradeContext> flowContext, Exception ex) {
-                return ClusterUpgradeFailedEvent.from(payload, ex);
+                return ClusterUpgradeFailedEvent.from(payload, ex, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
             }
         };
     }
@@ -136,7 +137,7 @@ public class ClusterUpgradeActions {
     }
 
     @Bean(name = "CLUSTER_UPGRADE_FAILED_STATE")
-    public Action<?, ?> clusterStartFailedAction() {
+    public Action<?, ?> clusterUpgradeFailedAction() {
         return new AbstractClusterUpgradeAction<>(ClusterUpgradeFailedEvent.class) {
 
             @Override
@@ -151,7 +152,7 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterUpgradeService.handleUpgradeClusterFailure(context.getStackId(), payload.getException().getMessage());
+                clusterUpgradeService.handleUpgradeClusterFailure(context.getStackId(), payload.getException().getMessage(), payload.getDetailedStatus());
                 sendEvent(context, CLUSTER_UPGRADE_FAIL_HANDLED_EVENT.event(), payload);
             }
 

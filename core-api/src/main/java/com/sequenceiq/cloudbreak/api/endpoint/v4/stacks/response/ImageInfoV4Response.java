@@ -71,4 +71,14 @@ public class ImageInfoV4Response {
     public void setComponentVersions(Map<String, String> componentVersions) {
         this.componentVersions = componentVersions;
     }
+
+    public ImageInfoV4Response imageId(String imageId) {
+        this.imageId = imageId;
+        return this;
+    }
+
+    public ImageInfoV4Response imageCatalogName(String catalogName) {
+        this.imageCatalogName = catalogName;
+        return this;
+    }
 }

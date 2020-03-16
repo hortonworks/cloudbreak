@@ -45,14 +45,14 @@ public class ClusterUpgradeService {
     public void clusterUpgradeFinished(long stackId, Image image) {
         String clusterStackVersion = image.getStackDetails().getVersion();
 
-        clusterService.updateClusterStatusByStackId(stackId, Status.START_REQUESTED);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Cluster Manager is successfully upgraded.");
+        clusterService.updateClusterStatusByStackId(stackId, Status.AVAILABLE);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED, "Cluster stack was successfully upgraded.");
         flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED, clusterStackVersion);
     }
 
-    public void handleUpgradeClusterFailure(long stackId, String errorReason) {
+    public void handleUpgradeClusterFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus) {
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_FAILED, errorReason);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
+        stackUpdater.updateStackStatus(stackId, detailedStatus);
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), CLUSTER_UPGRADE_FAILED, errorReason);
     }
 }

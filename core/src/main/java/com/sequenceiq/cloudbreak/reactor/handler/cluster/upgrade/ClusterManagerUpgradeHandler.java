@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerUpgradeService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManagerUpgradeRequest;
@@ -33,7 +34,7 @@ public class ClusterManagerUpgradeHandler extends ExceptionCatcherEventHandler<C
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new ClusterUpgradeFailedEvent(resourceId, e);
+        return new ClusterUpgradeFailedEvent(resourceId, e, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED);
     }
 
     @Override
@@ -46,7 +47,7 @@ public class ClusterManagerUpgradeHandler extends ExceptionCatcherEventHandler<C
             result = new ClusterManagerUpgradeSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.info("Cluster Manager upgrade event failed", e);
-            result = new ClusterUpgradeFailedEvent(request.getResourceId(), e);
+            result = new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED);
         }
         sendEvent(result, event);
     }

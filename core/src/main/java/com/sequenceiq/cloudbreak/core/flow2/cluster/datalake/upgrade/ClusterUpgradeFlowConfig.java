@@ -32,6 +32,9 @@ public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterU
                     .from(INIT_STATE).to(CLUSTER_MANAGER_UPGRADE_STATE).event(CLUSTER_MANAGER_UPGRADE_EVENT)
                     .defaultFailureEvent()
 
+                    .from(INIT_STATE).to(CLUSTER_UPGRADE_STATE).event(CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
                     .from(CLUSTER_MANAGER_UPGRADE_STATE).to(CLUSTER_UPGRADE_STATE).event(CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT)
                     .defaultFailureEvent()
 
