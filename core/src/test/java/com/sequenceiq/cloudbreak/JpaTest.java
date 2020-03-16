@@ -18,6 +18,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.repository.support.Repositories;
 
 @EnableAutoConfiguration
@@ -30,6 +32,7 @@ import org.springframework.data.repository.support.Repositories;
 })
 @DataJpaTest(properties = {
         "spring.jpa.properties.hibernate.session_factory.statement_inspector=com.sequenceiq.cloudbreak.SqlStatementInspector"})
+@EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @Import(SqlStatementInspector.class)
 public class JpaTest {
 

@@ -10,10 +10,6 @@ public class ClusterUpgradeSuccess extends StackEvent {
         super(stackId);
     }
 
-    public static ClusterUpgradeFailedEvent from(StackEvent event, Exception exception) {
-        return new ClusterUpgradeFailedEvent(event.getResourceId(), exception);
-    }
-
     @Override
     public String selector() {
         return CLUSTER_UPGRADE_FINISHED_EVENT.event();
