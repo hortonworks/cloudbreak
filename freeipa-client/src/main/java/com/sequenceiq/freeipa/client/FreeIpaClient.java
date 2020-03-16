@@ -468,6 +468,19 @@ public class FreeIpaClient {
         return (DnsZone) invoke("dnszone_add", flags, params, DnsZone.class).getResult();
     }
 
+    public DnsRecord getDnsRecord(String dnsZoneName, String recordName) throws FreeIpaClientException {
+        List<String> flags = List.of(dnsZoneName, recordName);
+        Map<String, Object> params = Map.of();
+        return (DnsRecord) invoke("dnsrecord_show", flags, params, DnsRecord.class).getResult();
+    }
+
+    public DnsRecord addDnsCnameRecord(String dnsZoneName, String recordName, String cnameRecord) throws FreeIpaClientException {
+        List<String> flags = List.of(dnsZoneName, recordName);
+        Map<String, Object> params = Map.of(
+                "cnamerecord", Set.of(cnameRecord + "."));
+        return (DnsRecord) invoke("dnsrecord_add", flags, params, DnsRecord.class).getResult();
+    }
+
     public RPCResponse<Object> deleteDnsZone(String... dnsZoneNames) throws FreeIpaClientException {
         List<String> flags = List.of(dnsZoneNames);
         Map<String, Object> params = Map.of();

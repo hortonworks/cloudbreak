@@ -69,8 +69,8 @@ class KerberosConfigRegisterServiceTest {
         KerberosConfig kerberosConfig = kerberosConfigArgumentCaptor.getValue();
         assertEquals(stack.getName(), kerberosConfig.getName());
         assertEquals(stack.getEnvironmentCrn(), kerberosConfig.getEnvironmentCrn());
-        assertEquals(instanceMetaData.getDiscoveryFQDN(), kerberosConfig.getUrl());
-        assertEquals(instanceMetaData.getDiscoveryFQDN(), kerberosConfig.getAdminUrl());
+        assertEquals("kdc.testdomain.local", kerberosConfig.getUrl());
+        assertEquals("kerberos.testdomain.local", kerberosConfig.getAdminUrl());
         assertEquals(instanceMetaData.getPrivateIp(), kerberosConfig.getNameServers());
         assertEquals(freeIpa.getAdminPassword(), kerberosConfig.getPassword());
         assertEquals(freeIpa.getDomain(), kerberosConfig.getDomain());
