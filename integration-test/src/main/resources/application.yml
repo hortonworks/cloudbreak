@@ -143,8 +143,8 @@ integrationtest:
 
   # aws parameters
   aws:
-    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.0.2
+    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.1.0
     region: eu-central-1
     location: eu-central-1
     availabilityZone: eu-central-1a
@@ -175,8 +175,8 @@ integrationtest:
 
   # azure parameters
   azure:
-    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.0.2
+    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.1.0
     availabilityZone:
     region: West US
     location: West US
@@ -209,8 +209,8 @@ integrationtest:
 
   # gcp parameters
   gcp:
-    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.0.2
+    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.1.0
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2
@@ -230,8 +230,8 @@ integrationtest:
 
   # openstack parameters
   openstack:
-    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.0.2
+    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.1.0
     availabilityZone: nova
     region: RegionOne
     location: Texas

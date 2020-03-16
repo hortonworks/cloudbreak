@@ -60,7 +60,7 @@ public class WaitUtil {
     @Value("${integrationtest.testsuite.pollingInterval:1000}")
     private long pollingInterval;
 
-    @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:1800}}")
+    @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:2700}}")
     private int maxRetry;
 
     public long getPollingInterval() {
