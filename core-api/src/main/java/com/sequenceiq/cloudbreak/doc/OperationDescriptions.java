@@ -186,17 +186,6 @@ public class OperationDescriptions {
         public static final String GET_REQUEST_BY_NAME = "get request by name";
     }
 
-    public static class KubernetesConfigOpDescription {
-        public static final String LIST_BY_WORKSPACE = "list Kubernetes configs for the given workspace";
-        public static final String GET_BY_NAME_IN_WORKSPACE = "get Kubernetes config by name in workspace";
-        public static final String CREATE_IN_WORKSPACE = "create Kubernetes config in workspace";
-        public static final String PUT_IN_WORKSPACE = "modify Kubernetes config in workspace";
-        public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete Kubernetes config by name in workspace";
-        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple Kubernetes configs by name in workspace";
-        public static final String ATTACH_TO_ENVIRONMENTS = "attach Kubernetes resource to environemnts";
-        public static final String DETACH_FROM_ENVIRONMENTS = "detach Kubernetes resource from environemnts";
-    }
-
     public static class ConnectorOpDescription {
         public static final String GET_DISK_TYPES = "retrive available disk types";
         public static final String GET_SERVICE_VERSIONS_BY_BLUEPRINT_NAME = "retrive services and versions";

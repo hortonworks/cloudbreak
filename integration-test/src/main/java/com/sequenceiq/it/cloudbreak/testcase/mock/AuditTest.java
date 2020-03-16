@@ -14,7 +14,6 @@ import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
-import com.sequenceiq.it.cloudbreak.client.KubernetesTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
@@ -25,7 +24,6 @@ import com.sequenceiq.it.cloudbreak.dto.audit.AuditTestDto;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.kubernetes.KubernetesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
@@ -54,9 +52,6 @@ public class AuditTest extends AbstractIntegrationTest {
     private RecipeTestClient recipeTestClient;
 
     @Inject
-    private KubernetesTestClient kubernetesTestClient;
-
-    @Inject
     private DatabaseTestClient databaseTestClient;
 
     @Inject
@@ -73,26 +68,6 @@ public class AuditTest extends AbstractIntegrationTest {
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a K8S config is created",
-            then = "an audit record must be available in the database")
-    public void createValidKubernetesConfigThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String kubernetesName = resourcePropertyProvider().getName();
-        testContext
-                .given(KubernetesTestDto.class)
-                .withName(kubernetesName)
-                .when(kubernetesTestClient.createV4(), key(kubernetesName))
-                .select(kubernetes -> kubernetes.getResponse().getId(), key(kubernetesName))
-                .given(AuditTestDto.class)
-                .withResourceIdByKey(kubernetesName)
-                .withResourceType("kubernetes")
-                .when(auditTestClient.listV4(), key(kubernetesName))
-                .then(AuditTestAssertion.listContainsAtLeast(1), key(kubernetesName))
-                .validate();
-    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(

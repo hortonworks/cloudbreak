@@ -27,7 +27,6 @@ public class ControllerDescription {
     public static final String RECIPES_V4_DESCRIPTION = "Operations on recipes by workspace";
     public static final String DATABASES_V4_DESCRIPTION = "Cloudbreak allows you to register an existing RDBMS instance as an external source "
             + "to be used for a database for certain services. After you register the RDBMS with Cloudbreak, you can use it for multiple clusters.";
-    public static final String KUBERNETESCONFIGS_V4_DESCRIPTION = "Operations on Kubernetes configs by workspace";
     public static final String LDAP_V4_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by workspace";
     public static final String CLUSTER_TEMPLATE_V4_DESCRIPTION = "Operations on ClusterTemplates by workspace";
     public static final String IMAGE_CATALOG_V4_DESCRIPTION = "Operations on Image Catalog by workspace";
