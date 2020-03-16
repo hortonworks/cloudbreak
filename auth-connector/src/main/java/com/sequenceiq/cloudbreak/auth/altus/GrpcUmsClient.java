@@ -607,6 +607,14 @@ public class GrpcUmsClient {
         }
     }
 
+    public List<UserManagementProto.WorkloadAdministrationGroup> listWorkloadAdministrationGroups(String actorCrn, String accountId,
+            Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            return client.listWorkloadAdministrationGroups(requestId.orElse(UUID.randomUUID().toString()), accountId);
+        }
+    }
+
     /**
      * Retrieves event generation ids for an account from UMS.
      *
