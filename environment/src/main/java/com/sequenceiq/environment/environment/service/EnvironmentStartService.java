@@ -1,8 +1,12 @@
 package com.sequenceiq.environment.environment.service;
 
+import java.util.Objects;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 
@@ -21,15 +25,30 @@ public class EnvironmentStartService {
 
     public void startByCrn(String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         EnvironmentDto environment = environmentService.getByCrnAndAccountId(crn, accountId);
-        reactorFlowManager.triggerStartFlow(environment.getId(), environment.getName(), userCrn);
+        start(environment, accountId);
     }
 
     public void startByName(String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         EnvironmentDto environment = environmentService.getByNameAndAccountId(name, accountId);
+        start(environment, accountId);
+    }
+
+    private void start(EnvironmentDto environment, String accountId) {
+        validateStartable(environment, accountId);
+
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         reactorFlowManager.triggerStartFlow(environment.getId(), environment.getName(), userCrn);
+    }
+
+    private void validateStartable(EnvironmentDto environment, String accountId) {
+        if (Objects.isNull(environment.getParentEnvironmentCrn())) {
+            return;
+        }
+        EnvironmentDto parentEnvironment = environmentService.getByCrnAndAccountId(environment.getParentEnvironmentCrn(), accountId);
+        if (parentEnvironment.getStatus() != EnvironmentStatus.AVAILABLE) {
+            throw new BadRequestException(String.format("Parent Environment [%s] must be available to start Environment.", parentEnvironment.getName()));
+        }
     }
 }
