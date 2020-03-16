@@ -57,6 +57,9 @@ public class Credential implements Serializable, AuthResource, AccountIdAwareRes
     @Column
     private String verificationStatusText;
 
+    @Column
+    private boolean verifyPermissions;
+
     private Long created = System.currentTimeMillis();
 
     public Long getCreated() {
@@ -162,4 +165,13 @@ public class Credential implements Serializable, AuthResource, AccountIdAwareRes
     public void setVerificationStatusText(String verificationStatusText) {
         this.verificationStatusText = verificationStatusText;
     }
+
+    public boolean isVerifyPermissions() {
+        return verifyPermissions;
+    }
+
+    public void setVerifyPermissions(boolean verifyPermissions) {
+        this.verifyPermissions = verifyPermissions;
+    }
+
 }
