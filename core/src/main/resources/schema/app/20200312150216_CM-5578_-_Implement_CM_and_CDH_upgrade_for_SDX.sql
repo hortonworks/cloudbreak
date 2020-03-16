@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS component_history (
 	componenttype varchar(255) NULL,
 	"name" varchar(255) NULL,
 	stack_id int8 NULL,
+	cluster_id int8 NULL,
 	CONSTRAINT component_history_pkey PRIMARY KEY (id,rev)
 );
 
@@ -24,7 +25,7 @@ ALTER TABLE component_history ADD CONSTRAINT fk_revinfo_rev FOREIGN KEY (rev) RE
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP TABLE IF EXISTS component_history;
+DROP TABLE IF EXISTS component_history CASCADE;
 DROP TABLE IF EXISTS revinfo;
 
 

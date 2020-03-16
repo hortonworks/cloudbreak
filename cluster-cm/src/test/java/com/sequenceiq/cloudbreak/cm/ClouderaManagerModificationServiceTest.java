@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerModificationServiceTest {
@@ -120,6 +121,9 @@ class ClouderaManagerModificationServiceTest {
 
     @Mock
     private ClouderaManagerRoleRefreshService clouderaManagerRoleRefreshService;
+
+    @Mock
+    private CloudbreakEventService eventService;
 
     private Cluster cluster;
 
@@ -291,7 +295,6 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
-
         BigDecimal apiCommandId = new BigDecimal(200);
         PollingResult successPollingResult = PollingResult.SUCCESS;
         ParcelResource parcelResource = new ParcelResource(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
@@ -323,7 +326,9 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClientMock, apiCommandId))
                 .thenReturn(successPollingResult);
 
-        ApiService apiService = new ApiService().configStalenessStatus(ApiConfigStalenessStatus.STALE)
+        ApiService apiService = new ApiService()
+                .name("SERVICE")
+                .configStalenessStatus(ApiConfigStalenessStatus.STALE)
                 .clientConfigStalenessStatus(ApiConfigStalenessStatus.STALE);
         List<ApiService> apiServices = List.of(apiService);
         ApiServiceList apiServiceList = new ApiServiceList();
@@ -331,7 +336,7 @@ class ClouderaManagerModificationServiceTest {
 
         when(servicesResourceApi.readServices(stack.getName(), "SUMMARY")).thenReturn(apiServiceList);
         when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY")).thenReturn(apiCommandList);
-        when(clustersResourceApi.deployClientConfigsAndRefresh(stack.getName())).thenReturn(new ApiCommand().id(apiCommandId));
+        when(clustersResourceApi.deployClientConfig(stack.getName())).thenReturn(new ApiCommand().id(apiCommandId));
         when(clustersResourceApi.refresh(stack.getName())).thenReturn(new ApiCommand().id(apiCommandId));
         when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(stack, apiClientMock, apiCommandId))
                 .thenReturn(successPollingResult);
@@ -344,7 +349,7 @@ class ClouderaManagerModificationServiceTest {
         verify(parcelResourceApi, times(1)).startDownloadCommand(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
         verify(parcelResourceApi, times(1)).startDistributionCommand(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
         verify(clustersResourceApi, times(1)).upgradeCdhCommand(stack.getName(), upgradeArgs);
-        verify(clustersResourceApi, times(1)).deployClientConfigsAndRefresh(stack.getName());
+        verify(clustersResourceApi, times(1)).deployClientConfig(stack.getName());
         verify(clustersResourceApi, times(1)).refresh(stack.getName());
 
     }

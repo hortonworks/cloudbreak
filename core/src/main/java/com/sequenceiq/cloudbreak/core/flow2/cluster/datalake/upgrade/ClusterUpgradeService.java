@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FAILED;
@@ -40,7 +41,7 @@ public class ClusterUpgradeService {
     public void upgradeCluster(long stackId, Image image) {
         String clusterManagerVersion = image.getVersion();
 
-        flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), CLUSTER_MANAGER_UPGRADE_FINISHED, clusterManagerVersion);
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE_FINISHED, clusterManagerVersion);
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE);
     }
@@ -56,6 +57,13 @@ public class ClusterUpgradeService {
     public void handleUpgradeClusterFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus) {
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_FAILED, errorReason);
         stackUpdater.updateStackStatus(stackId, detailedStatus);
-        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), CLUSTER_UPGRADE_FAILED, errorReason);
+        switch (detailedStatus) {
+            case CLUSTER_MANAGER_UPGRADE_FAILED:
+                flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), CLUSTER_MANAGER_UPGRADE_FAILED, errorReason);
+                break;
+            case CLUSTER_UPGRADE_FAILED:
+            default:
+                flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), CLUSTER_UPGRADE_FAILED, errorReason);
+        }
     }
 }

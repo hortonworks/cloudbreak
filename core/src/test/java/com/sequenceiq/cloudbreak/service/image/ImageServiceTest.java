@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -7,21 +8,31 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
@@ -32,6 +43,8 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.domain.stack.Component;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
@@ -44,9 +57,11 @@ public class ImageServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
-    private static final String PLATFORM = "Azure";
+    private static final String PLATFORM = "AZURE";
 
     private static final String STACK_VERSION = "7.1.0";
+
+    private static final String TARGET_STACK_VERSION = "7.1.1";
 
     private static final String CUSTOM_IMAGE_CATALOG_URL = "http://localhost/custom-imagecatalog-url";
 
@@ -79,6 +94,15 @@ public class ImageServiceTest {
 
     @Mock
     private BlueprintUtils blueprintUtils;
+
+    @Mock
+    private CloudConnector cloudConnector;
+
+    @Mock
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Mock
+    private ConversionService conversionService;
 
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
@@ -159,7 +183,7 @@ public class ImageServiceTest {
 
     @Test
     public void testGivenBaseImageIdAndDisabledBaseImageShouldReturnError() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString())).thenReturn(getImageFromCatalog(false, "uuid"));
+        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString())).thenReturn(getImageFromCatalog(false, "uuid", STACK_VERSION));
         CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
                 underTest.determineImageFromCatalog(
                         WORKSPACE_ID,
@@ -175,7 +199,7 @@ public class ImageServiceTest {
 
     @Test
     public void testGivenPrewarmedImageIdAndDisabledBaseImageShouldReturnOk() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString())).thenReturn(getImageFromCatalog(true, "uuid"));
+        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString())).thenReturn(getImageFromCatalog(true, "uuid", STACK_VERSION));
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
@@ -191,7 +215,7 @@ public class ImageServiceTest {
 
     @Test
     public void testGivenBaseImageIdAndEnabledBaseImageShouldReturnOk() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString())).thenReturn(getImageFromCatalog(false, "uuid"));
+        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString())).thenReturn(getImageFromCatalog(false, "uuid", STACK_VERSION));
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
@@ -207,7 +231,7 @@ public class ImageServiceTest {
 
     @Test
     public void testGivenPrewarmedImageIdAndEnabledBaseImageShouldReturnOk() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString())).thenReturn(getImageFromCatalog(true, "uuid"));
+        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString())).thenReturn(getImageFromCatalog(true, "uuid", STACK_VERSION));
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
@@ -224,7 +248,7 @@ public class ImageServiceTest {
     @Test
     public void testUseBaseImageAndEnabledBaseImageShouldReturnCorrectImage() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         imageSettingsV4Request.setId(null);
-        when(imageCatalogService.getLatestBaseImageDefaultPreferred(any(), any())).thenReturn(getImageFromCatalog(false, "uuid"));
+        when(imageCatalogService.getLatestBaseImageDefaultPreferred(any(), any())).thenReturn(getImageFromCatalog(false, "uuid", STACK_VERSION));
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
@@ -241,7 +265,7 @@ public class ImageServiceTest {
     @Test
     public void testNoUseBaseImageAndEnabledBaseImageShouldReturnCorrectImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         imageSettingsV4Request.setId(null);
-        when(imageCatalogService.getImagePrewarmedDefaultPreferred(any(), any())).thenReturn(getImageFromCatalog(false, "uuid"));
+        when(imageCatalogService.getImagePrewarmedDefaultPreferred(any(), any())).thenReturn(getImageFromCatalog(false, "uuid", STACK_VERSION));
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
@@ -258,7 +282,7 @@ public class ImageServiceTest {
     @Test
     public void testDisabledBaseImageShouldReturnCorrectImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         imageSettingsV4Request.setId(null);
-        when(imageCatalogService.getLatestPrewarmedImageDefaultPreferred(any(), any())).thenReturn(getImageFromCatalog(true, "uuid"));
+        when(imageCatalogService.getLatestPrewarmedImageDefaultPreferred(any(), any())).thenReturn(getImageFromCatalog(true, "uuid", STACK_VERSION));
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
@@ -272,23 +296,49 @@ public class ImageServiceTest {
         assertTrue(statedImage.getImage().isPrewarmed());
     }
 
-//    @Test
-//    public void testUpdateImageComponents() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
-//        Stack stack = TestUtil.stack();
-//        Cluster cluster = TestUtil.cluster();
-//        stack.setCluster(cluster);
-//        StatedImage targetImage = getImageFromCatalog(true, "uuid");
-//
-//        Image originalImage = getImage(true, "uuid");
-//        Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(originalImage), stack);
-//
-//        Set<ClusterComponent> clusterComponents = clusterComponentSet(cluster);
-//        when(componentConfigProviderService.getComponentsByStackId(stack.getId())).thenReturn(Set.of(imageComponent));
-//        when(clusterComponentConfigProvider.getComponentsByClusterId(cluster.getId())).thenReturn(clusterComponents);
-//
-//        verify(componentConfigProviderService.store())
-//        underTest.updateComponentsByStackId(stack, targetImage);
-//    }
+    @Test
+    public void testUpdateImageComponents() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
+
+        Stack stack = TestUtil.stack();
+        Cluster cluster = TestUtil.cluster();
+        stack.setCluster(cluster);
+        StatedImage targetImage = getImageFromCatalog(true, "targetImageUuid", TARGET_STACK_VERSION);
+
+        Image originalImage = getImage(true, "originalImageUuid", STACK_VERSION);
+        Component originalImageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(originalImage), stack);
+
+        String platform = stack.cloudPlatform();
+
+        Set<ClusterComponent> originalClusterComponents = clusterComponentSet(cluster);
+
+        when(componentConfigProviderService.getComponentsByStackId(stack.getId())).thenReturn(Set.of(originalImageComponent));
+        when(clusterComponentConfigProvider.getComponentsByClusterId(cluster.getId())).thenReturn(originalClusterComponents);
+        when(cloudPlatformConnectors.getDefault(platform(platform.toUpperCase()))).thenReturn(cloudConnector);
+        when(cloudConnector.regionToDisplayName(stack.getRegion())).thenReturn(stack.getRegion());
+        when(conversionService.convert(any(), eq(ClouderaManagerRepo.class))).thenReturn(getClouderaManagerRepo());
+
+        underTest.updateComponentsByStackId(stack, targetImage);
+
+        ArgumentCaptor<Set<Component>> componentCatcher = ArgumentCaptor.forClass(Set.class);
+        verify(componentConfigProviderService, times(1)).store(componentCatcher.capture());
+        assertEquals(3, componentCatcher.getValue().size());
+        assertTrue(componentCatcher.getValue().stream().anyMatch(
+                component -> {
+                    Object version = component.getAttributes().getValue("version");
+                    if (Objects.nonNull(version)) {
+                        return ((String) version).contains(TARGET_STACK_VERSION);
+                    } else {
+                        return false;
+                    }
+                }));
+
+        ArgumentCaptor<Set<ClusterComponent>> clusterComponentCatcher = ArgumentCaptor.forClass(Set.class);
+        verify(clusterComponentConfigProvider, times(1)).store(clusterComponentCatcher.capture());
+        // IMAGE is not saved as cluster component
+        assertEquals(2, clusterComponentCatcher.getValue().size());
+        assertTrue(clusterComponentCatcher.getValue().stream().anyMatch(
+                component -> ((String) component.getAttributes().getValue("version")).contains(TARGET_STACK_VERSION)));
+    }
 
     private ImageCatalog getImageCatalog() {
         ImageCatalog imageCatalog = new ImageCatalog();
@@ -302,20 +352,30 @@ public class ImageServiceTest {
         return imageCatalog;
     }
 
-    private StatedImage getImageFromCatalog(boolean prewarmed, String uuid) {
-        Image image = getImage(prewarmed, uuid);
+    private StatedImage getImageFromCatalog(boolean prewarmed, String uuid, String stackVersion) {
+        Image image = getImage(prewarmed, uuid, stackVersion);
         return StatedImage.statedImage(image, "url", "name");
     }
 
-    private Image getImage(boolean prewarmed, String uuid) {
+    private Image getImage(boolean prewarmed, String uuid, String stackVersion) {
         Map<String, String> packageVersions = Collections.singletonMap("package", "version");
+
+        Map<String, String> regionImageIdMap = new HashMap<>();
+        regionImageIdMap.put("region", uuid);
+        Map<String, String> stackDetailsMap = new HashMap<>();
+        stackDetailsMap.put("redhat7", "http://foo/parcels");
+        stackDetailsMap.put("repoid", String.format("CDH-%s", stackVersion));
+        stackDetailsMap.put("repository-version", String.format("%s-1.cdh%s.p0.2457278", stackVersion, stackVersion));
+        Map<String, Map<String, String>> imageSetsByProvider = new HashMap<>();
+        imageSetsByProvider.put(PLATFORM, regionImageIdMap);
+
         StackDetails stackDetails = null;
         if (prewarmed) {
-            StackRepoDetails repoDetails = new StackRepoDetails(Collections.emptyMap(), Collections.emptyMap());
-            stackDetails = new StackDetails("7.1.0", repoDetails, "1");
+            StackRepoDetails repoDetails = new StackRepoDetails(stackDetailsMap, Collections.emptyMap());
+            stackDetails = new StackDetails(stackVersion, repoDetails, "1");
         }
-        return new Image("asdf", System.currentTimeMillis(), "asdf", "centos7", uuid, "2.8.0", Collections.emptyMap(),
-                Collections.singletonMap(PLATFORM, Collections.emptyMap()), stackDetails, "centos", packageVersions,
+        return new Image("imageDate", System.currentTimeMillis(), "imageDesc", "centos7", uuid, stackVersion, Collections.emptyMap(),
+                imageSetsByProvider, stackDetails, "centos", packageVersions,
                 Collections.emptyList(), Collections.emptyList(), "1");
     }
 
@@ -328,5 +388,12 @@ public class ImageServiceTest {
         ClusterComponent cdhComponent = createClusterComponent(CDH_ATTRIBUTES, CDH, ComponentType.CDH_PRODUCT_DETAILS, cluster);
         ClusterComponent cmComponent = createClusterComponent(CM_ATTRIBUTES, ComponentType.CM_REPO_DETAILS.name(), ComponentType.CM_REPO_DETAILS, cluster);
         return Set.of(cdhComponent, cmComponent);
+    }
+
+    private ClouderaManagerRepo getClouderaManagerRepo() {
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setBaseUrl("http://public-repo-1.hortonworks.com/cm/centos7/7.1.0/updates/7.1.0");
+        clouderaManagerRepo.setVersion("7.1.0");
+        return clouderaManagerRepo;
     }
 }

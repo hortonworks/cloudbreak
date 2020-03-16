@@ -148,6 +148,7 @@ public class ImageService {
                     matching.ifPresent(value -> value.setAttributes(component.getAttributes()));
                 });
         clusterComponentConfigProvider.store(clusterComponents);
+        LOGGER.info("Updated cluster components:" + clusterComponents);
     }
 
     //CHECKSTYLE:OFF

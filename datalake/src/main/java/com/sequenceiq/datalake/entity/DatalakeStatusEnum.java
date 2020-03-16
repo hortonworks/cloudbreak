@@ -71,6 +71,8 @@ public enum DatalakeStatusEnum {
                 return UPGRADE_FAILED;
             case DELETE_REQUESTED:
                 return DELETE_FAILED;
+            case DATALAKE_UPGRADE_IN_PROGRESS:
+                return DATALAKE_UPGRADE_FAILED;
             default:
                 return this;
         }
