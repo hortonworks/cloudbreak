@@ -287,14 +287,15 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public void upgradeStackByName(String name, String imageId) {
-        sdxStackUpgradeService.upgradeStackByName(name, imageId);
+    public FlowIdentifier upgradeStackByName(String name, String imageId) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return sdxStackUpgradeService.triggerUpgradeByName(userCrn, name, imageId);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public void upgradeStackByCrn(String crn, String imageId) {
+    public FlowIdentifier upgradeStackByCrn(String crn, String imageId) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        sdxStackUpgradeService.upgradeStackByCrn(crn, imageId, userCrn);
+        return sdxStackUpgradeService.triggerUpgradeByCrn(userCrn, crn, imageId);
     }
 }

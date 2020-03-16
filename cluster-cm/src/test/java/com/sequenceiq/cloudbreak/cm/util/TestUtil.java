@@ -29,6 +29,7 @@ public class TestUtil {
             + "\"baseUrl\":\"https://archive.cloudera.com/cm7/7.0.0/redhat7/yum/\","
             + "\"gpgKeyUrl\":\"https://archive.cloudera.com/cm7/7.0.0/redhat7/yum/RPM-GPG-KEY-cloudera\"}";
 
+    private TestUtil() { }
 
     private static ClusterComponent createClusterComponent(String attributeString, String name, ComponentType componentType, Cluster cluster) {
         Json attributes = new Json(attributeString);

@@ -278,10 +278,9 @@ class ClouderaManagerModificationServiceTest {
                 = clusterComponents.stream().filter(clusterComponent -> !clusterComponent.getName().equals("CDH")).collect(Collectors.toSet());
 
         cluster.setComponents(clusterComponentsNoCDH);
-        NotFoundException exception = assertThrows(NotFoundException.class,() -> underTest.upgradeClusterRuntime(clusterComponentsNoCDH));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.upgradeClusterRuntime(clusterComponentsNoCDH));
         Assertions.assertEquals("Runtime component not found!", exception.getMessage());
     }
-
 
     @Test
     void testUpgradeCluster() throws CloudbreakException, ApiException {
@@ -298,12 +297,14 @@ class ClouderaManagerModificationServiceTest {
         ParcelResource parcelResource = new ParcelResource(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
 
         // Start download
-        when(parcelResourceApi.startDownloadCommand(eq(stack.getName()), eq(TestUtil.CDH), eq(TestUtil.CDH_VERSION))).thenReturn(new ApiCommand().id(apiCommandId));
+        when(parcelResourceApi.startDownloadCommand(eq(stack.getName()), eq(TestUtil.CDH), eq(TestUtil.CDH_VERSION)))
+                .thenReturn(new ApiCommand().id(apiCommandId));
         when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDownload(stack, apiClientMock, apiCommandId, parcelResource))
                 .thenReturn(successPollingResult);
 
         // Start distribute
-        when(parcelResourceApi.startDistributionCommand(eq(stack.getName()), eq(TestUtil.CDH), eq(TestUtil.CDH_VERSION))).thenReturn(new ApiCommand().id(apiCommandId));
+        when(parcelResourceApi.startDistributionCommand(eq(stack.getName()), eq(TestUtil.CDH), eq(TestUtil.CDH_VERSION)))
+                .thenReturn(new ApiCommand().id(apiCommandId));
         when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDistribute(stack, apiClientMock, apiCommandId, parcelResource))
                 .thenReturn(successPollingResult);
 

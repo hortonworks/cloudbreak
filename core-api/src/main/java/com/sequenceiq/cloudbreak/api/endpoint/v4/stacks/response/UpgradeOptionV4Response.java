@@ -43,4 +43,9 @@ public class UpgradeOptionV4Response {
                 ", reason='" + reason + '\'' +
                 '}';
     }
+
+    public UpgradeOptionV4Response upgrade(ImageInfoV4Response upgrade) {
+        this.upgrade = upgrade;
+        return this;
+    }
 }

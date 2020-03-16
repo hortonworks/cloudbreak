@@ -314,7 +314,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 .map(it -> it.getName() + ": " + it.getClientConfigStalenessStatus())
                 .collect(Collectors.joining(", ")));
         List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
-        ApiCommand deployClientConfigCmd = getApiCommand(commands, "DeployClusterClientConfig", stack.getName(), clustersResourceApi::deployClientConfigsAndRefresh);
+        ApiCommand deployClientConfigCmd =
+                getApiCommand(commands, "DeployClusterClientConfig", stack.getName(), clustersResourceApi::deployClientConfigsAndRefresh);
         pollDeployConfig(deployClientConfigCmd);
         ApiCommand refreshServicesCmd = getApiCommand(commands, "RefreshCluster", stack.getName(), clustersResourceApi::refresh);
         pollRefresh(refreshServicesCmd);
