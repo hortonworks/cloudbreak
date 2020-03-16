@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class EnvironmentStopAction implements Action<EnvironmentTestDto, EnvironmentClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentStartAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentStopAction.class);
 
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient environmentClient) throws Exception {
