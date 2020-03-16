@@ -61,6 +61,9 @@ public abstract class CredentialBase implements Serializable {
     @ApiModelProperty(CredentialModelDescription.VERIFICATION_STATUS_TEXT)
     private String verificationStatusText;
 
+    @ApiModelProperty(CredentialModelDescription.VERIFY_PERMISSIONS)
+    private boolean verifyPermissions;
+
     public MockParameters getMock() {
         return mock;
     }
@@ -132,4 +135,13 @@ public abstract class CredentialBase implements Serializable {
     public void setVerificationStatusText(String verificationStatusText) {
         this.verificationStatusText = verificationStatusText;
     }
+
+    public boolean isVerifyPermissions() {
+        return verifyPermissions;
+    }
+
+    public void setVerifyPermissions(boolean verifyPermissions) {
+        this.verifyPermissions = verifyPermissions;
+    }
+
 }
