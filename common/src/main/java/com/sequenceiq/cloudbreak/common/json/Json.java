@@ -162,4 +162,12 @@ public class Json implements Serializable {
         object.put(split[split.length - 1], newValue);
         value = jsonObject.toString();
     }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("Json{");
+        sb.append("value='").append(value).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

@@ -159,7 +159,7 @@ public class ClouderaManagerPollingServiceProvider {
     }
 
     public PollingResult startPollingCdpRuntimeParcelDistribute(Stack stack, ApiClient apiClient, BigDecimal commandId, ParcelResource parcelResource) {
-        LOGGER.debug("Waiting for Cloudera Manager to download CDP Runtime Parcel. [Server address: {}]", stack.getClusterManagerIp());
+        LOGGER.debug("Waiting for Cloudera Manager to distribute CDP Runtime Parcel. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_ATTEMPTS_FOUR_HOURS,
                 new ClouderaManagerUpgradeParcelDistributeListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService, parcelResource));
     }

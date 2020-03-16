@@ -184,6 +184,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
             MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient);
 
+            startClouderaManager(stack, apiClient);
             setParcelRepo(stackProductParcel);
             downloadParcel(stackProductVersion, parcelResourceApi, product);
             distributeParcel(stackProductVersion, parcelResourceApi, product);
@@ -307,15 +308,15 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void deployConfigAndRefreshStaleServices(ClustersResourceApi clustersResourceApi, List<ApiService> notFreshServices,
             List<ApiService> notFreshClientServices) throws ApiException, CloudbreakException {
-        LOGGER.debug("Services with config staleness statuses: {}", notFreshServices.stream()
+        LOGGER.debug("Services with config staleness status: {}", notFreshServices.stream()
                 .map(it -> it.getName() + ": " + it.getConfigStalenessStatus())
                 .collect(Collectors.joining(", ")));
-        LOGGER.debug("Services with client config staleness statuses: {}", notFreshClientServices.stream()
+        LOGGER.debug("Services with client config staleness status: {}", notFreshClientServices.stream()
                 .map(it -> it.getName() + ": " + it.getClientConfigStalenessStatus())
                 .collect(Collectors.joining(", ")));
         List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
         ApiCommand deployClientConfigCmd =
-                getApiCommand(commands, "DeployClusterClientConfig", stack.getName(), clustersResourceApi::deployClientConfigsAndRefresh);
+                getApiCommand(commands, "DeployClusterClientConfig", stack.getName(), clustersResourceApi::deployClientConfig);
         pollDeployConfig(deployClientConfigCmd);
         ApiCommand refreshServicesCmd = getApiCommand(commands, "RefreshCluster", stack.getName(), clustersResourceApi::refresh);
         pollRefresh(refreshServicesCmd);
@@ -420,6 +421,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     private void callUpgradeCdhCommand(String stackProductVersion,
             ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
         LOGGER.debug("Upgrading the CDP Runtime..");
+        eventService
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_UPGRADE);
         ApiCdhUpgradeArgs upgradeArgs = new ApiCdhUpgradeArgs();
         upgradeArgs.setCdhParcelVersion(stackProductVersion);
         ApiCommand apiCommand = clustersResourceApi.upgradeCdhCommand(stack.getName(), upgradeArgs);
@@ -434,6 +437,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void distributeParcel(String stackProductVersion, ParcelResourceApi parcelResourceApi, String product) throws ApiException, CloudbreakException {
+        eventService
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DISTRIBUTE_PARCEL);
         LOGGER.debug("Distributing downloaded parcel");
         ApiCommand apiCommand = parcelResourceApi.startDistributionCommand(stack.getName(), product, stackProductVersion);
         PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDistribute(
@@ -447,6 +452,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void downloadParcel(String stackProductVersion, ParcelResourceApi parcelResourceApi, String product) throws ApiException, CloudbreakException {
         LOGGER.debug("Downloading parcel..");
+        eventService
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DOWNLOAD_PARCEL);
         ApiCommand apiCommand = parcelResourceApi.startDownloadCommand(stack.getName(), product, stackProductVersion);
         PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDownload(
                 stack, apiClient, apiCommand.getId(), new ParcelResource(stack.getName(), product, stackProductVersion));

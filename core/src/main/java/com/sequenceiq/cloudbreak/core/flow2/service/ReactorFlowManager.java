@@ -157,11 +157,6 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public void triggerClusterUpgrade(Long stackId) {
-        String selector = FlowChainTriggers.CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
-        reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
-    }
-
     public FlowIdentifier triggerDatalakeClusterUpgrade(Long stackId, StatedImage targetImage) {
         String selector = FlowChainTriggers.DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
         return reactorNotifier.notify(stackId, selector, new DatalakeClusterUpgradeTriggerEvent(selector, stackId, targetImage));
