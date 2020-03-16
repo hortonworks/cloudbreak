@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Set;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,6 +17,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationToStackAuthenticationResponseConverter;
@@ -46,9 +49,9 @@ class StackToDescribeFreeIpaResponseConverterTest {
 
     private static final ImageSettingsResponse IMAGE_SETTINGS_RESPONSE = new ImageSettingsResponse();
 
-    private static final FreeIpaServerResponse FREE_IPA_SERVER_RESPONSE = new FreeIpaServerResponse();
+    private static final InstanceGroupResponse INSTANCE_GROUP_RESPONSE = new InstanceGroupResponse();
 
-    private static final List<InstanceGroupResponse> INSTANCE_GROUP_RESPONSES = List.of(new InstanceGroupResponse());
+    private static final List<InstanceGroupResponse> INSTANCE_GROUP_RESPONSES = List.of(INSTANCE_GROUP_RESPONSE);
 
     private static final Status STATUS = Status.AVAILABLE;
 
@@ -57,6 +60,14 @@ class StackToDescribeFreeIpaResponseConverterTest {
     private static final String APP_VERSION = "appVersion";
 
     private static final String STATUS_STRING = "Status string";
+
+    private static final String DOMAIN = "example.com";
+
+    private static final String FREEIPA_HOST = "freeipa.example.com";
+
+    private static final int GATEWAY_PORT = 8080;
+
+    private static final String SERVER_IP = "1.1.1.1";
 
     @InjectMocks
     private StackToDescribeFreeIpaResponseConverter underTest;
@@ -79,14 +90,23 @@ class StackToDescribeFreeIpaResponseConverterTest {
     @Mock
     private TelemetryConverter telemetryConverter;
 
+    @BeforeAll
+    static void initInstanceGroupResponse() {
+        InstanceMetaDataResponse instanceMetaDataResponse = new InstanceMetaDataResponse();
+        instanceMetaDataResponse.setPrivateIp(SERVER_IP);
+        INSTANCE_GROUP_RESPONSE.setMetaData(Set.of(instanceMetaDataResponse));
+    }
+
     @Test
     void convert() {
+        FreeIpaServerResponse freeIpaServerResponse = new FreeIpaServerResponse();
         Stack stack = createStack();
         Image image = new Image();
         FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
         when(authenticationResponseConverter.convert(stack.getStackAuthentication())).thenReturn(STACK_AUTHENTICATION_RESPONSE);
         when(imageSettingsResponseConverter.convert(image)).thenReturn(IMAGE_SETTINGS_RESPONSE);
-        when(freeIpaServerResponseConverter.convert(freeIpa)).thenReturn(FREE_IPA_SERVER_RESPONSE);
+        when(freeIpaServerResponseConverter.convert(freeIpa)).thenReturn(freeIpaServerResponse);
         when(instanceGroupConverter.convert(stack.getInstanceGroups())).thenReturn(INSTANCE_GROUP_RESPONSES);
 
         DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa);
@@ -98,7 +118,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .returns(CLOUD_PLATFORM, DescribeFreeIpaResponse::getCloudPlatform)
                 .returns(STACK_AUTHENTICATION_RESPONSE, DescribeFreeIpaResponse::getAuthentication)
                 .returns(IMAGE_SETTINGS_RESPONSE, DescribeFreeIpaResponse::getImage)
-                .returns(FREE_IPA_SERVER_RESPONSE, DescribeFreeIpaResponse::getFreeIpa)
+                .returns(freeIpaServerResponse, DescribeFreeIpaResponse::getFreeIpa)
                 // TODO placement
                 .returns(INSTANCE_GROUP_RESPONSES, DescribeFreeIpaResponse::getInstanceGroups)
                 .returns(STATUS, DescribeFreeIpaResponse::getStatus)
@@ -107,6 +127,11 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 // TODO decorateFreeIpaServerResponseWithIps
                 .returns(APP_VERSION, DescribeFreeIpaResponse::getAppVersion);
                 // TODO decorateWithCloudStorgeAndTelemetry
+
+        assertThat(freeIpaServerResponse)
+                .returns(Set.of(SERVER_IP), FreeIpaServerResponse::getServerIp)
+                .returns(FREEIPA_HOST, FreeIpaServerResponse::getFreeIpaHost)
+                .returns(GATEWAY_PORT, FreeIpaServerResponse::getFreeIpaPort);
     }
 
     private Stack createStack() {
@@ -118,6 +143,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         stack.setCloudPlatform(CLOUD_PLATFORM);
         stack.setStackAuthentication(new StackAuthentication());
         stack.setAppVersion(APP_VERSION);
+        stack.setGatewayport(GATEWAY_PORT);
         return stack;
     }
 
