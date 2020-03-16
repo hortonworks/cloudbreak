@@ -23,6 +23,7 @@ import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.RoleCommandsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
+import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.UsersResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 
@@ -119,6 +120,11 @@ public class CmClientConfig {
     @Bean
     public Function<ApiClient, AllHostsResourceApi> allHostsResourceApiFactory() {
         return this::allHostsResourceApi;
+    }
+
+    @Bean
+    public Function<ApiClient, ToolsResourceApi> toolsResourceApiFactory() {
+        return this::toolsResourceApi;
     }
 
     // prototype bean declarations:
@@ -229,5 +235,11 @@ public class CmClientConfig {
     @Scope(value = "prototype")
     public AllHostsResourceApi allHostsResourceApi(ApiClient apiClient) {
         return new AllHostsResourceApi(apiClient);
+    }
+
+    @Bean
+    @Scope(value = "prototype")
+    public ToolsResourceApi toolsResourceApi(ApiClient apiClient) {
+        return new ToolsResourceApi(apiClient);
     }
 }
