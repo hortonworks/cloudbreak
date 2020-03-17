@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.start;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_POLLING_FAILURE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.DNS_UPDATE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_STARTING_STATE;
@@ -11,6 +12,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartSta
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_START_POLLING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.UPDATING_DNS_IN_PEM_STATE;
 
 import java.util.List;
 
@@ -27,7 +29,8 @@ public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterSta
 
     private static final List<Transition<ClusterStartState, ClusterStartEvent>> TRANSITIONS =
             new Builder<ClusterStartState, ClusterStartEvent>()
-                    .from(INIT_STATE).to(CLUSTER_STARTING_STATE).event(CLUSTER_START_EVENT).noFailureEvent()
+                    .from(INIT_STATE).to(UPDATING_DNS_IN_PEM_STATE).event(CLUSTER_START_EVENT).noFailureEvent()
+                    .from(UPDATING_DNS_IN_PEM_STATE).to(CLUSTER_STARTING_STATE).event(DNS_UPDATE_FINISHED_EVENT).noFailureEvent()
                     .from(CLUSTER_STARTING_STATE).to(CLUSTER_START_POLLING_STATE).event(ClusterStartEvent.CLUSTER_START_POLLING_EVENT)
                         .failureEvent(CLUSTER_START_FAILURE_EVENT)
                     .from(CLUSTER_START_POLLING_STATE).to(CLUSTER_START_FINISHED_STATE).event(ClusterStartEvent.CLUSTER_START_FINISHED_EVENT)

@@ -51,7 +51,7 @@ public class GrpcClusterDnsClient {
         }
     }
 
-    public CreateDnsEntryResponse createDnsEntryWithIp(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard,
+    public CreateDnsEntryResponse createOrUpdateDnsEntryWithIp(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard,
             List<String> ips, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             ClusterDnsClient client = makeClient(channelWrapper.getChannel(), actorCrn);

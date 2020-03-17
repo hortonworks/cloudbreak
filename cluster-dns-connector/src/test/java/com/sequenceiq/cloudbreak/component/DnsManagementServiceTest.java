@@ -52,7 +52,7 @@ public class DnsManagementServiceTest {
         String environment = "gtopolyai-without-freeipa";
         boolean wildcard = false;
         List<String> ips = List.of("10.65.65.152");
-        dnsManagementService.createDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips);
+        dnsManagementService.createOrUpdateDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips);
         LOGGER.info("dns is registered");
         dnsManagementService.deleteDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips);
         LOGGER.info("dns is deleted");
@@ -67,7 +67,7 @@ public class DnsManagementServiceTest {
         String environment = "gtopolyai-without-freeipa";
         boolean wildcard = false;
         List<String> ips = List.of("10.65.65.212");
-        dnsManagementService.createDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips);
+        dnsManagementService.createOrUpdateDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips);
         LOGGER.info("dns is registered");
     }
 
