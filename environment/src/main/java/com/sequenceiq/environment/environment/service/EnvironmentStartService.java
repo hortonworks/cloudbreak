@@ -1,9 +1,8 @@
 package com.sequenceiq.environment.environment.service;
 
-import java.util.Objects;
-
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -43,7 +42,7 @@ public class EnvironmentStartService {
     }
 
     private void validateStartable(EnvironmentDto environment, String accountId) {
-        if (Objects.isNull(environment.getParentEnvironmentCrn())) {
+        if (Strings.isNullOrEmpty(environment.getParentEnvironmentCrn())) {
             return;
         }
         EnvironmentDto parentEnvironment = environmentService.getByCrnAndAccountId(environment.getParentEnvironmentCrn(), accountId);
