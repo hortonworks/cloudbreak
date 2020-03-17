@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.Collections;
 
@@ -15,7 +16,6 @@ import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
@@ -66,14 +66,14 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .await(AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
-                .awaitForFlow(RunningParameter.key(resourcePropertyProvider().getName()))
+                .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given("dx1", DistroXTestDto.class)
-                .when(distroXTestClient.create(), RunningParameter.key("dx1"))
+                .when(distroXTestClient.create(), key("dx1"))
                 .given("dx2", DistroXTestDto.class)
-                .when(distroXTestClient.create(), RunningParameter.key("dx2"))
-                .await(STACK_AVAILABLE, RunningParameter.key("dx1"))
-                .await(STACK_AVAILABLE, RunningParameter.key("dx2"))
+                .when(distroXTestClient.create(), key("dx2"))
+                .await(STACK_AVAILABLE, key("dx1"))
+                .await(STACK_AVAILABLE, key("dx2"))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop())
                 .await(EnvironmentStatus.ENV_STOPPED);

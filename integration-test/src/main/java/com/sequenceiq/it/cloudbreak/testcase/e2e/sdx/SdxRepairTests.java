@@ -49,6 +49,8 @@ public class SdxRepairTests extends BasicSdxTests {
 
     private static final String CREATE_FILE_RECIPE = "classpath:/recipes/post-install.sh";
 
+    private static final String DEFAULT_SDX_BLUEPRINT_NAME = "7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas";
+
     private final Map<String, InstanceStatus> instancesDeletedOnProviderSide = new HashMap<>() {{
         put(MASTER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
         put(IDBROKER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
@@ -244,14 +246,16 @@ public class SdxRepairTests extends BasicSdxTests {
 
         testContext
                 .given(clouderaManager, ClouderaManagerTestDto.class)
-                .given(cluster, ClusterTestDto.class).withValidateBlueprint(Boolean.FALSE).withClouderaManager(clouderaManager)
+                .given(cluster, ClusterTestDto.class).withBlueprintName(DEFAULT_SDX_BLUEPRINT_NAME).withValidateBlueprint(Boolean.FALSE)
+                .withClouderaManager(clouderaManager)
                 .given(RecipeTestDto.class).withName(recipeName).withContent(generateRecipeContent())
                 .withRecipeType(POST_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
                 .given(masterInstanceGroup, InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1).withRecipes(recipeName)
                 .given(idbrokerInstanceGroup, InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1).withRecipes(recipeName)
                 .given(stack, StackTestDto.class).withCluster(cluster).withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
-                .given(sdxInternal, SdxInternalTestDto.class).withStackRequest(stack, cluster)
+                .given(sdxInternal, SdxInternalTestDto.class)
+                .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
