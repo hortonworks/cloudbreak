@@ -22,6 +22,8 @@ public class ExposedService {
 
     private boolean apiOnly;
 
+    private boolean cmProxied;
+
     private boolean apiIncluded;
 
     private boolean visibleForDatalake;
@@ -102,6 +104,14 @@ public class ExposedService {
 
     public boolean isApiIncluded() {
         return apiIncluded;
+    }
+
+    public boolean isCmProxied() {
+        return cmProxied;
+    }
+
+    public void setCmProxied(boolean cmProxied) {
+        this.cmProxied = cmProxied;
     }
 
     public void setApiIncluded(boolean apiIncluded) {

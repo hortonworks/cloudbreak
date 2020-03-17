@@ -114,7 +114,8 @@ class ExposedServiceCollectorTest {
                 "SPARK_YARN_HISTORY_SERVER",
                 "STREAMS_MESSAGING_MANAGER_SERVER",
                 "STREAMS_MESSAGING_MANAGER_UI",
-                "ZEPPELIN_SERVER");
+                "ZEPPELIN_SERVER",
+                "QUEUEMANAGER_WEBAPP");
     }
 
     @Test
@@ -154,7 +155,8 @@ class ExposedServiceCollectorTest {
                 "WEBHBASE",
                 "WEBHDFS",
                 "YARNUIV2",
-                "ZEPPELIN");
+                "ZEPPELIN",
+                "QUEUEMANAGER_WEBAPP");
     }
 
     @Test

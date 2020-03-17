@@ -79,6 +79,10 @@ public class ExposedServiceCollector {
         return exposedServices.get("KUDU");
     }
 
+    public ExposedService getQueueService() {
+        return exposedServices.get("QUEUEMANAGER_WEBAPP");
+    }
+
     public ExposedService getNameNodeService() {
         return exposedServices.get("NAMENODE");
     }
