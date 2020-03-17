@@ -45,6 +45,7 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 
 @Prototype
@@ -91,6 +92,12 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
     private FreeIPATestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
+        return this;
+    }
+
+    public FreeIPATestDto withTelemetry(String telemetry) {
+        TelemetryTestDto telemetryTestDto = getTestContext().get(telemetry);
+        getRequest().setTelemetry(telemetryTestDto.getRequest());
         return this;
     }
 

@@ -11,6 +11,7 @@ import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
 public class FreeIPATests extends AbstractE2ETest {
@@ -31,7 +32,11 @@ public class FreeIPATests extends AbstractE2ETest {
         String freeIpa = resourcePropertyProvider().getName();
 
         testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogs()
                 .given(freeIpa, FreeIPATestDto.class)
+                .withTelemetry("telemetry")
                 .when(freeIPATestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .when(freeIPATestClient.stop())
@@ -55,8 +60,12 @@ public class FreeIPATests extends AbstractE2ETest {
         int instanceCountByGroup = 2;
 
         testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogs()
                 .given(freeIpa, FreeIPATestDto.class)
                 .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
+                .withTelemetry("telemetry")
                 .when(freeIPATestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .when(freeIPATestClient.stop())
