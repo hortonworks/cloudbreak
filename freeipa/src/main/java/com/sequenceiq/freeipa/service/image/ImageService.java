@@ -64,6 +64,10 @@ public class ImageService {
         return imageRepository.getByStack(stack);
     }
 
+    public Image getByStackId(Long stackId) {
+        return imageRepository.getByStackId(stackId);
+    }
+
     public Image decorateImageWithUserDataForStack(Stack stack, String userdata) {
         Image image = getByStack(stack);
         image.setUserdata(userdata);

@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.projection.StackAuthenticationView;
 
 @Transactional(TxType.REQUIRED)
 public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaData, Long> {
@@ -27,6 +29,12 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceId = :instanceId AND i.instanceGroup.stack.id= :stackId")
     InstanceMetaData findByInstanceId(@Param("stackId") Long stackId, @Param("instanceId") String instanceId);
+
+    @Query("SELECT s.id as stackId, s.stackAuthentication as stackAuthentication FROM InstanceMetaData i " +
+            "LEFT JOIN i.instanceGroup ig " +
+            "LEFT JOIN ig.stack s " +
+            "WHERE i.id = :instanceId")
+    Optional<StackAuthenticationView> getStackAuthenticationViewByInstanceMetaDataId(@Param("instanceId") Long id);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
     InstanceMetaData findHostInStack(@Param("stackId") Long stackId, @Param("hostName") String hostName);

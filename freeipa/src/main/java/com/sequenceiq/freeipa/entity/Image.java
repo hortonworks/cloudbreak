@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.entity;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,7 +16,7 @@ public class Image {
     @SequenceGenerator(name = "image_generator", sequenceName = "image_id_seq", allocationSize = 1)
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private Stack stack;
 
     private String imageName;

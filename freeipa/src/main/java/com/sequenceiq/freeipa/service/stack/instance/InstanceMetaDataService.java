@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.projection.StackAuthenticationView;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 
 @Service
@@ -93,5 +94,9 @@ public class InstanceMetaDataService {
 
     public Iterable<InstanceMetaData> saveAll(Iterable<InstanceMetaData> allInstanceMetaData) {
         return instanceMetaDataRepository.saveAll(allInstanceMetaData);
+    }
+
+    public Optional<StackAuthenticationView> getStackAuthenticationViewByInstanceMetaDataId(Long instanceId) {
+        return instanceMetaDataRepository.getStackAuthenticationViewByInstanceMetaDataId(instanceId);
     }
 }

@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -43,6 +44,7 @@ public class SdxBaseImageTests extends BasicSdxTests {
         initializeDefaultBlueprints(testContext);
     }
 
+    @Ignore("This should be re-enabled once CB-6103 is fixed")
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak",

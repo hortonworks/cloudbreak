@@ -6,9 +6,11 @@ import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.REQUESTED;
 import static java.lang.String.format;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.NotFoundException;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -366,7 +369,7 @@ public class WaitUtil {
             throw new RuntimeException(builder.toString());
         } else if (waitResult == WaitResult.TIMEOUT) {
             throw new RuntimeException("Timeout happened");
-        } else if (SdxClusterStatusResponse.DELETED != desiredStatus) {
+        } else if (DELETED != desiredStatus) {
             SdxClusterResponse sdxResponse = sdxClient.getSdxClient().sdxEndpoint().get(name);
             if (sdxResponse != null) {
                 errors = Map.of("status", sdxResponse.getStatus().name());
@@ -376,77 +379,20 @@ public class WaitUtil {
     }
 
     public SdxTestDto waitForSdxInstanceStatus(SdxTestDto sdxTestDto, SdxClient sdxClient, String hostGroup, InstanceStatus desiredState) {
-        int retryCount = 0;
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
-
-        long startTime = System.currentTimeMillis();
-        while (retryCount < maxRetry && !checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
-            LOGGER.info("Waiting for instance status {} in Host Group {} at {} SDX, ellapsed {}ms", desiredState, hostGroup, sdxName,
-                    System.currentTimeMillis() - startTime);
-            sleep(pollingInterval);
-            retryCount++;
-        }
-
-        if (checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
-            Log.log(LOGGER, format(" [%s] host group instance state is [%s] at [%s] SDX.", hostGroup, desiredState, sdxName));
-        } else {
-            LOGGER.error("Timeout: Host Group: {} desired instance state: {} is NOT available at {} SDX during {} retries", hostGroup, desiredState, sdxName,
-                    maxRetry);
-            throw new TestFailException(" Timeout: Host Group: " + hostGroup + " desired instance state: " + desiredState
-                    + " is NOT available at " + sdxName + " SDX during " + maxRetry + " retries");
-        }
+        waitForInstanceStatuses(sdxName, sdxClient, Map.of(hostGroup, desiredState));
         return sdxTestDto;
     }
 
     public SdxInternalTestDto waitForSdxInstancesStatus(SdxInternalTestDto sdxTestDto, SdxClient sdxClient, Map<String, InstanceStatus> hostGroupsAndStates) {
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
-
-        hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
-            int retryCount = 0;
-            long startTime = System.currentTimeMillis();
-            while (retryCount < maxRetry && !checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
-                LOGGER.info("Waiting for instance status {} in Host Group {} at {} SDX, ellapsed {}ms", desiredState, hostGroup, sdxName,
-                        System.currentTimeMillis() - startTime);
-                sleep(pollingInterval);
-                retryCount++;
-            }
-
-            if (checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
-                Log.log(LOGGER, format(" [%s] host group instance state is [%s] at [%s] SDX.", hostGroup, desiredState, sdxName));
-            } else {
-                LOGGER.error("Timeout: Host Group: {} desired instance state: {} is NOT available at {} SDX during {} retries", hostGroup, desiredState, sdxName,
-                        maxRetry);
-                throw new TestFailException(" Timeout: Host Group: " + hostGroup + " desired instance state: " + desiredState
-                        + " is NOT available at " + sdxName + " SDX during " + maxRetry + " retries");
-            }
-        });
-
+        waitForInstanceStatuses(sdxName, sdxClient, hostGroupsAndStates);
         return sdxTestDto;
     }
 
     public SdxTestDto waitForSdxInstancesStatus(SdxTestDto sdxTestDto, SdxClient sdxClient, Map<String, InstanceStatus> hostGroupsAndStates) {
         String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
-
-        hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
-            int retryCount = 0;
-            long startTime = System.currentTimeMillis();
-            while (retryCount < maxRetry && !checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
-                LOGGER.info("Waiting for instance status {} in Host Group {} at {} SDX, ellapsed {}ms", desiredState, hostGroup, sdxName,
-                        System.currentTimeMillis() - startTime);
-                sleep(pollingInterval);
-                retryCount++;
-            }
-
-            if (checkSdxInstanceStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
-                Log.log(LOGGER, format(" [%s] host group instance state is [%s] at [%s] SDX.", hostGroup, desiredState, sdxName));
-            } else {
-                LOGGER.error("Timeout: Host Group: {} desired instance state: {} is NOT available at {} SDX during {} retries", hostGroup, desiredState,
-                        sdxName, maxRetry);
-                throw new TestFailException(" Timeout: Host Group: " + hostGroup + " desired instance state: " + desiredState
-                        + " is NOT available at " + sdxName + " SDX during " + maxRetry + " retries");
-            }
-        });
-
+        waitForInstanceStatuses(sdxName, sdxClient, hostGroupsAndStates);
         return sdxTestDto;
     }
 
@@ -457,14 +403,14 @@ public class WaitUtil {
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
             long startTime = System.currentTimeMillis();
-            while (retryCount < maxRetry && !checkDistroxInstanceStateIsAvailable(cloudbreakClient, distroxName, hostGroup, desiredState)) {
+            while (retryCount < maxRetry && !checkDistroxInstanceState(cloudbreakClient, distroxName, hostGroup, desiredState)) {
                 LOGGER.info("Waiting for instance status {} in Host Group {} at {} DistroX, ellapsed {}ms", desiredState, hostGroup, distroxName,
                         System.currentTimeMillis() - startTime);
                 sleep(pollingInterval);
                 retryCount++;
             }
 
-            if (checkDistroxInstanceStateIsAvailable(cloudbreakClient, distroxName, hostGroup, desiredState)) {
+            if (checkDistroxInstanceState(cloudbreakClient, distroxName, hostGroup, desiredState)) {
                 Log.log(LOGGER, format(" [%s] host group instance state is [%s] at [%s] DostroX.", hostGroup, desiredState, distroxName));
             } else {
                 LOGGER.error("Timeout: Host Group: {} desired instance state: {} is NOT available at {} DostroX during {} retries", hostGroup, desiredState,
@@ -477,40 +423,65 @@ public class WaitUtil {
         return distroXTestDto;
     }
 
-    private boolean checkSdxInstanceStateIsAvailable(SdxClient sdxClient, String sdxName, String hostGroup, InstanceStatus desiredState) {
-        InstanceMetaDataV4Response instanceMetaDataV4Response = sdxClient.getSdxClient().sdxEndpoint().getDetail(sdxName, new HashSet<>())
-                .getStackV4Response().getInstanceGroups().stream().filter(instanceGroup -> instanceGroup.getName().equals(hostGroup))
-                .findFirst()
-                .orElse(null).getMetadata().stream().findFirst().orElse(null);
-        if (instanceMetaDataV4Response != null) {
-            LOGGER.info(" Instance group {} with {} group state and with {} instance state is present. ",
-                    instanceMetaDataV4Response.getInstanceGroup(),
-                    instanceMetaDataV4Response.getState(),
-                    instanceMetaDataV4Response.getInstanceStatus()
-            );
-            return instanceMetaDataV4Response.getInstanceStatus().equals(desiredState);
-        } else {
-            LOGGER.info(" Instance Metadata is NOT available for {} instance group! ", hostGroup);
-            return true;
-        }
+    private void waitForInstanceStatuses(String sdxName, SdxClient sdxClient, Map<String, InstanceStatus> hostGroupsAndStates) {
+        hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
+            int retryCount = 0;
+            long startTime = System.currentTimeMillis();
+            while (retryCount < maxRetry && !checkSdxInstanceState(sdxClient, sdxName, hostGroup, desiredState)) {
+                LOGGER.info("Waiting for instance status {} in Host Group {} at {} SDX, ellapsed {}ms", desiredState, hostGroup, sdxName,
+                        System.currentTimeMillis() - startTime);
+                sleep(pollingInterval);
+                retryCount++;
+            }
+
+            if (checkSdxInstanceState(sdxClient, sdxName, hostGroup, desiredState)) {
+                Log.log(LOGGER, format(" [%s] host group instance state is [%s] at [%s] SDX.", hostGroup, desiredState, sdxName));
+            } else {
+                LOGGER.error("Timeout: Host Group: {} desired instance state: {} is NOT available at {} SDX during {} retries", hostGroup, desiredState,
+                        sdxName, maxRetry);
+                throw new TestFailException(" Timeout: Host Group: " + hostGroup + " desired instance state: " + desiredState
+                        + " is NOT available at " + sdxName + " SDX during " + maxRetry + " retries");
+            }
+        });
     }
 
-    private boolean checkDistroxInstanceStateIsAvailable(CloudbreakClient cloudbreakClient, String distroxName, String hostGroup, InstanceStatus desiredState) {
-        InstanceMetaDataV4Response instanceMetaDataV4Response = cloudbreakClient.getCloudbreakClient().distroXV1Endpoint()
-                .getByName(distroxName, new HashSet<>())
-                .getInstanceGroups().stream().filter(instanceGroup -> instanceGroup.getName().equals(hostGroup))
-                .findFirst()
-                .orElse(null).getMetadata().stream().findFirst().orElse(null);
-        if (instanceMetaDataV4Response != null) {
-            LOGGER.info(" Instance group {} with {} group state and with {} instance state is present. ",
-                    instanceMetaDataV4Response.getInstanceGroup(),
-                    instanceMetaDataV4Response.getState(),
-                    instanceMetaDataV4Response.getInstanceStatus()
-            );
-            return instanceMetaDataV4Response.getInstanceStatus().equals(desiredState);
+    private boolean checkSdxInstanceState(SdxClient sdxClient, String sdxName, String hostGroup, InstanceStatus desiredState) {
+        List<InstanceGroupV4Response> instanceGroups = sdxClient.getSdxClient().sdxEndpoint().getDetail(sdxName, Set.of())
+                .getStackV4Response()
+                .getInstanceGroups();
+        return checkInstanceState(hostGroup, desiredState, instanceGroups);
+    }
+
+    private boolean checkDistroxInstanceState(CloudbreakClient cloudbreakClient, String distroxName, String hostGroup, InstanceStatus desiredState) {
+        List<InstanceGroupV4Response> instanceGroups = cloudbreakClient.getCloudbreakClient().distroXV1Endpoint().getByName(distroxName, Set.of())
+                .getInstanceGroups();
+        return checkInstanceState(hostGroup, desiredState, instanceGroups);
+    }
+
+    private boolean checkInstanceState(String hostGroup, InstanceStatus desiredState, List<InstanceGroupV4Response> instanceGroups) {
+        Optional<InstanceGroupV4Response> instanceGroup = instanceGroups
+                .stream()
+                .filter(ig -> ig.getName().equals(hostGroup))
+                .findFirst();
+        if (instanceGroup.isPresent()) {
+            Optional<InstanceMetaDataV4Response> instanceMetaData = instanceGroup
+                    .get().getMetadata().stream().findFirst();
+            if (instanceMetaData.isPresent()) {
+                InstanceMetaDataV4Response instanceMetaDataV4Response = instanceMetaData.get();
+                LOGGER.info(" Instance group {} with {} group state and with {} instance state is present. Desired state {}.",
+                        instanceMetaDataV4Response.getInstanceGroup(),
+                        instanceMetaDataV4Response.getState(),
+                        instanceMetaDataV4Response.getInstanceStatus(),
+                        desiredState
+                );
+                return Objects.equals(instanceMetaDataV4Response.getInstanceStatus(), desiredState);
+            } else {
+                LOGGER.info("{} instance group is empty. Waiting for instance with {} state.", hostGroup, desiredState);
+                return false;
+            }
         } else {
-            LOGGER.info(" Instance Metadata is NOT available for {} instance group! ", hostGroup);
-            return true;
+            LOGGER.info("{} instance group is not present. Waiting for instance with {} state.", hostGroup, desiredState);
+            return false;
         }
     }
 
