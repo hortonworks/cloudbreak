@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
@@ -117,16 +118,23 @@ public class ServiceEndpointCollector {
                         List<ClusterExposedServiceV4Response> apiServices = new ArrayList<>();
                         boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
                         SecurityConfig securityConfig = cluster.getStack().getSecurityConfig();
+                        String managerServerUrl = getManagerServerUrl(cluster, managerIp);
                         for (ExposedService exposedService : knownExposedServices) {
-                            if (!exposedService.isApiOnly()) {
-                                List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
-                                        managerIp, privateIps, exposedServicesInTopology, false, autoTlsEnabled, securityConfig);
+                            if (exposedService.isCmProxied()) {
+                                List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createCmProxiedServiceEntries(exposedService, gateway,
+                                        gatewayTopology, managerServerUrl, cluster.getName());
                                 uiServices.addAll(uiServiceOnPrivateIps);
-                            }
-                            if (exposedService.isApiIncluded()) {
-                                List<ClusterExposedServiceV4Response> apiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
-                                        managerIp, privateIps, exposedServicesInTopology, true, autoTlsEnabled, securityConfig);
-                                apiServices.addAll(apiServiceOnPrivateIps);
+                            } else {
+                                if (!exposedService.isApiOnly()) {
+                                    List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
+                                            managerIp, privateIps, exposedServicesInTopology, false, autoTlsEnabled, securityConfig);
+                                    uiServices.addAll(uiServiceOnPrivateIps);
+                                }
+                                if (exposedService.isApiIncluded()) {
+                                    List<ClusterExposedServiceV4Response> apiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
+                                            managerIp, privateIps, exposedServicesInTopology, true, autoTlsEnabled, securityConfig);
+                                    apiServices.addAll(apiServiceOnPrivateIps);
+                                }
                             }
                         }
                         clusterExposedServiceMap.put(gatewayTopology.getTopologyName(), uiServices);
@@ -188,6 +196,29 @@ public class ServiceEndpointCollector {
             });
         }
         return services;
+    }
+
+    private List<ClusterExposedServiceV4Response> createCmProxiedServiceEntries(ExposedService exposedService, Gateway gateway,
+        GatewayTopology gatewayTopology, String managerIp, String clusterName) {
+        List<ClusterExposedServiceV4Response> services = new ArrayList<>();
+        String serviceUrlsForService = getCmProxiedServiceUrlsForService(exposedService, gateway, gatewayTopology.getTopologyName(), managerIp, clusterName);
+        if (!Strings.isNullOrEmpty(serviceUrlsForService)) {
+            services.add(createCmProxiedExposedServiceResponse(exposedService, serviceUrlsForService));
+        }
+        return services;
+    }
+
+    private ClusterExposedServiceV4Response createCmProxiedExposedServiceResponse(ExposedService exposedService, String url) {
+        ClusterExposedServiceV4Response service = new ClusterExposedServiceV4Response();
+        service.setMode(SSOType.SSO_PROVIDER);
+        service.setDisplayName(exposedService.getDisplayName());
+        service.setKnoxService(exposedService.getKnoxService());
+        service.setServiceName(exposedService.getServiceName());
+        service.setOpen(true);
+        if (isNotEmpty(url)) {
+            service.setServiceUrl(url);
+        }
+        return service;
     }
 
     private ClusterExposedServiceV4Response createExposedServiceResponse(ExposedService exposedService,
@@ -279,6 +310,14 @@ public class ServiceEndpointCollector {
     }
     //CHECKSTYLE:ON
 
+    private String getCmProxiedServiceUrlsForService(ExposedService exposedService, Gateway gateway, String topologyName, String managerIp, String clusterName) {
+        String url = "";
+        if (hasKnoxUrl(exposedService) && managerIp != null) {
+            url = getCmProxiedExposedServiceUrl(managerIp, gateway, topologyName, exposedService, clusterName);
+        }
+        return url;
+    }
+
     private List<String> getJdbcUrlsForService(ExposedService exposedService, String managerIp, Gateway gateway, SecurityConfig securityConfig) {
         List<String> urls = new ArrayList<>();
         if (hasKnoxUrl(exposedService) && managerIp != null) {
@@ -318,7 +357,8 @@ public class ServiceEndpointCollector {
         urls.addAll(hbaseUrls);
     }
 
-    private void addResourceManagerUrl(ExposedService exposedService, String managerIp, Gateway gateway, String topologyName, boolean api, List<String> urls) {
+    private void addResourceManagerUrl(ExposedService exposedService, String managerIp, Gateway gateway, String topologyName, boolean api,
+        List<String> urls) {
         String knoxUrl = api ? "/resourcemanager/" : exposedService.getKnoxUrl();
         String topology = api ? topologyName + API_TOPOLOGY_POSTFIX : topologyName;
         urls.add(buildKnoxUrl(managerIp, gateway, knoxUrl, topology));
@@ -377,6 +417,10 @@ public class ServiceEndpointCollector {
         return buildKnoxUrl(managerIp, gateway, exposedService.getKnoxUrl(), topology);
     }
 
+    private String getCmProxiedExposedServiceUrl(String managerIp, Gateway gateway, String topologyName, ExposedService exposedService, String clusterName) {
+        return buildCMProxyUrl(managerIp, gateway, exposedService.getKnoxUrl(), topologyName, clusterName);
+    }
+
     private String buildKnoxUrlWithProtocol(String protocol, String managerIp, ExposedService exposedService, boolean autoTlsEnabled) {
         Integer port;
         if (autoTlsEnabled) {
@@ -385,6 +429,13 @@ public class ServiceEndpointCollector {
             port = exposedService.getPort();
         }
         return String.format("%s://%s:%s", protocol, managerIp, port);
+    }
+
+    private String buildCMProxyUrl(String managerIp, Gateway gateway, String knoxUrl, String topology, String clusterName) {
+        return new StringBuilder()
+                .append(managerIp.replaceAll("/home/", ""))
+                .append(knoxUrl.replaceAll("cluster-name", clusterName))
+                .toString();
     }
 
     private String buildKnoxUrl(String managerIp, Gateway gateway, String knoxUrl, String topology) {

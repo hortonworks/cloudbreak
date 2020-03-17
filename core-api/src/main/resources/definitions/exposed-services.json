@@ -487,7 +487,19 @@
       "tlsPort": 8765,
       "apiOnly": true,
       "apiIncluded": true,
-      "visible": true
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
+    },
+    {
+      "name": "QUEUEMANAGER_WEBAPP",
+      "displayName": "Queue Manager",
+      "serviceName": "QUEUEMANAGER_WEBAPP",
+      "knoxService": "QUEUEMANAGER_WEBAPP",
+      "knoxUrl": "/clusters/cluster-name/yarnQMPage",
+      "ssoSupported": false,
+      "cmProxied": true,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     }
   ]
 }
