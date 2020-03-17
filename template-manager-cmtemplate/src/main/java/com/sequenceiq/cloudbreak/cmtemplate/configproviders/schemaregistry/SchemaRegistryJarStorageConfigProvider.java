@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.CdhVersionForStreaming;
 import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
@@ -28,7 +30,8 @@ public class SchemaRegistryJarStorageConfigProvider implements CmHostGroupRoleCo
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
         // Currently, HDFS jar storage is used if there are multiple SCHEMA_REGISTRY_SERVER nodes. This should make sure
         // the Schema Registry version supports cloud storage. Ideally though this decision should be based on CDH version.
-        if (getSchemaRegistryInstanceCount(source) > 1) {
+        CdhVersionForStreaming cdhVersionForStreaming = KafkaConfigProviderUtils.getCdhVersionForStreaming(source);
+        if (cdhVersionForStreaming.supportsCloudJarStorage()) {
             // Use cloud storage
             return List.of(
                     config(CONFIG_JAR_STORAGE_DIRECTORY_PATH, "/schema-registry"),

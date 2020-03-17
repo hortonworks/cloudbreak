@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_3;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,12 +30,16 @@ public class KafkaConfigProviderUtils {
     Since it is difficult to predict future CDH releases and their content, the following is assumed on a best-effort basis:
     - 7.0.x (7.0.4, 7.0.5, ...) versions will use the same logic as 7.0.2 and 7.0.3
     - 7.1.0 and later versions will use the logic in 7.0.2.2
-    (it may need to be adjusted when a new version comes out)
+    Update for 7.1.0 and 7.1.1:
+    - 7.1.0 introduced SSL connection between Kafka and Zookeeper. Due to a CM issue, the Ranger Kafka plugin's Zookeeper
+    config doesn't use the SSL port, causing problems for Ranger connecting to Zookeeper.
      */
-    static CdhVersionForStreaming getCdhVersionForStreaming(TemplatePreparationObject source) {
+    public static CdhVersionForStreaming getCdhVersionForStreaming(TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getVersion().orElse("");
-        if (isVersionNewerOrEqualThanLimited(cdhVersion, () -> "7.1.0")) {
-            return CdhVersionForStreaming.VERSION_7_X_0;
+        if (isVersionNewerOrEqualThanLimited(cdhVersion, () -> "7.1.1")) {
+            return CdhVersionForStreaming.VERSION_7_X_X;
+        } else if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
+            return CdhVersionForStreaming.VERSION_7_1_0;
         } else if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_0_3)) {
             return CdhVersionForStreaming.VERSION_7_0_X;
         } else if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_0_2)) {
@@ -41,7 +47,6 @@ public class KafkaConfigProviderUtils {
             return patchVersion.isEmpty()
                     ? CdhVersionForStreaming.VERSION_7_0_2_MISSING_PATCH_VERSION
                     : patchVersion.get() >= 2 ? CdhVersionForStreaming.VERSION_7_0_2_X : CdhVersionForStreaming.VERSION_7_0_2;
-
         } else {
             return CdhVersionForStreaming.VERSION_7_0_0;
         }
@@ -69,24 +74,38 @@ public class KafkaConfigProviderUtils {
         return matcher.find() ? Optional.of(Integer.valueOf(matcher.group(1))) : Optional.empty();
     }
 
-    enum CdhVersionForStreaming {
-        VERSION_7_0_0(false, KafkaAuthConfigType.NO_AUTH),
-        VERSION_7_0_2(false, KafkaAuthConfigType.LDAP_AUTH),
-        VERSION_7_0_2_MISSING_PATCH_VERSION(false, KafkaAuthConfigType.LDAP_BASE_CONFIG),
-        VERSION_7_0_2_X(true, KafkaAuthConfigType.SASL_PAM_AUTH),
-        VERSION_7_0_X(false, KafkaAuthConfigType.LDAP_AUTH),
-        VERSION_7_X_0(true, KafkaAuthConfigType.SASL_PAM_AUTH);
+    public enum CdhVersionForStreaming {
+        VERSION_7_0_0(KafkaAuthConfigType.NO_AUTH),
+        VERSION_7_0_2(KafkaAuthConfigType.LDAP_AUTH),
+        VERSION_7_0_2_MISSING_PATCH_VERSION(KafkaAuthConfigType.LDAP_BASE_CONFIG),
+        VERSION_7_0_2_X(KafkaAuthConfigType.SASL_PAM_AUTH),
+        VERSION_7_0_X(KafkaAuthConfigType.LDAP_AUTH),
+        VERSION_7_1_0(KafkaAuthConfigType.SASL_PAM_AUTH),
+        VERSION_7_X_X(KafkaAuthConfigType.SASL_PAM_AUTH);
 
-        private final boolean supportsRangerServiceCreation;
+        private static final EnumSet<CdhVersionForStreaming> SUPPORTS_RANGER_SERVICE_CREATION = EnumSet.of(
+                VERSION_7_0_2_X, VERSION_7_1_0, VERSION_7_X_X);
+
+        private static final EnumSet<CdhVersionForStreaming> NEEDS_ZK_SLL_WORKAROUND = EnumSet.of(VERSION_7_1_0);
+
+        private static final EnumSet<CdhVersionForStreaming> SUPPORTS_CLOUD_JAR_STORAGE = EnumSet.of(VERSION_7_X_X);
+
         private final KafkaAuthConfigType authType;
 
-        CdhVersionForStreaming(boolean supportsCustomRangerServiceName, KafkaAuthConfigType authType) {
-            this.supportsRangerServiceCreation = supportsCustomRangerServiceName;
+        CdhVersionForStreaming(KafkaAuthConfigType authType) {
             this.authType = authType;
         }
 
-        boolean supportsRangerServiceCreation() {
-            return supportsRangerServiceCreation;
+        public boolean supportsRangerServiceCreation() {
+            return SUPPORTS_RANGER_SERVICE_CREATION.contains(this);
+        }
+
+        public boolean needsZkSslWorkaround() {
+            return NEEDS_ZK_SLL_WORKAROUND.contains(this);
+        }
+
+        public boolean supportsCloudJarStorage() {
+            return SUPPORTS_CLOUD_JAR_STORAGE.contains(this);
         }
 
         KafkaAuthConfigType authType() {
@@ -94,7 +113,7 @@ public class KafkaConfigProviderUtils {
         }
     }
 
-    enum KafkaAuthConfigType {
+    public enum KafkaAuthConfigType {
         NO_AUTH,
         LDAP_BASE_CONFIG,
         LDAP_AUTH,
