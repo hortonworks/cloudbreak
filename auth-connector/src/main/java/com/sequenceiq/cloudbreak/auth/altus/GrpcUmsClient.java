@@ -534,8 +534,8 @@ public class GrpcUmsClient {
                         .build());
     }
 
-    private UmsClient makeClient(ManagedChannel channel, String accountId) {
-        return new UmsClient(channel, accountId, umsClientConfig);
+    private UmsClient makeClient(ManagedChannel channel, String actorCrn) {
+        return new UmsClient(channel, actorCrn, umsClientConfig);
     }
 
     /**
@@ -643,6 +643,10 @@ public class GrpcUmsClient {
 
     public String getBuiltInCredentialOwnerResourceRoleCrn() {
         return getResourceRoleCrn("CredentialOwner").toString();
+    }
+
+    public String getBuiltInEnvironmentAdminResourceRoleCrn() {
+        return getResourceRoleCrn("EnvironmentAdmin").toString();
     }
 
     public Crn getResourceRoleCrn(String resourceRoleName) {

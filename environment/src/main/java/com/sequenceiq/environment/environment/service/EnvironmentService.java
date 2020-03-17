@@ -22,10 +22,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -40,6 +42,9 @@ import com.sequenceiq.environment.environment.validation.EnvironmentValidatorSer
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 import com.sequenceiq.flow.core.ResourceIdProvider;
+
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 @Service
 public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnProvider {
@@ -59,17 +64,21 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
 
     private final DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter;
 
+    private GrpcUmsClient grpcUmsClient;
+
     public EnvironmentService(
             EnvironmentValidatorService validatorService,
             EnvironmentRepository environmentRepository,
             PlatformParameterService platformParameterService,
             EnvironmentDtoConverter environmentDtoConverter,
-            DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter) {
+            DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter,
+            GrpcUmsClient grpcUmsClient) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.platformParameterService = platformParameterService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.delegatingCliEnvironmentRequestConverter = delegatingCliEnvironmentRequestConverter;
+        this.grpcUmsClient = grpcUmsClient;
     }
 
     public Environment save(Environment environment) {
@@ -278,5 +287,20 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
 
     public List<Environment> findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(String accountId, Long parentEnvironmentId) {
         return environmentRepository.findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(accountId, parentEnvironmentId);
+    }
+
+    public void assignEnvironmentAdminRole(String userCrn, String environmentCrn) {
+        try {
+            grpcUmsClient.assignResourceRole(userCrn, environmentCrn, grpcUmsClient.getBuiltInEnvironmentAdminResourceRoleCrn(), MDCUtils.getRequestId());
+            LOGGER.debug("EnvironmentAdmin role of {} environemnt is successfully assigned to the {} user", environmentCrn, userCrn);
+        } catch (StatusRuntimeException ex) {
+            if (Status.Code.ALREADY_EXISTS.equals(ex.getStatus().getCode())) {
+                LOGGER.debug("EnvironmentAdmin role of {} environemnt is already assigned to the {} user", environmentCrn, userCrn);
+            } else {
+                LOGGER.warn(String.format("EnvironmentAdmin role of %s environment cannot be assigned to the %s user", environmentCrn, userCrn), ex);
+            }
+        } catch (RuntimeException rex) {
+            LOGGER.warn(String.format("EnvironmentAdmin role of %s environment cannot be assigned to the %s user", environmentCrn, userCrn), rex);
+        }
     }
 }
