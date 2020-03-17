@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Map;
@@ -35,7 +37,6 @@ import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -212,7 +213,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
-                .awaitForFlow(RunningParameter.key(resourcePropertyProvider.getName()))
+                .awaitForFlow(key(resourcePropertyProvider.getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.create())
