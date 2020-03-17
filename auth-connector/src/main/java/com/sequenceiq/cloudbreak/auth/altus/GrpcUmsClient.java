@@ -53,6 +53,8 @@ public class GrpcUmsClient {
 
     private static final String ACCOUNT_IN_IAM_CRNS = "altus";
 
+    private static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
+
     @Inject
     private UmsConfig umsConfig;
 
@@ -555,7 +557,7 @@ public class GrpcUmsClient {
     // @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
     public void assignResourceRole(String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel(), INTERNAL_ACTOR_CRN);
             LOGGER.info("Assigning {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);
             client.assignResourceRole(requestId.orElse(UUID.randomUUID().toString()), userCrn, resourceCrn, resourceRoleCrn);
             LOGGER.info("Assigned {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);
@@ -566,7 +568,7 @@ public class GrpcUmsClient {
     // @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
     public void unassignResourceRole(String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel(), INTERNAL_ACTOR_CRN);
             LOGGER.info("Unassigning {} role for resource {} from user {}", resourceRoleCrn, resourceCrn, userCrn);
             client.unassignResourceRole(requestId.orElse(UUID.randomUUID().toString()), userCrn, resourceCrn, resourceRoleCrn);
             LOGGER.info("Unassigned {} role for resource {} from user {}", resourceRoleCrn, resourceCrn, userCrn);

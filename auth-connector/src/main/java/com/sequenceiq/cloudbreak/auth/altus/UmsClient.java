@@ -338,10 +338,7 @@ public class UmsClient {
 
     public void assignResourceRole(String requestId, String userCrn, String resourceCrn, String resourceRoleCrn) {
         newStub(requestId).assignResourceRole(UserManagementProto.AssignResourceRoleRequest.newBuilder()
-                .setAssignee(UserManagementProto.Assignee.newBuilder()
-                        .setAccountId(Crn.fromString(userCrn).getAccountId())
-                        .setUserIdOrCrn(userCrn)
-                        .build())
+                .setAssignee(getAssignee(userCrn))
                 .setResourceCrn(resourceCrn)
                 .setResourceRoleCrn(resourceRoleCrn)
                 .build());
@@ -349,10 +346,7 @@ public class UmsClient {
 
     public void unassignResourceRole(String requestId, String userCrn, String resourceCrn, String resourceRoleCrn) {
         newStub(requestId).unassignResourceRole(UserManagementProto.UnassignResourceRoleRequest.newBuilder()
-                .setAssignee(UserManagementProto.Assignee.newBuilder()
-                        .setAccountId(Crn.fromString(userCrn).getAccountId())
-                        .setUserIdOrCrn(userCrn)
-                        .build())
+                .setAssignee(getAssignee(userCrn))
                 .setResourceCrn(resourceCrn)
                 .setResourceRoleCrn(resourceRoleCrn)
                 .build());
@@ -747,5 +741,16 @@ public class UmsClient {
             requestBuilder.setPageToken(response.getNextPageToken());
         } while (response.hasNextPageToken());
         return wags;
+    }
+
+    private UserManagementProto.Assignee getAssignee(String userCrn) {
+        UserManagementProto.Assignee.Builder assignee = UserManagementProto.Assignee.newBuilder()
+                .setAccountId(Crn.fromString(userCrn).getAccountId());
+        if (Crn.isCrn(userCrn) && Crn.ResourceType.MACHINE_USER.equals(Crn.fromString(userCrn).getResourceType())) {
+            assignee.setMachineUserNameOrCrn(userCrn);
+        } else {
+            assignee.setUserIdOrCrn(userCrn);
+        }
+        return assignee.build();
     }
 }
