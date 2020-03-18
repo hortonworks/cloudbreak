@@ -311,7 +311,7 @@ public class AwsMetaDataCollectorTest {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         CloudContext cloudContext = new CloudContext(5L, "name", "platform", "variant",
                 location, USER_ID, WORKSPACE_ID);
-        CloudCredential credential = new CloudCredential("crn", null, null);
+        CloudCredential credential = new CloudCredential("crn", null, null, false);
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, credential);
         authenticatedContext.putParameter(AmazonEC2Client.class, amazonEC2Client);
         return authenticatedContext;

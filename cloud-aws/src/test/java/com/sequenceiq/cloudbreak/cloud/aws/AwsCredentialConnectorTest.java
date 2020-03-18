@@ -54,6 +54,7 @@ public class AwsCredentialConnectorTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(credential.isVerifyPermissions()).thenReturn(true);
         when(authenticatedContext.getCloudCredential()).thenReturn(credential);
         when(awsCredentialViewProvider.createAwsCredentialView(credential)).thenReturn(credentialView);
     }

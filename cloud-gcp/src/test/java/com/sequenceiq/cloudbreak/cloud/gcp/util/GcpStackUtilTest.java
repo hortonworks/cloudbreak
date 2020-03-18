@@ -40,7 +40,7 @@ public class GcpStackUtilTest {
     private CloudCredential cloudCredential(String projectId) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("projectId", projectId);
-        return new CloudCredential("crn", "test", parameters);
+        return new CloudCredential("crn", "test", parameters, false);
     }
 
     @Test
