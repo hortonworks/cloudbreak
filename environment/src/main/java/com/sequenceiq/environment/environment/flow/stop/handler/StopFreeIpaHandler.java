@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.stop.handler;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
@@ -33,7 +34,9 @@ public class StopFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> 
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            freeIpaPollerService.stopAttachedFreeipaInstances(environmentDto.getId(), environmentDto.getResourceCrn());
+            if (Strings.isNullOrEmpty(environmentDto.getParentEnvironmentCrn())) {
+                freeIpaPollerService.stopAttachedFreeipaInstances(environmentDto.getId(), environmentDto.getResourceCrn());
+            }
             EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                     .withSelector(EnvStopStateSelectors.FINISH_ENV_STOP_EVENT.selector())
                     .withResourceId(environmentDto.getId())
