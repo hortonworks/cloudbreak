@@ -735,7 +735,7 @@ public class AzureTemplateBuilderTest {
     private CloudCredential cloudCredential() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("projectId", "siq-haas");
-        return new CloudCredential("crn", "test", parameters);
+        return new CloudCredential("crn", "test", parameters, false);
     }
 
     private boolean isTemplateVersionGreaterOrEqualThan1165() {

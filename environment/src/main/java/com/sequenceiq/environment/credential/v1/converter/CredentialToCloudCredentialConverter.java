@@ -26,7 +26,7 @@ public class CredentialToCloudCredentialConverter {
             fields = new Json(credential.getAttributes()).getMap();
         }
         fields.put(GOV_CLOUD, credential.getGovCloud());
-        return new CloudCredential(credential.getResourceCrn(), credential.getName(), fields);
+        return new CloudCredential(credential.getResourceCrn(), credential.getName(), fields, credential.isVerifyPermissions());
     }
 
 }
