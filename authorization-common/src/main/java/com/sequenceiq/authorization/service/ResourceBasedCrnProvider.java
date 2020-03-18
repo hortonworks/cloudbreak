@@ -24,5 +24,9 @@ public interface ResourceBasedCrnProvider {
         throw new NotImplementedException("Logic for getting resource CRN by environment CRN should have been implemented for authorization!");
     }
 
+    default List<String> getResourceCrnsInAccount() {
+        throw new NotImplementedException("Logic for getting resource CRNs in account should have been implemented for authorization!");
+    }
+
     AuthorizationResourceType getResourceType();
 }

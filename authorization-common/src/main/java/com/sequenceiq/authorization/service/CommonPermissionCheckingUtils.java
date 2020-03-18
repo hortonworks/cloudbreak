@@ -5,6 +5,7 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,11 @@ public class CommonPermissionCheckingUtils {
     public void checkPermissionForUserOnResources(AuthorizationResourceType resource, AuthorizationResourceAction action,
             String userCrn, Collection<String> resourceCrns) {
         umsAuthorizationService.checkRightOfUserOnResources(userCrn, resource, action, resourceCrns);
+    }
+
+    public Map<String, Boolean> getPermissionsForUserOnResources(AuthorizationResourceType resource, AuthorizationResourceAction action,
+            String userCrn, List<String> resourceCrns) {
+        return umsAuthorizationService.getRightOfUserOnResources(userCrn, resource, action, resourceCrns);
     }
 
     public Object proceed(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {

@@ -70,8 +70,8 @@ public class CredentialToCredentialV1ResponseConverter {
                 response.getAws().setGovCloud(source.getGovCloud());
             }
             response.setAttributes(secretConverter.convert(source.getAttributesSecret()));
-            response.setCrn(source.getResourceCrn());
         }
+        response.setCrn(source.getResourceCrn());
         response.setCreator(source.getCreator());
         response.setCreated(source.getCreated());
         response.setDescription(source.getDescription() == null ? "" : source.getDescription());

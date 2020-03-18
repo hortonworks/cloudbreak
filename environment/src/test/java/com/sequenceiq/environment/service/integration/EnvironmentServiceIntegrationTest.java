@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.service.UmsAuthorizationService;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -77,7 +79,9 @@ public class EnvironmentServiceIntegrationTest {
 
     private static final String TEST_ACCOUNT_ID = "accid";
 
-    private static final String TEST_CRN = String.format("crn:cdp:iam:us-west-1:%s:user:mockuser@cloudera.com", TEST_ACCOUNT_ID);
+    private static final String TEST_USER_CRN = String.format("crn:cdp:iam:us-west-1:%s:user:mockuser@cloudera.com", TEST_ACCOUNT_ID);
+
+    private static final String TEST_RESOURCE_CRN = String.format("crn:cdp:environments:us-west-1:%s:credential:asdasd", TEST_ACCOUNT_ID);
 
     private static final String USER_CODE = "1234";
 
@@ -132,14 +136,14 @@ public class EnvironmentServiceIntegrationTest {
                 .withDebug(true)
                 .withIgnorePreValidation(true)
                 .build()
-                .withCrn(TEST_CRN);
+                .withCrn(TEST_USER_CRN);
 
         credential = new Credential();
         credential.setName("credential_test");
-        credential.setResourceCrn("credential_resourcecrn");
+        credential.setResourceCrn(TEST_RESOURCE_CRN);
         credential.setAccountId(TEST_ACCOUNT_ID);
         credential.setCloudPlatform("AWS");
-        credential.setCreator(TEST_CRN);
+        credential.setCreator(TEST_USER_CRN);
         credential.setDescription("description");
         credential.setGovCloud(false);
         credential.setArchived(false);
@@ -147,6 +151,9 @@ public class EnvironmentServiceIntegrationTest {
 
         when(entitlementService.azureEnabled(any(), any())).thenReturn(true);
         doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
+        Map<String, Boolean> rightCheckMap = Maps.newHashMap();
+        rightCheckMap.put(credential.getResourceCrn(), true);
+        when(umsAuthorizationService.getRightOfUserOnResources(anyString(), any(), any(), anyList())).thenReturn(rightCheckMap);
     }
 
     @AfterEach

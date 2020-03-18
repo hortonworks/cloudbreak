@@ -31,7 +31,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
@@ -362,8 +361,7 @@ public class GrpcUmsClient {
      * @return a list of booleans indicating whether the member has the specified rights
      */
     public List<Boolean> hasRights(String actorCrn, String memberCrn, List<AuthorizationProto.RightCheck> rightChecks, Optional<String> requestId) {
-        LOGGER.info("Checking whether member [] has rights [{}]",
-                memberCrn,
+        LOGGER.info("Checking whether member [{}] has rights [{}]", memberCrn,
                 rightChecks.stream().map(AuthorizationProto.RightCheck::getRight).collect(Collectors.toList()));
         if (InternalCrnBuilder.isInternalCrn(memberCrn)) {
             LOGGER.info("InternalCrn has all rights");
@@ -379,13 +377,16 @@ public class GrpcUmsClient {
         }
     }
 
-    public List<Boolean> hasRights(String actorCrn, String memberCrn, Map<String, String> rightCheckMap, Optional<String> requestId) {
-        List<AuthorizationProto.RightCheck> rightChecks = Lists.newArrayList();
-        rightCheckMap.entrySet().stream().forEach(entry -> rightChecks.add(AuthorizationProto.RightCheck.newBuilder()
-                .setResource(entry.getKey())
-                .setRight(entry.getValue())
-                .build()));
-        return hasRights(actorCrn, memberCrn, rightChecks, requestId);
+    public Map<String, Boolean> hasRights(String actorCrn, String memberCrn, List<String> resources, String right, Optional<String> requestId) {
+        List<AuthorizationProto.RightCheck> rightChecks = resources.stream()
+                .map(resource -> AuthorizationProto.RightCheck.newBuilder()
+                    .setResource(resource)
+                    .setRight(right)
+                    .build())
+                .collect(Collectors.toList());
+        List<Boolean> result = hasRights(actorCrn, memberCrn, rightChecks, requestId);
+        return resources.stream().collect(
+                Collectors.toMap(resource -> resource, resource -> result.get(resources.indexOf(resource))));
     }
 
     @Cacheable(cacheNames = "umsResourceAssigneesCache", key = "{ #actorCrn, #userCrn, #resourceCrn }")
