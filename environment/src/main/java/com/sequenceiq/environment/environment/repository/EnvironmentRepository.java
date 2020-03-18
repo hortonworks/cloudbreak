@@ -73,4 +73,8 @@ public interface EnvironmentRepository extends BaseJpaRepository<Environment, Lo
             + "WHERE pe.id = :parentEnvironmentId AND e.accountId = :accountId AND e.archived = false")
     List<Environment> findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(@Param("accountId") String accountId,
             @Param("parentEnvironmentId") Long parentEnvironmentId);
+
+    @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT e FROM Environment e WHERE e.archived = false and e.status in (:statuses)")
+    List<Environment> findAllRunningAndStatusIn(@Param("statuses") Collection<EnvironmentStatus> statuses);
 }

@@ -28,6 +28,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEve
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
 import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
@@ -49,12 +50,15 @@ public class EnvCreationActions {
 
     private final EnvironmentMetricService metricService;
 
+    private final EnvironmentJobService environmentJobService;
+
     public EnvCreationActions(EnvironmentService environmentService, NotificationService notificationService,
-            EnvironmentApiConverter environmentApiConverter, EnvironmentMetricService metricService) {
+            EnvironmentApiConverter environmentApiConverter, EnvironmentMetricService metricService, EnvironmentJobService environmentJobService) {
         this.environmentService = environmentService;
         this.notificationService = notificationService;
         this.environmentApiConverter = environmentApiConverter;
         this.metricService = metricService;
+        this.environmentJobService = environmentJobService;
     }
 
     @Bean(name = "ENVIRONMENT_CREATION_VALIDATION_STATE")
@@ -176,6 +180,7 @@ public class EnvCreationActions {
                             environment.setStatusReason(null);
                             environment.setStatus(EnvironmentStatus.AVAILABLE);
                             Environment result = environmentService.save(environment);
+                            environmentJobService.schedule(result);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
                             SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
                             metricService.incrementMetricCounter(MetricType.ENV_CREATION_FINISHED, environmentDto);

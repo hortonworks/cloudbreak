@@ -80,6 +80,7 @@ public enum ResourceEvent {
     ENVIRONMENT_FREEIPA_CREATION_FAILED("environment.freeipa.creation.failed"),
     ENVIRONMENT_CREATION_FINISHED("environment.creation.finished"),
     ENVIRONMENT_CREATION_FAILED("environment.creation.failed"),
+    ENVIRONMENT_SYNC_FINISHED("environment.sync.finished"),
 
     ENVIRONMENT_NETWORK_DELETION_STARTED("environment.network.deletion.started"),
     ENVIRONMENT_PUBLICKEY_DELETION_STARTED("environment.publickey.deletion.started"),
