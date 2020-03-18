@@ -16,6 +16,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 
 @Service
 public class PermissionCheckerService extends AbstractPermissionCheckerService {
@@ -25,7 +26,8 @@ public class PermissionCheckerService extends AbstractPermissionCheckerService {
     private static final List<Class<? extends Annotation>> POSSIBLE_METHOD_ANNOTATIONS =
             List.of(CheckPermissionByResourceCrn.class, CheckPermissionByResourceName.class, CheckPermissionByAccount.class,
                     DisableCheckPermissions.class, CheckPermissionByResourceCrnList.class, CheckPermissionByResourceNameList.class,
-                    CheckPermissionByResourceObject.class, CheckPermissionByEnvironmentCrn.class, CheckPermissionByEnvironmentName.class);
+                    CheckPermissionByResourceObject.class, CheckPermissionByEnvironmentCrn.class, CheckPermissionByEnvironmentName.class,
+                    FilterListBasedOnPermissions.class);
 
     @Override
     protected List<Class<? extends Annotation>> getPossibleMethodAnnotations() {

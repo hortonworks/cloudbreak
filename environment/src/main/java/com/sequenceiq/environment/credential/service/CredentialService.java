@@ -327,6 +327,12 @@ public class CredentialService extends AbstractCredentialService implements Reso
     }
 
     @Override
+    public List<String> getResourceCrnsInAccount() {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return repository.findAllResourceCrnsByAccountId(accountId);
+    }
+
+    @Override
     public AuthorizationResourceType getResourceType() {
         return AuthorizationResourceType.CREDENTIAL;
     }

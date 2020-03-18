@@ -1,10 +1,10 @@
 package com.sequenceiq.authorization.service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -15,6 +15,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.RightUtils;
@@ -64,29 +65,31 @@ public class UmsAuthorizationService {
             AuthorizationResourceAction action, String resourceCrn) {
         String right = RightUtils.getRight(resource, action);
         String unauthorizedMessage = String.format("You have no right to perform %s on resource %s.", right, resourceCrn);
-        checkRightOfUserOnResource(userCrn, resource, action, resourceCrn, unauthorizedMessage);
+        checkRightOfUserOnResource(userCrn, right, resourceCrn, unauthorizedMessage);
+    }
+
+    public Map<String, Boolean> getRightOfUserOnResources(String userCrn, AuthorizationResourceType resource, AuthorizationResourceAction action,
+            List<String> resourceCrns) {
+        return umsClient.hasRights(userCrn, userCrn, resourceCrns, RightUtils.getRight(resource, action), getRequestId());
     }
 
     public void checkRightOfUserOnResources(String userCrn, AuthorizationResourceType resource,
             AuthorizationResourceAction action, Collection<String> resourceCrns) {
         String right = RightUtils.getRight(resource, action);
         String unauthorizedMessage = String.format("You have no right to perform %s on resources [%s]", right, Joiner.on(",").join(resourceCrns));
-        checkRightOfUserOnResources(userCrn, resource, action, resourceCrns, unauthorizedMessage);
+        checkRightOfUserOnResources(userCrn, right, resourceCrns, unauthorizedMessage);
     }
 
-    private void checkRightOfUserOnResource(String userCrn, AuthorizationResourceType resource, AuthorizationResourceAction action,
-            String resourceCrn, String unauthorizedMessage) {
-        if (!umsClient.checkRight(userCrn, userCrn, RightUtils.getRight(resource, action), resourceCrn, getRequestId())) {
+    private void checkRightOfUserOnResource(String userCrn, String right, String resourceCrn, String unauthorizedMessage) {
+        if (!umsClient.checkRight(userCrn, userCrn, right, resourceCrn, getRequestId())) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
     }
 
-    private void checkRightOfUserOnResources(String userCrn, AuthorizationResourceType resource, AuthorizationResourceAction action,
-            Collection<String> resourceCrns, String unauthorizedMessage) {
-        Map<String, String> resourceCrnRightMap = resourceCrns.stream().distinct().collect(
-                Collectors.toMap(resourceCrn -> resourceCrn, resourceCrn -> RightUtils.getRight(resource, action)));
-        if (!umsClient.hasRights(userCrn, userCrn, resourceCrnRightMap, getRequestId()).stream().allMatch(Boolean::booleanValue)) {
+    private void checkRightOfUserOnResources(String userCrn, String right, Collection<String> resourceCrns, String unauthorizedMessage) {
+        if (!umsClient.hasRights(userCrn, userCrn, Lists.newArrayList(resourceCrns), right, getRequestId())
+                .values().stream().allMatch(Boolean::booleanValue)) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }

@@ -3,10 +3,13 @@ package com.sequenceiq.authorization.service;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.Map;
+import java.util.UUID;
 
 import javax.ws.rs.BadRequestException;
 
@@ -20,11 +23,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-
-import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UmsAuthorizationServiceTest {
@@ -33,7 +35,9 @@ public class UmsAuthorizationServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:" + USER_ID;
 
-    private static final String RESOURCE_CRN = "crn:cdp:datalake:us-west-1:1234:resource:" + USER_ID;
+    private static final String RESOURCE_CRN = "crn:cdp:datalake:us-west-1:1234:resource:1";
+
+    private static final String RESOURCE_CRN2 = "crn:cdp:datalake:us-west-1:1234:resource:2";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -97,19 +101,23 @@ public class UmsAuthorizationServiceTest {
 
     @Test
     public void testCheckRightOnResourcesFailure() {
-        when(umsClient.hasRights(anyString(), anyString(), anyMap(), any())).thenReturn(Lists.newArrayList(Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
+        when(umsClient.hasRights(anyString(), anyString(), anyList(), anyString(), any())).thenReturn(hasRightsResultMap());
 
         thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("You have no right to perform datalake/write on resources [" + RESOURCE_CRN + "]");
+        thrown.expectMessage("You have no right to perform datalake/write on resources [" + RESOURCE_CRN + "," + RESOURCE_CRN2 + "]");
 
-        underTest.checkRightOfUserOnResources(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.WRITE, Lists.newArrayList(RESOURCE_CRN));
+        underTest.checkRightOfUserOnResources(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.WRITE,
+                Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2));
     }
 
     @Test
     public void testCheckRightOnResources() {
-        when(umsClient.hasRights(anyString(), anyString(), anyMap(), any())).thenReturn(Lists.newArrayList(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
+        Map<String, Boolean> resultMap = hasRightsResultMap();
+        resultMap.put(RESOURCE_CRN2, Boolean.TRUE);
+        when(umsClient.hasRights(anyString(), anyString(), anyList(), anyString(), any())).thenReturn(resultMap);
 
-        underTest.checkRightOfUserOnResources(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.WRITE, Lists.newArrayList(RESOURCE_CRN));
+        underTest.checkRightOfUserOnResources(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.WRITE,
+                Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2));
     }
 
     @Test
@@ -162,5 +170,12 @@ public class UmsAuthorizationServiceTest {
         when(umsClient.checkRight(any(), any(), any(), any())).thenReturn(true);
 
         underTest.checkCallerIsSelfOrHasRight(USER_CRN, user2, AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.GET_KEYTAB);
+    }
+
+    private Map<String, Boolean> hasRightsResultMap() {
+        Map<String, Boolean> result = Maps.newHashMap();
+        result.put(RESOURCE_CRN, Boolean.TRUE);
+        result.put(RESOURCE_CRN2, Boolean.FALSE);
+        return result;
     }
 }

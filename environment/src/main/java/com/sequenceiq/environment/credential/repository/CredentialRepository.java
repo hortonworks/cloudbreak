@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.credential.repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -48,4 +49,7 @@ public interface CredentialRepository extends JpaRepository<Credential, Long> {
             @Param("envName") String envName,
             @Param("accountId") String accountId,
             @Param("cloudPlatforms") Collection<String> cloudPlatforms);
+
+    @Query("SELECT c.resourceCrn FROM Credential c WHERE c.accountId = :accountId")
+    List<String> findAllResourceCrnsByAccountId(@Param("accountId") String accountId);
 }
