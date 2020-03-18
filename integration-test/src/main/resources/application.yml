@@ -171,6 +171,7 @@ integrationtest:
         instanceProfile:
       baseLocation:
       fileSystemType: S3
+    hybridCloudSecurityGroupID: sg-0c73a7f815c452e9d
 
   # azure parameters
   azure:
@@ -249,8 +250,7 @@ integrationtest:
 
   # yarn parameters
   yarn:
-    defaultBlueprintName: "CDP 1.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.0.2
+    defaultBlueprintName: "7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
     availabilityZone:
     region: default
     location: Frankfurt
