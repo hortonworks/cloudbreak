@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user.poller;
 
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -68,7 +69,7 @@ class UserSyncPollerTest {
 
         underTest.syncAllFreeIpaStacks();
 
-        verify(userSyncService).synchronizeUsers(UserSyncPollerTestUtils.ACCOUNT_ID, UserSyncPoller.INTERNAL_ACTOR_CRN,
+        verify(userSyncService).synchronizeUsers(UserSyncPollerTestUtils.ACCOUNT_ID, INTERNAL_ACTOR_CRN,
                 Set.of(UserSyncPollerTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of());
     }
 
@@ -93,7 +94,7 @@ class UserSyncPollerTest {
 
         underTest.syncAllFreeIpaStacks();
 
-        verify(userSyncService).synchronizeUsers(UserSyncPollerTestUtils.ACCOUNT_ID, UserSyncPoller.INTERNAL_ACTOR_CRN,
+        verify(userSyncService).synchronizeUsers(UserSyncPollerTestUtils.ACCOUNT_ID, INTERNAL_ACTOR_CRN,
                 Set.of(UserSyncPollerTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of());
     }
 

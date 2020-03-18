@@ -1,30 +1,29 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
-import com.sequenceiq.freeipa.kerberos.KerberosConfig;
-import com.sequenceiq.freeipa.kerberos.KerberosConfigRepository;
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.freeipa.controller.exception.NotFoundException.notFound;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
-
-import java.util.List;
-
-import static com.sequenceiq.freeipa.controller.exception.NotFoundException.notFound;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+import com.sequenceiq.freeipa.kerberos.KerberosConfig;
+import com.sequenceiq.freeipa.kerberos.KerberosConfigRepository;
 
 @Service
 public class UserKeytabService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserKeytabService.class);
-
-    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     @Inject
     private KerberosConfigRepository kerberosConfigRepository;
@@ -56,7 +55,7 @@ public class UserKeytabService {
         String realm = getKerberosRealm(userAccountId, environmentCrn);
 
         GetActorWorkloadCredentialsResponse getActorWorkloadCredentialsResponse =
-                grpcUmsClient.getActorWorkloadCredentials(IAM_INTERNAL_ACTOR_CRN, userCrn, MDCUtils.getRequestId());
+                grpcUmsClient.getActorWorkloadCredentials(INTERNAL_ACTOR_CRN, userCrn, MDCUtils.getRequestId());
         String workloadUsername = getActorWorkloadCredentialsResponse.getWorkloadUsername();
         List<ActorKerberosKey> actorKerberosKeys = getActorWorkloadCredentialsResponse.getKerberosKeysList();
         return userKeytabGenerator.generateKeytabBase64(workloadUsername, realm, actorKerberosKeys);

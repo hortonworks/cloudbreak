@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_S3GUARD_TABLE_DELETE_EVENT;
 
@@ -9,9 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationErrorStatus;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
@@ -27,9 +25,6 @@ import reactor.bus.Event;
 
 @Component
 public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> {
-
-    @VisibleForTesting
-    static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IdBrokerMappingsDeleteHandler.class);
 
@@ -83,7 +78,7 @@ public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<Envir
     private void deleteIdBrokerMappings(String environmentCrn) {
         try {
             // Must pass the internal actor here as this operation is internal-use only; requests with other actors will be always rejected.
-            idbmmsClient.deleteMappings(IAM_INTERNAL_ACTOR_CRN, environmentCrn, Optional.empty());
+            idbmmsClient.deleteMappings(INTERNAL_ACTOR_CRN, environmentCrn, Optional.empty());
         } catch (IdbmmsOperationException e) {
             if (e.getErrorStatus() == IdbmmsOperationErrorStatus.NOT_FOUND) {
                 // This is a non-fatal situation when deleting the environment.

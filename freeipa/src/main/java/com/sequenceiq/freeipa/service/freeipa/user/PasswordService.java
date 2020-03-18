@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +20,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -41,9 +42,6 @@ import com.sequenceiq.freeipa.util.CrnService;
 
 @Service
 public class PasswordService {
-
-    @VisibleForTesting
-    static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PasswordService.class);
 

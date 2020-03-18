@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,18 +23,14 @@ import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.RightUtils;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
 class EnvironmentAccessCheckerTest {
-
-    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
@@ -65,7 +62,7 @@ class EnvironmentAccessCheckerTest {
 
         underTest.hasAccess(MEMBER_CRN, Optional.empty());
 
-        verify(grpcUmsClient).hasRights(eq(IAM_INTERNAL_ACTOR_CRN), eq(MEMBER_CRN), argumentCaptor.capture(), any());
+        verify(grpcUmsClient).hasRights(eq(INTERNAL_ACTOR_CRN), eq(MEMBER_CRN), argumentCaptor.capture(), any());
         List<AuthorizationProto.RightCheck> capturedRightChecks = argumentCaptor.getValue();
         assertEquals(2, capturedRightChecks.size());
         AuthorizationProto.RightCheck hasAccess = capturedRightChecks.get(0);

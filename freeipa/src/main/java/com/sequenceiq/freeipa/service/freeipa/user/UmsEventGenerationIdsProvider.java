@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -12,15 +14,11 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
 
 @Component
 public class UmsEventGenerationIdsProvider {
-
-    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     @VisibleForTesting
     enum EventMapping {
@@ -53,7 +51,7 @@ public class UmsEventGenerationIdsProvider {
     private GrpcUmsClient grpcUmsClient;
 
     public UmsEventGenerationIds getEventGenerationIds(String accountId, Optional<String> requestId) {
-        GetEventGenerationIdsResponse response = grpcUmsClient.getEventGenerationIds(IAM_INTERNAL_ACTOR_CRN, accountId, requestId);
+        GetEventGenerationIdsResponse response = grpcUmsClient.getEventGenerationIds(INTERNAL_ACTOR_CRN, accountId, requestId);
 
         UmsEventGenerationIds umsEventGenerationIds = new UmsEventGenerationIds();
         Map<String, String> eventGenerationIdsMap = new HashMap<>();

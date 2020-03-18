@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
@@ -15,7 +16,6 @@ import com.sequenceiq.authorization.resource.RightUtils;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 
 import io.grpc.Status;
@@ -23,8 +23,6 @@ import io.grpc.StatusRuntimeException;
 
 public class EnvironmentAccessChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentAccessChecker.class);
-
-    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private static final String ACCESS_ENVIRONMENT_RIGHT = RightUtils.getRight(AuthorizationResourceType.ENVIRONMENT,
             AuthorizationResourceAction.ACCESS_ENVIRONMENT);
@@ -64,7 +62,7 @@ public class EnvironmentAccessChecker {
         requireNonNull(requestId, "requestId is null");
 
         try {
-            List<Boolean> hasRights = grpcUmsClient.hasRights(IAM_INTERNAL_ACTOR_CRN, memberCrn, rightChecks, requestId);
+            List<Boolean> hasRights = grpcUmsClient.hasRights(INTERNAL_ACTOR_CRN, memberCrn, rightChecks, requestId);
             return new EnvironmentAccessRights(hasRights.get(0), hasRights.get(1));
         } catch (StatusRuntimeException e) {
             // NOT_FOUND errors indicate that a user/machineUser has been deleted after we have
