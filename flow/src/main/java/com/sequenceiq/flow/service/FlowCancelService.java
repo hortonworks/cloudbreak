@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.service;
+package com.sequenceiq.flow.service;
 
 import java.util.Date;
 
@@ -9,8 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.flow.core.EventParameterFactory;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -45,7 +46,7 @@ public class FlowCancelService {
 
     public void cancelRunningFlows(Long resourceId) {
         LOGGER.info("Cancel running flow for id: [{}]", resourceId);
-        StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, resourceId);
+        Payload cancelEvent = () -> resourceId;
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(eventParameterFactory.createEventParameters(resourceId), cancelEvent));
     }
 

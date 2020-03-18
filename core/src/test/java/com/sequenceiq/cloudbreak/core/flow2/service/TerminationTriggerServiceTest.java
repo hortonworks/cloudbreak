@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TerminationTriggerServiceTest {

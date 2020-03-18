@@ -30,7 +30,6 @@ import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.flow.upgrade.event.SdxUpgradeStartEvent;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
-import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -88,12 +87,6 @@ public class SdxReactorFlowManager {
         String selector = SDX_STOP_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxStartStopEvent(selector, sdxId, userId));
-    }
-
-    public void cancelRunningFlows(Long sdxId) {
-        String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxEvent cancelEvent = new SdxEvent(Flow2Handler.FLOW_CANCEL, sdxId, userId);
-        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }
 
     private FlowIdentifier notify(String selector, SdxEvent acceptable) {

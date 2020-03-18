@@ -14,13 +14,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.core.model.ResultType;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.freeipa.flow.stack.StackEvent;
-import com.sequenceiq.freeipa.service.stack.StackService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -38,9 +35,6 @@ public class FreeIpaFlowManager {
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
-    @Inject
-    private StackService stackService;
-
     public void notify(String selector, Acceptable acceptable) {
         Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(headerWithUserCrn, acceptable);
@@ -49,16 +43,12 @@ public class FreeIpaFlowManager {
 
     public void notify(Selectable selectable) {
         Event<Selectable> event = eventFactory.createEvent(selectable);
+        LOGGER.debug("Notify reactor with event [{}]", event);
         reactor.notify(selectable.selector(), event);
     }
 
-    public void cancelRunningFlows(Long stackId) {
-        LOGGER.info("Cancelling running flows for id [{}]", stackId);
-        StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
-        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(createEventParameters(stackId), cancelEvent));
-    }
-
     private void notify(String selector, Event<Acceptable> event) {
+        LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selector, event);
         reactor.notify(selector, event);
         try {
             FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
@@ -78,15 +68,5 @@ public class FreeIpaFlowManager {
             decoratedHeader.put(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
         }
         return decoratedHeader;
-    }
-
-    private Map<String, Object> createEventParameters(Long stackId) {
-        String userCrn;
-        try {
-            userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        } catch (RuntimeException ex) {
-            userCrn = stackService.getStackById(stackId).getOwner();
-        }
-        return Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
     }
 }

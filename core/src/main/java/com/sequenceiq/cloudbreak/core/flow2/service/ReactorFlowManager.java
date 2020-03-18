@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 import reactor.rx.Promise;
 

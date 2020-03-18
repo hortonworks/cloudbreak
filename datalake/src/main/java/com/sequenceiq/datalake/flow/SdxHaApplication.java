@@ -21,6 +21,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 @Primary
 @Component
@@ -37,10 +38,10 @@ public class SdxHaApplication implements HaApplication {
     private SdxService sdxService;
 
     @Inject
-    private SdxReactorFlowManager reactorFlowManager;
+    private FlowRegister runningFlows;
 
     @Inject
-    private FlowRegister runningFlows;
+    private FlowCancelService flowCancelService;
 
     @Override
     public Set<Long> getDeletingResources(Set<Long> resourceIds) {
@@ -61,7 +62,7 @@ public class SdxHaApplication implements HaApplication {
     @Override
     public void cancelRunningFlow(Long resourceId) {
         DatalakeInMemoryStateStore.put(resourceId, PollGroup.CANCELLED);
-        reactorFlowManager.cancelRunningFlows(resourceId);
+        flowCancelService.cancelRunningFlows(resourceId);
     }
 
     @Override

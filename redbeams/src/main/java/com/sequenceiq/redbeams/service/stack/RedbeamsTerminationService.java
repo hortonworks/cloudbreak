@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
@@ -33,6 +34,9 @@ public class RedbeamsTerminationService {
 
     @Inject
     private RedbeamsFlowManager flowManager;
+
+    @Inject
+    private FlowCancelService cancelService;
 
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
@@ -64,7 +68,7 @@ public class RedbeamsTerminationService {
         // re-fetch to see new status
         server = databaseServerConfigService.getByCrn(crn);
 
-        flowManager.cancelRunningFlows(dbStack.getId());
+        cancelService.cancelRunningFlows(dbStack.getId());
         flowManager.notify(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(),
                 new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(), dbStack.getId(), force));
         return server;

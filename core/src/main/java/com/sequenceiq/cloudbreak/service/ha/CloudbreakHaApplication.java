@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
-import com.sequenceiq.cloudbreak.core.flow2.service.FlowCancelService;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
