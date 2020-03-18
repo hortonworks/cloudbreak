@@ -53,7 +53,9 @@ public enum EnvironmentStatus {
     START_DATALAKE_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_DATALAKE_STARTED),
     START_DATALAKE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_DATALAKE_FAILED),
     START_FREEIPA_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_FREEIPA_STARTED),
-    START_FREEIPA_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_FREEIPA_FAILED);
+    START_FREEIPA_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_FREEIPA_FAILED),
+
+    FREEIPA_DELETED_ON_PROVIDER_SIDE(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE);
 
     public static final Set<EnvironmentStatus> AVAILABLE_STATUSES = Set.of(
             CREATION_INITIATED,

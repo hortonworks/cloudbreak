@@ -31,6 +31,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
 
 public class EnvironmentDeletionServiceTest {
 
@@ -42,8 +43,10 @@ public class EnvironmentDeletionServiceTest {
 
     private final EnvironmentResourceDeletionService environmentResourceDeletionService = Mockito.mock(EnvironmentResourceDeletionService.class);
 
-    private final EnvironmentDeletionService environmentDeletionService
-            = new EnvironmentDeletionService(environmentService, environmentDtoConverter, reactorFlowManager, environmentResourceDeletionService);
+    private final EnvironmentJobService environmentJobService = Mockito.mock(EnvironmentJobService.class);
+
+    private final EnvironmentDeletionService environmentDeletionService = new EnvironmentDeletionService(environmentService, environmentDtoConverter,
+            reactorFlowManager, environmentResourceDeletionService, environmentJobService);
 
     private Environment environment;
 
@@ -127,6 +130,7 @@ public class EnvironmentDeletionServiceTest {
         assertEquals(environmentDto, environmentDeletionServiceWired
                 .deleteByCrnAndAccountId(TestConstants.CRN, TestConstants.ACCOUNT_ID, TestConstants.USER, forced));
         verify(environmentDeletionServiceWired).delete(eq(environment), eq(TestConstants.USER), anyBoolean());
+        verify(environmentJobService).unschedule(environment);
         if (forced) {
             verify(reactorFlowManager).triggerForcedDeleteFlow(eq(environment), eq(TestConstants.USER));
             verify(reactorFlowManager, never()).triggerDeleteFlow(any(), any());
