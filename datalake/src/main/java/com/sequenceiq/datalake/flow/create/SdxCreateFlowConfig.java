@@ -24,24 +24,35 @@ public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateStat
 
     private static final List<Transition<SdxCreateState, SdxCreateEvent>> TRANSITIONS = new Builder<SdxCreateState, SdxCreateEvent>()
             .defaultFailureEvent(SDX_CREATE_FAILED_EVENT)
+
             .from(INIT_STATE)
-            .to(SDX_CREATION_WAIT_ENV_STATE)
-            .event(SdxCreateEvent.ENV_WAIT_EVENT).defaultFailureEvent()
-            .from(SDX_CREATION_WAIT_ENV_STATE)
             .to(SDX_CREATION_WAIT_RDS_STATE)
-            .event(SdxCreateEvent.ENV_WAIT_SUCCESS_EVENT).defaultFailureEvent()
+            .event(SdxCreateEvent.ENV_WAIT_EVENT).defaultFailureEvent()
+
+            .from(INIT_STATE)
+            .to(SDX_CREATION_WAIT_RDS_STATE)
+            .event(SdxCreateEvent.RDS_WAIT_EVENT).defaultFailureEvent()
+
             .from(SDX_CREATION_WAIT_RDS_STATE)
-            .to(SDX_CREATION_START_STATE)
+            .to(SDX_CREATION_WAIT_ENV_STATE)
             .event(SdxCreateEvent.RDS_WAIT_SUCCESS_EVENT).defaultFailureEvent()
+
+            .from(SDX_CREATION_WAIT_ENV_STATE)
+            .to(SDX_CREATION_START_STATE)
+            .event(SdxCreateEvent.ENV_WAIT_SUCCESS_EVENT).defaultFailureEvent()
+
             .from(SDX_CREATION_START_STATE)
             .to(SDX_STACK_CREATION_IN_PROGRESS_STATE)
             .event(SdxCreateEvent.SDX_STACK_CREATION_IN_PROGRESS_EVENT).defaultFailureEvent()
+
             .from(SDX_STACK_CREATION_IN_PROGRESS_STATE)
             .to(SDX_CREATION_FINISHED_STATE)
             .event(SdxCreateEvent.SDX_STACK_CREATION_SUCCESS_EVENT).failureEvent(SDX_CREATE_FAILED_EVENT)
+
             .from(SDX_CREATION_FINISHED_STATE)
             .to(FINAL_STATE)
             .event(SdxCreateEvent.SDX_CREATE_FINALIZED_EVENT).defaultFailureEvent()
+
             .build();
 
     private static final FlowEdgeConfig<SdxCreateState, SdxCreateEvent> EDGE_CONFIG =
@@ -59,7 +70,7 @@ public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateStat
     @Override
     public SdxCreateEvent[] getInitEvents() {
         return new SdxCreateEvent[]{
-                SdxCreateEvent.ENV_WAIT_EVENT
+                SdxCreateEvent.RDS_WAIT_EVENT
         };
     }
 
