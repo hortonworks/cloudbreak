@@ -11,8 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.service.ha.HaApplication;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
-import com.sequenceiq.redbeams.repository.DBStackRepository;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.store.RedbeamsInMemoryStateStoreService;
 
@@ -23,19 +22,16 @@ public class RedbeamsHaApplication implements HaApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsHaApplication.class);
 
     @Inject
-    private DBStackRepository dbStackRepository;
-
-    @Inject
     private DBStackService dbStackService;
 
     @Inject
     private RedbeamsInMemoryStateStoreService redbeamsInMemoryStateStoreService;
 
     @Inject
-    private RedbeamsFlowManager redbeamsFlowManager;
+    private FlowRegister runningFlows;
 
     @Inject
-    private FlowRegister runningFlows;
+    private FlowCancelService flowCancelService;
 
     @Override
     public Set<Long> getDeletingResources(Set<Long> resourceIds) {
@@ -57,7 +53,7 @@ public class RedbeamsHaApplication implements HaApplication {
     public void cancelRunningFlow(Long resourceId) {
         dbStackService.findById(resourceId).ifPresentOrElse(
                 db -> {
-                    redbeamsFlowManager.cancelRunningFlows(resourceId);
+                    flowCancelService.cancelRunningFlows(resourceId);
                     redbeamsInMemoryStateStoreService.registerCancel(resourceId);
                 },
                 () -> LOGGER.error("Cannot cancel the flow, because the database stack with this id does not exist: {}", resourceId));

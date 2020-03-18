@@ -64,6 +64,7 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -123,6 +124,9 @@ class SdxServiceTest {
 
     @Mock
     private CDPConfigService cdpConfigService;
+
+    @Mock
+    private FlowCancelService flowCancelService;
 
     @InjectMocks
     private SdxService underTest;

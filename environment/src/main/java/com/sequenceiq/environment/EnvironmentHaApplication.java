@@ -20,10 +20,10 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.service.ha.HaApplication;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 @Primary
 @Component
@@ -36,14 +36,14 @@ public class EnvironmentHaApplication implements HaApplication {
 
     private final EnvironmentService environmentService;
 
-    private final EnvironmentReactorFlowManager reactorFlowManager;
-
     private final FlowRegister runningFlows;
 
-    public EnvironmentHaApplication(EnvironmentService environmentService, EnvironmentReactorFlowManager reactorFlowManager, FlowRegister runningFlows) {
+    private final FlowCancelService flowCancelService;
+
+    public EnvironmentHaApplication(EnvironmentService environmentService, FlowRegister runningFlows, FlowCancelService flowCancelService) {
         this.environmentService = environmentService;
-        this.reactorFlowManager = reactorFlowManager;
         this.runningFlows = runningFlows;
+        this.flowCancelService = flowCancelService;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class EnvironmentHaApplication implements HaApplication {
     public void cancelRunningFlow(Long resourceId) {
         environmentService.findById(resourceId).ifPresentOrElse(environmentDto -> {
             EnvironmentInMemoryStateStore.put(resourceId, PollGroup.CANCELLED);
-            reactorFlowManager.cancelRunningFlows(resourceId, environmentDto.getName(), environmentDto.getResourceCrn());
+            flowCancelService.cancelRunningFlows(resourceId);
         }, () -> LOGGER.error("Cannot cancel the flow, because the environment does not exist: {}", resourceId));
     }
 

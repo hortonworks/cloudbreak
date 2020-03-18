@@ -13,16 +13,12 @@ import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.repository.DBStackRepository;
-import com.sequenceiq.redbeams.service.crn.CrnService;
 
 @Service
 public class DBStackService {
 
     @Inject
     private DBStackRepository dbStackRepository;
-
-    @Inject
-    private CrnService crnService;
 
     public DBStack getById(Long id) {
         return dbStackRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("Stack [%s] not found", id)));

@@ -32,7 +32,7 @@ public class FreeipaJobService {
     }
 
     public void unschedule(Stack stack) {
-        jobService.schedule(new StackJobAdapter(stack));
+        jobService.unschedule(new StackJobAdapter(stack).getLocalId());
         LOGGER.info("{} is unscheduled, it will not auto sync anymore", stack.getName());
     }
 }

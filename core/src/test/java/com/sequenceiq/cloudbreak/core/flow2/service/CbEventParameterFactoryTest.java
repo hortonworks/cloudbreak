@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.flow.core.FlowConstants;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EventParameterFactoryTest {
+public class CbEventParameterFactoryTest {
 
     private static final String CRN = "crn";
 
@@ -31,7 +31,7 @@ public class EventParameterFactoryTest {
     private AuthenticatedUserService authenticatedUserService;
 
     @InjectMocks
-    private EventParameterFactory underTest;
+    private CbEventParameterFactory underTest;
 
     @Test
     public void testUserServiceReturnCrn() {

@@ -56,6 +56,7 @@ import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocat
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.ResourceIdProvider;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -97,6 +98,9 @@ public class SdxService implements ResourceIdProvider {
 
     @Inject
     private CDPConfigService cdpConfigService;
+
+    @Inject
+    private FlowCancelService flowCancelService;
 
     @Value("${sdx.default.runtime:7.1.0}")
     private String defaultRuntime;
@@ -410,7 +414,7 @@ public class SdxService implements ResourceIdProvider {
         sdxClusterRepository.save(sdxCluster);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId(), forced);
-        sdxReactorFlowManager.cancelRunningFlows(sdxCluster.getId());
+        flowCancelService.cancelRunningFlows(sdxCluster.getId());
         LOGGER.info("SDX delete triggered: {}", sdxCluster.getClusterName());
         return flowIdentifier;
     }

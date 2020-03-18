@@ -17,14 +17,11 @@ import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
-import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 import reactor.bus.Event;
-import reactor.bus.EventBus;
 import reactor.rx.Promise;
 
 @Service
@@ -32,16 +29,13 @@ public class EnvironmentReactorFlowManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentReactorFlowManager.class);
 
-    private final EventBus eventBus;
-
     private final EventSender eventSender;
 
-    private final ErrorHandlerAwareReactorEventFactory eventFactory;
+    private final FlowCancelService flowCancelService;
 
-    public EnvironmentReactorFlowManager(EventBus eventBus, EventSender eventSender, ErrorHandlerAwareReactorEventFactory eventFactory) {
-        this.eventBus = eventBus;
+    public EnvironmentReactorFlowManager(EventSender eventSender, FlowCancelService flowCancelService) {
         this.eventSender = eventSender;
-        this.eventFactory = eventFactory;
+        this.flowCancelService = flowCancelService;
     }
 
     public void triggerCreationFlow(long envId, String envName, String userCrn, String envCrn) {
@@ -54,13 +48,16 @@ public class EnvironmentReactorFlowManager {
                 .withResourceCrn(envCrn)
                 .build();
 
-        Map<String, Object> flowTriggerUserCrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
-        eventSender.sendEvent(envCreationEvent, new Event.Headers(flowTriggerUserCrn));
+        eventSender.sendEvent(envCreationEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+    }
+
+    private Map<String, Object> getFlowTriggerUsercrn(String userCrn) {
+        return Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
     }
 
     public void triggerDeleteFlow(Environment environment, String userCrn) {
         LOGGER.info("Trigger flow deletion: {}", environment.getName());
-        cancelRunningFlows(environment.getId(), environment.getName(), environment.getResourceCrn());
+        flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                 .withAccepted(new Promise<>())
                 .withSelector(START_FREEIPA_DELETE_EVENT.selector())
@@ -68,13 +65,12 @@ public class EnvironmentReactorFlowManager {
                 .withResourceName(environment.getName())
                 .build();
 
-        Map<String, Object> flowTriggerUserCrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
-        eventSender.sendEvent(envDeleteEvent, new Event.Headers(flowTriggerUserCrn));
+        eventSender.sendEvent(envDeleteEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
     public void triggerForcedDeleteFlow(Environment environment, String userCrn) {
         LOGGER.info("Trigger forced deletion flow: {}", environment.getName());
-        cancelRunningFlows(environment.getId(), environment.getName(), environment.getResourceCrn());
+        flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                 .withAccepted(new Promise<>())
                 .withSelector(ENV_DELETE_CLUSTERS_TRIGGER_EVENT)
@@ -82,8 +78,7 @@ public class EnvironmentReactorFlowManager {
                 .withResourceName(environment.getName())
                 .build();
 
-        Map<String, Object> flowTriggerUserCrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
-        eventSender.sendEvent(envDeleteEvent, new Event.Headers(flowTriggerUserCrn));
+        eventSender.sendEvent(envDeleteEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
     public void triggerStopFlow(long envId, String envName, String userCrn) {
@@ -95,8 +90,7 @@ public class EnvironmentReactorFlowManager {
                 .withResourceName(envName)
                 .build();
 
-        Map<String, Object> flowTriggerUserCrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
-        eventSender.sendEvent(envStopEvent, new Event.Headers(flowTriggerUserCrn));
+        eventSender.sendEvent(envStopEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
     public void triggerStartFlow(long envId, String envName, String userCrn) {
@@ -108,13 +102,6 @@ public class EnvironmentReactorFlowManager {
                 .withResourceName(envName)
                 .build();
 
-        Map<String, Object> flowTriggerUserCrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
-        eventSender.sendEvent(envSrartEvent, new Event.Headers(flowTriggerUserCrn));
-    }
-
-    public void cancelRunningFlows(Long environmentId, String environmentName, String environmentCrn) {
-        LOGGER.info("Cancel the running flow");
-        BaseNamedFlowEvent cancellationEvent = new BaseNamedFlowEvent(Flow2Handler.FLOW_CANCEL, environmentId, environmentName, environmentCrn);
-        eventBus.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancellationEvent));
+        eventSender.sendEvent(envSrartEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 }

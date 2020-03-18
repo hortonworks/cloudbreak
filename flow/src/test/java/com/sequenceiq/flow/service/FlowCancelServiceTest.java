@@ -1,6 +1,5 @@
-package com.sequenceiq.cloudbreak.core.flow2.service;
+package com.sequenceiq.flow.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -12,14 +11,16 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.flow.core.EventParameterFactory;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -53,12 +54,11 @@ public class FlowCancelServiceTest {
     public void testCancelRunningFlows() {
         Map<String, Object> parameters = Map.of();
         when(eventParameterFactory.createEventParameters(1L)).thenReturn(parameters);
-        when(eventFactory.createEventWithErrHandler(eq(parameters), any(StackEvent.class)))
+        when(eventFactory.createEventWithErrHandler(eq(parameters), any(Payload.class)))
                 .thenAnswer(invocation -> {
-                    StackEvent event = invocation.getArgument(1, StackEvent.class);
-                    assertEquals(Long.valueOf(1L), event.getResourceId());
-                    assertEquals(Flow2Handler.FLOW_CANCEL, event.selector());
-                    return new Event<>(event);
+                    Payload payload = invocation.getArgument(1, Payload.class);
+                    Assert.assertEquals(Long.valueOf(1L), payload.getResourceId());
+                    return new Event<>(payload);
                 });
 
         underTest.cancelRunningFlows(1L);
