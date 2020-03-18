@@ -145,7 +145,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public final SdxInternalTestDto sdxInternal(SdxInternalTestDto sdxInternal) {
-        sdxInternal.withStackRequest();
+        sdxInternal.withDefaultSDXSettings();
         return sdxInternal;
     }
 

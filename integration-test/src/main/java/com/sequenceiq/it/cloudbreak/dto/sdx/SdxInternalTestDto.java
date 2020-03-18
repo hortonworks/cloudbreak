@@ -86,7 +86,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxInternalTestDto valid() {
         withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withTestNameAsTag()
-                .withLightDutySettings()
+                .withDefaultSDXSettings()
                 .withEnvironment()
                 .withClusterShape(getCloudProvider().getInternalClusterShape())
                 .withTags(getCloudProvider().getTags());
@@ -96,11 +96,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public String getName() {
         return super.getName() == null ? DEFAULT_SDX_NAME : super.getName();
-    }
-
-    public SdxInternalTestDto withStackRequest(StackV4Request stackV4Request) {
-        getRequest().setStackV4Request(stackV4Request);
-        return this;
     }
 
     public SdxInternalTestDto withDatabase(SdxDatabaseRequest sdxDatabaseRequest) {
@@ -131,47 +126,43 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return this;
     }
 
-    public SdxInternalTestDto withStackRequest() {
-        StackTestDto stack = getTestContext().given(StackTestDto.class);
-        ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
-
-        return withStackRequest(stack, cluster);
+    public SdxInternalTestDto withStackRequest(StackV4Request stackV4Request) {
+        getRequest().setStackV4Request(stackV4Request);
+        return this;
     }
 
-    public SdxInternalTestDto withStackRequest(String stackKey, String clusterKey) {
-        StackTestDto stack = getTestContext().given(stackKey, StackTestDto.class);
-        ClusterTestDto cluster = getTestContext().given(clusterKey, ClusterTestDto.class);
-
-        return withStackRequest(stack, cluster);
+    private SdxInternalTestDto withStackRequest(ClusterTestDto cluster, StackTestDto stack) {
+        stack.withCluster(cluster);
+        return withStackRequest(stack.getRequest());
     }
 
-    private SdxInternalTestDto withLightDutySettings() {
-        StackTestDto stack = getTestContext().given(StackTestDto.class);
-        ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
+    public SdxInternalTestDto withStackRequest(RunningParameter clusterKey, RunningParameter stackKey) {
+        ClusterTestDto cluster = getTestContext().get(clusterKey.getKey());
+        StackTestDto stack = getTestContext().get(stackKey.getKey());
 
-        if (getTestContext().given(InstanceGroupTestDto.class).getResponse() == null) {
-            getTestContext()
-                    .given("master", InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1)
-                    .given("idbroker", InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1);
+        if (cluster == null) {
+            throw new IllegalArgumentException("Cluster is null with given key: " + clusterKey.getKey());
         }
+        if (stack == null) {
+            throw new IllegalArgumentException("Stack is null with given key: " + stackKey.getKey());
+        }
+        return withStackRequest(cluster, stack);
+    }
 
+    public SdxInternalTestDto withDefaultSDXSettings() {
+        StackTestDto stack = getTestContext().given(StackTestDto.class);
+        ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
+
+        getTestContext()
+                .given("master", InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1)
+                .given("idbroker", InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1);
         cluster.withName(cluster.getName())
                 .withBlueprintName(DEFAULT_SDX_BLUEPRINT_NAME)
                 .withValidateBlueprint(Boolean.FALSE);
         stack.withName(stack.getName())
-                .withImageSettings(getCloudProvider().imageSettings(getTestContext().given(ImageSettingsTestDto.class)))
-                .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.sdxHostGroup(getTestContext()))
                 .withInstanceGroups(MASTER.getName(), IDBROKER.getName())
-                .withStackAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
-                .withGatewayPort(getCloudProvider().gatewayPort(stack))
                 .withCluster(cluster);
-        SdxInternalTestDto sdxInternalTestDto = withStackRequest(stack.getRequest());
-        sdxInternalTestDto.withRuntimeVersion(DEFAULT_SDX_RUNTIME);
-        return sdxInternalTestDto;
-    }
-
-    private SdxInternalTestDto withStackRequest(StackTestDto stack, ClusterTestDto cluster) {
         SdxInternalTestDto sdxInternalTestDto = withStackRequest(stack.getRequest());
         sdxInternalTestDto.withRuntimeVersion(DEFAULT_SDX_RUNTIME);
         return sdxInternalTestDto;
