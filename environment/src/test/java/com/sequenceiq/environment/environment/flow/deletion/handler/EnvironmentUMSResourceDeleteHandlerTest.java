@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
-import static com.sequenceiq.environment.environment.flow.deletion.handler.EnvironmentUMSResourceDeleteHandler.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;

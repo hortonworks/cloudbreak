@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.datalake.service.sdx.StackRequestManifester.IAM_INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -135,7 +135,7 @@ public class StackRequestManifesterTest {
     public void testSetupCloudStorageAccountMappingWhenCloudStorageWithNoAccountMappingAndIdbmmsSourceAndSuccess() {
         when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
         when(stackV4Request.getName()).thenReturn(STACK_NAME);
-        when(idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, ENVIRONMENT_CRN, Optional.empty())).thenReturn(mappingsConfig);
+        when(idbmmsClient.getMappingsConfig(INTERNAL_ACTOR_CRN, ENVIRONMENT_CRN, Optional.empty())).thenReturn(mappingsConfig);
         when(mappingsConfig.getGroupMappings()).thenReturn(Map.ofEntries(Map.entry(GROUP_2, GROUP_ROLE_2)));
         when(mappingsConfig.getActorMappings()).thenReturn(Map.ofEntries(Map.entry(USER_2, USER_ROLE_2)));
 
@@ -154,7 +154,7 @@ public class StackRequestManifesterTest {
     public void testSetupCloudStorageAccountMappingWhenCloudStorageWithNoAccountMappingAndIdbmmsSourceAndFailure() {
         when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
         when(stackV4Request.getName()).thenReturn(STACK_NAME);
-        when(idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, BAD_ENVIRONMENT_CRN, Optional.empty()))
+        when(idbmmsClient.getMappingsConfig(INTERNAL_ACTOR_CRN, BAD_ENVIRONMENT_CRN, Optional.empty()))
                 .thenThrow(new IdbmmsOperationException("Houston, we have a problem."));
 
         clusterV4Request.setCloudStorage(cloudStorage);

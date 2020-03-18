@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static java.util.Objects.requireNonNull;
 
 import java.time.Instant;
@@ -25,7 +26,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
@@ -39,8 +39,6 @@ import io.grpc.StatusRuntimeException;
 @Service
 public class UmsUsersStateProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsUsersStateProvider.class);
-
-    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private static final String ADMIN_FREEIPA_GROUP = "admins";
 
@@ -63,7 +61,7 @@ public class UmsUsersStateProvider {
             Map<String, FmsGroup> crnToFmsGroup = grpcUmsClient.listGroups(actorCrn, accountId, List.of(), requestIdOptional).stream()
                     .collect(Collectors.toMap(Group::getCrn, this::umsGroupToGroup));
 
-            Set<FmsGroup> wags = grpcUmsClient.listWorkloadAdministrationGroups(IAM_INTERNAL_ACTOR_CRN, accountId, requestIdOptional).stream()
+            Set<FmsGroup> wags = grpcUmsClient.listWorkloadAdministrationGroups(INTERNAL_ACTOR_CRN, accountId, requestIdOptional).stream()
                     .map(wag -> nameToGroup(wag.getWorkloadAdministrationGroupName()))
                     .collect(Collectors.toSet());
 
@@ -132,7 +130,7 @@ public class UmsUsersStateProvider {
     }
 
     private WorkloadCredential getCredentials(String userCrn, Optional<String> requestId) {
-        GetActorWorkloadCredentialsResponse response = grpcUmsClient.getActorWorkloadCredentials(IAM_INTERNAL_ACTOR_CRN, userCrn, requestId);
+        GetActorWorkloadCredentialsResponse response = grpcUmsClient.getActorWorkloadCredentials(INTERNAL_ACTOR_CRN, userCrn, requestId);
         String hashedPassword = response.getPasswordHash();
         List<ActorKerberosKey> keys = response.getKerberosKeysList();
         long expirationDate = response.getPasswordHashExpirationDate();
@@ -151,9 +149,9 @@ public class UmsUsersStateProvider {
 
                 // Retrieve all information from UMS before modifying to the UmsUsersState or UsersState. This is so that
                 // we don't partially modify the state if the member has been deleted after we started the sync
-                List<String> groupCrnsForMember = grpcUmsClient.listGroupsForMember(IAM_INTERNAL_ACTOR_CRN, accountId, memberCrn, requestId);
+                List<String> groupCrnsForMember = grpcUmsClient.listGroupsForMember(INTERNAL_ACTOR_CRN, accountId, memberCrn, requestId);
                 UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse workloadAdministrationGroups =
-                        grpcUmsClient.listWorkloadAdministrationGroupsForMember(IAM_INTERNAL_ACTOR_CRN, memberCrn, requestId);
+                        grpcUmsClient.listWorkloadAdministrationGroupsForMember(INTERNAL_ACTOR_CRN, memberCrn, requestId);
                 WorkloadCredential workloadCredential = getCredentials(memberCrn, requestId);
 
                 groupCrnsForMember.forEach(gcrn -> {

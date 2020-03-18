@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
@@ -32,7 +33,6 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
@@ -52,6 +52,7 @@ import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.user.kerberos.KrbKeySetEncoder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
@@ -62,14 +63,11 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.service.freeipa.user.kerberos.KrbKeySetEncoder;
 
 @Service
 public class UserSyncService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserSyncService.class);
-
-    private static final String INTERNAL_USER_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     @VisibleForTesting
     @Value("${freeipa.usersync.max-subjects-per-request}")
@@ -124,7 +122,7 @@ public class UserSyncService {
 
         if (operationState == OperationState.RUNNING) {
             tryWithOperationCleanup(operationId, accountId, () ->
-                ThreadBasedUserCrnProvider.doAs(INTERNAL_USER_CRN, () -> {
+                ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> {
                     boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
                     if (fullSync) {
                         long currentTime = Instant.now().toEpochMilli();

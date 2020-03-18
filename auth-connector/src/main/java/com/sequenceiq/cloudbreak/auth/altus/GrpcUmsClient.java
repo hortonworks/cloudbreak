@@ -49,11 +49,11 @@ import io.grpc.StatusRuntimeException;
 @Component
 public class GrpcUmsClient {
 
+    public static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcUmsClient.class);
 
     private static final String ACCOUNT_IN_IAM_CRNS = "altus";
-
-    private static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     @Inject
     private UmsConfig umsConfig;

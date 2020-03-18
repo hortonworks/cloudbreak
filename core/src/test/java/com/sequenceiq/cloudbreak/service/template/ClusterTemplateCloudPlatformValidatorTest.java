@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.template;
 
-import static com.sequenceiq.cloudbreak.service.template.ClusterTemplateCloudPlatformValidator.IAM_INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
 
@@ -92,7 +92,7 @@ class ClusterTemplateCloudPlatformValidatorTest {
             boolean validExpected) {
         setUpUnderTest(enabledPlatforms);
         if (AZURE.equalsIgnoreCase(cloudPlatform)) {
-            lenient().when(entitlementService.azureEnabled(IAM_INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(azureEnabled);
+            lenient().when(entitlementService.azureEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(azureEnabled);
         }
         assertThat(underTest.isClusterTemplateCloudPlatformValid(cloudPlatform, ACCOUNT_ID)).isEqualTo(validExpected);
     }

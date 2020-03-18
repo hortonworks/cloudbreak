@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -32,7 +33,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -64,8 +64,6 @@ class UserSyncServiceTest {
 
     private static final String MACHINE_USER_CRN = "crn:cdp:iam:us-west-1:"
             + ACCOUNT_ID + ":machineUser:" + UUID.randomUUID().toString();
-
-    private static final String INTERNAL_USER_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private static final int MAX_SUBJECTS_PER_REQUEST = 10;
 
@@ -205,7 +203,7 @@ class UserSyncServiceTest {
         UserSyncService spyService = spy(underTest);
 
         doAnswer(invocation -> {
-            assertEquals(INTERNAL_USER_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+            assertEquals(INTERNAL_ACTOR_CRN, ThreadBasedUserCrnProvider.getUserCrn());
             return null;
         })
                 .when(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), anySet(), anySet(), anyBoolean());

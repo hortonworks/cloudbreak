@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.credential.validation;
 
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
 import java.util.HashMap;
@@ -14,10 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -31,9 +30,6 @@ import com.sequenceiq.environment.credential.validation.definition.CredentialDef
 
 @Component
 public class CredentialValidator {
-
-    @VisibleForTesting
-    static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private final Set<String> enabledPlatforms;
 
@@ -72,7 +68,7 @@ public class CredentialValidator {
 
     public boolean isCredentialCloudPlatformValid(String cloudPlatform, String accountId) {
         try {
-            validateCredentialCloudPlatformInternal(cloudPlatform, IAM_INTERNAL_ACTOR_CRN, accountId);
+            validateCredentialCloudPlatformInternal(cloudPlatform, INTERNAL_ACTOR_CRN, accountId);
             return true;
         } catch (BadRequestException e) {
             return false;

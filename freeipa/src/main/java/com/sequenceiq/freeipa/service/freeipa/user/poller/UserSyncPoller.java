@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.user.poller;
 
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -19,8 +21,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -39,8 +39,6 @@ import com.sequenceiq.freeipa.service.stack.StackService;
         matchIfMissing = false
 )
 public class UserSyncPoller {
-    @VisibleForTesting
-    static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserSyncPoller.class);
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.credential.validation;
 
-import static com.sequenceiq.environment.credential.validation.CredentialValidator.IAM_INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -94,7 +94,7 @@ class CredentialValidatorTest {
     @MethodSource("validateCredentialCloudPlatformDataProvider")
     void testIsCredentialCloudPlatformValid(String testCaseName, String cloudPlatform, boolean azureEnabled, boolean validExpected) {
         if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
-            when(entitlementService.azureEnabled(IAM_INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(azureEnabled);
+            when(entitlementService.azureEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(azureEnabled);
         }
         assertThat(underTest.isCredentialCloudPlatformValid(cloudPlatform, ACCOUNT_ID)).isEqualTo(validExpected);
     }
