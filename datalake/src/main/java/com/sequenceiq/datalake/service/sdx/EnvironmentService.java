@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -22,6 +23,7 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
 @Service
 public class EnvironmentService {
@@ -44,10 +46,16 @@ public class EnvironmentService {
     public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId) {
         PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_ENV_POLLING, TimeUnit.SECONDS,
                 DURATION_IN_MINUTES_FOR_ENV_POLLING, TimeUnit.MINUTES);
-        return waitAndGetEnvironment(sdxId, pollingConfig);
+        return waitAndGetEnvironment(sdxId, pollingConfig, EnvironmentStatus::isAvailable);
     }
 
-    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, PollingConfig pollingConfig) {
+    public DetailedEnvironmentResponse waitNetworkAndGetEnvironment(Long sdxId) {
+        PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_ENV_POLLING, TimeUnit.SECONDS,
+                DURATION_IN_MINUTES_FOR_ENV_POLLING, TimeUnit.MINUTES);
+        return waitAndGetEnvironment(sdxId, pollingConfig, EnvironmentStatus::isNetworkCreationFinished);
+    }
+
+    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, PollingConfig pollingConfig, Function<EnvironmentStatus, Boolean> statusCheck) {
         Optional<SdxCluster> sdxClusterOptional = sdxClusterRepository.findById(sdxId);
         if (sdxClusterOptional.isPresent()) {
             SdxCluster sdxCluster = sdxClusterOptional.get();
@@ -64,7 +72,7 @@ public class EnvironmentService {
                                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(sdxCluster.getEnvCrn());
                         LOGGER.info("Response from environment: {}", JsonUtil.writeValueAsString(environment));
-                        if (environment.getEnvironmentStatus().isAvailable()) {
+                        if (statusCheck.apply(environment.getEnvironmentStatus())) {
                             return AttemptResults.finishWith(environment);
                         } else {
                             if (environment.getEnvironmentStatus().isFailed()) {

@@ -10,23 +10,12 @@ public class RdsWaitSuccessEvent extends SdxEvent {
 
     private DatabaseServerStatusV4Response databaseServerResponse;
 
-    public RdsWaitSuccessEvent(Long sdxId, String userId, DetailedEnvironmentResponse detailedEnvironmentResponse,
-            DatabaseServerStatusV4Response databaseServerResponse) {
+    public RdsWaitSuccessEvent(Long sdxId, String userId) {
         super(sdxId, userId);
-        this.detailedEnvironmentResponse = detailedEnvironmentResponse;
-        this.databaseServerResponse = databaseServerResponse;
     }
 
     @Override
     public String selector() {
         return "RdsWaitSuccessEvent";
-    }
-
-    public DetailedEnvironmentResponse getDetailedEnvironmentResponse() {
-        return detailedEnvironmentResponse;
-    }
-
-    public DatabaseServerStatusV4Response getDatabaseServerResponse() {
-        return databaseServerResponse;
     }
 }

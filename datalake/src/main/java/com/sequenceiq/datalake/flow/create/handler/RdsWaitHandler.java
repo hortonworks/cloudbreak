@@ -25,6 +25,7 @@ import com.sequenceiq.datalake.flow.create.event.RdsWaitRequest;
 import com.sequenceiq.datalake.flow.create.event.RdsWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -35,6 +36,9 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsWaitHandler.class);
+
+    @Inject
+    private EnvironmentService environmentService;
 
     @Inject
     private DatabaseService databaseService;
@@ -60,7 +64,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
         RdsWaitRequest rdsWaitRequest = event.getData();
         Long sdxId = rdsWaitRequest.getResourceId();
         String userId = rdsWaitRequest.getUserId();
-        DetailedEnvironmentResponse env = rdsWaitRequest.getDetailedEnvironmentResponse();
+        DetailedEnvironmentResponse env = environmentService.waitNetworkAndGetEnvironment(sdxId);
         try {
             sdxClusterRepository.findById(sdxId).ifPresentOrElse(sdxCluster -> {
                 if (sdxCluster.hasExternalDatabase()) {
@@ -68,10 +72,10 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
                     LOGGER.debug("start polling database for sdx: {}", sdxId);
                     DatabaseServerStatusV4Response db = databaseService.create(sdxCluster, env);
                     setRdsCreatedStatus(sdxCluster);
-                    sendEvent(new RdsWaitSuccessEvent(sdxId, userId, env, db), event);
+                    sendEvent(new RdsWaitSuccessEvent(sdxId, userId), event);
                 } else {
                     LOGGER.debug("skipping creation of database for sdx: {}", sdxId);
-                    sendEvent(new RdsWaitSuccessEvent(sdxId, userId, env, null), event);
+                    sendEvent(new RdsWaitSuccessEvent(sdxId, userId), event);
                 }
             }, () -> {
                 throw notFound("SDX cluster", sdxId).get();

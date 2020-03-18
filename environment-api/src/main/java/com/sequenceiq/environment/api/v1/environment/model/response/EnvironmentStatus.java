@@ -74,6 +74,10 @@ public enum EnvironmentStatus {
         return equals(AVAILABLE);
     }
 
+    public boolean isNetworkCreationFinished() {
+        return equals(PUBLICKEY_CREATE_IN_PROGRESS) || equals(FREEIPA_CREATION_IN_PROGRESS) || equals(AVAILABLE);
+    }
+
     public boolean isFailed() {
         return equals(CREATE_FAILED) || equals(DELETE_FAILED) || equals(UPDATE_FAILED);
     }
