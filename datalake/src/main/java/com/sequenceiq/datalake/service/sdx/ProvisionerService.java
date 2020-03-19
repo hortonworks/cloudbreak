@@ -99,7 +99,7 @@ public class ProvisionerService {
 
     public void waitCloudbreakClusterDeletion(Long id, PollingConfig pollingConfig) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
-            AtomicInteger deleteFailedCount = new AtomicInteger();
+            AtomicInteger deleteFailedCount = new AtomicInteger(1);
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
@@ -118,9 +118,12 @@ public class ProvisionerService {
                                 if (Status.DELETE_FAILED.equals(cluster.getStatus())) {
                                     // it's a hack, until we implement a nice non-async terminate which can return with flowid..
                                     // if it is implemented, please remove this
-                                    if (deleteFailedCount.getAndIncrement() > DELETE_FAILED_RETRY_COUNT) {
+                                    if (deleteFailedCount.getAndIncrement() >= DELETE_FAILED_RETRY_COUNT) {
+                                        LOGGER.error("Cluster deletion failed '" + sdxCluster.getClusterName() + "', "
+                                                + stackV4Response.getCluster().getStatusReason());
                                         return AttemptResults.breakFor(
-                                                "Cluster deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
+                                                "Data Lake deletion failed '" + sdxCluster.getClusterName() + "', "
+                                                        + stackV4Response.getCluster().getStatusReason()
                                         );
                                     } else {
                                         return AttemptResults.justContinue();
@@ -130,9 +133,10 @@ public class ProvisionerService {
                             if (Status.DELETE_FAILED.equals(stackV4Response.getStatus())) {
                                 // it's a hack, until we implement a nice non-async terminate which can return with flowid..
                                 // if it is implemented, please remove this
-                                if (deleteFailedCount.getAndIncrement() > DELETE_FAILED_RETRY_COUNT) {
+                                if (deleteFailedCount.getAndIncrement() >= DELETE_FAILED_RETRY_COUNT) {
+                                    LOGGER.error("Stack deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason());
                                     return AttemptResults.breakFor(
-                                            "Stack deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
+                                            "Data Lake deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
                                     );
                                 } else {
                                     return AttemptResults.justContinue();
