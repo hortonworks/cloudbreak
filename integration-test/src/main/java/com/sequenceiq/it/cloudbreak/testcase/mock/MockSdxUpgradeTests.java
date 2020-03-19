@@ -59,7 +59,7 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
     )
     public void testSdxUpgradeCriteriaNotMetTest(MockedTestContext testContext) {
         String upgradeImageCatalogName = resourcePropertyProvider().getName();
-        createImageCatalogForUpgrade(testContext, upgradeImageCatalogName);
+        createImageCatalogForOsUpgrade(testContext, upgradeImageCatalogName);
         String sdxInternal = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
@@ -92,7 +92,7 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then(SdxUpgradeTestAssertion
-                        .validateReasonContains("Repair is only supported when single node Cloudera Manager state stored in external Database."))
+                        .validateReasonContains("Repair is only supported if Cloudera Manager state is stored in external Database."))
                 .then(SdxUpgradeTestAssertion.validateReasonContains("Cloudera Manager server failure with embedded Database cannot be repaired!"))
                 .validate();
     }
@@ -105,7 +105,7 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
     )
     public void testSdxUpgradeSuccessful(MockedTestContext testContext) {
         String upgradeImageCatalogName = resourcePropertyProvider().getName();
-        createImageCatalogForUpgrade(testContext, upgradeImageCatalogName);
+        createImageCatalogForOsUpgrade(testContext, upgradeImageCatalogName);
         String sdxInternal = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
@@ -145,7 +145,7 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
                 .validate();
     }
 
-    protected ImageCatalogTestDto createImageCatalogForUpgrade(TestContext testContext, String name) {
+    protected ImageCatalogTestDto createImageCatalogForOsUpgrade(TestContext testContext, String name) {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
         return testContext
                 .given(ImageCatalogTestDto.class)

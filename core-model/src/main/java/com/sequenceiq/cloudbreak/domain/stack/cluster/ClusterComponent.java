@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
         subgraphs = @NamedSubgraph(name = "rdsConfig", attributeNodes = @NamedAttributeNode("rdsConfigs")))
 @Entity
 @Audited
-@AuditTable("component_history")
+@AuditTable("clustercomponent_history")
 public class ClusterComponent implements ProvisionEntity {
 
     @Id

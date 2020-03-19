@@ -31,7 +31,7 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
-import com.sequenceiq.datalake.service.upgrade.SdxStackUpgradeService;
+import com.sequenceiq.datalake.service.upgrade.SdxClusterUpgradeService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
@@ -72,7 +72,7 @@ public class SdxController implements SdxEndpoint {
     private SdxMetricService metricService;
 
     @Inject
-    private SdxStackUpgradeService sdxStackUpgradeService;
+    private SdxClusterUpgradeService sdxClusterUpgradeService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
@@ -274,28 +274,28 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public UpgradeOptionsV4Response checkForStackUpgradeByName(String name) {
-        return sdxStackUpgradeService.checkForStackUpgradeByName(name);
+    public UpgradeOptionsV4Response checkForClusterUpgradeByName(String name) {
+        return sdxClusterUpgradeService.checkForClusterUpgradeByName(name);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public UpgradeOptionsV4Response checkForStackUpgradeByCrn(String crn) {
+    public UpgradeOptionsV4Response checkForClusterUpgradeByCrn(String crn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxStackUpgradeService.checkForStackUpgradeByCrn(crn, userCrn);
+        return sdxClusterUpgradeService.checkForStackUpgradeByCrn(crn, userCrn);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public FlowIdentifier upgradeStackByName(String name, String imageId) {
+    public FlowIdentifier upgradeClusterByName(String name, String imageId) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxStackUpgradeService.triggerUpgradeByName(userCrn, name, imageId);
+        return sdxClusterUpgradeService.triggerUpgradeByName(userCrn, name, imageId);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
-    public FlowIdentifier upgradeStackByCrn(String crn, String imageId) {
+    public FlowIdentifier upgradeClusterByCrn(String crn, String imageId) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxStackUpgradeService.triggerUpgradeByCrn(userCrn, crn, imageId);
+        return sdxClusterUpgradeService.triggerUpgradeByCrn(userCrn, crn, imageId);
     }
 }

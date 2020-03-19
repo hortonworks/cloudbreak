@@ -191,27 +191,27 @@ public interface SdxEndpoint {
     @ApiOperation(value = "list advertised datalake versions", produces = MediaType.APPLICATION_JSON, nickname = "advertisedruntimes")
     List<AdvertisedRuntime> advertisedRuntimes();
 
-    @GET
-    @Path("{name}/check_stack_upgrade")
+
+    @Path("{name}/check_cluster_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "checks for upgrade options by name", nickname = "checkForStackUpgradeByName")
-    UpgradeOptionsV4Response checkForStackUpgradeByName(@PathParam("name") String name);
+    @ApiOperation(value = "checks for cluster upgrade options by name", nickname = "checkForClusterUpgradeByName")
+    UpgradeOptionsV4Response checkForClusterUpgradeByName(@PathParam("name") String name);
 
     @GET
-    @Path("/crn/{crn}/check_stack_upgrade")
+    @Path("/crn/{crn}/check_cluster_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "checks for stack upgrade options by crn", nickname = "checkForStackUpgradeByCrn")
-    UpgradeOptionsV4Response checkForStackUpgradeByCrn(@PathParam("crn") String crn);
+    @ApiOperation(value = "checks for cluster upgrade options by crn", nickname = "checkForClusterUpgradeByCrn")
+    UpgradeOptionsV4Response checkForClusterUpgradeByCrn(@PathParam("crn") String crn);
 
     @POST
-    @Path("{name}/stack_upgrade/image/{image}")
+    @Path("{name}/cluster_upgrade/image/{image}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "upgrades the datalake stack by name", nickname = "upgradeStackByName")
-    FlowIdentifier upgradeStackByName(@PathParam("name") String name, @PathParam("image") String imageId);
+    @ApiOperation(value = "upgrades the datalake cluster by name", nickname = "upgradeClusterByName")
+    FlowIdentifier upgradeClusterByName(@PathParam("name") String name,  @PathParam("image") String imageId);
 
     @POST
-    @Path("/crn/{crn}/stack_upgrade/image/{image}")
+    @Path("/crn/{crn}/cluster_upgrade/image/{image}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "upgrades the datalake stack by crn", nickname = "upgradeStackByCrn")
-    FlowIdentifier upgradeStackByCrn(@PathParam("crn") String crn, @PathParam("image") String imageId);
+    @ApiOperation(value = "upgrades the datalake cluster by crn", nickname = "upgradeClusterByCrn")
+    FlowIdentifier upgradeClusterByCrn(@PathParam("crn") String crn, @PathParam("image") String imageId);
 }

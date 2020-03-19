@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StackUpgradeServiceTest {
+public class ClusterUpgradeAvailabilityServiceTest {
 
     private static final long WORKSPACE_ID = 1L;
 
@@ -62,7 +62,7 @@ public class StackUpgradeServiceTest {
     private ImageService imageService;
 
     @Mock
-    private StackUpgradeImageFilter stackUpgradeImageFilter;
+    private ClusterUpgradeImageFilter clusterUpgradeImageFilter;
 
     @Mock
     private UpgradeOptionsResponseFactory upgradeOptionsResponseFactory;
@@ -91,7 +91,7 @@ public class StackUpgradeServiceTest {
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
         when(imageCatalogProvider.getImageCatalogV2(CATALOG_URL)).thenReturn(imageCatalog);
         Images filteredImages = createFilteredImages(properImage);
-        when(stackUpgradeImageFilter.filter(imageCatalog.getImages().getCdhImages(), imageCatalog.getVersions(), currentImageFromCatalog,
+        when(clusterUpgradeImageFilter.filter(imageCatalog.getImages().getCdhImages(), imageCatalog.getVersions(), currentImageFromCatalog,
                 stack.getCloudPlatform())).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
@@ -103,7 +103,7 @@ public class StackUpgradeServiceTest {
         verify(stackService).getByNameInWorkspace(STACK_NAME, WORKSPACE_ID);
         verify(imageService).getImage(stack.getId());
         verify(imageCatalogProvider).getImageCatalogV2(CATALOG_URL);
-        verify(stackUpgradeImageFilter).filter(imageCatalog.getImages().getCdhImages(), imageCatalog.getVersions(), currentImageFromCatalog,
+        verify(clusterUpgradeImageFilter).filter(imageCatalog.getImages().getCdhImages(), imageCatalog.getVersions(), currentImageFromCatalog,
                 stack.getCloudPlatform());
         verify(upgradeOptionsResponseFactory).createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName());

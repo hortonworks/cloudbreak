@@ -18,9 +18,9 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
 import com.sequenceiq.cloudbreak.service.image.VersionBasedImageFilter;
 
 @Component
-public class StackUpgradeImageFilter {
+public class ClusterUpgradeImageFilter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackUpgradeImageFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeImageFilter.class);
 
     private static final String CM_PACKAGE_KEY = "cm";
 

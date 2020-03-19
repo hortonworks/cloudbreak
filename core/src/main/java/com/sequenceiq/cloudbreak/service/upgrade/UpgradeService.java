@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -53,9 +52,6 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 @Component
 public class UpgradeService {
 
-    private static final Set<Status> UPGRADEABLE_ATTACHED_DISTRO_X_STATES = Sets.immutableEnumSet(Status.STOPPED, Status.DELETE_COMPLETED,
-            Status.CREATE_FAILED, Status.DELETE_FAILED);
-
     private static final boolean NOT_BASE_IMAGE = false;
 
     private static final String SALT_BOOTSTRAP = "salt-bootstrap";
@@ -89,7 +85,7 @@ public class UpgradeService {
     @Inject
     private ReactorFlowManager flowManager;
 
-    public UpgradeOptionV4Response getUpgradeOsOptionByStackNameOrCrn(Long workspaceId, NameOrCrn nameOrCrn, User user) {
+    public UpgradeOptionV4Response getOsUpgradeOptionByStackNameOrCrn(Long workspaceId, NameOrCrn nameOrCrn, User user) {
         try {
             return transactionService.required(() -> {
                 Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
@@ -181,9 +177,9 @@ public class UpgradeService {
     private boolean attachedClustersStoppedOrDeleted(Stack stack) {
         StackViewV4Responses stackViewV4Responses = distroXV1Endpoint.list(null, stack.getEnvironmentCrn());
         for (StackViewV4Response stackViewV4Response : stackViewV4Responses.getResponses()) {
-            if (!UPGRADEABLE_ATTACHED_DISTRO_X_STATES.contains(stackViewV4Response.getStatus())
+            if (!Status.getUpgradableStates().contains(stackViewV4Response.getStatus())
                     || (stackViewV4Response.getCluster() != null
-                    && !UPGRADEABLE_ATTACHED_DISTRO_X_STATES.contains(stackViewV4Response.getCluster().getStatus()))) {
+                    && !Status.getUpgradableStates().contains(stackViewV4Response.getCluster().getStatus()))) {
                 return false;
             }
         }
@@ -257,7 +253,7 @@ public class UpgradeService {
     private UpgradeOptionV4Response notUpgradable(Image image, String reason) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         UpgradeOptionV4Response response = createUpgradeBaseWithCurrent(image);
         response.setReason(reason);
-        LOGGER.error("Datalake upgrade option evaulation finished with error, reason: {}", response.getReason());
+        LOGGER.error("Datalake upgrade option evaluation finished with error, reason: {}", response.getReason());
         return response;
     }
 

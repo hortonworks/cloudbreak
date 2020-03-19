@@ -20,6 +20,7 @@ import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
+import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -32,8 +33,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 public class ClouderaManagerParcelActivationListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelActivationListenerTask.class);
-
-    private static final String PARCEL_ACTIVATED_STAGE = "ACTIVATED";
 
     public ClouderaManagerParcelActivationListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
             CloudbreakEventService cloudbreakEventService) {
@@ -104,7 +103,7 @@ public class ClouderaManagerParcelActivationListenerTask extends AbstractClouder
     }
 
     private void addNotActivated(ApiParcel matchingParcel, List<ApiParcel> notActivated) {
-        if (!PARCEL_ACTIVATED_STAGE.equals(matchingParcel.getStage())) {
+        if (!ParcelStatus.ACTIVATED.name().equals(matchingParcel.getStage())) {
             notActivated.add(matchingParcel);
         }
     }

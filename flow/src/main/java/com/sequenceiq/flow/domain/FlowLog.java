@@ -230,4 +230,9 @@ public class FlowLog {
                 ", stateStatus=" + stateStatus +
                 '}';
     }
+
+    @Override
+    public String toString() {
+        return minimizedString();
+    }
 }

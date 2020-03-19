@@ -2,7 +2,7 @@ package com.sequenceiq.datalake.flow.upgrade;
 
 import com.sequenceiq.flow.core.FlowEvent;
 
-public enum SdxUpgradeEvent implements FlowEvent {
+public enum SdxOsUpgradeEvent implements FlowEvent {
 
     SDX_UPGRADE_EVENT("SDX_UPGRADE_EVENT"),
     SDX_UPGRADE_FAILED_TO_START_EVENT("SDX_UPGRADE_FAILED_TO_START_EVENT"),
@@ -15,7 +15,7 @@ public enum SdxUpgradeEvent implements FlowEvent {
 
     private final String event;
 
-    SdxUpgradeEvent(String event) {
+    SdxOsUpgradeEvent(String event) {
         this.event = event;
     }
 
