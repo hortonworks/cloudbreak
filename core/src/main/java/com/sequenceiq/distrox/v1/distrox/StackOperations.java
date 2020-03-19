@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -40,9 +41,9 @@ import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
-import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -186,7 +187,7 @@ public class StackOperations implements ResourceBasedCrnProvider {
         return stackCommonService.repairCluster(workspaceId, nameOrCrn, clusterRepairRequest);
     }
 
-    public FlowIdentifier upgradeClusterOs(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+    public FlowIdentifier upgradeOs(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         LOGGER.debug("Starting to upgrade OS: " + nameOrCrn);
         if (nameOrCrn.hasName()) {
             return upgradeService.upgradeOsByStackName(workspaceId, nameOrCrn.getName());
@@ -199,7 +200,7 @@ public class StackOperations implements ResourceBasedCrnProvider {
     public UpgradeOptionV4Response checkForOsUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         if (nameOrCrn.hasName()) {
-            return upgradeService.getUpgradeOsOptionByStackNameOrCrn(workspaceId, nameOrCrn, user);
+            return upgradeService.getOsUpgradeOptionByStackNameOrCrn(workspaceId, nameOrCrn, user);
         } else {
             LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
             throw new BadRequestException("Please provide a stack name for upgrade");
@@ -218,7 +219,13 @@ public class StackOperations implements ResourceBasedCrnProvider {
 
     public UpgradeOptionsV4Response checkForClusterUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         if (nameOrCrn.hasName()) {
-            return clusterUpgradeAvailabilityService.checkForUpgradesByName(workspaceId, nameOrCrn.getName());
+            UpgradeOptionsV4Response upgradeOptionsV4Response = clusterUpgradeAvailabilityService.checkForUpgradesByName(workspaceId, nameOrCrn.getName());
+            if (StringUtils.isEmpty(upgradeOptionsV4Response.getReason())) {
+                Stack stack = getStackByName(nameOrCrn.getName());
+                StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
+                upgradeOptionsV4Response = clusterUpgradeAvailabilityService.checkForNotAttachedClusters(stackViewV4Responses, upgradeOptionsV4Response);
+            }
+            return upgradeOptionsV4Response;
         } else {
             LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
             throw new BadRequestException("Please provide a stack name for upgrade");

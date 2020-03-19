@@ -49,7 +49,7 @@ public class StackUpgradeImageFilterTest {
     private static final Map<String, String> IMAGE_MAP = Collections.emptyMap();
 
     @InjectMocks
-    private StackUpgradeImageFilter underTest;
+    private ClusterUpgradeImageFilter underTest;
 
     @Mock
     private CustomVersionComparator customVersionComparator;

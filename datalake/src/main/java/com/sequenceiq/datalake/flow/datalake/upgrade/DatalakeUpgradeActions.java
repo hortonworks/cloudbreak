@@ -55,7 +55,7 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradeStartEvent payload, Map<Object, Object> variables) throws Exception {
-                sdxUpgradeService.upgradeStack(payload.getResourceId(), payload.getImageId());
+                sdxUpgradeService.upgradeCluster(payload.getResourceId(), payload.getImageId());
                 sendEvent(context, DatalakeUpgradeWaitRequest.from(context, payload.getImageId()));
             }
 

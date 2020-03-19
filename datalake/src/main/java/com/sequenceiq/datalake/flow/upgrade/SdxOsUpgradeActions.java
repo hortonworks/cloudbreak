@@ -1,8 +1,8 @@
 package com.sequenceiq.datalake.flow.upgrade;
 
-import static com.sequenceiq.datalake.flow.upgrade.SdxUpgradeEvent.SDX_UPGRADE_FAILED_HANDLED_EVENT;
-import static com.sequenceiq.datalake.flow.upgrade.SdxUpgradeEvent.SDX_UPGRADE_FINALIZED_EVENT;
-import static com.sequenceiq.datalake.flow.upgrade.SdxUpgradeEvent.SDX_UPGRADE_IN_PROGRESS_EVENT;
+import static com.sequenceiq.datalake.flow.upgrade.SdxOsUpgradeEvent.SDX_UPGRADE_FAILED_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.upgrade.SdxOsUpgradeEvent.SDX_UPGRADE_FINALIZED_EVENT;
+import static com.sequenceiq.datalake.flow.upgrade.SdxOsUpgradeEvent.SDX_UPGRADE_IN_PROGRESS_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -34,9 +34,9 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 
 @Configuration
-public class SdxUpgradeActions {
+public class SdxOsUpgradeActions {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeActions.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxOsUpgradeActions.class);
 
     @Inject
     private SdxUpgradeService sdxUpgradeService;
@@ -98,7 +98,7 @@ public class SdxUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxImageChangedEvent payload, Map<Object, Object> variables) throws Exception {
-                sdxUpgradeService.upgrade(payload.getResourceId());
+                sdxUpgradeService.upgradeOs(payload.getResourceId());
                 sendEvent(context);
             }
 

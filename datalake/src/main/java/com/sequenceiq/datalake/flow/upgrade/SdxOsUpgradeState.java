@@ -4,7 +4,7 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
-public enum SdxUpgradeState implements FlowState {
+public enum SdxOsUpgradeState implements FlowState {
 
     INIT_STATE,
     SDX_UPGRADE_START_STATE,
@@ -16,10 +16,10 @@ public enum SdxUpgradeState implements FlowState {
 
     private Class<? extends DefaultRestartAction> restartAction = DefaultRestartAction.class;
 
-    SdxUpgradeState() {
+    SdxOsUpgradeState() {
     }
 
-    SdxUpgradeState(Class<? extends DefaultRestartAction> restartAction) {
+    SdxOsUpgradeState(Class<? extends DefaultRestartAction> restartAction) {
         this.restartAction = restartAction;
     }
 

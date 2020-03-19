@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 
 public class SdxSetFlowChainIdAction implements Action<SdxTestDto, SdxClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxOsUpgradeAction.class);
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {

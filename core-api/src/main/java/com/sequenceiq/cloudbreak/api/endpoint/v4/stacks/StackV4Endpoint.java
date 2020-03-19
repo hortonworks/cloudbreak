@@ -150,15 +150,15 @@ public interface StackV4Endpoint {
     @Path("{name}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UPGRADE_CLUSTER_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_UPGRADE_NOTES,
-            nickname = "upgradeClusterInWorkspaceV4")
-    FlowIdentifier upgradeCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+            nickname = "upgradeOsInWorkspaceV4")
+    FlowIdentifier upgradeOs(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
     @Path("{name}/check_for_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CHECK_FOR_UPGRADE_CLUSTER_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.CHECK_FOR_CLUSTER_UPGRADE_NOTES,
-            nickname = "checkForUpgradeInWorkspaceV4")
-    UpgradeOptionV4Response checkForUpgrade(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+            nickname = "checkForOsUpgradeInWorkspaceV4")
+    UpgradeOptionV4Response checkForOsUpgrade(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
     @Path("{name}/blueprint")
@@ -243,15 +243,15 @@ public interface StackV4Endpoint {
     String getClusterHostsInventory(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @GET
-    @Path("{name}/check_stack_upgrade")
+    @Path("{name}/check_cluster_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CHECK_STACK_UPGRADE, nickname = "checkForUpgradeByName")
-    UpgradeOptionsV4Response checkForStackUpgradeByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    @ApiOperation(value = CHECK_STACK_UPGRADE, nickname = "checkForClusterUpgradeByName")
+    UpgradeOptionsV4Response checkForClusterUpgradeByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @POST
-    @Path("{name}/stack_upgrade")
+    @Path("{name}/cluster_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = STACK_UPGRADE, nickname = "upgradeStackByName")
-    FlowIdentifier upgradeStackByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, String imageId);
+    @ApiOperation(value = STACK_UPGRADE, nickname = "upgradeClusterByName")
+    FlowIdentifier upgradeClusterByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, String imageId);
 
 }

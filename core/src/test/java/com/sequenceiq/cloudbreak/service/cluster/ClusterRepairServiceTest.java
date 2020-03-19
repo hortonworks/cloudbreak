@@ -295,8 +295,8 @@ public class ClusterRepairServiceTest {
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
             underTest.repairNodes(1L, Set.of("instanceId1"), false, false);
         });
-        assertEquals("Repair cannot be performed, because there is already an active operation.", exception.getMessage());
-        verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START, "Repair cannot be performed, because there is already an active operation.");
+        assertEquals("Repair cannot be performed because there is an active flow running.", exception.getMessage());
+        verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START, "Repair cannot be performed because there is an active flow running.");
         verifyZeroInteractions(stackUpdater);
     }
 
@@ -346,7 +346,7 @@ public class ClusterRepairServiceTest {
         });
 
         String expectedErrorMessage =
-                "Repair cannot be performed, because stopped nodes are in the cluster. Please select them for repair or start the stopped nodes.";
+                "Repair cannot be performed because there are stopped nodes in the cluster. Please select them for repair or start the stopped nodes.";
         assertEquals(expectedErrorMessage,
                 exception.getMessage());
         verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START,

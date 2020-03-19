@@ -13,9 +13,9 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.FlowUtil;
 
-public class SdxUpgradeAction implements Action<SdxInternalTestDto, SdxClient> {
+public class SdxOsUpgradeAction implements Action<SdxInternalTestDto, SdxClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxOsUpgradeAction.class);
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {

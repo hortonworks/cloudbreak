@@ -11,12 +11,11 @@ import com.cloudera.api.swagger.model.ApiParcel;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
+import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
-
-    public static final String DOWNLOADED = "DOWNLOADED";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerUpgradeParcelDownloadListenerTask.class);
 
@@ -41,8 +40,10 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
         ApiParcel apiParcel = parcelResourceApi.readParcel(parcelResource.getClusterName(), parcelResource.getProduct(), parcelResource.getVersion());
         String parcelStage = apiParcel.getStage();
 
-        if (!DOWNLOADED.equals(parcelStage)) {
-            LOGGER.warn("Expected parcel status is {}, received status is: {}", DOWNLOADED, parcelStage);
+        if (!ParcelStatus.DOWNLOADED.name().equals(parcelStage)
+                || !ParcelStatus.DISTRIBUTED.name().equals(parcelStage)
+                || !ParcelStatus.ACTIVATED.name().equals(parcelStage)) {
+            LOGGER.warn("Expected parcel status is {}, received status is: {}", ParcelStatus.DOWNLOADED.name(), parcelStage);
             return false;
         } else {
             return true;

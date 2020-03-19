@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -10,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -43,7 +47,7 @@ public class ClusterUpgradeAvailabilityService {
     private ImageService imageService;
 
     @Inject
-    private StackUpgradeImageFilter stackUpgradeImageFilter;
+    private ClusterUpgradeImageFilter clusterUpgradeImageFilter;
 
     @Inject
     private UpgradeOptionsResponseFactory upgradeOptionsResponseFactory;
@@ -66,6 +70,21 @@ public class ClusterUpgradeAvailabilityService {
             LOGGER.warn(String.format("Cannot upgrade cluster because: %s", upgradeOptions.getReason()));
         } else {
             upgradeOptions = checkForUpgrades(stack);
+        }
+        return upgradeOptions;
+    }
+
+    public UpgradeOptionsV4Response checkForNotAttachedClusters(StackViewV4Responses stackViewV4Responses, UpgradeOptionsV4Response upgradeOptions) {
+
+        String notStoppedAttachedClusters = stackViewV4Responses.getResponses().stream()
+                .filter(stackViewV4Response ->
+                                !Status.getUpgradableStates().contains(stackViewV4Response.getStatus())
+                                        || (stackViewV4Response.getCluster() != null
+                                        && !Status.getUpgradableStates().contains(stackViewV4Response.getCluster().getStatus())))
+                .map(StackViewV4Response::getName).collect(Collectors.joining(","));
+        if (!notStoppedAttachedClusters.isEmpty()) {
+            upgradeOptions.setReason(String.format("There are attached Data Hub clusters in incorrect state: %s. "
+                    + "Please stop those to be able to perform the upgrade.", notStoppedAttachedClusters));
         }
         return upgradeOptions;
     }
@@ -100,7 +119,7 @@ public class ClusterUpgradeAvailabilityService {
     }
 
     private Images filterImages(CloudbreakImageCatalogV2 imageCatalog, Image currentImage, String cloudPlatform) {
-        return stackUpgradeImageFilter.filter(getCdhImages(imageCatalog), imageCatalog.getVersions(), currentImage, cloudPlatform);
+        return clusterUpgradeImageFilter.filter(getCdhImages(imageCatalog), imageCatalog.getVersions(), currentImage, cloudPlatform);
     }
 
     private List<Image> getCdhImages(CloudbreakImageCatalogV2 imageCatalog) {

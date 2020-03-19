@@ -6,7 +6,7 @@ import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVEN
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
-import static com.sequenceiq.datalake.flow.upgrade.SdxUpgradeEvent.SDX_UPGRADE_EVENT;
+import static com.sequenceiq.datalake.flow.upgrade.SdxOsUpgradeEvent.SDX_UPGRADE_EVENT;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -68,13 +68,13 @@ public class SdxReactorFlowManager {
         return notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, settings));
     }
 
-    public FlowIdentifier triggerDatalakeUpgradeFlow(Long sdxId, UpgradeOptionV4Response upgradeOption) {
+    public FlowIdentifier triggerDatalakeOsUpgradeFlow(Long sdxId, UpgradeOptionV4Response upgradeOption) {
         String selector = SDX_UPGRADE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxUpgradeStartEvent(selector, sdxId, userId, upgradeOption));
     }
 
-    public FlowIdentifier triggerDatalakeStackUpgradeFlow(Long sdxId, String imageId) {
+    public FlowIdentifier triggerDatalakeClusterUpgradeFlow(Long sdxId, String imageId) {
         String selector = DATALAKE_UPGRADE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new DatalakeUpgradeStartEvent(selector, sdxId, userId, imageId));

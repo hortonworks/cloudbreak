@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.common;
 
 import java.util.Arrays;
+import java.util.Set;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.StatusKind;
 
 public enum Status {
@@ -93,5 +95,10 @@ public enum Status {
             default:
                 return this;
         }
+    }
+
+    public static Set<Status> getUpgradableStates() {
+        return Sets.immutableEnumSet(Status.STOPPED, Status.DELETE_COMPLETED,
+                Status.CREATE_FAILED, Status.DELETE_FAILED);
     }
 }
