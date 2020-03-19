@@ -20,7 +20,7 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class EnvironmentStartStopTests extends AbstractE2ETest {
+public class EnvironmentStopStartTests extends AbstractE2ETest {
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
