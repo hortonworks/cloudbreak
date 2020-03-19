@@ -3,22 +3,32 @@ package com.sequenceiq.freeipa.service.stack;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.TERMINATION_EVENT;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.flow.core.ApplicationFlowInformation;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.ChildEnvironment;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState;
 import com.sequenceiq.freeipa.flow.stack.termination.event.TerminationEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 @Service
 public class FreeIpaDeletionService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaDeletionService.class);
 
     @Inject
     private StackService stackService;
@@ -30,7 +40,16 @@ public class FreeIpaDeletionService {
     private FreeIpaFlowManager flowManager;
 
     @Inject
+    private FlowCancelService flowCancelService;
+
+    @Inject
     private FreeipaJobService freeipaJobService;
+
+    @Inject
+    private FlowLogService flowLogService;
+
+    @Inject
+    private ApplicationFlowInformation applicationFlowInformation;
 
     public void delete(String environmentCrn, String accountId) {
         List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
@@ -42,9 +61,39 @@ public class FreeIpaDeletionService {
     }
 
     private void unscheduleAndTriggerTerminate(Stack stack) {
+        flowCancelService.cancelTooOldTerminationFlowForResource(stack.getId(), stack.getName());
         freeipaJobService.unschedule(stack);
+        if (!stack.isDeleteCompleted()) {
+            handleIfStackIsNotTerminated(stack);
+        } else {
+            LOGGER.debug("Stack is already deleted.");
+        }
+    }
+
+    private void handleIfStackIsNotTerminated(Stack stack) {
+        LOGGER.info("Stack {} in environment {} is not deleted.", stack.getName(), stack.getEnvironmentCrn());
+        Optional<FlowLog> optionalFlowLog = findLatestTerminationFlowLogWithInitState(stack);
+        if (optionalFlowLog.isPresent()) {
+            FlowLog flowLog = optionalFlowLog.get();
+            LOGGER.debug("Found termination flowlog with id [{}] and payload [{}]", flowLog.getFlowId(), flowLog.getPayload());
+        } else {
+            fireTerminationEvent(stack);
+        }
+    }
+
+    private void fireTerminationEvent(Stack stack) {
+        LOGGER.debug("Couldn't find termination FlowLog with 'INIT_STATE'. Triggering termination");
         flowManager.notify(TERMINATION_EVENT.event(), new TerminationEvent(TERMINATION_EVENT.event(), stack.getId(), false));
-        flowManager.cancelRunningFlows(stack.getId());
+        flowCancelService.cancelRunningFlows(stack.getId());
+    }
+
+    private Optional<FlowLog> findLatestTerminationFlowLogWithInitState(Stack stack) {
+        List<FlowLog> flowLogs = flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(stack.getId());
+        return flowLogs.stream()
+                .filter(flowLog -> applicationFlowInformation.getTerminationFlow().stream()
+                        .anyMatch(terminationFlowClass -> terminationFlowClass.equals(flowLog.getFlowType())))
+                .filter(fl -> StackTerminationState.INIT_STATE.name().equalsIgnoreCase(fl.getCurrentState()))
+                .findFirst();
     }
 
     private void validateDeletion(Stack stack, String accountId) {

@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 @Service
 public class TerminationTriggerService {
@@ -58,7 +59,7 @@ public class TerminationTriggerService {
             LOGGER.debug("Found termination flowlog with id [{}] and payload [{}]", flowLog.getFlowId(), flowLog.getPayload());
             handleIfFlowLogExistsForTermination(stack, forced, flowLog);
         } else {
-            LOGGER.warn("Couldn't find FlowLog with 'PRE_TERMINATION_STATE'. Triggering termination");
+            LOGGER.debug("Couldn't find termination FlowLog with 'INIT_STATE'. Triggering termination");
             fireTerminationEvent(stack, forced);
         }
     }

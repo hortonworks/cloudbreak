@@ -15,8 +15,8 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.service.ha.HaApplication;
 import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
-import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Primary
@@ -28,7 +28,7 @@ public class FreeIpaHaApplication implements HaApplication {
     private StackService stackService;
 
     @Inject
-    private FreeIpaFlowManager reactorFlowManager;
+    private FlowCancelService flowCancelService;
 
     @Inject
     private FlowRegister runningFlows;
@@ -54,7 +54,7 @@ public class FreeIpaHaApplication implements HaApplication {
     @Override
     public void cancelRunningFlow(Long resourceId) {
         InMemoryStateStore.putStack(resourceId, PollGroup.CANCELLED);
-        reactorFlowManager.cancelRunningFlows(resourceId);
+        flowCancelService.cancelRunningFlows(resourceId);
     }
 
     @Override

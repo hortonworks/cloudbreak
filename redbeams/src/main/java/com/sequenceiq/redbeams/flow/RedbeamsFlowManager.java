@@ -7,25 +7,20 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
-import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.core.model.ResultType;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
 public class RedbeamsFlowManager {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsFlowManager.class);
 
     private static final long WAIT_FOR_ACCEPT = 10L;
 
@@ -39,11 +34,6 @@ public class RedbeamsFlowManager {
         Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(headerWithUserCrn, acceptable);
         notify(selector, event);
-    }
-
-    public void cancelRunningFlows(Long dbstackId) {
-        RedbeamsEvent cancelEvent = new RedbeamsEvent(Flow2Handler.FLOW_CANCEL, dbstackId);
-        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }
 
     private void notify(String selector, Event<Acceptable> event) {

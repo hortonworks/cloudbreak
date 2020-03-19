@@ -10,10 +10,11 @@ import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserS
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.flow.core.EventParameterFactory;
 import com.sequenceiq.flow.core.FlowConstants;
 
 @Component
-public class EventParameterFactory {
+public class CbEventParameterFactory implements EventParameterFactory {
 
     @Inject
     private StackService stackService;
@@ -27,7 +28,7 @@ public class EventParameterFactory {
     }
 
     private String getUserCrn(Long stackId) {
-        String userCrn = null;
+        String userCrn;
         try {
             userCrn = authenticatedUserService.getUserCrn();
         } catch (RuntimeException ex) {

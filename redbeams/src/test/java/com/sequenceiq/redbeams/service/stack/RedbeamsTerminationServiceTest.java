@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
@@ -72,6 +73,9 @@ class RedbeamsTerminationServiceTest {
 
     @Mock
     private DatabaseServerConfigService databaseServerConfigService;
+
+    @Mock
+    private FlowCancelService cancelService;
 
     @InjectMocks
     private RedbeamsTerminationService underTest;
@@ -146,7 +150,7 @@ class RedbeamsTerminationServiceTest {
         assertEquals(server, terminatingServer);
 
         verify(dbStackStatusUpdater, never()).updateStatus(anyLong(), any());
-        verify(flowManager, never()).cancelRunningFlows(1L);
+        verify(cancelService, never()).cancelRunningFlows(1L);
         verify(flowManager, never()).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), any());
     }
 
@@ -174,8 +178,8 @@ class RedbeamsTerminationServiceTest {
     private void verifyTermination(long id) {
         verify(dbStackStatusUpdater).updateStatus(id, DetailedDBStackStatus.DELETE_REQUESTED);
         ArgumentCaptor<RedbeamsEvent> eventCaptor = ArgumentCaptor.forClass(RedbeamsEvent.class);
-        InOrder inOrder = Mockito.inOrder(flowManager);
-        inOrder.verify(flowManager).cancelRunningFlows(id);
+        InOrder inOrder = Mockito.inOrder(cancelService, flowManager);
+        inOrder.verify(cancelService).cancelRunningFlows(id);
         inOrder.verify(flowManager).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), eventCaptor.capture());
         RedbeamsEvent event = eventCaptor.getValue();
         assertEquals(id, event.getResourceId().longValue());

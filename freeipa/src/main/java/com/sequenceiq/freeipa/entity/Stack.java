@@ -349,6 +349,10 @@ public class Stack {
         return STOP_FAILED.equals(stackStatus.getStatus());
     }
 
+    public boolean isDeleteCompleted() {
+        return DELETE_COMPLETED.equals(stackStatus.getStatus());
+    }
+
     public String getMinaSshdServiceId() {
         return minaSshdServiceId;
     }

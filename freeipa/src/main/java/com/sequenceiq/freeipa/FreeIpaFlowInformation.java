@@ -12,6 +12,7 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopFlowConfig;
+import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationFlowConfig;
 
 @Component
@@ -25,7 +26,9 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
             StackStopFlowConfig.class,
             FreeIpaCleanupFlowConfig.class);
 
-    private static final List<String> PARALLEL_FLOWS = List.of(FreeIpaCleanupEvent.CLEANUP_EVENT.event());
+    private static final List<String> PARALLEL_FLOWS = List.of(
+            FreeIpaCleanupEvent.CLEANUP_EVENT.event(),
+            StackTerminationEvent.TERMINATION_EVENT.event());
 
     @Override
     public List<Class<? extends FlowConfiguration<?>>> getRestartableFlows() {
