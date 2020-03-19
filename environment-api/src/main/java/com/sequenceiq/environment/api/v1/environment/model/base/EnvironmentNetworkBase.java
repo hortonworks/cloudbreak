@@ -13,6 +13,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMoc
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.api.v1.environment.validator.cidr.NetworkCidr;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,6 +27,7 @@ public abstract class EnvironmentNetworkBase {
     private Set<String> subnetIds;
 
     @Size(max = 255)
+    @NetworkCidr
     private String networkCidr;
 
     @ApiModelProperty(EnvironmentModelDescription.PRIVATE_SUBNET_CREATION)

@@ -12,7 +12,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class SubnetValidator implements ConstraintValidator<ValidSubnet, String> {
 
-    private SubnetType subnetType;
+    private SubnetType subnetType = SubnetType.RFC_1918_COMPLIANT_ONLY;
 
     @Override
     public void initialize(ValidSubnet constraintAnnotation) {
@@ -27,15 +27,20 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
             return false;
         }
         try {
+
+
             SubnetInfo info = new SubnetUtils(value).getInfo();
             if (!info.getAddress().equals(info.getNetworkAddress())) {
                 return false;
             }
-            if (subnetType.equals(SubnetType.RFC_1918_COMPLIANT_ONLY)) {
-                return isRfc1918CompliantSubnet(info);
+            switch (subnetType) {
+                case CUSTOM:
+                    return true;
+                case RFC_1918_COMPLIANT_ONLY:
+                default:
+                    return isRfc1918CompliantSubnet(info);
             }
-            return true;
-        } catch (RuntimeException ignored) {
+        } catch (IllegalArgumentException exception) {
             return false;
         }
     }

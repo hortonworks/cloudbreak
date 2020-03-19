@@ -75,9 +75,27 @@ class EnvironmentNetworkProviderValidatorTest {
 
     @Test
     void testIfNetworkParamsHasNotSpecifiedThenNoErrorComes() {
-        ValidationResult result = underTest.validate(EnvironmentDto.builder().build());
+        ValidationResult result = underTest.validate(EnvironmentDto.builder().withCloudPlatform("AWS").build());
 
         assertFalse(result.hasError());
+    }
+
+    @Test
+    void testNetworkHasValidCidrShouldPass() {
+        NetworkDto network = NetworkDto.builder().withNetworkCidr("10.128.0.0/16").build();
+        ValidationResult result = underTest.validate(getEnvDto(network));
+
+        assertFalse(result.hasError());
+    }
+
+    @Test
+    void testNetworkHasCidrButMaskIsNotRfcCompliantShouldFail() {
+        NetworkDto network = NetworkDto.builder().withNetworkCidr("10.128.0.0/8").build();
+        ValidationResult result = underTest.validate(getEnvDto(network));
+
+        assertTrue(result.hasError());
+        assertEquals(1, result.getErrors().size());
+        assertTrue(result.getErrors().get(0).startsWith("The netmask must be"));
     }
 
     private EnvironmentDto getEnvDto(NetworkDto network) {

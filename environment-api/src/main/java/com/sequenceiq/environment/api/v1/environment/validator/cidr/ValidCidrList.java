@@ -12,8 +12,8 @@ import javax.validation.Payload;
 @Documented
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = CidrValidator.class)
-public @interface ValidCidr {
+@Constraint(validatedBy = CidrListValidator.class)
+public @interface ValidCidrList {
     String message() default "The format of the CIDR is not accepted.";
 
     Class<?>[] groups() default {};
