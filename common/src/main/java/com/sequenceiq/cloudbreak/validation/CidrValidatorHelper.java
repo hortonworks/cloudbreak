@@ -1,15 +1,11 @@
-package com.sequenceiq.environment.api.v1.environment.validator.cidr;
+package com.sequenceiq.cloudbreak.validation;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import org.springframework.util.StringUtils;
 
-import com.google.common.base.CharMatcher;
-
-public class CidrValidator implements ConstraintValidator<ValidCidr, String> {
-
+public class CidrValidatorHelper {
     public static final String CIDR_REGEX = "(^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}"
             + "(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|"
             + "2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|"
@@ -22,32 +18,29 @@ public class CidrValidator implements ConstraintValidator<ValidCidr, String> {
             + "12[0-8]))$)|"
             + "(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(/([0-9]|[1-2][0-9]|3[0-2]))$)";
 
-    @Override
-    public void initialize(ValidCidr constraintAnnotation) {
+    public static final String EXPECTED_NETWORK_MASK_TO_CREATE_SUBNETS_EASILY = "16";
+
+    private CidrValidatorHelper() {
     }
 
-    @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
-        boolean result = true;
-        if (value != null) {
-            String[] cidrs = value.split(",");
-            int numberOfCommas = CharMatcher.is(',').countIn(value);
-            int count = 0;
-            for (String cidr : cidrs) {
-                Pattern pattern = Pattern.compile(CIDR_REGEX);
-                Matcher matcher = pattern.matcher(cidr);
-                if (!matcher.find()) {
-                    result = false;
-                }
-                count++;
-            }
-            // more commas then expected
-            if (count != numberOfCommas + 1) {
-                result = false;
-            }
-        } else {
-            result = true;
+    public static boolean isCidrPatternMatched(String value) {
+        if (StringUtils.isEmpty(value)) {
+            return false;
         }
-        return result;
+        Pattern pattern = Pattern.compile(CIDR_REGEX);
+        Matcher matcher = pattern.matcher(value);
+        if (!matcher.find()) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isPrefixLengthCouldBeDividedIntoSubnets(String value) {
+        String[] parts = value.split("/");
+        if (parts.length != 2) {
+            return false;
+        }
+        return parts[1].equals(EXPECTED_NETWORK_MASK_TO_CREATE_SUBNETS_EASILY);
+
     }
 }

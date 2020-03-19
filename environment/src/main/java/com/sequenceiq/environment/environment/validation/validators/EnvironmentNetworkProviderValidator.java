@@ -26,15 +26,12 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
-import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
 public class EnvironmentNetworkProviderValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentNetworkProviderValidator.class);
-
-    private static final String EXPECTED_NETWORK_MASK = "16";
 
     private final Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform;
 
@@ -90,28 +87,19 @@ public class EnvironmentNetworkProviderValidator {
     }
 
     private void validateNetwork(NetworkDto networkDto, String cloudPlatform, ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto) {
-        if (networkDto != null) {
-            if (Strings.isNullOrEmpty(networkDto.getNetworkCidr()) || RegistrationType.EXISTING.equals(networkDto.getRegistrationType())) {
-                EnvironmentNetworkValidator environmentNetworkValidator = environmentNetworkValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
-                if (environmentNetworkValidator != null) {
-                    LOGGER.debug("Going to validate environment ({}) network in flow", environmentDto.getName());
-                    environmentNetworkValidator.validateDuringFlow(environmentDto, networkDto, resultBuilder);
-                } else {
-                    resultBuilder.error(String.format("Environment specific network is not supported for cloud platform: '%s'!", cloudPlatform));
-                }
-            } else {
-                LOGGER.debug("Checking wheter the provided network cidr is valid or not.");
-                if (!networkDto.getNetworkCidr().split("/")[1].equals(EXPECTED_NETWORK_MASK)) {
-                    resultBuilder.error(String.format("The netmask must be /%s.", EXPECTED_NETWORK_MASK));
-                }
-            }
+        if (networkDto != null && !Strings.isNullOrEmpty(networkDto.getNetworkCidr()) && isInvalidNetworkMask(networkDto.getNetworkCidr())) {
+            resultBuilder.error("The netmask must be RFC-1918 compliant.");
+        }
+        EnvironmentNetworkValidator environmentNetworkValidator = environmentNetworkValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
+        if (environmentNetworkValidator != null) {
+            environmentNetworkValidator.validateDuringFlow(environmentDto, networkDto, resultBuilder);
         } else {
-            LOGGER.debug("Nothing to validate since the provided NetworkDto instance was null.");
+            resultBuilder.error(String.format("Environment specific network is not supported for cloud platform: '%s'!", cloudPlatform));
         }
     }
 
     private boolean isInvalidNetworkMask(String networkCidr) {
-        return !new SubnetValidator().isValid(networkCidr, null) || !networkCidr.split("/")[1].equals(EXPECTED_NETWORK_MASK);
+        return !new SubnetValidator().isValid(networkCidr, null);
     }
 
     private void validateSecurityGroup(EnvironmentDto request, String cloudPlatform, ValidationResultBuilder resultBuilder) {

@@ -6,7 +6,7 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
-import com.sequenceiq.environment.api.v1.environment.validator.cidr.ValidCidr;
+import com.sequenceiq.environment.api.v1.environment.validator.cidr.ValidCidrList;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -22,7 +22,7 @@ public abstract class SecurityAccessBase {
     @ApiModelProperty(EnvironmentModelDescription.DEFAULT_SECURITY_GROUP)
     private String defaultSecurityGroupId;
 
-    @ValidCidr
+    @ValidCidrList
     @ApiModelProperty(EnvironmentModelDescription.SECURITY_CIDR)
     private String cidr;
 

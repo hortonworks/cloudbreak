@@ -35,8 +35,8 @@ public class MockNetworkConnector implements NetworkConnector {
         CreatedSubnet subnet2 = new CreatedSubnet();
         subnet1.setAvailabilityZone("europe-a");
         subnet2.setAvailabilityZone("europe-b");
-        subnet1.setCidr("10.1.0.0/16");
-        subnet2.setCidr("10.2.0.0/16");
+        subnet1.setCidr("172.16.0.0/16");
+        subnet2.setCidr("172.17.0.0/16");
         subnet2.setPublicSubnet(true);
         subnet1.setSubnetId("1");
         subnet2.setSubnetId("2");
@@ -57,7 +57,7 @@ public class MockNetworkConnector implements NetworkConnector {
 
     @Override
     public String getNetworkCidr(Network network, CloudCredential credential) {
-        return "10.0.0.0/8";
+        return "172.16.0.0/16";
     }
 
     @Override

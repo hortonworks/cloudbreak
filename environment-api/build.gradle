@@ -39,6 +39,7 @@ dependencies {
     testImplementation group: "com.openpojo",                  name: "openpojo",                       version: openPojoVersion
     testImplementation group: "org.ow2.asm",                   name: "asm",                            version: asmVersion
     testImplementation group: "org.hibernate",                 name: "hibernate-validator",            version: hibernateValidatorVersion
+    testImplementation group: "org.hamcrest",                  name: "hamcrest",                       version: "2.2"
 
     testImplementation group: 'org.mockito',                   name: 'mockito-core',                   version: mockitoVersion
 }

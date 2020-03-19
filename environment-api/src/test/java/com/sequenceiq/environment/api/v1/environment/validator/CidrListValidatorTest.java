@@ -12,13 +12,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.environment.api.v1.environment.validator.cidr.CidrValidator;
+import com.sequenceiq.environment.api.v1.environment.validator.cidr.CidrListValidator;
 
 @ExtendWith(MockitoExtension.class)
-class CidrValidatorTest {
+class CidrListValidatorTest {
 
     @InjectMocks
-    private CidrValidator underTest;
+    private CidrListValidator underTest;
 
     @Mock
     private ConstraintValidatorContext constraintValidatorContext;
