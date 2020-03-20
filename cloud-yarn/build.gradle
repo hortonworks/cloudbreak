@@ -18,10 +18,7 @@ dependencies {
     compile project(':cloud-reactor')
 
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-
-    compile group: 'com.sun.jersey',                name: 'jersey-core',                    version: '1.19.1'
-    compile group: 'com.sun.jersey',                name: 'jersey-client',                   version: '1.19.1'
-    compile group: 'com.sun.jersey',                name: 'jersey-json',                    version: '1.19.1'
+    compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
 
     testCompile group: 'org.springframework.boot',  name:'spring-boot-starter-test',        version: springBootVersion
     testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion

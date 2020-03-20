@@ -50,8 +50,11 @@ allprojects {
   ext['hibernate-validator.version'] = hibernateValidatorVersion
   ext['jackson.version'] = jacksonVersion
 
-  // override AWS SDK Depenendencies
-  ext['netty.version'] = "4.1.42.Final"
+  // override AWS SDK Depenendency
+  ext['netty.version'] = nettyCodecVersion
+  
+  // override swagger-jersey2-jaxrs dependency
+  ext['snakeyaml.version'] = snakeYamlVersion
 
   configurations {
       all {
@@ -68,6 +71,8 @@ allprojects {
               force "org.codehaus.jackson:jackson-core-asl:1.9.13"
               force "org.codehaus.jackson:jackson-xc:1.9.13"
               force "org.testng:testng:$testNgVersion"
+              force "io.netty:netty-codec-http:$nettyCodecVersion"
+              force "org.yaml:snakeyaml:$snakeYamlVersion"
           }
       }
   }
