@@ -17,9 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.validation.SubnetValidator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -87,19 +85,12 @@ public class EnvironmentNetworkProviderValidator {
     }
 
     private void validateNetwork(NetworkDto networkDto, String cloudPlatform, ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto) {
-        if (networkDto != null && !Strings.isNullOrEmpty(networkDto.getNetworkCidr()) && isInvalidNetworkMask(networkDto.getNetworkCidr())) {
-            resultBuilder.error("The netmask must be RFC-1918 compliant.");
-        }
         EnvironmentNetworkValidator environmentNetworkValidator = environmentNetworkValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
         if (environmentNetworkValidator != null) {
             environmentNetworkValidator.validateDuringFlow(environmentDto, networkDto, resultBuilder);
         } else {
             resultBuilder.error(String.format("Environment specific network is not supported for cloud platform: '%s'!", cloudPlatform));
         }
-    }
-
-    private boolean isInvalidNetworkMask(String networkCidr) {
-        return !new SubnetValidator().isValid(networkCidr, null);
     }
 
     private void validateSecurityGroup(EnvironmentDto request, String cloudPlatform, ValidationResultBuilder resultBuilder) {

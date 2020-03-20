@@ -6,6 +6,8 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.validation.SubnetType;
+import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
@@ -28,6 +30,7 @@ public abstract class EnvironmentNetworkBase {
 
     @Size(max = 255)
     @NetworkCidr
+    @ValidSubnet(SubnetType.RFC_1918_COMPLIANT_ONLY_OR_EMPTY)
     private String networkCidr;
 
     @ApiModelProperty(EnvironmentModelDescription.PRIVATE_SUBNET_CREATION)
