@@ -71,24 +71,46 @@ PATH_PREFIX="/user"
 
 export KRB5CCNAME=/tmp/krb5cc_cloudbreak_$EUID
 
-WEBHDFS_HTTP_POLICY=$(hdfs getconf -confkey dfs.http.policy)
-
-if [ "$WEBHDFS_HTTP_POLICY" == "HTTP_ONLY" ]; then
-  NAMENODE_HTTP_ADDRESS=$(hdfs getconf -confkey dfs.namenode.http-address)
-  WEBHDFS_URL=http://$NAMENODE_HTTP_ADDRESS/webhdfs/v1
-else
-  NAMENODE_HTTP_ADDRESS=$(hdfs getconf -confkey dfs.namenode.https-address)
-  WEBHDFS_URL=https://$NAMENODE_HTTP_ADDRESS/webhdfs/v1
-fi
-
-echo "Webhdfs url: $WEBHDFS_URL"
-
-WEBHDFS_COOKIE_JAR=/tmp/cloudbreak-webhdfs.cookies
 
 klist -s
 if [[ $? -ne 0 ]]; then
   kinit_as_hdfs
 fi
+
+WEBHDFS_HTTP_POLICY=$(hdfs getconf -confkey dfs.http.policy)
+
+if ! hdfs haadmin -getAllServiceState
+then
+  echo "Single node configuration"
+  if [ "$WEBHDFS_HTTP_POLICY" == "HTTP_ONLY" ]; then
+    NAMENODE_HTTP_ADDRESS=$(hdfs getconf -confkey dfs.namenode.http-address)
+    WEBHDFS_URL=http://$NAMENODE_HTTP_ADDRESS/webhdfs/v1
+  else
+    NAMENODE_HTTP_ADDRESS=$(hdfs getconf -confkey dfs.namenode.https-address)
+    WEBHDFS_URL=https://$NAMENODE_HTTP_ADDRESS/webhdfs/v1
+  fi
+else
+  echo "HA configuration"
+  NN_HOST=$(hdfs haadmin -getAllServiceState | grep active | cut -d':' -f 1)
+  echo "Active NAMENODE host: $NN_HOST"
+  if [ "$NN_HOST" != "$(hostname -f)" ]; then
+    echo "This is not the active host. Script will run on the active one"
+    exit 0
+  fi
+  if [ "$WEBHDFS_HTTP_POLICY" == "HTTP_ONLY" ]; then
+    NAMENODE_PORT=$(hdfs getconf -confkey dfs.namenode.http-address | cut -d':' -f 2)
+    echo "NN port: $NAMENODE_PORT"
+    WEBHDFS_URL=http://$NN_HOST:$NAMENODE_PORT/webhdfs/v1
+  else
+    NAMENODE_PORT=$(hdfs getconf -confkey dfs.namenode.https-address |cut -d':' -f 2)
+    echo "NN port: $NAMENODE_PORT"
+    WEBHDFS_URL=https://$NN_HOST:$NAMENODE_PORT/webhdfs/v1
+  fi
+fi
+
+echo "Webhdfs url: $WEBHDFS_URL"
+
+WEBHDFS_COOKIE_JAR=/tmp/cloudbreak-webhdfs.cookies
 
 mapfile -t users < <((ipa user-find --sizelimit=0 --timelimit=0) | grep 'User login:' | awk '{ print $3}')
 declare -a existingusers
