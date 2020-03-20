@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.configuration;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.datalake.service.sdx.CDPConfigKey;
+import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
@@ -37,8 +39,17 @@ public class CDPConfigService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPConfigService.class);
 
-    @Value("${datalake.unsupported.runtimes:}")
-    private Set<String> unsupportedRuntimes;
+    // Defines what is the default runtime version (UI / API)
+    @Value("${sdx.default.runtime:7.1.0}")
+    private String defaultRuntime;
+
+    // Defines what versions shall be advertised for the UI, if it is empty then it shall be the same as supported versions
+    @Value("${datalake.advertised.runtimes:}")
+    private Set<String> advertisedRuntimes;
+
+    // Defines what versions are actually supported
+    @Value("${datalake.supported.runtimes:7.1.0}")
+    private Set<String> supportedRuntimes;
 
     private Map<CDPConfigKey, String> cdpStackRequests = new HashMap<>();
 
@@ -51,7 +62,7 @@ public class CDPConfigService {
                 Matcher matcher = Pattern.compile(".*/runtime/(.*)/(.*)/(.*).json").matcher(resource.getURL().getPath());
                 if (matcher.find()) {
                     String runtimeVersion = matcher.group(RUNTIME_GROUP);
-                    if (!unsupportedRuntimes.contains(runtimeVersion)) {
+                    if (supportedRuntimes.isEmpty() || supportedRuntimes.contains(runtimeVersion)) {
                         CloudPlatform cloudPlatform = CloudPlatform.valueOf(matcher.group(CLOUDPLATFORM_GROUP).toUpperCase());
                         SdxClusterShape sdxClusterShape = SdxClusterShape.valueOf(matcher.group(CLUSTERSHAPE_GROUP).toUpperCase());
                         CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, sdxClusterShape, runtimeVersion);
@@ -81,8 +92,32 @@ public class CDPConfigService {
         }
     }
 
-    public List<String> getDatalakeVersions() {
-        return cdpStackRequests.keySet().stream().map(CDPConfigKey::getRuntimeVersion).distinct().collect(Collectors.toList());
+    public String getDefaultRuntime() {
+        return defaultRuntime;
     }
 
+    public List<String> getDatalakeVersions() {
+        List<String> runtimeVersions = cdpStackRequests.keySet().stream()
+                .map(CDPConfigKey::getRuntimeVersion).distinct().sorted().collect(Collectors.toList());
+
+        LOGGER.debug("Available runtime versions for datalake: {}", runtimeVersions);
+        return runtimeVersions;
+    }
+
+    public List<AdvertisedRuntime> getAdvertisedRuntimes() {
+        List<String> runtimeVersions = getDatalakeVersions().stream()
+                .filter(runtimeVersion -> advertisedRuntimes.isEmpty() || advertisedRuntimes.contains(runtimeVersion)).collect(Collectors.toList());
+
+        List<AdvertisedRuntime> advertisedRuntimes = new ArrayList<>();
+        for (String runtimeVersion : runtimeVersions) {
+            AdvertisedRuntime advertisedRuntime = new AdvertisedRuntime();
+            advertisedRuntime.setRuntimeVersion(runtimeVersion);
+            if (runtimeVersion.equals(defaultRuntime)) {
+                advertisedRuntime.setDefaultRuntimeVersion(true);
+            }
+            advertisedRuntimes.add(advertisedRuntime);
+        }
+        LOGGER.debug("Advertised runtime versions for datalake: {}", advertisedRuntimes);
+        return advertisedRuntimes;
+    }
 }

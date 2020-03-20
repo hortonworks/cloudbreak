@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -103,9 +102,6 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
 
     @Inject
     private FlowCancelService flowCancelService;
-
-    @Value("${sdx.default.runtime:7.1.0}")
-    private String defaultRuntime;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
@@ -229,7 +225,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         } else if (stackV4Request != null) {
             return null;
         } else {
-            return defaultRuntime;
+            return cdpConfigService.getDefaultRuntime();
         }
     }
 

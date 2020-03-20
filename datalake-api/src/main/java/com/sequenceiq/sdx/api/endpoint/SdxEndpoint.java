@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -185,6 +186,12 @@ public interface SdxEndpoint {
     List<String> versions();
 
     @GET
+    @Path("/advertisedruntimes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "list advertised datalake versions", produces = MediaType.APPLICATION_JSON, nickname = "advertisedruntimes")
+    List<AdvertisedRuntime> advertisedRuntimes();
+
+    @GET
     @Path("{name}/check_stack_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "checks for upgrade options by name", nickname = "checkForStackUpgradeByName")
@@ -200,7 +207,7 @@ public interface SdxEndpoint {
     @Path("{name}/stack_upgrade/image/{image}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "upgrades the datalake stack by name", nickname = "upgradeStackByName")
-    void upgradeStackByName(@PathParam("name") String name,  @PathParam("image") String imageId);
+    void upgradeStackByName(@PathParam("name") String name, @PathParam("image") String imageId);
 
     @POST
     @Path("/crn/{crn}/stack_upgrade/image/{image}")
