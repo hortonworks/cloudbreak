@@ -2,8 +2,15 @@ package com.sequenceiq.cloudbreak.cloud.yarn.client;
 
 import java.net.MalformedURLException;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.glassfish.jersey.client.JerseyInvocation;
+import org.glassfish.jersey.client.JerseyWebTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,12 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.DeleteApplicati
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDetailResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationErrorResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.client.filter.LoggingFilter;
 
 public class YarnHttpClient implements YarnClient {
 
@@ -38,19 +39,21 @@ public class YarnHttpClient implements YarnClient {
             MalformedURLException {
         YarnEndpoint dashEndpoint = new YarnEndpoint(apiEndpoint, YarnResourceConstants.APPLICATIONS_PATH);
 
+        JerseyClient jerseyClient = JerseyClientBuilder.createClient();
+        JerseyWebTarget webTarget = jerseyClient.target(dashEndpoint.getFullEndpointUrl().toString());
+        JerseyInvocation jerseyInvocation = webTarget.request()
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .buildPost(Entity.entity(createApplicationRequest, MediaType.APPLICATION_JSON));
+        Response response = jerseyInvocation.invoke();
         ResponseContext responseContext = new ResponseContext();
-        // Construct the webresource and perform the get
-        WebResource webResource = getNewWebResource(dashEndpoint.getFullEndpointUrl().toString());
-        ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .post(ClientResponse.class, createApplicationRequest);
         responseContext.setStatusCode(response.getStatus());
 
             // Validate the results
         if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_ACCEPTED) {
-            responseContext.setResponseObject(response.getEntity(ApplicationDetailResponse.class));
+            responseContext.setResponseObject(response.readEntity(ApplicationDetailResponse.class));
         } else {
-            responseContext.setResponseError(response.getEntity(ApplicationErrorResponse.class));
+            responseContext.setResponseError(response.readEntity(ApplicationErrorResponse.class));
         }
 
         return responseContext;
@@ -64,12 +67,13 @@ public class YarnHttpClient implements YarnClient {
                 YarnResourceConstants.APPLICATIONS_PATH
                         + '/' + deleteApplicationRequest.getName());
 
-        ClientConfig clientConfig = new DefaultClientConfig();
-        Client client = Client.create(clientConfig);
-
-        // Delete the application
-        WebResource webResource = client.resource(dashEndpoint.getFullEndpointUrl().toString());
-        ClientResponse response = webResource.accept("application/json").type("application/json").delete(ClientResponse.class);
+        JerseyClient jerseyClient = JerseyClientBuilder.createClient();
+        JerseyWebTarget webTarget = jerseyClient.target(dashEndpoint.getFullEndpointUrl().toString());
+        JerseyInvocation jerseyInvocation = webTarget.request()
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .buildDelete();
+        Response response = jerseyInvocation.invoke();
 
         // Validate HTTP 204 return
         String msg;
@@ -86,7 +90,7 @@ public class YarnHttpClient implements YarnClient {
                 msg = String.format("Received %d status code from url %s, reason: %s",
                         response.getStatus(),
                         dashEndpoint.getFullEndpointUrl().toString(),
-                        response.getEntity(String.class));
+                        response.readEntity(String.class));
                 LOGGER.debug(msg);
                 throw new YarnClientException(msg);
         }
@@ -97,18 +101,20 @@ public class YarnHttpClient implements YarnClient {
     public void validateApiEndpoint() throws YarnClientException, MalformedURLException {
         YarnEndpoint dashEndpoint = new YarnEndpoint(apiEndpoint, YarnResourceConstants.APPLICATIONS_PATH);
 
-        ClientConfig clientConfig = new DefaultClientConfig();
-        Client client = Client.create(clientConfig);
-
-        WebResource webResource = client.resource(dashEndpoint.getFullEndpointUrl().toString());
-        ClientResponse response = webResource.accept("application/json").type("application/json").get(ClientResponse.class);
+        JerseyClient jerseyClient = JerseyClientBuilder.createClient();
+        JerseyWebTarget webTarget = jerseyClient.target(dashEndpoint.getFullEndpointUrl().toString());
+        JerseyInvocation jerseyInvocation = webTarget.request()
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .buildGet();
+        Response response = jerseyInvocation.invoke();
 
         // Validate HTTP 200 status code
         if (response.getStatus() != YarnResourceConstants.HTTP_SUCCESS) {
             String msg = String.format("Received %d status code from url %s, reason: %s",
                     response.getStatus(),
                     dashEndpoint.getFullEndpointUrl().toString(),
-                    response.getEntity(String.class));
+                    response.readEntity(String.class));
             LOGGER.debug(msg);
             throw new YarnClientException(msg);
         }
@@ -125,42 +131,31 @@ public class YarnHttpClient implements YarnClient {
                 YarnResourceConstants.APPLICATIONS_PATH
                         + '/' + applicationDetailRequest.getName());
 
-        // Construct the webresource and perform the get
-        WebResource webResource = getNewWebResource(dashEndpoint.getFullEndpointUrl().toString());
-        ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .get(ClientResponse.class);
-
+        JerseyClient jerseyClient = JerseyClientBuilder.createClient();
+        JerseyWebTarget webTarget = jerseyClient.target(dashEndpoint.getFullEndpointUrl().toString());
+        JerseyInvocation jerseyInvocation = webTarget.request()
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .buildGet();
+        Response response = jerseyInvocation.invoke();
         responseContext.setStatusCode(response.getStatus());
 
         // Validate the results
         if (checkStatusCode(response, YarnResourceConstants.HTTP_SUCCESS)) {
-            responseContext.setResponseObject(response.getEntity(ApplicationDetailResponse.class));
+            responseContext.setResponseObject(response.readEntity(ApplicationDetailResponse.class));
         } else {
-            responseContext.setResponseError(response.getEntity(ApplicationErrorResponse.class));
+            responseContext.setResponseError(response.readEntity(ApplicationErrorResponse.class));
         }
 
         return responseContext;
 
     }
 
-    public boolean checkStatusCode(ClientResponse response, int successStatusCode) {
+    private boolean checkStatusCode(Response response, int successStatusCode) {
         boolean success = false;
         if (successStatusCode == response.getStatus()) {
             success = true;
         }
         return success;
-    }
-
-    public WebResource getNewWebResource(String url) {
-        ClientConfig clientConfig = new DefaultClientConfig();
-        Client client = Client.create(clientConfig);
-        client.addFilter(new LoggingFilter());
-        return client.resource(url);
-    }
-
-    public WebResource getNewWebResourceWithClientConfig(ClientConfig clientConfig, String url) {
-        Client client = Client.create(clientConfig);
-        return client.resource(url);
     }
 }
