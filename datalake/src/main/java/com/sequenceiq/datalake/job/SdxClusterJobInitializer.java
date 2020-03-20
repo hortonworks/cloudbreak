@@ -1,12 +1,11 @@
 package com.sequenceiq.datalake.job;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.projection.SdxClusterIdView;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.statuschecker.model.JobInitializer;
 import com.sequenceiq.statuschecker.service.JobService;
@@ -22,13 +21,17 @@ public class SdxClusterJobInitializer implements JobInitializer {
 
     @Override
     public void initJobs() {
-        List<SdxCluster> clusters = sdxClusterRepository.findAll();
         jobService.deleteAll();
-        for (SdxCluster cluster : clusters) {
-            if (cluster.getDeleted() == null) {
-                jobService.schedule(new SdxClusterJobAdapter(cluster));
-            }
-        }
+        sdxClusterRepository.findAllAliveView().stream()
+                .map(this::convertToSdx)
+                .forEach(s -> jobService.schedule(new SdxClusterJobAdapter(s)));
+    }
+
+    private SdxCluster convertToSdx(SdxClusterIdView view) {
+        SdxCluster result = new SdxCluster();
+        result.setId(view.getId());
+        result.setStackCrn(view.getStackCrn());
+        return result;
     }
 
 }
