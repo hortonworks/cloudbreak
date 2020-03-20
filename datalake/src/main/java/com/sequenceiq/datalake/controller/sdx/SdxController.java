@@ -34,6 +34,7 @@ import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
 import com.sequenceiq.datalake.service.upgrade.SdxStackUpgradeService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -264,6 +265,11 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public List<String> versions() {
         return cdpConfigService.getDatalakeVersions();
+    }
+
+    @Override
+    public List<AdvertisedRuntime> advertisedRuntimes() {
+        return cdpConfigService.getAdvertisedRuntimes();
     }
 
     @Override
