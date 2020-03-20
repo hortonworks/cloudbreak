@@ -7,6 +7,7 @@ public enum SubnetType {
     // 20-bit block 172.16.0.0 – 172.31.255.255
     // 16-bit block 192.168.0.0 – 192.168.255.255
     RFC_1918_COMPLIANT_ONLY,
+    RFC_1918_COMPLIANT_ONLY_OR_EMPTY,
     // Any valid CIDR-s
     CUSTOM
 }

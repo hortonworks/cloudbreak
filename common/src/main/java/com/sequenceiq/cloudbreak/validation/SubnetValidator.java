@@ -23,8 +23,9 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null) {
             return true;
-        } else if (value.isEmpty()) {
-            return false;
+        }
+        if (value.isEmpty()) {
+            return subnetType.equals(SubnetType.RFC_1918_COMPLIANT_ONLY_OR_EMPTY);
         }
         try {
 

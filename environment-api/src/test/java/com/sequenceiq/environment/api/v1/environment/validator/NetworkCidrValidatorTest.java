@@ -35,7 +35,7 @@ class NetworkCidrValidatorTest {
     @Test
     void testValidatorShouldFailWhenMaskIsNot16() {
         EnvironmentNetworkRequest request = new EnvironmentNetworkRequest();
-        request.setNetworkCidr("0.0.0.0/0");
+        request.setNetworkCidr("172.16.0.0/17");
         Set<ConstraintViolation<EnvironmentNetworkRequest>> violation = validator.validate(request);
         MatcherAssert.assertThat(violation, hasSize(1));
         MatcherAssert.assertThat(violation, hasItem(
@@ -45,7 +45,7 @@ class NetworkCidrValidatorTest {
     @Test
     void testValidatorShouldPassWhenCidrMaskIs16() {
         EnvironmentNetworkRequest request = new EnvironmentNetworkRequest();
-        request.setNetworkCidr("0.0.0.0/16");
+        request.setNetworkCidr("172.16.0.0/16");
         Set<ConstraintViolation<EnvironmentNetworkRequest>> violation = validator.validate(request);
         MatcherAssert.assertThat(violation, empty());
     }
@@ -71,8 +71,20 @@ class NetworkCidrValidatorTest {
         EnvironmentNetworkRequest request = new EnvironmentNetworkRequest();
         request.setNetworkCidr("16/16");
         Set<ConstraintViolation<EnvironmentNetworkRequest>> violation = validator.validate(request);
-        MatcherAssert.assertThat(violation, hasSize(1));
+        MatcherAssert.assertThat(violation, hasSize(2));
         MatcherAssert.assertThat(violation, hasItem(
                 hasProperty("message", is("The format of the CIDR is not accepted. Prefix mask must be /16"))));
+        MatcherAssert.assertThat(violation, hasItem(
+                hasProperty("message", is("The field should contain a valid CIDR definition."))));
+    }
+
+    @Test
+    void testValidatorShouldFailWhenCidrIsNotRfcCompliant() {
+        EnvironmentNetworkRequest request = new EnvironmentNetworkRequest();
+        request.setNetworkCidr("0.0.0.0/16");
+        Set<ConstraintViolation<EnvironmentNetworkRequest>> violation = validator.validate(request);
+        MatcherAssert.assertThat(violation, hasSize(1));
+        MatcherAssert.assertThat(violation, hasItem(
+                hasProperty("message", is("The field should contain a valid CIDR definition."))));
     }
 }
