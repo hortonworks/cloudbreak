@@ -304,4 +304,22 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
         }
     }
 
+    public List<Environment> findAllForAutoSync() {
+        return environmentRepository.findAllRunningAndStatusIn(List.of(
+                EnvironmentStatus.AVAILABLE,
+                EnvironmentStatus.UPDATE_FAILED,
+                EnvironmentStatus.START_DATAHUB_FAILED,
+                EnvironmentStatus.START_DATALAKE_FAILED,
+                EnvironmentStatus.START_FREEIPA_FAILED,
+                EnvironmentStatus.START_DATAHUB_STARTED,
+                EnvironmentStatus.START_DATALAKE_STARTED,
+                EnvironmentStatus.START_FREEIPA_STARTED,
+                EnvironmentStatus.STOP_DATAHUB_FAILED,
+                EnvironmentStatus.STOP_DATALAKE_FAILED,
+                EnvironmentStatus.STOP_FREEIPA_FAILED,
+                EnvironmentStatus.STOP_DATAHUB_STARTED,
+                EnvironmentStatus.STOP_DATALAKE_STARTED,
+                EnvironmentStatus.STOP_FREEIPA_STARTED,
+                EnvironmentStatus.ENV_STOPPED));
+    }
 }

@@ -52,7 +52,9 @@ public enum EnvironmentStatus {
     START_DATALAKE_STARTED,
     START_DATALAKE_FAILED,
     START_FREEIPA_STARTED,
-    START_FREEIPA_FAILED;
+    START_FREEIPA_FAILED,
+
+    FREEIPA_DELETED_ON_PROVIDER_SIDE;
 
     public boolean isAvailable() {
         return equals(AVAILABLE);
