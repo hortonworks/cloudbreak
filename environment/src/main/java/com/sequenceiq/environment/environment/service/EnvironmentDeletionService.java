@@ -18,6 +18,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
 
 @Service
 public class EnvironmentDeletionService {
@@ -32,12 +33,16 @@ public class EnvironmentDeletionService {
 
     private final EnvironmentResourceDeletionService environmentResourceDeletionService;
 
+    private final EnvironmentJobService environmentJobService;
+
     public EnvironmentDeletionService(EnvironmentService environmentService, EnvironmentDtoConverter environmentDtoConverter,
-            EnvironmentReactorFlowManager reactorFlowManager, EnvironmentResourceDeletionService environmentResourceDeletionService) {
+            EnvironmentReactorFlowManager reactorFlowManager, EnvironmentResourceDeletionService environmentResourceDeletionService,
+            EnvironmentJobService environmentJobService) {
         this.environmentService = environmentService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.reactorFlowManager = reactorFlowManager;
         this.environmentResourceDeletionService = environmentResourceDeletionService;
+        this.environmentJobService = environmentJobService;
     }
 
     public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn, boolean forced) {
@@ -64,6 +69,7 @@ public class EnvironmentDeletionService {
         MDCBuilder.buildMdcContext(environment);
         validateDeletion(environment);
         LOGGER.debug("Deleting environment with name: {}", environment.getName());
+        environmentJobService.unschedule(environment);
         if (forced) {
             reactorFlowManager.triggerForcedDeleteFlow(environment, userCrn);
         } else {

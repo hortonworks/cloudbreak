@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -67,5 +69,14 @@ public class EnvironmentStatusUpdateService {
                 }).orElseThrow(() -> new IllegalStateException(
                         String.format("Cannot update status of environment, because it does not exist: %s. ", failedFlowEvent.getResourceId())
                 ));
+    }
+
+    public void updateEnvironmentStatusAndNotify(Environment environment, EnvironmentStatus environmentStatus, ResourceEvent resourceEvent) {
+        LOGGER.info("Update environment status from {} to {} and notify", environment.getStatus().name(), environmentStatus.name());
+        environment.setStatus(environmentStatus);
+        Environment env = environmentService.save(environment);
+        EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
+        SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+        notificationService.send(resourceEvent, List.of(environmentStatus), simpleResponse, env.getCreator());
     }
 }
