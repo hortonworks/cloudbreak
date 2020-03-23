@@ -64,13 +64,13 @@ public class FreeIpaClient {
     }
 
     public User userShow(String user) throws FreeIpaClientException {
-        List<Object> flags = List.of(user);
+        List<String> flags = List.of(user);
         Map<String, Object> params = Map.of();
         return (User) invoke("user_show", flags, params, User.class).getResult();
     }
 
     public Optional<User> userFind(String user) throws FreeIpaClientException {
-        List<Object> flags = List.of(user);
+        List<String> flags = List.of(user);
         Map<String, Object> params = Map.of(
                 "uid", user,
                 "all", true
@@ -89,7 +89,7 @@ public class FreeIpaClient {
     }
 
     public Set<User> userFindAll() throws FreeIpaClientException {
-        List<Object> flags = List.of();
+        List<String> flags = List.of();
         Map<String, Object> params = Map.of(
                 "sizelimit", 0,
                 "timelimit", 0,
@@ -101,7 +101,7 @@ public class FreeIpaClient {
     }
 
     public Set<Role> findAllRole() throws FreeIpaClientException {
-        List<Object> flags = List.of();
+        List<String> flags = List.of();
         Map<String, Object> params = Map.of(
                 "sizelimit", 0,
                 "timelimit", 0
@@ -112,13 +112,13 @@ public class FreeIpaClient {
     }
 
     public Privilege showPrivilege(String privilegeName) throws FreeIpaClientException {
-        List<Object> flags = List.of(privilegeName);
+        List<String> flags = List.of(privilegeName);
         Map<String, Object> params = Map.of();
         return (Privilege) invoke("privilege_show", flags, params, Privilege.class).getResult();
     }
 
     public Set<Host> findAllHost() throws FreeIpaClientException {
-        List<Object> flags = List.of();
+        List<String> flags = List.of();
         Map<String, Object> params = Map.of(
                 "sizelimit", 0,
                 "timelimit", 0
@@ -140,19 +140,19 @@ public class FreeIpaClient {
     }
 
     public User deleteUser(String userUid) throws FreeIpaClientException {
-        List<Object> flags = List.of(userUid);
+        List<String> flags = List.of(userUid);
         Map<String, Object> params = Map.of();
         return (User) invoke("user_del", flags, params, User.class).getResult();
     }
 
     public Role deleteRole(String roleName) throws FreeIpaClientException {
-        List<Object> flags = List.of(roleName);
+        List<String> flags = List.of(roleName);
         Map<String, Object> params = Map.of();
         return (Role) invoke("role_del", flags, params, Role.class).getResult();
     }
 
     public User userAdd(String user, String firstName, String lastName) throws FreeIpaClientException {
-        List<Object> flags = List.of(user);
+        List<String> flags = List.of(user);
         Map<String, Object> params = Map.of(
                 "givenname", firstName,
                 "sn", lastName,
@@ -213,18 +213,18 @@ public class FreeIpaClient {
     }
 
     public User userMod(String user, Map<String, Object> params) throws FreeIpaClientException {
-        List<Object> flags = List.of(user);
+        List<String> flags = List.of(user);
         return (User) invoke("user_mod", flags, params, User.class).getResult();
     }
 
     public Group groupAdd(String group) throws FreeIpaClientException {
-        List<Object> flags = List.of(group);
+        List<String> flags = List.of(group);
         Map<String, Object> params = Map.of();
         return (Group) invoke("group_add", flags, params, Group.class).getResult();
     }
 
     public void deleteGroup(String group) throws FreeIpaClientException {
-        List<Object> flags = List.of(group);
+        List<String> flags = List.of(group);
         Map<String, Object> params = Map.of();
         invoke("group_del", flags, params, Object.class);
     }
@@ -266,7 +266,7 @@ public class FreeIpaClient {
     //}
     // TODO the response to this API call not currently deserializable
     public RPCResponse<Object> groupAddMembers(String group, Collection<String> users) throws FreeIpaClientException {
-        List<Object> flags = List.of(group);
+        List<String> flags = List.of(group);
         Map<String, Object> params = Map.of(
                 "user", users
         );
@@ -274,7 +274,7 @@ public class FreeIpaClient {
     }
 
     public RPCResponse<Object> groupRemoveMembers(String group, Collection<String> users) throws FreeIpaClientException {
-        List<Object> flags = List.of(group);
+        List<String> flags = List.of(group);
         Map<String, Object> params = Map.of(
                 "user", users
         );
@@ -282,7 +282,7 @@ public class FreeIpaClient {
     }
 
     public Set<Group> groupFindAll() throws FreeIpaClientException {
-        List<Object> flags = List.of();
+        List<String> flags = List.of();
         Map<String, Object> params = Map.of(
                 "sizelimit", 0,
                 "timelimit", 0,
@@ -294,7 +294,7 @@ public class FreeIpaClient {
     }
 
     public String getRootCertificate() throws FreeIpaClientException {
-        List<Object> flags = List.of("ipa");
+        List<String> flags = List.of("ipa");
         Map<String, Object> params = Map.of();
         RPCResponse<Ca> response = invoke("ca_show", flags, params, Ca.class);
         return response.getResult().getCertificate();
@@ -307,13 +307,13 @@ public class FreeIpaClient {
     }
 
     public void revokeCert(int serialNumber) throws FreeIpaClientException {
-        List<Object> flags = List.of(String.valueOf(serialNumber));
+        List<String> flags = List.of(String.valueOf(serialNumber));
         Map<String, Object> params = Map.of("revocation_reason", CESSATION_OF_OPERATION);
         invoke("cert_revoke", flags, params, Object.class);
     }
 
     public void addPasswordExpirationPermission(String permission) throws FreeIpaClientException {
-        List<Object> flags = List.of(permission);
+        List<String> flags = List.of(permission);
         Map<String, Object> params = Map.of(
                 "attrs", List.of("krbpasswordexpiration"),
                 "ipapermright", List.of("write"),
@@ -349,7 +349,7 @@ public class FreeIpaClient {
     }
 
     public void addPermissionsToPrivilege(String privilege, List<String> permissions) throws FreeIpaClientException {
-        List<Object> flags = List.of(privilege);
+        List<String> flags = List.of(privilege);
         Map<String, Object> params = Map.of(
                 "permission", permissions
         );
@@ -357,7 +357,7 @@ public class FreeIpaClient {
     }
 
     public Set<DnsZoneList> findAllDnsZone() throws FreeIpaClientException {
-        List<Object> flags = List.of();
+        List<String> flags = List.of();
         Map<String, Object> params = Map.of(
                 "sizelimit", 0,
                 "pkey_only", true,
@@ -369,7 +369,7 @@ public class FreeIpaClient {
     }
 
     public Set<DnsZoneList> findDnsZone(String cidr) throws FreeIpaClientException {
-        List<Object> flags = List.of();
+        List<String> flags = List.of();
         Map<String, Object> params = Map.of(
                 "sizelimit", 0,
                 "pkey_only", true,
@@ -382,7 +382,7 @@ public class FreeIpaClient {
     }
 
     public Set<Service> findAllService() throws FreeIpaClientException {
-        List<Object> flags = List.of();
+        List<String> flags = List.of();
         Map<String, Object> params = Map.of(
                 "sizelimit", 0,
                 "timelimit", 0
@@ -393,44 +393,44 @@ public class FreeIpaClient {
     }
 
     public Service deleteService(String canonicalPrincipal) throws FreeIpaClientException {
-        List<Object> flags = List.of(canonicalPrincipal);
+        List<String> flags = List.of(canonicalPrincipal);
         Map<String, Object> params = Map.of();
         return (Service) invoke("service_del", flags, params, Service.class).getResult();
     }
 
     public Service addService(String canonicalPrincipal) throws FreeIpaClientException {
-        List<Object> flags = List.of(canonicalPrincipal);
+        List<String> flags = List.of(canonicalPrincipal);
         Map<String, Object> params = Map.of("force", true);
         return (Service) invoke("service_add", flags, params, Service.class).getResult();
     }
 
     public Service addServiceAlias(String canonicalPrincipal, String principalname) throws FreeIpaClientException {
-        List<Object> flags = List.of(canonicalPrincipal, principalname);
+        List<String> flags = List.of(canonicalPrincipal, principalname);
         Map<String, Object> params = Map.of();
         return (Service) invoke("service_add_principal", flags, params, Service.class).getResult();
     }
 
     public Role addRole(String roleName) throws FreeIpaClientException {
-        List<Object> flags = List.of(roleName);
+        List<String> flags = List.of(roleName);
         Map<String, Object> params = Map.of();
         return (Role) invoke("role_add", flags, params, Role.class).getResult();
     }
 
     public Role addRolePrivileges(String roleName, Set<String> privilegeNames) throws FreeIpaClientException {
-        List<Object> flags = List.of(roleName);
+        List<String> flags = List.of(roleName);
         Map<String, Object> params = Map.of("privilege", privilegeNames);
         return (Role) invoke("role_add_privilege", flags, params, Role.class).getResult();
     }
 
     public Role showRole(String roleName) throws FreeIpaClientException {
-        List<Object> flags = List.of(roleName);
+        List<String> flags = List.of(roleName);
         Map<String, Object> params = Map.of();
         return (Role) invoke("role_show", flags, params, Role.class).getResult();
     }
 
     public Role addRoleMember(String roleName, Set<String> users, Set<String> groups, Set<String> hosts, Set<String> hostgroups, Set<String> services)
             throws FreeIpaClientException {
-        List<Object> flags = List.of(roleName);
+        List<String> flags = List.of(roleName);
         Map<String, Object> params = new HashMap<>();
         addToMapIfNotEmpty(params, "user", users);
         addToMapIfNotEmpty(params, "group", groups);
@@ -447,7 +447,7 @@ public class FreeIpaClient {
     }
 
     public Service showService(String canonicalPrincipal) throws FreeIpaClientException {
-        List<Object> flags = List.of(canonicalPrincipal);
+        List<String> flags = List.of(canonicalPrincipal);
         Map<String, Object> params = Map.of(
                 "rights", true,
                 "all", true);
@@ -461,7 +461,7 @@ public class FreeIpaClient {
      * @return DnsZone created
      */
     public DnsZone addReverseDnsZone(String cidr) throws FreeIpaClientException {
-        List<Object> flags = List.of();
+        List<String> flags = List.of();
         Map<String, Object> params = Map.of(
                 "name_from_ip", cidr,
                 "raw", true);
@@ -469,26 +469,26 @@ public class FreeIpaClient {
     }
 
     public DnsRecord getDnsRecord(String dnsZoneName, String recordName) throws FreeIpaClientException {
-        List<Object> flags = List.of(dnsZoneName, createDnsName(recordName));
+        List<String> flags = List.of(dnsZoneName, recordName);
         Map<String, Object> params = Map.of();
         return (DnsRecord) invoke("dnsrecord_show", flags, params, DnsRecord.class).getResult();
     }
 
     public DnsRecord addDnsCnameRecord(String dnsZoneName, String recordName, String cnameRecord) throws FreeIpaClientException {
-        List<Object> flags = List.of(dnsZoneName, createDnsName(recordName));
+        List<String> flags = List.of(dnsZoneName, recordName);
         Map<String, Object> params = Map.of(
                 "cnamerecord", Set.of(cnameRecord + "."));
         return (DnsRecord) invoke("dnsrecord_add", flags, params, DnsRecord.class).getResult();
     }
 
     public RPCResponse<Object> deleteDnsZone(String... dnsZoneNames) throws FreeIpaClientException {
-        List<Object> flags = List.of(dnsZoneNames);
+        List<String> flags = List.of(dnsZoneNames);
         Map<String, Object> params = Map.of();
         return invoke("dnszone_del", flags, params, Object.class);
     }
 
     public Set<DnsRecord> findAllDnsRecordInZone(String dnsZoneName) throws FreeIpaClientException {
-        List<Object> flags = List.of(dnsZoneName);
+        List<String> flags = List.of(dnsZoneName);
         Map<String, Object> params = Map.of();
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, DnsRecord.class);
@@ -496,37 +496,37 @@ public class FreeIpaClient {
     }
 
     public RPCResponse<Object> deleteDnsRecord(String recordName, String dnsZoneName) throws FreeIpaClientException {
-        List<Object> flags = List.of(dnsZoneName, createDnsName(recordName));
+        List<String> flags = List.of(dnsZoneName, recordName);
         Map<String, Object> params = Map.of("del_all", true);
         return invoke("dnsrecord_del", flags, params, Object.class);
     }
 
     public void allowServiceKeytabRetrieval(String canonicalPrincipal, String user) throws FreeIpaClientException {
-        List<Object> flags = List.of(canonicalPrincipal);
+        List<String> flags = List.of(canonicalPrincipal);
         Map<String, Object> params = Map.of("user", user);
         invoke("service_allow_retrieve_keytab", flags, params, Service.class);
     }
 
     public void allowHostKeytabRetrieval(String fqdn, String user) throws FreeIpaClientException {
-        List<Object> flags = List.of(fqdn);
+        List<String> flags = List.of(fqdn);
         Map<String, Object> params = Map.of("user", user);
         invoke("host_allow_retrieve_keytab", flags, params, Host.class);
     }
 
     public Keytab getExistingKeytab(String canonicalPrincipal) throws FreeIpaClientException {
-        List<Object> flags = List.of(canonicalPrincipal);
+        List<String> flags = List.of(canonicalPrincipal);
         Map<String, Object> params = Map.of("retrieve", true);
         return (Keytab) invoke("get_keytab", flags, params, Keytab.class).getResult();
     }
 
     public Keytab getKeytab(String canonicalPrincipal) throws FreeIpaClientException {
-        List<Object> flags = List.of(canonicalPrincipal);
+        List<String> flags = List.of(canonicalPrincipal);
         Map<String, Object> params = Map.of();
         return (Keytab) invoke("get_keytab", flags, params, Keytab.class).getResult();
     }
 
     public Host showHost(String fqdn) throws FreeIpaClientException {
-        List<Object> flags = List.of(fqdn);
+        List<String> flags = List.of(fqdn);
         Map<String, Object> params = Map.of();
         return (Host) invoke("host_show", flags, params, Host.class).getResult();
     }
@@ -535,7 +535,7 @@ public class FreeIpaClient {
         return invoke("server_conncheck", List.of(cn), Map.of("remote_cn", remoteCn), Boolean.class);
     }
 
-    public <T> RPCResponse<T> invoke(String method, List<Object> flags, Map<String, Object> params, Type resultType) throws FreeIpaClientException {
+    public <T> RPCResponse<T> invoke(String method, List<String> flags, Map<String, Object> params, Type resultType) throws FreeIpaClientException {
         Map<String, Object> parameterMap = new HashMap<>();
         if (params != null && !params.isEmpty()) {
             parameterMap.putAll(params);
@@ -570,7 +570,7 @@ public class FreeIpaClient {
     }
 
     public List<TopologySuffix> findAllTopologySuffixes() throws FreeIpaClientException {
-        List<Object> flags = List.of();
+        List<String> flags = List.of();
         Map<String, Object> params = Map.of();
         ParameterizedType type = TypeUtils
                 .parameterize(List.class, TopologySuffix.class);
@@ -578,7 +578,7 @@ public class FreeIpaClient {
     }
 
     public List<TopologySegment> findTopologySegments(String topologySuffixCn) throws FreeIpaClientException {
-        List<Object> flags = List.of(topologySuffixCn);
+        List<String> flags = List.of(topologySuffixCn);
         Map<String, Object> params = Map.of();
         ParameterizedType type = TypeUtils
                 .parameterize(List.class, TopologySegment.class);
@@ -586,7 +586,7 @@ public class FreeIpaClient {
     }
 
     public TopologySegment addTopologySegment(String topologySuffixCn, TopologySegment topologySegment) throws FreeIpaClientException {
-        List<Object> flags = List.of(topologySuffixCn, topologySegment.getCn());
+        List<String> flags = List.of(topologySuffixCn, topologySegment.getCn());
         Map<String, Object> params = Map.of(
             "iparepltoposegmentleftnode", topologySegment.getLeftNode(),
             "iparepltoposegmentrightnode", topologySegment.getRightNode(),
@@ -596,13 +596,9 @@ public class FreeIpaClient {
     }
 
     public TopologySegment deleteTopologySegment(String topologySuffixCn, TopologySegment topologySegment) throws FreeIpaClientException {
-        List<Object> flags = List.of(topologySuffixCn, topologySegment.getCn());
+        List<String> flags = List.of(topologySuffixCn, topologySegment.getCn());
         Map<String, Object> params = Map.of();
         return (TopologySegment) invoke("topologysegment_del", flags, params, TopologySegment.class).getResult();
-    }
-
-    private static Map<String, String> createDnsName(String name) {
-        return Map.of("__dns_name__", name);
     }
 
 }
