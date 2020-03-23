@@ -16,120 +16,151 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse.Builder;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 
 import io.grpc.stub.StreamObserver;
 
 @Service
 class MockGroupManagementService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MockGroupManagementService.class);
 
     private static final String CM_ADMIN_RIGHT = "environments/adminClouderaManager";
 
+    private static final int NUM_USER_GROUPS = 5;
+
     @Inject
     private MockCrnService mockCrnService;
 
-    private final Map<String, Map<String, UserManagementProto.Group>> accountGroups = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, Group>> accountWorkloadGroups = new ConcurrentHashMap<>();
 
-    void listGroups(UserManagementProto.ListGroupsRequest request, StreamObserver<UserManagementProto.ListGroupsResponse> responseObserver) {
+    private final Map<String, Map<String, Group>> accountUserGroups = new ConcurrentHashMap<>();
 
-        UserManagementProto.ListGroupsResponse.Builder groupsBuilder = UserManagementProto.ListGroupsResponse.newBuilder();
+    void listGroups(ListGroupsRequest request, StreamObserver<ListGroupsResponse> responseObserver) {
+        ListGroupsResponse.Builder groupsBuilder = ListGroupsResponse.newBuilder();
         if (request.getGroupNameOrCrnCount() == 0) {
             if (isNotEmpty(request.getAccountId())) {
-                getOrCreateGroups(request.getAccountId()).stream()
+                getOrCreateUserGroups(request.getAccountId())
                         .forEach(groupsBuilder::addGroup);
             }
-            responseObserver.onNext(groupsBuilder.build());
         } else {
             request.getGroupNameOrCrnList().stream()
-                    .map(this::getOrCreateGroup)
+                    .map(this::getOrCreateUserGroup)
                     .forEach(groupsBuilder::addGroup);
-            responseObserver.onNext(groupsBuilder.build());
         }
+        responseObserver.onNext(groupsBuilder.build());
         responseObserver.onCompleted();
     }
 
-    List<UserManagementProto.Group> getOrCreateGroups(String accountId) {
-        accountGroups.computeIfAbsent(accountId, this::createVirtualGroups);
-        List<UserManagementProto.Group> groups = new ArrayList<>(accountGroups.get(accountId).values());
-        groups.sort(Comparator.comparing(UserManagementProto.Group::getGroupName));
+    List<Group> getOrCreateWorkloadGroups(String accountId) {
+        accountWorkloadGroups.computeIfAbsent(accountId, this::createWorkloadGroups);
+        List<Group> groups = new ArrayList<>(accountWorkloadGroups.get(accountId).values());
+        groups.sort(Comparator.comparing(Group::getGroupName));
         return groups;
     }
 
-    void getWorkloadAdministrationGroupName(UserManagementProto.GetWorkloadAdministrationGroupNameRequest request,
-            StreamObserver<UserManagementProto.GetWorkloadAdministrationGroupNameResponse> responseObserver) {
+    List<Group> getOrCreateUserGroups(String accountId) {
+        accountUserGroups.computeIfAbsent(accountId, this::createUserGroups);
+        List<Group> groups = new ArrayList<>(accountUserGroups.get(accountId).values());
+        groups.sort(Comparator.comparing(Group::getGroupName));
+        return groups;
+    }
+
+    void getWorkloadAdministrationGroupName(GetWorkloadAdministrationGroupNameRequest request,
+            StreamObserver<GetWorkloadAdministrationGroupNameResponse> responseObserver) {
         mockCrnService.ensureInternalActor();
-        UserManagementProto.GetWorkloadAdministrationGroupNameResponse.Builder respBuilder =
-                UserManagementProto.GetWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
-        respBuilder.setWorkloadAdministrationGroupName(generateVirtualGroupName(request.getRightName()));
+        Builder respBuilder =
+                GetWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
+        respBuilder.setWorkloadAdministrationGroupName(generateWorkloadGroupName(request.getRightName()));
         responseObserver.onNext(respBuilder.build());
         responseObserver.onCompleted();
     }
 
-    void setWorkloadAdministrationGroupName(UserManagementProto.SetWorkloadAdministrationGroupNameRequest request,
-            StreamObserver<UserManagementProto.SetWorkloadAdministrationGroupNameResponse> responseObserver) {
+    void setWorkloadAdministrationGroupName(SetWorkloadAdministrationGroupNameRequest request,
+            StreamObserver<SetWorkloadAdministrationGroupNameResponse> responseObserver) {
         mockCrnService.ensureInternalActor();
-        UserManagementProto.SetWorkloadAdministrationGroupNameResponse.Builder respBuilder =
-                UserManagementProto.SetWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
-        respBuilder.setWorkloadAdministrationGroupName(generateVirtualGroupName(request.getRightName()));
+        SetWorkloadAdministrationGroupNameResponse.Builder respBuilder =
+                SetWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
+        respBuilder.setWorkloadAdministrationGroupName(generateWorkloadGroupName(request.getRightName()));
         responseObserver.onNext(respBuilder.build());
         responseObserver.onCompleted();
     }
 
-    void deleteWorkloadAdministrationGroupName(UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request,
-            StreamObserver<UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
+    void deleteWorkloadAdministrationGroupName(DeleteWorkloadAdministrationGroupNameRequest request,
+            StreamObserver<DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
         mockCrnService.ensureInternalActor();
-        UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse.Builder respBuilder =
-                UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
+        DeleteWorkloadAdministrationGroupNameResponse.Builder respBuilder =
+                DeleteWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
         responseObserver.onNext(respBuilder.build());
         responseObserver.onCompleted();
     }
 
-    String generateVirtualGroupName(String umsRight) {
+    String generateWorkloadGroupName(String umsRight) {
         String groupNamePostfix = umsRight.replaceAll("/", "_").toLowerCase();
         return "_c_" + groupNamePostfix;
     }
 
-    private UserManagementProto.Group getOrCreateGroup(String groupCrn) {
-        String[] splittedCrn = groupCrn.split(":");
-        String accountId = splittedCrn[4];
-
-        accountGroups.computeIfAbsent(accountId, this::createVirtualGroups);
-        Map<String, UserManagementProto.Group> groups = accountGroups.get(accountId);
-
-        groups.computeIfAbsent(groupCrn, this::createGroupFromCrn);
-        return groups.get(groupCrn);
-    }
-
-    private Map<String, UserManagementProto.Group> createVirtualGroups(String accountId) {
-        Map<String, UserManagementProto.Group> groups = new HashMap<>();
-        for (UmsRight right : UmsRight.values()) {
-            UserManagementProto.Group group = createGroup(accountId, generateVirtualGroupName(right.getRight()));
-            groups.put(group.getCrn(), group);
-        }
-        LOGGER.info("groups for user: {}", groups);
-        return groups;
-    }
-
-    private UserManagementProto.Group createGroup(String accountId, String groupName) {
+    Group createGroup(String accountId, String groupName) {
         String groupId = UUID.randomUUID().toString();
-        String groupCrn = mockCrnService.createCrn(accountId, Crn.Service.IAM, Crn.ResourceType.GROUP, groupId).toString();
-        return UserManagementProto.Group.newBuilder()
+        String groupCrn = mockCrnService.createCrn(accountId, Crn.Service.IAM, ResourceType.GROUP, groupId).toString();
+        return Group.newBuilder()
                 .setGroupId(groupId)
                 .setCrn(groupCrn)
                 .setGroupName(groupName)
                 .build();
     }
 
-    private UserManagementProto.Group createGroupFromCrn(String groupCrn) {
+    private Map<String, Group> createWorkloadGroups(String accountId) {
+        Map<String, Group> groups = new HashMap<>();
+        for (UmsRight right : UmsRight.values()) {
+            Group group = createGroup(accountId, generateWorkloadGroupName(right.getRight()));
+            groups.put(group.getCrn(), group);
+        }
+        LOGGER.info("workload groups for user: {}", groups);
+        return groups;
+    }
+
+    private Map<String, Group> createUserGroups(String accountId) {
+        Map<String, Group> groups = new HashMap<>();
+        for (int i = 0; i < NUM_USER_GROUPS; i++) {
+            Group group = createGroup(accountId, "fakemockgroup" + i);
+            groups.put(group.getCrn(), group);
+        }
+        LOGGER.info("user groups for user: {}", groups);
+        return groups;
+    }
+
+    private Group getOrCreateUserGroup(String groupCrn) {
+        String[] splittedCrn = groupCrn.split(":");
+        String accountId = splittedCrn[4];
+
+        accountUserGroups.computeIfAbsent(accountId, this::createUserGroups);
+        Map<String, Group> groups = accountUserGroups.get(accountId);
+
+        groups.computeIfAbsent(groupCrn, this::createGroupFromCrn);
+        return groups.get(groupCrn);
+    }
+
+    private Group createGroupFromCrn(String groupCrn) {
         String[] splittedCrn = groupCrn.split(":");
         String groupId = splittedCrn[6];
-        return UserManagementProto.Group.newBuilder()
+        return Group.newBuilder()
                 .setGroupId(groupId)
                 .setCrn(groupCrn)
                 .setGroupName(groupId)
                 .build();
     }
+
 }

@@ -17,12 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
@@ -46,7 +47,7 @@ public class UmsUsersStateProvider {
     private GrpcUmsClient grpcUmsClient;
 
     public Map<String, UmsUsersState> getEnvToUmsUsersStateMap(String accountId, String actorCrn, Set<String> environmentCrns,
-                                                            Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
+            Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
         try {
             LOGGER.debug("Getting UMS state for environments {} with requestId {}", environmentCrns, requestIdOptional);
 
@@ -61,16 +62,19 @@ public class UmsUsersStateProvider {
             Map<String, FmsGroup> crnToFmsGroup = grpcUmsClient.listGroups(actorCrn, accountId, List.of(), requestIdOptional).stream()
                     .collect(Collectors.toMap(Group::getCrn, this::umsGroupToGroup));
 
-            Set<FmsGroup> wags = grpcUmsClient.listWorkloadAdministrationGroups(INTERNAL_ACTOR_CRN, accountId, requestIdOptional).stream()
-                    .map(wag -> nameToGroup(wag.getWorkloadAdministrationGroupName()))
-                    .collect(Collectors.toSet());
+            List<WorkloadAdministrationGroup> wags = grpcUmsClient.listWorkloadAdministrationGroups(INTERNAL_ACTOR_CRN, accountId, requestIdOptional);
 
-            environmentCrns.stream().forEach(environmentCrn -> {
+            environmentCrns.forEach(environmentCrn -> {
                 UmsUsersState.Builder umsUsersStateBuilder = new UmsUsersState.Builder();
                 UsersState.Builder usersStateBuilder = new UsersState.Builder();
 
-                crnToFmsGroup.values().stream().forEach(usersStateBuilder::addGroup);
-                wags.stream().forEach(usersStateBuilder::addGroup);
+                crnToFmsGroup.values().forEach(usersStateBuilder::addGroup);
+
+                // Only add workload admin groups that belong to this environment
+                wags.stream()
+                        .filter(wag -> wag.getResource().equalsIgnoreCase(environmentCrn))
+                        .map(wag -> nameToGroup(wag.getWorkloadAdministrationGroupName()))
+                        .forEach(usersStateBuilder::addGroup);
 
                 // add internal usersync group for each environment
                 FmsGroup internalUserSyncGroup = new FmsGroup();
@@ -79,7 +83,7 @@ public class UmsUsersStateProvider {
 
                 EnvironmentAccessChecker environmentAccessChecker = createEnvironmentAccessChecker(environmentCrn);
 
-                users.stream().forEach(u -> {
+                users.forEach(u -> {
                     FmsUser fmsUser = umsUserToUser(u);
                     // add workload username for each user. This will be helpful in getting users from IPA.
                     umsUsersStateBuilder.addRequestedWorkloadUsers(fmsUser);
@@ -89,7 +93,7 @@ public class UmsUsersStateProvider {
 
                 });
 
-                machineUsers.stream().forEach(mu -> {
+                machineUsers.forEach(mu -> {
                     FmsUser fmsUser = umsMachineUserToUser(mu);
                     umsUsersStateBuilder.addRequestedWorkloadUsers(fmsUser);
                     // add workload username for each user. This will be helpful in getting users from IPA.
@@ -141,7 +145,7 @@ public class UmsUsersStateProvider {
 
     @SuppressWarnings("ParameterNumber")
     private void handleUser(UmsUsersState.Builder umsUsersStateBuilder, UsersState.Builder usersStateBuilder, Map<String, FmsGroup> crnToFmsGroup,
-                            String memberCrn, FmsUser fmsUser, EnvironmentAccessRights environmentAccessRights, Optional<String> requestId) {
+            String memberCrn, FmsUser fmsUser, EnvironmentAccessRights environmentAccessRights, Optional<String> requestId) {
         try {
             if (environmentAccessRights.hasEnvironmentAccessRight()) {
                 String username = fmsUser.getName();
@@ -150,7 +154,7 @@ public class UmsUsersStateProvider {
                 // Retrieve all information from UMS before modifying to the UmsUsersState or UsersState. This is so that
                 // we don't partially modify the state if the member has been deleted after we started the sync
                 List<String> groupCrnsForMember = grpcUmsClient.listGroupsForMember(INTERNAL_ACTOR_CRN, accountId, memberCrn, requestId);
-                UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse workloadAdministrationGroups =
+                ListWorkloadAdministrationGroupsForMemberResponse workloadAdministrationGroupsForUser =
                         grpcUmsClient.listWorkloadAdministrationGroupsForMember(INTERNAL_ACTOR_CRN, memberCrn, requestId);
                 WorkloadCredential workloadCredential = getCredentials(memberCrn, requestId);
 
@@ -166,7 +170,7 @@ public class UmsUsersStateProvider {
                     }
                 });
 
-                workloadAdministrationGroups.getWorkloadAdministrationGroupNameList().forEach(groupName -> {
+                workloadAdministrationGroupsForUser.getWorkloadAdministrationGroupNameList().forEach(groupName -> {
                     usersStateBuilder.addGroup(nameToGroup(groupName));
                     usersStateBuilder.addMemberToGroup(groupName, username);
                 });

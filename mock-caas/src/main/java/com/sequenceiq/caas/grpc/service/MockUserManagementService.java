@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -32,35 +33,83 @@ import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementImplBase;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKey;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyType;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccountType;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Entitlement;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse.Builder;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Policy;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.PolicyDefinition;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.PolicyStatement;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ResourceAssignee;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ResourceAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Role;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadPasswordPolicy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -76,13 +125,15 @@ import com.sequenceiq.caas.util.CrnHelper;
 import com.sequenceiq.caas.util.IniUtil;
 import com.sequenceiq.caas.util.JsonUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
+import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 
 @Service
-public class MockUserManagementService extends UserManagementGrpc.UserManagementImplBase {
+public class MockUserManagementService extends UserManagementImplBase {
 
     @VisibleForTesting
     static final long PASSWORD_LIFETIME = 31449600000L;
@@ -92,8 +143,6 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     private static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
 
     private static final Logger LOG = LoggerFactory.getLogger(MockUserManagementService.class);
-
-    private static final int FIRST_GROUP = 0;
 
     private static final String ALTUS_ACCESS_KEY_ID = "altus_access_key_id";
 
@@ -185,18 +234,18 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private GetActorWorkloadCredentialsResponse actorWorkloadCredentialsResponse;
 
-    private UserManagementProto.WorkloadPasswordPolicy workloadPasswordPolicy;
+    private WorkloadPasswordPolicy workloadPasswordPolicy;
 
     @PostConstruct
     public void init() {
-        this.cbLicense = getLicense();
-        this.telemetyPublisherCredential = getAltusCredential(databusTpCredentialFile, databusTpCredentialProfile);
-        this.fluentCredential = getAltusCredential(databusFluentCredentialFile, databusFluentCredentialProfile);
-        this.eventGenerationIdsCache = CacheBuilder.newBuilder()
+        cbLicense = getLicense();
+        telemetyPublisherCredential = getAltusCredential(databusTpCredentialFile, databusTpCredentialProfile);
+        fluentCredential = getAltusCredential(databusFluentCredentialFile, databusFluentCredentialProfile);
+        eventGenerationIdsCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(eventGenerationExirationMinutes, TimeUnit.MINUTES)
-                .build(new CacheLoader<String, GetEventGenerationIdsResponse>() {
+                .build(new CacheLoader<>() {
                     @Override
-                    public GetEventGenerationIdsResponse load(String key) throws Exception {
+                    public GetEventGenerationIdsResponse load(String key) {
                         GetEventGenerationIdsResponse.Builder respBuilder = GetEventGenerationIdsResponse.newBuilder();
                         respBuilder.setLastRoleAssignmentEventId(UUID.randomUUID().toString());
                         respBuilder.setLastResourceRoleAssignmentEventId(UUID.randomUUID().toString());
@@ -273,27 +322,29 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     private GetRightsResponse buildGetRightsResponse(String accountId) {
-        List<Group> groups = List.copyOf(mockGroupManagementService.getOrCreateGroups(accountId));
+        List<Group> workloadGroups = List.copyOf(mockGroupManagementService.getOrCreateWorkloadGroups(accountId));
+        List<Group> userGroups = List.copyOf(mockGroupManagementService.getOrCreateUserGroups(accountId));
         PolicyStatement policyStatement = PolicyStatement.newBuilder()
                 .addRight(ALL_RIGHTS_AND_RESOURCES)
                 .addResource(ALL_RIGHTS_AND_RESOURCES)
                 .build();
         PolicyDefinition policyDefinition = PolicyDefinition.newBuilder().addStatement(policyStatement).build();
         Policy powerUserPolicy = Policy.newBuilder()
-                .setCrn(mockCrnService.createCrn(ACCOUNT_ID_ALTUS, Crn.Service.IAM, Crn.ResourceType.POLICY, "PowerUserPolicy").toString())
+                .setCrn(mockCrnService.createCrn(ACCOUNT_ID_ALTUS, Crn.Service.IAM, ResourceType.POLICY, "PowerUserPolicy").toString())
                 .setCreationDateMs(CREATION_DATE_MS)
                 .setPolicyDefinition(policyDefinition)
                 .build();
         Role powerUserRole = Role.newBuilder()
-                .setCrn(mockCrnService.createCrn(ACCOUNT_ID_ALTUS, Crn.Service.IAM, Crn.ResourceType.ROLE, "PowerUser").toString())
+                .setCrn(mockCrnService.createCrn(ACCOUNT_ID_ALTUS, Crn.Service.IAM, ResourceType.ROLE, "PowerUser").toString())
                 .setCreationDateMs(CREATION_DATE_MS)
                 .addPolicy(powerUserPolicy)
                 .build();
         RoleAssignment roleAssignment = RoleAssignment.newBuilder().setRole(powerUserRole).build();
         GetRightsResponse.Builder rightsBuilder = GetRightsResponse.newBuilder()
                 .addRoleAssignment(roleAssignment)
-                .addWorkloadAdministrationGroupName(mockGroupManagementService.generateVirtualGroupName(ENV_ACCESS_RIGHT));
-        groups.stream().forEach(group -> rightsBuilder.addGroupCrn(group.getCrn()));
+                .addWorkloadAdministrationGroupName(mockGroupManagementService.generateWorkloadGroupName(ENV_ACCESS_RIGHT));
+        workloadGroups.forEach(group -> rightsBuilder.addGroupCrn(group.getCrn()));
+        userGroups.forEach(group -> rightsBuilder.addGroupCrn(group.getCrn()));
         return rightsBuilder.build();
     }
 
@@ -306,13 +357,33 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     @Override
-    public void listGroupsForMember(ListGroupsForMemberRequest request,
-            StreamObserver<ListGroupsForMemberResponse> responseObserver) {
+    public void listGroupsForMember(ListGroupsForMemberRequest request, StreamObserver<ListGroupsForMemberResponse> responseObserver) {
         String accountId = request.getMember().getAccountId();
-        List<Group> groups = List.copyOf(mockGroupManagementService.getOrCreateGroups(accountId));
-        ListGroupsForMemberResponse.Builder responseBuilder =
-                ListGroupsForMemberResponse.newBuilder();
-        groups.forEach(g -> responseBuilder.addGroupCrn(g.getCrn()));
+        ListGroupsForMemberResponse.Builder responseBuilder = ListGroupsForMemberResponse.newBuilder();
+        List<Group> userGroups = List.copyOf(mockGroupManagementService.getOrCreateUserGroups(accountId));
+        userGroups.forEach(g -> responseBuilder.addGroupCrn(g.getCrn()));
+        responseObserver.onNext(responseBuilder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listWorkloadAdministrationGroups(ListWorkloadAdministrationGroupsRequest request,
+            StreamObserver<ListWorkloadAdministrationGroupsResponse> responseObserver) {
+        mockCrnService.ensureInternalActor();
+        String accountId = request.getAccountId();
+
+        ListWorkloadAdministrationGroupsResponse.Builder responseBuilder = ListWorkloadAdministrationGroupsResponse.newBuilder();
+        for (UmsRight right : UmsRight.values()) {
+            Group group = mockGroupManagementService.createGroup(accountId, mockGroupManagementService.generateWorkloadGroupName(right.getRight()));
+            responseBuilder.addWorkloadAdministrationGroup(
+                    WorkloadAdministrationGroup.newBuilder()
+                            .setWorkloadAdministrationGroupName(group.getGroupName())
+                            .setRightName(right.getRight())
+                            .setResource(MOCK_RESOURCE)
+                            .build()
+            );
+        }
+
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
@@ -322,10 +393,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             StreamObserver<ListWorkloadAdministrationGroupsForMemberResponse> responseObserver) {
         String memberCrn = request.getMemberCrn();
         String accountId = Crn.fromString(memberCrn).getAccountId();
-        GetRightsResponse getRightsResponse = buildGetRightsResponse(accountId);
-        ListWorkloadAdministrationGroupsForMemberResponse.Builder responseBuilder =
-                ListWorkloadAdministrationGroupsForMemberResponse.newBuilder();
-        responseBuilder.addAllWorkloadAdministrationGroupName(getRightsResponse.getWorkloadAdministrationGroupNameList());
+        Set<String> groups = mockGroupManagementService.getOrCreateWorkloadGroups(accountId).stream().map(Group::getGroupName).collect(Collectors.toSet());
+        ListWorkloadAdministrationGroupsForMemberResponse.Builder responseBuilder = ListWorkloadAdministrationGroupsForMemberResponse.newBuilder();
+        responseBuilder.addAllWorkloadAdministrationGroupName(groups);
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
@@ -339,7 +409,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 .setResource(userName)
                 .build().toString();
         return User.newBuilder()
-                .setUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
+                .setUserId(UUID.nameUUIDFromBytes((accountId + '#' + userName).getBytes()).toString())
                 .setCrn(userCrn)
                 .setEmail(userName.contains("@") ? userName : userName + "@ums.mock")
                 .setWorkloadUsername(sanitizeWorkloadUsername(userName))
@@ -352,7 +422,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     @Override
-    public void listMachineUsers(UserManagementProto.ListMachineUsersRequest request, StreamObserver<ListMachineUsersResponse> responseObserver) {
+    public void listMachineUsers(ListMachineUsersRequest request, StreamObserver<ListMachineUsersResponse> responseObserver) {
         if (request.getMachineUserNameOrCrnCount() == 0) {
             responseObserver.onNext(ListMachineUsersResponse.newBuilder().build());
         } else {
@@ -366,13 +436,13 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 crnString = machineUserIdOrCrn;
             } else {
                 userName = machineUserIdOrCrn;
-                Crn crn = mockCrnService.createCrn(accountId, Crn.Service.IAM, Crn.ResourceType.MACHINE_USER, userName);
+                Crn crn = mockCrnService.createCrn(accountId, Crn.Service.IAM, ResourceType.MACHINE_USER, userName);
                 crnString = crn.toString();
             }
             responseObserver.onNext(
                     ListMachineUsersResponse.newBuilder()
                             .addMachineUser(MachineUser.newBuilder()
-                                    .setMachineUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
+                                    .setMachineUserId(UUID.nameUUIDFromBytes((accountId + '#' + userName).getBytes()).toString())
                                     .setCrn(crnString)
                                     .setWorkloadUsername(sanitizeWorkloadUsername(userName))
                                     .build())
@@ -383,7 +453,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void getAccount(GetAccountRequest request, StreamObserver<GetAccountResponse> responseObserver) {
-        UserManagementProto.Account.Builder builder = UserManagementProto.Account.newBuilder();
+        Account.Builder builder = Account.newBuilder();
         if (enableCcm) {
             builder.addEntitlements(createEntitlement(REVERSE_SSH_TUNNEL));
         }
@@ -411,99 +481,97 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         responseObserver.onCompleted();
     }
 
-    private UserManagementProto.Entitlement createEntitlement(String entitlementName) {
-        return UserManagementProto.Entitlement.newBuilder()
+    private Entitlement createEntitlement(String entitlementName) {
+        return Entitlement.newBuilder()
                 .setEntitlementName(entitlementName)
                 .build();
     }
 
     @Override
-    public void verifyInteractiveUserSessionToken(UserManagementProto.VerifyInteractiveUserSessionTokenRequest request,
-            StreamObserver<UserManagementProto.VerifyInteractiveUserSessionTokenResponse> responseObserver) {
+    public void verifyInteractiveUserSessionToken(VerifyInteractiveUserSessionTokenRequest request,
+            StreamObserver<VerifyInteractiveUserSessionTokenResponse> responseObserver) {
         String sessionToken = request.getSessionToken();
         Jwt token = decodeAndVerify(sessionToken, SIGNATURE_VERIFIER);
         AltusToken introspectResponse = jsonUtil.toObject(token.getClaims(), AltusToken.class);
         String userIdOrCrn = introspectResponse.getSub();
         String[] splittedCrn = userIdOrCrn.split(":");
         responseObserver.onNext(
-                UserManagementProto.VerifyInteractiveUserSessionTokenResponse.newBuilder()
+                VerifyInteractiveUserSessionTokenResponse.newBuilder()
                         .setAccountId(splittedCrn[4])
-                        .setAccountType(UserManagementProto.AccountType.REGULAR)
+                        .setAccountType(AccountType.REGULAR)
                         .setUserCrn(userIdOrCrn)
                         .build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void authenticate(UserManagementProto.AuthenticateRequest request,
-            StreamObserver<UserManagementProto.AuthenticateResponse> responseObserver) {
+    public void authenticate(AuthenticateRequest request,
+            StreamObserver<AuthenticateResponse> responseObserver) {
         String authHeader = request.getAccessKeyV1AuthRequest().getAuthHeader();
         String crn = CrnHelper.extractCrnFromAuthHeader(authHeader);
         LOG.info("Crn: {}", crn);
 
         responseObserver.onNext(
-                UserManagementProto.AuthenticateResponse.newBuilder()
+                AuthenticateResponse.newBuilder()
                         .setActorCrn(crn)
                         .build());
         responseObserver.onCompleted();
     }
 
-    public void assignResourceRole(UserManagementProto.AssignResourceRoleRequest request,
-            StreamObserver<UserManagementProto.AssignResourceRoleResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.AssignResourceRoleResponse.newBuilder().build());
+    public void assignResourceRole(AssignResourceRoleRequest request, StreamObserver<AssignResourceRoleResponse> responseObserver) {
+        responseObserver.onNext(AssignResourceRoleResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void unassignResourceRole(UserManagementProto.UnassignResourceRoleRequest request,
-            StreamObserver<UserManagementProto.UnassignResourceRoleResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.UnassignResourceRoleResponse.newBuilder().build());
+    public void unassignResourceRole(UnassignResourceRoleRequest request, StreamObserver<UnassignResourceRoleResponse> responseObserver) {
+        responseObserver.onNext(UnassignResourceRoleResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void assignRole(UserManagementProto.AssignRoleRequest request, StreamObserver<UserManagementProto.AssignRoleResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.AssignRoleResponse.newBuilder().build());
+    public void assignRole(AssignRoleRequest request, StreamObserver<AssignRoleResponse> responseObserver) {
+        responseObserver.onNext(AssignRoleResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void unassignRole(UserManagementProto.UnassignRoleRequest request, StreamObserver<UserManagementProto.UnassignRoleResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.UnassignRoleResponse.newBuilder().build());
+    public void unassignRole(UnassignRoleRequest request, StreamObserver<UnassignRoleResponse> responseObserver) {
+        responseObserver.onNext(UnassignRoleResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void getAssigneeAuthorizationInformation(UserManagementProto.GetAssigneeAuthorizationInformationRequest request,
-            StreamObserver<UserManagementProto.GetAssigneeAuthorizationInformationResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.GetAssigneeAuthorizationInformationResponse.newBuilder()
+    public void getAssigneeAuthorizationInformation(GetAssigneeAuthorizationInformationRequest request,
+            StreamObserver<GetAssigneeAuthorizationInformationResponse> responseObserver) {
+        responseObserver.onNext(GetAssigneeAuthorizationInformationResponse.newBuilder()
                 .setResourceAssignment(0, createResourceAssigment(request.getAssigneeCrn()))
                 .build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void listResourceAssignees(UserManagementProto.ListResourceAssigneesRequest request,
-            StreamObserver<UserManagementProto.ListResourceAssigneesResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.ListResourceAssigneesResponse.newBuilder()
+    public void listResourceAssignees(ListResourceAssigneesRequest request,
+            StreamObserver<ListResourceAssigneesResponse> responseObserver) {
+        responseObserver.onNext(ListResourceAssigneesResponse.newBuilder()
                 .setResourceAssignee(0, createResourceAssignee(request.getResourceCrn()))
                 .build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void notifyResourceDeleted(UserManagementProto.NotifyResourceDeletedRequest request,
-            StreamObserver<UserManagementProto.NotifyResourceDeletedResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.NotifyResourceDeletedResponse.newBuilder().build());
+    public void notifyResourceDeleted(NotifyResourceDeletedRequest request,
+            StreamObserver<NotifyResourceDeletedResponse> responseObserver) {
+        responseObserver.onNext(NotifyResourceDeletedResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void createAccessKey(UserManagementProto.CreateAccessKeyRequest request,
-            StreamObserver<UserManagementProto.CreateAccessKeyResponse> responseObserver) {
-        String accessKeyId = null;
-        String privateKey = null;
-        AltusCredential altusCredential = UserManagementProto.AccessKeyType.Value.UNSET.equals(request.getType())
+    public void createAccessKey(CreateAccessKeyRequest request,
+            StreamObserver<CreateAccessKeyResponse> responseObserver) {
+        String accessKeyId;
+        String privateKey;
+        AltusCredential altusCredential = AccessKeyType.Value.UNSET.equals(request.getType())
                 ? telemetyPublisherCredential : fluentCredential;
         if (altusCredential != null) {
             accessKeyId = altusCredential.getAccessKey();
@@ -512,9 +580,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             accessKeyId = UUID.randomUUID().toString();
             privateKey = UUID.randomUUID().toString();
         }
-        responseObserver.onNext(UserManagementProto.CreateAccessKeyResponse.newBuilder()
+        responseObserver.onNext(CreateAccessKeyResponse.newBuilder()
                 .setPrivateKey(privateKey)
-                .setAccessKey(UserManagementProto.AccessKey.newBuilder()
+                .setAccessKey(AccessKey.newBuilder()
                         .setAccessKeyId(accessKeyId)
                         .build())
                 .build());
@@ -522,9 +590,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     @Override
-    public void listAccessKeys(UserManagementProto.ListAccessKeysRequest request, StreamObserver<UserManagementProto.ListAccessKeysResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.ListAccessKeysResponse.newBuilder()
-                .addAccessKey(0, UserManagementProto.AccessKey.newBuilder()
+    public void listAccessKeys(ListAccessKeysRequest request, StreamObserver<ListAccessKeysResponse> responseObserver) {
+        responseObserver.onNext(ListAccessKeysResponse.newBuilder()
+                .addAccessKey(0, AccessKey.newBuilder()
                         .setAccessKeyId(UUID.randomUUID().toString())
                         .setCrn(UUID.randomUUID().toString())
                         .build())
@@ -533,20 +601,20 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     @Override
-    public void deleteAccessKey(UserManagementProto.DeleteAccessKeyRequest request,
-            StreamObserver<UserManagementProto.DeleteAccessKeyResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.DeleteAccessKeyResponse.newBuilder().build());
+    public void deleteAccessKey(DeleteAccessKeyRequest request,
+            StreamObserver<DeleteAccessKeyResponse> responseObserver) {
+        responseObserver.onNext(DeleteAccessKeyResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void createMachineUser(UserManagementProto.CreateMachineUserRequest request,
-            StreamObserver<UserManagementProto.CreateMachineUserResponse> responseObserver) {
+    public void createMachineUser(CreateMachineUserRequest request,
+            StreamObserver<CreateMachineUserResponse> responseObserver) {
         String accountId = Crn.fromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn()).getAccountId();
         String name = request.getMachineUserName();
-        responseObserver.onNext(UserManagementProto.CreateMachineUserResponse.newBuilder()
+        responseObserver.onNext(CreateMachineUserResponse.newBuilder()
                 .setMachineUser(MachineUser.newBuilder()
-                        .setMachineUserId(UUID.nameUUIDFromBytes((accountId + "#" + name).getBytes()).toString())
+                        .setMachineUserId(UUID.nameUUIDFromBytes((accountId + '#' + name).getBytes()).toString())
                         .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
                         .build())
                 .build());
@@ -554,17 +622,15 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     @Override
-    public void deleteMachineUser(UserManagementProto.DeleteMachineUserRequest request,
-            StreamObserver<UserManagementProto.DeleteMachineUserResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.DeleteMachineUserResponse.newBuilder()
-                .build());
+    public void deleteMachineUser(DeleteMachineUserRequest request, StreamObserver<DeleteMachineUserResponse> responseObserver) {
+        responseObserver.onNext(DeleteMachineUserResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
     public void getIdPMetadataForWorkloadSSO(
-            UserManagementProto.GetIdPMetadataForWorkloadSSORequest request,
-            StreamObserver<UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> responseObserver) {
+            GetIdPMetadataForWorkloadSSORequest request,
+            StreamObserver<GetIdPMetadataForWorkloadSSOResponse> responseObserver) {
         checkArgument(!Strings.isNullOrEmpty(request.getAccountId()));
         try {
             String metadata = Resources.toString(
@@ -586,8 +652,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     @Override
-    public void listRoles(UserManagementProto.ListRolesRequest request, StreamObserver<UserManagementProto.ListRolesResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.ListRolesResponse.newBuilder().build());
+    public void listRoles(ListRolesRequest request, StreamObserver<ListRolesResponse> responseObserver) {
+        responseObserver.onNext(ListRolesResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
@@ -598,9 +664,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
      * Hashed value used internally is sha256 hash of <i>Password123!</i>.
      */
     @Override
-    public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
-            io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement
-                    .UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
+    public void getActorWorkloadCredentials(GetActorWorkloadCredentialsRequest request,
+            io.grpc.stub.StreamObserver<GetActorWorkloadCredentialsResponse> responseObserver) {
 
         GetActorWorkloadCredentialsResponse.Builder builder = GetActorWorkloadCredentialsResponse.newBuilder(actorWorkloadCredentialsResponse);
         builder.setPasswordHashExpirationDate(System.currentTimeMillis() + PASSWORD_LIFETIME);
@@ -658,51 +723,35 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     @Override
-    public void getWorkloadAdministrationGroupName(UserManagementProto.GetWorkloadAdministrationGroupNameRequest request,
-            StreamObserver<UserManagementProto.GetWorkloadAdministrationGroupNameResponse> responseObserver) {
+    public void getWorkloadAdministrationGroupName(GetWorkloadAdministrationGroupNameRequest request,
+            StreamObserver<GetWorkloadAdministrationGroupNameResponse> responseObserver) {
         mockGroupManagementService.getWorkloadAdministrationGroupName(request, responseObserver);
     }
 
     @Override
-    public void setWorkloadAdministrationGroupName(UserManagementProto.SetWorkloadAdministrationGroupNameRequest request,
-            StreamObserver<UserManagementProto.SetWorkloadAdministrationGroupNameResponse> responseObserver) {
+    public void setWorkloadAdministrationGroupName(SetWorkloadAdministrationGroupNameRequest request,
+            StreamObserver<SetWorkloadAdministrationGroupNameResponse> responseObserver) {
         mockGroupManagementService.setWorkloadAdministrationGroupName(request, responseObserver);
     }
 
     @Override
-    public void deleteWorkloadAdministrationGroupName(UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request,
-            StreamObserver<UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
+    public void deleteWorkloadAdministrationGroupName(DeleteWorkloadAdministrationGroupNameRequest request,
+            StreamObserver<DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
         mockGroupManagementService.deleteWorkloadAdministrationGroupName(request, responseObserver);
     }
 
-    @Override
-    public void listWorkloadAdministrationGroups(UserManagementProto.ListWorkloadAdministrationGroupsRequest request,
-            StreamObserver<UserManagementProto.ListWorkloadAdministrationGroupsResponse> responseObserver) {
-        mockCrnService.ensureInternalActor();
-        responseObserver.onNext(UserManagementProto.ListWorkloadAdministrationGroupsResponse.newBuilder()
-                .addWorkloadAdministrationGroup(
-                        UserManagementProto.WorkloadAdministrationGroup.newBuilder()
-                                .setWorkloadAdministrationGroupName(mockGroupManagementService.generateVirtualGroupName(ENV_ACCESS_RIGHT))
-                                .setRightName(ENV_ACCESS_RIGHT)
-                                .setResource(MOCK_RESOURCE)
-                                .build()
-                )
-                .build());
-        responseObserver.onCompleted();
-    }
-
-    private UserManagementProto.ResourceAssignee createResourceAssignee(String resourceCrn) {
-        return UserManagementProto.ResourceAssignee.newBuilder()
+    private ResourceAssignee createResourceAssignee(String resourceCrn) {
+        return ResourceAssignee.newBuilder()
                 .setAssigneeCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
-                .setResourceRoleCrn(mockCrnService.createCrn(resourceCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
+                .setResourceRoleCrn(mockCrnService.createCrn(resourceCrn, ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
                 .build();
     }
 
-    private UserManagementProto.ResourceAssignment createResourceAssigment(String assigneeCrn) {
-        String resourceCrn = mockCrnService.createCrn(assigneeCrn, Crn.ResourceType.WORKSPACE, Crn.fromString(assigneeCrn).getAccountId()).toString();
-        return UserManagementProto.ResourceAssignment.newBuilder()
+    private ResourceAssignment createResourceAssigment(String assigneeCrn) {
+        String resourceCrn = mockCrnService.createCrn(assigneeCrn, ResourceType.WORKSPACE, Crn.fromString(assigneeCrn).getAccountId()).toString();
+        return ResourceAssignment.newBuilder()
                 .setResourceCrn(resourceCrn)
-                .setResourceRoleCrn(mockCrnService.createCrn(assigneeCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
+                .setResourceRoleCrn(mockCrnService.createCrn(assigneeCrn, ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
                 .build();
     }
 
