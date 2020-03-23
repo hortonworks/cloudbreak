@@ -12,7 +12,8 @@ public enum AuthorizationResourceAction {
     RD_WRITE("rdWrite", ActionType.RESOURCE_DEPENDENT),
     ACCESS_ENVIRONMENT("accessEnvironment", ActionType.RESOURCE_DEPENDENT),
     ADMIN_FREEIPA("adminFreeIPA", ActionType.RESOURCE_DEPENDENT),
-    CREATE("create", ActionType.RESOURCE_INDEPENDENT);
+    CREATE("create", ActionType.RESOURCE_INDEPENDENT),
+    GET_KEYTAB("getKeytab", ActionType.RESOURCE_INDEPENDENT);
 
     private final String action;
 

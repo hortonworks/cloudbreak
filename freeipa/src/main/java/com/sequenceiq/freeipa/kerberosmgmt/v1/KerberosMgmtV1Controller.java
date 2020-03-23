@@ -5,6 +5,7 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
+import com.sequenceiq.authorization.service.UmsAuthorizationService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import org.slf4j.Logger;
@@ -34,6 +35,8 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtV1Controller.class);
 
+    private static final String GET_USER_KEYTAB_RIGHT = "environments/getKeytab";
+
     @Inject
     private KerberosMgmtV1Service kerberosMgmtV1Service;
 
@@ -42,6 +45,9 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
 
     @Inject
     private UserKeytabService userKeytabService;
+
+    @Inject
+    private UmsAuthorizationService umsAuthorizationService;
 
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request) throws FreeIpaClientException {
@@ -96,11 +102,8 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         String actorCrn = checkActorCrn();
         LOGGER.debug("getUserKeytab() request for environmentCrn={} for targetUserCrn={} as actorCrn={}",
                 environmentCrn, actorCrn, targetUserCrn);
-        // TODO: For now we only allow retrieving keytab for the calling user. When we enable calling this against
-        //       other users we need to ensure the caller has the neccessary authorization / rights.
-        if (!actorCrn.equals(targetUserCrn)) {
-            throw new BadRequestException("Retrieving a keytab for another user is unsupported");
-        }
+        umsAuthorizationService.checkCallerIsSelfOrHasRight(actorCrn, targetUserCrn, AuthorizationResourceType.ENVIRONMENT,
+                AuthorizationResourceAction.GET_KEYTAB);
         return userKeytabService.getKeytabBase64(targetUserCrn, environmentCrn);
     }
 

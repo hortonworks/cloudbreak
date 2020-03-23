@@ -24,6 +24,8 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 
+import java.util.UUID;
+
 @RunWith(MockitoJUnitRunner.class)
 public class UmsAuthorizationServiceTest {
 
@@ -130,4 +132,35 @@ public class UmsAuthorizationServiceTest {
         verifyZeroInteractions(umsClient);
     }
 
+    @Test
+    public void testCheckCallerIsSelfOrHasRightSameActor() {
+        underTest.checkCallerIsSelfOrHasRight(USER_CRN, USER_CRN, AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.GET_KEYTAB);
+    }
+
+    @Test
+    public void testCheckCallerIsSelfOrHasRightDifferent() {
+        String userInDifferentAccount = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
+        thrown.expect(AccessDeniedException.class);
+        thrown.expectMessage("Unauthorized to run this operation in a different account");
+
+        underTest.checkCallerIsSelfOrHasRight(USER_CRN, userInDifferentAccount, AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.GET_KEYTAB);
+    }
+
+    @Test
+    public void testActorAndTargetDifferentAndMissingRight() {
+        String user2 = "crn:cdp:iam:us-west-1:1234:user:someOtherUserId";
+        when(umsClient.checkRight(any(), any(), any(), any())).thenReturn(false);
+        thrown.expect(AccessDeniedException.class);
+        thrown.expectMessage(String.format("You have no right to perform environments/getKeytab on user %s", user2));
+
+        underTest.checkCallerIsSelfOrHasRight(USER_CRN, user2, AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.GET_KEYTAB);
+    }
+
+    @Test
+    public void testActorAndTargetDifferentHasRequiredRight() {
+        String user2 = "crn:cdp:iam:us-west-1:1234:user:someOtherUserId";
+        when(umsClient.checkRight(any(), any(), any(), any())).thenReturn(true);
+
+        underTest.checkCallerIsSelfOrHasRight(USER_CRN, user2, AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.GET_KEYTAB);
+    }
 }
