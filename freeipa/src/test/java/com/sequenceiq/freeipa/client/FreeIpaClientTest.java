@@ -23,7 +23,7 @@ class FreeIpaClientTest {
 
     @BeforeEach
     void setUp() {
-        freeIpaClient = new FreeIpaClient(jsonRpcHttpClient);
+        freeIpaClient = new FreeIpaClient(jsonRpcHttpClient, "1.1.1.1", "localhost");
     }
 
     @Test

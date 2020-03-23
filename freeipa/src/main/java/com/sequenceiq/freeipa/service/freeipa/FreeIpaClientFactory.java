@@ -152,6 +152,7 @@ public class FreeIpaClientFactory {
         return new FreeIpaClientBuilder(ADMIN_USER,
                 freeIpa.getAdminPassword(),
                 httpClientConfig,
+                clusterProxyConfiguration.getClusterProxyHost(),
                 clusterProxyConfiguration.getClusterProxyPort(),
                 clusterProxyPath,
                 ADDITIONAL_CLUSTER_PROXY_HEADERS,
@@ -162,7 +163,8 @@ public class FreeIpaClientFactory {
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(
                 stack, instanceMetaData.getPublicIpWrapper(), instanceMetaData);
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), httpClientConfig, stack.getGatewayport());
+        return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), httpClientConfig, stack.getGatewayport(),
+                instanceMetaData.getDiscoveryFQDN());
     }
 
     private FreeIpaClientException createFreeIpaStateIsInvalidException(Status stackStatus) {

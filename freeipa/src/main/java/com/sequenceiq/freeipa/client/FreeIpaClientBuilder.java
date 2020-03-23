@@ -78,18 +78,21 @@ public class FreeIpaClientBuilder {
 
     private final int port;
 
+    private final String hostname;
+
     private final HttpClientConfig clientConfig;
 
     private final RequestListener rpcRequestListener;
 
     private Map<String, String> additionalHeaders;
 
-    public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, int port, String basePath,
+    public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, String hostname, int port, String basePath,
             Map<String, String> additionalHeaders, JsonRpcClient.RequestListener rpcRequestListener) throws Exception {
         this.user = user;
         this.pass = pass;
         this.clientConfig = clientConfig;
         this.port = port;
+        this.hostname = hostname;
 
         if (clientConfig.hasSSLConfigs()) {
             this.sslContext =
@@ -112,8 +115,8 @@ public class FreeIpaClientBuilder {
         this.rpcRequestListener = rpcRequestListener;
     }
 
-    public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, int port) throws Exception {
-        this(user, pass, clientConfig, port, DEFAULT_BASE_PATH, Map.of(), null);
+    public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, int port, String hostname) throws Exception {
+        this(user, pass, clientConfig, hostname, port, DEFAULT_BASE_PATH, Map.of(), null);
     }
 
     public FreeIpaClient build(boolean withPing) throws URISyntaxException, IOException, FreeIpaClientException {
@@ -156,7 +159,7 @@ public class FreeIpaClientBuilder {
         jsonRpcHttpClient.setHostNameVerifier(hostnameVerifier());
         jsonRpcHttpClient.setReadTimeoutMillis(READ_TIMEOUT_MILLIS);
         jsonRpcHttpClient.setRequestListener(rpcRequestListener);
-        return new FreeIpaClient(jsonRpcHttpClient);
+        return new FreeIpaClient(jsonRpcHttpClient, clientConfig.getApiAddress(), hostname);
     }
 
     private String connect(String user, String pass, String apiAddress, int port)
