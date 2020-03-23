@@ -262,6 +262,79 @@ class ProvisionerServiceTest {
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED, "Datalake stack deleted", sdxCluster);
     }
 
+    @Test
+    void waitCloudbreakClusterDeletionClusterRetryFailedTest() {
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
+        sdxCluster.setClusterName("sdxcluster1");
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
+
+        StackV4Response firstStackV4Response = new StackV4Response();
+        firstStackV4Response.setStatus(Status.DELETE_IN_PROGRESS);
+        ClusterV4Response firstClusterResponse = new ClusterV4Response();
+        firstClusterResponse.setStatus(Status.DELETE_IN_PROGRESS);
+        firstClusterResponse.setStatusReason("delete failed");
+        firstStackV4Response.setCluster(firstClusterResponse);
+
+        StackV4Response secondStackV4Response = new StackV4Response();
+        secondStackV4Response.setStatus(Status.DELETE_FAILED);
+        ClusterV4Response secondClusterResponse = new ClusterV4Response();
+        secondClusterResponse.setStatus(Status.DELETE_IN_PROGRESS);
+        secondClusterResponse.setStatusReason("delete failed");
+        secondStackV4Response.setCluster(secondClusterResponse);
+
+        StackV4Response thirdStackV4Response = new StackV4Response();
+        thirdStackV4Response.setStatus(Status.DELETE_FAILED);
+        ClusterV4Response thirdClusterResponse = new ClusterV4Response();
+        thirdClusterResponse.setStatus(Status.DELETE_FAILED);
+        thirdClusterResponse.setStatusReason("delete failed");
+        thirdStackV4Response.setCluster(thirdClusterResponse);
+
+        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet()))
+                .thenReturn(firstStackV4Response)
+                .thenReturn(secondStackV4Response)
+                .thenReturn(thirdStackV4Response);
+
+        PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
+
+        Assertions.assertThrows(UserBreakException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig),
+                "Data lake deletion failed 'sdxcluster1', delete failed");
+        verify(stackV4Endpoint, times(5)).get(anyLong(), eq(sdxCluster.getClusterName()), anySet());
+    }
+
+    @Test
+    void waitCloudbreakClusterDeletionStackRetryFailedTest() {
+        long clusterId = CLUSTER_ID.incrementAndGet();
+        SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
+        sdxCluster.setClusterName("sdxcluster1");
+        when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
+
+        StackV4Response firstStackV4Response = new StackV4Response();
+        firstStackV4Response.setStatus(Status.DELETE_FAILED);
+        ClusterV4Response firstClusterResponse = new ClusterV4Response();
+        firstClusterResponse.setStatus(Status.DELETE_IN_PROGRESS);
+        firstStackV4Response.setCluster(firstClusterResponse);
+
+        StackV4Response secondStackV4Response = new StackV4Response();
+        secondStackV4Response.setStatus(Status.DELETE_FAILED);
+        ClusterV4Response secondClusterResponse = new ClusterV4Response();
+        secondClusterResponse.setStatus(Status.DELETE_COMPLETED);
+        secondStackV4Response.setCluster(secondClusterResponse);
+
+        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet()))
+                .thenReturn(firstStackV4Response)
+                .thenReturn(secondStackV4Response)
+                .thenThrow(new NotFoundException());
+
+        PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 400, TimeUnit.MILLISECONDS);
+
+        underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig);
+
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED, "Datalake stack deleted", sdxCluster);
+        verify(stackV4Endpoint, times(3)).get(anyLong(), eq(sdxCluster.getClusterName()), anySet());
+    }
+
     private DatabaseServerStatusV4Response getDatabaseServerResponse() {
         return new DatabaseServerStatusV4Response();
     }
