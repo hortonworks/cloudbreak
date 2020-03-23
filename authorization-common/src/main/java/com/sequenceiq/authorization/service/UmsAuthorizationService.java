@@ -92,6 +92,27 @@ public class UmsAuthorizationService {
         }
     }
 
+    // Checks that the calling actor is either performing an action against themselves or have the right
+    public void checkCallerIsSelfOrHasRight(String actorCrnStr, String targetUserCrnStr, AuthorizationResourceType resource,
+                                            AuthorizationResourceAction action) {
+        Crn actorCrn = Crn.safeFromString(actorCrnStr);
+        Crn targetUserCrn = Crn.safeFromString(targetUserCrnStr);
+        if (actorCrn.equals(targetUserCrn)) {
+            return;
+        }
+        String right = RightUtils.getRight(resource, action);
+        if (!actorCrn.getAccountId().equals(targetUserCrn.getAccountId())) {
+            String unauthorizedMessage = "Unauthorized to run this operation in a different account";
+            LOGGER.error(unauthorizedMessage);
+            throw new AccessDeniedException(unauthorizedMessage);
+        }
+        if (!umsClient.checkRight(GrpcUmsClient.INTERNAL_ACTOR_CRN, actorCrn.toString(), RightUtils.getRight(resource, action), getRequestId())) {
+            String unauthorizedMessage = String.format("You have no right to perform %s on user %s.", right, targetUserCrnStr);
+            LOGGER.error(unauthorizedMessage);
+            throw new AccessDeniedException(unauthorizedMessage);
+        }
+    }
+
     protected Optional<String> getRequestId() {
         String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
         if (requestId == null) {
