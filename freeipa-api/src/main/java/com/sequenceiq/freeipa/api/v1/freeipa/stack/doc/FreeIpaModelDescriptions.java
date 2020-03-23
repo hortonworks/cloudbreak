@@ -89,7 +89,5 @@ public class FreeIpaModelDescriptions {
         public static final String HOSTNAME = "Base hostname for FreeIPA servers";
         public static final String ADMIN_GROUP_NAME = "Name of the admin group to be used for all the services.";
         public static final String TAGS = "Tags on freeipa.";
-        public static final String FREEIPA_HOST = "A DNS load balanced FQDN to the FreeIPA servers";
-        public static final String FREEIPA_PORT = "The port for the load balanced FQDN to the FreeIPA servers";
     }
 }

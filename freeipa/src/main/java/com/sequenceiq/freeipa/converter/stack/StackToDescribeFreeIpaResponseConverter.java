@@ -29,7 +29,6 @@ import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
 
 @Component
 public class StackToDescribeFreeIpaResponseConverter {
@@ -68,7 +67,6 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setStatusString(stack.getStackStatus().getStatusString());
         describeFreeIpaResponse.setStatusReason(stack.getStackStatus().getStatusReason());
         decorateFreeIpaServerResponseWithIps(describeFreeIpaResponse.getFreeIpa(), describeFreeIpaResponse.getInstanceGroups());
-        decoreateFreeIpaServerResponseWithLoadBalancedHost(stack, describeFreeIpaResponse.getFreeIpa(), freeIpa);
         describeFreeIpaResponse.setAppVersion(stack.getAppVersion());
         decorateWithCloudStorgeAndTelemetry(stack, describeFreeIpaResponse);
         return describeFreeIpaResponse;
@@ -97,13 +95,6 @@ public class StackToDescribeFreeIpaResponseConverter {
                 cloudStorageResponse.setIdentities(identities);
                 response.setCloudStorage(cloudStorageResponse);
             }
-        }
-    }
-
-    private void decoreateFreeIpaServerResponseWithLoadBalancedHost(Stack stack, FreeIpaServerResponse freeIpaServerResponse, FreeIpa freeIpa) {
-        if (Objects.nonNull(freeIpaServerResponse)) {
-            freeIpaServerResponse.setFreeIpaHost(FreeIpaDomainUtils.getFreeIpaFqdn(freeIpa.getDomain()));
-            freeIpaServerResponse.setFreeIpaPort(stack.getGatewayport());
         }
     }
 

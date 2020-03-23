@@ -68,7 +68,7 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
         ldapConfig.setUserSearchBase(USER_SEARCH_BASE + domainComponent);
         ldapConfig.setGroupSearchBase(GROUP_SEARCH_BASE + domainComponent);
         ldapConfig.setUserDnPattern(USER_DN_PATTERN + domainComponent);
-        ldapConfig.setServerHost(FreeIpaDomainUtils.getLdapFqdn(freeIpa.getDomain()));
+        ldapConfig.setServerHost(getMasterInstance(stack).getDiscoveryFQDN());
         ldapConfig.setProtocol(PROTOCOL);
         ldapConfig.setServerPort(SERVER_PORT);
         ldapConfig.setDomain(freeIpa.getDomain());

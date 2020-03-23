@@ -16,12 +16,6 @@ public class FreeIpaServerResponse extends FreeIpaServerBase {
     @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.SERVER_IP)
     private Set<String> serverIp = new HashSet<>();
 
-    @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.FREEIPA_HOST)
-    private String freeIpaHost;
-
-    @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.FREEIPA_PORT)
-    private Integer freeIpaPort;
-
     public Set<String> getServerIp() {
         return serverIp;
     }
@@ -29,21 +23,4 @@ public class FreeIpaServerResponse extends FreeIpaServerBase {
     public void setServerIp(Set<String> serverIp) {
         this.serverIp = serverIp;
     }
-
-    public String getFreeIpaHost() {
-        return freeIpaHost;
-    }
-
-    public void setFreeIpaHost(String freeIpaHost) {
-        this.freeIpaHost = freeIpaHost;
-    }
-
-    public Integer getFreeIpaPort() {
-        return freeIpaPort;
-    }
-
-    public void setFreeIpaPort(Integer freeIpaPort) {
-        this.freeIpaPort = freeIpaPort;
-    }
-
 }

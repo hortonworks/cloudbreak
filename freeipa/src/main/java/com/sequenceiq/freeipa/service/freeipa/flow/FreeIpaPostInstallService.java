@@ -15,10 +15,8 @@ import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.User;
-import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -63,17 +61,10 @@ public class FreeIpaPostInstallService {
     @Inject
     private FreeIpaTopologyService freeIpaTopologyService;
 
-    @Inject
-    private FreeIpaService freeIpaService;
-
-    @Inject
-    private DnsLoadBalanceSetupService dnsLoadBalanceSetupService;
-
     public void postInstallFreeIpa(Long stackId) throws Exception {
         LOGGER.debug("Performing post-install configuration for stack {}", stackId);
         freeIpaTopologyService.updateReplicationTopology(stackId);
         Stack stack = stackService.getStackById(stackId);
-        FreeIpa freeIpa = freeIpaService.findByStack(stack);
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         Set<Permission> permission = freeIpaClient.findPermission(SET_PASSWORD_EXPIRATION_PERMISSION);
         if (permission.isEmpty()) {
@@ -87,7 +78,6 @@ public class FreeIpaPostInstallService {
         }
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
         modifyAdminPasswordExpirationIfNeeded(freeIpaClient);
-        dnsLoadBalanceSetupService.addDnsLoadBalancedEntries(freeIpaClient, freeIpa);
         userSyncService.synchronizeUsers(
                 ThreadBasedUserCrnProvider.getAccountId(), ThreadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
     }
@@ -105,5 +95,4 @@ public class FreeIpaPostInstallService {
             LOGGER.debug("Password expiration is already set.");
         }
     }
-
 }

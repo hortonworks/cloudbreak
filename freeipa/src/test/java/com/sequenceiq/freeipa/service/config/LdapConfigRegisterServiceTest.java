@@ -87,7 +87,7 @@ class LdapConfigRegisterServiceTest {
         assertEquals(ldapConfig.getUserSearchBase(), USER_SEARCH_BASE + domainComponent);
         assertEquals(ldapConfig.getGroupSearchBase(), GROUP_SEARCH_BASE + domainComponent);
         assertEquals(ldapConfig.getUserDnPattern(), USER_DN_PATTERN + domainComponent);
-        assertEquals(ldapConfig.getServerHost(), "ldap.testdomain.local");
+        assertEquals(ldapConfig.getServerHost(), instanceMetaData.getDiscoveryFQDN());
         assertEquals(ldapConfig.getProtocol(), PROTOCOL);
         assertEquals(ldapConfig.getServerPort(), SERVER_PORT);
         assertEquals(ldapConfig.getDomain(), freeIpa.getDomain());

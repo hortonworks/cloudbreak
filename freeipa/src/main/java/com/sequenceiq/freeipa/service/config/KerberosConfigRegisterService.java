@@ -40,7 +40,8 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
             environmentCrn = stack.getEnvironmentCrn();
         }
         KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setAdminUrl(FreeIpaDomainUtils.getKerberosFqdn(freeIpa.getDomain()));
+        InstanceMetaData master = getMasterInstance(stack);
+        kerberosConfig.setAdminUrl(master.getDiscoveryFQDN());
         kerberosConfig.setDomain(freeIpa.getDomain());
         kerberosConfig.setEnvironmentCrn(environmentCrn);
         kerberosConfig.setName(stack.getName());
@@ -51,7 +52,8 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
                 .flatMap(instanceGroup -> instanceGroup.getNotDeletedInstanceMetaDataSet().stream()).collect(Collectors.toSet());
         String allFreeIpaIpJoined = allNotDeletedInstances.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.joining(","));
         kerberosConfig.setNameServers(allFreeIpaIpJoined);
-        kerberosConfig.setUrl(FreeIpaDomainUtils.getKdcFqdn(freeIpa.getDomain()));
+        String allNotDeletedIpaInstanceFQDNJoined = allNotDeletedInstances.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.joining(","));
+        kerberosConfig.setUrl(allNotDeletedIpaInstanceFQDNJoined);
         kerberosConfig.setPassword(StringUtils.isBlank(password) ? freeIpa.getAdminPassword() : password);
         kerberosConfig.setClusterName(clusterName);
         return kerberosConfigService.createKerberosConfig(kerberosConfig, stack.getAccountId());
