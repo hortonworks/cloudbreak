@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -40,19 +42,25 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         LOGGER.info("add property values for NifiKnoxRoleConfigProvider");
-        String clusterName = source.getGeneralClusterConfigs().getClusterName();
-        String topologyName = source.getGatewayView().getTopologyName();
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
 
-        configs.add(config(PROXY_CONTEXT_PATH, String.format("%s/%s/nifi-app", clusterName, topologyName)));
-        LOGGER.debug("PROXY_CONTEXT_PATH added to template");
+        Set<String> topologyNames = source.getGatewayView().getGatewayTopologies().keySet();
+        if (!topologyNames.isEmpty()) {
+            String clusterName = source.getGeneralClusterConfigs().getClusterName();
+            String proxyContextPath = topologyNames.stream()
+                    .map(topologyName -> String.format("%s/%s/nifi-app", clusterName, topologyName))
+                    .collect(Collectors.joining(","));
+            LOGGER.debug("{} = {} added to template", PROXY_CONTEXT_PATH, proxyContextPath);
+            configs.add(config(PROXY_CONTEXT_PATH, proxyContextPath));
+        }
 
         Optional<ClouderaManagerProduct> cfm = getClouderaManagerProduct(source);
         Optional<ClusterExposedServiceView> nifi = getNifi(source);
 
         if (cfm.isPresent() && isVersionNewerOrEqualThanLimited(cfm.get().getVersion(), CFM_VERSION_2_0_0_0) && nifi.isPresent()) {
-            LOGGER.debug("NIFI_UI_KNOX_URL added to template");
-            configs.add(config(NIFI_UI_KNOX_URL, nifi.get().getServiceUrl()));
+            String nifiUiKnoxURL = nifi.get().getServiceUrl();
+            LOGGER.debug("{} = {} added to template", NIFI_UI_KNOX_URL, nifiUiKnoxURL);
+            configs.add(config(NIFI_UI_KNOX_URL, nifiUiKnoxURL));
         }
         return configs;
     }
