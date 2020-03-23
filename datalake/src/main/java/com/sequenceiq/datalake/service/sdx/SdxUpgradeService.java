@@ -92,8 +92,9 @@ public class SdxUpgradeService {
     public void changeImage(Long id, UpgradeOptionV4Response upgradeOption) {
         Optional<SdxCluster> cluster = sdxClusterRepository.findById(id);
         if (cluster.isPresent()) {
+            String targetImageId = upgradeOption.getUpgrade().getImageId();
             StackImageChangeV4Request stackImageChangeRequest = new StackImageChangeV4Request();
-            stackImageChangeRequest.setImageId(upgradeOption.getUpgrade().getImageId());
+            stackImageChangeRequest.setImageId(targetImageId);
             stackImageChangeRequest.setImageCatalogName(upgradeOption.getUpgrade().getImageCatalogName());
             sdxStatusService.setStatusForDatalakeAndNotify(
                     DatalakeStatusEnum.CHANGE_IMAGE_IN_PROGRESS,
@@ -203,7 +204,7 @@ public class SdxUpgradeService {
                 return sdxUpgradeFailed(sdxCluster, stackV4Response.getCluster().getStatusReason(), pollingMessage);
             } else {
                 if (FINISHED.equals(flowState)) {
-                    LOGGER.info("Flow finished, but stack hasn't upgraded: {}", sdxCluster.getClusterName());
+                    LOGGER.info("Flow finished, but stack hasn't been upgraded: {}", sdxCluster.getClusterName());
                     return sdxUpgradeFailed(sdxCluster, "stack is in improper state", pollingMessage);
                 } else {
                     return AttemptResults.justContinue();

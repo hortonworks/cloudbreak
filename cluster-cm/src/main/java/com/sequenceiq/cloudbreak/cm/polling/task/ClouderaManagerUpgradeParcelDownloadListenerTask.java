@@ -41,8 +41,8 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
         String parcelStage = apiParcel.getStage();
 
         if (!ParcelStatus.DOWNLOADED.name().equals(parcelStage)
-                || !ParcelStatus.DISTRIBUTED.name().equals(parcelStage)
-                || !ParcelStatus.ACTIVATED.name().equals(parcelStage)) {
+                && !ParcelStatus.DISTRIBUTED.name().equals(parcelStage)
+                && !ParcelStatus.ACTIVATED.name().equals(parcelStage)) {
             LOGGER.warn("Expected parcel status is {}, received status is: {}", ParcelStatus.DOWNLOADED.name(), parcelStage);
             return false;
         } else {
@@ -52,7 +52,7 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
 
     @Override
     public void handleTimeout(ClouderaManagerPollerObject toolsResourceApi) {
-        throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to download parcel.");
+        throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to download parcel in time.");
     }
 
     @Override

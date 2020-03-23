@@ -74,7 +74,7 @@ public class SdxRepairActions {
     }
 
     @Bean(name = "SDX_REPAIR_IN_PROGRESS_STATE")
-    public Action<?, ?> sdxStackDeletionInProgress() {
+    public Action<?, ?> sdxRepairInProgress() {
         return new AbstractSdxAction<>(SdxEvent.class) {
 
             @Override
@@ -137,7 +137,7 @@ public class SdxRepairActions {
             @Override
             protected void doExecute(SdxContext context, SdxRepairCouldNotStartEvent payload, Map<Object, Object> variables) throws Exception {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake repair could not start for datalakeId: {}", payload.getResourceId(), exception);
+                LOGGER.error("Datalake repair could not be started for datalake with id: {}", payload.getResourceId(), exception);
                 sendEvent(context, SDX_REPAIR_FAILED_HANDLED_EVENT.event(), payload);
             }
 

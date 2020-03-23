@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFoundExce
 import static java.util.stream.Collectors.toSet;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -35,6 +37,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
@@ -45,9 +48,12 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.FlowLog;
 
 @Component
 public class UpgradeService {
@@ -57,6 +63,8 @@ public class UpgradeService {
     private static final String SALT_BOOTSTRAP = "salt-bootstrap";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeService.class);
+
+    private static final String DATALAKE_UPGRADE = "DATALAKE_UPGRADE";
 
     @Inject
     private StackService stackService;
@@ -84,6 +92,12 @@ public class UpgradeService {
 
     @Inject
     private ReactorFlowManager flowManager;
+
+    @Inject
+    private FlowLogService flowLogService;
+
+    @Inject
+    private CloudbreakEventService eventService;
 
     public UpgradeOptionV4Response getOsUpgradeOptionByStackNameOrCrn(Long workspaceId, NameOrCrn nameOrCrn, User user) {
         try {
@@ -123,8 +137,21 @@ public class UpgradeService {
         Optional<Stack> stackOptional = stackService.findStackByNameAndWorkspaceId(stackName, workspaceId);
         if (stackOptional.isPresent()) {
             Stack stack = stackOptional.get();
-            StatedImage targetImage = updateImageComponents(imageId, stack);
-            return flowManager.triggerDatalakeClusterUpgrade(stack.getId(), targetImage);
+            List<FlowLog> flowLogs = flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(stack.getId());
+            if (!CollectionUtils.isEmpty(flowLogs)) {
+                String errorMsg = String.format("Repair cannot be performed because there is an active flow running: %s",
+                        flowLogs.stream().map(FlowLog::toString));
+                eventService.fireCloudbreakEvent(
+                        stack.getId(),
+                        DATALAKE_UPGRADE,
+                        ResourceEvent.DATALAKE_UPGRADE_COULD_NOT_START,
+                        List.of(errorMsg));
+                throw new BadRequestException(errorMsg);
+            } else {
+                StatedImage targetImage = updateImageComponents(imageId, stack);
+                return flowManager.triggerDatalakeClusterUpgrade(stack.getId(), targetImage);
+            }
+
         } else {
             throw notFoundException("Stack", stackName);
         }
@@ -177,9 +204,9 @@ public class UpgradeService {
     private boolean attachedClustersStoppedOrDeleted(Stack stack) {
         StackViewV4Responses stackViewV4Responses = distroXV1Endpoint.list(null, stack.getEnvironmentCrn());
         for (StackViewV4Response stackViewV4Response : stackViewV4Responses.getResponses()) {
-            if (!Status.getUpgradableStates().contains(stackViewV4Response.getStatus())
+            if (!Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getStatus())
                     || (stackViewV4Response.getCluster() != null
-                    && !Status.getUpgradableStates().contains(stackViewV4Response.getCluster().getStatus()))) {
+                    && !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getCluster().getStatus()))) {
                 return false;
             }
         }

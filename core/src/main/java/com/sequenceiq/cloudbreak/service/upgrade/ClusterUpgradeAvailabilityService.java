@@ -78,9 +78,9 @@ public class ClusterUpgradeAvailabilityService {
 
         String notStoppedAttachedClusters = stackViewV4Responses.getResponses().stream()
                 .filter(stackViewV4Response ->
-                                !Status.getUpgradableStates().contains(stackViewV4Response.getStatus())
+                                !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getStatus())
                                         || (stackViewV4Response.getCluster() != null
-                                        && !Status.getUpgradableStates().contains(stackViewV4Response.getCluster().getStatus())))
+                                        && !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getCluster().getStatus())))
                 .map(StackViewV4Response::getName).collect(Collectors.joining(","));
         if (!notStoppedAttachedClusters.isEmpty()) {
             upgradeOptions.setReason(String.format("There are attached Data Hub clusters in incorrect state: %s. "

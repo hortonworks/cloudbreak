@@ -13,7 +13,17 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiExceptionRetryPolicy.class);
 
-    private static final int RETRY_LIMIT = 15;
+    private static final int DEFAULT_MAX_ATTEMPTS = 5;
+
+    private volatile int maxAttempts;
+
+    public ApiExceptionRetryPolicy() {
+        this(DEFAULT_MAX_ATTEMPTS);
+    }
+
+    public ApiExceptionRetryPolicy(int maxAttempts) {
+        this.maxAttempts = maxAttempts;
+    }
 
     @Override
     public boolean canRetry(RetryContext context) {
@@ -22,7 +32,7 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
             return true;
         }
         if (lastThrowable instanceof ApiException) {
-            if (context.getRetryCount() <= RETRY_LIMIT) {
+            if (context.getRetryCount() <= maxAttempts) {
                 int code = ApiException.class.cast(lastThrowable).getCode();
                 HttpStatus httpStatus = HttpStatus.valueOf(code);
                 boolean httpStatus5xxServerError = httpStatus.is5xxServerError();
@@ -30,7 +40,7 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
                         code,
                         httpStatus5xxServerError,
                         context.getRetryCount(),
-                        RETRY_LIMIT);
+                        maxAttempts);
                 return httpStatus5xxServerError;
             } else {
                 return false;

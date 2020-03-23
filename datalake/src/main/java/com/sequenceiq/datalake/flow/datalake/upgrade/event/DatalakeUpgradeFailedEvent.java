@@ -23,4 +23,12 @@ public class DatalakeUpgradeFailedEvent extends SdxEvent {
     public Exception getException() {
         return exception;
     }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("DatalakeUpgradeFailedEvent{");
+        sb.append("exception=").append(exception);
+        sb.append('}');
+        return sb.toString();
+    }
 }

@@ -20,8 +20,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -351,6 +353,14 @@ class ClouderaManagerModificationServiceTest {
         verify(clustersResourceApi, times(1)).upgradeCdhCommand(stack.getName(), upgradeArgs);
         verify(clustersResourceApi, times(1)).deployClientConfig(stack.getName());
         verify(clustersResourceApi, times(1)).refresh(stack.getName());
+
+        InOrder inOrder = Mockito.inOrder(clouderaManagerResourceApi, parcelResourceApi, clustersResourceApi);
+        inOrder.verify(clouderaManagerResourceApi).updateConfig(any(), any());
+        inOrder.verify(parcelResourceApi).startDownloadCommand(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
+        inOrder.verify(parcelResourceApi).startDistributionCommand(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
+        inOrder.verify(clustersResourceApi).upgradeCdhCommand(stack.getName(), upgradeArgs);
+        inOrder.verify(clustersResourceApi).deployClientConfig(stack.getName());
+        inOrder.verify(clustersResourceApi).refresh(stack.getName());
 
     }
 

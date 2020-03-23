@@ -25,23 +25,40 @@ public interface ClusterModificationService {
 
     String getStackRepositoryJson(StackRepoDetails repoDetails, String stackRepoId);
 
-    Map<String, String> gatherInstalledComponents(String hostname);
-
-    void stopComponents(Map<String, String> components, String hostname) throws CloudbreakException;
-
-    void ensureComponentsAreStopped(Map<String, String> components, String hostname) throws CloudbreakException;
-
-    void initComponents(Map<String, String> components, String hostname) throws CloudbreakException;
-
-    void installComponents(Map<String, String> components, String hostname) throws CloudbreakException;
-
-    void regenerateKerberosKeytabs(String hostname, KerberosConfig kerberosConfig) throws CloudbreakException;
-
-    void startComponents(Map<String, String> components, String hostname) throws CloudbreakException;
-
     void cleanupCluster(Telemetry telemetry) throws CloudbreakException;
 
-    void restartAll() throws CloudbreakException;
-
     void upgradeClusterRuntime(Set<ClusterComponent> components) throws CloudbreakException;
+
+    default Map<String, String> gatherInstalledComponents(String hostname) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    default void stopComponents(Map<String, String> components, String hostname) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    default void ensureComponentsAreStopped(Map<String, String> components, String hostname) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    default void initComponents(Map<String, String> components, String hostname) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    default void installComponents(Map<String, String> components, String hostname) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    default void regenerateKerberosKeytabs(String hostname, KerberosConfig kerberosConfig) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    default void startComponents(Map<String, String> components, String hostname) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    default void restartAll() {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
 }

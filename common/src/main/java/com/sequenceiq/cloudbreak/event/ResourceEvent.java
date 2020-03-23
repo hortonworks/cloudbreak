@@ -222,6 +222,7 @@ public enum ResourceEvent {
     CLUSTER_AMBARI_CLUSTER_COULD_NOT_SYNC("cluster.ambari.cluster.could.not.sync"),
     CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED("cluster.ambari.cluster.synchronized"),
     DATALAKE_UPGRADE("datalake.upgrade"),
+    DATALAKE_UPGRADE_COULD_NOT_START("datalake.upgrade.could.not.start"),
     CLUSTER_MANAGER_UPGRADE("cluster.manager.upgrade"),
     CLUSTER_MANAGER_UPGRADE_FINISHED("cluster.manager.upgrade.finished"),
     CLUSTER_MANAGER_UPGRADE_FAILED("cluster.manager.upgrade.failed"),

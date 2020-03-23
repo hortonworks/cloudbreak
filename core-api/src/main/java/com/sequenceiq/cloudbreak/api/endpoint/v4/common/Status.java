@@ -97,7 +97,7 @@ public enum Status {
         }
     }
 
-    public static Set<Status> getUpgradableStates() {
+    public static Set<Status> getAllowedDataHubStatesForSdxUpgrade() {
         return Sets.immutableEnumSet(Status.STOPPED, Status.DELETE_COMPLETED,
                 Status.CREATE_FAILED, Status.DELETE_FAILED);
     }

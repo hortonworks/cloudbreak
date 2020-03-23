@@ -1,15 +1,18 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade;
 
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_IMAGE_CHANGE_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_COULD_NOT_START_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FAILED_HANDLED_EVENT;
-import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FAILED_TO_START_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FINALIZED_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_IMAGE_CHANGE_STATE;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_UPGRADE_COULD_NOT_START_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_UPGRADE_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_UPGRADE_FINISHED_STATE;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_UPGRADE_IN_PROGRESS_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_UPGRADE_START_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.INIT_STATE;
@@ -34,12 +37,14 @@ public class DatalakeUpgradeFlowConfig extends AbstractFlowConfiguration<Datalak
                     .event(DATALAKE_UPGRADE_EVENT).noFailureEvent()
 
                     .from(DATALAKE_UPGRADE_START_STATE)
+                    .to(DATALAKE_UPGRADE_IN_PROGRESS_STATE)
+                    .event(DATALAKE_UPGRADE_IN_PROGRESS_EVENT)
+                    .failureState(DATALAKE_UPGRADE_COULD_NOT_START_STATE)
+                    .failureEvent(DATALAKE_UPGRADE_COULD_NOT_START_EVENT)
+
+                    .from(DATALAKE_UPGRADE_IN_PROGRESS_STATE)
                     .to(DATALAKE_IMAGE_CHANGE_STATE)
                     .event(DATALAKE_IMAGE_CHANGE_EVENT).defaultFailureEvent()
-
-                    .from(DATALAKE_UPGRADE_START_STATE)
-                    .to(FINAL_STATE)
-                    .event(DATALAKE_UPGRADE_FAILED_TO_START_EVENT).defaultFailureEvent()
 
                     .from(DATALAKE_IMAGE_CHANGE_STATE)
                     .to(DATALAKE_UPGRADE_FINISHED_STATE)
