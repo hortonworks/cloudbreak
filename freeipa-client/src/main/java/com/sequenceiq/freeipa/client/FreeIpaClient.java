@@ -52,15 +52,29 @@ public class FreeIpaClient {
 
     private JsonRpcHttpClient jsonRpcHttpClient;
 
-    private String apiVersion;
+    private final String apiVersion;
 
-    public FreeIpaClient(JsonRpcHttpClient jsonRpcHttpClient) {
-        this(jsonRpcHttpClient, DEFAULT_API_VERSION);
+    private final String apiAddress;
+
+    private final String hostname;
+
+    public FreeIpaClient(JsonRpcHttpClient jsonRpcHttpClient, String apiAddress, String hostname) {
+        this(jsonRpcHttpClient, DEFAULT_API_VERSION, apiAddress, hostname);
     }
 
-    public FreeIpaClient(JsonRpcHttpClient jsonRpcHttpClient, String apiVersion) {
+    public FreeIpaClient(JsonRpcHttpClient jsonRpcHttpClient, String apiVersion, String apiAddress, String hostname) {
         this.jsonRpcHttpClient = jsonRpcHttpClient;
         this.apiVersion = apiVersion;
+        this.apiAddress = apiAddress;
+        this.hostname = hostname;
+    }
+
+    public String getApiAddress() {
+        return apiAddress;
+    }
+
+    public String getHostname() {
+        return hostname;
     }
 
     public User userShow(String user) throws FreeIpaClientException {

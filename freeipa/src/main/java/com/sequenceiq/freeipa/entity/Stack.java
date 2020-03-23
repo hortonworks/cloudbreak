@@ -323,6 +323,12 @@ public class Stack {
                 .collect(Collectors.toList());
     }
 
+    public List<InstanceMetaData> getAllInstanceMetaDataList() {
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getAllInstanceMetaData().stream())
+                .collect(Collectors.toList());
+    }
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
