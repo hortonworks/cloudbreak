@@ -34,7 +34,7 @@ import com.sequenceiq.flow.core.FlowState;
 @Configuration
 public class ClusterUpgradeActions {
 
-    public static final String TARGET_IMAGE = "TARGET_IMAGE";
+    private static final String TARGET_IMAGE = "TARGET_IMAGE";
 
     @Inject
     private StackService stackService;

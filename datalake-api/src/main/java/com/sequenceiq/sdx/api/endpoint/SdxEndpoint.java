@@ -191,7 +191,7 @@ public interface SdxEndpoint {
     @ApiOperation(value = "list advertised datalake versions", produces = MediaType.APPLICATION_JSON, nickname = "advertisedruntimes")
     List<AdvertisedRuntime> advertisedRuntimes();
 
-
+    @GET
     @Path("{name}/check_cluster_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "checks for cluster upgrade options by name", nickname = "checkForClusterUpgradeByName")

@@ -70,7 +70,7 @@ public class ClusterManagerUpgradeService {
                         singletonMap("cloudera-manager", singletonMap("repo", clouderaManagerRepo))));
 
                 SaltConfig pillar = new SaltConfig(servicePillar);
-                hostOrchestrator.upgradeClusterManager(gatewayConfig, gatewayFQDN, stackUtil.collectNodes(stack), pillar, exitCriteriaModel);
+                hostOrchestrator.upgradeClusterManager(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stack), pillar, exitCriteriaModel);
             } else {
                 throw new UnsupportedOperationException("Cloudera Manager upgrade supports host orchestrator only!");
             }

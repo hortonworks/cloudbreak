@@ -26,7 +26,7 @@ public class DatalakeUpgradeWaitHandler extends ExceptionCatcherEventHandler<Dat
 
     private static final int SLEEP_TIME_IN_SEC = 20;
 
-    private static final int DURATION_IN_MINUTES = 60;
+    private static final int DURATION_IN_MINUTES = 90;
 
     @Inject
     private SdxUpgradeService upgradeService;

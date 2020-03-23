@@ -282,20 +282,20 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public UpgradeOptionsV4Response checkForClusterUpgradeByCrn(String crn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxClusterUpgradeService.checkForStackUpgradeByCrn(crn, userCrn);
+        return sdxClusterUpgradeService.checkForClusterUpgradeByCrn(crn, userCrn);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public FlowIdentifier upgradeClusterByName(String name, String imageId) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxClusterUpgradeService.triggerUpgradeByName(userCrn, name, imageId);
+        return sdxClusterUpgradeService.triggerClusterUpgradeByName(userCrn, name, imageId);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public FlowIdentifier upgradeClusterByCrn(String crn, String imageId) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxClusterUpgradeService.triggerUpgradeByCrn(userCrn, crn, imageId);
+        return sdxClusterUpgradeService.triggerClusterUpgradeByCrn(userCrn, crn, imageId);
     }
 }

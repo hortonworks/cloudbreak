@@ -63,7 +63,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
@@ -195,46 +194,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.info("Could not upgrade Cloudera Runtime services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
-    }
-
-    @Override
-    public Map<String, String> gatherInstalledComponents(String hostname) {
-        return Map.of();
-    }
-
-    @Override
-    public void stopComponents(Map<String, String> components, String hostname) {
-
-    }
-
-    @Override
-    public void ensureComponentsAreStopped(Map<String, String> components, String hostname) {
-
-    }
-
-    @Override
-    public void initComponents(Map<String, String> components, String hostname) {
-
-    }
-
-    @Override
-    public void installComponents(Map<String, String> components, String hostname) {
-
-    }
-
-    @Override
-    public void regenerateKerberosKeytabs(String hostname, KerberosConfig kerberosConfig) {
-
-    }
-
-    @Override
-    public void startComponents(Map<String, String> components, String hostname) {
-
-    }
-
-    @Override
-    public void restartAll() {
-
     }
 
     private List<String> getUpscaleHosts(ClustersResourceApi clustersResourceApi, String clusterName, Collection<InstanceMetaData> instanceMetaDatas)
