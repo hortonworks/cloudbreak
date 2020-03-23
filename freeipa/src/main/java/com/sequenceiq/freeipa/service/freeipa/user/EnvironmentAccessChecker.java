@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
+import com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.RightUtils;
@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 
-import io.grpc.Status;
+import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;
 
 public class EnvironmentAccessChecker {
@@ -33,11 +33,12 @@ public class EnvironmentAccessChecker {
 
     private final String environmentCrn;
 
-    private final List<AuthorizationProto.RightCheck> rightChecks;
+    private final List<RightCheck> rightChecks;
 
     /**
      * Creates an EnvironmentAccessChecker instance.
-     * @param grpcUmsClient a GrpcUmsClient
+     *
+     * @param grpcUmsClient  a GrpcUmsClient
      * @param environmentCrn a environment CRN
      * @throws NullPointerException if the environmentCrn is null
      * @throws CrnParseException    if the environmentCrn does not match the CRN pattern or cannot be parsed
@@ -47,12 +48,12 @@ public class EnvironmentAccessChecker {
         Crn.safeFromString(environmentCrn);
         this.environmentCrn = environmentCrn;
 
-        this.rightChecks = List.of(
-                AuthorizationProto.RightCheck.newBuilder()
+        rightChecks = List.of(
+                RightCheck.newBuilder()
                         .setRight(ACCESS_ENVIRONMENT_RIGHT)
                         .setResource(environmentCrn)
                         .build(),
-                AuthorizationProto.RightCheck.newBuilder()
+                RightCheck.newBuilder()
                         .setRight(ADMIN_FREEIPA_RIGHT)
                         .build());
     }
@@ -68,7 +69,7 @@ public class EnvironmentAccessChecker {
             // NOT_FOUND errors indicate that a user/machineUser has been deleted after we have
             // retrieved the list of users/machineUsers from the UMS. Treat these users as if
             // they do not have the right to access this environment and belong to no groups.
-            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+            if (e.getStatus().getCode() == Code.NOT_FOUND) {
                 LOGGER.warn("Member CRN {} not found in UMS. Treating as if member has no rights to environment {}: {}",
                         memberCrn, environmentCrn, e.getLocalizedMessage());
                 return new EnvironmentAccessRights(false, false);
