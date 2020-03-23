@@ -243,7 +243,7 @@ class ProvisionerServiceTest {
         secondStackV4Response.setStatus(Status.DELETE_FAILED);
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenReturn(firstStackV4Response)
                 .thenReturn(secondStackV4Response);
-        PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
+        PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
 
         Assertions.assertThrows(UserBreakException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig));
     }
@@ -295,7 +295,7 @@ class ProvisionerServiceTest {
                 .thenReturn(secondStackV4Response)
                 .thenReturn(thirdStackV4Response);
 
-        PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
+        PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
 
         Assertions.assertThrows(UserBreakException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig),
                 "Data lake deletion failed 'sdxcluster1', delete failed");
@@ -326,7 +326,7 @@ class ProvisionerServiceTest {
                 .thenReturn(secondStackV4Response)
                 .thenThrow(new NotFoundException());
 
-        PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 400, TimeUnit.MILLISECONDS);
+        PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 1000, TimeUnit.MILLISECONDS);
 
         underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig);
 
