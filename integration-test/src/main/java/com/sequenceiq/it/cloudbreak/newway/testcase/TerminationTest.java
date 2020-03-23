@@ -37,7 +37,6 @@ public class TerminationTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testInstanceTermination(TestContext testContext) {
         testContext
-                // create stack
                 .given("ig", InstanceGroupEntity.class).withHostGroup(HostGroupType.WORKER).withNodeCount(3)
                 .given(StackEntity.class).replaceInstanceGroups("ig")
                 .when(Stack.postV2(), key("stack-post"))
@@ -54,7 +53,6 @@ public class TerminationTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testInstanceTerminationReplicationError(TestContext testContext) {
         testContext
-                // create stack
                 .given("ig", InstanceGroupEntity.class).withHostGroup(HostGroupType.WORKER).withNodeCount(2)
                 .given(StackEntity.class).replaceInstanceGroups("ig")
                 .when(Stack.postV2(), key("stack-post"))
