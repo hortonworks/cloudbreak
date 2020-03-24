@@ -9,10 +9,7 @@ import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.core.FlowParameters;
-import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
-import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
@@ -43,10 +40,6 @@ public abstract class AbstractFreeIpaCleanupAction<P extends Payload> extends Ab
     @Override
     protected Object getFailurePayload(P payload, Optional<FreeIpaContext> flowContext, Exception ex) {
         return null;
-    }
-
-    protected FreeIpaClient getFreeIpaClient(Stack stack) throws FreeIpaClientException {
-        return freeIpaClientFactory.getFreeIpaClientForStack(stack);
     }
 
     protected CleanupService getCleanupService() {

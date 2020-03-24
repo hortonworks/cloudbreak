@@ -21,6 +21,11 @@ public class FreeIpaClientException extends Exception {
         statusCode = OptionalInt.empty();
     }
 
+    public FreeIpaClientException(String message, Throwable cause, OptionalInt statusCode) {
+        super(message, cause);
+        this.statusCode = statusCode;
+    }
+
     public OptionalInt getStatusCode() {
         return statusCode;
     }
