@@ -55,10 +55,10 @@ public class SpiFileSystem extends DynamicModel {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("FileSystem{");
-        sb.append("name='").append(name).append('\'');
-        sb.append(", type='").append(type).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "FileSystem{" +
+                "name='" + name + '\'' +
+                ", type=" + type +
+                ", cloudFileSystems=" + cloudFileSystems +
+                '}';
     }
 }

@@ -28,20 +28,6 @@
       "AllowedPattern" : "subnet-[a-z0-9]*(?:,subnet-[a-z0-9]*)*"
     },
 
-    "StackOwner" : {
-      "Description" : "The instances will have this parameter as an Owner tag.",
-      "Type" : "String",
-      "MinLength": "1",
-      "MaxLength": "50"
-    },
-
-    "stackowner" : {
-       "Description" : "The instances will have this parameter as an owner tag.",
-       "Type" : "String",
-       "MinLength": "1",
-       "MaxLength": "200"
-    },
-
     "CBGateWayUserData" : {
       "Description" : "Gateway user data to be executed",
       "Type" : "String",
@@ -126,8 +112,6 @@
         "MaxSize" : ${group.instanceCount},
         "DesiredCapacity" : ${group.instanceCount},
         "Tags" : [ { "Key" : "Name", "Value" : { "Fn::Join" : ["-", [ { "Ref" : "StackName" }, "${group.groupName}"]] }, "PropagateAtLaunch" : "true" },
-                   { "Key" : "owner", "Value" : { "Ref" : "stackowner" }, "PropagateAtLaunch" : "true" },
-                   { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }, "PropagateAtLaunch" : "true" },
                    { "Key" : "instanceGroup", "Value" : "${group.groupName}", "PropagateAtLaunch" : "true" }]
       }
     },
@@ -180,10 +164,6 @@
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
         "GroupDescription" : "Allow access from web and bastion as well as outbound HTTP and HTTPS traffic",
-        "Tags" : [
-            { "Key" : "owner", "Value" : { "Ref" : "stackowner" }},
-            { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" }}
-        ],
         "VpcId" : { "Ref" : "VPCId" },
         "SecurityGroupIngress" : [
           <#list group.rules as r>

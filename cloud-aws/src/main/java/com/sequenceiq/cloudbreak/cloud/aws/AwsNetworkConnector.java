@@ -6,7 +6,6 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAI
 import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
-import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,7 +29,6 @@ import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.OnFailure;
-import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.Tag;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
@@ -40,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetSelectorStrategy;
+import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetSelectorStrategyType;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
@@ -49,15 +48,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
+import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
-import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetSelectorStrategyType;
 
 @Service
 public class AwsNetworkConnector implements NetworkConnector {
@@ -209,23 +207,7 @@ public class AwsNetworkConnector implements NetworkConnector {
                 .withOnFailure(OnFailure.DO_NOTHING)
                 .withTemplateBody(cloudFormationTemplate)
                 .withTags(awsTags)
-                .withCapabilities(CAPABILITY_IAM)
-                .withParameters(getStackParameters(creatorUser));
-    }
-
-    private Collection<Parameter> getStackParameters(String creatorUser) {
-        Collection<Parameter> parameters = new ArrayList<>();
-        parameters.addAll(asList(
-                getStackOwner("StackOwner", creatorUser),
-                getStackOwner("stackowner", creatorUser)
-        ));
-        return parameters;
-    }
-
-    private Parameter getStackOwner(String referenceName, String referenceValue) {
-        return new Parameter()
-                .withParameterKey(referenceName)
-                .withParameterValue(referenceValue);
+                .withCapabilities(CAPABILITY_IAM);
     }
 
     private PollTask<Boolean> getNewNetworkPollTask(AwsCredentialView credentialView, NetworkCreationRequest networkRequest) {
