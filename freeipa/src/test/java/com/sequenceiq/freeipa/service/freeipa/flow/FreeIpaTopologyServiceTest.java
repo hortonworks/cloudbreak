@@ -6,7 +6,6 @@ import com.sequenceiq.freeipa.client.model.TopologySegment;
 import com.sequenceiq.freeipa.client.model.TopologySuffix;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -37,9 +36,6 @@ class FreeIpaTopologyServiceTest {
 
     @Mock
     private Stack stack;
-
-    @Mock
-    private FreeIpaClientFactory freeIpaClientFactory;
 
     @Test
     void testGenerateTopology() throws FreeIpaClientException {
@@ -138,7 +134,6 @@ class FreeIpaTopologyServiceTest {
             imSet.add(im);
         }
         Mockito.when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(imSet);
-        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(Mockito.any())).thenReturn(freeIpaClient);
         TopologySuffix caSuffix = new TopologySuffix();
         caSuffix.setCn("ca");
         TopologySuffix domainSuffix = new TopologySuffix();
@@ -164,7 +159,7 @@ class FreeIpaTopologyServiceTest {
         if (expectedSegmentsToRemove > 0) {
             Mockito.when(freeIpaClient.deleteTopologySegment(Mockito.anyString(), Mockito.any())).thenReturn(new TopologySegment());
         }
-        underTest.updateReplicationTopology(1L);
+        underTest.updateReplicationTopology(1L, freeIpaClient);
         Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToAdd)).addTopologySegment(Mockito.eq("ca"), Mockito.any());
         Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToAdd)).addTopologySegment(Mockito.eq("domain"), Mockito.any());
         Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToRemove)).deleteTopologySegment(Mockito.eq("ca"), Mockito.any());

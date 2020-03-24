@@ -22,6 +22,7 @@ dependencies {
   implementation     group: 'org.apache.commons',               name: 'commons-lang3',               version: apacheCommonsLangVersion
   implementation     group: 'org.bouncycastle',                 name: 'bcprov-jdk15on',              version: bouncycastleVersion
   implementation     group: 'org.bouncycastle',                 name: 'bcpkix-jdk15on',              version: bouncycastleVersion
+  implementation     group: 'org.springframework',              name: 'spring-web',                  version: springFrameworkVersion
   testImplementation group: 'org.mockito',                      name: 'mockito-core',                version: mockitoVersion
   testCompile        group: 'junit',                            name: 'junit',                       version: junitVersion
 }

@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
+import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ErrorCodes.DUPLICATE_ENTRY;
+import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ErrorCodes.EXECUTION_ERROR;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,6 +26,7 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.VaultCleanupRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
+import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Keytab;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
@@ -261,12 +265,14 @@ public class KerberosMgmtV1Service {
         throw new KeytabCreationException(EMPTY_REALM);
     }
 
-    private Host addHost(String hostname, RoleRequest roleRequest, FreeIpaClient ipaClient) throws KeytabCreationException {
+    private Host addHost(String hostname, RoleRequest roleRequest, FreeIpaClient ipaClient) throws FreeIpaClientException, KeytabCreationException {
         Host host;
         try {
             try {
                 Optional<Host> optionalHost = fetchHostIfExists(hostname, ipaClient);
                 host = optionalHost.isEmpty() ? ipaClient.addHost(hostname) : optionalHost.get();
+            } catch (RetryableFreeIpaClientException e) {
+                throw e;
             } catch (FreeIpaClientException e) {
                 if (!FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
                     LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
@@ -276,6 +282,9 @@ public class KerberosMgmtV1Service {
             }
             allowHostKeytabRetrieval(hostname, freeIpaClientFactory.getAdminUser(), ipaClient);
             roleComponent.addRoleAndPrivileges(Optional.empty(), Optional.of(host), roleRequest, ipaClient);
+        } catch (RetryableFreeIpaClientException e) {
+            LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
+            throw new RetryableFreeIpaClientException(HOST_CREATION_FAILED, e, new KeytabCreationException(HOST_CREATION_FAILED));
         } catch (FreeIpaClientException e) {
             LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
             throw new KeytabCreationException(HOST_CREATION_FAILED);
@@ -289,7 +298,7 @@ public class KerberosMgmtV1Service {
     }
 
     private com.sequenceiq.freeipa.client.model.Service serviceAdd(ServiceKeytabRequest request, String realm, FreeIpaClient ipaClient)
-            throws KeytabCreationException {
+            throws FreeIpaClientException, KeytabCreationException {
         String canonicalPrincipal = constructPrincipal(request.getServiceName(), request.getServerHostName(), realm);
         com.sequenceiq.freeipa.client.model.Service service;
         try {
@@ -303,6 +312,9 @@ public class KerberosMgmtV1Service {
             }
             allowServiceKeytabRetrieval(service.getKrbcanonicalname(), freeIpaClientFactory.getAdminUser(), ipaClient);
             roleComponent.addRoleAndPrivileges(Optional.of(service), Optional.empty(), request.getRoleRequest(), ipaClient);
+        } catch (RetryableFreeIpaClientException e) {
+            LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + ' ' + e.getLocalizedMessage(), e);
+            throw new RetryableFreeIpaClientException(SERVICE_PRINCIPAL_CREATION_FAILED, e, new KeytabCreationException(SERVICE_PRINCIPAL_CREATION_FAILED));
         } catch (FreeIpaClientException e) {
             LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + ' ' + e.getLocalizedMessage(), e);
             throw new KeytabCreationException(SERVICE_PRINCIPAL_CREATION_FAILED);
@@ -345,7 +357,7 @@ public class KerberosMgmtV1Service {
             service = ipaClient.addServiceAlias(canonicalPrincipal, aliasPrincipal);
         } catch (FreeIpaClientException e) {
             if (!FreeIpaClientExceptionUtil.isExceptionWithErrorCode(e,
-                    Set.of(FreeIpaClientExceptionUtil.NOT_MAPPED_ERROR_CODE, FreeIpaClientExceptionUtil.DUPLICATE_ENTRY_ERROR_CODE))) {
+                    Set.of(EXECUTION_ERROR, DUPLICATE_ENTRY))) {
                 throw e;
             }
             service = ipaClient.showService(canonicalPrincipal);
@@ -353,9 +365,12 @@ public class KerberosMgmtV1Service {
         return service;
     }
 
-    private void delService(String canonicalPrincipal, FreeIpaClient ipaClient) throws DeleteException {
+    private void delService(String canonicalPrincipal, FreeIpaClient ipaClient) throws FreeIpaClientException, DeleteException {
         try {
             ipaClient.deleteService(canonicalPrincipal);
+        } catch (RetryableFreeIpaClientException e) {
+            LOGGER.error(SERVICE_PRINCIPAL_DELETION_FAILED + " " + e.getLocalizedMessage(), e);
+            throw new RetryableFreeIpaClientException(SERVICE_PRINCIPAL_DELETION_FAILED, e, new DeleteException(SERVICE_PRINCIPAL_DELETION_FAILED));
         } catch (FreeIpaClientException e) {
             if (!FreeIpaClientExceptionUtil.isNotFoundException(e)) {
                 LOGGER.error(SERVICE_PRINCIPAL_DELETION_FAILED + " " + e.getLocalizedMessage(), e);
@@ -382,20 +397,26 @@ public class KerberosMgmtV1Service {
         }
     }
 
-    private String getKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) throws KeytabCreationException {
+    private String getKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) throws FreeIpaClientException, KeytabCreationException {
         try {
             Keytab keytab = ipaClient.getKeytab(canonicalPrincipal);
             return keytab.getKeytab();
+        } catch (RetryableFreeIpaClientException e) {
+            LOGGER.error(KEYTAB_GENERATION_FAILED + " " + e.getLocalizedMessage(), e);
+            throw new RetryableFreeIpaClientException(KEYTAB_GENERATION_FAILED, e, new KeytabCreationException(KEYTAB_GENERATION_FAILED));
         } catch (FreeIpaClientException e) {
             LOGGER.error(KEYTAB_GENERATION_FAILED + " " + e.getLocalizedMessage(), e);
             throw new KeytabCreationException(KEYTAB_GENERATION_FAILED);
         }
     }
 
-    private String getExistingKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) throws KeytabCreationException {
+    private String getExistingKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) throws FreeIpaClientException, KeytabCreationException {
         try {
             Keytab keytab = ipaClient.getExistingKeytab(canonicalPrincipal);
             return keytab.getKeytab();
+        } catch (RetryableFreeIpaClientException e) {
+            LOGGER.error(KEYTAB_FETCH_FAILED + " " + e.getLocalizedMessage(), e);
+            throw new RetryableFreeIpaClientException(KEYTAB_FETCH_FAILED, e, new KeytabCreationException(KEYTAB_FETCH_FAILED));
         } catch (FreeIpaClientException e) {
             LOGGER.error(KEYTAB_FETCH_FAILED + " " + e.getLocalizedMessage(), e);
             throw new KeytabCreationException(KEYTAB_FETCH_FAILED);

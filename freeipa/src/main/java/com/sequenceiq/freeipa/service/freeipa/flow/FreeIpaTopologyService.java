@@ -7,7 +7,6 @@ import com.sequenceiq.freeipa.client.model.TopologySegment;
 import com.sequenceiq.freeipa.client.model.TopologySuffix;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import org.springframework.stereotype.Service;
 
@@ -29,15 +28,11 @@ class FreeIpaTopologyService {
     @Inject
     private StackService stackService;
 
-    @Inject
-    private FreeIpaClientFactory freeIpaClientFactory;
-
-    public void updateReplicationTopology(Long stackId) throws FreeIpaClientException {
+    public void updateReplicationTopology(Long stackId, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<String> allNodesFqdn = stack.getNotDeletedInstanceMetaDataSet().stream()
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(Collectors.toSet());
-        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         Set<TopologySegment> topology = generateTopology(allNodesFqdn).stream()
                 .map(pair -> {
                     TopologySegment s = new TopologySegment();
