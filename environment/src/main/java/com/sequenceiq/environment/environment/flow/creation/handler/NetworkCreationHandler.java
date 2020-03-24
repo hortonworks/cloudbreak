@@ -70,7 +70,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
         try {
             environmentService.findEnvironmentById(environmentDto.getId())
                     .ifPresent(environment -> {
-                        setChildEnvironmentNetworkIfItHasParent(environmentDto);
+                        setChildEnvironmentNetworkIfItHasParentWithTheSameCloudProvider(environmentDto);
                         if (environmentDto.getNetwork() != null) {
                             LOGGER.debug("Environment ({}) dto has network, hence we're filling it's related subnet fields", environment.getName());
                             environmentDto.getNetwork().setSubnetMetas(cloudNetworkService.retrieveSubnetMetadata(environmentDto,
@@ -94,9 +94,10 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
         }
     }
 
-    private void setChildEnvironmentNetworkIfItHasParent(EnvironmentDto currentEnvDto) {
+    private void setChildEnvironmentNetworkIfItHasParentWithTheSameCloudProvider(EnvironmentDto currentEnvDto) {
         String parentEnvName = currentEnvDto.getParentEnvironmentName();
-        if (StringUtils.isNotEmpty(parentEnvName)) {
+        if (StringUtils.isNotEmpty(parentEnvName) && currentEnvDto.getCloudPlatform() != null &&
+                currentEnvDto.getCloudPlatform().equals(currentEnvDto.getParentEnvironmentCloudPlatform())) {
             LOGGER.debug("Parent environment (with name: {} ) has detected, going to fetch it for it's network for the child.", parentEnvName);
             EnvironmentDto parentEnvDto = environmentService.getByNameAndAccountId(parentEnvName, currentEnvDto.getAccountId());
             NetworkDto parentNetworkDto = parentEnvDto.getNetwork();
