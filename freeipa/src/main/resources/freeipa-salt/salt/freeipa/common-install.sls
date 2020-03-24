@@ -1,3 +1,13 @@
+update_cnames:
+  cmd.run:
+    - name: /opt/salt/scripts/update_cnames.sh
+    - env:
+        - FPW: {{salt['pillar.get']('freeipa:password')}}
+        - DOMAIN: {{salt['pillar.get']('freeipa:domain')}}
+        - REALM: {{salt['pillar.get']('freeipa:realm')}}
+    - require:
+        - file: /opt/salt/scripts/update_cnames.sh
+
 one_week_next_update_grace_period:
   file.replace:
     - name: /var/lib/pki/pki-tomcat/ca/conf/CS.cfg
