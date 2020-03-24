@@ -6,7 +6,6 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAI
 import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
-import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +30,6 @@ import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.OnFailure;
-import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.Tag;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
@@ -60,6 +58,10 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+
+<<<<<<<HEAD
+=======
+        >>>>>>>CB-6218 remove stackowner
 
 @Service
 public class AwsNetworkConnector extends DefaultNetworkConnector {
@@ -232,23 +234,7 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
                 .withOnFailure(OnFailure.DO_NOTHING)
                 .withTemplateBody(cloudFormationTemplate)
                 .withTags(awsTags)
-                .withCapabilities(CAPABILITY_IAM)
-                .withParameters(getStackParameters(creatorUser));
-    }
-
-    private Collection<Parameter> getStackParameters(String creatorUser) {
-        Collection<Parameter> parameters = new ArrayList<>();
-        parameters.addAll(asList(
-                getStackOwner("StackOwner", creatorUser),
-                getStackOwner("stackowner", creatorUser)
-        ));
-        return parameters;
-    }
-
-    private Parameter getStackOwner(String referenceName, String referenceValue) {
-        return new Parameter()
-                .withParameterKey(referenceName)
-                .withParameterValue(referenceValue);
+                .withCapabilities(CAPABILITY_IAM);
     }
 
     private PollTask<Boolean> getNewNetworkPollTask(AwsCredentialView credentialView, NetworkCreationRequest networkRequest) {

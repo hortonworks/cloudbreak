@@ -168,7 +168,6 @@ public class AwsStackRequestHelperTest {
         assertContainsParameter(parameters, "PortParameter", "5432");
         assertContainsParameter(parameters, "StorageTypeParameter", "gp2");
         assertContainsParameter(parameters, "VPCSecurityGroupsParameter", "sg-1234,sg-5678");
-        assertContainsParameter(parameters, "StackOwner", "bob@cloudera.com");
     }
 
     @Test

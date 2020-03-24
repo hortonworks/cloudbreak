@@ -1,20 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Deploys a Cloudera Data Platform VPC on AWS.",
-  "Parameters": {
-    "StackOwner": {
-      "Description": "The instances will have this parameter as an Owner tag.",
-      "Type": "String",
-      "MinLength": "1",
-      "MaxLength": "200"
-    },
-    "stackowner": {
-      "Description": "The instances will have this parameter as an owner tag.",
-      "Type": "String",
-      "MinLength": "1",
-      "MaxLength": "200"
-    }
-  },
   "Resources": {
     "VPC": {
       "Type": "AWS::EC2::VPC",
@@ -32,6 +18,10 @@
           {
             "Key": "Name",
             "Value": "VPC-1"
+          },
+          {
+            "Key": "Network",
+            "Value": "Public"
           }
         ]
       }
@@ -49,6 +39,10 @@
           {
             "Key": "Name",
             "Value": "ig-1"
+          },
+          {
+            "Key": "Network",
+            "Value": "Public"
           }
         ]
       }
@@ -388,6 +382,10 @@
           {
             "Key": "Name",
             "Value": "prt-envName-1"
+          },
+          {
+            "Key": "Network",
+            "Value": "Public"
           }
         ]
       }
