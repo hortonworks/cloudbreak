@@ -14,13 +14,10 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_PROVISIONED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_PROVISIONING;
 import static java.lang.String.format;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -40,9 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -225,19 +220,6 @@ public class StackCreationService {
         }
     }
 
-    public void handleStackCreationFailure(Stack stack, Exception errorDetails) {
-        LOGGER.info("Error during stack creation flow:", errorDetails);
-        String errorReason = errorDetails == null ? "Unknown error" : errorDetails.getMessage();
-        if (errorDetails instanceof CancellationException || ExceptionUtils.getRootCause(errorDetails) instanceof CancellationException) {
-            LOGGER.debug("The flow has been cancelled.");
-        } else {
-            if (!stack.isStackInDeletionPhase()) {
-                handleFailure(stack, errorReason);
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, errorReason);
-            }
-        }
-    }
-
     private void sendNotification(CheckImageResult result, Stack stack) {
         notificationSender.send(getImageCopyNotification(result, stack));
     }
@@ -304,26 +286,5 @@ public class StackCreationService {
         if (!failedResources.isEmpty()) {
             throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext, failedResources));
         }
-    }
-
-    private List<CloudResourceStatus> removeFailedMetadata(Long stackId, List<CloudResourceStatus> statuses, Group group) {
-        Map<Long, CloudResourceStatus> failedResources = new HashMap<>();
-        Set<Long> groupPrivateIds = getPrivateIds(group);
-        for (CloudResourceStatus status : statuses) {
-            Long privateId = status.getPrivateId();
-            if (privateId != null && status.isFailed() && !failedResources.containsKey(privateId) && groupPrivateIds.contains(privateId)) {
-                failedResources.put(privateId, status);
-                instanceMetaDataService.deleteInstanceRequest(stackId, privateId);
-            }
-        }
-        return new ArrayList<>(failedResources.values());
-    }
-
-    private Set<Long> getPrivateIds(Group group) {
-        Set<Long> ids = new HashSet<>();
-        for (CloudInstance cloudInstance : group.getInstances()) {
-            ids.add(cloudInstance.getTemplate().getPrivateId());
-        }
-        return ids;
     }
 }
