@@ -134,16 +134,7 @@ public class ClusterBuilderService {
         clusterService.updateCluster(cluster);
         final Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
 
-        if (cluster.getProxyConfigCrn() != null) {
-            ProxyConfig proxyConfig = proxyConfigDtoService.getByCrn(cluster.getProxyConfigCrn());
-            if (proxyConfig != null) {
-                LOGGER.info("proxyConfig is not null, setup proxy for cluster");
-                connector.clusterSetupService().setupProxy(proxyConfig);
-            } else {
-                LOGGER.info("proxyConfig was not found by proxyConfigCrn");
-            }
-        }
-
+        setupProxy(connector, cluster);
         Set<DatalakeResources> datalakeResources = datalakeResourcesService
                 .findDatalakeResourcesByWorkspaceAndEnvironment(stack.getWorkspace().getId(), stack.getEnvironmentCrn());
 
@@ -197,6 +188,16 @@ public class ClusterBuilderService {
         }
     }
 
+    private void setupProxy(ClusterApi connector, Cluster cluster) {
+        Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByCrnWithEnvironmentFallback(cluster.getProxyConfigCrn(), cluster.getEnvironmentCrn());
+        proxyConfig.ifPresentOrElse(
+                pc -> {
+                    LOGGER.info("proxyConfig is not null, setup proxy for cluster: {}", pc);
+                    connector.clusterSetupService().setupProxy(pc);
+                },
+                () -> LOGGER.info("proxyConfig was not found by proxyConfigCrn"));
+    }
+
     private Map<HostGroup, List<InstanceMetaData>> loadInstanceMetadataForHostGroups(Iterable<HostGroup> hostGroups) {
         Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup = new HashMap<>();
         for (HostGroup hostGroup : hostGroups) {
@@ -206,5 +207,4 @@ public class ClusterBuilderService {
         }
         return instanceMetaDataByHostGroup;
     }
-
 }

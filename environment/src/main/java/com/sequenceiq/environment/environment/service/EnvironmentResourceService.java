@@ -30,6 +30,8 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
+import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 
 @Service
 public class EnvironmentResourceService {
@@ -48,16 +50,19 @@ public class EnvironmentResourceService {
 
     private final Clock clock;
 
+    private ProxyConfigService proxyConfigService;
+
     public EnvironmentResourceService(CredentialService credentialService, NetworkService networkService, CloudPlatformConnectors cloudPlatformConnectors,
-            CredentialToCloudCredentialConverter credentialToCloudCredentialConverter, Clock clock) {
+            CredentialToCloudCredentialConverter credentialToCloudCredentialConverter, Clock clock, ProxyConfigService proxyConfigService) {
         this.credentialService = credentialService;
         this.networkService = networkService;
         this.cloudPlatformConnectors = cloudPlatformConnectors;
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
         this.clock = clock;
+        this.proxyConfigService = proxyConfigService;
     }
 
-    public Credential getCredentialFromRequest(CredentialAwareEnvRequest request, String accountId, String creator) {
+    public Credential getCredentialFromRequest(CredentialAwareEnvRequest request, String accountId) {
         Credential credential;
         if (StringUtils.isNotEmpty(request.getCredentialName())) {
             try {
@@ -70,6 +75,18 @@ public class EnvironmentResourceService {
             throw new BadRequestException("No credential has been specified in request for environment creation.");
         }
         return credential;
+    }
+
+    public Optional<ProxyConfig> getProxyConfig(String proxyConfigName, String accountId) {
+        ProxyConfig proxyConfig = null;
+        if (StringUtils.isNotEmpty(proxyConfigName)) {
+            try {
+                proxyConfig = proxyConfigService.getByNameForAccountId(proxyConfigName, accountId);
+            } catch (NotFoundException e) {
+                throw new BadRequestException(String.format("No ProxyConfig found with name [%s] in the workspace.", proxyConfigName), e);
+            }
+        }
+        return Optional.ofNullable(proxyConfig);
     }
 
     public boolean createAndUpdateSshKey(Environment environment) {

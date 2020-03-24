@@ -18,6 +18,7 @@ jar {
 
 dependencies {
   compile project(':core-model')
+  compile project(':environment-common')
   compile project(':cloud-api')
   compile project(':template-manager-core')
 

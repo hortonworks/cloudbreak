@@ -76,6 +76,9 @@ public class EnvironmentModelDescription {
     public static final String FREEIPA_AWS_SPOT_PARAMETERS = "Aws spot instance related parameters.";
     public static final String FREEIPA_AWS_SPOT_PERCENTAGE = "Percentage of spot instances launched in FreeIpa instance group";
 
+    public static final String PROXYCONFIG_NAME = "Name of the proxyconfig of the environment.";
+    public static final String PROXYCONFIG_RESPONSE = "ProxyConfig attached to the environment.";
+
     private EnvironmentModelDescription() {
     }
 }

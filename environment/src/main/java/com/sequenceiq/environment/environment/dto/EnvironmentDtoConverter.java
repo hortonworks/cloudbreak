@@ -90,7 +90,8 @@ public class EnvironmentDtoConverter {
                 .withExperimentalFeatures(environment.getExperimentalFeaturesJson())
                 .withTags(environment.getEnvironmentTags())
                 .withSecurityAccess(environmentToSecurityAccessDto(environment))
-                .withAdminGroupName(environment.getAdminGroupName());
+                .withAdminGroupName(environment.getAdminGroupName())
+                .withProxyConfig(environment.getProxyConfig());
 
         doIfNotNull(environment.getParameters(), parameters -> builder.withParameters(
                 environmentParamsConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform())).convertToDto(parameters)));

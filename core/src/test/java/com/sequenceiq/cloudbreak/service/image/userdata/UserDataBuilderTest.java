@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
+import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -66,7 +68,40 @@ public class UserDataBuilderTest {
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
         // JSA todo add test for CCM parameters
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-            "cloudbreak", getPlatformParameters(), "pass", "cert", null);
+            "cloudbreak", getPlatformParameters(), "pass", "cert", null, null);
+        Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
+        Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+    }
+
+    @Test
+    public void testBuildUserDataAzureWithNoAuthProxy() throws IOException {
+        String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init-noauthproxy.sh");
+        String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
+        ProxyConfig proxyConfig = ProxyConfig.builder()
+                .withServerHost("proxy.host")
+                .withServerPort(1234)
+                .build();
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", null, proxyConfig);
+        Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
+        Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+    }
+
+    @Test
+    public void testBuildUserDataAzureWithAuthProxy() throws IOException {
+        String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init-authproxy.sh");
+        String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
+        ProxyAuthentication proxyAuthentication = ProxyAuthentication.builder()
+                .withUserName("user")
+                .withPassword("pwd")
+                .build();
+        ProxyConfig proxyConfig = ProxyConfig.builder()
+                .withServerHost("proxy.host")
+                .withServerPort(1234)
+                .withProxyAuthentication(proxyAuthentication)
+                .build();
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", null, proxyConfig);
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }

@@ -11,11 +11,13 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
@@ -26,7 +28,6 @@ import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyRequestCo
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyRequestToProxyConfigConverter;
 import com.sequenceiq.notification.NotificationController;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Controller
 @AuthorizationResource(type = AuthorizationResourceType.ENVIRONMENT)
@@ -65,6 +66,14 @@ public class ProxyController extends NotificationController implements ProxyEndp
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ProxyConfig config = proxyConfigService.getByNameForAccountId(name, accountId);
         return proxyConfigToProxyResponseConverter.convert(config);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    public ProxyResponse getByEnvironmentCrn(@ResourceCrn String environmentCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        ProxyConfig proxyConfig = proxyConfigService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        return proxyConfigToProxyResponseConverter.convert(proxyConfig);
     }
 
     @Override

@@ -95,6 +95,7 @@ dependencies {
   implementation project(':secret-engine')
   implementation project(':notification-sender')
   implementation project(':environment-api')
+  implementation project(':environment-common')
   implementation project(':cluster-proxy')
   implementation project(':status-checker')
   implementation project(':template-manager-tag')

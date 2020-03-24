@@ -436,12 +436,10 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_server").value(proxyConfig.getServerHost()));
         proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_port").value(String.valueOf(proxyConfig.getServerPort())));
         proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_protocol").value(proxyConfig.getProtocol().toUpperCase()));
-        if (proxyConfig.getUserName() != null) {
-            proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_user").value(proxyConfig.getUserName()));
-        }
-        if (proxyConfig.getPassword() != null) {
-            proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_password").value(proxyConfig.getPassword()));
-        }
+        proxyConfig.getProxyAuthentication().ifPresent(auth -> {
+            proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_user").value(auth.getUserName()));
+            proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_password").value(auth.getPassword()));
+        });
         try {
             LOGGER.info("Update settings with: " + proxyConfigList);
             clouderaManagerResourceApi.updateConfig("Update proxy settings", proxyConfigList);

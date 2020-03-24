@@ -88,6 +88,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.ADMIN_GROUP_NAME)
     private String adminGroupName;
 
+    @ApiModelProperty(EnvironmentModelDescription.PROXYCONFIG_NAME)
+    private String proxyConfigName;
+
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
@@ -243,5 +246,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setParentEnvironmentName(String parentEnvironmentName) {
         this.parentEnvironmentName = parentEnvironmentName;
+    }
+
+    public String getProxyConfigName() {
+        return proxyConfigName;
+    }
+
+    public void setProxyConfigName(String proxyConfigName) {
+        this.proxyConfigName = proxyConfigName;
     }
 }

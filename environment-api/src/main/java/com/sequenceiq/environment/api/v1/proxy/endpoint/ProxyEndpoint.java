@@ -42,6 +42,13 @@ public interface ProxyEndpoint {
     ProxyResponse getByName(@PathParam("name") String name);
 
     @GET
+    @Path("environment/crn/{environmentCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ProxyConfigDescription.GET_BY_ENVIRONMENT_CRN, produces = MediaType.APPLICATION_JSON,
+            notes = ProxyConfigDescription.PROXY_CONFIG_NOTES, nickname = "getProxyConfigByEnvironmentCrnV1", httpMethod = "GET")
+    ProxyResponse getByEnvironmentCrn(@PathParam("environmentCrn") String environmentCrn);
+
+    @GET
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON,

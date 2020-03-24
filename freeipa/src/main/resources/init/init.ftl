@@ -15,6 +15,19 @@ export SSH_USER=${sshUser}
 export SALT_BOOT_PASSWORD=${saltBootPassword}
 export SALT_BOOT_SIGN_KEY=${signaturePublicKey}
 export CB_CERT=${cbCert}
+<#if proxyEnabled!false>
+export IS_PROXY_ENABLED=true
+export PROXY_HOST=${proxyHost}
+export PROXY_PORT=${proxyPort}
+<#if proxyUser??>
+export PROXY_USER="${proxyUser}"
+<#if proxyPassword??>
+export PROXY_PASSWORD="${proxyPassword}"
+</#if>
+</#if>
+<#else>
+export IS_PROXY_ENABLED=false
+</#if>
 <#if ccmEnabled!false>
 export IS_CCM_ENABLED=true
 export CCM_HOST=${ccmHost}

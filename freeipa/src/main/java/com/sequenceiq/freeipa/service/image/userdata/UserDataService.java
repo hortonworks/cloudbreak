@@ -26,7 +26,9 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
@@ -63,6 +65,9 @@ public class UserDataService {
     private CredentialService credentialService;
 
     @Inject
+    private ProxyConfigDtoService proxyConfigDtoService;
+
+    @Inject
     private StackService stackService;
 
     @Inject
@@ -84,8 +89,9 @@ public class UserDataService {
         try {
             PlatformParameters platformParameters = platformParametersFuture.get();
             CcmParameters ccmParameters = fetchCcmParameters(stack);
+            Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             String userData = userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()), cbSshKeyDer, sshUser, platformParameters,
-                    saltBootPassword, cbCert, ccmParameters);
+                    saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
             imageService.decorateImageWithUserDataForStack(stack, userData);
             if (ccmParameters != null) {
                 String minaSshdServiceId = ccmParameters.getServerParameters().getMinaSshdServiceId();

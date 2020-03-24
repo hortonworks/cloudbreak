@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.dto;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
@@ -40,9 +39,6 @@ public class EnvironmentDto implements Payload {
 
     private Long deletionTimestamp = -1L;
 
-    // TODO: switch to dto
-    private Set<ProxyConfig> proxyConfigs = new HashSet<>();
-
     private NetworkDto network;
 
     private String accountId;
@@ -76,6 +72,8 @@ public class EnvironmentDto implements Payload {
     private String parentEnvironmentName;
 
     private String parentEnvironmentCloudPlatform;
+
+    private ProxyConfig proxyConfig;
 
     @Override
     public Long getResourceId() {
@@ -172,14 +170,6 @@ public class EnvironmentDto implements Payload {
 
     public void setDeletionTimestamp(Long deletionTimestamp) {
         this.deletionTimestamp = deletionTimestamp;
-    }
-
-    public Set<ProxyConfig> getProxyConfigs() {
-        return proxyConfigs;
-    }
-
-    public void setProxyConfigs(Set<ProxyConfig> proxyConfigs) {
-        this.proxyConfigs = proxyConfigs;
     }
 
     public NetworkDto getNetwork() {
@@ -318,6 +308,14 @@ public class EnvironmentDto implements Payload {
         this.parentEnvironmentCloudPlatform = parentEnvironmentCloudPlatform;
     }
 
+    public ProxyConfig getProxyConfig() {
+        return proxyConfig;
+    }
+
+    public void setProxyConfig(ProxyConfig proxyConfig) {
+        this.proxyConfig = proxyConfig;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentDto{"
@@ -355,8 +353,6 @@ public class EnvironmentDto implements Payload {
 
         private Long deletionTimestamp = -1L;
 
-        private Set<ProxyConfig> proxyConfigs = new HashSet<>();
-
         private NetworkDto network;
 
         private String accountId;
@@ -390,6 +386,8 @@ public class EnvironmentDto implements Payload {
         private String parentEnvironmentName;
 
         private String parentEnvironmentCloudPlatform;
+
+        private ProxyConfig proxyConfig;
 
         private Builder() {
         }
@@ -441,11 +439,6 @@ public class EnvironmentDto implements Payload {
 
         public Builder withDeletionTimestamp(Long deletionTimestamp) {
             this.deletionTimestamp = deletionTimestamp;
-            return this;
-        }
-
-        public Builder withProxyConfigs(Set<ProxyConfig> proxyConfigs) {
-            this.proxyConfigs = proxyConfigs;
             return this;
         }
 
@@ -539,6 +532,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withProxyConfig(ProxyConfig proxyConfig) {
+            this.proxyConfig = proxyConfig;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -552,7 +550,6 @@ public class EnvironmentDto implements Payload {
             environmentDto.setRegions(regions);
             environmentDto.setArchived(archived);
             environmentDto.setDeletionTimestamp(deletionTimestamp);
-            environmentDto.setProxyConfigs(proxyConfigs);
             environmentDto.setNetwork(network);
             environmentDto.setAccountId(accountId);
             environmentDto.setResourceCrn(resourceCrn);
@@ -570,6 +567,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setParentEnvironmentCrn(parentEnvironmentCrn);
             environmentDto.setParentEnvironmentName(parentEnvironmentName);
             environmentDto.setParentEnvironmentCloudPlatform(parentEnvironmentCloudPlatform);
+            environmentDto.setProxyConfig(proxyConfig);
             return environmentDto;
         }
     }

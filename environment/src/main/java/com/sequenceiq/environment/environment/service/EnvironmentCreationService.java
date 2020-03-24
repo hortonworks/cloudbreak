@@ -33,6 +33,7 @@ import com.sequenceiq.environment.environment.validation.EnvironmentValidatorSer
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 @Service
 public class EnvironmentCreationService {
@@ -120,9 +121,10 @@ public class EnvironmentCreationService {
     private Environment initializeEnvironment(EnvironmentCreationDto creationDto) {
         Environment environment = environmentDtoConverter.creationDtoToEnvironment(creationDto);
         environment.setResourceCrn(creationDto.getCrn());
-        Credential credential = environmentResourceService
-                .getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId(), creationDto.getCreator());
+        Credential credential = environmentResourceService.getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId());
         environment.setCredential(credential);
+        Optional<ProxyConfig> proxyConfig = environmentResourceService.getProxyConfig(creationDto.getProxyConfigName(), creationDto.getAccountId());
+        proxyConfig.ifPresent(pc -> environment.setProxyConfig(pc));
         environment.setCloudPlatform(credential.getCloudPlatform());
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
         return environment;

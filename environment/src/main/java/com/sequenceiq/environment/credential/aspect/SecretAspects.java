@@ -21,19 +21,19 @@ public class SecretAspects {
     @Inject
     private SecretAspectService secretAspectService;
 
-    @Pointcut("execution(public * com.sequenceiq.environment.credential.repository..*.save(..)) ")
+    @Pointcut("execution(public * com.sequenceiq.environment..repository..*.save(..)) ")
     public void onRepositorySave() {
     }
 
-    @Pointcut("execution(public void com.sequenceiq.environment.credential.repository..*.delete(..)) ")
+    @Pointcut("execution(public void com.sequenceiq.environment..repository..*.delete(..)) ")
     public void onRepositoryDelete() {
     }
 
-    @Pointcut("execution(public * com.sequenceiq.environment.credential.repository..*.saveAll(..)) ")
+    @Pointcut("execution(public * com.sequenceiq.environment..repository..*.saveAll(..)) ")
     public void onRepositorySaveAll() {
     }
 
-    @Pointcut("execution(public void com.sequenceiq.environment.credential.repository..*.deleteAll(..)) ")
+    @Pointcut("execution(public void com.sequenceiq.environment..repository..*.deleteAll(..)) ")
     public void onRepositoryDeleteAll() {
     }
 

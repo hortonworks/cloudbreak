@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.proxy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -19,8 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.vault.VaultException;
 
-import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
@@ -71,8 +72,9 @@ class ProxyConfigDtoServiceTest {
         assertEquals(proxyConfig.getName(), name);
         assertEquals(proxyConfig.getServerHost(), host);
         assertEquals(proxyConfig.getServerPort(), port);
-        assertEquals(proxyConfig.getUserName(), decryptedSecretValue);
-        assertEquals(proxyConfig.getPassword(), decryptedSecretValue);
+        assertTrue(proxyConfig.getProxyAuthentication().isPresent());
+        assertEquals(proxyConfig.getProxyAuthentication().get().getUserName(), decryptedSecretValue);
+        assertEquals(proxyConfig.getProxyAuthentication().get().getPassword(), decryptedSecretValue);
     }
 
     @Test

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -21,6 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig.ProxyConfigBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -74,31 +76,15 @@ public class ProxyConfigProviderTest {
     }
 
     @Test
-    public void testWithoutAuthUsernameSetProxy() {
-        ProxyConfigBuilder proxyConfig = ProxyConfig.builder();
-        proxyConfig.withUserName("test");
-        Map<String, Object> properties = testProxyCore(proxyConfig);
-        assertFalse(properties.containsKey("user"));
-        assertFalse(properties.containsKey("password"));
-    }
-
-    @Test
-    public void testWithoutAuthPasswordSetProxy() {
-        ProxyConfigBuilder proxyConfig = ProxyConfig.builder();
-        proxyConfig.withPassword("test");
-        Map<String, Object> properties = testProxyCore(proxyConfig);
-        assertFalse(properties.containsKey("user"));
-        assertFalse(properties.containsKey("password"));
-    }
-
-    @Test
     public void testWithAuthProxy() {
         ProxyConfigBuilder proxyConfig = ProxyConfig.builder();
-        proxyConfig.withUserName("user");
-        proxyConfig.withPassword("pass");
+        proxyConfig.withProxyAuthentication(ProxyAuthentication.builder()
+                .withUserName("user")
+                .withPassword("pass")
+                .build());
         Map<String, Object> properties = testProxyCore(proxyConfig);
-        assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("user")));
-        assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("password")));
+        assertEquals("user", properties.get("user"));
+        assertEquals("pass", properties.get("password"));
     }
 
     private Map<String, Object> testProxyCore(ProxyConfigBuilder proxyConfigBuilder) {
@@ -106,12 +92,12 @@ public class ProxyConfigProviderTest {
         proxyConfigBuilder.withServerPort(3128);
         proxyConfigBuilder.withProtocol("http");
         cluster.setProxyConfigCrn("ANY_CRN");
-        when(proxyConfigDtoService.getByCrn(anyString())).thenReturn(proxyConfigBuilder.build());
+        cluster.setEnvironmentCrn("ANY_CRN");
+        when(proxyConfigDtoService.getByCrnWithEnvironmentFallback(anyString(), anyString())).thenReturn(Optional.of(proxyConfigBuilder.build()));
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
         SaltPillarProperties pillarProperties = servicePillar.get(ProxyConfigProvider.PROXY_KEY);
         assertNotNull(pillarProperties);
         assertEquals(ProxyConfigProvider.PROXY_SLS_PATH, pillarProperties.getPath());
         return (Map<String, Object>) pillarProperties.getProperties().get(ProxyConfigProvider.PROXY_KEY);
     }
-
 }

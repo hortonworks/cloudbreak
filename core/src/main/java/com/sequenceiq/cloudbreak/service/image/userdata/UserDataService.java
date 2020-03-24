@@ -31,7 +31,9 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
@@ -65,6 +67,9 @@ public class UserDataService {
     @Inject
     private ImageService imageService;
 
+    @Inject
+    private ProxyConfigDtoService proxyConfigDtoService;
+
     public void createUserData(Long stackId) throws CloudbreakImageNotFoundException {
         Stack stack = stackService.getById(stackId);
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
@@ -84,8 +89,9 @@ public class UserDataService {
         try {
             PlatformParameters platformParameters = platformParametersFuture.get();
             CcmParameters ccmParameters = fetchCcmParameters(stack);
+            Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()), cbSshKeyDer,
-                    sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters);
+                    sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
             imageService.decorateImageWithUserDataForStack(stack, userData);
             if (ccmParameters != null) {
                 String minaSshdServiceId = ccmParameters.getServerParameters().getMinaSshdServiceId();

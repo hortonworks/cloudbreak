@@ -33,8 +33,6 @@ public class EnvironmentCreationDto {
 
     private final Set<String> regions;
 
-    private final Set<String> proxyNames;
-
     private final FreeIpaCreationDto freeIpaCreation;
 
     private final AuthenticationDto authentication;
@@ -57,13 +55,15 @@ public class EnvironmentCreationDto {
 
     private final String parentEnvironmentName;
 
+    private final String proxyConfigName;
+
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             String creator, LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
-            Set<String> regions, Set<String> proxyNames, FreeIpaCreationDto freeIpaCreation, AuthenticationDto authentication,
+            Set<String> regions, FreeIpaCreationDto freeIpaCreation, AuthenticationDto authentication,
             Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, String adminGroupName,
             ParametersDto parameters, ExperimentalFeatures experimentalFeatures, Map<String, String> tags, String crn,
-            String parentEnvironmentName) {
+            String parentEnvironmentName, String proxyConfigName) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -80,11 +80,6 @@ public class EnvironmentCreationDto {
         } else {
             this.regions = regions;
         }
-        if (CollectionUtils.isEmpty(proxyNames)) {
-            this.proxyNames = new HashSet<>();
-        } else {
-            this.proxyNames = proxyNames;
-        }
         this.authentication = authentication;
         this.telemetry = telemetry;
         this.securityAccess = securityAccess;
@@ -98,6 +93,7 @@ public class EnvironmentCreationDto {
         }
         this.crn = crn;
         this.parentEnvironmentName = parentEnvironmentName;
+        this.proxyConfigName = proxyConfigName;
     }
 
     public static Builder builder() {
@@ -126,10 +122,6 @@ public class EnvironmentCreationDto {
 
     public LocationDto getLocation() {
         return location;
-    }
-
-    public Set<String> getProxyNames() {
-        return proxyNames;
     }
 
     public String getAccountId() {
@@ -188,6 +180,10 @@ public class EnvironmentCreationDto {
         return parentEnvironmentName;
     }
 
+    public String getProxyConfigName() {
+        return proxyConfigName;
+    }
+
     public static final class Builder {
         private String name;
 
@@ -206,8 +202,6 @@ public class EnvironmentCreationDto {
         private CredentialAwareEnvRequest credential;
 
         private Set<String> regions;
-
-        private Set<String> proxyNames;
 
         private EnvironmentTelemetry telemetry;
 
@@ -230,6 +224,8 @@ public class EnvironmentCreationDto {
         private String crn;
 
         private String parentEnvironmentName;
+
+        private String proxyConfigName;
 
         private Builder() {
         }
@@ -276,11 +272,6 @@ public class EnvironmentCreationDto {
 
         public Builder withRegions(Set<String> regions) {
             this.regions = regions;
-            return this;
-        }
-
-        public Builder withProxyNames(Set<String> proxyNames) {
-            this.proxyNames = proxyNames;
             return this;
         }
 
@@ -339,11 +330,16 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withProxyConfigName(String proxyConfigName) {
+            this.proxyConfigName = proxyConfigName;
+            return this;
+        }
+
         public EnvironmentCreationDto build() {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, creator,
-                    location, network, credential, regions, proxyNames, freeIpaCreation, authentication,
+                    location, network, credential, regions, freeIpaCreation, authentication,
                     created, telemetry, securityAccess, adminGroupName, parameters, experimentalFeatures, tags, crn,
-                    parentEnvironmentName);
+                    parentEnvironmentName, proxyConfigName);
         }
     }
 }
