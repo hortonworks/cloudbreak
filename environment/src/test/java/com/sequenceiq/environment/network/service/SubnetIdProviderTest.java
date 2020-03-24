@@ -141,6 +141,25 @@ class SubnetIdProviderTest {
         Assertions.assertNotNull(actual);
     }
 
+    @Test
+    public void shouldReturnNullInCaseOfNonSupportedCloudPlatform() {
+        setupNotSupportedConnector();
+        NetworkDto networkDto = NetworkDto.builder()
+                .withSubnetMetas(Map.of(
+                        "AZ-a", new CloudSubnet("id-1", "name-1"),
+                        "AZ-b", new CloudSubnet("id-2", "name-2")
+                ))
+                .withCbSubnets(Map.of(
+                        "AZ-a", new CloudSubnet("id-1", "name-1"),
+                        "AZ-b", new CloudSubnet("id-2", "name-2")
+                ))
+                .build();
+
+        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+
+        Assertions.assertNull(actual);
+    }
+
     private NetworkConnector setupConnectorWithSelectionResult(List<CloudSubnet> selectedSubnets) {
         return setupConnector(null, selectedSubnets);
     }
@@ -160,5 +179,10 @@ class SubnetIdProviderTest {
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         return networkConnector;
+    }
+
+    private void setupNotSupportedConnector() {
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
     }
 }
