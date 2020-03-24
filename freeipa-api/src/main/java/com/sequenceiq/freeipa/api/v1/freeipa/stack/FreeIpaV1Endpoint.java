@@ -89,7 +89,7 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.TEXT_PLAIN)
     @ApiOperation(value = FreeIpaOperationDescriptions.GET_ROOTCERTIFICATE_BY_ENVID, produces = MediaType.TEXT_PLAIN, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "getFreeIpaRootCertificateByEnvironmentV1")
-    String getRootCertificate(@QueryParam("environment") @NotEmpty String environmentCrn);
+    String getRootCertificate(@QueryParam("environment") @NotEmpty String environmentCrn) throws Exception;
 
     @DELETE
     @Path("")

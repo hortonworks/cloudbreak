@@ -30,7 +30,12 @@ management:
 
 freeipa:
   cert.dir: /certs/
-  client.id: freeipa
+  client:
+    id: freeipa
+    retry:
+      delay: 500
+      multiplier: 2
+      retries: 5
   default.gateway.cidr: 0.0.0.0/0
   structuredevent:
     rest:

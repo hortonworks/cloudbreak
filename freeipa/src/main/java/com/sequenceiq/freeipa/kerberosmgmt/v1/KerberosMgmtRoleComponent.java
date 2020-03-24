@@ -15,6 +15,7 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.RoleRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Privilege;
 import com.sequenceiq.freeipa.client.model.Role;
@@ -25,21 +26,25 @@ public class KerberosMgmtRoleComponent {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtRoleComponent.class);
 
-    public boolean privilegesExist(RoleRequest roleRequest, FreeIpaClient ipaClient) {
-        return roleRequest == null ||
-            roleRequest.getPrivileges().stream().allMatch(privilegeName -> {
-                try {
-                    ipaClient.showPrivilege(privilegeName);
-                    return true;
-                } catch (FreeIpaClientException e) {
-                    if (!FreeIpaClientExceptionUtil.isNotFoundException(e)) {
-                        LOGGER.debug("Privilege [{}] does not exist", privilegeName);
-                    } else {
-                        LOGGER.error("Privilege [{}] show error", privilegeName, e);
-                    }
-                    return false;
-                }
-            });
+    public boolean privilegesExist(RoleRequest roleRequest, FreeIpaClient ipaClient) throws FreeIpaClientException {
+        try {
+            return roleRequest == null ||
+                    roleRequest.getPrivileges().stream().allMatch(privilegeName -> {
+                        try {
+                            ipaClient.showPrivilege(privilegeName);
+                            return true;
+                        } catch (FreeIpaClientException e) {
+                            if (!FreeIpaClientExceptionUtil.isNotFoundException(e)) {
+                                LOGGER.error("Privilege [{}] show error", privilegeName, e);
+                                throw new FreeIpaClientExceptionWrapper(e);
+                            }
+                            LOGGER.debug("Privilege [{}] does not exist", privilegeName);
+                            return false;
+                        }
+                    });
+        } catch (FreeIpaClientExceptionWrapper e) {
+            throw e.getWrappedException();
+        }
     }
 
     public void addRoleAndPrivileges(Optional<Service> service, Optional<Host> host, RoleRequest roleRequest,
@@ -64,19 +69,23 @@ public class KerberosMgmtRoleComponent {
     }
 
     private void addPrivilegesToRole(Set<String> privileges, FreeIpaClient ipaClient, Role role) throws FreeIpaClientException {
-        if (privileges != null) {
-            Set<String> privilegesToAdd = privileges.stream().filter(privilegeName -> {
-                try {
-                    Privilege privilege = ipaClient.showPrivilege(privilegeName);
-                    return privilege.getMember().stream().noneMatch(member -> member.equals(role.getCn()));
-                } catch (FreeIpaClientException e) {
-                    LOGGER.error("Privilege [{}] show error", privilegeName, e);
-                    return false;
+        try {
+            if (privileges != null) {
+                Set<String> privilegesToAdd = privileges.stream().filter(privilegeName -> {
+                    try {
+                        Privilege privilege = ipaClient.showPrivilege(privilegeName);
+                        return privilege.getMember().stream().noneMatch(member -> member.equals(role.getCn()));
+                    } catch (FreeIpaClientException e) {
+                        LOGGER.error("Privilege [{}] show error", privilegeName, e);
+                        throw new FreeIpaClientExceptionWrapper(e);
+                    }
+                }).collect(Collectors.toSet());
+                if (!privilegesToAdd.isEmpty()) {
+                    ipaClient.addRolePrivileges(role.getCn(), privilegesToAdd);
                 }
-            }).collect(Collectors.toSet());
-            if (!privilegesToAdd.isEmpty()) {
-                ipaClient.addRolePrivileges(role.getCn(), privilegesToAdd);
             }
+        } catch (FreeIpaClientExceptionWrapper e) {
+            throw e.getWrappedException();
         }
     }
 

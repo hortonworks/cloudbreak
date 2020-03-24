@@ -23,6 +23,7 @@ import com.sequenceiq.freeipa.client.ClusterProxyErrorRpcListener;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientBuilder;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -79,7 +80,11 @@ public class FreeIpaClientFactory {
         if (!stackStatus.isFreeIpaUnreachableStatus()) {
             try {
                 if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
-                    return getFreeIpaClientBuilderForClusterProxy(stack).build(withPing);
+                    try {
+                        return getFreeIpaClientBuilderForClusterProxy(stack).build(withPing);
+                    } catch (IOException e) {
+                        throw new RetryableFreeIpaClientException("Unable to connect to FreeIPA using cluster proxy", e);
+                    }
                 } else {
                     return createClientForDirectConnection(stack, withPing);
                 }
@@ -122,7 +127,7 @@ public class FreeIpaClientFactory {
     private boolean canTryAnotherInstance(boolean lastInstance, FreeIpaClientException e) {
         return !lastInstance &&
                 e.getStatusCode().isPresent() &&
-                e.getStatusCode().getAsInt() == HttpStatus.UNAUTHORIZED.value();
+                e.getStatusCode().getAsInt() != HttpStatus.UNAUTHORIZED.value();
     }
 
     private boolean canTryAnotherInstance(boolean lastInstance, IOException e) {

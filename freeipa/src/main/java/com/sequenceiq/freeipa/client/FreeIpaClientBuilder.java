@@ -193,11 +193,11 @@ public class FreeIpaClientBuilder {
                     }
                 }
 
-                throw new FreeIpaClientException(String.format("Encountered unexpected response from "
-                        + "FreeIPA; details:%n%n"
+                throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(String.format(
+                        "Encountered unexpected response from FreeIPA; details:%n%n"
                         + "code: %s%n"
                         + "headers: %s", response.getStatusLine().getStatusCode(), response.getAllHeaders()),
-                        response.getStatusLine().getStatusCode());
+                        response.getStatusLine().getStatusCode()));
             }
         }
         Cookie sessionCookie = cookieStore.getCookies().stream().filter(cookie -> "ipa_session".equalsIgnoreCase(cookie.getName())).findFirst().get();

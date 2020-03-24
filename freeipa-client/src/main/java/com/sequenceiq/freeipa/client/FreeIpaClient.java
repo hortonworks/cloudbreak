@@ -568,6 +568,10 @@ public class FreeIpaClient {
                 throw new NullPointerException("JSON-RPC response is null");
             }
             return response;
+        } catch (Exception e) {
+            String message = String.format("Invoke FreeIpa failed: %s", e.getLocalizedMessage());
+            LOGGER.error(message, e);
+            throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(message, e));
         } catch (Throwable throwable) {
             String message = String.format("Invoke FreeIpa failed: %s", throwable.getLocalizedMessage());
             LOGGER.error(message, throwable);

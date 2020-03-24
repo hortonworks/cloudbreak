@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
+import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 
@@ -33,6 +34,8 @@ public class HostDeletionService {
             try {
                 client.deleteHost(host);
                 hostCleanupSuccess.add(host);
+            } catch (RetryableFreeIpaClientException e) {
+                throw e;
             } catch (FreeIpaClientException e) {
                 handleErrorDuringDeletion(hostCleanupSuccess, hostCleanupFailed, host, e);
             }
@@ -59,12 +62,15 @@ public class HostDeletionService {
         return client.findAllHost().stream().map(Host::getFqdn).collect(Collectors.toSet());
     }
 
-    public void deleteHostsWithDeleteException(FreeIpaClient client, Set<String> hosts) throws DeleteException {
+    public void deleteHostsWithDeleteException(FreeIpaClient client, Set<String> hosts) throws FreeIpaClientException, DeleteException {
         try {
             Pair<Set<String>, Map<String, String>> removeHostsResult = removeHosts(client, hosts);
             if (!removeHostsResult.getSecond().isEmpty()) {
                 throw new DeleteException(HOST_DELETION_FAILED + ' ' + removeHostsResult.getSecond());
             }
+        } catch (RetryableFreeIpaClientException e) {
+            LOGGER.error(HOST_DELETION_FAILED + ' ' + e.getLocalizedMessage(), e);
+            throw new RetryableFreeIpaClientException(HOST_DELETION_FAILED, e, new DeleteException(HOST_DELETION_FAILED));
         } catch (FreeIpaClientException e) {
             LOGGER.error(HOST_DELETION_FAILED + ' ' + e.getLocalizedMessage(), e);
             throw new DeleteException(HOST_DELETION_FAILED);

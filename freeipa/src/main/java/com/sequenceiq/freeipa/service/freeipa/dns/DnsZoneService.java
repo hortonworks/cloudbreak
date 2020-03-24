@@ -17,6 +17,7 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.DnsZoneList;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
@@ -49,6 +50,8 @@ public class DnsZoneService {
                 client.addReverseDnsZone(subnet);
                 response.getSuccess().add(subnet);
                 LOGGER.debug("Subnet [{}] added", subnet);
+            } catch (RetryableFreeIpaClientException e) {
+                throw e;
             } catch (FreeIpaClientException e) {
                 LOGGER.warn("Can't add subnet's [{}] reverse DNS zone", subnet, e);
                 response.getFailed().put(subnet, e.getMessage());
@@ -93,6 +96,8 @@ public class DnsZoneService {
                     response.getSuccess().add(subnet.getKey());
                     LOGGER.debug("Subnet [{}] added", subnet);
                 }
+            } catch (RetryableFreeIpaClientException e) {
+                throw e;
             } catch (FreeIpaClientException e) {
                 LOGGER.warn("Can't add subnet's [{}] reverse DNS zone", subnet, e);
                 response.getFailed().put(subnet.getKey(), e.getMessage());
