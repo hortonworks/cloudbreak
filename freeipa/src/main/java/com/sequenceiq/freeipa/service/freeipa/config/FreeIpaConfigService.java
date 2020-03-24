@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -48,6 +49,9 @@ public class FreeIpaConfigService {
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
 
+    @Inject
+    private ProxyConfigDtoService proxyConfigDtoService;
+
     public FreeIpaConfigView createFreeIpaConfigs(Stack stack, Set<Node> hosts) {
         final FreeIpaConfigView.Builder builder = new FreeIpaConfigView.Builder();
 
@@ -71,7 +75,7 @@ public class FreeIpaConfigService {
         Backup backup = stack.getBackup();
         final FreeIpaBackupConfigView.Builder builder = new FreeIpaBackupConfigView.Builder();
         if (backup != null) {
-            builder.withEnabled(true)
+            builder.withEnabled(!proxyConfigDtoService.isProxyConfiguredForEnvironment(stack.getEnvironmentCrn()))
                     .withMonthlyFullEnabled(backup.isMonthlyFullEnabled())
                     .withHourlyEnabled(backup.isHourlyEnabled())
                     .withInitialFullEnabled(backup.isInitialFullEnabled())

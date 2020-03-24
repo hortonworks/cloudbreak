@@ -28,6 +28,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.store.EnvironmentStatusUpdater;
 
 @Entity
@@ -130,6 +131,9 @@ public class Environment implements AuthResource {
     @ManyToOne
     @JoinColumn(name = "parent_environment_id", referencedColumnName = "id")
     private Environment parentEnvironment;
+
+    @ManyToOne
+    private ProxyConfig proxyConfig;
 
     public Environment() {
         regions = new Json(new HashSet<Region>());
@@ -420,5 +424,13 @@ public class Environment implements AuthResource {
 
     public void setParentEnvironment(Environment parentEnvironment) {
         this.parentEnvironment = parentEnvironment;
+    }
+
+    public ProxyConfig getProxyConfig() {
+        return proxyConfig;
+    }
+
+    public void setProxyConfig(ProxyConfig proxyConfig) {
+        this.proxyConfig = proxyConfig;
     }
 }

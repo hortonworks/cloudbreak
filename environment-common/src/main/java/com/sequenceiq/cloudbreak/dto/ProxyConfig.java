@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.dto;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ProxyConfig implements Serializable {
 
@@ -15,21 +16,16 @@ public class ProxyConfig implements Serializable {
 
     private final String protocol;
 
-    private final String userName;
+    private final ProxyAuthentication proxyAuthentication;
 
-    private final String password;
-
-    //CHECKSTYLE:OFF
-    private ProxyConfig(String crn, String name, String serverHost, Integer serverPort, String protocol, String userName, String password) {
+    private ProxyConfig(String crn, String name, String serverHost, Integer serverPort, String protocol, ProxyAuthentication proxyAuthentication) {
         this.crn = crn;
         this.name = name;
         this.serverHost = serverHost;
         this.serverPort = serverPort;
         this.protocol = protocol;
-        this.userName = userName;
-        this.password = password;
+        this.proxyAuthentication = proxyAuthentication;
     }
-    //CHECKSTYLE:ON
 
     public static ProxyConfigBuilder builder() {
         return new ProxyConfigBuilder();
@@ -55,12 +51,20 @@ public class ProxyConfig implements Serializable {
         return protocol;
     }
 
-    public String getUserName() {
-        return userName;
+    public Optional<ProxyAuthentication> getProxyAuthentication() {
+        return Optional.ofNullable(proxyAuthentication);
     }
 
-    public String getPassword() {
-        return password;
+    @Override
+    public String toString() {
+        return "ProxyConfig{" +
+                "crn='" + crn + '\'' +
+                ", name='" + name + '\'' +
+                ", serverHost='" + serverHost + '\'' +
+                ", serverPort=" + serverPort +
+                ", protocol='" + protocol + '\'' +
+                ", proxyAuthentication=" + proxyAuthentication +
+                '}';
     }
 
     @Override
@@ -92,9 +96,7 @@ public class ProxyConfig implements Serializable {
 
         private String protocol;
 
-        private String userName;
-
-        private String password;
+        private ProxyAuthentication proxyAuthentication;
 
         private ProxyConfigBuilder() {
         }
@@ -124,18 +126,13 @@ public class ProxyConfig implements Serializable {
             return this;
         }
 
-        public ProxyConfigBuilder withUserName(String userName) {
-            this.userName = userName;
-            return this;
-        }
-
-        public ProxyConfigBuilder withPassword(String password) {
-            this.password = password;
+        public ProxyConfigBuilder withProxyAuthentication(ProxyAuthentication proxyAuthentication) {
+            this.proxyAuthentication = proxyAuthentication;
             return this;
         }
 
         public ProxyConfig build() {
-            return new ProxyConfig(crn, name, serverHost, serverPort, protocol, userName, password);
+            return new ProxyConfig(crn, name, serverHost, serverPort, protocol, proxyAuthentication);
         }
     }
 }

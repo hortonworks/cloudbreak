@@ -250,6 +250,7 @@ dependencies {
   compile project(':common-model')
   compile project(':workspace')
   compile project(':environment-api')
+  compile project(':environment-common')
   compile project(':authorization-common')
   compile project(':freeipa-api')
   compile project(':redbeams-api')

@@ -29,4 +29,10 @@ public interface ProxyConfigRepository extends JpaRepository<ProxyConfig, Long> 
     @Query("SELECT p FROM ProxyConfig p WHERE p.accountId= :accountId AND (p.name IN :nameList OR p.resourceCrn IN :nameList) "
             + "AND p.archived IS FALSE")
     Set<ProxyConfig> findByNameOrResourceCrnInAccount(@Param("nameList") Set<String> names, @Param("accountId") String accountId);
+
+    @Query("SELECT p FROM ProxyConfig p JOIN Environment e ON e.proxyConfig.id = p.id WHERE e.resourceCrn = :envCrn AND p.accountId = :accountId "
+            + "AND e.accountId = :accountId AND p.archived IS FALSE")
+    Optional<ProxyConfig> findByEnvironmentCrnAndAccountId(
+            @Param("envCrn") String envCrn,
+            @Param("accountId") String accountId);
 }

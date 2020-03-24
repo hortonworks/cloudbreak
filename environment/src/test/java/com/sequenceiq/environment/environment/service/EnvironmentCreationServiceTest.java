@@ -138,7 +138,7 @@ class EnvironmentCreationServiceTest {
         credential.setCloudPlatform("AZURE");
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), any(), any()))
+        when(environmentResourceService.getCredentialFromRequest(any(), any()))
                 .thenReturn(credential);
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
@@ -181,7 +181,7 @@ class EnvironmentCreationServiceTest {
         credential.setCloudPlatform("platform");
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(CRN)))
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID)))
                 .thenReturn(credential);
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
@@ -237,7 +237,7 @@ class EnvironmentCreationServiceTest {
         when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(any(), eq(ACCOUNT_ID))).thenReturn(Optional.of(parentEnvironment));
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(CRN)))
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID)))
                 .thenReturn(credential);
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
@@ -282,7 +282,7 @@ class EnvironmentCreationServiceTest {
         credential.setCloudPlatform("platform");
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(CRN)))
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID)))
                 .thenReturn(credential);
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
@@ -325,7 +325,7 @@ class EnvironmentCreationServiceTest {
         credential.setCloudPlatform("platform");
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID), eq(CRN)))
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID)))
                 .thenReturn(credential);
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());

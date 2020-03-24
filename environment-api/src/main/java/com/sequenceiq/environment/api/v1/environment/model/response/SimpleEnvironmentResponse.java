@@ -5,6 +5,7 @@ import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyViewResponse;
 
 import io.swagger.annotations.ApiModel;
 
@@ -14,12 +15,22 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
     private CredentialViewResponse credential;
 
+    private ProxyViewResponse proxyConfig;
+
     public CredentialViewResponse getCredential() {
         return credential;
     }
 
     public void setCredential(CredentialViewResponse credential) {
         this.credential = credential;
+    }
+
+    public ProxyViewResponse getProxyConfig() {
+        return proxyConfig;
+    }
+
+    public void setProxyConfig(ProxyViewResponse proxyConfig) {
+        this.proxyConfig = proxyConfig;
     }
 
     public static Builder builder() {
@@ -66,6 +77,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
         private TagResponse tags;
 
         private String parentEnvironmentName;
+
+        private ProxyViewResponse proxyConfig;
 
         private Builder() {
         }
@@ -170,6 +183,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withProxyConfig(ProxyViewResponse proxyConfig) {
+            this.proxyConfig = proxyConfig;
+            return this;
+        }
+
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -192,6 +210,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setAdminGroupName(adminGroupName);
             simpleEnvironmentResponse.setTags(tags);
             simpleEnvironmentResponse.setParentEnvironmentName(parentEnvironmentName);
+            simpleEnvironmentResponse.setProxyConfig(proxyConfig);
             return simpleEnvironmentResponse;
         }
     }

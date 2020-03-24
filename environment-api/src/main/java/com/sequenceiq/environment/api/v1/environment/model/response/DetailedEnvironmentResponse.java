@@ -10,6 +10,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -22,12 +23,23 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_RESPONSE)
     private CredentialResponse credential;
 
+    @ApiModelProperty(EnvironmentModelDescription.PROXYCONFIG_RESPONSE)
+    private ProxyResponse proxyConfig;
+
     public CredentialResponse getCredential() {
         return credential;
     }
 
     public void setCredential(CredentialResponse credential) {
         this.credential = credential;
+    }
+
+    public ProxyResponse getProxyConfig() {
+        return proxyConfig;
+    }
+
+    public void setProxyConfig(ProxyResponse proxyConfig) {
+        this.proxyConfig = proxyConfig;
     }
 
     public static final class Builder {
@@ -82,6 +94,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private String parentEnvironmentName;
 
         private String parentEnvironmentCloudPlatform;
+
+        private ProxyResponse proxyConfig;
 
         private Builder() {
         }
@@ -220,6 +234,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withProxyConfig(ProxyResponse proxyConfig) {
+            this.proxyConfig = proxyConfig;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -248,6 +267,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setParentEnvironmentCrn(parentEnvironmentCrn);
             detailedEnvironmentResponse.setParentEnvironmentName(parentEnvironmentName);
             detailedEnvironmentResponse.setParentEnvironmentCloudPlatform(parentEnvironmentCloudPlatform);
+            detailedEnvironmentResponse.setProxyConfig(proxyConfig);
             return detailedEnvironmentResponse;
         }
     }

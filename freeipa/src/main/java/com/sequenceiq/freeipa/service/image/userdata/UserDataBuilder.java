@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Configuration;
@@ -36,14 +37,14 @@ public class UserDataBuilder {
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     public String buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
-            PlatformParameters parameters, String saltBootPassword, String cbCert, CcmParameters ccmParameters) {
-        String userData = build(cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert, ccmParameters);
+            PlatformParameters parameters, String saltBootPassword, String cbCert, CcmParameters ccmParameters, ProxyConfig proxyConfig) {
+        String userData = build(cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert, ccmParameters, proxyConfig);
         LOGGER.debug("User data  content; {}", userData);
         return userData;
     }
 
     private String build(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
-            PlatformParameters params, String saltBootPassword, String cbCert, CcmParameters ccmParameters) {
+            PlatformParameters params, String saltBootPassword, String cbCert, CcmParameters ccmParameters, ProxyConfig proxyConfig) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
@@ -55,7 +56,24 @@ public class UserDataBuilder {
         model.put("saltBootPassword", saltBootPassword);
         model.put("cbCert", cbCert);
         CcmParameters.addToTemplateModel(ccmParameters, model);
+        extendModelWithProxyParams(proxyConfig, model);
         return build(model);
+    }
+
+    private void extendModelWithProxyParams(ProxyConfig proxyConfig, Map<String, Object> model) {
+        if (proxyConfig != null) {
+            model.put("proxyEnabled", Boolean.TRUE);
+            model.put("proxyHost", proxyConfig.getServerHost());
+            model.put("proxyPort", proxyConfig.getServerPort().toString());
+            proxyConfig.getProxyAuthentication().ifPresent(auth -> {
+                model.put("proxyUser", auth.getUserName());
+                model.put("proxyPassword", auth.getPassword());
+            });
+            LOGGER.info("Proxy config set up for freeipa instances' userdata script: {}", proxyConfig);
+        } else {
+            model.put("proxyEnabled", Boolean.FALSE);
+            LOGGER.info("No proxy config set up for freeipa instances' userdata script");
+        }
     }
 
     private String build(Map<String, Object> model) {

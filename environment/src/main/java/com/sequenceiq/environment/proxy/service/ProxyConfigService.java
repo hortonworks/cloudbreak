@@ -75,6 +75,11 @@ public class ProxyConfigService  {
                 .orElseThrow(notFound("No proxy config found with crn", crn));
     }
 
+    public ProxyConfig getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
+        return proxyConfigRepository.findByEnvironmentCrnAndAccountId(environmentCrn, accountId)
+                .orElseThrow(notFound("ProxyConfig for environmentCrn:", environmentCrn));
+    }
+
     public Set<ProxyConfig> listInAccount(String accountId) {
         return proxyConfigRepository.findAllInAccount(accountId);
     }

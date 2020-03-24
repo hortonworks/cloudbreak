@@ -4,39 +4,42 @@ import static java.util.Collections.singletonMap;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 
 @Service
 public class ProxyConfigProvider {
-
     public static final String PROXY_KEY = "proxy";
 
     public static final String PROXY_SLS_PATH = "/proxy/proxy.sls";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigProvider.class);
 
     @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
 
     public void decoratePillarWithProxyDataIfNeeded(Map<String, SaltPillarProperties> servicePillar, Cluster cluster) {
-        String proxyConfigCrn = cluster.getProxyConfigCrn();
-        if (StringUtils.isNotEmpty(proxyConfigCrn)) {
-            ProxyConfig proxyConfig = proxyConfigDtoService.getByCrn(proxyConfigCrn);
+        Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByCrnWithEnvironmentFallback(cluster.getProxyConfigCrn(), cluster.getEnvironmentCrn());
+        proxyConfig.ifPresent(pc -> {
             Map<String, Object> proxy = new HashMap<>();
-            proxy.put("host", proxyConfig.getServerHost());
-            proxy.put("port", proxyConfig.getServerPort());
-            proxy.put("protocol", proxyConfig.getProtocol());
-            if (StringUtils.isNotBlank(proxyConfig.getUserName()) && StringUtils.isNotBlank(proxyConfig.getPassword())) {
-                proxy.put("user", proxyConfig.getUserName());
-                proxy.put("password", proxyConfig.getPassword());
-            }
+            proxy.put("host", pc.getServerHost());
+            proxy.put("port", pc.getServerPort());
+            proxy.put("protocol", pc.getProtocol());
+            pc.getProxyAuthentication().ifPresent(auth -> {
+                proxy.put("user", auth.getUserName());
+                proxy.put("password", auth.getPassword());
+            });
             servicePillar.put(PROXY_KEY, new SaltPillarProperties(PROXY_SLS_PATH, singletonMap(PROXY_KEY, proxy)));
-        }
+            LOGGER.info("Salt pillar properties extend with proxy config: {}", pc);
+        });
     }
 }
