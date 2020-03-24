@@ -1,0 +1,6 @@
+name: "distrox-bigscale-tests"
+tests:
+  - name: "distrox-bigscale-tests"
+    parameters: {hostgroup: worker, scale_up: 100, scale_down: 10, times: 10}
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
