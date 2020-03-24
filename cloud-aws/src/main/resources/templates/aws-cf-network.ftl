@@ -4,21 +4,6 @@
 
   "Description" : "Deploys a Cloudera Data Platform VPC on AWS.",
 
-  "Parameters" : {
-    "StackOwner" : {
-        "Description" : "The instances will have this parameter as an Owner tag.",
-        "Type" : "String",
-        "MinLength": "1",
-        "MaxLength": "200"
-    },
-    "stackowner" : {
-        "Description" : "The instances will have this parameter as an owner tag.",
-        "Type" : "String",
-        "MinLength": "1",
-        "MaxLength": "200"
-    }
-  },
-
   "Resources" : {
 
     "VPC" : {
@@ -29,9 +14,7 @@
         "EnableDnsHostnames" : "true",
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+          { "Key" : "Network", "Value" : "Public" }
         ]
       }
     },
@@ -40,9 +23,7 @@
       "Properties" : {
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+          { "Key" : "Network", "Value" : "Public" }
         ]
       }
     },
@@ -65,9 +46,7 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "kubernetes.io/role/elb", "Value" : "1" },
-          { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+          { "Key" : "kubernetes.io/role/elb", "Value" : "1" }
         ]
       }
     },
@@ -82,9 +61,7 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Private" },
-          { "Key" : "kubernetes.io/role/elb", "Value" : "1" },
-          { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+          { "Key" : "kubernetes.io/role/elb", "Value" : "1" }
         ]
       }
     },
@@ -108,9 +85,7 @@
         "VpcId" : { "Ref" : "VPC" },
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Network", "Value" : "Private" },
-          { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+          { "Key" : "Network", "Value" : "Private" }
         ]
       }
     },
@@ -162,9 +137,7 @@
         "VpcId" : { "Ref" : "VPC" },
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "owner", "Value" : { "Ref" : "stackowner" } },
-          { "Key" : "Owner", "Value" : { "Ref" : "StackOwner" } }
+          { "Key" : "Network", "Value" : "Public" }
         ]
       }
     },

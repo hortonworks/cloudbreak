@@ -93,12 +93,17 @@ public class CloudStack {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("CloudStack{");
-        sb.append("groups=").append(groups);
-        sb.append(", network=").append(network);
-        sb.append(", image=").append(image);
-        sb.append(", cloudFileSystem=").append(fileSystem.orElse(null));
-        sb.append('}');
-        return sb.toString();
+        return "CloudStack{" +
+                "groups=" + groups +
+                ", network=" + network +
+                ", image=" + image +
+                ", template='" + template + '\'' +
+                ", loginUserName='" + loginUserName + '\'' +
+                ", publicKey='" + publicKey + '\'' +
+                ", parameters=" + parameters +
+                ", tags=" + tags +
+                ", instanceAuthentication=" + instanceAuthentication +
+                ", fileSystem=" + fileSystem +
+                '}';
     }
 }
