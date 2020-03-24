@@ -3,19 +3,22 @@ package com.sequenceiq.freeipa.kerberosmgmt;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigRepository;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.UserKeytabService;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.UserKeytabGenerator;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,6 +50,9 @@ class UserKeytabServiceTest {
     @Mock
     private UserKeytabGenerator userKeytabGenerator;
 
+    @Mock
+    private FreeIpaClientFactory freeIpaClientFactory;
+
     @InjectMocks
     private UserKeytabService underTest;
 
@@ -56,24 +62,50 @@ class UserKeytabServiceTest {
         return List.of(key1, key2);
     }
 
-    @Test
-    void testGetKeytabBase64() throws IOException {
-        String keytabBase64 = "keytabBase64...";
-
+    private void setupKerberosConfig() {
         KerberosConfig kerberosConfig = mock(KerberosConfig.class);
         when(kerberosConfig.getRealm()).thenReturn("realm");
         when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(any(), any()))
                 .thenReturn(Optional.of(kerberosConfig));
+    }
 
+    private void setupGrpcResponse() {
         GetActorWorkloadCredentialsResponse response = GetActorWorkloadCredentialsResponse.newBuilder()
                 .setWorkloadUsername("workloadUserName")
                 .addAllKerberosKeys(newActorKerberosKeys())
                 .build();
-
         when(grpcUmsClient.getActorWorkloadCredentials(any(), any(), any())).thenReturn(response);
+    }
+
+    @Test
+    void testGetKeytabBase64() throws FreeIpaClientException {
+        String keytabBase64 = "keytabBase64...";
+
+        setupKerberosConfig();
+        setupGrpcResponse();
+
+        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        when(freeIpaClient.userFind(any())).thenReturn(Optional.of(mock(User.class)));
+        when(freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(any(), any())).thenReturn(freeIpaClient);
+
         when(userKeytabGenerator.generateKeytabBase64(eq("workloadUserName"), eq("realm"), any())).thenReturn(keytabBase64);
 
         assertEquals(underTest.getKeytabBase64(USER_CRN, ENV_CRN), keytabBase64);
+    }
+
+    @Test
+    void testGetKeytabBase64WorkloadUserNotInEnvironment() throws FreeIpaClientException {
+        String keytabBase64 = "keytabBase64...";
+
+        setupKerberosConfig();
+        setupGrpcResponse();
+
+        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        when(freeIpaClient.userFind(any())).thenReturn(Optional.empty());
+        when(freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(any(), any())).thenReturn(freeIpaClient);
+
+        Exception exception = assertThrows(NotFoundException.class, () -> underTest.getKeytabBase64(USER_CRN, ENV_CRN));
+        assertEquals(String.format("Workload user workloadUserName has not been synced into environment %s", ENV_CRN), exception.getMessage());
     }
 
     @Test
