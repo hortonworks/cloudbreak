@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -174,16 +175,17 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
-        assertThat(templateString, containsString("AmbariNodesmaster"));
-        assertThat(templateString, containsString("AmbariNodeLaunchConfigmaster"));
-        assertThat(templateString, containsString("ClusterNodeSecurityGroupmaster"));
-        assertThat(templateString, containsString("AmbariNodesgateway"));
-        assertThat(templateString, containsString("AmbariNodeLaunchConfiggateway"));
-        assertThat(templateString, containsString("ClusterNodeSecurityGroupgateway"));
-        assertThat(templateString, not(containsString("testtagkey")));
-        assertThat(templateString, not(containsString("testtagvalue")));
-        assertThat(templateString, containsString(Integer.toString(ROOT_VOLUME_SIZE)));
+        Assertions.assertThat(templateString)
+                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+                .contains("AmbariNodesmaster")
+                .matches(template -> template.contains("AmbariNodeLaunchConfigmaster") || template.contains("ClusterManagerNodeLaunchTemplatemaster"))
+                .contains("ClusterNodeSecurityGroupmaster")
+                .contains("AmbariNodesgateway")
+                .matches(template -> template.contains("AmbariNodeLaunchConfiggateway") || template.contains("ClusterManagerNodeLaunchTemplategateway"))
+                .contains("ClusterNodeSecurityGroupgateway")
+                .doesNotContain("testtagkey")
+                .doesNotContain("testtagkey")
+                .contains(Integer.toString(ROOT_VOLUME_SIZE));
     }
 
     @Test

@@ -120,7 +120,10 @@
         <#else>
         "VPCZoneIdentifier" : [{ "Ref" : "SubnetId" }],
         </#if>
-        "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}" },
+        "LaunchTemplate" : {
+          "LaunchTemplateId": { "Ref" : "ClusterManagerNodeLaunchTemplate${group.groupName?replace('_', '')}" },
+          "Version": { "Fn::GetAtt": "ClusterManagerNodeLaunchTemplate${group.groupName?replace('_', '')}.LatestVersionNumber" }
+        },
         "TerminationPolicies" : [ "NewestInstance" ],
         "MinSize" : 0,
         "MaxSize" : ${group.instanceCount},
@@ -132,46 +135,50 @@
       }
     },
 
-    "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}"  : {
-      "Type" : "AWS::AutoScaling::LaunchConfiguration",
+    "ClusterManagerNodeLaunchTemplate${group.groupName?replace('_', '')}"  : {
+      "Type" : "AWS::EC2::LaunchTemplate",
       "Properties" : {
-        <#if group.ebsOptimized == true>
-        "EbsOptimized" : "true",
-        </#if>
-        <#if group.hasInstanceProfile>
-        "IamInstanceProfile" : "${group.instanceProfile}",
-        </#if>
-        "BlockDeviceMappings" : [
-          {
-            "DeviceName" : { "Ref" : "RootDeviceName" },
-            "Ebs" : {
-              "VolumeSize" : "${group.rootVolumeSize}",
-              "VolumeType" : "gp2"
+        "LaunchTemplateData": {
+          <#if group.ebsOptimized == true>
+          "EbsOptimized" : "true",
+          </#if>
+          <#if group.hasInstanceProfile>
+          "IamInstanceProfile" : {
+            "Arn": "${group.instanceProfile}"
+          },
+          </#if>
+          "BlockDeviceMappings" : [
+            {
+              "DeviceName" : { "Ref" : "RootDeviceName" },
+              "Ebs" : {
+                "VolumeSize" : "${group.rootVolumeSize}",
+                "VolumeType" : "gp2"
+              }
             }
-          }
-        ],
-        <#if group.ebsEncrypted == true>
-        "ImageId"        : "${group.encryptedAMI}",
-        <#else>
-        "ImageId"        : { "Ref" : "AMI" },
-        </#if>
-        <#if group.cloudSecurityIds?size != 0>
-        "SecurityGroups" : [ <#list group.cloudSecurityIds as cloudSecurityId>
-                               "${cloudSecurityId}"<#if cloudSecurityId_has_next>,</#if>
-                             </#list>
-                           ],
-        <#else>
-        "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup${group.groupName?replace('_', '')}" } ],
-        </#if>
-        "InstanceType"   : "${group.flavor}",
-        "KeyName"        : { "Ref" : "KeyName" },
-        <#if group.spotPrice??>
-        "SpotPrice"      : "${group.spotPrice}",
-        </#if>
-        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [ { "Ref" : "CBGateWayUserData"},
-                                                                  { "Ref" : "CBGateWayUserData1"},
-                                                                  { "Ref" : "CBGateWayUserData2"},
-                                                                  { "Ref" : "CBGateWayUserData3"}]] }}
+          ],
+          <#if group.ebsEncrypted == true>
+          "ImageId"        : "${group.encryptedAMI}",
+          <#else>
+          "ImageId"        : { "Ref" : "AMI" },
+          </#if>
+          <#if group.cloudSecurityIds?size != 0>
+          "SecurityGroupIds" : [ <#list group.cloudSecurityIds as cloudSecurityId>
+                                 "${cloudSecurityId}"<#if cloudSecurityId_has_next>,</#if>
+                               </#list>
+                             ],
+          <#else>
+          "SecurityGroupIds" : [ { "Ref" : "ClusterNodeSecurityGroup${group.groupName?replace('_', '')}" } ],
+          </#if>
+          "InstanceType"   : "${group.flavor}",
+          "KeyName"        : { "Ref" : "KeyName" },
+          <#if group.spotPrice??>
+          "SpotPrice"      : "${group.spotPrice}",
+          </#if>
+          "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [ { "Ref" : "CBGateWayUserData"},
+                                                                    { "Ref" : "CBGateWayUserData1"},
+                                                                    { "Ref" : "CBGateWayUserData2"},
+                                                                    { "Ref" : "CBGateWayUserData3"}]] }}
+        }
       }
     }
 

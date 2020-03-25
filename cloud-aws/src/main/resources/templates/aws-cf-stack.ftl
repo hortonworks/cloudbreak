@@ -312,7 +312,10 @@
         "VPCZoneIdentifier" : [{ "Ref" : "SubnetId" }],
         </#if>
         </#if>
-        "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}" },
+        "LaunchTemplate" : {
+          "LaunchTemplateId": { "Ref" : "ClusterManagerNodeLaunchTemplate${group.groupName?replace('_', '')}" },
+          "Version": { "Fn::GetAtt": "ClusterManagerNodeLaunchTemplate${group.groupName?replace('_', '')}.LatestVersionNumber" }
+        },
         "TerminationPolicies" : [ "NewestInstance" ],
         "MinSize" : 0,
         "MaxSize" : ${group.instanceCount},
@@ -324,65 +327,69 @@
       }
     },
 
-    "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}"  : {
-      "Type" : "AWS::AutoScaling::LaunchConfiguration",
+    "ClusterManagerNodeLaunchTemplate${group.groupName?replace('_', '')}"  : {
+      "Type" : "AWS::EC2::LaunchTemplate",
       "Properties" : {
-        <#if group.ebsOptimized == true>
-        "EbsOptimized" : "true",
-        </#if>
-        <#if group.hasInstanceProfile>
-        "IamInstanceProfile" : "${group.instanceProfile}",
-        </#if>
-      	"BlockDeviceMappings" : [
-      	  {
-            "DeviceName" : { "Ref" : "RootDeviceName" },
-            "Ebs" : {
-              "VolumeSize" : "${group.rootVolumeSize}",
-              "VolumeType" : "gp2"
-            }
-          }
-          <#assign ephemeralCount = group.getVolumeCount("ephemeral")>
-          <#if ephemeralCount != 0>
-            <#assign seq = ["b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]>
-            <#list seq as x>
-              <#if x_index = ephemeralCount><#break></#if>
-              ,{
-                "DeviceName" : "/dev/xvd${x}",
-                "VirtualName" : "ephemeral${x_index}"
-              }
-			</#list>
+        "LaunchTemplateData": {
+          <#if group.ebsOptimized == true>
+          "EbsOptimized" : "true",
           </#if>
-        ],
-      	<#if group.ebsEncrypted == true>
-      	"ImageId"        : "${group.encryptedAMI}",
-        <#else>
-        "ImageId"        : { "Ref" : "AMI" },
-        </#if>
-        <#if group.cloudSecurityIds?size != 0>
-        "SecurityGroups" : [ <#list group.cloudSecurityIds as cloudSecurityId>
-                               "${cloudSecurityId}"<#if cloudSecurityId_has_next>,</#if>
-                             </#list>
-                           ],
-        <#else>
-        "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup${group.groupName?replace('_', '')}" } ],
-        </#if>
-        "InstanceType"   : "${group.flavor}",
-        "KeyName"        : { "Ref" : "KeyName" },
-        <#if group.spotPrice??>
-        "SpotPrice"      : "${group.spotPrice}",
-        </#if>
-        <#if group.type == "CORE">
-        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [ { "Ref" : "CBUserData"},
-                                                                  { "Ref" : "CBUserData1"},
-                                                                  { "Ref" : "CBUserData2"},
-                                                                  { "Ref" : "CBUserData3"}]] }}
-        </#if>
-        <#if group.type == "GATEWAY">
-        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [ { "Ref" : "CBGateWayUserData"},
-                                                                  { "Ref" : "CBGateWayUserData1"},
-                                                                  { "Ref" : "CBGateWayUserData2"},
-                                                                  { "Ref" : "CBGateWayUserData3"}]] }}
-        </#if>
+          <#if group.hasInstanceProfile>
+          "IamInstanceProfile" : {
+            "Arn": "${group.instanceProfile}"
+          },
+          </#if>
+          "BlockDeviceMappings" : [
+            {
+              "DeviceName" : { "Ref" : "RootDeviceName" },
+              "Ebs" : {
+                "VolumeSize" : "${group.rootVolumeSize}",
+                "VolumeType" : "gp2"
+              }
+            }
+            <#assign ephemeralCount = group.getVolumeCount("ephemeral")>
+            <#if ephemeralCount != 0>
+              <#assign seq = ["b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]>
+              <#list seq as x>
+                <#if x_index = ephemeralCount><#break></#if>
+                ,{
+                  "DeviceName" : "/dev/xvd${x}",
+                  "VirtualName" : "ephemeral${x_index}"
+                }
+              </#list>
+            </#if>
+          ],
+          <#if group.ebsEncrypted == true>
+          "ImageId"        : "${group.encryptedAMI}",
+          <#else>
+          "ImageId"        : { "Ref" : "AMI" },
+          </#if>
+          <#if group.cloudSecurityIds?size != 0>
+          "SecurityGroupIds" : [ <#list group.cloudSecurityIds as cloudSecurityId>
+                                 "${cloudSecurityId}"<#if cloudSecurityId_has_next>,</#if>
+                               </#list>
+                             ],
+          <#else>
+          "SecurityGroupIds" : [ { "Ref" : "ClusterNodeSecurityGroup${group.groupName?replace('_', '')}" } ],
+          </#if>
+          "InstanceType"   : "${group.flavor}",
+          "KeyName"        : { "Ref" : "KeyName" },
+          <#if group.spotPrice??>
+          "SpotPrice"      : "${group.spotPrice}",
+          </#if>
+          <#if group.type == "CORE">
+          "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [ { "Ref" : "CBUserData"},
+                                                                    { "Ref" : "CBUserData1"},
+                                                                    { "Ref" : "CBUserData2"},
+                                                                    { "Ref" : "CBUserData3"}]] }}
+          </#if>
+          <#if group.type == "GATEWAY">
+          "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [ { "Ref" : "CBGateWayUserData"},
+                                                                    { "Ref" : "CBGateWayUserData1"},
+                                                                    { "Ref" : "CBGateWayUserData2"},
+                                                                    { "Ref" : "CBGateWayUserData3"}]] }}
+          </#if>
+        }
       }
     }
 
