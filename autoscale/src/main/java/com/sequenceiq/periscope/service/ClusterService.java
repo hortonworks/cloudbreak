@@ -186,7 +186,7 @@ public class ClusterService {
         return cluster;
     }
 
-    public Cluster setAutoscaleState(Long clusterId, boolean enableAutoscaling) {
+    public Cluster setAutoscaleState(Long clusterId, Boolean enableAutoscaling) {
         Cluster cluster = findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
         cluster.setAutoscalingEnabled(enableAutoscaling);
@@ -194,6 +194,10 @@ public class ClusterService {
         cluster = clusterRepository.save(cluster);
         calculateClusterStateMetrics();
         return cluster;
+    }
+
+    public String findStackCrnById(Long clusterId) {
+        return clusterRepository.findStackCrnById(clusterId);
     }
 
     public List<Cluster> findAllByStateAndNode(ClusterState state, String nodeId) {

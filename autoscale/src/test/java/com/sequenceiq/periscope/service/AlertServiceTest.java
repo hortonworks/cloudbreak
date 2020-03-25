@@ -3,6 +3,7 @@ package com.sequenceiq.periscope.service;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.NODE_COUNT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
@@ -74,15 +75,15 @@ public class AlertServiceTest {
         LoadAlert testAlert = getLoadAlert();
 
         when(loadAlertRepository.findByCluster(alertId, clusterId)).thenReturn(mockLoadAlert);
+        when(mockLoadAlert.getScalingPolicy()).thenReturn(new ScalingPolicy());
         when(loadAlertRepository.save(mockLoadAlert)).thenReturn(mockLoadAlert);
 
         LoadAlert response = underTest.updateLoadAlert(clusterId, alertId, testAlert);
         assertNotNull("LoadAlert should not be null", response);
 
-        verify(loadAlertRepository).save(any(LoadAlert.class));
         verify(mockLoadAlert).setName(anyString());
         verify(mockLoadAlert).setDescription(anyString());
-        verify(mockLoadAlert).setScalingPolicy(any(ScalingPolicy.class));
+        verify(mockLoadAlert, times(4)).getScalingPolicy();
         verify(loadAlertRepository).save(mockLoadAlert);
     }
 
@@ -126,17 +127,17 @@ public class AlertServiceTest {
         TimeAlert testAlert = getTimeAlert();
 
         when(timeAlertRepository.findByCluster(alertId, clusterId)).thenReturn(mockTimeAlert);
+        when(mockTimeAlert.getScalingPolicy()).thenReturn(new ScalingPolicy());
         when(timeAlertRepository.save(mockTimeAlert)).thenReturn(mockTimeAlert);
 
         TimeAlert response = underTest.updateTimeAlert(clusterId, alertId, testAlert);
         assertNotNull("TimeAlert should not be null", response);
 
-        verify(timeAlertRepository).save(any(TimeAlert.class));
         verify(mockTimeAlert).setName(anyString());
-        verify(mockTimeAlert).setDescription(anyString());
         verify(mockTimeAlert).setDescription(anyString());
         verify(mockTimeAlert).setCron(anyString());
         verify(mockTimeAlert).setTimeZone(anyString());
+        verify(mockTimeAlert, times(4)).getScalingPolicy();
         verify(timeAlertRepository).save(mockTimeAlert);
     }
 

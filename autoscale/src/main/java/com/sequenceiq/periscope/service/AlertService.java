@@ -132,12 +132,18 @@ public class AlertService {
         return timeAlertRepository.findByCluster(alertId, clusterId);
     }
 
-    public TimeAlert updateTimeAlert(Long clusterId, Long alertId, TimeAlert timeAlert) {
+    public TimeAlert updateTimeAlert(Long clusterId, Long alertId, TimeAlert timeAlertForUpdate) {
         TimeAlert alert = timeAlertRepository.findByCluster(alertId, clusterId);
-        alert.setDescription(timeAlert.getDescription());
-        alert.setCron(timeAlert.getCron());
-        alert.setTimeZone(timeAlert.getTimeZone());
-        alert.setName(timeAlert.getName());
+        alert.setDescription(timeAlertForUpdate.getDescription());
+        alert.setCron(timeAlertForUpdate.getCron());
+        alert.setTimeZone(timeAlertForUpdate.getTimeZone());
+        alert.setName(timeAlertForUpdate.getName());
+        if (timeAlertForUpdate.getScalingPolicy() != null) {
+            alert.getScalingPolicy().setName(timeAlertForUpdate.getScalingPolicy().getName());
+            alert.getScalingPolicy().setAdjustmentType(timeAlertForUpdate.getScalingPolicy().getAdjustmentType());
+            alert.getScalingPolicy().setScalingAdjustment(timeAlertForUpdate.getScalingPolicy().getScalingAdjustment());
+            alert.getScalingPolicy().setHostGroup(timeAlertForUpdate.getScalingPolicy().getHostGroup());
+        }
         return timeAlertRepository.save(alert);
     }
 
@@ -302,31 +308,16 @@ public class AlertService {
         return loadAlert;
     }
 
-    public void createOrUpdateLoadAlerts(Long clusterId, Set<LoadAlert> loadAlerts) {
-        for (LoadAlert loadAlert : loadAlerts) {
-            if (loadAlert.getId() == null) {
-                createLoadAlert(clusterId, loadAlert);
-            } else {
-                updateLoadAlert(clusterId, loadAlert.getId(), loadAlert);
-            }
-        }
-    }
-
-    public void createOrUpdateTimeAlerts(Long clusterId, Set<TimeAlert> timeAlerts) {
-        for (TimeAlert timeAlert : timeAlerts) {
-            if (timeAlert.getId() == null) {
-                createTimeAlert(clusterId, timeAlert);
-            } else {
-                updateTimeAlert(clusterId, timeAlert.getId(), timeAlert);
-            }
-        }
-    }
-
-    public LoadAlert updateLoadAlert(Long clusterId, Long alertId, LoadAlert loadAlert) {
+    public LoadAlert updateLoadAlert(Long clusterId, Long alertId, LoadAlert loadAlertForUpdate) {
         LoadAlert alert = loadAlertRepository.findByCluster(alertId, clusterId);
-        alert.setName(loadAlert.getName());
-        alert.setDescription(loadAlert.getDescription());
-        alert.setScalingPolicy(loadAlert.getScalingPolicy());
+        alert.setName(loadAlertForUpdate.getName());
+        alert.setDescription(loadAlertForUpdate.getDescription());
+        if (loadAlertForUpdate.getScalingPolicy() != null) {
+            alert.getScalingPolicy().setName(loadAlertForUpdate.getScalingPolicy().getName());
+            alert.getScalingPolicy().setAdjustmentType(loadAlertForUpdate.getScalingPolicy().getAdjustmentType());
+            alert.getScalingPolicy().setScalingAdjustment(loadAlertForUpdate.getScalingPolicy().getScalingAdjustment());
+            alert.getScalingPolicy().setHostGroup(loadAlertForUpdate.getScalingPolicy().getHostGroup());
+        }
         return loadAlertRepository.save(alert);
     }
 

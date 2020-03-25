@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,7 @@ import com.sequenceiq.periscope.domain.MetricAlert;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.service.AlertService;
+import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DateService;
 import com.sequenceiq.periscope.service.NotFoundException;
 
@@ -75,6 +77,9 @@ public class AlertController implements AlertEndpoint {
     @Inject
     private DateService dateService;
 
+    @Inject
+    private ClusterService clusterService;
+
     @Override
     public MetricAlertResponse createMetricAlerts(Long clusterId, MetricAlertRequest json) {
         MetricAlert metricAlert = metricAlertRequestConverter.convert(json);
@@ -104,15 +109,16 @@ public class AlertController implements AlertEndpoint {
 
     @Override
     public TimeAlertResponse createTimeAlert(Long clusterId, TimeAlertRequest json) throws ParseException {
-        TimeAlert timeAlert = validateTimeAlert(json);
+        validateTimeAlert(clusterId, Optional.empty(), json);
+        TimeAlert timeAlert = timeAlertRequestConverter.convert(json);
         return createTimeAlertResponse(alertService.createTimeAlert(clusterId, timeAlert));
     }
 
     @Override
     public TimeAlertResponse updateTimeAlert(Long clusterId, Long alertId, TimeAlertRequest json)
             throws ParseException {
-        validateAlertForUpdate(clusterId, alertId, AlertType.TIME);
-        TimeAlert timeAlert = validateTimeAlert(json);
+        validateTimeAlert(clusterId, Optional.of(alertId), json);
+        TimeAlert timeAlert = timeAlertRequestConverter.convert(json);
         return createTimeAlertResponse(alertService.updateTimeAlert(clusterId, alertId, timeAlert));
     }
 
@@ -165,7 +171,9 @@ public class AlertController implements AlertEndpoint {
     public LoadAlertResponse createLoadAlert(Long clusterId, @Valid LoadAlertRequest json) throws ParseException {
         String hostGroup = json.getScalingPolicy().getHostGroup();
         if (!alertService.getLoadAlertsForClusterHostGroup(clusterId, hostGroup).isEmpty()) {
-            throw new BadRequestException(String.format("LoadAlert is already defined for cluster %s, HostGroup", clusterId, hostGroup));
+            String stackCrn = clusterService.findStackCrnById(clusterId);
+            throw new BadRequestException(String.format("LoadAlert is already defined for Cluster %s, HostGroup %s",
+                    stackCrn, hostGroup));
         }
         LoadAlert loadAlert = loadAlertRequestConverter.convert(json);
         return createLoadAlertResponse(alertService.createLoadAlert(clusterId, loadAlert));
@@ -173,7 +181,7 @@ public class AlertController implements AlertEndpoint {
 
     @Override
     public LoadAlertResponse updateLoadAlert(Long clusterId, Long alertId, @Valid LoadAlertRequest json) throws ParseException {
-        validateAlertForUpdate(clusterId, alertId, AlertType.LOAD);
+        validateLoadAlert(clusterId, Optional.of(alertId), json);
         LoadAlert loadAlert = loadAlertRequestConverter.convert(json);
         return createLoadAlertResponse(alertService.updateLoadAlert(clusterId, alertId, loadAlert));
     }
@@ -189,15 +197,46 @@ public class AlertController implements AlertEndpoint {
         alertService.deleteLoadAlert(clusterId, alertId);
     }
 
+    public void createLoadAlerts(Long clusterId, List<LoadAlertRequest> loadAlerts) throws ParseException {
+        for (LoadAlertRequest loadAlert : loadAlerts) {
+            createLoadAlert(clusterId, loadAlert);
+        }
+    }
+
+    public void createTimeAlerts(Long clusterId, List<TimeAlertRequest> timeAlerts) throws ParseException {
+        for (TimeAlertRequest timeAlert : timeAlerts) {
+            createTimeAlert(clusterId, timeAlert);
+        }
+    }
+
+    public void validateLoadAlertRequests(Long clusterId, List<LoadAlertRequest> loadAlertRequests) throws ParseException {
+        for (LoadAlertRequest loadAlertRequest : loadAlertRequests) {
+            validateLoadAlert(clusterId, Optional.empty(), loadAlertRequest);
+        }
+    }
+
+    public void validateTimeAlertRequests(Long clusterId, List<TimeAlertRequest> timeAlertRequests) throws ParseException {
+        for (TimeAlertRequest timeAlertRequest : timeAlertRequests) {
+            validateTimeAlert(clusterId, Optional.empty(), timeAlertRequest);
+        }
+    }
+
+    protected void setDateService(DateService dateService) {
+        this.dateService = dateService;
+    }
+
     private LoadAlertResponse createLoadAlertResponse(LoadAlert loadAlert) {
         return loadAlertResponseConverter.convert(loadAlert);
     }
 
-    private TimeAlert validateTimeAlert(TimeAlertRequest json) throws ParseException {
-        TimeAlert alert = timeAlertRequestConverter.convert(json);
-        dateService.validateTimeZone(alert.getTimeZone());
-        dateService.getCronExpression(alert.getCron());
-        return alert;
+    private void validateTimeAlert(Long clusterId, Optional<Long> alertId, TimeAlertRequest json) throws ParseException {
+        validateAlertForUpdate(clusterId, alertId, AlertType.TIME);
+        dateService.validateTimeZone(json.getTimeZone());
+        dateService.getCronExpression(json.getCron());
+    }
+
+    private void validateLoadAlert(Long clusterId, Optional<Long> alertId, LoadAlertRequest json) throws ParseException {
+        validateAlertForUpdate(clusterId, alertId, AlertType.LOAD);
     }
 
     private List<MetricAlertResponse> createAlarmsResponse(Set<MetricAlert> alerts) {
@@ -226,27 +265,30 @@ public class AlertController implements AlertEndpoint {
         return prometheusAlertResponseConverter.convert(alarm);
     }
 
-    private void validateAlertForUpdate(Long clusterId, Long alertId, AlertType alertType) {
-        BaseAlert alert;
-        switch (alertType) {
-            case LOAD:
-                alert = alertService.findLoadAlertByCluster(clusterId, alertId);
-                break;
-            case TIME:
-                alert = alertService.findTimeAlertByCluster(clusterId, alertId);
-                break;
-            case METRIC:
-                alert = alertService.findMetricAlertByCluster(clusterId, alertId);
-                break;
-            case PROMETHEUS:
-                alert = alertService.findPrometheusAlertByCluster(clusterId, alertId);
-                break;
-            default:
-                alert = null;
+    private void validateAlertForUpdate(Long clusterId, Optional<Long> alertIdRequest, AlertType alertType) {
+        alertIdRequest.ifPresent(alertId -> {
+            BaseAlert alert;
+            String clusterCrn = clusterService.findStackCrnById(clusterId);
+            switch (alertType) {
+                case LOAD:
+                    alert = alertService.findLoadAlertByCluster(clusterId, alertId);
+                    break;
+                case TIME:
+                    alert = alertService.findTimeAlertByCluster(clusterId, alertId);
+                    break;
+                case METRIC:
+                    alert = alertService.findMetricAlertByCluster(clusterId, alertId);
+                    break;
+                case PROMETHEUS:
+                    alert = alertService.findPrometheusAlertByCluster(clusterId, alertId);
+                    break;
+                default:
+                    alert = null;
 
-        }
-        if (alert == null) {
-            throw new NotFoundException(String.format("Could not find %s alert with id: '%s', for cluster: '%s'", alertType, alertId, clusterId));
-        }
+            }
+            if (alert == null) {
+                throw new NotFoundException(String.format("Could not find %s alert with id: '%s', for cluster: '%s'", alertType, alertId, clusterCrn));
+            }
+        });
     }
 }

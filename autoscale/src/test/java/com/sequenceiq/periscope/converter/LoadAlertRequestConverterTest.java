@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.converter;
 
-import static com.sequenceiq.periscope.api.model.AdjustmentType.NODE_COUNT;
+import static com.sequenceiq.periscope.api.model.AdjustmentType.LOAD_BASED;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -48,14 +48,14 @@ public class LoadAlertRequestConverterTest {
         assertEquals("LoadAlert Hostgroup should match",
                 loadAlert.getScalingPolicy().getHostGroup(), "compute");
         assertEquals("LoadAlert Adjustment Type should match",
-                loadAlert.getScalingPolicy().getAdjustmentType(), NODE_COUNT);
+                loadAlert.getScalingPolicy().getAdjustmentType(), LOAD_BASED);
         assertEquals("LoadAlert Adjustment should match",
                 loadAlert.getScalingPolicy().getScalingAdjustment(), 10);
     }
 
     private ScalingPolicyRequest getScalingPolicyRequest() {
         ScalingPolicyRequest scalingPolicyRequest = new ScalingPolicyRequest();
-        scalingPolicyRequest.setAdjustmentType(NODE_COUNT);
+        scalingPolicyRequest.setAdjustmentType(LOAD_BASED);
         scalingPolicyRequest.setHostGroup("compute");
         scalingPolicyRequest.setScalingAdjustment(10);
         return scalingPolicyRequest;

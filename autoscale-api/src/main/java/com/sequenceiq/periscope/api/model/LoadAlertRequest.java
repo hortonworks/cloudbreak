@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.api.model;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.periscope.doc.ApiDescription.BaseAlertJsonProperties;
 import com.sequenceiq.periscope.doc.ApiDescription.LoadAlertJsonProperties;
@@ -15,7 +16,7 @@ public class LoadAlertRequest extends AbstractAlertJson {
     private @Valid LoadAlertConfigurationRequest loadAlertConfiguration;
 
     @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
-    private @Valid ScalingPolicyRequest scalingPolicy;
+    private @Valid @NotNull ScalingPolicyRequest scalingPolicy;
 
     public ScalingPolicyRequest getScalingPolicy() {
         return scalingPolicy;

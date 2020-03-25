@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.controller;
 
+import java.text.ParseException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -8,15 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
-import com.sequenceiq.periscope.api.model.AutoscalingModeType;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
-import com.sequenceiq.periscope.converter.DistroXClusterRequestConverter;
-import com.sequenceiq.periscope.converter.DistroXClusterResponseConverter;
+import com.sequenceiq.periscope.converter.DistroXAutoscaleClusterResponseConverter;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.service.AlertService;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @Component
@@ -31,17 +28,14 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     private ClusterService clusterService;
 
     @Inject
-    private AlertService alertService;
+    private AlertController alertController;
 
     @Inject
-    private DistroXClusterResponseConverter distroXClusterResponseConverter;
-
-    @Inject
-    private DistroXClusterRequestConverter distroXClusterRequestConverter;
+    private DistroXAutoscaleClusterResponseConverter distroXAutoscaleClusterResponseConverter;
 
     @Override
     public List<DistroXAutoscaleClusterResponse> getClusters() {
-        return distroXClusterResponseConverter.convertAllToJson(asClusterCommonService.getDistroXClusters());
+        return distroXAutoscaleClusterResponseConverter.convertAllToJson(asClusterCommonService.getDistroXClusters());
     }
 
     @Override
@@ -66,46 +60,34 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     }
 
     @Override
-    public DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterCrn(String clusterCrn, DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
+    public DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterCrn(String clusterCrn,
+            DistroXAutoscaleClusterRequest autoscaleClusterRequest) throws ParseException {
         Cluster cluster = clusterService.findOneByStackCrn(clusterCrn);
-        return updateClusterAutoScaleConfig(cluster.getId(), cluster.getStackCrn(), autoscaleClusterRequest);
+        return updateClusterAutoScaleConfig(cluster.getId(), autoscaleClusterRequest);
     }
 
     @Override
-    public DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterName(String clusterName, DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
+    public DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterName(String clusterName,
+            DistroXAutoscaleClusterRequest autoscaleClusterRequest) throws ParseException {
         Cluster cluster = clusterService.findOneByStackName(clusterName);
-        return updateClusterAutoScaleConfig(cluster.getId(), cluster.getStackCrn(), autoscaleClusterRequest);
+        return updateClusterAutoScaleConfig(cluster.getId(), autoscaleClusterRequest);
     }
 
     private DistroXAutoscaleClusterResponse createClusterJsonResponse(Cluster cluster) {
-        return distroXClusterResponseConverter.convert(cluster);
+        return distroXAutoscaleClusterResponseConverter.convert(cluster);
     }
 
     private DistroXAutoscaleClusterResponse updateClusterAutoScaleConfig(Long clusterId,
-            String stackCrn, DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
-        Cluster distroXCluster = distroXClusterRequestConverter.convert(autoscaleClusterRequest);
-        if (distroXCluster.isAutoscalingEnabled() != null) {
-            clusterService.setAutoscaleState(clusterId, distroXCluster.isAutoscalingEnabled());
-        }
+            DistroXAutoscaleClusterRequest autoscaleClusterRequest) throws ParseException {
 
-        if (autoscaleClusterRequest.getScalingConfiguration() != null) {
-            clusterService.updateScalingConfiguration(clusterId, autoscaleClusterRequest.getScalingConfiguration());
-        }
+        alertController.validateLoadAlertRequests(clusterId, autoscaleClusterRequest.getLoadAlertRequests());
+        alertController.validateTimeAlertRequests(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
 
-        AutoscalingModeType autoScalingMode = distroXCluster.getAutoscalingMode();
-        if (autoScalingMode != null) {
-            switch (autoScalingMode) {
-                case LOAD_BASED:
-                    alertService.createOrUpdateLoadAlerts(clusterId, distroXCluster.getLoadAlerts());
-                    break;
-                case TIME_BASED:
-                    alertService.createOrUpdateTimeAlerts(clusterId, distroXCluster.getTimeAlerts());
-                    break;
-                default:
-                    throw new BadRequestException(
-                            String.format("AutoScalingMode %s is not supported for clusterCRN %s", autoScalingMode, stackCrn));
-            }
-        }
+        clusterService.deleteAlertsForCluster(clusterId);
+        alertController.createLoadAlerts(clusterId, autoscaleClusterRequest.getLoadAlertRequests());
+        alertController.createTimeAlerts(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
+        clusterService.setAutoscaleState(clusterId, autoscaleClusterRequest.getEnableAutoscaling());
+
         return createClusterJsonResponse(clusterService.findById(clusterId));
     }
 }

@@ -2,8 +2,10 @@ package com.sequenceiq.periscope.api.endpoint.v1;
 
 import static com.sequenceiq.periscope.doc.ApiDescription.CLUSTERS_DESCRIPTION;
 
+import java.text.ParseException;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -13,10 +15,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.periscope.api.endpoint.validator.ValidDistroXAutoscaleRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
-import com.sequenceiq.periscope.doc.ApiDescription.DistroXClusterNotes;
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterOpDescription;
+import com.sequenceiq.periscope.doc.ApiDescription.DistroXClusterNotes;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -48,14 +51,14 @@ public interface DistroXAutoScaleClusterV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.CLUSTER_SET_AUTOSCALE_STATE, produces = MediaType.APPLICATION_JSON, notes = DistroXClusterNotes.NOTES)
     DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterCrn(@PathParam("crn") String clusterCrn,
-            DistroXAutoscaleClusterRequest autoscaleClusterRequest);
+            @ValidDistroXAutoscaleRequest @Valid DistroXAutoscaleClusterRequest autoscaleClusterRequest) throws ParseException;
 
     @POST
     @Path("name/{name}/autoscaleconfig")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.CLUSTER_SET_AUTOSCALE_STATE, produces = MediaType.APPLICATION_JSON, notes = DistroXClusterNotes.NOTES)
     DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterName(@PathParam("name") String clusterName,
-            DistroXAutoscaleClusterRequest autoscaleClusterRequest);
+            @ValidDistroXAutoscaleRequest @Valid DistroXAutoscaleClusterRequest autoscaleClusterRequest) throws ParseException;
 
     @DELETE
     @Path("name/{name}")

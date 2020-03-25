@@ -31,6 +31,8 @@ public class ScalingPolicyBase implements Json {
     @ApiModelProperty(ScalingPolicyJsonProperties.HOSTGROUP)
     @NotEmpty
     @Size(max = 250)
+    @Pattern(regexp = "(^[a-zA-Z][-a-zA-Z0-9]*$)",
+            message = "The hostGroup can only contain alphanumeric characters and hyphens and has to start with an alphanumeric character")
     private String hostGroup;
 
     public long getAlertId() {

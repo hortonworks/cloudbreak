@@ -21,7 +21,6 @@ import javax.persistence.SequenceGenerator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.periscope.api.model.AutoscalingModeType;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.converter.db.StackTypeAttributeConverter;
 import com.sequenceiq.periscope.model.MonitoredStack;
@@ -53,10 +52,6 @@ public class Cluster implements Monitored, Clustered {
 
     @Enumerated(EnumType.STRING)
     private ClusterState state = ClusterState.PENDING;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "autoscaling_mode")
-    private AutoscalingModeType autoscalingMode;
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<MetricAlert> metricAlerts = new HashSet<>();
@@ -280,14 +275,6 @@ public class Cluster implements Monitored, Clustered {
 
     public void setAutoscalingEnabled(Boolean autoscalingEnabled) {
         this.autoscalingEnabled = autoscalingEnabled;
-    }
-
-    public AutoscalingModeType getAutoscalingMode() {
-        return autoscalingMode;
-    }
-
-    public void setAutoscalingMode(AutoscalingModeType autoscalingMode) {
-        this.autoscalingMode = autoscalingMode;
     }
 
     public String getPeriscopeNodeId() {

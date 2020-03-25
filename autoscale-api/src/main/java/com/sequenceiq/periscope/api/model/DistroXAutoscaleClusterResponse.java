@@ -3,7 +3,6 @@ package com.sequenceiq.periscope.api.model;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.periscope.doc.ApiDescription;
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 
 import io.swagger.annotations.ApiModel;
@@ -29,17 +28,11 @@ public class DistroXAutoscaleClusterResponse implements Json {
     @ApiModelProperty(ClusterJsonsProperties.AUTOSCALING_ENABLED)
     private Boolean autoscalingEnabled;
 
-    @ApiModelProperty(ApiDescription.DistroXClusterJsonsProperties.DISTROX_SCALING_MODE)
-    private AutoscalingModeType autoScalingMode;
-
     @ApiModelProperty(ClusterJsonsProperties.TIME_ALERTS)
     private List<TimeAlertResponse> timeAlerts;
 
     @ApiModelProperty(ClusterJsonsProperties.LOAD_ALERTS)
     private List<LoadAlertResponse> loadAlerts;
-
-    @ApiModelProperty(ClusterJsonsProperties.SCALING_CONFIGURATION)
-    private ScalingConfigurationRequest scalingConfiguration;
 
     public DistroXAutoscaleClusterResponse() {
     }
@@ -101,14 +94,6 @@ public class DistroXAutoscaleClusterResponse implements Json {
         this.loadAlerts = loadAlerts;
     }
 
-    public AutoscalingModeType getAutoScalingMode() {
-        return autoScalingMode;
-    }
-
-    public void setAutoScalingMode(AutoscalingModeType autoScalingMode) {
-        this.autoScalingMode = autoScalingMode;
-    }
-
     public String getStackName() {
         return stackName;
     }
@@ -123,13 +108,5 @@ public class DistroXAutoscaleClusterResponse implements Json {
 
     public void setStackCrn(String stackCrn) {
         this.stackCrn = stackCrn;
-    }
-
-    public ScalingConfigurationRequest getScalingConfiguration() {
-        return scalingConfiguration;
-    }
-
-    public void setScalingConfiguration(ScalingConfigurationRequest scalingConfiguration) {
-        this.scalingConfiguration = scalingConfiguration;
     }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.api.model;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.sequenceiq.periscope.doc.ApiDescription.BaseAlertJsonProperties;
@@ -23,6 +24,7 @@ public class TimeAlertRequest extends AbstractAlertJson {
     private String cron;
 
     @Valid
+    @NotNull
     @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
     private ScalingPolicyRequest scalingPolicy;
 
