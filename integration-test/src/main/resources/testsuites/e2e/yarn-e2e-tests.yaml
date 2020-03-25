@@ -2,6 +2,6 @@ name: "yarn-e2e-tests"
 tests:
   - name: "yarn e2e tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.BasicSdxTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxDistroxTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.BasicEnvironmentTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.stack.StackCreateTests

@@ -2,4 +2,4 @@ name: "azure-image-validation-tests"
 tests:
   - name: "azure image validation e2e tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxDistroxTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxDistroxTest

@@ -202,8 +202,9 @@ public class EnvironmentTestDto
         if (CloudPlatform.AWS.equals(getTestContext().getCloudProvider().getCloudPlatform())) {
             String tableName = dynamoTableName + '-' + UUID.randomUUID().toString();
             return withS3Guard(tableName);
+        } else {
+            LOGGER.info("S3guard is ignored on cloudplatform {}.", getTestContext().getCloudProvider().getCloudPlatform());
         }
-        LOGGER.info("S3guard is ignored on cloudplatform {}.", getTestContext().getCloudProvider().getCloudPlatform());
         return this;
     }
 
