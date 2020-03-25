@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.hybrid;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -9,6 +10,7 @@ import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -19,7 +21,7 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.BasicSdxTests;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import net.schmizz.sshj.SSHClient;
@@ -30,11 +32,13 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static org.testng.Assert.fail;
 
-public class AwsYcloudHybridCloudTest extends BasicSdxTests {
+public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
     private static final CloudPlatform CHILD_CLOUD_PLATFORM = CloudPlatform.YARN;
 
@@ -57,6 +61,11 @@ public class AwsYcloudHybridCloudTest extends BasicSdxTests {
     private static final int SSH_PORT = 22;
 
     private static final int SSH_CONNECT_TIMEOUT = 120000;
+
+    private Map<String, InstanceStatus> instancesHealthy = new HashMap<>() {{
+        put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
+        put(HostGroupType.IDBROKER.getName(), InstanceStatus.SERVICES_HEALTHY);
+    }};
 
     @Value("${integrationtest.aws.hybridCloudSecurityGroupID}")
     private String hybridCloudSecurityGroupID;
@@ -126,7 +135,7 @@ public class AwsYcloudHybridCloudTest extends BasicSdxTests {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .then((tc, testDto, client) -> waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState()))
+                .then((tc, testDto, client) -> waitUtil.waitForSdxInstancesStatus(testDto, client, instancesHealthy))
                 .then((tc, dto, client) -> {
                     for (InstanceGroupV4Response ig : dto.getResponse().getStackV4Response().getInstanceGroups()) {
                         for (InstanceMetaDataV4Response i : ig.getMetadata()) {
@@ -137,21 +146,32 @@ public class AwsYcloudHybridCloudTest extends BasicSdxTests {
                     }
                     return dto;
                 })
+                .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
+                .when(environmentTestClient.forceDelete(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
+                .await(EnvironmentStatus.ARCHIVED, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .validate();
+        //Cleaned up during the test case by forced environment delete
+        testContext.getResources().remove(sdxInternal);
+        testContext.getResources().remove(CHILD_ENVIRONMENT_KEY);
     }
 
     private void testShhAuthenticationSuccessfull(String host) throws IOException, UserAuthException {
         SSHClient client = getSshClient(host);
         client.authPassword(MOCK_UMS_USER, MOCK_UMS_PASSWORD);
+        client.close();
     }
 
     private void testShhAuthenticationFailure(String host) throws IOException {
+        SSHClient client = null;
         try {
-            SSHClient client = getSshClient(host);
+            client = getSshClient(host);
             client.authPassword(MOCK_UMS_USER, MOCK_UMS_PASSWORD_INVALID);
             fail("SSH authentication passed with invalid password.");
         } catch (UserAuthException ex) {
             //Expected
+        }
+        if (client != null) {
+            client.close();
         }
     }
 
