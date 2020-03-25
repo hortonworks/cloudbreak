@@ -1,0 +1,6 @@
+[
+  {
+    "serviceType": "HDFS",
+    "componentName": "JOURNALNODE"
+  }
+]

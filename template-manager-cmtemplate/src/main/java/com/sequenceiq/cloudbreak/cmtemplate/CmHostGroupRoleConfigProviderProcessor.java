@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
+import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 
@@ -10,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -23,6 +26,9 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateInstantiator;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroupInfo;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.cmtemplate.sharedcomponent.SharedComponent;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -35,6 +41,19 @@ public class CmHostGroupRoleConfigProviderProcessor {
     @Inject
     private List<CmHostGroupRoleConfigProvider> providers;
 
+    private List<SharedComponent> sharedComponents = new ArrayList<>();
+
+    @PostConstruct
+    private void parseSharedComponents() {
+        try {
+            String configJson = readFileFromClasspath("shared-components-config.json");
+            sharedComponents = asList(new Json(configJson).get(SharedComponent[].class));
+            LOGGER.info("shared components are loaded: {}", sharedComponents);
+        } catch (Exception e) {
+            LOGGER.warn("Cannot read shared components from: `shared-components-config.json`. Message: {}", e.getMessage());
+        }
+    }
+
     public void process(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         if (!getHostTemplates(templateProcessor).isEmpty()) {
             updateConfigsInTemplate(templateProcessor, generateConfigs(templateProcessor, source));
@@ -45,11 +64,10 @@ public class CmHostGroupRoleConfigProviderProcessor {
         return ofNullable(templateProcessor.getTemplate().getHostTemplates()).orElseGet(List::of);
     }
 
-    private Map<String, Map<String, List<ApiClusterTemplateConfig>>> generateConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
+    @VisibleForTesting
+    Map<String, Map<String, List<ApiClusterTemplateConfig>>> generateConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         Map<String, Map<String, List<ApiClusterTemplateConfig>>> configsByRoleConfigGroup = new HashMap<>();
-
-        Map<String, HostgroupView> hostGroups = source.getHostgroupViews().stream()
-                .collect(toMap(HostgroupView::getName, Function.identity()));
+        Map<String, HostgroupView> hostGroups = source.getHostgroupViews().stream().collect(toMap(HostgroupView::getName, Function.identity()));
         List<ApiClusterTemplateHostTemplate> hostTemplates = getHostTemplates(templateProcessor);
         Map<String, ServiceComponent> serviceComponents = templateProcessor.mapRoleRefsToServiceComponents();
 
@@ -57,23 +75,38 @@ public class CmHostGroupRoleConfigProviderProcessor {
             String hostGroupName = hostTemplate.getRefName();
             List<String> roleConfigGroups = ofNullable(hostTemplate.getRoleConfigGroupsRefNames()).orElseGet(List::of);
             HostgroupView hostgroupView = hostGroups.get(hostGroupName);
+            groupByHostGroupName(source, configsByRoleConfigGroup, serviceComponents, hostGroupName, roleConfigGroups, hostgroupView);
+        }
+        return configsByRoleConfigGroup;
+    }
 
-            for (String roleConfigGroup : roleConfigGroups) {
-                for (CmHostGroupRoleConfigProvider provider : providers) {
-                    ServiceComponent serviceComponent = serviceComponents.get(roleConfigGroup);
-
-                    if (serviceComponent != null
-                            && Objects.equals(provider.getServiceType(), serviceComponent.getService())
-                            && provider.getRoleTypes().contains(serviceComponent.getComponent())) {
-
-                        configsByRoleConfigGroup.computeIfAbsent(roleConfigGroup, __ -> new HashMap<>())
-                                .computeIfAbsent(hostGroupName, __ -> new ArrayList<>())
-                                .addAll(provider.getRoleConfigs(serviceComponent.getComponent(), hostgroupView, source));
-                    }
+    private void groupByHostGroupName(TemplatePreparationObject source, Map<String, Map<String, List<ApiClusterTemplateConfig>>> configsByRoleConfigGroup,
+            Map<String, ServiceComponent> serviceComponents, String hostGroupName, List<String> roleConfigGroups, HostgroupView hostgroupView) {
+        for (String roleConfigGroup : roleConfigGroups) {
+            for (CmHostGroupRoleConfigProvider provider : providers) {
+                ServiceComponent serviceComponent = serviceComponents.get(roleConfigGroup);
+                if (isEqualsAndNotSharedComponent(provider, serviceComponent)) {
+                    Map<String, List<ApiClusterTemplateConfig>> configs = configsByRoleConfigGroup.computeIfAbsent(roleConfigGroup, __ -> new HashMap<>());
+                    configs.computeIfAbsent(hostGroupName, __ -> new ArrayList<>())
+                            .addAll(provider.getRoleConfigs(serviceComponent.getComponent(), hostgroupView, source));
                 }
             }
         }
-        return configsByRoleConfigGroup;
+    }
+
+    private boolean isEqualsAndNotSharedComponent(CmHostGroupRoleConfigProvider provider, ServiceComponent serviceComponent) {
+        return serviceComponent != null
+                && isEqualsByServiceTypeAndRoleType(provider, serviceComponent)
+                && !isSharedComponent(serviceComponent);
+    }
+
+    private boolean isSharedComponent(ServiceComponent serviceComponent) {
+        return sharedComponents.stream().anyMatch(s -> s.getComponentName().equals(serviceComponent.getComponent())
+                && s.getServiceType().equals(serviceComponent.getService()));
+    }
+
+    private boolean isEqualsByServiceTypeAndRoleType(CmHostGroupRoleConfigProvider provider, ServiceComponent serviceComponent) {
+        return Objects.equals(provider.getServiceType(), serviceComponent.getService()) && provider.getRoleTypes().contains(serviceComponent.getComponent());
     }
 
     private void updateConfigsInTemplate(CmTemplateProcessor templateProcessor, Map<String, Map<String, List<ApiClusterTemplateConfig>>> newConfigsByRCG) {
