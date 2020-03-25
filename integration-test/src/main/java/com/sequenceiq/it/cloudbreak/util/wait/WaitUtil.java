@@ -4,6 +4,7 @@ package com.sequenceiq.it.cloudbreak.util.wait;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.REQUESTED;
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -449,13 +451,37 @@ public class WaitUtil {
         List<InstanceGroupV4Response> instanceGroups = sdxClient.getSdxClient().sdxEndpoint().getDetail(sdxName, Set.of())
                 .getStackV4Response()
                 .getInstanceGroups();
-        return checkInstanceState(hostGroup, desiredState, instanceGroups);
+        SdxClusterResponse sdxResponse = sdxClient.getSdxClient().sdxEndpoint().get(sdxName);
+        if (sdxResponse != null) {
+            String sdxStatus = sdxResponse.getStatus().name();
+            if (containsIgnoreCase(sdxStatus, "FAILED")) {
+                LOGGER.error(" SDX is in {} state ", sdxStatus);
+                throw new TestFailException("SDX is in " + sdxStatus + " state. ");
+            } else {
+                return checkInstanceState(hostGroup, desiredState, instanceGroups);
+            }
+        } else {
+            LOGGER.error(" {} SDX is not present ", sdxName);
+            throw new TestFailException(sdxName + " SDX is not present. ");
+        }
     }
 
     private boolean checkDistroxInstanceState(CloudbreakClient cloudbreakClient, String distroxName, String hostGroup, InstanceStatus desiredState) {
         List<InstanceGroupV4Response> instanceGroups = cloudbreakClient.getCloudbreakClient().distroXV1Endpoint().getByName(distroxName, Set.of())
                 .getInstanceGroups();
-        return checkInstanceState(hostGroup, desiredState, instanceGroups);
+        StackV4Response distroxResponse = cloudbreakClient.getCloudbreakClient().distroXV1Endpoint().getByName(distroxName, Set.of());
+        if (distroxResponse != null) {
+            String distroxStatus = distroxResponse.getStatus().name();
+            if (containsIgnoreCase(distroxStatus, "FAILED")) {
+                LOGGER.error(" Distrox is in {} state ", distroxStatus);
+                throw new TestFailException("Distrox is in " + distroxStatus + " state. ");
+            } else {
+                return checkInstanceState(hostGroup, desiredState, instanceGroups);
+            }
+        } else {
+            LOGGER.error(" {} Distrox is not present ", distroxName);
+            throw new TestFailException(distroxName + " Distrox is not present. ");
+        }
     }
 
     private boolean checkInstanceState(String hostGroup, InstanceStatus desiredState, List<InstanceGroupV4Response> instanceGroups) {
@@ -476,12 +502,12 @@ public class WaitUtil {
                 );
                 return Objects.equals(instanceMetaDataV4Response.getInstanceStatus(), desiredState);
             } else {
-                LOGGER.info("{} instance group is empty. Waiting for instance with {} state.", hostGroup, desiredState);
-                return false;
+                LOGGER.error(" instance metadata is empty, may {} instance group was deleted. ", hostGroup);
+                throw new TestFailException("instance metadata is empty, may " + hostGroup + " instance group was deleted. ");
             }
         } else {
-            LOGGER.info("{} instance group is not present. Waiting for instance with {} state.", hostGroup, desiredState);
-            return false;
+            LOGGER.error(" {} instance group is not present, may this was deleted. ", hostGroup);
+            throw new TestFailException(hostGroup + " instance group is not present, may this was deleted. ");
         }
     }
 

@@ -66,7 +66,7 @@ public class IntegrationTestApp implements CommandLineRunner {
     @Value("${integrationtest.threadCount:2}")
     private int threadCount;
 
-    @Value("${integrationtest.parallel:FALSE}")
+    @Value("${integrationtest.parallel:methods}")
     private String parallel;
 
     @Inject
@@ -166,7 +166,7 @@ public class IntegrationTestApp implements CommandLineRunner {
         IFileParser<XmlSuite> parser = getParser(suitePath);
         try (InputStream inputStream = resource.getInputStream()) {
             XmlSuite xmlSuite = parser.parse(suitePath, inputStream, true);
-            xmlSuite.setParallel(XmlSuite.ParallelMode.valueOf(parallel.toUpperCase()));
+            xmlSuite.setParallel(XmlSuite.ParallelMode.getValidParallel(parallel));
             xmlSuite.setThreadCount(threadCount);
             LOG.info("Test are running in: {} type of parallel mode, thread count: {}", parallel.toUpperCase(), threadCount);
             return xmlSuite;

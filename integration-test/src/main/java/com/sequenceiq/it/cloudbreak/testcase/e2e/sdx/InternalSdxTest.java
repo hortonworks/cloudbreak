@@ -10,23 +10,17 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.ImageValidatorE2ETest;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
-public class InternalSdxTests extends ImageValidatorE2ETest {
+public class InternalSdxTest extends PreconditionSdxE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
 
-    @Override
-    protected void setupTest(TestContext testContext) {
-        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createEnvironmentWithNetworkAndFreeIPA(testContext);
-        initializeDefaultBlueprints(testContext);
-    }
+    @Inject
+    private WaitUtil waitUtil;
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
@@ -40,12 +34,10 @@ public class InternalSdxTests extends ImageValidatorE2ETest {
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
+                .then((tc, testDto, client) -> {
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
+                })
                 .when(sdxTestClient.describeInternal())
                 .validate();
-    }
-
-    @Override
-    protected String getImageId(TestContext testContext) {
-        return testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getId();
     }
 }
