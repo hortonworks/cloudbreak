@@ -2,4 +2,4 @@ name: "aws-sdx-baseimage-tests"
 tests:
   - name: "aws sdx e2e base image tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxBaseImageTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests

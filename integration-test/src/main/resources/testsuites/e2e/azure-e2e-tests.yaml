@@ -3,11 +3,8 @@ tests:
   - name: "azure e2e tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.storage.AzureAdlsGen2Tests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.BasicEnvironmentTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXTest
-        includedMethods:
-          - testCreateDistroX
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxCloudStorageTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXEncryptedVolumeTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxDistroxTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
