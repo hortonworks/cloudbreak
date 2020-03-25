@@ -233,10 +233,10 @@
       "ssoSupported": true,
       "port": 11000,
       "tlsPort": 11443,
-      "apiOnly": false,
+      "apiOnly": true,
       "apiIncluded": true,
       "visibleForDatalake": false,
-      "visibleForDatahub": false
+      "visibleForDatahub": true
     },
     {
       "name": "SOLR",

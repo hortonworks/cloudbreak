@@ -123,7 +123,7 @@ public class ExposedServiceCollector {
                                 || getClouderaManagerService().getServiceName().equals(exposedService.getServiceName())
                                 // IMPALA_DEBUG_UI needs to be exposed under the same service name, but with different purpose
                                 || (getImpalaDebugUIService().getServiceName().equals(exposedService.getServiceName())
-                                    && components.contains(getImpalaService().getServiceName())))
+                                && components.contains(getImpalaService().getServiceName())))
                 .collect(Collectors.toList());
     }
 
@@ -140,8 +140,8 @@ public class ExposedServiceCollector {
 
     public Map<String, Integer> getAllServicePorts(boolean tls) {
         return exposedServices.values().stream().filter(x -> StringUtils.isNotEmpty(x.getServiceName())
-                        && StringUtils.isNotEmpty(x.getKnoxService())
-                        && Objects.nonNull(tls ? x.getTlsPort() : x.getPort()))
+                && StringUtils.isNotEmpty(x.getKnoxService())
+                && Objects.nonNull(tls ? x.getTlsPort() : x.getPort()))
                 .collect(Collectors.toMap(ExposedService::getKnoxService, v -> tls ? v.getTlsPort() : v.getPort()));
     }
 
@@ -152,7 +152,8 @@ public class ExposedServiceCollector {
             exposedServices = JsonUtil.readValue(exposedServiceDefinition, ExposedServices.class).getServices()
                     .stream()
                     .collect(Collectors.toMap(ExposedService::getName, Function.identity()));
-
+            String exposedServiceNames = String.join(",", exposedServices.keySet());
+            LOGGER.info("The following exposed service(s) has loaded (in total: {}): {}", exposedServices.size(), exposedServiceNames);
         } catch (IOException | IllegalArgumentException e) {
             throw new IllegalStateException("Cannot initialize Exposed services.", e);
         }
