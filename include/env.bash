@@ -201,6 +201,7 @@ UAA_FLEX_USAGE_CLIENT_SECRET - Secret of the Flex usage generator scope in Ident
 UAA_PERISCOPE_ID - Identity of the Autoscale scope in Identity
 UAA_PERISCOPE_SECRET - Secret of the Autoscale scope in Identity
 UAA_PORT - Identity service public port
+ULU_CLIENT_TIMEOUT - Timout for UI activites in minutes
 UAA_SULTANS_ID - Identity of the Authentication service scope in Identity
 UAA_SULTANS_SECRET - Secret of the Authentication service scope in Identity
 UAA_ULUWATU_ID - Identity of the Web UI scope in Identity

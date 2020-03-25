@@ -10,6 +10,7 @@ compose-init() {
     env-import CBD_LOG_NAME cbreak
     env-import ULUWATU_VOLUME_HOST /dev/null
     env-import ULUWATU_CONTAINER_PATH /hortonworks-cloud-web
+    env-import ULU_CLIENT_TIMEOUT 60
 
     if [[ "$ULUWATU_VOLUME_HOST" != "/dev/null" ]]; then
       ULUWATU_VOLUME_CONTAINER=${ULUWATU_CONTAINER_PATH}
@@ -576,6 +577,7 @@ uluwatu:
         - ULU_HWX_CLOUD_DEFAULT_IGW_ID
         - ULU_HWX_CLOUD_DEFAULT_SUBNET_ID
         - ULU_HWX_CLOUD_DEFAULT_ARM_VIRTUAL_NETWORK_ID
+        - ULU_CLIENT_TIMEOUT
         - HWX_CLOUD_TEMPLATE_VERSION
         - HWX_CLOUD_ENABLE_GOVERNANCE_AND_SECURITY
         - ULU_ADDRESS_RESOLVING_TIMEOUT
