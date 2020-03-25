@@ -59,10 +59,6 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
-<<<<<<<HEAD
-=======
-        >>>>>>>CB-6218 remove stackowner
-
 @Service
 public class AwsNetworkConnector extends DefaultNetworkConnector {
 

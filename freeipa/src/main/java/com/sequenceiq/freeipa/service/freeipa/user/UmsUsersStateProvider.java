@@ -47,7 +47,7 @@ public class UmsUsersStateProvider {
     private UmsCredentialProvider umsCredentialProvider;
 
     public Map<String, UmsUsersState> getEnvToUmsUsersStateMap(String accountId, String actorCrn, Set<String> environmentCrns,
-            Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
+        Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
         try {
             LOGGER.debug("Getting UMS state for environments {} with requestId {}", environmentCrns, requestIdOptional);
 
@@ -123,7 +123,7 @@ public class UmsUsersStateProvider {
     }
 
     private List<MachineUser> getMachineUsers(String actorCrn, String accountId, Optional<String> requestIdOptional,
-            boolean fullSync, Set<String> machineUserCrns) {
+        boolean fullSync, Set<String> machineUserCrns) {
         if (fullSync) {
             return grpcUmsClient.listAllMachineUsers(actorCrn, accountId, requestIdOptional);
         } else if (!machineUserCrns.isEmpty()) {
@@ -135,7 +135,7 @@ public class UmsUsersStateProvider {
 
     @SuppressWarnings("ParameterNumber")
     private void handleUser(UmsUsersState.Builder umsUsersStateBuilder, UsersState.Builder usersStateBuilder, Map<String, FmsGroup> crnToFmsGroup,
-            String memberCrn, FmsUser fmsUser, EnvironmentAccessRights environmentAccessRights, Optional<String> requestId) {
+                            String memberCrn, FmsUser fmsUser, EnvironmentAccessRights environmentAccessRights, Optional<String> requestId) {
         try {
             if (environmentAccessRights.hasEnvironmentAccessRight()) {
                 String username = fmsUser.getName();
