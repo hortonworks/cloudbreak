@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -37,6 +39,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -117,12 +120,17 @@ class CredentialServiceTest {
     @MockBean
     private GrpcUmsClient grpcUmsClient;
 
+    @MockBean
+    private TransactionService transactionService;
+
     @BeforeEach
-    void setupTestCredential() {
+    void setupTestCredential() throws TransactionService.TransactionExecutionException {
         CREDENTIAL.setName(CREDENTIAL_NAME);
         CREDENTIAL.setCloudPlatform(PLATFORM);
         String credentialAttributesSecret = getTestAttributes(STATE, DEPLOYMENT_ADDRESS, REDIRECT_URL);
         CREDENTIAL.setAttributes(credentialAttributesSecret);
+
+        lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 
     @Test
@@ -284,6 +292,7 @@ class CredentialServiceTest {
         verify(credentialValidator).validateCredentialCloudPlatform(eq(PLATFORM), eq(USER_ID));
         verify(credentialValidator).validateParameters(any(), any());
         verify(repository).save(any());
+        verify(grpcUmsClient).assignResourceRole(any(), any(), any(), any());
     }
 
     @Test

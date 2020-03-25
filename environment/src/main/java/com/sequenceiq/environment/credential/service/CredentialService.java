@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -80,6 +82,9 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
+
+    @Inject
+    private TransactionService transactionService;
 
     protected CredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService,
             @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
@@ -170,11 +175,18 @@ public class CredentialService extends AbstractCredentialService implements Reso
         credential.setResourceCrn(credentialCrn);
         credential.setCreator(creatorUserCrn);
         credential.setAccountId(accountId);
-        Credential created = repository.save(credentialAdapter.verify(credential, accountId).getCredential());
-        sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
-        String credentialOwnerCrn = grpcUmsClient.getBuiltInCredentialOwnerResourceRoleCrn();
-        grpcUmsClient.assignResourceRole(creatorUserCrn, credentialCrn, credentialOwnerCrn, MDCUtils.getRequestId());
-        return created;
+        try {
+            return transactionService.required(() -> {
+                Credential created = repository.save(credentialAdapter.verify(credential, accountId).getCredential());
+                String credentialOwnerCrn = grpcUmsClient.getBuiltInCredentialOwnerResourceRoleCrn();
+                grpcUmsClient.assignResourceRole(creatorUserCrn, credentialCrn, credentialOwnerCrn, MDCUtils.getRequestId());
+                sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
+                return created;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            LOGGER.error("Error happened during credential creation: ", e);
+            throw new InternalServerErrorException(e);
+        }
     }
 
     public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress, String userCrn) {
