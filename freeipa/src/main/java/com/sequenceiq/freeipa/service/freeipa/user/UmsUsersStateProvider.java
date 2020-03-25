@@ -22,6 +22,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Machi
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ResourceRoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
@@ -45,7 +46,7 @@ public class UmsUsersStateProvider {
     private GrpcUmsClient grpcUmsClient;
 
     public Map<String, UmsUsersState> getEnvToUmsUsersStateMap(String accountId, String actorCrn, Set<String> environmentCrns,
-                                                            Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
+            Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
         try {
             LOGGER.debug("Getting UMS state for environments {} with requestId {}", environmentCrns, requestIdOptional);
 
@@ -60,16 +61,19 @@ public class UmsUsersStateProvider {
             Map<String, FmsGroup> crnToFmsGroup = grpcUmsClient.listGroups(actorCrn, accountId, List.of(), requestIdOptional).stream()
                     .collect(Collectors.toMap(Group::getCrn, this::umsGroupToGroup));
 
-            Set<FmsGroup> wags = grpcUmsClient.listWorkloadAdministrationGroups(IAM_INTERNAL_ACTOR_CRN, accountId, requestIdOptional).stream()
-                    .map(wag -> nameToGroup(wag.getWorkloadAdministrationGroupName()))
-                    .collect(Collectors.toSet());
+            List<WorkloadAdministrationGroup> wags = grpcUmsClient.listWorkloadAdministrationGroups(IAM_INTERNAL_ACTOR_CRN, accountId, requestIdOptional);
 
             environmentCrns.stream().forEach(environmentCrn -> {
                 UmsUsersState.Builder umsUsersStateBuilder = new UmsUsersState.Builder();
                 UsersState.Builder usersStateBuilder = new UsersState.Builder();
 
                 crnToFmsGroup.values().stream().forEach(usersStateBuilder::addGroup);
-                wags.stream().forEach(usersStateBuilder::addGroup);
+
+                // Only add workload admin groups that belong to this environment
+                wags.stream()
+                        .filter(wag -> wag.getResource().equalsIgnoreCase(environmentCrn))
+                        .map(wag -> nameToGroup(wag.getWorkloadAdministrationGroupName()))
+                        .forEach(usersStateBuilder::addGroup);
 
                 // add internal usersync group for each environment
                 FmsGroup internalUserSyncGroup = new FmsGroup();
@@ -140,7 +144,7 @@ public class UmsUsersStateProvider {
         for (RoleAssignment roleAssigned : rolesAssignedList) {
             // TODO: should come from IAM Roles and check against Role Object
             if (roleAssigned.getRole().getCrn().contains("PowerUser") ||
-                roleAssigned.getRole().getCrn().contains("EnvironmentAdmin")) {
+                    roleAssigned.getRole().getCrn().contains("EnvironmentAdmin")) {
                 return true;
                 // admins are also users
             }
@@ -150,7 +154,7 @@ public class UmsUsersStateProvider {
         for (ResourceRoleAssignment resourceRoleAssigned : resourceRoleAssignedList) {
             // TODO: should come from IAM Roles and check against Role Object
             if (resourceRoleAssigned.getResourceRole().getCrn().contains("EnvironmentAdmin") ||
-                (resourceRoleAssigned.getResourceRole().getCrn().contains("EnvironmentUser"))) {
+                    (resourceRoleAssigned.getResourceRole().getCrn().contains("EnvironmentUser"))) {
                 return true;
             }
         }
@@ -163,7 +167,7 @@ public class UmsUsersStateProvider {
         for (RoleAssignment roleAssigned : rolesAssignedList) {
             // TODO: should come from IAM Roles and check against Role Object
             if (roleAssigned.getRole().getCrn().contains("PowerUser") ||
-                roleAssigned.getRole().getCrn().contains("EnvironmentAdmin")) {
+                    roleAssigned.getRole().getCrn().contains("EnvironmentAdmin")) {
                 return true;
             }
         }
@@ -181,7 +185,7 @@ public class UmsUsersStateProvider {
 
     @SuppressWarnings("ParameterNumber")
     private void handleUser(UmsUsersState.Builder umsUsersStateBuilder, UsersState.Builder usersStateBuilder, Map<String, FmsGroup> crnToFmsGroup,
-                            String actorCrn, String memberCrn, FmsUser fmsUser, String environmentCrn, Optional<String> requestId) {
+            String actorCrn, String memberCrn, FmsUser fmsUser, String environmentCrn, Optional<String> requestId) {
         try {
             GetRightsResponse rightsResponse = grpcUmsClient.getRightsForUser(actorCrn, memberCrn, environmentCrn, requestId);
             if (isEnvironmentUser(environmentCrn, rightsResponse)) {
