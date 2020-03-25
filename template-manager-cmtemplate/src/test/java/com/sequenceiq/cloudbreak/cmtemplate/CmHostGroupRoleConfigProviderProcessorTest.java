@@ -1,8 +1,9 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
+package com.sequenceiq.cloudbreak.cmtemplate;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static java.util.Optional.ofNullable;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
@@ -12,28 +13,27 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
-import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
-import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProviderProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsVolumeConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnVolumeConfigProvider;
-import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.cmtemplate.sharedcomponent.SharedComponent;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CmHostGroupRoleConfigProviderProcessorTest {
 
     @InjectMocks
@@ -62,8 +62,8 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
         assertEquals(List.of(config("fs_checkpoint_dir_list", "/hadoopfs/fs1/namesecondary")), roleConfigs.get("hdfs-SECONDARYNAMENODE-BASE"));
         assertEquals(
                 List.of(
-                    config("yarn_nodemanager_local_dirs", "/hadoopfs/fs1/nodemanager,/hadoopfs/fs2/nodemanager"),
-                    config("yarn_nodemanager_log_dirs", "/hadoopfs/fs1/nodemanager/log,/hadoopfs/fs2/nodemanager/log")
+                        config("yarn_nodemanager_local_dirs", "/hadoopfs/fs1/nodemanager,/hadoopfs/fs2/nodemanager"),
+                        config("yarn_nodemanager_log_dirs", "/hadoopfs/fs1/nodemanager/log,/hadoopfs/fs2/nodemanager/log")
                 ),
                 roleConfigs.get("yarn-NODEMANAGER-BASE")
         );
@@ -212,6 +212,36 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
         assertEquals(1, computeDN.size());
         assertEquals("dfs_data_dir_list", computeDN.get(0).getName());
         assertEquals("/hadoopfs/root1/datanode", computeDN.get(0).getValue());
+    }
+
+    @Test
+    public void testGenerateConfigsWhenHdfsJournalNodeNotNull() {
+        List<SharedComponent> sharedComponents = List.of(new SharedComponent("HDFS", "JOURNALNODE"));
+        ReflectionTestUtils.setField(underTest, "sharedComponents", sharedComponents);
+        HostgroupView master1 = new HostgroupView("master1", 1, InstanceGroupType.GATEWAY, 1);
+        HostgroupView master2 = new HostgroupView("master2", 1, InstanceGroupType.GATEWAY, 1);
+        HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
+        HostgroupView compute = new HostgroupView("compute", 3, InstanceGroupType.CORE, 2);
+        HostgroupView quorum = new HostgroupView("quorum", 3, InstanceGroupType.CORE, 2);
+        setup("input/cb5660.bp", Builder.builder().withHostgroupViews(Set.of(master1, master2, worker, compute, quorum)));
+
+        Map<String, Map<String, List<ApiClusterTemplateConfig>>> actual = underTest.generateConfigs(templateProcessor, templatePreparator);
+        assertNull(actual.get("hdfs-JOURNALNODE-BASE"));
+    }
+
+    @Test
+    public void testGenerateConfigsWhenHdfsJournalNodeIsNotNull() {
+        List<SharedComponent> sharedComponents = List.of();
+        ReflectionTestUtils.setField(underTest, "sharedComponents", sharedComponents);
+        HostgroupView master1 = new HostgroupView("master1", 1, InstanceGroupType.GATEWAY, 1);
+        HostgroupView master2 = new HostgroupView("master2", 1, InstanceGroupType.GATEWAY, 1);
+        HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
+        HostgroupView compute = new HostgroupView("compute", 3, InstanceGroupType.CORE, 2);
+        HostgroupView quorum = new HostgroupView("quorum", 3, InstanceGroupType.CORE, 2);
+        setup("input/cb5660.bp", Builder.builder().withHostgroupViews(Set.of(master1, master2, worker, compute, quorum)));
+
+        Map<String, Map<String, List<ApiClusterTemplateConfig>>> actual = underTest.generateConfigs(templateProcessor, templatePreparator);
+        assertNotNull(actual.get("hdfs-JOURNALNODE-BASE"));
     }
 
     private String getBlueprintText(String path) {
