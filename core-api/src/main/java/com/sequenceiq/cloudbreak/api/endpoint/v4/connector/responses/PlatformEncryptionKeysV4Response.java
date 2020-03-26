@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.common.model.JsonEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformEncryptionKeysV4Response implements JsonEntity {

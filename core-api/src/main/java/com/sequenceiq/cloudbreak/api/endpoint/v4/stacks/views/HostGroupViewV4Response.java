@@ -8,7 +8,7 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.NAME;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 

@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescript
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.validation.ValidEnvironmentSettings;
 
 import io.swagger.annotations.ApiModel;
