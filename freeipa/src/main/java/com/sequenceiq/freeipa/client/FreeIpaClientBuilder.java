@@ -8,6 +8,7 @@ import java.net.URL;
 import java.security.Security;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -31,6 +32,7 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -40,6 +42,7 @@ import org.springframework.http.HttpStatus;
 
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jsonrpc4j.JsonRpcClient;
+import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -79,7 +82,7 @@ public class FreeIpaClientBuilder {
 
     private final HttpClientConfig clientConfig;
 
-    private final JsonRpcClient.RequestListener rpcRequestListener;
+    private final RequestListener rpcRequestListener;
 
     private Map<String, String> additionalHeaders;
 
@@ -118,12 +121,15 @@ public class FreeIpaClientBuilder {
     }
 
     public FreeIpaClient buildWithPing() throws URISyntaxException, FreeIpaClientException, IOException {
+        List<BasicHeader> defaultHeaders = additionalHeaders.entrySet().stream()
+                .map(entry -> new BasicHeader(entry.getKey(), entry.getValue())).collect(Collectors.toList());
         try (CloseableHttpClient client = HttpClientBuilder
                 .create()
                 .useSystemProperties()
                 .setConnectionManager(connectionManager)
                 .setConnectionManagerShared(true)
                 .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(TEST_CONNECTION_READ_TIMEOUT_MILLIS).build())
+                .setDefaultHeaders(defaultHeaders)
                 .setDefaultSocketConfig(
                         SocketConfig.custom()
                                 .setSoTimeout(SO_TIMEOUT)
