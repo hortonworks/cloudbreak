@@ -8,10 +8,12 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.freeipa.client.FreeIpaCapabilities;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
+import com.sequenceiq.freeipa.controller.exception.UnsupportedException;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,11 +59,14 @@ public class UserKeytabService {
         }
     }
 
-    private void validateWorkloadUserInEnvironment(String workloadUsername, String environmentCrn) {
+    private void validateFreeIPAState(String workloadUsername, String environmentCrn) {
         String accountId = Crn.safeFromString(environmentCrn).getAccountId();
         FreeIpaClient freeIpaClient;
         try {
             freeIpaClient = freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(environmentCrn, accountId);
+            if (!FreeIpaCapabilities.hasSetPasswordHashSupport(freeIpaClient.getConfig())) {
+                throw new UnsupportedException("User keytab retrieval requires a newer environment and FreeIPA version");
+            }
             Optional<User> user = freeIpaClient.userFind(workloadUsername);
             if (user.isEmpty()) {
                 throw new NotFoundException(String.format("Workload user %s has not been synced into environment %s", workloadUsername, environmentCrn));
@@ -80,7 +85,8 @@ public class UserKeytabService {
         GetActorWorkloadCredentialsResponse getActorWorkloadCredentialsResponse =
                 grpcUmsClient.getActorWorkloadCredentials(INTERNAL_ACTOR_CRN, userCrn, MDCUtils.getRequestId());
         String workloadUsername = getActorWorkloadCredentialsResponse.getWorkloadUsername();
-        validateWorkloadUserInEnvironment(workloadUsername, environmentCrn);
+
+        validateFreeIPAState(workloadUsername, environmentCrn);
 
         List<ActorKerberosKey> actorKerberosKeys = getActorWorkloadCredentialsResponse.getKerberosKeysList();
         return userKeytabGenerator.generateKeytabBase64(workloadUsername, realm, actorKerberosKeys);
