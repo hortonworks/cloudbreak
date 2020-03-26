@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -86,9 +85,6 @@ public class StackCommonService implements StackEndpoint {
 
     @Inject
     private FileSystemValidator fileSystemValidator;
-
-    @Inject
-    private StackRequestValidator stackValidator;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;

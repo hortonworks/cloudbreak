@@ -9,3 +9,7 @@ gpgcheck=0
 {%- endif %}
 enabled=1
 priority=1
+{% if pillar['paywall'] is defined %}
+username={{ salt['pillar.get']('paywall:paywallUser') }}
+password={{ salt['pillar.get']('paywall:paywallPassword') }}
+{% endif%}

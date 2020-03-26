@@ -8,6 +8,8 @@ public class AmbariInfo {
 
     private Map<String, AmbariRepoDetails> repo;
 
+    private boolean paywallProtected;
+
     public String getVersion() {
         return version;
     }
@@ -24,4 +26,11 @@ public class AmbariInfo {
         this.repo = repo;
     }
 
+    public boolean isPaywallProtected() {
+        return paywallProtected;
+    }
+
+    public void setPaywallProtected(boolean paywallProtected) {
+        this.paywallProtected = paywallProtected;
+    }
 }

@@ -25,8 +25,7 @@ public class AmbariStackDetailsJson implements JsonEntity {
     private String stack;
 
     @ApiModelProperty(AmbariStackDetailsDescription.VERSION)
-    @Pattern(regexp = "(^[0-9]+\\.[0-9]+$)",
-            message = "Valid stack version is in MAJOR.MINOR format eg.: 2.6")
+    @Pattern(regexp = "[0-9]+\\.[0-9]?(\\.?[0-9])", message = "Valid stack version is in MAJOR.MINOR.MAINTENANCE format eg.: 2.6.1")
     private String version;
 
     @ApiModelProperty(AmbariStackDetailsDescription.OS)

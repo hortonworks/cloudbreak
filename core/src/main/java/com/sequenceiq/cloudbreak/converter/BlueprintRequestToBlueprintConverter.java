@@ -77,9 +77,10 @@ public class BlueprintRequestToBlueprintConverter extends AbstractConversionServ
         try {
             JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
             String stackVersion = blueprintUtils.getBlueprintStackVersion(root);
-            if (StringUtils.isBlank(stackVersion) || !stackVersion.matches("[0-9]+\\.[0-9]+")) {
-                throw new BadRequestException(String.format("Stack version [%s] is not valid. Valid stack version is in MAJOR.MINOR format eg.: 2.6",
-                        stackVersion));
+            if (StringUtils.isBlank(stackVersion) || !stackVersion.matches("[0-9]+\\.[0-9]?(\\.?[0-9])")) {
+                throw new BadRequestException(
+                        String.format("Stack version [%s] is not valid. Valid stack version is in MAJOR.MINOR.MAINTENANCE format eg.: 2.6.1",
+                                stackVersion));
             }
         } catch (IOException e) {
             throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
