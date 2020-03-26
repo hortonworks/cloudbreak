@@ -27,4 +27,13 @@ public class InstanceAuthentication extends DynamicModel {
     public String getLoginUserName() {
         return loginUserName;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceAuthentication{" +
+                "publicKey='" + publicKey + '\'' +
+                ", publicKeyId='" + publicKeyId + '\'' +
+                ", loginUserName='" + loginUserName + '\'' +
+                '}';
+    }
 }

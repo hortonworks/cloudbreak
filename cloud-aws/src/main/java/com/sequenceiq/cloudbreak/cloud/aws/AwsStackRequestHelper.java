@@ -91,8 +91,6 @@ public class AwsStackRequestHelper {
         addParameterChunks(parameters, "CBGateWayUserData", stack.getImage().getUserDataByType(InstanceGroupType.GATEWAY), CHUNK_COUNT);
         parameters.addAll(asList(
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
-                getStackOwnerFromStack(ac, stack, "Owner", "StackOwner"),
-                getStackOwnerFromStack(ac, stack, "owner", "stackowner"),
                 new Parameter().withParameterKey("KeyName").withParameterValue(keyPairName),
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage().getImageName()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(ac, stack))
@@ -193,9 +191,7 @@ public class AwsStackRequestHelper {
                 new Parameter().withParameterKey("DBSubnetGroupSubnetIdsParameter").withParameterValue(String.join(",", awsNetworkView.getSubnetList())),
                 new Parameter().withParameterKey("EngineParameter").withParameterValue(awsRdsInstanceView.getEngine()),
                 new Parameter().withParameterKey("MasterUsernameParameter").withParameterValue(awsRdsInstanceView.getMasterUsername()),
-                new Parameter().withParameterKey("MasterUserPasswordParameter").withParameterValue(awsRdsInstanceView.getMasterUserPassword()),
-                getStackOwnerFromDatabase(ac, stack, "Owner", "StackOwner"),
-                getStackOwnerFromDatabase(ac, stack, "owner", "stackowner"))
+                new Parameter().withParameterKey("MasterUserPasswordParameter").withParameterValue(awsRdsInstanceView.getMasterUserPassword()))
         );
 
         addParameterIfNotNull(parameters, "AllocatedStorageParameter", awsRdsInstanceView.getAllocatedStorage());

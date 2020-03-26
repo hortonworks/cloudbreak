@@ -102,20 +102,8 @@
     "VPCCidrParameter": {
         "Type":"String",
         "Description":"VPC Cidr"
-    },
-    </#if>
-    "StackOwner" : {
-      "Description" : "The instances will have this parameter as an Owner tag.",
-      "Type" : "String",
-      "MinLength": "1",
-      "MaxLength": "200"
-    },
-    "stackowner" : {
-        "Description" : "The instances will have this parameter as an owner tag.",
-        "Type" : "String",
-        "MinLength": "1",
-        "MaxLength": "200"
     }
+    </#if>
   },
 
   "Conditions" : {

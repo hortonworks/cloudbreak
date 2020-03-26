@@ -4,21 +4,6 @@
 
   "Description" : "Deploys a Cloudera Data Platform VPC on AWS.",
 
-  "Parameters" : {
-    "StackOwner" : {
-        "Description" : "The instances will have this parameter as an Owner tag.",
-        "Type" : "String",
-        "MinLength": "1",
-        "MaxLength": "200"
-    },
-    "stackowner" : {
-        "Description" : "The instances will have this parameter as an owner tag.",
-        "Type" : "String",
-        "MinLength": "1",
-        "MaxLength": "200"
-    }
-  },
-
   "Resources" : {
 
     "VPC" : {
@@ -29,7 +14,8 @@
         "EnableDnsHostnames" : "true",
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Name", "Value" : "VPC-${environmentId}" }
+          { "Key" : "Name", "Value" : "VPC-${environmentId}" },
+          { "Key" : "Network", "Value" : "Public" }
         ]
       }
     },
@@ -38,7 +24,8 @@
       "Properties" : {
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Name", "Value" : "ig-${environmentId}" }
+          { "Key" : "Name", "Value" : "ig-${environmentId}" },
+          { "Key" : "Network", "Value" : "Public" }
         ]
       }
     },
@@ -169,7 +156,8 @@
         "VpcId" : { "Ref" : "VPC" },
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-          { "Key" : "Name", "Value" : "prt-${environmentName}-${environmentId}" }
+          { "Key" : "Name", "Value" : "prt-${environmentName}-${environmentId}" },
+          { "Key" : "Network", "Value" : "Public" }
         ]
       }
     },
