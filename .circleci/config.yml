@@ -101,13 +101,6 @@ workflows:
                 - rc-2.9
           requires:
             - build
-      - upload-snapshot:
-          filters:
-            branches:
-              only: 
-                - master
-          requires:
-            - build
       - release:
           filters:
             branches:
