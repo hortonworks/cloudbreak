@@ -25,6 +25,8 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
 
     private ImagesV4Response imagesV4Response;
 
+    private Boolean skipCleanup = Boolean.FALSE;
+
     public ImageCatalogTestDto(TestContext testContext) {
         super(new ImageCatalogV4Request(), testContext);
     }
@@ -46,6 +48,11 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
 
     public ImageCatalogTestDto withUrl(String url) {
         getRequest().setUrl(url);
+        return this;
+    }
+
+    public ImageCatalogTestDto withoutCleanup() {
+        setSkipCleanup(Boolean.TRUE);
         return this;
     }
 
@@ -73,9 +80,15 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
         this.imagesV4Response = imagesV4Response;
     }
 
+    public void setSkipCleanup(Boolean skipCleanup) {
+        this.skipCleanup = skipCleanup;
+    }
+
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        delete(context, getResponse(), cloudbreakClient);
+        if (!skipCleanup) {
+            delete(context, getResponse(), cloudbreakClient);
+        }
     }
 
     @Override
