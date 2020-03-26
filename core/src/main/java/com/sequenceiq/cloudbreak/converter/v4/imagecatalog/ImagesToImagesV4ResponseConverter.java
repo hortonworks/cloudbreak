@@ -121,6 +121,8 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         }
         json.setImageSetsByProvider(new HashMap<>(source.getImageSetsByProvider()));
         json.setCmBuildNumber(source.getCmBuildNumber());
+        json.setPreWarmCsd(source.getPreWarmCsd());
+        json.setPreWarmParcels(source.getPreWarmParcels());
     }
 
     private BaseStackDetailsV4Response convertStackDetailsToJson(StackDetails stackDetails, String osType, StackType stackType) {
