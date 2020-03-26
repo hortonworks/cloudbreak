@@ -495,6 +495,8 @@ cloudbreak:
         - SMARTSENSE_UPLOAD_USERNAME
         - SMARTSENSE_UPLOAD_PASSWORD
         - CB_UPSCALE_MAX_NODECOUNT
+        - CB_PAYWALL_USERNAME=$CB_PAYWALL_USERNAME
+        - CB_PAYWALL_PASSWORD=$CB_PAYWALL_PASSWORD
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/cb/
