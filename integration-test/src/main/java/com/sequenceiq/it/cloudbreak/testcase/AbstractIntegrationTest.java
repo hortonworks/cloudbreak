@@ -133,6 +133,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         testContext.given(ImageCatalogTestDto.class)
                 .withUrl(url)
                 .withName(name)
+                .withoutCleanup()
                 .when(imageCatalogTestClient.createIfNotExistV4());
     }
 
