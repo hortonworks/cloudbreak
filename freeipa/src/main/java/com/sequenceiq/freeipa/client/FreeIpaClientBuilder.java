@@ -40,6 +40,7 @@ import org.springframework.http.HttpStatus;
 
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.jsonrpc4j.JsonRpcClient;
+import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -77,7 +78,7 @@ public class FreeIpaClientBuilder {
 
     private final HttpClientConfig clientConfig;
 
-    private final JsonRpcClient.RequestListener rpcRequestListener;
+    private final RequestListener rpcRequestListener;
 
     private Map<String, String> additionalHeaders;
 
@@ -113,7 +114,7 @@ public class FreeIpaClientBuilder {
         this(user, pass, clientConfig, port, DEFAULT_BASE_PATH, Map.of(), null);
     }
 
-    public FreeIpaClient build(boolean withPing) throws URISyntaxException, FreeIpaClientException, IOException {
+    public FreeIpaClient build(boolean withPing) throws URISyntaxException, IOException, FreeIpaClientException {
         if (withPing) {
             try (CloseableHttpClient client = HttpClientBuilder
                     .create()
