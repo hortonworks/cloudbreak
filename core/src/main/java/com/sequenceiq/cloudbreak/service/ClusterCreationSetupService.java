@@ -26,10 +26,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.stack.StackDescriptor;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRequest;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -116,13 +114,13 @@ public class ClusterCreationSetupService {
     private DefaultAmbariRepoService defaultAmbariRepoService;
 
     @Inject
-    private StackMatrixService stackMatrixService;
-
-    @Inject
     private ManagementPackValidator mpackValidator;
 
     @Inject
     private RdsConfigValidator rdsConfigValidator;
+
+    @Inject
+    private RepositoryValidator repositoryValidator;
 
     public void validate(ClusterRequest request, Stack stack, User user, Workspace workspace) {
         validate(request, null, stack, user, workspace);
@@ -187,7 +185,7 @@ public class ClusterCreationSetupService {
                 stackImageComponent);
         components.add(hdpRepoConfig);
 
-        checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get(), request.getValidateRepositories());
+        repositoryValidator.checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get(), request.getValidateRepositories());
         checkVDFFile(ambariRepoConfig, hdpRepoConfig, stackName);
 
         LOGGER.info("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
@@ -197,36 +195,6 @@ public class ClusterCreationSetupService {
         LOGGER.info("Cluster object creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         return savedCluster;
-    }
-
-    private void checkRepositories(ClusterComponent ambariRepoComponent, ClusterComponent stackRepoComponent, Component imageComponent, boolean strictCheck)
-            throws IOException {
-        AmbariRepo ambariRepo = ambariRepoComponent.getAttributes().get(AmbariRepo.class);
-        StackRepoDetails stackRepoDetails = stackRepoComponent.getAttributes().get(StackRepoDetails.class);
-        Image image = imageComponent.getAttributes().get(Image.class);
-        String stackMajorVersion = stackRepoDetails.getMajorHdpVersion();
-        String stackType = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);
-        if (stackType.contains("-")) {
-            stackType = stackType.substring(0, stackType.indexOf('-'));
-        }
-        StackDescriptor stackDescriptor = stackMatrixService.getStackDescriptor(stackType, stackMajorVersion);
-        if (stackDescriptor != null) {
-            boolean hasDefaultStackRepoUrlForOsType = stackDescriptor.getRepo().getStack().containsKey(image.getOsType());
-            boolean hasDefaultAmbariRepoUrlForOsType = stackDescriptor.getAmbari().getRepo().containsKey(image.getOsType());
-            boolean compatibleAmbari = new VersionComparator().compare(() -> ambariRepo.getVersion().substring(0, stackDescriptor.getMinAmbari().length()),
-                    stackDescriptor::getMinAmbari) >= 0;
-            if (!hasDefaultAmbariRepoUrlForOsType || !hasDefaultStackRepoUrlForOsType || !compatibleAmbari) {
-                String message = String.format("The given repository information seems to be incompatible."
-                                + " Ambari version: %s, Stack type: %s, Stack version: %s, Image Id: %s, Os type: %s.", ambariRepo.getVersion(),
-                        stackType, stackRepoDetails.getHdpVersion(), image.getImageId(), image.getOsType());
-                if (strictCheck) {
-                    LOGGER.error(message);
-                    throw new BadRequestException(message);
-                } else {
-                    LOGGER.warn(message);
-                }
-            }
-        }
     }
 
     private void checkVDFFile(ClusterComponent ambariRepoConfig, ClusterComponent hdpRepoConfig, String stackName) throws IOException {
@@ -263,7 +231,7 @@ public class ClusterCreationSetupService {
             throws IOException, CloudbreakImageNotFoundException {
         Json stackRepoDetailsJson;
         AmbariStackDetailsJson ambariStackDetails = request.getAmbariStackDetails();
-        if (!stackHdpRepoConfig.isPresent()) {
+        if (stackHdpRepoConfig.isEmpty()) {
             if (ambariStackDetails != null && (stackRepoDetailsConverter.isBaseRepoRequiredFieldsExists(ambariStackDetails)
                     || stackRepoDetailsConverter.isVdfRequiredFieldsExists(ambariStackDetails))) {
                 setOsTypeFromImageIfMissing(cluster, stackImageComponent, ambariStackDetails);

@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.ParameterValidator;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackRequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -61,9 +60,6 @@ public class StackDecorator {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDecorator.class);
 
     private static final double ONE_HUNDRED = 100.0;
-
-    @Inject
-    private StackRequestValidator stackValidator;
 
     @Inject
     private StackParameterService stackParameterService;

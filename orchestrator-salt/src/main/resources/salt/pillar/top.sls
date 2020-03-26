@@ -12,6 +12,7 @@ base:
     - docker
     - metadata.init
     - proxy.proxy
+    - hdp.paywall
 
   'roles:gateway':
     - match: grain

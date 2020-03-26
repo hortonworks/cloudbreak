@@ -25,7 +25,11 @@ curl -x {{ pillar['proxy']['protocol'] }}://{{ pillar['proxy']['user'] }}:{{ pil
 curl -x {{ pillar['proxy']['protocol'] }}://{{ pillar['proxy']['host'] }}:{{ pillar['proxy']['port'] }} $VDF_URL -o vdf.xml
 {% endif%}
 {% else %}
+{% if pillar['paywall'] is defined %}
+curl -u {{ pillar['paywall']['paywallUser'] }}:{{ pillar['paywall']['paywallPassword'] }} $VDF_URL -o vdf.xml
+{% else %}
 curl $VDF_URL -o vdf.xml
+{% endif%}
 {% endif%}
 
 
@@ -59,6 +63,10 @@ baseurl=$repoUrl
 path=/
 enabled=1
 gpgcheck=0
+{% if pillar['paywall'] is defined %}
+username={{ pillar['paywall']['paywallUser'] }}
+password={{ pillar['paywall']['paywallPassword'] }}
+{% endif%}
 EOF
 }
 

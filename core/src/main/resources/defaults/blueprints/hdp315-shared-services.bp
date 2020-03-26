@@ -1,0 +1,61 @@
+{
+  "inputs": [],
+  "tags": {
+    "shared_services_ready": true
+  },
+  "blueprint": {
+    "Blueprints": {
+      "blueprint_name": "hdp315-shared-services",
+      "stack_name": "HDP",
+      "stack_version": "3.1.5"
+    },
+    "settings": [
+      {
+        "recovery_settings": []
+      },
+      {
+        "service_settings": [
+          {
+            "name": "HIVE",
+            "credential_store_enabled": "false"
+          }
+        ]
+      },
+      {
+        "component_settings": []
+      }
+    ],
+    "configurations": [],
+    "host_groups": [
+      {
+        "name": "master",
+        "configurations": [
+        ],
+        "components": [
+          {
+            "name": "ZOOKEEPER_CLIENT"
+          },
+          {
+            "name": "ZOOKEEPER_SERVER"
+          },
+          {
+            "name": "INFRA_SOLR_CLIENT"
+          },
+          {
+            "name": "RANGER_TAGSYNC"
+          },
+          {
+            "name": "RANGER_USERSYNC"
+          },
+          {
+            "name": "RANGER_ADMIN"
+          },
+          {
+            "name": "INFRA_SOLR"
+          }
+        ],
+        "cardinality": "1"
+      }
+    ]
+  }
+}

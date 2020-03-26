@@ -12,6 +12,8 @@ public class StackInfo implements Versioned {
 
     private String minAmbari;
 
+    private boolean paywallProtected;
+
     @Override
     public String getVersion() {
         return version;
@@ -38,6 +40,14 @@ public class StackInfo implements Versioned {
 
     public void setRepo(DefaultStackRepoDetails repo) {
         this.repo = repo;
+    }
+
+    public boolean isPaywallProtected() {
+        return paywallProtected;
+    }
+
+    public void setPaywallProtected(boolean paywallProtected) {
+        this.paywallProtected = paywallProtected;
     }
 
     @Override
