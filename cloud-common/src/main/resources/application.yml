@@ -113,7 +113,10 @@ cb:
                 Data Lake: Apache Ranger, Apache Hive Metastore HA=hdp26-shared-services-ha;
                 HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin=hdp31-data-science-spark2;
                 HDP 3.1 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp31-edw-analytics;
-                HDP 3.1 - Data Lake: Apache Ranger, Apache Hive Metastore=hdp31-shared-services
+                HDP 3.1 - Data Lake: Apache Ranger, Apache Hive Metastore=hdp31-shared-services;
+                HDP 3.1.5 - Data Science: Apache Spark 2, Apache Zeppelin=hdp315-data-science-spark2;
+                HDP 3.1.5 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp315-edw-analytics;
+                HDP 3.1.5 - Data Lake: Apache Ranger, Apache Hive Metastore=hdp315-shared-services
      internal: >
                 Messaging Management: Apache Kafka, Schema Registry=hdf33-messaging-kafka-registry;
 
@@ -183,6 +186,10 @@ cb:
     db: ranger
     port: 5432
 
+  paywall:
+    username:
+    password:
+
   ambari:
     entries:
       2.6:
@@ -219,6 +226,25 @@ cb:
           amazonlinux2:
             baseurl: http://public-repo-1.hortonworks.com/ambari/amazonlinux2/2.x/updates/2.7.3.0
             gpgkey: http://public-repo-1.hortonworks.com/ambari/amazonlinux2/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      "[2.7.5]":
+        version: 2.7.5.0
+        paywallProtected: true
+        repo:
+          redhat7:
+            baseurl: https://archive.cloudera.com/p/ambari/centos7/2.x/updates/2.7.5.0/
+            gpgkey: https://archive.cloudera.com/p/ambari/centos7/2.x/updates/2.7.5.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+          debian9:
+            baseurl: https://archive.cloudera.com/p/ambari/debian9/2.x/updates/2.7.5.0/
+          ubuntu16:
+            baseurl: https://archive.cloudera.com/p/ambari/ubuntu16/2.x/updates/2.7.5.0/
+          ubuntu18:
+            baseurl: https://archive.cloudera.com/p/ambari/ubuntu18/2.x/updates/2.7.5.0/
+          sles12:
+            baseurl: https://archive.cloudera.com/p/ambari/sles12/2.x/updates/2.7.5.0/
+            gpgkey: https://archive.cloudera.com/p/ambari/sles12/2.x/updates/2.7.5.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+          amazonlinux2:
+            baseurl: https://archive.cloudera.com/p/ambari/amazonlinux2/2.x/updates/2.7.5.0/
+            gpgkey: https://archive.cloudera.com/p/ambari/amazonlinux2/2.x/updates/2.7.5.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       port: 5432
       user: ambari
@@ -322,6 +348,34 @@ cb:
             ubuntu18: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu18
             sles12: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12
             amazonlinux2: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/amazonlinux2
+      "[3.1.5]":
+        version: 3.1.5.0
+        minAmbari: 2.7.5
+        paywallProtected: true
+        repo:
+          stack:
+            repoid: HDP-3.1.5
+            redhat7: https://archive.cloudera.com/p/HDP/centos7/3.x/updates/3.1.5.0
+            debian9: https://archive.cloudera.com/p/HDP/debian9/3.x/updates/3.1.5.0
+            ubuntu16: https://archive.cloudera.com/p/HDP/ubuntu16/3.x/updates/3.1.5.0
+            ubuntu18: https://archive.cloudera.com/p/HDP/ubuntu18/3.x/updates/3.1.5.0
+            sles12: https://archive.cloudera.com/p/HDP/sles12/3.x/updates/3.1.5.0
+            amazonlinux2: https://archive.cloudera.com/p/HDP/amazonlinux2/3.x/updates/3.1.5.0
+            repository-version: 3.1.5.0-152
+            vdf-redhat7: https://archive.cloudera.com/p/HDP/centos7/3.x/updates/3.1.5.0/HDP-3.1.5.0-152.xml
+            vdf-debian9: https://archive.cloudera.com/p/HDP/debian9/3.x/updates/3.1.5.0/HDP-3.1.5.0-152.xml
+            vdf-ubuntu16: https://archive.cloudera.com/p/HDP/ubuntu16/3.x/updates/3.1.5.0/HDP-3.1.5.0-152.xml
+            vdf-ubuntu18: https://archive.cloudera.com/p/HDP/ubuntu18/3.x/updates/3.1.5.0/HDP-3.1.5.0-152.xml
+            vdf-sles12: https://archive.cloudera.com/p/HDP/sles12/3.x/updates/3.1.5.0/HDP-3.1.5.0-152.xml
+            vdf-amazonlinux2: https://archive.cloudera.com/p/HDP/amazonlinux2/3.x/updates/3.1.5.0/HDP-3.1.5.0-152.xml
+          util:
+            repoid: HDP-UTILS-1.1.0.22
+            redhat7: https://archive.cloudera.com/p/HDP-UTILS/1.1.0.22/repos/centos7
+            debian9: https://archive.cloudera.com/p/HDP-UTILS/1.1.0.22/repos/debian9
+            ubuntu16: https://archive.cloudera.com/p/HDP-UTILS/1.1.0.22/repos/ubuntu16
+            ubuntu18: https://archive.cloudera.com/p/HDP-UTILS/1.1.0.22/repos/ubuntu18
+            sles12: https://archive.cloudera.com/p/HDP-UTILS/1.1.0.22/repos/sles12
+            amazonlinux2: https://archive.cloudera.com/p/HDP-UTILS/1.1.0.22/repos/amazonlinux2
   hdf:
     entries:
       3.1:

@@ -67,6 +67,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.credential.PaywallCredentialService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -137,6 +138,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
+
+    @Inject
+    private PaywallCredentialService paywallCredentialService;
 
     public void runAmbariServices(Stack stack, Cluster cluster) {
         try {
@@ -238,6 +242,7 @@ public class ClusterHostServiceRunner {
         }
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
+        paywallCredentialService.getPaywallCredential(servicePillar);
         Map<String, Object> credentials = new HashMap<>();
         credentials.put("username", ambariSecurityConfigProvider.getAmbariUserName(stack.getCluster()));
         credentials.put("password", ambariSecurityConfigProvider.getAmbariPassword(stack.getCluster()));

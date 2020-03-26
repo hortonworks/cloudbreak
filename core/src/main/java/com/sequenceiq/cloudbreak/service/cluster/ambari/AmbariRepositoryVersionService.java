@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.credential.PaywallCredentialService;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -61,6 +62,9 @@ public class AmbariRepositoryVersionService {
 
     @Inject
     private JsonHelper jsonHelper;
+
+    @Inject
+    private PaywallCredentialService paywallCredentialService;
 
     public String getRepositoryVersion(Long clusterId, Orchestrator orchestrator) throws CloudbreakException {
         StackRepoDetails stackRepoDetails = getStackRepoDetails(clusterId, orchestrator);
@@ -160,10 +164,12 @@ public class AmbariRepositoryVersionService {
     private void addVersionDefinitionFileToAmbari(String stackName, ClusterService ambariClient, StackRepoDetails stackRepoDetails)
             throws IOException, URISyntaxException {
         Optional<String> vdfUrl = Optional.ofNullable(stackRepoDetails.getStack().get(CUSTOM_VDF_REPO_KEY));
-        if (!vdfUrl.isPresent()) {
+        if (vdfUrl.isEmpty()) {
             String message = String.format("Couldn't determine any VDF file for the stack: %s", stackName);
             LOGGER.error(message);
             throw new AmbariOperationFailedException(message);
+        } else {
+            vdfUrl = Optional.of(paywallCredentialService.addCredentialForUrl(vdfUrl.get()));
         }
 
         String repoId = stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG);

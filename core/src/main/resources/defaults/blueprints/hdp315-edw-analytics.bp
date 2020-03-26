@@ -1,0 +1,203 @@
+{
+  "inputs": [],
+  "description": "Useful for EDW analytics using Hive LLAP",
+  "blueprint": {
+    "Blueprints": {
+      "blueprint_name": "hdp315-edw-analytics-v3",
+      "stack_name": "HDP",
+      "stack_version": "3.1.5"
+    },
+    "settings": [
+      {
+        "recovery_settings": []
+      },
+      {
+        "service_settings": [
+          {
+            "name": "HIVE",
+            "credential_store_enabled": "false"
+          }
+        ]
+      },
+      {
+        "component_settings": []
+      }
+    ],
+    "configurations": [
+      {
+        "hive-interactive-env": {
+          "enable_hive_interactive": "true"
+        }
+      },
+      {
+        "core-site": {
+          "fs.trash.interval": "4320"
+        }
+      },
+      {
+        "hdfs-site": {
+          "dfs.namenode.safemode.threshold-pct": "0.99"
+        }
+      },
+      {
+        "hive-interactive-site": {
+          "hive.exec.orc.split.strategy":"BI",
+          "hive.stats.fetch.bitvector":"true",
+          "hive.metastore.rawstore.impl":"org.apache.hadoop.hive.metastore.cache.CachedStore"
+       }
+     },
+     {
+        "hive-site": {
+          "hive.exec.compress.output": "true",
+          "hive.merge.mapfiles": "true",
+          "hive.server2.tez.initialize.default.sessions": "true",
+          "hive.server2.transport.mode": "http"
+        }
+      },
+      {
+        "mapred-site": {
+          "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
+          "mapreduce.map.output.compress": "true",
+          "mapreduce.output.fileoutputformat.compress": "true"
+        }
+      },
+      {
+        "tez-site": {
+          "tez.runtime.shuffle.parallel.copies":"4",
+          "tez.runtime.enable.final-merge.in.output":"false",
+          "tez.am.am-rm.heartbeat.interval-ms.max":"2000"
+        }
+      },
+      {
+        "yarn-site": {
+          "yarn.acl.enable": "true"
+        }
+      },
+      {
+        "capacity-scheduler" : {
+          "properties" : {
+            "yarn.scheduler.capacity.root.queues" : "default,llap",
+            "yarn.scheduler.capacity.root.capacity" : "100",
+            "yarn.scheduler.capacity.root.default.capacity" : "25",
+            "yarn.scheduler.capacity.root.default.maximum-capacity" : "100",
+            "yarn.scheduler.capacity.root.llap.maximum-capacity" : "100",
+            "yarn.scheduler.capacity.root.llap.capacity" : "75"
+          }
+        }
+      }
+    ],
+    "host_groups": [
+      {
+        "name": "master",
+        "configurations": [],
+        "components": [
+          {
+            "name": "APP_TIMELINE_SERVER"
+          },
+          {
+            "name": "TIMELINE_READER"
+          },
+          {
+            "name": "HDFS_CLIENT"
+          },
+          {
+            "name": "HISTORYSERVER"
+          },
+          {
+            "name": "HIVE_CLIENT"
+          },
+          {
+            "name": "HIVE_METASTORE"
+          },
+          {
+            "name": "HIVE_SERVER"
+          },
+          {
+            "name": "HIVE_SERVER_INTERACTIVE"
+          },
+          {
+            "name": "JOURNALNODE"
+          },
+          {
+            "name": "MAPREDUCE2_CLIENT"
+          },
+          {
+            "name": "METRICS_COLLECTOR"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NAMENODE"
+          },
+          {
+            "name": "PIG"
+          },
+          {
+            "name": "RESOURCEMANAGER"
+          },
+          {
+            "name": "SECONDARY_NAMENODE"
+          },
+          {
+            "name": "TEZ_CLIENT"
+          },
+          {
+            "name": "YARN_CLIENT"
+          },
+          {
+            "name": "ZEPPELIN_MASTER"
+          },
+          {
+            "name": "ZOOKEEPER_CLIENT"
+          },
+          {
+            "name": "ZOOKEEPER_SERVER"
+          }
+        ],
+        "cardinality": "1"
+      },
+      {
+        "name": "worker",
+        "configurations": [],
+        "components": [
+          {
+            "name": "HIVE_CLIENT"
+          },
+          {
+            "name": "TEZ_CLIENT"
+          },
+          {
+            "name": "DATANODE"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NODEMANAGER"
+          }
+        ],
+        "cardinality": "1+"
+      },
+      {
+        "name": "compute",
+        "configurations": [],
+        "components": [
+          {
+            "name": "HIVE_CLIENT"
+          },
+          {
+            "name": "TEZ_CLIENT"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NODEMANAGER"
+          }
+        ],
+        "cardinality": "1+"
+      }
+    ]
+  }
+}

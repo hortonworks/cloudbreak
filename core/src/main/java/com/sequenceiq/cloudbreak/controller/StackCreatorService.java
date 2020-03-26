@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.PaywallCredentialValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -108,6 +109,9 @@ public class StackCreatorService {
     @Inject
     private ParametersValidator parametersValidator;
 
+    @Inject
+    private PaywallCredentialValidator paywallCredentialValidator;
+
     public StackResponse createStack(CloudbreakUser cloudbreakUser, User user, Workspace workspace, StackRequest stackRequest) {
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
         if (validationResult.getState() == State.ERROR) {
@@ -162,6 +166,10 @@ public class StackCreatorService {
                     LOGGER.info("Stack validation object has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                     blueprint = stackValidation.getBlueprint();
+
+                    start = System.currentTimeMillis();
+                    paywallCredentialValidator.validateCredential(stackRequest.getClusterRequest(), blueprint.getStackType(), blueprint.getStackVersion());
+                    LOGGER.info("Paywall credential has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                     start = System.currentTimeMillis();
                     stackService.validateStack(stackValidation, stackRequest.getClusterRequest().getValidateBlueprint());

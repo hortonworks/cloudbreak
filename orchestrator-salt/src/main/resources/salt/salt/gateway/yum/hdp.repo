@@ -10,3 +10,7 @@ baseurl={{ salt['pillar.get'](active_stack) }}
 path=/
 enabled=1
 gpgcheck=0
+{% if pillar['paywall'] is defined %}
+username={{ salt['pillar.get']('paywall:paywallUser') }}
+password={{ salt['pillar.get']('paywall:paywallPassword') }}
+{% endif%}
