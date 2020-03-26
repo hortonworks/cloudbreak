@@ -83,7 +83,14 @@ workflows:
   version: 2
   build_and_upload:
     jobs:
-      - build
+      - build:
+          filters:
+            branches:
+              only:
+                - rc-1.16
+                - rc-2.4
+                - rc-2.7
+                - rc-2.9
       - upload-tagged:
           filters:
             branches:
