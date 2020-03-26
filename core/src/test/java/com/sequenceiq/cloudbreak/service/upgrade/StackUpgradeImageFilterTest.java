@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -68,12 +69,16 @@ public class StackUpgradeImageFilterTest {
     public void before() {
         currentImage = createCurrentImage();
         properImage = createProperImage();
+
+        when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MINOR)).thenReturn(-1);
+
+        when(customVersionComparator.compare(V_7_0_2, V_7_0_2, CompareLevel.MINOR)).thenReturn(0);
     }
 
     @Test
     public void testFilterShouldReturnTheAvailableImage() {
         List<Image> properImages = List.of(properImage);
-        when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
+
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImages)).thenReturn(properImages);
 
         Images actual = underTest.filter(properImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
@@ -87,7 +92,6 @@ public class StackUpgradeImageFilterTest {
         Image availableImages = createImageWithDifferentPlatform();
         List<Image> allImage = List.of(availableImages, properImage);
 
-        when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(allImage);
 
         Images actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM);
@@ -102,8 +106,6 @@ public class StackUpgradeImageFilterTest {
         Image lowerCmAndCdpImage = createImageWithLowerCmAndCdpVersion();
         List<Image> availableImages = List.of(properImage, lowerCmImage, lowerCmAndCdpImage);
 
-        when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
-        when(customVersionComparator.compare(V_7_0_2, V_7_0_2, CompareLevel.MAINTENANCE)).thenReturn(0);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
 
         Images actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
@@ -114,11 +116,12 @@ public class StackUpgradeImageFilterTest {
     }
 
     @Test
+    @Ignore("Extensions are not checked since they are not relevant from SDX point of view, anyway the comparator does work properly")
     public void testFilterShouldReturnTheProperImageWhenTheCmfVersionIsNotMatches() {
-        Image differentCmfVersionImage = createImageWithDifferentCmfVersion();
+        // We use older CFM version
+        Image differentCmfVersionImage = createImageWithCfmVersion("2.0.0.0-120");
         List<Image> availableImages = List.of(properImage, differentCmfVersionImage);
 
-        when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
 
         Images actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
@@ -128,11 +131,11 @@ public class StackUpgradeImageFilterTest {
     }
 
     @Test
+    @Ignore("Extensions are not checked since they are not relevant from SDX point of view, anyway the comparator does work properly")
     public void testFilterShouldReturnTheProperImageWhenTheCspVersionIsNotMatches() {
         Image differentCspVersionImage = createImageWithDifferentCspVersion();
         List<Image> availableImages = List.of(properImage, differentCspVersionImage);
 
-        when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
 
         Images actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
@@ -146,7 +149,6 @@ public class StackUpgradeImageFilterTest {
         Image differentSaltVersionImage = createImageWithDifferentSaltVersion();
         List<Image> availableImages = List.of(properImage, differentSaltVersionImage);
 
-        when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
 
         Images actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
@@ -160,7 +162,6 @@ public class StackUpgradeImageFilterTest {
         Image imageWithSameId = createImageWithCurrentImageId();
         List<Image> availableImages = List.of(properImage, imageWithSameId);
 
-        when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MAINTENANCE)).thenReturn(-1);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
 
         Images actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
@@ -211,9 +212,9 @@ public class StackUpgradeImageFilterTest {
                 OS_TYPE, createPackageVersions(V_7_0_2, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION), null, null, null);
     }
 
-    private Image createImageWithDifferentCmfVersion() {
+    private Image createImageWithCfmVersion(String cfmVersion) {
         return new Image(null, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
-                OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_3, "3.0.0.0-121", CSP_VERSION, SALT_VERSION), null, null, null);
+                OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_3, cfmVersion, CSP_VERSION, SALT_VERSION), null, null, null);
     }
 
     private Image createImageWithDifferentCspVersion() {
@@ -231,11 +232,11 @@ public class StackUpgradeImageFilterTest {
                 null, OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION), null, null, null);
     }
 
-    private Map<String, String> createPackageVersions(String cmVersion, String cdhVersion, String cmfVersion, String cspVersion, String saltVersion) {
+    private Map<String, String> createPackageVersions(String cmVersion, String cdhVersion, String cfmVersion, String cspVersion, String saltVersion) {
         return Map.of(
                 "cm", cmVersion,
                 "stack", cdhVersion,
-                "cfm", cmfVersion,
+                "cfm", cfmVersion,
                 "csp", cspVersion,
                 "salt", saltVersion);
     }

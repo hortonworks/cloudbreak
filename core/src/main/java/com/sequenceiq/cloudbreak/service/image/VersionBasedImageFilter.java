@@ -22,7 +22,7 @@ public class VersionBasedImageFilter {
 
     public List<Image> getCdhImagesForCbVersion(Versions versions, List<Image> availableImages) {
         List<String> imageIds = getImageIds(versions);
-        LOGGER.debug(String.format("%s image found for %s Cloudbreak version.", imageIds.size(), cbVersion));
+        LOGGER.debug("{} image id(s) found for Cloudbreak version: {}", imageIds.size(), cbVersion);
         return availableImages.stream()
                 .filter(image -> imageIds.contains(image.getUuid()))
                 .collect(Collectors.toList());

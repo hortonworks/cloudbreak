@@ -22,6 +22,8 @@ public class ClusterUpgradeImageFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeImageFilter.class);
 
+    private static final String IGNORED_CM_VERSION = "7.x.0";
+
     private static final String CM_PACKAGE_KEY = "cm";
 
     private static final String STACK_PACKAGE_KEY = "stack";
@@ -44,6 +46,7 @@ public class ClusterUpgradeImageFilter {
 
     private List<Image> getImages(List<Image> images, Versions versions, Image currentImage, String cloudPlatform) {
         List<Image> imagesForCbVersion = getImagesForCbVersion(versions, images);
+        LOGGER.debug("{} image(s) found for the given CB version", imagesForCbVersion.size());
         return filterImages(imagesForCbVersion, currentImage, cloudPlatform);
     }
 
@@ -52,12 +55,15 @@ public class ClusterUpgradeImageFilter {
     }
 
     private List<Image> filterImages(List<Image> availableImages, Image currentImage, String cloudPlatform) {
+        // I think the whole logic is broken, since we don't allow an upgrade if we shipped a new parcel extension...
         return availableImages.stream()
+                .filter(ignoredCmVersion())
                 .filter(validateCmVersion(currentImage).or(validateStackVersion(currentImage)))
                 .filter(validateCloudPlatform(cloudPlatform))
                 .filter(validateOsVersion(currentImage))
-                .filter(validateCfmVersion(currentImage))
-                .filter(validateCspVersion(currentImage))
+                // We don't necessary need CFM and CSP since only SDX upgrade is supported
+                //.filter(validateCfmVersion(currentImage))
+                //.filter(validateCspVersion(currentImage))
                 .filter(validateSaltVersion(currentImage))
                 .filter(filterCurrentImage(currentImage))
                 .collect(Collectors.toList());
@@ -72,12 +78,18 @@ public class ClusterUpgradeImageFilter {
                 && newImage.getOsType().equalsIgnoreCase(currentImage.getOsType());
     }
 
+    private Predicate<Image> ignoredCmVersion() {
+        // There are some legacy CM versions that do not follow a proper versioning scheme, we must ignore them
+        return image -> image.getPackageVersions().get(CM_PACKAGE_KEY) != null &&
+                !image.getPackageVersions().get(CM_PACKAGE_KEY).contains(IGNORED_CM_VERSION);
+    }
+
     private Predicate<Image> validateCmVersion(Image currentImage) {
-        return image -> compareVersion(currentImage.getPackageVersions().get(CM_PACKAGE_KEY), image.getPackageVersions().get(CM_PACKAGE_KEY));
+        return image -> compareVersionStrict(currentImage.getPackageVersions().get(CM_PACKAGE_KEY), image.getPackageVersions().get(CM_PACKAGE_KEY));
     }
 
     private Predicate<Image> validateStackVersion(Image currentImage) {
-        return image -> compareVersion(currentImage.getPackageVersions().get(STACK_PACKAGE_KEY), image.getPackageVersions().get(STACK_PACKAGE_KEY));
+        return image -> compareVersionStrict(currentImage.getPackageVersions().get(STACK_PACKAGE_KEY), image.getPackageVersions().get(STACK_PACKAGE_KEY));
     }
 
     private Predicate<Image> validateCloudPlatform(String cloudPlatform) {
@@ -85,11 +97,11 @@ public class ClusterUpgradeImageFilter {
     }
 
     private Predicate<Image> validateCfmVersion(Image currentImage) {
-        return image -> image.getPackageVersions().get(CFM_PACKAGE_KEY).equals(currentImage.getPackageVersions().get(CFM_PACKAGE_KEY));
+        return image -> compareExtensionVersions(currentImage.getPackageVersions().get(CFM_PACKAGE_KEY), image.getPackageVersions().get(CFM_PACKAGE_KEY));
     }
 
     private Predicate<Image> validateCspVersion(Image currentImage) {
-        return image -> image.getPackageVersions().get(CSP_PACKAGE_KEY).equals(currentImage.getPackageVersions().get(CSP_PACKAGE_KEY));
+        return image -> compareExtensionVersions(currentImage.getPackageVersions().get(CSP_PACKAGE_KEY), image.getPackageVersions().get(CSP_PACKAGE_KEY));
     }
 
     private Predicate<Image> validateSaltVersion(Image currentImage) {
@@ -100,13 +112,30 @@ public class ClusterUpgradeImageFilter {
         return image -> !image.getUuid().equals(currentImage.getUuid());
     }
 
-    private boolean compareVersion(String currentVersion, String newVersion) {
-        boolean result;
-        try {
-            result = customVersionComparator.compare(currentVersion, newVersion, CompareLevel.MAINTENANCE) < 0;
-        } catch (Exception e) {
-            LOGGER.warn(String.format("Failed to compare versions: %s %s", currentVersion, newVersion));
-            result = false;
+    private boolean compareVersionStrict(String currentVersion, String newVersion) {
+        boolean result = false;
+        if (currentVersion != null && newVersion != null) {
+            try {
+                result = customVersionComparator.compare(currentVersion, newVersion, CompareLevel.MINOR) < 0;
+            } catch (Exception e) {
+                LOGGER.warn("Failed to compare versions: {} == {}", currentVersion, newVersion, e);
+            }
+        }
+        return result;
+    }
+
+    private boolean compareExtensionVersions(String currentVersion, String newVersion) {
+        boolean result = false;
+        if (currentVersion == null) {
+            // We shall not care care if they do not exists on the old image
+            result = true;
+        } else if (newVersion != null) {
+            try {
+                // even if there is no new extension version we shall alow to upgrade to this image
+                result = customVersionComparator.compare(currentVersion, newVersion, CompareLevel.MINOR) <= 0;
+            } catch (Exception e) {
+                LOGGER.warn("Failed to compare versions: {} == {}", currentVersion, newVersion, e);
+            }
         }
         return result;
     }
