@@ -5,9 +5,11 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Actor
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
+import com.sequenceiq.freeipa.controller.exception.UnsupportedException;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigRepository;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.UserKeytabService;
@@ -21,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -77,6 +80,18 @@ class UserKeytabServiceTest {
         when(grpcUmsClient.getActorWorkloadCredentials(any(), any(), any())).thenReturn(response);
     }
 
+    private FreeIpaClient newfreeIpaClient(boolean hasPasswordHashSuppport) throws FreeIpaClientException {
+        FreeIpaClient mockFreeIpaClient = mock(FreeIpaClient.class);
+        Config config = mock(Config.class);
+        if (hasPasswordHashSuppport) {
+            when(config.getIpauserobjectclasses()).thenReturn(Set.of("cdpUserAttr"));
+        } else {
+            when(config.getIpauserobjectclasses()).thenReturn(Set.of());
+        }
+        when(mockFreeIpaClient.getConfig()).thenReturn(config);
+        return mockFreeIpaClient;
+    }
+
     @Test
     void testGetKeytabBase64() throws FreeIpaClientException {
         String keytabBase64 = "keytabBase64...";
@@ -84,7 +99,7 @@ class UserKeytabServiceTest {
         setupKerberosConfig();
         setupGrpcResponse();
 
-        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        FreeIpaClient freeIpaClient = newfreeIpaClient(true);
         when(freeIpaClient.userFind(any())).thenReturn(Optional.of(mock(User.class)));
         when(freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(any(), any())).thenReturn(freeIpaClient);
 
@@ -94,13 +109,27 @@ class UserKeytabServiceTest {
     }
 
     @Test
+    void testGetKeytabBase64NoPasswordHashSupport() throws FreeIpaClientException {
+        String keytabBase64 = "keytabBase64...";
+
+        setupKerberosConfig();
+        setupGrpcResponse();
+
+        FreeIpaClient freeIpaClient = newfreeIpaClient(false);
+        when(freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(any(), any())).thenReturn(freeIpaClient);
+
+        Exception exception = assertThrows(UnsupportedException.class, () -> underTest.getKeytabBase64(USER_CRN, ENV_CRN));
+        assertEquals("User keytab retrieval requires a newer environment and FreeIPA version", exception.getMessage());
+    }
+
+    @Test
     void testGetKeytabBase64WorkloadUserNotInEnvironment() throws FreeIpaClientException {
         String keytabBase64 = "keytabBase64...";
 
         setupKerberosConfig();
         setupGrpcResponse();
 
-        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        FreeIpaClient freeIpaClient = newfreeIpaClient(true);
         when(freeIpaClient.userFind(any())).thenReturn(Optional.empty());
         when(freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(any(), any())).thenReturn(freeIpaClient);
 
