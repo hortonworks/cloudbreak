@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostMetadataModelD
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.ID;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.NAME;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 

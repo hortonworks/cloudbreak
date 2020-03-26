@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.model.request;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.common.model.JsonEntity;
 
 public class ApplicationDetailRequest implements JsonEntity {
 

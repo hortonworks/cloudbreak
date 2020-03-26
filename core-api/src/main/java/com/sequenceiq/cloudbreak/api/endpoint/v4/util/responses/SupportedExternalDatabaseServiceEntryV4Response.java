@@ -4,7 +4,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SupportedDatabaseModelDescription;
 
 import io.swagger.annotations.ApiModel;

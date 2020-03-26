@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4;
+package com.sequenceiq.common.model;
 
 import java.io.Serializable;
 
