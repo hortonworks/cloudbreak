@@ -106,9 +106,18 @@
         <#else>
         "VPCZoneIdentifier" : [{ "Ref" : "SubnetId" }],
         </#if>
-        "LaunchTemplate" : {
-          "LaunchTemplateId": { "Ref" : "ClusterManagerNodeLaunchTemplate${group.groupName?replace('_', '')}" },
-          "Version": { "Fn::GetAtt": "ClusterManagerNodeLaunchTemplate${group.groupName?replace('_', '')}.LatestVersionNumber" }
+        "MixedInstancesPolicy": {
+          "LaunchTemplate" : {
+            "LaunchTemplateSpecification": {
+              "LaunchTemplateId": { "Ref" : "ClusterManagerNodeLaunchTemplate${group.groupName?replace('_', '')}" },
+              "Version": { "Fn::GetAtt": "ClusterManagerNodeLaunchTemplate${group.groupName?replace('_', '')}.LatestVersionNumber" }
+            }
+          },
+          "InstancesDistribution": {
+            "OnDemandBaseCapacity": 0,
+            "OnDemandPercentageAboveBaseCapacity": 100,
+            "SpotAllocationStrategy": "capacity-optimized"
+          }
         },
         "TerminationPolicies" : [ "NewestInstance" ],
         "MinSize" : 0,
