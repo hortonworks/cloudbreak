@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -51,10 +53,14 @@ class CredentialDeleteServiceTest {
     @Mock
     private EnvironmentViewService environmentViewService;
 
+    @Mock
+    private GrpcUmsClient grpcUmsClient;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        underTest = new CredentialDeleteService(credentialService, notificationSender, messagesService, environmentViewService, Set.of("AWS", "AZURE", "YARN"));
+        underTest = new CredentialDeleteService(credentialService, notificationSender, messagesService,
+                environmentViewService, grpcUmsClient, Set.of("AWS", "AZURE", "YARN"));
     }
 
     @Test
@@ -68,6 +74,7 @@ class CredentialDeleteServiceTest {
         when(credentialService.findByNameAndAccountId(eq(secondCredentialName), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(secondCred));
         when(credentialService.save(firstCred)).thenReturn(firstCred);
         when(credentialService.save(secondCred)).thenReturn(secondCred);
+        doNothing().when(grpcUmsClient).notifyResourceDeleted(any(), any(), any());
 
         Set<Credential> result = underTest.deleteMultiple(names, ACCOUNT_ID);
 
@@ -82,6 +89,7 @@ class CredentialDeleteServiceTest {
         verify(credentialService, times(2)).save(any());
         verify(credentialService, times(1)).save(firstCred);
         verify(credentialService, times(1)).save(secondCred);
+        verify(grpcUmsClient, times(2)).notifyResourceDeleted(any(), any(), any());
     }
 
     @Test
@@ -115,10 +123,13 @@ class CredentialDeleteServiceTest {
         Credential cred = createCredentialWithName("first");
         when(credentialService.findByNameAndAccountId(eq(cred.getName()), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(cred));
         when(credentialService.save(cred)).thenReturn(cred);
+        doNothing().when(grpcUmsClient).notifyResourceDeleted(any(), any(), any());
 
         underTest.deleteMultiple(Set.of(cred.getName()), ACCOUNT_ID);
 
         notificationSender.send(any(Notification.class), any(List.class), any(Client.class));
+
+        verify(grpcUmsClient, times(1)).notifyResourceDeleted(any(), any(), any());
     }
 
     private Credential createCredentialWithName(String name) {

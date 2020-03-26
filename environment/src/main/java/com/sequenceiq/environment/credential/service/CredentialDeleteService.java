@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -30,14 +32,18 @@ public class CredentialDeleteService extends AbstractCredentialService {
 
     private EnvironmentViewService environmentViewService;
 
+    private GrpcUmsClient grpcUmsClient;
+
     public CredentialDeleteService(CredentialService credentialService,
             NotificationSender notificationSender,
             CloudbreakMessagesService messagesService,
             EnvironmentViewService environmentViewService,
+            GrpcUmsClient grpcUmsClient,
             @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
         super(notificationSender, messagesService, enabledPlatforms);
         this.credentialService = credentialService;
         this.environmentViewService = environmentViewService;
+        this.grpcUmsClient = grpcUmsClient;
     }
 
     public Set<Credential> deleteMultiple(Set<String> names, String accountId) {
@@ -52,6 +58,7 @@ public class CredentialDeleteService extends AbstractCredentialService {
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", name);
         Credential archived = archiveCredential(credential);
+        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, archived.getResourceCrn(), MDCUtils.getRequestId());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
         return archived;
     }
@@ -62,6 +69,7 @@ public class CredentialDeleteService extends AbstractCredentialService {
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", crn);
         Credential archived = archiveCredential(credential);
+        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, archived.getResourceCrn(), MDCUtils.getRequestId());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
         return archived;
     }
