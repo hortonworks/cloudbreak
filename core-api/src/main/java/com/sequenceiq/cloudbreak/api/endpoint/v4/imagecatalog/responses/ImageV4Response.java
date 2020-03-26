@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;
@@ -51,6 +52,14 @@ public class ImageV4Response implements JsonEntity {
     @JsonProperty("stackDetails")
     @JsonInclude(NON_EMPTY)
     private BaseStackDetailsV4Response stackDetails;
+
+    @JsonProperty("preWarmParcels")
+    @JsonInclude(NON_EMPTY)
+    private List<List<String>> preWarmParcels;
+
+    @JsonProperty("preWarmCsd")
+    @JsonInclude(NON_EMPTY)
+    private List<String> preWarmCsd;
 
     @JsonProperty("defaultImage")
     private boolean defaultImage;
@@ -160,5 +169,21 @@ public class ImageV4Response implements JsonEntity {
 
     public void setCmBuildNumber(String cmBuildNumber) {
         this.cmBuildNumber = cmBuildNumber;
+    }
+
+    public List<List<String>> getPreWarmParcels() {
+        return preWarmParcels;
+    }
+
+    public void setPreWarmParcels(List<List<String>> preWarmParcels) {
+        this.preWarmParcels = preWarmParcels;
+    }
+
+    public List<String> getPreWarmCsd() {
+        return preWarmCsd;
+    }
+
+    public void setPreWarmCsd(List<String> preWarmCsd) {
+        this.preWarmCsd = preWarmCsd;
     }
 }
