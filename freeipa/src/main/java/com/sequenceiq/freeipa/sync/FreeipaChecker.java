@@ -21,10 +21,7 @@ import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import com.sequenceiq.freeipa.service.stack.StackUpdater;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Component
 public class FreeipaChecker {
@@ -33,15 +30,6 @@ public class FreeipaChecker {
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
-
-    @Inject
-    private GatewayConfigService gatewayConfigService;
-
-    @Inject
-    private StackUpdater stackUpdater;
-
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
 
     private RPCResponse<Boolean> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances) throws Exception {
         return checkedMeasure(() -> {
