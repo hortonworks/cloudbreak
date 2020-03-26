@@ -135,7 +135,7 @@ public class UmsUsersStateProvider {
 
     @SuppressWarnings("ParameterNumber")
     private void handleUser(UmsUsersState.Builder umsUsersStateBuilder, UsersState.Builder usersStateBuilder, Map<String, FmsGroup> crnToFmsGroup,
-                            String memberCrn, FmsUser fmsUser, EnvironmentAccessRights environmentAccessRights, Optional<String> requestId) {
+        String memberCrn, FmsUser fmsUser, EnvironmentAccessRights environmentAccessRights, Optional<String> requestId) {
         try {
             if (environmentAccessRights.hasEnvironmentAccessRight()) {
                 String username = fmsUser.getName();
