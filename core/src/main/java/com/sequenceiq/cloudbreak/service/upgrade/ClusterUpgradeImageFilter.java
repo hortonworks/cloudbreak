@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.CompareLevel;
-import com.sequenceiq.cloudbreak.cloud.CustomVersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
@@ -35,10 +33,10 @@ public class ClusterUpgradeImageFilter {
     private static final String SALT_PACKAGE_KEY = "salt";
 
     @Inject
-    private CustomVersionComparator customVersionComparator;
+    private VersionBasedImageFilter versionBasedImageFilter;
 
     @Inject
-    private VersionBasedImageFilter versionBasedImageFilter;
+    private UpgradePermissionProvider upgradePermissionProvider;
 
     Images filter(List<Image> availableImages, Versions supportedVersions, Image currentImage, String cloudPlatform) {
         return new Images(null, null, null, getImages(availableImages, supportedVersions, currentImage, cloudPlatform), null);
@@ -85,11 +83,11 @@ public class ClusterUpgradeImageFilter {
     }
 
     private Predicate<Image> validateCmVersion(Image currentImage) {
-        return image -> compareVersionStrict(currentImage.getPackageVersions().get(CM_PACKAGE_KEY), image.getPackageVersions().get(CM_PACKAGE_KEY));
+        return image -> permitCmAndSatckUpgrade(currentImage, image, CM_PACKAGE_KEY);
     }
 
     private Predicate<Image> validateStackVersion(Image currentImage) {
-        return image -> compareVersionStrict(currentImage.getPackageVersions().get(STACK_PACKAGE_KEY), image.getPackageVersions().get(STACK_PACKAGE_KEY));
+        return image -> permitCmAndSatckUpgrade(currentImage, image, STACK_PACKAGE_KEY);
     }
 
     private Predicate<Image> validateCloudPlatform(String cloudPlatform) {
@@ -97,11 +95,21 @@ public class ClusterUpgradeImageFilter {
     }
 
     private Predicate<Image> validateCfmVersion(Image currentImage) {
-        return image -> compareExtensionVersions(currentImage.getPackageVersions().get(CFM_PACKAGE_KEY), image.getPackageVersions().get(CFM_PACKAGE_KEY));
+        return image -> permitExtensionUpgrade(currentImage, image, CFM_PACKAGE_KEY);
     }
 
     private Predicate<Image> validateCspVersion(Image currentImage) {
-        return image -> compareExtensionVersions(currentImage.getPackageVersions().get(CSP_PACKAGE_KEY), image.getPackageVersions().get(CSP_PACKAGE_KEY));
+        return image -> permitExtensionUpgrade(currentImage, image, CSP_PACKAGE_KEY);
+    }
+
+    private boolean permitCmAndSatckUpgrade(Image currentImage, Image image, String key) {
+        return upgradePermissionProvider.permitCmAndSatckUpgrade(currentImage.getPackageVersions().get(STACK_PACKAGE_KEY),
+                image.getPackageVersions().get(key));
+    }
+
+    private boolean permitExtensionUpgrade(Image currentImage, Image image, String key) {
+        return upgradePermissionProvider.permitExtensionUpgrade(currentImage.getPackageVersions().get(STACK_PACKAGE_KEY),
+                image.getPackageVersions().get(key));
     }
 
     private Predicate<Image> validateSaltVersion(Image currentImage) {
@@ -110,33 +118,5 @@ public class ClusterUpgradeImageFilter {
 
     private Predicate<Image> filterCurrentImage(Image currentImage) {
         return image -> !image.getUuid().equals(currentImage.getUuid());
-    }
-
-    private boolean compareVersionStrict(String currentVersion, String newVersion) {
-        boolean result = false;
-        if (currentVersion != null && newVersion != null) {
-            try {
-                result = customVersionComparator.compare(currentVersion, newVersion, CompareLevel.MINOR) < 0;
-            } catch (Exception e) {
-                LOGGER.warn("Failed to compare versions: {} == {}", currentVersion, newVersion, e);
-            }
-        }
-        return result;
-    }
-
-    private boolean compareExtensionVersions(String currentVersion, String newVersion) {
-        boolean result = false;
-        if (currentVersion == null) {
-            // We shall not care care if they do not exists on the old image
-            result = true;
-        } else if (newVersion != null) {
-            try {
-                // even if there is no new extension version we shall alow to upgrade to this image
-                result = customVersionComparator.compare(currentVersion, newVersion, CompareLevel.MINOR) <= 0;
-            } catch (Exception e) {
-                LOGGER.warn("Failed to compare versions: {} == {}", currentVersion, newVersion, e);
-            }
-        }
-        return result;
     }
 }

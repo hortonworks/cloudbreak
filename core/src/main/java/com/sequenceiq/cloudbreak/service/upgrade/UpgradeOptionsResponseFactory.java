@@ -8,10 +8,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ParcelType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ImageInfoV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -32,24 +31,27 @@ public class UpgradeOptionsResponseFactory {
 
     private ImageInfoV4Response createImageInfoFromCurrentImage(Image currentImage, String cloudPlatform, String region, String imageCatalogName) {
         return new ImageInfoV4Response(getImageName(currentImage, cloudPlatform, region), currentImage.getUuid(), imageCatalogName, currentImage.getCreated(),
-                getComponentVersions(currentImage.getPackageVersions()));
+                getComponentVersions(currentImage.getPackageVersions(), currentImage.getOs(), currentImage.getDate()));
     }
 
     private List<ImageInfoV4Response> createImageInfoFromFilteredImages(Images filteredImages, String imageCatalogName, String cloudPlatform, String region) {
         return filteredImages.getCdhImages().stream()
-                .map(image -> createImageInfo(image, imageCatalogName, cloudPlatform, region))
-                .collect(Collectors.toList());
+                .map(image -> createImageInfo(image, imageCatalogName, cloudPlatform, region)).sorted().collect(Collectors.toList());
     }
 
     private ImageInfoV4Response createImageInfo(Image image, String imageCatalogName, String cloudPlatform, String region) {
         return new ImageInfoV4Response(getImageName(image, cloudPlatform, region), image.getUuid(), imageCatalogName, image.getCreated(),
-                getComponentVersions(image.getPackageVersions()));
+                getComponentVersions(image.getPackageVersions(), image.getOs(), image.getDate()));
     }
 
-    private Map<String, String> getComponentVersions(Map<String, String> packageVersions) {
-        return Map.of(
-                ClusterManagerVariant.CLOUDERA_MANAGER.getName(), packageVersions.get("cm"),
-                ParcelType.CLOUDERA_RUNTIME.getName(), packageVersions.get("stack"));
+    private ImageComponentVersions getComponentVersions(Map<String, String> packageVersions, String os, String osPatchLevel) {
+        return new ImageComponentVersions(
+                packageVersions.get("cm"),
+                packageVersions.get("cm-build-number"),
+                packageVersions.get("stack"),
+                packageVersions.get("cdh-build-number"),
+                os,
+                osPatchLevel);
     }
 
     private String getImageName(Image image, String cloudPlatform, String region) {

@@ -6,8 +6,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.common.type.Versioned;
-
 public class VersionComparatorTest {
 
     private VersionComparator underTest;
@@ -70,20 +68,6 @@ public class VersionComparatorTest {
     @Test
     public void testSmallerNonEqualLength() {
         Assert.assertEquals(-1, underTest.compare(new VersionString("2.4.0.0"), new VersionString("2.5.0.0-770")));
-    }
-
-    private static class VersionString implements Versioned {
-
-        private final String version;
-
-        private VersionString(String version) {
-            this.version = version;
-        }
-
-        @Override
-        public String getVersion() {
-            return version;
-        }
     }
 
 }
