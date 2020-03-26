@@ -8,6 +8,7 @@ import java.net.URL;
 import java.security.Security;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -31,6 +32,7 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -116,12 +118,15 @@ public class FreeIpaClientBuilder {
 
     public FreeIpaClient build(boolean withPing) throws URISyntaxException, IOException, FreeIpaClientException {
         if (withPing) {
+            List<BasicHeader> defaultHeaders = additionalHeaders.entrySet().stream()
+                    .map(entry -> new BasicHeader(entry.getKey(), entry.getValue())).collect(Collectors.toList());
             try (CloseableHttpClient client = HttpClientBuilder
                     .create()
                     .useSystemProperties()
                     .setConnectionManager(connectionManager)
                     .setConnectionManagerShared(true)
                     .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(TEST_CONNECTION_READ_TIMEOUT_MILLIS).build())
+                    .setDefaultHeaders(defaultHeaders)
                     .setDefaultSocketConfig(
                             SocketConfig.custom()
                                     .setSoTimeout(SO_TIMEOUT)
