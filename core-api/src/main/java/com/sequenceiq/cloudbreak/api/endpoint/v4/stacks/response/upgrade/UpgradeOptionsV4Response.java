@@ -1,6 +1,8 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade;
 
 import java.util.List;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 
 public class UpgradeOptionsV4Response {
 

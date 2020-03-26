@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -15,17 +14,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.cloud.CompareLevel;
-import com.sequenceiq.cloudbreak.cloud.CustomVersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
 import com.sequenceiq.cloudbreak.service.image.VersionBasedImageFilter;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StackUpgradeImageFilterTest {
+public class ClusterUpgradeImageFilterTest {
 
     private static final String CLOUD_PLATFORM = "aws";
 
@@ -52,8 +50,8 @@ public class StackUpgradeImageFilterTest {
     @InjectMocks
     private ClusterUpgradeImageFilter underTest;
 
-    @Mock
-    private CustomVersionComparator customVersionComparator;
+    @Spy
+    private UpgradePermissionProvider upgradePermissionProvider;
 
     @Mock
     private VersionBasedImageFilter versionBasedImageFilter;
@@ -69,10 +67,6 @@ public class StackUpgradeImageFilterTest {
     public void before() {
         currentImage = createCurrentImage();
         properImage = createProperImage();
-
-        when(customVersionComparator.compare(V_7_0_2, V_7_0_3, CompareLevel.MINOR)).thenReturn(-1);
-
-        when(customVersionComparator.compare(V_7_0_2, V_7_0_2, CompareLevel.MINOR)).thenReturn(0);
     }
 
     @Test
@@ -168,17 +162,6 @@ public class StackUpgradeImageFilterTest {
 
         assertTrue(actual.getCdhImages().contains(properImage));
         assertEquals(1, actual.getCdhImages().size());
-    }
-
-    @Test
-    public void testFilterShouldReturnEmptyListWhenTheCurrentCbVersionIsNotSupported() {
-        List<Image> availableImages = List.of(properImage);
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(Collections.emptyList());
-
-        Images actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
-
-        assertTrue(actual.getCdhImages().isEmpty());
-        verifyZeroInteractions(customVersionComparator);
     }
 
     private Image createCurrentImage() {

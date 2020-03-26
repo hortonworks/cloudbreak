@@ -12,7 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -46,7 +47,7 @@ public class UpgradeOptionsResponseFactoryTest {
     @Test
     public void testCreateV4ResponseShouldReturnTheUpgradeOptionsFromTheGivenParameters() throws CloudbreakImageNotFoundException {
         Map<String, String> packageVersions = createPackageVersions();
-        Map<String, String> expectedPackageVersions = creatExpectedPackageVersions();
+        ImageComponentVersions expectedPackageVersions = creatExpectedPackageVersions();
         Image currentImage = createImage(packageVersions);
         Images availableImages = createAvailableImages(packageVersions);
 
@@ -83,10 +84,11 @@ public class UpgradeOptionsResponseFactoryTest {
                 "stack", V_7_0_2);
     }
 
-    private Map<String, String> creatExpectedPackageVersions() {
-        return Map.of(
-                "Cloudera Manager", V_7_0_3,
-                "Cloudera Runtime", V_7_0_2);
+    private ImageComponentVersions creatExpectedPackageVersions() {
+        ImageComponentVersions imageComponentVersions = new ImageComponentVersions();
+        imageComponentVersions.setCm(V_7_0_3);
+        imageComponentVersions.setCdp(V_7_0_2);
+        return imageComponentVersions;
     }
 
 }

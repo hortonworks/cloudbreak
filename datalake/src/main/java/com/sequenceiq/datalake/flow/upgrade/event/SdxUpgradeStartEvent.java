@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.flow.upgrade.event;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class SdxUpgradeStartEvent extends SdxEvent {

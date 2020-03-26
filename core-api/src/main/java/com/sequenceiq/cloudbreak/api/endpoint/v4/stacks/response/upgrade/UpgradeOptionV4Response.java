@@ -1,4 +1,6 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 
 public class UpgradeOptionV4Response {
 

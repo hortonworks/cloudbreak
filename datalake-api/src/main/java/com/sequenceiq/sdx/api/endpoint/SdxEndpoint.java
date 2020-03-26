@@ -17,8 +17,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.UpgradeOptionsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
