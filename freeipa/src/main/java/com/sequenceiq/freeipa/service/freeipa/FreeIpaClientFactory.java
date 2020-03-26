@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.googlecode.jsonrpc4j.JsonRpcClient;
+import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -26,7 +26,6 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -40,16 +39,13 @@ public class FreeIpaClientFactory {
 
     private static final Map<String, String> ADDITIONAL_CLUSTER_PROXY_HEADERS = Map.of("Proxy-Ignore-Auth", "true");
 
-    private static final JsonRpcClient.RequestListener CLUSTER_PROXY_ERROR_LISTENER = new ClusterProxyErrorRpcListener();
+    private static final RequestListener CLUSTER_PROXY_ERROR_LISTENER = new ClusterProxyErrorRpcListener();
 
     @Inject
     private ClusterProxyConfiguration clusterProxyConfiguration;
 
     @Inject
     private ClusterProxyService clusterProxyService;
-
-    @Inject
-    private GatewayConfigService gatewayConfigService;
 
     @Inject
     private StackService stackService;
