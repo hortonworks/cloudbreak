@@ -13,20 +13,20 @@ public class CustomVersionComparator {
         VersionComparator versionComparator = new VersionComparator();
         int result = 0;
         switch (compareLevel) {
-        case FULL:
-            result = versionComparator.compare(() -> version1, () -> version2);
-            break;
-        case MINOR:
-            validateMajorVersion(version1, version2);
-            String ver1 = getVersionWithoutMajorVersion(version1);
-            String ver2 = getVersionWithoutMajorVersion(version2);
-            result = versionComparator.compare(() -> ver1, () -> ver2);
-            break;
-        case MAINTENANCE:
-            result = compareVersions(version1, version2);
-            break;
-        default:
-            throw new IllegalArgumentException("Invalid compare level!");
+            case FULL:
+                result = versionComparator.compare(() -> version1, () -> version2);
+                break;
+            case MINOR:
+                validateMajorVersion(version1, version2);
+                String ver1 = getVersionWithoutMajorVersion(version1);
+                String ver2 = getVersionWithoutMajorVersion(version2);
+                result = versionComparator.compare(() -> ver1, () -> ver2);
+                break;
+            case MAINTENANCE:
+                result = compareVersions(version1, version2);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid compare level!");
         }
         return result;
     }
