@@ -18,7 +18,7 @@ public class SdxUpgradeTestAssertion {
     public static Assertion<SdxInternalTestDto, SdxClient> validateReasonContains(String reason) {
         return (testContext, entity, sdxClient) -> {
             UpgradeOptionV4Response upgradeOptionsV4Response =
-                    sdxClient.getSdxClient().sdxEndpoint().checkForUpgradeByName(entity.getName());
+                    sdxClient.getSdxClient().sdxUpgradeEndpoint().checkForUpgradeByName(entity.getName());
             assertNotNull(upgradeOptionsV4Response);
             assertTrue(upgradeOptionsV4Response.getReason().contains(reason));
             return entity;
@@ -28,7 +28,7 @@ public class SdxUpgradeTestAssertion {
     public static Assertion<SdxInternalTestDto, SdxClient> validateSucessfulUpgrade() {
         return (testContext, entity, sdxClient) -> {
             UpgradeOptionV4Response upgradeOptionsV4Response =
-                    sdxClient.getSdxClient().sdxEndpoint().checkForUpgradeByName(entity.getName());
+                    sdxClient.getSdxClient().sdxUpgradeEndpoint().checkForUpgradeByName(entity.getName());
             assertNotNull(upgradeOptionsV4Response);
             assertEquals("aaa778fc-7f17-4535-9021-515351df3691", upgradeOptionsV4Response.getCurrent().getImageId());
             assertEquals(1583391600L, upgradeOptionsV4Response.getCurrent().getCreated());
