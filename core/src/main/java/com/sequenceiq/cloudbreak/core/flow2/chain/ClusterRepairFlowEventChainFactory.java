@@ -156,7 +156,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         ClusterManagerType cmType = ClusterManagerType.CLOUDERA_MANAGER;
         return new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(), hostGroupName,
                 hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames), singlePrimaryGateway,
-                kerberosSecured, event.accepted(), singleNodeCluster, cmType);
+                kerberosSecured, event.accepted(), singleNodeCluster, cmType).setRepair();
     }
 
     private boolean isKerberosSecured(Long stackId) {

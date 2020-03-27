@@ -39,6 +39,8 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
 
     static final String HOSTNAMES = "HOSTNAMES";
 
+    static final String REPAIR = "REPAIR";
+
     @Inject
     private StackService stackService;
 

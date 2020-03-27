@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.cleanup;
 
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -16,15 +17,11 @@ import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
-import com.sequenceiq.freeipa.service.stack.StackService;
 
 public abstract class AbstractFreeIpaCleanupAction<P extends Payload> extends AbstractStackAction<FreeIpaCleanupState, FreeIpaCleanupEvent, FreeIpaContext, P> {
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private FreeIpaService freeIpaService;
@@ -54,5 +51,9 @@ public abstract class AbstractFreeIpaCleanupAction<P extends Payload> extends Ab
 
     protected CleanupService getCleanupService() {
         return cleanupService;
+    }
+
+    protected boolean shouldSkipState(CleanupEvent event, Map<Object, Object> variables) {
+        return event.getStatesToSkip() != null && event.getStatesToSkip().contains(getCurrentFlowStateName(variables));
     }
 }
