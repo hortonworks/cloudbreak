@@ -5,6 +5,7 @@ import static java.util.Collections.emptyList;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -53,6 +54,9 @@ public class StackImageFilterService {
     }
 
     private Images getApplicableImages(String imageCatalogName, StatedImages statedImages, Stack stack) {
+        if (Objects.nonNull(statedImages)) {
+            LOGGER.info("Selecting applicable images from catalog {} from {} candidates.", imageCatalogName, statedImages.getImages().getNumberOfImages());
+        }
         if (!Status.AVAILABLE.equals(stack.getStackStatus().getStatus())
                 || (!stack.getCluster().isAvailable() && !stack.getCluster().isMaintenanceModeEnabled())) {
             throw new BadRequestException("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
@@ -63,14 +67,20 @@ public class StackImageFilterService {
 
         List<Image> filteredBaseImages =
                 filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getBaseImages(), currentImageUuid);
+        LOGGER.info("Filtered base images: {}", filteredBaseImages);
+
 
         List<Image> filteredHdpImages = stackType.equals(StackType.HDP)
                 ? filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getHdpImages(), currentImageUuid)
                 : Collections.emptyList();
+        LOGGER.info("Filtered HDP images: {}", filteredHdpImages);
+
 
         List<Image> filteredHdfImages = stackType.equals(StackType.HDF)
                 ? filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getHdfImages(), currentImageUuid)
                 : Collections.emptyList();
+        LOGGER.info("Filtered HDF images: {}", filteredHdpImages);
+
 
         return new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, emptyList(), statedImages.getImages().getSuppertedVersions());
     }
