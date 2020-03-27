@@ -22,7 +22,7 @@ public class SdxOsUpgradeAction implements Action<SdxInternalTestDto, SdxClient>
         Log.log(LOGGER, format(" Environment: %s", testDto.getRequest().getEnvironment()));
         Log.whenJson(LOGGER, " SDX upgrade request: ", testDto.getRequest());
         FlowIdentifier flowIdentifier = client.getSdxClient()
-                .sdxEndpoint()
+                .sdxUpgradeEndpoint()
                 .upgradeClusterByName(testDto.getName());
         FlowUtil.setFlow("SDX upgrade", testDto, flowIdentifier, client);
         Log.log(LOGGER, " SDX name: %s", client.getSdxClient().sdxEndpoint().get(testDto.getName()).getName());

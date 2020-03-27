@@ -21,7 +21,7 @@ public class SdxCheckForOsUpgradeAction implements Action<SdxInternalTestDto, Sd
         Log.log(LOGGER, format(" Environment: %s", testDto.getRequest().getEnvironment()));
         Log.whenJson(LOGGER, " SDX check for upgrade request: ", testDto.getRequest());
         UpgradeOptionV4Response upgradeResponse = client.getSdxClient()
-                .sdxEndpoint()
+                .sdxUpgradeEndpoint()
                 .checkForUpgradeByName(testDto.getName());
         Log.whenJson(LOGGER, " SDX check for upgrade response: ", upgradeResponse);
         Log.log(LOGGER, " SDX name: %s", client.getSdxClient().sdxEndpoint().get(testDto.getName()).getName());

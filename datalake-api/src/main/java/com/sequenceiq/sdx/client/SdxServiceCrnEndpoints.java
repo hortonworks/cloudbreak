@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 
 public class SdxServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint implements SdxClient {
 
@@ -21,6 +22,11 @@ public class SdxServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint imple
     @Override
     public SdxEndpoint sdxEndpoint() {
         return getEndpoint(SdxEndpoint.class);
+    }
+
+    @Override
+    public SdxUpgradeEndpoint sdxUpgradeEndpoint() {
+        return getEndpoint(SdxUpgradeEndpoint.class);
     }
 
     @Override

@@ -16,6 +16,7 @@ import com.sequenceiq.datalake.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.datalake.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.datalake.controller.sdx.SdxController;
 import com.sequenceiq.datalake.controller.sdx.SdxInternalController;
+import com.sequenceiq.datalake.controller.sdx.SdxUpgradeController;
 import com.sequenceiq.datalake.controller.util.UtilController;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.sdx.api.SdxApi;
@@ -30,7 +31,7 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 @Configuration
 public class EndpointConfig extends ResourceConfig {
 
-    private static final List<Class<?>> CONTROLLERS = Arrays.asList(SdxController.class, SdxInternalController.class,
+    private static final List<Class<?>> CONTROLLERS = Arrays.asList(SdxController.class, SdxUpgradeController.class, SdxInternalController.class,
             UtilController.class, FlowController.class);
 
     @Value("${info.app.version:unspecified}")
