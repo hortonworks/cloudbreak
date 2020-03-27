@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DE
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -53,6 +54,9 @@ public class StackImageFilterService {
     }
 
     private Images getApplicableImages(String imageCatalogName, StatedImages statedImages, Stack stack) {
+        if (Objects.nonNull(statedImages)) {
+            LOGGER.info("Selecting applicable images from catalog {} from {} candidates.", imageCatalogName, statedImages.getImages().getNumberOfImages());
+        }
         if (!Status.AVAILABLE.equals(stack.getStackStatus().getStatus())
                 || (!stack.getCluster().isAvailable() && !stack.getCluster().isMaintenanceModeEnabled())) {
             throw new BadRequestException("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
@@ -61,11 +65,15 @@ public class StackImageFilterService {
         String currentImageUuid = getCurrentImageUuid(stack);
         List<Image> filteredBaseImages =
                 filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getBaseImages(), currentImageUuid);
+        LOGGER.info("Filtered base images: {}", filteredBaseImages);
+
         List<Image> filteredCdhImages =
                 filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getCdhImages(), currentImageUuid);
+        LOGGER.info("Filtered CDH images: {}", filteredCdhImages);
 
         return new Images(filteredBaseImages, Collections.emptyList(), Collections.emptyList(), filteredCdhImages,
                 statedImages.getImages().getSuppertedVersions());
+
     }
 
     private String getCurrentImageUuid(Stack stack) {
