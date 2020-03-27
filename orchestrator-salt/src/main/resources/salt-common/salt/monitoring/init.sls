@@ -37,13 +37,13 @@
 install_pyyaml:
   cmd.run:
     - name: pip install PyYAML --ignore-installed
-    - unless: pip list | grep -E 'PyYAML'
+    - unless: pip list --no-index | grep -E 'PyYAML'
 
 {%- if monitoring.type == "cloudera_manager" %}
 install_cm_client:
   cmd.run:
     - name: pip install cm-client==40.0.3 --ignore-installed
-    - unless: pip list | grep -E 'cm-client.*40.0.3'
+    - unless: pip list --no-index | grep -E 'cm-client.*40.0.3'
 
 /opt/metrics-collector/cm_metrics_collector.py:
    file.managed:
