@@ -1,5 +1,15 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -17,14 +27,6 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @Service
 public class TerminationService {
@@ -92,7 +94,7 @@ public class TerminationService {
 
     private void cleanupFreeIpa(Boolean forcedTermination, Stack stack) {
         try {
-            freeIpaCleanupService.cleanup(stack, false, null, null);
+            freeIpaCleanupService.cleanup(stack, false, false, null, null);
         } catch (Exception e) {
             LOGGER.warn("FreeIPA cleanup has failed during termination finalization, ignoring error", e);
         }

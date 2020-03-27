@@ -14,6 +14,8 @@ public class CleanupEvent extends StackEvent {
 
     private final Set<String> ips;
 
+    private final Set<String> statesToSkip;
+
     private final String accountId;
 
     private final String operationId;
@@ -23,13 +25,14 @@ public class CleanupEvent extends StackEvent {
     private final String environmentCrn;
 
     @SuppressWarnings("ExecutableStatementCount")
-    public CleanupEvent(Long stackId, Set<String> users, Set<String> hosts, Set<String> roles, Set<String> ips, String accountId, String operationId,
-            String clusterName, String environmentCrn) {
+    public CleanupEvent(Long stackId, Set<String> users, Set<String> hosts, Set<String> roles, Set<String> ips, Set<String> statesToSkip, String accountId,
+            String operationId, String clusterName, String environmentCrn) {
         super(stackId);
         this.users = users;
         this.hosts = hosts;
         this.roles = roles;
         this.ips = ips;
+        this.statesToSkip = statesToSkip;
         this.accountId = accountId;
         this.operationId = operationId;
         this.clusterName = clusterName;
@@ -38,12 +41,13 @@ public class CleanupEvent extends StackEvent {
 
     @SuppressWarnings("ExecutableStatementCount")
     public CleanupEvent(String selector, Long stackId, Set<String> users, Set<String> hosts, Set<String> roles,
-            Set<String> ips, String accountId, String operationId, String clusterName, String environmentCrn) {
+            Set<String> ips, Set<String> statesToSkip, String accountId, String operationId, String clusterName, String environmentCrn) {
         super(selector, stackId);
         this.users = users;
         this.hosts = hosts;
         this.roles = roles;
         this.ips = ips;
+        this.statesToSkip = statesToSkip;
         this.accountId = accountId;
         this.operationId = operationId;
         this.clusterName = clusterName;
@@ -82,6 +86,10 @@ public class CleanupEvent extends StackEvent {
         return ips;
     }
 
+    public Set<String> getStatesToSkip() {
+        return statesToSkip;
+    }
+
     @Override
     public String toString() {
         return "CleanupEvent{" +
@@ -89,6 +97,7 @@ public class CleanupEvent extends StackEvent {
                 ", hosts=" + hosts +
                 ", roles=" + roles +
                 ", ips=" + ips +
+                ", statesToSkip=" + statesToSkip +
                 ", accountId='" + accountId + '\'' +
                 ", operationId='" + operationId + '\'' +
                 ", clusterName='" + clusterName + '\'' +

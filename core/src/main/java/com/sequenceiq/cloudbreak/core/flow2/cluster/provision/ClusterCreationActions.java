@@ -129,7 +129,7 @@ public class ClusterCreationActions {
                 Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.findNotTerminatedForStack(context.getStack().getId());
                 Set<String> hostNames = instanceMetaData.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
                 Set<String> ips = instanceMetaData.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toSet());
-                return new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips);
+                return new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips, false);
             }
         };
     }

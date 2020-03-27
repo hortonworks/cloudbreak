@@ -80,14 +80,19 @@ public class CleanupService {
     @Inject
     private HostDeletionService hostDeletionService;
 
+    @Inject
+    private CleanupStepToStateNameConverter cleanupStepToStateNameConverter;
+
     public OperationStatus cleanup(String accountId, CleanupRequest request) {
         String environmentCrn = request.getEnvironmentCrn();
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         Operation operation =
                 operationService.startOperation(accountId, OperationType.CLEANUP, Set.of(environmentCrn), Collections.emptySet());
+        Set<String> statesToSkip = cleanupStepToStateNameConverter.convert(request.getCleanupStepsToSkip());
         CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), stack.getId(), request.getUsers(),
-                request.getHosts(), request.getRoles(), request.getIps(), accountId, operation.getOperationId(), request.getClusterName(), environmentCrn);
+                request.getHosts(), request.getRoles(), request.getIps(), statesToSkip, accountId, operation.getOperationId(),
+                request.getClusterName(), environmentCrn);
         flowManager.notify(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), cleanupEvent);
         return operationToOperationStatusConverter.convert(operation);
     }

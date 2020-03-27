@@ -75,7 +75,7 @@ public class FreeIpaCleanupServiceTest {
         when(freeIpaV1Endpoint.cleanup(any(CleanupRequest.class))).thenReturn(operationStatus);
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResultExceptionPair);
 
-        victim.cleanup(stack, false, emptySet(), emptySet());
+        victim.cleanup(stack, false, false, emptySet(), emptySet());
 
         verify(freeIpaV1Endpoint).cleanup(any());
     }
@@ -89,7 +89,7 @@ public class FreeIpaCleanupServiceTest {
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(true);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, true, kerberosConfig)).thenReturn(false);
 
-        victim.cleanup(stack, false, emptySet(), emptySet());
+        victim.cleanup(stack, false, false, emptySet(), emptySet());
 
         verifyNoMoreInteractions(freeIpaV1Endpoint);
     }
