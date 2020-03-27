@@ -101,6 +101,7 @@ public class StackUpscaleActions {
                 variables.put(INSTANCEGROUPNAME, payload.getInstanceGroup());
                 variables.put(ADJUSTMENT, payload.getAdjustment());
                 variables.put(HOSTNAMES, payload.getHostNames());
+                variables.put(REPAIR, payload.isRepair());
             }
 
             @Override
@@ -304,8 +305,12 @@ public class StackUpscaleActions {
                 Set<String> hostNames = instanceMetaData.stream()
                         .filter(im -> ips.contains(im.getPrivateIp()))
                         .map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
-                CleanupFreeIpaEvent cleanupFreeIpaEvent = new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips);
+                CleanupFreeIpaEvent cleanupFreeIpaEvent = new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips, isRepair(variables));
                 sendEvent(context, cleanupFreeIpaEvent);
+            }
+
+            private boolean isRepair(Map<Object, Object> variables) {
+                return (boolean) variables.getOrDefault(REPAIR, Boolean.FALSE);
             }
         };
     }

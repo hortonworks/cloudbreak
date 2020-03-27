@@ -47,7 +47,7 @@ public class FreeIpaCleanupActions {
         return new AbstractFreeIpaCleanupAction<>(CleanupEvent.class) {
             @Override
             protected void doExecute(FreeIpaContext context, CleanupEvent payload, Map<Object, Object> variables) {
-                if (payload.getHosts() == null || payload.getHosts().isEmpty()) {
+                if (shouldSkipState(payload, variables) || payload.getHosts() == null || payload.getHosts().isEmpty()) {
                     LOGGER.info("Host is empty, skipping revoking certificates");
                     RevokeCertsResponse response =
                             new RevokeCertsResponse(payload, Collections.emptySet(), Collections.emptyMap());
@@ -65,7 +65,7 @@ public class FreeIpaCleanupActions {
         return new AbstractFreeIpaCleanupAction<>(RevokeCertsResponse.class) {
             @Override
             protected void doExecute(FreeIpaContext context, RevokeCertsResponse payload, Map<Object, Object> variables) {
-                if (payload.getHosts() == null || payload.getHosts().isEmpty()) {
+                if (shouldSkipState(payload, variables) || payload.getHosts() == null || payload.getHosts().isEmpty()) {
                     LOGGER.info("Host is empty, skipping removing hosts");
                     RemoveHostsResponse response =
                             new RemoveHostsResponse(payload, Collections.emptySet(), Collections.emptyMap());
@@ -83,7 +83,8 @@ public class FreeIpaCleanupActions {
         return new AbstractFreeIpaCleanupAction<>(RemoveHostsResponse.class) {
             @Override
             protected void doExecute(FreeIpaContext context, RemoveHostsResponse payload, Map<Object, Object> variables) {
-                if ((payload.getHosts() == null || payload.getHosts().isEmpty()) && (payload.getIps() == null || payload.getIps().isEmpty())) {
+                if (shouldSkipState(payload, variables)
+                        || (payload.getHosts() == null || payload.getHosts().isEmpty()) && (payload.getIps() == null || payload.getIps().isEmpty())) {
                     LOGGER.info("Host is empty, skipping removing hosts");
                     RemoveDnsResponse response =
                             new RemoveDnsResponse(payload, Collections.emptySet(), Collections.emptyMap());
@@ -101,7 +102,7 @@ public class FreeIpaCleanupActions {
         return new AbstractFreeIpaCleanupAction<>(RemoveDnsResponse.class) {
             @Override
             protected void doExecute(FreeIpaContext context, RemoveDnsResponse payload, Map<Object, Object> variables) {
-                if (payload.getHosts() == null || payload.getHosts().isEmpty()) {
+                if (shouldSkipState(payload, variables) || payload.getHosts() == null || payload.getHosts().isEmpty()) {
                     LOGGER.info("Host is empty, skipping removing vault entries");
                     RemoveVaultEntriesResponse response =
                             new RemoveVaultEntriesResponse(payload, Collections.emptySet(), Collections.emptyMap());
@@ -119,7 +120,7 @@ public class FreeIpaCleanupActions {
         return new AbstractFreeIpaCleanupAction<>(RemoveVaultEntriesResponse.class) {
             @Override
             protected void doExecute(FreeIpaContext context, RemoveVaultEntriesResponse payload, Map<Object, Object> variables) {
-                if (payload.getUsers() == null || payload.getUsers().isEmpty()) {
+                if (shouldSkipState(payload, variables) || payload.getUsers() == null || payload.getUsers().isEmpty()) {
                     LOGGER.info("User is empty, skipping removing users");
                     RemoveUsersResponse response =
                             new RemoveUsersResponse(payload, Collections.emptySet(), Collections.emptyMap());
@@ -137,7 +138,7 @@ public class FreeIpaCleanupActions {
         return new AbstractFreeIpaCleanupAction<>(RemoveUsersResponse.class) {
             @Override
             protected void doExecute(FreeIpaContext context, RemoveUsersResponse payload, Map<Object, Object> variables) {
-                if (payload.getRoles() == null || payload.getRoles().isEmpty()) {
+                if (shouldSkipState(payload, variables) || payload.getRoles() == null || payload.getRoles().isEmpty()) {
                     LOGGER.info("Roles is empty, skipping removing roles");
                     RemoveRolesResponse response =
                             new RemoveRolesResponse(payload, Collections.emptySet(), Collections.emptyMap());
@@ -160,8 +161,8 @@ public class FreeIpaCleanupActions {
             @Override
             protected void doExecute(FreeIpaContext context, RemoveRolesResponse payload, Map<Object, Object> variables) {
                 CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_FINISHED_EVENT.event(), payload.getResourceId(), payload.getUsers(),
-                        payload.getHosts(), payload.getRoles(), payload.getIps(), payload.getAccountId(), payload.getOperationId(), payload.getClusterName(),
-                        payload.getEnvironmentCrn());
+                        payload.getHosts(), payload.getRoles(), payload.getIps(), payload.getStatesToSkip(), payload.getAccountId(), payload.getOperationId(),
+                        payload.getClusterName(), payload.getEnvironmentCrn());
                 SuccessDetails successDetails = new SuccessDetails(payload.getEnvironmentCrn());
                 successDetails.getAdditionalDetails().put("Hosts", payload.getHosts() == null ? List.of() : new ArrayList<>(payload.getHosts()));
                 successDetails.getAdditionalDetails().put("Users", payload.getUsers() == null ? List.of() : new ArrayList<>(payload.getUsers()));

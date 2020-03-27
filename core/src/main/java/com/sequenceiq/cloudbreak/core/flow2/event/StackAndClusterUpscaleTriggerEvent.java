@@ -39,7 +39,6 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
         this.kerberosSecured = kerberosSecured;
         this.singleNodeCluster = singleNodeCluster;
         this.clusterManagerType = clusterManagerType;
-
     }
 
     public ScalingType getScalingType() {
@@ -60,5 +59,11 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
 
     public ClusterManagerType getClusterManagerType() {
         return clusterManagerType;
+    }
+
+    @Override
+    public StackAndClusterUpscaleTriggerEvent setRepair() {
+        super.setRepair();
+        return this;
     }
 }

@@ -13,22 +13,27 @@ public class CleanupFreeIpaEvent extends StackEvent {
 
     private final Set<String> ips;
 
-    public CleanupFreeIpaEvent(Long stackId, Set<String> hostNames, Set<String> ips) {
+    private final boolean recover;
+
+    public CleanupFreeIpaEvent(Long stackId, Set<String> hostNames, Set<String> ips, boolean recover) {
         super(stackId);
         this.hostNames = hostNames;
         this.ips = ips;
+        this.recover = recover;
     }
 
-    public CleanupFreeIpaEvent(String selector, Long stackId, Set<String> hostNames, Set<String> ips) {
+    public CleanupFreeIpaEvent(String selector, Long stackId, Set<String> hostNames, Set<String> ips, boolean recover) {
         super(selector, stackId);
         this.hostNames = hostNames;
         this.ips = ips;
+        this.recover = recover;
     }
 
-    public CleanupFreeIpaEvent(String selector, Long stackId, Promise<AcceptResult> accepted, Set<String> hostNames, Set<String> ips) {
+    public CleanupFreeIpaEvent(String selector, Long stackId, Promise<AcceptResult> accepted, Set<String> hostNames, Set<String> ips, boolean recover) {
         super(selector, stackId, accepted);
         this.hostNames = hostNames;
         this.ips = ips;
+        this.recover = recover;
     }
 
     public Set<String> getHostNames() {
@@ -39,12 +44,16 @@ public class CleanupFreeIpaEvent extends StackEvent {
         return ips;
     }
 
+    public boolean isRecover() {
+        return recover;
+    }
+
     @Override
     public String toString() {
         return "CleanupFreeIpaEvent{" +
-                "{super=" + super.toString() + '}' +
                 "hostNames=" + hostNames +
-                "ips=" + ips +
+                ", ips=" + ips +
+                ", recover=" + recover +
                 '}';
     }
 }

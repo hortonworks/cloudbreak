@@ -29,6 +29,8 @@ public class CleanupRequest {
 
     private Set<String> ips;
 
+    private Set<CleanupStep> cleanupStepsToSkip;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -77,15 +79,24 @@ public class CleanupRequest {
         this.ips = ips;
     }
 
+    public Set<CleanupStep> getCleanupStepsToSkip() {
+        return cleanupStepsToSkip;
+    }
+
+    public void setCleanupStepsToSkip(Set<CleanupStep> cleanupStepsToSkip) {
+        this.cleanupStepsToSkip = cleanupStepsToSkip;
+    }
+
     @Override
     public String toString() {
-        return "CleanupRequest{"
-                + "environmentCrn='" + environmentCrn + '\''
-                + "clusterName='" + clusterName + '\''
-                + ", users=" + users
-                + ", hosts=" + hosts
-                + ", roles=" + roles
-                + ", ips=" + ips
-                + '}';
+        return "CleanupRequest{" +
+                "environmentCrn='" + environmentCrn + '\'' +
+                ", clusterName='" + clusterName + '\'' +
+                ", users=" + users +
+                ", hosts=" + hosts +
+                ", roles=" + roles +
+                ", ips=" + ips +
+                ", statesToSkip=" + cleanupStepsToSkip +
+                '}';
     }
 }

@@ -16,6 +16,8 @@ public class StackScaleTriggerEvent extends StackEvent {
 
     private final Set<String> hostNames;
 
+    private boolean repair;
+
     public StackScaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment) {
         this(selector, stackId, instanceGroup, adjustment, Collections.emptySet());
     }
@@ -39,6 +41,11 @@ public class StackScaleTriggerEvent extends StackEvent {
         this.hostNames = hostNames;
     }
 
+    public StackScaleTriggerEvent setRepair() {
+        repair = true;
+        return this;
+    }
+
     public String getInstanceGroup() {
         return instanceGroup;
     }
@@ -49,5 +56,9 @@ public class StackScaleTriggerEvent extends StackEvent {
 
     public Set<String> getHostNames() {
         return hostNames;
+    }
+
+    public boolean isRepair() {
+        return repair;
     }
 }

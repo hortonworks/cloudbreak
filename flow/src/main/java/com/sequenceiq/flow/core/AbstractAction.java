@@ -183,4 +183,8 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         }
         return result;
     }
+
+    protected String getCurrentFlowStateName(Map<Object, Object> variables) {
+        return String.valueOf(variables.get(FLOW_STATE_NAME));
+    }
 }
