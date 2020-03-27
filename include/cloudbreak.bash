@@ -255,8 +255,8 @@ cloudbreak-conf-defaults() {
     env-import CB_LOG_LEVEL "INFO"
     env-import AMBARI_CLIENT_LOG_LEVEL "ERROR"
     env-import CB_PORT 8080
-    env-import CB_PAYWALL_USERNAME
-    env-import CB_PAYWALL_PASSWORD
+    env-import CB_PAYWALL_USERNAME ""
+    env-import CB_PAYWALL_PASSWORD ""
 
 
     env-import CB_INSTANCE_UUID
