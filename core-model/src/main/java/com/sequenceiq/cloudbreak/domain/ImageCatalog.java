@@ -100,4 +100,13 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
     public WorkspaceResource getResource() {
         return WorkspaceResource.IMAGECATALOG;
     }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("ImageCatalog{");
+        sb.append("name='").append(name).append('\'');
+        sb.append(", imageCatalogUrl='").append(imageCatalogUrl).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }
