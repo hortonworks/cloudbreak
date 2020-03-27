@@ -18,10 +18,6 @@
           {
             "Key": "Name",
             "Value": "VPC-1"
-          },
-          {
-            "Key": "Network",
-            "Value": "Public"
           }
         ]
       }
@@ -39,10 +35,6 @@
           {
             "Key": "Name",
             "Value": "ig-1"
-          },
-          {
-            "Key": "Network",
-            "Value": "Public"
           }
         ]
       }
@@ -328,6 +320,44 @@
         }
       }
     },
+    "S3Endpoint": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "RouteTableIds": [
+          {
+            "Ref": "PRT0"
+          },
+          {
+            "Ref": "PRT1"
+          }
+        ],
+        "ServiceName": {
+          "Fn::Sub": "com.amazonaws.${AWS::Region}.s3"
+        },
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      }
+    },
+    "DDBEndpoint": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "RouteTableIds": [
+          {
+            "Ref": "PRT0"
+          },
+          {
+            "Ref": "PRT1"
+          }
+        ],
+        "ServiceName": {
+          "Fn::Sub": "com.amazonaws.${AWS::Region}.dynamodb"
+        },
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      }
+    },
     "PublicRouteTable": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
@@ -344,10 +374,6 @@
           {
             "Key": "Name",
             "Value": "prt-envName-1"
-          },
-          {
-            "Key": "Network",
-            "Value": "Public"
           }
         ]
       }

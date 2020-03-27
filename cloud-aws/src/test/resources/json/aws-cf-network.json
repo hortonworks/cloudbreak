@@ -18,10 +18,6 @@
           {
             "Key": "Name",
             "Value": "VPC-1"
-          },
-          {
-            "Key": "Network",
-            "Value": "Public"
           }
         ]
       }
@@ -39,10 +35,6 @@
           {
             "Key": "Name",
             "Value": "ig-1"
-          },
-          {
-            "Key": "Network",
-            "Value": "Public"
           }
         ]
       }
@@ -344,10 +336,6 @@
           {
             "Key": "Name",
             "Value": "prt-envName-1"
-          },
-          {
-            "Key": "Network",
-            "Value": "Public"
           }
         ]
       }
