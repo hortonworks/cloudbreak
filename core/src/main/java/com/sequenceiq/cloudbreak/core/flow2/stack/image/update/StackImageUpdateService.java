@@ -213,8 +213,25 @@ public class StackImageUpdateService {
             try {
                 Image currentImage = getCurrentImage(stack);
                 StatedImage newImage = getNewImage(newImageId, imageCatalogName, imageCatalogUrl, currentImage);
-                return isCloudPlatformMatches(stack, newImage) && isOsVersionsMatch(currentImage, newImage) && isStackMatchIfPrewarmed(stack, newImage)
-                        && checkPackageVersions(stack, newImage).getStatus() == EventStatus.OK;
+                boolean cloudPlatformMatches = isCloudPlatformMatches(stack, newImage);
+                boolean osVersionsMatch = isOsVersionsMatch(currentImage, newImage);
+                boolean stackMatchIfPrewarmed = isStackMatchIfPrewarmed(stack, newImage);
+                CheckResult status = checkPackageVersions(stack, newImage);
+                boolean aggregatedValidationResult = cloudPlatformMatches && osVersionsMatch && stackMatchIfPrewarmed
+                        && status.getStatus() == EventStatus.OK;
+                if (!aggregatedValidationResult) {
+                    LOGGER.info("Image validation for {}:\n "
+                                    + "Valid platform? {}\n "
+                                    + "Valid os? {}\n "
+                                    + "Valid stack (prewarmed only)? {}\n "
+                                    + "Valid package versions? {}",
+                            newImageId,
+                            cloudPlatformMatches,
+                            osVersionsMatch,
+                            stackMatchIfPrewarmed,
+                            status);
+                }
+                return aggregatedValidationResult;
             } catch (CloudbreakImageNotFoundException e) {
                 LOGGER.warn("Cloudbreak Image not found", e);
                 return false;
