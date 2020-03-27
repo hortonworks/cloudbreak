@@ -404,7 +404,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         Collection<ApiService> apiServices = readServices(stack);
         boolean anyServiceNotStarted = apiServices.stream()
                 .anyMatch(service -> !ApiServiceState.STARTED.equals(service.getServiceState())
-                        && !ApiServiceState.STARTING.equals(service.getServiceState()));
+                        && !ApiServiceState.STARTING.equals(service.getServiceState())
+                        && !ApiServiceState.NA.equals(service.getServiceState()));
         ApiCommand apiCommand = null;
         if (anyServiceNotStarted) {
             apiCommand = apiInstance.startCommand(clusterName);
