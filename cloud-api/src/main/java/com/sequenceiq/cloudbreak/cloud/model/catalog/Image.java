@@ -146,6 +146,10 @@ public class Image {
 
     @Override
     public String toString() {
+        return shortOsDescriptionFormat();
+    }
+
+    public String toStringFull() {
         return "Image{"
                 + "uuid='" + uuid + '\''
                 + ", date='" + date + '\''

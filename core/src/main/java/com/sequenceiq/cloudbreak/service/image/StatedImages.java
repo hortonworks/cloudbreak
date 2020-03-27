@@ -31,4 +31,14 @@ public class StatedImages {
     public static StatedImages statedImages(Images images, String imageCatalogUrl, String imageCatalogName) {
         return new StatedImages(images, imageCatalogUrl, imageCatalogName);
     }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("StatedImages{");
+        sb.append("images=").append(images.getNumberOfImages());
+        sb.append(", imageCatalogUrl='").append(imageCatalogUrl).append('\'');
+        sb.append(", imageCatalogName='").append(imageCatalogName).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

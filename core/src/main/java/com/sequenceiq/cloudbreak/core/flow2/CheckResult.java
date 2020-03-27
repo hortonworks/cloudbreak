@@ -32,4 +32,13 @@ public class CheckResult {
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("CheckResult{");
+        sb.append("status=").append(status);
+        sb.append(", message='").append(message).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

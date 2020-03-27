@@ -427,11 +427,14 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         CloudbreakImageCatalogV2 imageCatalogV2 = imageCatalogProvider.getImageCatalogV2(imageFilter.getImageCatalog().getImageCatalogUrl());
         Set<String> suppertedVersions;
         if (imageCatalogV2 != null) {
+            LOGGER.info("Image catalog found, filtering the images..");
+
             Set<String> vMImageUUIDs = new HashSet<>();
             Set<String> defaultVMImageUUIDs = new HashSet<>();
             List<CloudbreakVersion> cloudbreakVersions = imageCatalogV2.getVersions().getCloudbreakVersions();
             String cbv = versionFilter.isVersionUnspecified(imageFilter.getCbVersion())
-                    ? versionFilter.latestCloudbreakVersion(cloudbreakVersions) : imageFilter.getCbVersion();
+                    ? versionFilter.latestCloudbreakVersion(cloudbreakVersions)
+                            : imageFilter.getCbVersion();
             List<CloudbreakVersion> exactMatchedImgs = cloudbreakVersions.stream()
                     .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().contains(cbv)).collect(Collectors.toList());
 
@@ -448,6 +451,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                 defaultVMImageUUIDs.addAll(prefixMatchImages.defaultVMImageUUIDs);
                 suppertedVersions = prefixMatchImages.supportedVersions;
             }
+            LOGGER.info("The following images are matching for CB version ({}): {} ", cbv, vMImageUUIDs);
 
             List<Image> baseImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV2.getImages().getBaseImages(), vMImageUUIDs);
             List<Image> hdpImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV2.getImages().getHdpImages(), vMImageUUIDs);
@@ -466,7 +470,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                     imageFilter.getImageCatalog().getImageCatalogUrl(),
                     imageFilter.getImageCatalog().getName());
         } else {
-            images = statedImages(emptyImages(),
+            LOGGER.warn("Image catalog {} not found, returning empty response", imageFilter.getImageCatalog());
+                    images = statedImages(emptyImages(),
                     imageFilter.getImageCatalog().getImageCatalogUrl(),
                     imageFilter.getImageCatalog().getName());
         }

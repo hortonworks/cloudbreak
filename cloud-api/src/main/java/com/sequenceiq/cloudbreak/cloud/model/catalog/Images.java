@@ -56,4 +56,8 @@ public class Images {
     public Set<String> getSuppertedVersions() {
         return suppertedVersions;
     }
+
+    public int getNumberOfImages() {
+        return baseImages.size() + hdpImages.size() + hdfImages.size() + cdhImages.size();
+    }
 }
