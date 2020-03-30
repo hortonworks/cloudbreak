@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.authorization.service.AbstractPermissionCheckerService;
+import com.sequenceiq.authorization.service.PermissionCheckService;
 
 @Component
 @Aspect
@@ -19,7 +19,7 @@ public class CheckPermissionsAspects {
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckPermissionsAspects.class);
 
     @Inject
-    private AbstractPermissionCheckerService permissionCheckerService;
+    private PermissionCheckService permissionCheckerService;
 
     @Pointcut("within(@org.springframework.stereotype.Controller *) "
             + "&& within(@com.sequenceiq.authorization.annotation.AuthorizationResource *)")

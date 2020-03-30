@@ -5,26 +5,26 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
-import com.sequenceiq.authorization.service.UmsAuthorizationService;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.UmsAuthorizationService;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
-import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.VaultCleanupRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServicePrincipalRequest;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.VaultCleanupRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -98,6 +98,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public String getUserKeytab(@NotEmpty String environmentCrn, @NotEmpty String targetUserCrn) {
         String actorCrn = checkActorCrn();
         LOGGER.debug("getUserKeytab() request for environmentCrn={} for targetUserCrn={} as actorCrn={}",

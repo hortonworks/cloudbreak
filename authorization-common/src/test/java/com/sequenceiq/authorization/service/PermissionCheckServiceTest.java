@@ -55,7 +55,7 @@ public class PermissionCheckServiceTest {
     private MethodSignature methodSignature;
 
     @InjectMocks
-    private PermissionCheckerService underTest;
+    private PermissionCheckService underTest;
 
     @Before
     public void setup() {
