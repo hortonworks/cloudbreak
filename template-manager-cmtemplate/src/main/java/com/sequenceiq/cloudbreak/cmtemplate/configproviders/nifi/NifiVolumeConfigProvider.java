@@ -32,7 +32,7 @@ public class NifiVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
                 .filter(product -> product.getName().equals("CFM"))
                 .anyMatch(product -> {
             String version = product.getVersion();
-            return version.equals("1.0.0.0") || version.equals("1.0.1.0");
+            return "1.0.0.0".equals(version) || "1.0.1.0".equals(version);
         })) {
             return List.of();
         }
