@@ -27,9 +27,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -137,7 +139,7 @@ public class CommonPermissionCheckingUtilsTest {
     @Test
     public void testGetParameterWithCorrectlyAnnotatedMethod() throws NoSuchMethodException {
         when(methodSignature.getMethod())
-                .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithAnnotation", String.class, String.class));
+                .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithParamAnnotation", String.class, String.class));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[]{"name", "other"});
 
         String parameter = underTest.getParameter(proceedingJoinPoint, methodSignature, ResourceName.class, String.class);
@@ -148,10 +150,11 @@ public class CommonPermissionCheckingUtilsTest {
     @Test
     public void testGetParameterWithIncorrectlyAnnotatedMethod() throws NoSuchMethodException {
         when(methodSignature.getMethod())
-                .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithAnnotation", String.class, String.class));
+                .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithParamAnnotation", String.class, String.class));
 
         thrown.expect(IllegalStateException.class);
-        thrown.expectMessage("Your controller method exampleMethodWithAnnotation should have one and only one parameter with the annotation ResourceCrn");
+        thrown.expectMessage("Your controller method exampleMethodWithParamAnnotation should " +
+                "have one and only one parameter with the annotation ResourceCrn");
 
         underTest.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
     }
@@ -159,7 +162,7 @@ public class CommonPermissionCheckingUtilsTest {
     @Test
     public void testGetParameterWithIncorrectlyParametrizedMethod() throws NoSuchMethodException {
         when(methodSignature.getMethod())
-                .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithAnnotation", String.class, String.class));
+                .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithParamAnnotation", String.class, String.class));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[]{0L, "other"});
 
         thrown.expect(IllegalStateException.class);
@@ -171,10 +174,11 @@ public class CommonPermissionCheckingUtilsTest {
     @Test
     public void testGetParameterWithNukeMethod() throws NoSuchMethodException {
         when(methodSignature.getMethod())
-                .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithoutAnnotation", String.class, String.class));
+                .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithoutParamAnnotation", String.class, String.class));
 
         thrown.expect(IllegalStateException.class);
-        thrown.expectMessage("Your controller method exampleMethodWithoutAnnotation should have one and only one parameter with the annotation ResourceCrn");
+        thrown.expectMessage("Your controller method exampleMethodWithoutParamAnnotation should " +
+                "have one and only one parameter with the annotation ResourceCrn");
 
         underTest.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
     }
@@ -182,10 +186,11 @@ public class CommonPermissionCheckingUtilsTest {
     @Test
     public void testGetParameterWithTooManyAnnotations() throws NoSuchMethodException {
         when(methodSignature.getMethod())
-                .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithTooManyAnnotation", String.class, String.class));
+                .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithTooManyParamAnnotation", String.class, String.class));
 
         thrown.expect(IllegalStateException.class);
-        thrown.expectMessage("Your controller method exampleMethodWithTooManyAnnotation should have one and only one parameter with the annotation ResourceCrn");
+        thrown.expectMessage("Your controller method exampleMethodWithTooManyParamAnnotation should " +
+                "have one and only one parameter with the annotation ResourceCrn");
 
         underTest.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
     }
@@ -193,15 +198,18 @@ public class CommonPermissionCheckingUtilsTest {
     @AuthorizationResource(type = AuthorizationResourceType.CREDENTIAL)
     private static class ExampleAuthorizationResourceClass {
 
-        public void exampleMethodWithAnnotation(@ResourceName String name, String other) {
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+        public void exampleMethodWithParamAnnotation(@ResourceName String name, String other) {
             LOGGER.info(name + other);
         }
 
-        public void exampleMethodWithoutAnnotation(String name, String other) {
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+        public void exampleMethodWithoutParamAnnotation(String name, String other) {
             LOGGER.info(name + other);
         }
 
-        public void exampleMethodWithTooManyAnnotation(@ResourceCrn String name, @ResourceCrn String other) {
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+        public void exampleMethodWithTooManyParamAnnotation(@ResourceCrn String name, @ResourceCrn String other) {
             LOGGER.info(name + other);
         }
     }

@@ -33,6 +33,7 @@ public class LdapConfigV1Controller extends NotificationController implements Ld
     private CrnService crnService;
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public DescribeLdapConfigResponse describe(String environmentId) {
         return ldapConfigV1Service.describe(environmentId);
     }

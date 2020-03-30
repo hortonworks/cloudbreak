@@ -18,16 +18,19 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
-public abstract class AbstractPermissionCheckerService {
+@Service
+public class PermissionCheckService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPermissionCheckerService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PermissionCheckService.class);
 
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
@@ -59,8 +62,6 @@ public abstract class AbstractPermissionCheckerService {
         return checkPermission(proceedingJoinPoint, methodSignature, authorizationClass.get(), startTime);
     }
 
-    protected abstract List<Class<? extends Annotation>> getPossibleMethodAnnotations();
-
     protected Object checkPermission(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, Class<?> authorizationClass, long startTime) {
         Optional<Annotation> classAnnotation = commonPermissionCheckingUtils.getClassAnnotation(authorizationClass);
 
@@ -68,11 +69,11 @@ public abstract class AbstractPermissionCheckerService {
         AuthorizationResourceType resource = classAuthorizationResource.type();
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
 
-        List<? extends Annotation> annotations = getPossibleMethodAnnotations().stream()
+        List<? extends Annotation> annotations = AuthorizationAnnotationUtils.getPossibleMethodAnnotations().stream()
                 .map(c -> methodSignature.getMethod().getAnnotation(c))
                 .collect(Collectors.toList());
 
-        Optional<Annotation> methodAnnotation = validateNumberOfAnnotations(methodSignature, annotations);
+        Optional<Annotation> methodAnnotation = validateNumberOfAnnotations(annotations);
         if (!methodAnnotation.isPresent()) {
             LOGGER.warn("Your Controller ({}) method {} does not have any authorization related annotation, " +
                             "thus we are checking write permission on current account.",
@@ -87,7 +88,7 @@ public abstract class AbstractPermissionCheckerService {
         return permissionChecker.checkPermissions(methodAnnotation.get(), resource, userCrn, proceedingJoinPoint, methodSignature, startTime);
     }
 
-    private Optional<Annotation> validateNumberOfAnnotations(MethodSignature methodSignature, List<? extends Annotation> annotations) {
+    private Optional<Annotation> validateNumberOfAnnotations(List<? extends Annotation> annotations) {
         annotations = annotations.stream().filter(Objects::nonNull).collect(Collectors.toList());
         if (annotations.isEmpty()) {
             return Optional.empty();

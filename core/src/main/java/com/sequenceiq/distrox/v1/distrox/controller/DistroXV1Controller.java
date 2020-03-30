@@ -296,6 +296,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public Object getRequestfromName(String name) {
         StackV4Request stackV4Request = getStackV4Request(NameOrCrn.ofName(name));
         return getCreateAWSClusterRequest(stackV4Request);
