@@ -17,6 +17,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.usersync.UserSyncStatusResponse;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -78,6 +79,9 @@ public class DescribeFreeIpaResponse {
 
     @ApiModelProperty(value = FreeIpaModelDescriptions.CLOUD_STORAGE)
     private CloudStorageResponse cloudStorage;
+
+    @ApiModelProperty(value = FreeIpaModelDescriptions.USERSYNC_STATUS_DETAILS)
+    private UserSyncStatusResponse userSyncStatus;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -205,5 +209,13 @@ public class DescribeFreeIpaResponse {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public UserSyncStatusResponse getUserSyncStatus() {
+        return userSyncStatus;
+    }
+
+    public void setUserSyncStatus(UserSyncStatusResponse userSyncStatus) {
+        this.userSyncStatus = userSyncStatus;
     }
 }

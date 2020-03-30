@@ -9,7 +9,9 @@ import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConv
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncStatusService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 
 @Service
@@ -25,12 +27,16 @@ public class FreeIpaDescribeService {
     private FreeIpaService freeIpaService;
 
     @Inject
+    private UserSyncStatusService userSyncStatusService;
+
+    @Inject
     private StackToDescribeFreeIpaResponseConverter stackToDescribeFreeIpaResponseConverter;
 
     public DescribeFreeIpaResponse describe(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
         Image image = imageService.getByStack(stack);
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa);
+        UserSyncStatus userSyncStatus = userSyncStatusService.findByStack(stack);
+        return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, userSyncStatus);
     }
 }

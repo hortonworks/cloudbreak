@@ -28,4 +28,9 @@ public class UserSyncStatusService {
             return userSyncStatusRepository.save(userSyncStatus);
         });
     }
+
+    public UserSyncStatus findByStack(Stack stack) {
+        return userSyncStatusRepository.getByStack(stack).orElse(null);
+    }
+
 }
