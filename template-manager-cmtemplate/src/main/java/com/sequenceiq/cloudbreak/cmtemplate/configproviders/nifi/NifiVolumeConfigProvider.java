@@ -26,8 +26,6 @@ public class NifiVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
-
-        // https://jira.cloudera.com/browse/CFM-913
         if (source.getProductDetailsView().getProducts().stream()
                 .filter(product -> product.getName().equals("CFM"))
                 .anyMatch(product -> {
