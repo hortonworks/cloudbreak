@@ -230,6 +230,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public List<AdvertisedRuntime> advertisedRuntimes() {
         return cdpConfigService.getAdvertisedRuntimes();
     }
