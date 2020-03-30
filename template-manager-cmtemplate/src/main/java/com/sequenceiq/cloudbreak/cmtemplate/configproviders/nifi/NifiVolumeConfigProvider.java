@@ -26,6 +26,17 @@ public class NifiVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+
+        // https://jira.cloudera.com/browse/CFM-913
+        if (source.getProductDetailsView().getProducts().stream()
+                .filter(product -> product.getName().equals("CFM"))
+                .anyMatch(product -> {
+            String version = product.getVersion();
+            return version.equals("1.0.0.0") || version.equals("1.0.1.0");
+        })) {
+            return List.of();
+        }
+
         Integer volumeCount = Objects.nonNull(hostGroupView) ? hostGroupView.getVolumeCount() : 0;
         int flowFileVolInd = FIRST_VOLUME;
         int contentVolInd = SECOND_VOLUME;
