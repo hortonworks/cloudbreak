@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
@@ -72,10 +73,7 @@ public class EnvironmentServiceIntegrationTest {
 
     private static final String SERVICE_ADDRESS = "http://localhost:%d/environmentservice";
 
-    private static final String DEFINITION_AWS = "{\"values\":[{\"name\":\"smartSenseId\",\"type\":\"String\",\"sensitive\":false,\"optional\":true},"
-            + "{\"name\":\"govCloud\",\"type\":\"String\",\"sensitive\":false,\"optional\":true}],\"selectors\":[{\"name\":\"role-based\",\"values\":"
-            + "[{\"name\":\"roleArn\",\"type\":\"String\"},{\"name\":\"externalId\",\"type\":\"String\",\"optional\":true}]},"
-            + "{\"name\":\"key-based\",\"values\":[{\"name\":\"accessKey\",\"type\":\"String\"},{\"name\":\"secretKey\",\"type\":\"String\"}]}]}";
+    private static final String DEFINITION_AWS = FileReaderUtils.readFileFromClasspathQuietly("testCredentialDefinitionAws.json");
 
     private static final String TEST_ACCOUNT_ID = "accid";
 
