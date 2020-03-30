@@ -2,7 +2,7 @@
 # Name: freeipa_backup.sh
 # Description: Backup FreeIPA and Upload backup to provided Cloud Location
 ################################################################
-
+set -x
 
 CONFIG_FILE=/etc/freeipa_backup.conf
 
@@ -13,7 +13,7 @@ config=( # set default values in config array
     [backup_platform]="LOCAL"
     [azure_instance_msi]=""
     [logfile]="/var/log/ipabackup.log"
-    [backup_path]="/var/lib/ipa/backup/"
+    [backup_path]="/var/lib/ipa/backup"
 )
 
 # Override defaults with config file
@@ -60,7 +60,7 @@ fi
 
 LOGFILE="${config[logfile]}"
 DATE_FOLDER="$(date -I)"
-BACKUP_PATH_POSTFIX="${FOLDER}/"
+BACKUP_PATH_POSTFIX="${FOLDER}"
 
 BACKUP_OPTIONS=""
 if [ "$TYPE" = "FULL" ]; then
@@ -89,7 +89,7 @@ error_exit()
 
 remove_local_backups() {
     doLog "INFO Removing local backup copies"
-    find ${config[backup_path]} -name ipa-* -type d  -print0 | xargs -0 /usr/bin/rm -vrf >> $LOGFILE 2>&1 || error_exit "Unable to remove local backup copies"
+    find ${config[backup_path]}/ -name ipa-* -type d  -print0 | xargs -0 /usr/bin/rm -vrf >> $LOGFILE 2>&1 || error_exit "Unable to remove local backup copies"
 }
 
 doLog "INFO Running ${TYPE} IPA backup."
@@ -103,7 +103,7 @@ doLog "DEBUG Uploading backup to ${BACKUP_LOCATION} on ${config[backup_platform]
 
 if [ "${config[backup_platform]}" = "AWS" ]; then
     doLog "INFO Syncing backups to AWS S3"
-    /usr/bin/aws s3 cp --recursive --sse AES256 --no-progress ${config[backup_path]}${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR} >> $LOGFILE 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
+    /usr/bin/aws s3 cp --recursive --sse AES256 --no-progress ${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR} >> $LOGFILE 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
     remove_local_backups
 elif [ "${config[backup_platform]}" = "AZURE" ]; then
     doLog "INFO  Syncing backups to Azure Blog Storage"
