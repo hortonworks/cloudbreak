@@ -4,6 +4,13 @@ ifeq ($(REPO_URL),"")
 REPO_URL = https://cloudbreak-maven.s3.amazonaws.com/releases
 endif
 
+CB_VERSION = $(shell echo \${VERSION})
+ifeq ($(CB_VERSION),)
+CB_VERSION = $(shell git tag --points-at HEAD | sort -n | tail -1)
+endif
+
+CB_TARGET_BRANCH = $(shell echo \${TARGET_BRANCH})
+
 all: download-cbd buildcb runtest
 
 runtest: create-image create-cloudbreak-context docker-compose stop-containers check-results
@@ -20,7 +27,7 @@ download-jar-from-s3:
 	./scripts/download-artifacts.sh
 
 download-cbd:
-	./scripts/download-cbd.sh
+	CB_VERSION=$(CB_VERSION) CB_TARGET_BRANCH=$(CB_TARGET_BRANCH) ./scripts/download-cbd.sh
 
 buildcb:
 	./scripts/build-cb.sh
