@@ -26,9 +26,11 @@ import com.sequenceiq.freeipa.converter.image.ImageToImageSettingsResponseConver
 import com.sequenceiq.freeipa.converter.instance.InstanceGroupToInstanceGroupResponseConverter;
 import com.sequenceiq.freeipa.converter.network.NetworkToNetworkResponseConverter;
 import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
+import com.sequenceiq.freeipa.converter.usersync.UserSyncStatusToUserSyncStatusResponseConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
 
 @Component
@@ -52,7 +54,10 @@ public class StackToDescribeFreeIpaResponseConverter {
     @Inject
     private TelemetryConverter telemetryConverter;
 
-    public DescribeFreeIpaResponse convert(Stack stack, Image image, FreeIpa freeIpa) {
+    @Inject
+    private UserSyncStatusToUserSyncStatusResponseConverter userSyncStatusConverter;
+
+    public DescribeFreeIpaResponse convert(Stack stack, Image image, FreeIpa freeIpa, UserSyncStatus userSyncStatus) {
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
         describeFreeIpaResponse.setName(stack.getName());
         describeFreeIpaResponse.setEnvironmentCrn(stack.getEnvironmentCrn());
@@ -71,6 +76,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         decoreateFreeIpaServerResponseWithLoadBalancedHost(stack, describeFreeIpaResponse.getFreeIpa(), freeIpa);
         describeFreeIpaResponse.setAppVersion(stack.getAppVersion());
         decorateWithCloudStorgeAndTelemetry(stack, describeFreeIpaResponse);
+        Optional.ofNullable(userSyncStatus).ifPresent(u -> describeFreeIpaResponse.setUserSyncStatus(userSyncStatusConverter.convert(u)));
         return describeFreeIpaResponse;
     }
 

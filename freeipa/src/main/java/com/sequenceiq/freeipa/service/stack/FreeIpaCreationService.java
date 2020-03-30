@@ -152,7 +152,7 @@ public class FreeIpaCreationService {
                     new StackEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT, stackImageFreeIpaTuple.getLeft().getId()));
             InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
             return stackToDescribeFreeIpaResponseConverter
-                    .convert(stackImageFreeIpaTuple.getLeft(), stackImageFreeIpaTuple.getMiddle(), stackImageFreeIpaTuple.getRight());
+                    .convert(stackImageFreeIpaTuple.getLeft(), stackImageFreeIpaTuple.getMiddle(), stackImageFreeIpaTuple.getRight(), null);
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Creation of FreeIPA failed", e);
             throw new BadRequestException("Creation of FreeIPA failed: " + e.getCause().getMessage(), e);
