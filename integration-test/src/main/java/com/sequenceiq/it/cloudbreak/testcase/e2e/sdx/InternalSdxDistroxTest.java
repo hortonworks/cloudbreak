@@ -13,26 +13,16 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.ImageValidatorE2ETest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
-public class InternalSdxDistroxTests extends ImageValidatorE2ETest {
+public class InternalSdxDistroxTest extends ImageValidatorE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
 
     @Inject
     private DistroXTestClient distroXTestClient;
-
-    @Override
-    protected void setupTest(TestContext testContext) {
-        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createEnvironmentWithNetworkAndFreeIPA(testContext);
-        initializeDefaultBlueprints(testContext);
-    }
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
@@ -59,6 +49,10 @@ public class InternalSdxDistroxTests extends ImageValidatorE2ETest {
                         .withImageId(testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getId()))
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
+                .then((context, distrox, client) -> {
+                    distrox.getResponse();
+                    return distrox;
+                })
                 .when(distroXTestClient.get())
                 .validate();
     }

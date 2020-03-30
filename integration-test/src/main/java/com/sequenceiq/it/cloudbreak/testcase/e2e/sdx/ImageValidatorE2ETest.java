@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +13,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
 public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
 
@@ -32,6 +33,15 @@ public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
 
     @Value("${integrationtest.imageValidation.sourceCatalogUrl}")
     private String sourceImageCatalogUrl;
+
+    @Override
+    protected void setupTest(TestContext testContext) {
+        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        createEnvironmentWithNetworkAndFreeIPA(testContext);
+        initializeDefaultBlueprints(testContext);
+    }
 
     @BeforeMethod
     public void createSourceCatalogIfNotExists(Object[] data) {

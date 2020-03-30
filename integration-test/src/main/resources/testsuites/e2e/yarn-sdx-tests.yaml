@@ -1,5 +1,0 @@
-name: "yarn-sdx-tests"
-tests:
-  - name: "yarn sdx e2e tests"
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.yarn.YarnSdxTests

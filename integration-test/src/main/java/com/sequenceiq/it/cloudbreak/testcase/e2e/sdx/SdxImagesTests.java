@@ -20,15 +20,15 @@ import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.BasicSdxTests;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class SdxBaseImageTests extends BasicSdxTests {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxBaseImageTests.class);
+public class SdxImagesTests extends PreconditionSdxE2ETest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxImagesTests.class);
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -36,12 +36,24 @@ public class SdxBaseImageTests extends BasicSdxTests {
     @Inject
     private WaitUtil waitUtil;
 
-    @Override
-    protected void setupTest(TestContext testContext) {
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createEnvironmentForSdx(testContext);
-        initializeDefaultBlueprints(testContext);
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running Cloudbreak",
+            when = "a basic SDX create request is sent",
+            then = "SDX should be available AND deletable"
+    )
+    public void testSDXWithPrewarmedImageCanBeCreatedSuccessfully(TestContext testContext) {
+        String sdx = resourcePropertyProvider().getName();
+
+        testContext
+                .given(sdx, SdxTestDto.class)
+                .when(sdxTestClient.create(), key(sdx))
+                .awaitForFlow(key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING)
+                .then((tc, testDto, client) -> {
+                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
+                })
+                .validate();
     }
 
     @Ignore("This should be re-enabled once CB-6103 is fixed")

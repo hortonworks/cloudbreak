@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -27,8 +28,8 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 
-public class DistroXBaseImageTests extends AbstractE2ETest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXBaseImageTests.class);
+public class DistroXImagesTests extends AbstractE2ETest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXImagesTests.class);
 
     private Map<String, InstanceStatus> instancesHealthy = new HashMap<>() {{
         put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
@@ -48,6 +49,28 @@ public class DistroXBaseImageTests extends AbstractE2ETest {
         createDefaultCredential(testContext);
         createEnvironmentWithNetworkAndFreeIPA(testContext);
         initializeDefaultBlueprints(testContext);
+    }
+
+    @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running Cloudbreak",
+            when = "a basic DistroX create request is sent",
+            then = "DistroX should be available and deletable"
+    )
+    public void testDistroXWithPrewarmedImageCanBeCreatedSuccessfully(TestContext testContext) {
+        String distrox = resourcePropertyProvider().getName();
+
+        testContext
+                .given(distrox, DistroXTestDto.class)
+                .when(distroXTestClient.create(), key(distrox))
+                .await(STACK_AVAILABLE)
+                .then((context, dto, client) -> {
+                    dto.getResponse();
+                    return dto;
+                })
+                .when(distroXTestClient.get())
+                .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT)

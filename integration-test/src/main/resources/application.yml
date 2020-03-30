@@ -8,6 +8,8 @@ logging:
     path: ${integrationtest.outputdir}
 
 integrationtest:
+  threadCount: 8
+  parallel: methods
   imageValidation:
     sourceCatalogName: v3-dev
     sourceCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
@@ -127,7 +129,7 @@ integrationtest:
 
   testsuite:
     pollingInterval: 1000
-    threadPoolSize: 6
+    threadPoolSize: 8
     skipRemainingTestsAfterOneFailed: true
     cleanUpOnFailure: false
 

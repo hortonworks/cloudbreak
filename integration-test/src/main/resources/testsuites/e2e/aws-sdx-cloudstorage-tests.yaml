@@ -2,4 +2,4 @@ name: "aws-sdx-cloudstorage-tests"
 tests:
   - name: "aws sdx cloudstorage e2e tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxCloudStorageTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxCloudStorageTest

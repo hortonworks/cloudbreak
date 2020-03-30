@@ -10,13 +10,11 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.BasicSdxTests;
-import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.AmazonS3Util;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class SdxCloudStorageTests extends BasicSdxTests {
+public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -34,7 +32,6 @@ public class SdxCloudStorageTests extends BasicSdxTests {
             then = "SDX should be available along with the created Cloud storage objects"
     )
     public void testSDXWithDataLakeAndFreeIPAStorageCanBeCreatedSuccessfully(TestContext testContext) {
-        CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         String sdx = resourcePropertyProvider().getName();
 
         testContext
@@ -46,17 +43,13 @@ public class SdxCloudStorageTests extends BasicSdxTests {
                     return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
                 })
                 .then((tc, testDto, client) -> {
-                    cloudFunctionality.cloudStorageListContainerDataLake(getBaseLocation(testDto));
+                    getCloudFunctionality(tc).cloudStorageListContainerDataLake(getBaseLocation(testDto));
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    cloudFunctionality.cloudStorageListContainerFreeIPA(getBaseLocation(testDto));
+                    getCloudFunctionality(tc).cloudStorageListContainerFreeIPA(getBaseLocation(testDto));
                     return testDto;
                 })
                 .validate();
-    }
-
-    private String getBaseLocation(SdxTestDto testDto) {
-        return testDto.getRequest().getCloudStorage().getBaseLocation();
     }
 }
