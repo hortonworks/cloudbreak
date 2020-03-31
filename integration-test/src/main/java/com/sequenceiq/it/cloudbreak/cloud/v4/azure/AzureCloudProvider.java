@@ -6,6 +6,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -43,6 +44,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
 
@@ -68,9 +70,19 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         appBased.setAccessKey(azureProperties.getCredential().getAppId());
         appBased.setSecretKey(azureProperties.getCredential().getAppPassword());
         parameters.setAppBased(appBased);
+        validateCredential(parameters);
         return credential.withAzureParameters(parameters)
                 .withCloudPlatform(CloudPlatform.AZURE.name())
                 .withDescription(commonCloudProperties().getDefaultCredentialDescription());
+    }
+
+    private void validateCredential(AzureCredentialRequestParameters parameters) {
+        if (StringUtils.isEmpty(parameters.getSubscriptionId()) && StringUtils.isEmpty(parameters.getTenantId())
+                && StringUtils.isEmpty(parameters.getAppBased().getAccessKey()) && StringUtils.isEmpty(parameters.getAppBased().getSecretKey())) {
+            throw new TestFailException("Invalid azure credentials. You should define: \n" +
+                    "\t * subscription with tenant: `integrationtest.azure.credential.subscriptionId` and `integrationtest.azure.credential.tenantId` and\n" +
+                    "\t * app based: `integrationtest.azure.credential.appId` and `integrationtest.azure.credential.appPassword`");
+        }
     }
 
     @Override
