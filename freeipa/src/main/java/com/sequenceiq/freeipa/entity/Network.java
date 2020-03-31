@@ -62,4 +62,14 @@ public class Network {
     public String getCloudPlatform() {
         return cloudPlatform;
     }
+
+    @Override
+    public String toString() {
+        return "Network{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", attributes=" + attributes +
+                '}';
+    }
 }

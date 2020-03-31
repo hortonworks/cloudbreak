@@ -101,4 +101,16 @@ public class SecurityConfig implements AccountIdAwareResource {
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
+
+    @Override
+    public String toString() {
+        return "SecurityConfig{" +
+                "id=" + id +
+                ", clientKeyVault=" + clientKeyVault +
+                ", clientCertVault=" + clientCertVault +
+                ", saltSecurityConfig=" + saltSecurityConfig +
+                ", usePrivateIpToTls=" + usePrivateIpToTls +
+                ", accountId='" + accountId + '\'' +
+                '}';
+    }
 }
