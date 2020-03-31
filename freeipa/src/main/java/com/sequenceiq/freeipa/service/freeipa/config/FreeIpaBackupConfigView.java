@@ -75,6 +75,7 @@ public class FreeIpaBackupConfigView {
         map.put("hourly_enabled", this.hourlyEnabled);
         map.put("initial_full_enabled", this.initialFullEnabled);
         map.put("platform", ObjectUtils.defaultIfNull(this.platform, EMPTY_CONFIG_DEFAULT));
+        map.put("azure_instance_msi", ObjectUtils.defaultIfNull(this.azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
         return map;
     }
 
