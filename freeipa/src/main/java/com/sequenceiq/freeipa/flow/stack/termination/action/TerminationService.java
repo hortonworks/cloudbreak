@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.termination.action;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -20,10 +20,10 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.TerminationFailedException;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Service;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Service
 public class TerminationService {
@@ -54,22 +54,22 @@ public class TerminationService {
     private KerberosMgmtV1Service kerberosMgmtV1Service;
 
     public void finalizeTermination(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Date now = new Date();
-        String terminatedName = stack.getName() + DELIMITER + now.getTime();
+        long currentTimeMillis = clock.getCurrentTimeMillis();
         try {
             transactionService.required(() -> {
+                Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+                String terminatedName = stack.getName() + DELIMITER + currentTimeMillis;
                 stack.setName(terminatedName);
-                stack.setTerminated(clock.getCurrentTimeMillis());
+                stack.setTerminated(currentTimeMillis);
                 terminateInstanceGroups(stack);
                 terminateMetaDataInstances(stack);
                 cleanupVault(stack);
+                stackUpdater.updateStackStatus(stack, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
                 stackService.save(stack);
-                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
                 return null;
             });
-        } catch (TransactionService.TransactionExecutionException ex) {
-            LOGGER.info("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
+        } catch (TransactionExecutionException ex) {
+            LOGGER.info("Failed to terminate cluster infrastructure.");
             throw new TerminationFailedException(ex);
         }
     }

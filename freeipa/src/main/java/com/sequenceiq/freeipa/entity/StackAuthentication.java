@@ -53,4 +53,14 @@ public class StackAuthentication {
     public void setLoginUserName(String loginUserName) {
         this.loginUserName = loginUserName;
     }
+
+    @Override
+    public String toString() {
+        return "StackAuthentication{" +
+                "id=" + id +
+                ", publicKey='" + publicKey + '\'' +
+                ", publicKeyId='" + publicKeyId + '\'' +
+                ", loginUserName='" + loginUserName + '\'' +
+                '}';
+    }
 }
