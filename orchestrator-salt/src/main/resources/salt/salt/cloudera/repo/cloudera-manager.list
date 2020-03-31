@@ -1,2 +1,2 @@
 # Cloudera Manager {{ salt['pillar.get']('cloudera-manager:repo:version') }}
-deb [arch=amd64] {{ salt['pillar.get']('cloudera-manager:repo:baseUrl') }} xenial-cm{{ salt['pillar.get']('cloudera-manager:repo:version') }} contrib
+deb [arch=amd64 trusted=yes] {{ salt['pillar.get']('cloudera-manager:repo:baseUrl') }} xenial-cm{{ salt['pillar.get']('cloudera-manager:repo:version') }} contrib
