@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -50,23 +52,46 @@ public class StackUpdater {
         return doUpdateStackStatus(stack, detailedStatus, statusReason);
     }
 
-    private Stack doUpdateStackStatus(Stack stack, DetailedStackStatus detailedStatus, String statusReason) {
-        Status status = detailedStatus.getStatus();
-        if (!Status.DELETE_COMPLETED.equals(stack.getStackStatus().getStatus())) {
-            if (status != stack.getStackStatus().getStatus()) {
-                LOGGER.debug("Status is updated. {} to {}", stack.getStackStatus().getStatus(), status);
-                stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));
-                stack = stackService.save(stack);
-                if (status.isRemovableStatus()) {
-                    InMemoryStateStore.deleteStack(stack.getId());
-                } else {
-                    PollGroup pollGroup = Status.DELETE_COMPLETED.equals(status) ? PollGroup.CANCELLED : PollGroup.POLLABLE;
-                    InMemoryStateStore.putStack(stack.getId(), pollGroup);
-                }
+    private Stack doUpdateStackStatus(Stack stack, DetailedStackStatus newDetailedStatus, String newStatusReason) {
+        Status newStatus = newDetailedStatus.getStatus();
+        StackStatus stackStatus = stack.getStackStatus();
+        if (!Status.DELETE_COMPLETED.equals(stackStatus.getStatus())) {
+            if (isStatusChanged(stack, newDetailedStatus, newStatusReason, newStatus)) {
+                stack = handleStatusChange(stack, newDetailedStatus, newStatusReason, newStatus, stackStatus);
             } else {
                 LOGGER.debug("Statuses are the same, it will not update");
             }
         }
         return stack;
+    }
+
+    private Stack handleStatusChange(Stack stack, DetailedStackStatus newDetailedStatus, String newStatusReason, Status newStatus, StackStatus stackStatus) {
+        stack = saveStackNewStatus(stack, newDetailedStatus, newStatusReason, newStatus, stackStatus);
+        updateInMemoryStore(stack, newStatus);
+        return stack;
+    }
+
+    private void updateInMemoryStore(Stack stack, Status newStatus) {
+        if (newStatus.isRemovableStatus()) {
+            InMemoryStateStore.deleteStack(stack.getId());
+        } else {
+            PollGroup pollGroup = Status.DELETE_COMPLETED.equals(newStatus) ? PollGroup.CANCELLED : PollGroup.POLLABLE;
+            InMemoryStateStore.putStack(stack.getId(), pollGroup);
+        }
+    }
+
+    private Stack saveStackNewStatus(Stack stack, DetailedStackStatus newDetailedStatus, String newStatusReason, Status newStatus, StackStatus stackStatus) {
+        LOGGER.debug("Updated: status from {} to {} - detailed status from {} to {} - reason from {} to {}",
+                stackStatus.getStatus(), newStatus, stackStatus.getDetailedStackStatus(), newDetailedStatus,
+                stackStatus.getStatusReason(), newStatusReason);
+        stack.setStackStatus(new StackStatus(stack, newStatus, newStatusReason, newDetailedStatus));
+        stack = stackService.save(stack);
+        return stack;
+    }
+
+    private boolean isStatusChanged(Stack stack, DetailedStackStatus detailedStatus, String statusReason, Status status) {
+        return status != stack.getStackStatus().getStatus()
+                || !detailedStatus.equals(stack.getStackStatus().getDetailedStackStatus())
+                || !Objects.equals(statusReason, stack.getStackStatus().getStatusReason());
     }
 }

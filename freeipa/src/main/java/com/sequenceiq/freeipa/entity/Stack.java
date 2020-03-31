@@ -384,4 +384,34 @@ public class Stack {
     public void setMinaSshdServiceId(String minaSshdServiceId) {
         this.minaSshdServiceId = minaSshdServiceId;
     }
+
+    @Override
+    public String toString() {
+        return "Stack{" +
+                "id=" + id +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", name='" + name + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", region='" + region + '\'' +
+                ", created=" + created +
+                ", platformvariant='" + platformvariant + '\'' +
+                ", availabilityZone='" + availabilityZone + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", gatewayport=" + gatewayport +
+                ", useCcm=" + useCcm +
+                ", tunnel=" + tunnel +
+                ", clusterProxyRegistered=" + clusterProxyRegistered +
+                ", securityConfig=" + securityConfig +
+                ", stackAuthentication=" + stackAuthentication +
+                ", terminated=" + terminated +
+                ", tags=" + tags +
+                ", telemetry=" + telemetry +
+                ", network=" + network +
+                ", stackStatus=" + stackStatus +
+                ", owner='" + owner + '\'' +
+                ", appVersion='" + appVersion + '\'' +
+                ", minaSshdServiceId='" + minaSshdServiceId + '\'' +
+                '}';
+    }
 }

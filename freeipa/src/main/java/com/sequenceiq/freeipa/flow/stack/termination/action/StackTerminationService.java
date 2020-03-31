@@ -30,13 +30,10 @@ public class StackTerminationService {
     }
 
     public void handleStackTerminationError(Stack stack, StackFailureEvent payload, boolean forced) {
-        String stackUpdateMessage;
-        DetailedStackStatus status;
         if (!forced) {
             Exception errorDetails = payload.getException();
-            stackUpdateMessage = "Termination failed: " + errorDetails.getMessage();
-            status = DetailedStackStatus.DELETE_FAILED;
-            stackUpdater.updateStackStatus(stack.getId(), status, stackUpdateMessage);
+            String stackUpdateMessage = "Termination failed: " + errorDetails.getMessage();
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_FAILED, stackUpdateMessage);
             LOGGER.debug("Error during stack termination flow: ", errorDetails);
         } else {
             terminationService.finalizeTermination(stack.getId());

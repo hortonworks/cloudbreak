@@ -201,7 +201,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     private <T> T throwNotImplementedException() {
-        throw new NotImplementedException(String.format("Not implemented on %s", getCloudPlatform()));
+        throw new NotImplementedException(String.format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
+                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
     }
 
     @Override

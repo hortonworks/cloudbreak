@@ -120,4 +120,17 @@ public class StackStatus {
     public Long getCreated() {
         return created;
     }
+
+    @Override
+    public String toString() {
+        return "StackStatus{" +
+                "id=" + id +
+                ", created=" + created +
+                ", status=" + status +
+                ", statusString='" + statusString + '\'' +
+                ", statusReason='" + statusReason + '\'' +
+                ", detailedStackStatus=" + detailedStackStatus +
+                ", detailedStackStatusString='" + detailedStackStatusString + '\'' +
+                '}';
+    }
 }
