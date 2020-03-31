@@ -7,7 +7,7 @@
 
 {% elif grains['os_family'] == 'Debian' %}
 
-/etc/apt/sources.list.d/cloudera-manager.list
+/etc/apt/sources.list.d/cloudera-manager.list:
   file.managed:
     - source: salt://cloudera/repo/cloudera-manager.list
     - template: jinja
