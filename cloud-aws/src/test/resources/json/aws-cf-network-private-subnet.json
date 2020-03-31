@@ -325,6 +325,9 @@
       "Properties": {
         "RouteTableIds": [
           {
+            "Ref": "PublicRouteTable"
+          },
+          {
             "Ref": "PRT0"
           },
           {
@@ -343,6 +346,9 @@
       "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "RouteTableIds": [
+          {
+            "Ref": "PublicRouteTable"
+          },
           {
             "Ref": "PRT0"
           },

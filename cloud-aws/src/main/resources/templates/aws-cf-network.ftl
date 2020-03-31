@@ -120,6 +120,7 @@
       "Type" : "AWS::EC2::VPCEndpoint",
       "Properties" : {
         "RouteTableIds" : [
+         {"Ref" : "PublicRouteTable"} <#if privateSubnetEnabled == true>, </#if>
         <#list subnetDetails as subnet>
             <#if subnet.privateSubnetCidr?has_content>
              {"Ref" : "PRT${subnet.index}"}<#if subnet_has_next>,</#if>
@@ -134,6 +135,7 @@
       "Type" : "AWS::EC2::VPCEndpoint",
       "Properties" : {
         "RouteTableIds" : [
+         {"Ref" : "PublicRouteTable"} <#if privateSubnetEnabled == true>, </#if>
         <#list subnetDetails as subnet>
             <#if subnet.privateSubnetCidr?has_content>
              {"Ref" : "PRT${subnet.index}"}<#if subnet_has_next>,</#if>
