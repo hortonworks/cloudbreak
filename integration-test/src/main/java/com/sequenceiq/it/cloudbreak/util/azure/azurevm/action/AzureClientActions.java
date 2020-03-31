@@ -50,11 +50,11 @@ public class AzureClientActions {
                             .doOnError(throwable -> LOGGER.debug("Error when stopping instance {}: {}", id, throwable))
                             .subscribeOn(Schedulers.io());
                 }).withInstanceStatusCheck(id -> {
-                    String resourceGroup = id.replaceFirst("..$", "");
-                    VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
-                    LOGGER.debug("After stop: vm {} is {} (expected null)", id, vm);
-                    return vm == null;
-                }).withTimeout(10, TimeUnit.MINUTES).build().execute();
+            String resourceGroup = id.replaceFirst("..$", "");
+            VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
+            LOGGER.debug("After stop: vm {} is {} (expected null)", id, vm);
+            return vm == null;
+        }).withTimeout(10, TimeUnit.MINUTES).build().execute();
         LOGGER.debug("Deleting instances finished succesfully");
     }
 
@@ -65,15 +65,15 @@ public class AzureClientActions {
                     String resourceGroup = id.replaceFirst("..$", "");
                     VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
                     LOGGER.debug("Before stop: vm {} power state is {}", id, vm.powerState());
-                    return azure.virtualMachines().powerOffAsync(vm.resourceGroupName(), vm.name())
+                    return azure.virtualMachines().deallocateAsync(vm.resourceGroupName(), vm.name())
                             .doOnError(throwable -> LOGGER.debug("Error when stopping instance {}: {}", id, throwable))
                             .subscribeOn(Schedulers.io());
                 }).withInstanceStatusCheck(id -> {
-                    String resourceGroup = id.replaceFirst("..$", "");
-                    VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
-                    LOGGER.debug("After stop: vm {} power state is {}", id, vm.powerState());
-                            return PowerState.STOPPED.equals(vm.powerState());
-                }).withTimeout(10, TimeUnit.MINUTES).build().execute();
+            String resourceGroup = id.replaceFirst("..$", "");
+            VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
+            LOGGER.debug("After stop: vm {} power state is {}", id, vm.powerState());
+            return PowerState.DEALLOCATED.equals(vm.powerState());
+        }).withTimeout(10, TimeUnit.MINUTES).build().execute();
         LOGGER.debug("Stopping of instances finished succesfully");
     }
 }
