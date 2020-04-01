@@ -49,10 +49,10 @@ public class UpgradeOptionsResponseFactoryTest {
         Map<String, String> packageVersions = createPackageVersions();
         ImageComponentVersions expectedPackageVersions = creatExpectedPackageVersions();
         Image currentImage = createImage(packageVersions);
-        Images availableImages = createAvailableImages(packageVersions);
+        ImageFilterResult availableImages = createAvailableImages(packageVersions);
 
         when(imageService.determineImageName(CLOUD_PLATFORM, REGION, currentImage)).thenReturn(IMAGE_NAME);
-        when(imageService.determineImageName(CLOUD_PLATFORM, REGION, availableImages.getCdhImages().get(0))).thenReturn(IMAGE_NAME);
+        when(imageService.determineImageName(CLOUD_PLATFORM, REGION, availableImages.getAvailableImages().getCdhImages().get(0))).thenReturn(IMAGE_NAME);
 
         UpgradeOptionsV4Response actual = underTest.createV4Response(currentImage, availableImages, CLOUD_PLATFORM, REGION, IMAGE_CATALOG_NAME);
 
@@ -68,8 +68,8 @@ public class UpgradeOptionsResponseFactoryTest {
         assertEquals(CREATION_DATE, actual.getUpgradeCandidates().get(0).getCreated());
     }
 
-    private Images createAvailableImages(Map<String, String> packageVersions) {
-        return new Images(null, null, null, List.of(createImage(packageVersions)), null);
+    private ImageFilterResult createAvailableImages(Map<String, String> packageVersions) {
+        return new ImageFilterResult(new Images(null, null, null, List.of(createImage(packageVersions)), null), null);
     }
 
     private Image createImage(Map<String, String> packageVersions) {

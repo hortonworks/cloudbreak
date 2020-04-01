@@ -23,10 +23,12 @@ public class UpgradeOptionsResponseFactory {
     @Inject
     private ImageService imageService;
 
-    public UpgradeOptionsV4Response createV4Response(Image currentImage, Images filteredImages, String cloudPlatform, String region, String imageCatalogName) {
+    public UpgradeOptionsV4Response createV4Response(Image currentImage, ImageFilterResult filteredImages, String cloudPlatform, String region,
+            String imageCatalogName) {
         return new UpgradeOptionsV4Response(
                 createImageInfoFromCurrentImage(currentImage, cloudPlatform, region, imageCatalogName),
-                createImageInfoFromFilteredImages(filteredImages, imageCatalogName, cloudPlatform, region));
+                createImageInfoFromFilteredImages(filteredImages.getAvailableImages(), imageCatalogName, cloudPlatform, region),
+                filteredImages.getReason());
     }
 
     private ImageInfoV4Response createImageInfoFromCurrentImage(Image currentImage, String cloudPlatform, String region, String imageCatalogName) {
