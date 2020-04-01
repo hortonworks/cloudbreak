@@ -12,11 +12,12 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
@@ -151,19 +152,22 @@ public class EnvironmentModificationService {
             if (validationResult.hasError()) {
                 throw new BadRequestException(validationResult.getFormattedErrors());
             }
-            String oldSshKeyIdForDeletion = null;
-            String oldSshKeyId = environment.getAuthentication().getPublicKeyId();
-            if (environment.getAuthentication().isManagedKey()) {
-                oldSshKeyIdForDeletion = oldSshKeyId;
-            }
+            EnvironmentAuthentication originalAuthentication = environment.getAuthentication();
             environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(authenticationDto));
+            boolean cleanupOldSshKey = true;
             if (StringUtils.isNotEmpty(authenticationDto.getPublicKey())) {
-                environmentResourceService.createAndUpdateSshKey(environment);
+                cleanupOldSshKey = environmentResourceService.createAndUpdateSshKey(environment);
             }
-            if (oldSshKeyIdForDeletion != null) {
-                environmentResourceService.deletePublicKey(environment, oldSshKeyIdForDeletion);
+            if (cleanupOldSshKey) {
+                String oldSshKeyId = originalAuthentication.getPublicKeyId();
+                LOGGER.info("The '{}' of ssh key is replaced with {}", oldSshKeyId, environment.getAuthentication().getPublicKeyId());
+                if (originalAuthentication.isManagedKey()) {
+                    environmentResourceService.deletePublicKey(environment, oldSshKeyId);
+                }
+            } else {
+                LOGGER.info("Create and update was not run successfully. We are reverting the authentication to the previous version");
+                environment.setAuthentication(originalAuthentication);
             }
-            LOGGER.info("The '{}' of ssh key is replaced with {}", oldSshKeyId, environment.getAuthentication().getPublicKeyId());
         }
     }
 

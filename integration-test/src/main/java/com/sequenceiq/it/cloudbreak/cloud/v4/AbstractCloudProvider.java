@@ -13,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -27,6 +28,12 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
 
     private static final String DEFAULT_ACCESS_CIDR = "0.0.0.0/0";
+
+    private static final String DUMMY_SSH_KEY = "ssh-rsa "
+            + "AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
+            + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
+            + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
+            + " centos";
 
     @Inject
     private TestParameter testParameter;
@@ -153,6 +160,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     public final SdxRepairTestDto sdxRepair(SdxRepairTestDto sdxRepair) {
         sdxRepair.withHostGroupNames(List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()));
         return sdxRepair;
+    }
+
+    @Override
+    public EnvironmentAuthenticationTestDto environmentAuthentication(EnvironmentAuthenticationTestDto environmentAuthenticationEntity) {
+        return environmentAuthenticationEntity.withPublicKey(DUMMY_SSH_KEY);
     }
 
     protected abstract ClusterTestDto withCluster(ClusterTestDto cluster);

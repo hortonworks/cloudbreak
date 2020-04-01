@@ -48,7 +48,11 @@ abstract class AbstractRequestHandler<T> {
 
     public HttpMock clearDefinedResponses() {
         mock.getDynamicRouteStack().clear(method.getHttpMethod(), path);
+        return mock;
+    }
 
+    public HttpMock clearCalls() {
+        mock.getRequestList().clear();
         return mock;
     }
 

@@ -18,23 +18,35 @@ public class EnvironmentMetricService extends AbstractMetricService {
     }
 
     public void incrementMetricCounter(MetricType metricType, EnvironmentDto environment) {
+        String name = "empty network";
+        if (environment.getNetwork() != null) {
+            name = environment.getNetwork().getRegistrationType().name();
+        }
         incrementMetricCounter(metricType,
-                EnvironmentMetricTag.NETWORK_REGISTRATION_TYPE.name(), environment.getNetwork().getRegistrationType().name(),
+                EnvironmentMetricTag.NETWORK_REGISTRATION_TYPE.name(), name,
                 MetricTag.TUNNEL_TYPE.name(), environment.getExperimentalFeatures().getTunnel().name(),
                 MetricTag.CLOUD_PROVIDER.name(), environment.getCloudPlatform());
     }
 
     public void incrementMetricCounter(MetricType metricType, EnvironmentDto environment, Exception exception) {
+        String name = "empty network";
+        if (environment.getNetwork() != null) {
+            name = environment.getNetwork().getRegistrationType().name();
+        }
         incrementMetricCounter(metricType,
-                EnvironmentMetricTag.NETWORK_REGISTRATION_TYPE.name(), environment.getNetwork().getRegistrationType().name(),
+                EnvironmentMetricTag.NETWORK_REGISTRATION_TYPE.name(), name,
                 MetricTag.TUNNEL_TYPE.name(), environment.getExperimentalFeatures().getTunnel().name(),
                 MetricTag.EXCEPTION_TYPE.name(), exception.getClass().getName(),
                 MetricTag.CLOUD_PROVIDER.name(), environment.getCloudPlatform());
     }
 
     public void incrementMetricCounter(MetricType metricType, Environment environment, Exception exception) {
+        String name = "empty network";
+        if (environment.getNetwork() != null) {
+            name = environment.getNetwork().getRegistrationType().name();
+        }
         incrementMetricCounter(metricType,
-                EnvironmentMetricTag.NETWORK_REGISTRATION_TYPE.name(), environment.getNetwork().getRegistrationType().name(),
+                EnvironmentMetricTag.NETWORK_REGISTRATION_TYPE.name(), name,
                 MetricTag.TUNNEL_TYPE.name(), environment.getExperimentalFeaturesJson().getTunnel().name(),
                 MetricTag.EXCEPTION_TYPE.name(), exception.getClass().getName(),
                 MetricTag.CLOUD_PROVIDER.name(), environment.getCloudPlatform());

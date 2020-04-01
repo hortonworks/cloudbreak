@@ -398,6 +398,7 @@ class EnvironmentModificationServiceTest {
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateAuthenticationModification(environmentEditDto, environment)).thenReturn(validationResult);
         when(authenticationDtoConverter.dtoToAuthentication(authenticationDto)).thenReturn(newEnvironmentAuthentication);
+        when(environmentResourceService.createAndUpdateSshKey(environment)).thenReturn(true);
 
         environmentModificationServiceUnderTest.editAuthenticationIfChanged(environmentEditDto, environment);
 
@@ -426,6 +427,7 @@ class EnvironmentModificationServiceTest {
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateAuthenticationModification(environmentEditDto, environment)).thenReturn(validationResult);
         when(authenticationDtoConverter.dtoToAuthentication(authenticationDto)).thenReturn(newEnvironmentAuthentication);
+        when(environmentResourceService.createAndUpdateSshKey(environment)).thenReturn(true);
 
         environmentModificationServiceUnderTest.editAuthenticationIfChanged(environmentEditDto, environment);
 
@@ -478,6 +480,33 @@ class EnvironmentModificationServiceTest {
 
         verify(environmentResourceService, times(0)).deletePublicKey(environment, "old-public-key-id");
         verify(environmentResourceService, times(0)).createAndUpdateSshKey(environment);
+    }
+
+    @Test
+    void testEditAuthenticationIfChangedWhenNotCreatedAndRevertToOldOne() {
+        AuthenticationDto authenticationDto = AuthenticationDto.builder()
+                .withPublicKey("ssh-key")
+                .build();
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder().withAuthentication(authenticationDto).build();
+        Environment environment = new Environment();
+        EnvironmentAuthentication originalEnvironmentAuthentication = new EnvironmentAuthentication();
+        originalEnvironmentAuthentication.setPublicKey("original-ssh-key");
+        originalEnvironmentAuthentication.setManagedKey(false);
+        environment.setAuthentication(originalEnvironmentAuthentication);
+
+        EnvironmentAuthentication newEnvironmentAuthentication = new EnvironmentAuthentication();
+        newEnvironmentAuthentication.setPublicKey("new-ssh-key");
+
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(validatorService.validateAuthenticationModification(environmentEditDto, environment)).thenReturn(validationResult);
+        when(authenticationDtoConverter.dtoToAuthentication(authenticationDto)).thenReturn(newEnvironmentAuthentication);
+        when(environmentResourceService.createAndUpdateSshKey(environment)).thenReturn(false);
+
+        environmentModificationServiceUnderTest.editAuthenticationIfChanged(environmentEditDto, environment);
+
+        verify(environmentResourceService, times(1)).createAndUpdateSshKey(environment);
+        verify(environmentResourceService, times(0)).deletePublicKey(environment, "old-public-key-id");
+        assertEquals(environment.getAuthentication().getPublicKey(), "original-ssh-key");
     }
 
     @Configuration
