@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -40,6 +41,7 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
     @ApiModelProperty(InstanceGroupModelDescription.GCP_PARAMETERS)
     private GcpInstanceGroupV4Parameters gcp;
 
+    @Valid
     @ApiModelProperty(InstanceGroupModelDescription.AWS_PARAMETERS)
     private AwsInstanceGroupV4Parameters aws;
 

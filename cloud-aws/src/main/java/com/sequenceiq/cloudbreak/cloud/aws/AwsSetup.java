@@ -141,7 +141,7 @@ public class AwsSetup implements Setup {
             for (Group group : stack.getGroups()) {
                 if (group.getInstances() != null
                         && !group.getInstances().isEmpty()
-                        && new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).getSpotPrice() != null) {
+                        && new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).getSpotPercentage() != null) {
                     throw new CloudConnectorException(String.format("Spot instances are not supported on this AMI: %s", stack.getImage()));
                 }
             }

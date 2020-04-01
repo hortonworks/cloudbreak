@@ -28,8 +28,6 @@ public class AwsGroupView {
 
     private final Map<String, Long> volumeCounts;
 
-    private final Double spotPrice;
-
     private final List<SecurityRule> rules;
 
     private final List<String> cloudSecurityIds;
@@ -46,16 +44,17 @@ public class AwsGroupView {
 
     private final String instanceProfile;
 
+    private final int onDemandPercentage;
+
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Boolean ebsEncrypted, Integer rootVolumeSize,
-            Map<String, Long> volumeCounts, Double spotPrice, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId, Boolean kmsKeyDefined,
-            String kmsKey, String encryptedAMI, boolean useNetworkCidrAsSourceForDefaultRules, String instanceProfile) {
+            Map<String, Long> volumeCounts, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId, Boolean kmsKeyDefined,
+            String kmsKey, String encryptedAMI, boolean useNetworkCidrAsSourceForDefaultRules, String instanceProfile, int onDemandPercentage) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
         this.groupName = groupName;
         this.ebsEncrypted = ebsEncrypted;
         this.rootVolumeSize = rootVolumeSize;
-        this.spotPrice = spotPrice;
         this.rules = rules;
         this.cloudSecurityIds = cloudSecurityIds;
         this.subnetId = subnetId;
@@ -66,11 +65,8 @@ public class AwsGroupView {
         autoScalingGroupName = getAutoScalingGroupName(groupName);
         this.useNetworkCidrAsSourceForDefaultRules = useNetworkCidrAsSourceForDefaultRules;
         this.instanceProfile = instanceProfile;
-        if (instanceProfile != null) {
-            hasInstanceProfile = true;
-        } else {
-            hasInstanceProfile = false;
-        }
+        hasInstanceProfile = instanceProfile != null;
+        this.onDemandPercentage = onDemandPercentage;
     }
 
     public static String getAutoScalingGroupName(String groupName) {
@@ -99,10 +95,6 @@ public class AwsGroupView {
 
     public Long getVolumeCount(String volumeType) {
         return volumeCounts.getOrDefault(volumeType, 0L);
-    }
-
-    public Double getSpotPrice() {
-        return spotPrice;
     }
 
     public Map<String, Long> getVolumeCounts() {
@@ -159,5 +151,9 @@ public class AwsGroupView {
 
     public String getInstanceProfile() {
         return instanceProfile;
+    }
+
+    public int getOnDemandPercentage() {
+        return onDemandPercentage;
     }
 }

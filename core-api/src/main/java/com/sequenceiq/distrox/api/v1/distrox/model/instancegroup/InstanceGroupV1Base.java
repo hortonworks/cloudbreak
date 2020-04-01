@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.api.v1.distrox.model.instancegroup;
 
 import java.io.Serializable;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -33,6 +34,7 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
     @ApiModelProperty(InstanceGroupModelDescription.AZURE_PARAMETERS)
     private AzureInstanceGroupV1Parameters azure;
 
+    @Valid
     @ApiModelProperty(InstanceGroupModelDescription.AWS_PARAMETERS)
     private AwsInstanceGroupV1Parameters aws;
 

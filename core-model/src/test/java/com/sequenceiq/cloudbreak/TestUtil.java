@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -710,17 +709,6 @@ public class TestUtil {
         gateway.setTokenCert("tokencert");
         gateway.setSignPub("signpub");
         return gateway;
-    }
-
-    public static Stack setSpotInstances(Stack stack) {
-        if (stack.cloudPlatform().equals(AWS)) {
-            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                (instanceGroup.getTemplate()).setAttributes(new JsonToString().convertToEntityAttribute(
-                        "{\"sshLocation\":\"0.0.0.0/0\",\"encrypted\":false,\"spotPrice\":0.04}"));
-            }
-        }
-        return stack;
-
     }
 
     public static StorageLocations emptyStorageLocations() {

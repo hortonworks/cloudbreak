@@ -1,12 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.common.api.type.EncryptionType;
 
 public class AwsInstanceView {
+
+    private static final int HUNDRED_PERCENT = 100;
 
     private final InstanceTemplate instanceTemplate;
 
@@ -74,15 +77,11 @@ public class AwsInstanceView {
         return instanceTemplate.getStringParameter("key");
     }
 
-    public Double getSpotPrice() {
-        Object sv = instanceTemplate.getParameter("spotPrice", Object.class);
-        if (sv instanceof Double) {
-            return (Double) sv;
-        } else if (sv instanceof Integer) {
-            return ((Number) sv).doubleValue();
-        } else if (sv instanceof String) {
-            return Double.valueOf((String) sv);
-        }
-        return null;
+    public Integer getSpotPercentage() {
+        return instanceTemplate.getParameter("spotPercentage", Integer.class);
+    }
+
+    public int getOnDemandPercentage() {
+        return HUNDRED_PERCENT - Objects.requireNonNullElse(getSpotPercentage(), 0);
     }
 }

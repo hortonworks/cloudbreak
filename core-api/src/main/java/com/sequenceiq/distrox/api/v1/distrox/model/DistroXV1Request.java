@@ -27,6 +27,7 @@ public class DistroXV1Request extends DistroXV1Base {
 
     private String environmentName;
 
+    @Valid
     private Set<InstanceGroupV1Request> instanceGroups;
 
     private DistroXImageV1Request image;
