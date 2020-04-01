@@ -430,11 +430,16 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    @Override
+    protected void setupTest(TestContext testContext) {
+        super.setupTest(testContext);
+    }
+
     private ClusterTemplateTestDto validateDefaultCount(TestContext tc, ClusterTemplateTestDto entity, CloudbreakClient cc) {
         assertNotNull(entity);
         assertNotNull(entity.getResponses());
         long defaultCount = entity.getResponses().stream().filter(template -> ResourceStatus.DEFAULT.equals(template.getStatus())).count();
-        long expectedCount = 42;
+        long expectedCount = 24;
         assertEquals("Should have " + expectedCount + " of default cluster templates.", expectedCount, defaultCount);
         return entity;
     }
