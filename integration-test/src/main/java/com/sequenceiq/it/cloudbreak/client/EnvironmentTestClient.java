@@ -8,6 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeCrede
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteByNameAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeAuthenticationAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentInternalGetAction;
@@ -57,5 +58,9 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> start() {
         return new EnvironmentStartAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> changeAuthentication() {
+        return new EnvironmentChangeAuthenticationAction();
     }
 }

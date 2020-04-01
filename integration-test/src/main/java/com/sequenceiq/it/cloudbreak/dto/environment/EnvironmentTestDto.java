@@ -22,7 +22,6 @@ import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoin
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -53,12 +52,6 @@ public class EnvironmentTestDto
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
     private static final int ORDER = 600;
-
-    private static final String DUMMY_SSH_KEY = "ssh-rsa "
-            + "AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
-            + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
-            + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
-            + " centos";
 
     @Value("${integrationtest.aws.cloudstorage.s3Guard.dynamoTableName:apitesting}")
     private String dynamoTableName;
@@ -101,7 +94,7 @@ public class EnvironmentTestDto
                 .environment(withName(getResourcePropertyProvider().getEnvironmentName(getCloudPlatform()))
                         .withDescription(getResourcePropertyProvider().getDescription("environment")))
                 .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
-                .withAuthentication(DUMMY_SSH_KEY)
+                .withAuthentication(getTestContext().given(EnvironmentAuthenticationTestDto.class))
                 .withCloudplatform(getCloudPlatform().toString())
                 .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
                 .withCloudStorageValidation(CloudStorageValidation.ENABLED);
@@ -163,10 +156,14 @@ public class EnvironmentTestDto
         return this;
     }
 
-    public EnvironmentTestDto withAuthentication(String sshKey) {
-        EnvironmentAuthenticationRequest authentication = new EnvironmentAuthenticationRequest();
-        authentication.setPublicKey(sshKey);
-        getRequest().setAuthentication(authentication);
+    public EnvironmentTestDto withAuthentication(EnvironmentAuthenticationTestDto authentication) {
+        getRequest().setAuthentication(authentication.getRequest());
+        return this;
+    }
+
+    public EnvironmentTestDto withAuthentication() {
+        EnvironmentAuthenticationTestDto authenticationTestDto = getTestContext().get(EnvironmentAuthenticationTestDto.class);
+        getRequest().setAuthentication(authenticationTestDto.getRequest());
         return this;
     }
 

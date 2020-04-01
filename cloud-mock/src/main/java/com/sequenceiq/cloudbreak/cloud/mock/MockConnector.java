@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.NoSqlConnector;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
+import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
@@ -62,6 +63,9 @@ public class MockConnector implements CloudConnector<Object> {
 
     @Inject
     private MockNoSqlConnector mockNoSqlConnector;
+
+    @Inject
+    private MockPublicKeyConnector mockPublicKeyConnector;
 
     @Override
     public Authenticator authentication() {
@@ -136,5 +140,10 @@ public class MockConnector implements CloudConnector<Object> {
     @Override
     public NoSqlConnector noSql() {
         return mockNoSqlConnector;
+    }
+
+    @Override
+    public PublicKeyConnector publicKey() {
+        return mockPublicKeyConnector;
     }
 }

@@ -91,6 +91,7 @@ public class EnvironmentResourceService {
         boolean created = createPublicKey(environment, publicKeyId);
         if (created) {
             environment.getAuthentication().setPublicKeyId(publicKeyId);
+            LOGGER.debug("The public key id ({}) is updated in {}.", publicKeyId, environment.getName());
         }
         return created;
     }
@@ -105,6 +106,8 @@ public class EnvironmentResourceService {
             return true;
         } catch (UnsupportedOperationException e) {
             LOGGER.info("Cloud platform {} does not support public key services", environment.getCloudPlatform());
+        } catch (Exception e) {
+            LOGGER.info("Public key could not be registered. {}", e.getMessage(), e);
         }
         return false;
     }
@@ -139,10 +142,12 @@ public class EnvironmentResourceService {
 
     public void deletePublicKey(Environment environment, String publicKeyId) {
         try {
+            LOGGER.info("Try to delete the ssh key ({}) for {}", publicKeyId, environment.getName());
             PublicKeyConnector publicKeyConnector = getPublicKeyConnector(environment.getCloudPlatform())
                     .orElseThrow(() -> new BadRequestException("No public key connector for cloud platform: " + environment.getCloudPlatform()));
             PublicKeyUnregisterRequest request = createPublicKeyUnregisterRequest(environment, publicKeyId);
             publicKeyConnector.unregister(request);
+            LOGGER.info("the ssh key ({}) deleted successfully for {}", publicKeyId, environment.getName());
         } catch (UnsupportedOperationException e) {
             LOGGER.info("Cloud platform {} does not support public key services", environment.getCloudPlatform());
         }
