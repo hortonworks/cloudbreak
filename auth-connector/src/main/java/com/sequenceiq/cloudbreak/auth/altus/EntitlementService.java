@@ -16,10 +16,6 @@ public class EntitlementService {
     @Inject
     private GrpcUmsClient umsClient;
 
-    public boolean ccmEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, "CDP_REVERSE_SSH_TUNNEL");
-    }
-
     public boolean azureEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, "CDP_AZURE");
     }

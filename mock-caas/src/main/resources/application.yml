@@ -10,7 +10,6 @@ auth:
       fluent:
         file: databus_credentials
   mock:
-    ccm.enable: false
     baseimage.enable: true
     event-generation:
       expiration-minutes: 10
