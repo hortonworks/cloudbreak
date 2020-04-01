@@ -37,7 +37,9 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.powermock.reflect.Whitebox;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -58,6 +60,7 @@ import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -65,8 +68,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintServiceTest {
-
-    private static final String INVALID_DTO_MESSAGE = "One and only one value of the crn and name should be filled!";
 
     private static final List<String> INVALID_HOST_GROUP_NAME_LIST = List.of("master", "worker", "master");
 
@@ -110,6 +111,9 @@ public class BlueprintServiceTest {
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
 
+    @Spy
+    private BlueprintListFilters blueprintListFilters;
+
     @InjectMocks
     private BlueprintService underTest;
 
@@ -118,6 +122,7 @@ public class BlueprintServiceTest {
     @Before
     public void setup() {
         blueprint = getBlueprint("name", USER_MANAGED);
+        Whitebox.setInternalState(blueprintListFilters, "supportedRuntimes", new SupportedRuntimes());
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
         when(workspaceService.get(1L, user)).thenReturn(getWorkspace());

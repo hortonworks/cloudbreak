@@ -65,10 +65,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintService.class);
 
-    private static final String SHARED_SERVICES_READY = "shared_services_ready";
-
-    private static final String INVALID_DTO_MESSAGE = "One and only one value of the crn and name should be filled!";
-
     private static final String MULTI_HOSTNAME_EXCEPTION_MESSAGE_FORMAT = "Host %s names must be unique! The following host %s names are invalid due to " +
             "their multiple occurrence: %s";
 
@@ -98,6 +94,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private CloudResourceAdvisor cloudResourceAdvisor;
+
+    @Inject
+    private BlueprintListFilters blueprintListFilters;
 
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Cluster definition", id));
@@ -162,7 +161,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public PlatformRecommendation getRecommendation(Long workspaceId, String blueprintName, String credentialName,
-        String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
+            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         if (!ObjectUtils.allNotNull(region)) {
             throw new BadRequestException("region cannot be null");
         }
@@ -186,18 +185,13 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         updateDefaultBlueprintCollection(workspace);
         Set<BlueprintView> allByNotDeletedInWorkspace = blueprintViewRepository.findAllByNotDeletedInWorkspace(workspaceId);
+        allByNotDeletedInWorkspace = allByNotDeletedInWorkspace.stream()
+                .filter(b -> blueprintListFilters.isDistroXDisplayed(b)).collect(Collectors.toSet());
         if (withSdx) {
             return allByNotDeletedInWorkspace;
         }
-        return allByNotDeletedInWorkspace.stream().filter(it -> !isSdxReady(it)).collect(Collectors.toSet());
-    }
-
-    private boolean isSdxReady(BlueprintView blueprintView) {
-        if (blueprintView.getTags() == null || blueprintView.getTags().getValue() == null) {
-            return false;
-        }
-        Boolean sdxReady = blueprintView.getTags().getValue(SHARED_SERVICES_READY);
-        return sdxReady == null ? false : sdxReady;
+        return allByNotDeletedInWorkspace.stream()
+                .filter(it -> !blueprintListFilters.isDatalakeBlueprint(it)).collect(Collectors.toSet());
     }
 
     public Set<Blueprint> getAllAvailableInWorkspace(Workspace workspace) {
@@ -244,7 +238,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public boolean isDatalakeBlueprint(Blueprint blueprint) {
-        return Optional.ofNullable((Boolean) blueprint.getTags().getMap().get(SHARED_SERVICES_READY)).orElse(false);
+        return blueprintListFilters.isDatalakeBlueprint(blueprint);
     }
 
     private Iterable<Blueprint> saveDefaultsWithReadRight(Iterable<Blueprint> blueprints, Workspace workspace) {

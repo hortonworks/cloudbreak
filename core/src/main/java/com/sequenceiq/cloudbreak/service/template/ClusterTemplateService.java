@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
+import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackTemplateService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -109,6 +110,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private SupportedRuntimes supportedRuntimes;
 
     @Inject
     private ClusterTemplateCloudPlatformValidator cloudPlatformValidator;
@@ -227,7 +231,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     }
 
     private boolean isDefaultTemplate(ClusterTemplateViewV4Response response) {
-        return ResourceStatus.DEFAULT == response.getStatus();
+        return ResourceStatus.DEFAULT == response.getStatus() && supportedRuntimes.isSupported(response.getStackVersion());
     }
 
     @VisibleForTesting

@@ -29,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/v4/{workspaceId}/cluster_templates")
-@Api(value = "/v4/{workspaceId}/clustertemplates", description = ControllerDescription.CLUSTER_TEMPLATE_V4_DESCRIPTION, protocols = "http,https",
+@Api(value = "/v4/{workspaceId}/cluster_templates", description = ControllerDescription.CLUSTER_TEMPLATE_V4_DESCRIPTION, protocols = "http,https",
         consumes = MediaType.APPLICATION_JSON)
 public interface ClusterTemplateV4Endpoint {
     @POST
