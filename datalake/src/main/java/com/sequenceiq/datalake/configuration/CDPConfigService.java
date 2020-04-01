@@ -40,15 +40,15 @@ public class CDPConfigService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPConfigService.class);
 
     // Defines what is the default runtime version (UI / API)
-    @Value("${sdx.default.runtime:7.1.0}")
+    @Value("${datalake.runtimes.default}")
     private String defaultRuntime;
 
     // Defines what versions shall be advertised for the UI, if it is empty then it shall be the same as supported versions
-    @Value("${datalake.advertised.runtimes:}")
+    @Value("${datalake.runtimes.advertised}")
     private Set<String> advertisedRuntimes;
 
     // Defines what versions are actually supported
-    @Value("${datalake.supported.runtimes:7.1.0}")
+    @Value("${datalake.runtimes.supported}")
     private Set<String> supportedRuntimes;
 
     private Map<CDPConfigKey, String> cdpStackRequests = new HashMap<>();

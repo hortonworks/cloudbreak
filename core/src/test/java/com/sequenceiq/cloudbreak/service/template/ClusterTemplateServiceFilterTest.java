@@ -17,6 +17,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplateView;
+import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,6 +62,9 @@ class ClusterTemplateServiceFilterTest {
 
     @Mock
     private ClusterTemplateCloudPlatformValidator cloudPlatformValidator;
+
+    @Spy
+    private SupportedRuntimes supportedRuntimes;
 
     @InjectMocks
     private ClusterTemplateService underTest;
