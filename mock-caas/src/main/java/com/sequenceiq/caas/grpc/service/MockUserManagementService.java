@@ -162,8 +162,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String ALL_RIGHTS_AND_RESOURCES = "*";
 
-    private static final String REVERSE_SSH_TUNNEL = "CDP_REVERSE_SSH_TUNNEL";
-
     private static final String CDP_AZURE = "CDP_AZURE";
 
     private static final String CDP_AUTOMATIC_USERSYNC_POLLER = "CDP_AUTOMATIC_USERSYNC_POLLER";
@@ -206,9 +204,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.databus.credential.fluent.profile:default}")
     private String databusFluentCredentialProfile;
-
-    @Value("${auth.mock.ccm.enable}")
-    private boolean enableCcm;
 
     @Value("${auth.mock.baseimage.enable}")
     private boolean enableBaseImages;
@@ -454,9 +449,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void getAccount(GetAccountRequest request, StreamObserver<GetAccountResponse> responseObserver) {
         Account.Builder builder = Account.newBuilder();
-        if (enableCcm) {
-            builder.addEntitlements(createEntitlement(REVERSE_SSH_TUNNEL));
-        }
         if (enableBaseImages) {
             builder.addEntitlements(createEntitlement(CDP_BASE_IMAGE));
         }

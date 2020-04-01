@@ -12,7 +12,6 @@ import javax.ws.rs.BadRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -22,7 +21,6 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -40,9 +38,6 @@ import com.sequenceiq.environment.parameters.service.ParametersService;
 public class EnvironmentCreationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCreationService.class);
-
-    @Value("${environment.tunnel.ccm.validate.entitlement:}")
-    private boolean validateCcmEntitlement;
 
     private final EnvironmentService environmentService;
 
@@ -173,9 +168,6 @@ public class EnvironmentCreationService {
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
 
-        validationBuilder.ifError(() -> isTunnelInvalid(creationDto.getCreator(), creationDto.getExperimentalFeatures().getTunnel()),
-                "Reverse SSH tunnel is not enabled for this account.");
-
         validationBuilder.ifError(() -> isCloudPlatformInvalid(creationDto.getCreator(), creationDto.getCloudPlatform()),
                 "Provisioning in Microsoft Azure is not enabled for this account.");
 
@@ -183,10 +175,6 @@ public class EnvironmentCreationService {
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
-    }
-
-    private boolean isTunnelInvalid(String userCrn, Tunnel tunnel) {
-        return validateCcmEntitlement && !entitlementService.ccmEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId()) && Tunnel.CCM == tunnel;
     }
 
     private boolean isCloudPlatformInvalid(String userCrn, String cloudPlatform) {

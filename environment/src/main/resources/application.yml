@@ -91,7 +91,6 @@ environment:
   enabledChildPlatforms: YARN, MOCK
   tunnel:
     default: DIRECT
-    ccm.validate.entitlement: false
   admin.group.default.prefix: cdp_
 
 cb:
