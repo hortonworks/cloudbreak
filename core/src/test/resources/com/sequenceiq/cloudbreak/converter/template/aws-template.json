@@ -7,7 +7,7 @@
     "instanceType":"m3.large",
     "volumeType":"standard",
     "encrypted":true,
-    "spotPrice":0.1
+    "spotPercentage":100
   },
   "name":"aws-template",
   "public":true,

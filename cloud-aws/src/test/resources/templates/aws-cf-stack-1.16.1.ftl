@@ -343,9 +343,6 @@
         </#if>
         "InstanceType"   : "${group.flavor}",
         "KeyName"        : { "Ref" : "KeyName" },
-        <#if group.spotPrice??>
-        "SpotPrice"      : "${group.spotPrice}",
-        </#if>
         <#if group.type == "CORE">
         "UserData"       : { "Fn::Base64" : { "Ref" : "CBUserData"}}
         </#if>

@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
+
 import java.util.Map;
+
+import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,11 +23,20 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4ParameterBase {
 
-    @ApiModelProperty(TemplateModelDescription.AWS_SPOT_PRICE)
-    private Double spotPrice;
+    @Valid
+    @ApiModelProperty(TemplateModelDescription.AWS_SPOT_PARAMETERS)
+    private AwsInstanceTemplateV4SpotParameters spot;
 
     @ApiModelProperty(TemplateModelDescription.ENCRYPTION)
     private AwsEncryptionV4Parameters encryption;
+
+    public AwsInstanceTemplateV4SpotParameters getSpot() {
+        return spot;
+    }
+
+    public void setSpot(AwsInstanceTemplateV4SpotParameters spot) {
+        this.spot = spot;
+    }
 
     public AwsEncryptionV4Parameters getEncryption() {
         return encryption;
@@ -33,18 +46,10 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
         this.encryption = encryption;
     }
 
-    public Double getSpotPrice() {
-        return spotPrice;
-    }
-
-    public void setSpotPrice(Double spotPrice) {
-        this.spotPrice = spotPrice;
-    }
-
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map, "spotPrice", spotPrice);
+        doIfNotNull(spot, sp -> putIfValueNotNull(map, "spotPercentage", sp.getPercentage()));
         if (encryption != null) {
             putIfValueNotNull(map, "type", encryption.getType());
             putIfValueNotNull(map, "encrypted", encryption.getType() != EncryptionType.NONE);
@@ -70,15 +75,16 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
 
     @Override
     public void parse(Map<String, Object> parameters) {
-        String spotPrice = getParameterOrNull(parameters, "spotPrice");
-        if (spotPrice != null) {
-            this.spotPrice = Double.parseDouble(spotPrice);
-        }
-        AwsEncryptionV4Parameters encription = new AwsEncryptionV4Parameters();
-        encription.setKey(getParameterOrNull(parameters, "key"));
+        Integer spotPercentage = getInt(parameters, "spotPercentage");
+        doIfNotNull(spotPercentage, sp -> {
+            spot = new AwsInstanceTemplateV4SpotParameters();
+            spot.setPercentage(sp);
+        });
+        AwsEncryptionV4Parameters encryption = new AwsEncryptionV4Parameters();
+        encryption.setKey(getParameterOrNull(parameters, "key"));
         String type = getParameterOrNull(parameters, "type");
         if (type != null) {
-            encription.setType(EncryptionType.valueOf(type));
+            encryption.setType(EncryptionType.valueOf(type));
         }
     }
 }

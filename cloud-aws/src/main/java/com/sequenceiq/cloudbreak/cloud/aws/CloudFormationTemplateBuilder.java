@@ -54,7 +54,6 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.isEncryptedVolumes(),
                     group.getRootVolumeSize(),
                     awsInstanceView.getVolumes().stream().collect(Collectors.groupingBy(Volume::getType, Collectors.counting())),
-                    awsInstanceView.getSpotPrice(),
                     group.getSecurity().getRules(),
                     group.getSecurity().getCloudSecurityIds(),
                     getSubnetIds(context.existingSubnetIds, subnetCounter, group, multigw),
@@ -62,7 +61,8 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getKmsKey(),
                     encryptedAMI,
                     group.getSecurity().isUseNetworkCidrAsSourceForDefaultRules(),
-                    getInstanceProfile(group));
+                    getInstanceProfile(group),
+                    awsInstanceView.getOnDemandPercentage());
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);

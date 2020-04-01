@@ -13,6 +13,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AzureInstanceGr
 
 @Component
 public class InstanceGroupParameterConverter {
+
     public AwsInstanceGroupV4Parameters convert(AwsInstanceGroupV1Parameters source) {
         return new AwsInstanceGroupV4Parameters();
     }

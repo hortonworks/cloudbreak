@@ -2,6 +2,8 @@ package com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template;
 
 import java.io.Serializable;
 
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -16,6 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class InstanceTemplateV1Base implements Serializable, CloudPlatformProvider {
 
+    @Valid
     @ApiModelProperty(TemplateModelDescription.AWS_PARAMETERS)
     private AwsInstanceTemplateV1Parameters aws;
 

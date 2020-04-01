@@ -299,7 +299,7 @@
           },
           "InstancesDistribution": {
             "OnDemandBaseCapacity": 0,
-            "OnDemandPercentageAboveBaseCapacity": 100,
+            "OnDemandPercentageAboveBaseCapacity": ${group.onDemandPercentage},
             "SpotAllocationStrategy": "capacity-optimized"
           }
         },
@@ -359,9 +359,6 @@
           </#if>
           "InstanceType"   : "${group.flavor}",
           "KeyName"        : { "Ref" : "KeyName" },
-          <#if group.spotPrice??>
-          "SpotPrice"      : "${group.spotPrice}",
-          </#if>
           <#if group.type == "CORE">
           "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [ { "Ref" : "CBUserData"},
                                                                     { "Ref" : "CBUserData1"},

@@ -3,6 +3,7 @@ package com.sequenceiq.distrox.api.v1.distrox.model.instancegroup;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,6 +21,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class InstanceGroupV1Request extends InstanceGroupV1Base {
 
+    @Valid
     @NotNull
     @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateV1Request template;

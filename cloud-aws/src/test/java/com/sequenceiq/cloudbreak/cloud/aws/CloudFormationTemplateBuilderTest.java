@@ -9,12 +9,9 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,23 +20,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -70,10 +64,8 @@ import com.sequenceiq.common.model.CloudIdentityType;
 
 import freemarker.template.Configuration;
 
-@RunWith(Parameterized.class)
+@RunWith(MockitoJUnitRunner.class)
 public class CloudFormationTemplateBuilderTest {
-
-    private static final String V16 = "1.16";
 
     private static final String USER_ID = "horton@hortonworks.com";
 
@@ -104,8 +96,6 @@ public class CloudFormationTemplateBuilderTest {
 
     private String existingSubnetCidr;
 
-    private final String templatePath;
-
     private final Map<String, String> defaultTags = new HashMap<>();
 
     private Image image;
@@ -114,25 +104,8 @@ public class CloudFormationTemplateBuilderTest {
 
     private CloudInstance instance;
 
-    public CloudFormationTemplateBuilderTest(String templatePath) {
-        this.templatePath = templatePath;
-    }
-
-    @Parameters(name = "{0}")
-    public static Iterable<?> getTemplatesPath() {
-        List<String> templates = Lists.newArrayList(LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH);
-        File[] templateFiles = new File(CloudFormationTemplateBuilderTest.class.getClassLoader().getResource("templates").getPath()).listFiles();
-        List<String> olderTemplates = Arrays.stream(templateFiles).map(file -> {
-            String[] path = file.getPath().split("/");
-            return "templates/" + path[path.length - 1];
-        }).collect(Collectors.toList());
-        templates.addAll(olderTemplates);
-        return templates;
-    }
-
     @Before
     public void setUp() throws Exception {
-        initMocks(this);
         FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
         factoryBean.setPreferFileSystemAccess(false);
         factoryBean.setTemplateLoaderPath("classpath:/");
@@ -142,7 +115,7 @@ public class CloudFormationTemplateBuilderTest {
 
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
 
-        awsCloudFormationTemplate = configuration.getTemplate(templatePath, "UTF-8").toString();
+        awsCloudFormationTemplate = configuration.getTemplate(LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH, "UTF-8").toString();
         authenticatedContext = authenticatedContext();
         existingSubnetCidr = "testSubnet";
 
@@ -388,7 +361,6 @@ public class CloudFormationTemplateBuilderTest {
 
     @Test
     public void buildTestWithVPCAndIGWAndVpcSubnets() {
-        assumeFalse(templatePath.contains("1.16"));
         String vpcSubnet = "10.0.0.0/24";
         List<String> vpcSubnets = List.of(vpcSubnet);
         Security security = new Security(getDefaultSecurityRules(), List.of(), true);
@@ -752,10 +724,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        // older templates are invalids
-        if ("templates/aws-cf-stack.ftl".equals(templatePath)) {
-            Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
-        }
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, containsString("\"single-sg-id\""));
     }
@@ -783,10 +752,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        // older templates are invalids
-        if ("templates/aws-cf-stack.ftl".equals(templatePath)) {
-            Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
-        }
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, containsString("\"single-sg-id\""));
     }
@@ -812,23 +778,19 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        // older templates are invalids
-        if ("templates/aws-cf-stack.ftl".equals(templatePath)) {
-            Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
-            // we don't support the multiple security groups in older templates
-            assertThat(templateString, containsString("\"multi-sg-id1\",\"multi-sg-id2\""));
-        }
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertThat(templateString, containsString("\"multi-sg-id1\",\"multi-sg-id2\""));
         assertThat(templateString, containsString("VPCId"));
     }
 
     @Test
-    public void buildTestInstanceGroupsWithSpotInstances() throws IOException {
+    public void buildTestInstanceGroupsWithSpotInstances() {
         //GIVEN
         List<Group> groups = new ArrayList<>();
         Security security = getDefaultCloudStackSecurity();
         groups.add(createDefaultGroup("master", InstanceGroupType.CORE, ROOT_VOLUME_SIZE, security, Optional.empty()));
         InstanceTemplate spotInstanceTemplate = createDefaultInstanceTemplate();
-        spotInstanceTemplate.putParameter("spotPrice", "0.1");
+        spotInstanceTemplate.putParameter("spotPercentage", 60);
         CloudInstance spotInstance = new CloudInstance("SOME_ID", spotInstanceTemplate, instanceAuthentication);
         groups.add(new Group("compute", InstanceGroupType.CORE, singletonList(spotInstance), security, spotInstance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE, Optional.empty()));
@@ -850,7 +812,7 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
-        assertThat(templateString, stringContainsInOrder("SpotPrice", "0.1"));
+        assertThat(templateString, stringContainsInOrder("OnDemandPercentageAboveBaseCapacity", "40"));
     }
 
     private CloudStack initCloudStackWithInstanceProfile() {
