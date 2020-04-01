@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -246,9 +247,14 @@ public class InstanceMetadataUpdater {
 
     private Map<String, Map<String, String>> mapHostPkgNameVersionToHostNameVersionMap(Map<String, String> pkgNames,
             Map<String, Map<String, String>> packageVersionsByPkgNameByHost) {
+
+        Map<String, ArrayList<String>> packageNamesByType = packageNamesByType(pkgNames);
+        ArrayList<String> stackTypedPackages = packageNamesByType.get("stack");
+
         // Map<host, Map<name, version>
         Map<String, Map<String, String>> packageVersionsByNameByHost = new HashMap<>();
         for (Entry<String, Map<String, String>> entry : packageVersionsByPkgNameByHost.entrySet()) {
+            removeDuplicateStack(stackTypedPackages, entry);
             Map<String, String> versionByName =
                     entry.getValue().entrySet().stream()
                             .filter(e -> StringUtils.isNotBlank(e.getValue()) && !StringUtils.equalsAny(e.getValue(), "false", "null", null))
@@ -258,15 +264,50 @@ public class InstanceMetadataUpdater {
         return packageVersionsByNameByHost;
     }
 
+    private void removeDuplicateStack(ArrayList<String> stackTypedPackages, Entry<String, Map<String, String>> entry) {
+        if (!CollectionUtils.isEmpty(stackTypedPackages)) {
+            int found = 0;
+            Set<String> keySet = entry.getValue().keySet();
+            for (String stackTypedPackage : stackTypedPackages) {
+
+                if (keySet.contains(stackTypedPackage)) {
+                    found++;
+                    if (found > 1) {
+                        LOGGER.warn("There are multiple stacks ({}) installed to node {}, removing {} before proceeding.",
+                                entry.getValue(), entry.getKey(), stackTypedPackage);
+                        entry.getValue().remove(stackTypedPackage);
+                    }
+                }
+            }
+        }
+    }
+
+    // returns list of components by keys like 'stack' or 'ambari'
+    private Map<String, ArrayList<String>> packageNamesByType(Map<String, String> pkgNames) {
+        return new HashMap<>(
+                pkgNames.entrySet().stream()
+                        .collect(Collectors.groupingBy(Entry::getValue)).values().stream()
+                        .collect(Collectors.toMap(
+                                item -> item.get(0).getValue(),
+                                item -> new ArrayList<>(
+                                        item.stream()
+                                                .map(Entry::getKey)
+                                                .collect(Collectors.toList())
+                                ))
+                        ));
+    }
+
     private Map<String, String> mapPackageToPkgNameAndNameMap() {
         /*
          * From Package { List<String> pkgName; String name; }
          * To Map<pkgName, name>
+         * preserving the original ordering to enable precedence on Stack components
          */
         return packages.stream().filter(pkg -> pkg.getPkgName() != null && !pkg.getPkgName().isEmpty())
                 .flatMap(pkg -> pkg.getPkgName().stream()
                         .map(pkgName -> new SimpleEntry<>(pkgName, pkg.getName())))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (u, v) -> u,
+                        LinkedHashMap::new));
     }
 
     public List<String> collectPackagesWithMultipleVersions(Collection<InstanceMetaData> instanceMetadataList) {
