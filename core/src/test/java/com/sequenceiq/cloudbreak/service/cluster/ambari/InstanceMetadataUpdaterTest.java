@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -179,6 +180,35 @@ public class InstanceMetadataUpdaterTest {
                 .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGES_ON_INSTANCES_ARE_DIFFERENT.code()), anyCollection());
         verify(cloudbreakMessagesService, times(1))
                 .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGE_VERSIONS_ARE_CHANGED.code()), anyCollection());
+    }
+
+    @Test
+    public void testMultipleStackComponents() throws Exception {
+        InstanceMetadataUpdater.Package package1 = new InstanceMetadataUpdater.Package();
+        package1.setName("stack");
+        package1.setPkgName(Lists.newArrayList("stack1"));
+        InstanceMetadataUpdater.Package package2 = new InstanceMetadataUpdater.Package();
+        package2.setName("stack");
+        package2.setPkgName(Lists.newArrayList("stack2"));
+        InstanceMetadataUpdater.Package package3 = new InstanceMetadataUpdater.Package();
+        package3.setName("stack");
+        package3.setPkgName(Lists.newArrayList("stack3"));
+
+        Map<String, String> packageMap = Maps.newHashMap();
+        packageMap.put("stack1", "1");
+        packageMap.put("stack2", "2");
+        packageMap.put("stack3", "3");
+
+        Map<String, Map<String, String>> hostPackageMap = Maps.newHashMap();
+        hostPackageMap.put("instanceId", packageMap);
+        when(hostOrchestrator.getPackageVersionsFromAllHosts(any(GatewayConfig.class), any())).thenReturn(hostPackageMap);
+
+        underTest.setPackages(Lists.newArrayList(package1, package2, package3));
+        underTest.updatePackageVersionsOnAllInstances(createStack());
+        ArgumentCaptor<InstanceMetaData> captor = ArgumentCaptor.forClass(InstanceMetaData.class);
+        verify(instanceMetaDataRepository, times(2)).save(captor.capture());
+        Image actualImage = captor.getValue().getImage().get(Image.class);
+        assertEquals("1", actualImage.getPackageVersions().get("stack"));
     }
 
     private Map<String, String> packageMap() {
