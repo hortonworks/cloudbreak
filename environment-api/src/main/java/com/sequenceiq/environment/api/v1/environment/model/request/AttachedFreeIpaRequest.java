@@ -1,8 +1,10 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AttachedFreeIpaRequestAwsParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,6 +18,10 @@ public class AttachedFreeIpaRequest {
 
     @ApiModelProperty(value = EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP)
     private Integer instanceCountByGroup;
+
+    @Valid
+    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_PARAMETERS)
+    private AttachedFreeIpaRequestAwsParameters aws;
 
     public Boolean getCreate() {
         return create;
@@ -33,4 +39,11 @@ public class AttachedFreeIpaRequest {
         this.instanceCountByGroup = instanceCountByGroup;
     }
 
+    public AttachedFreeIpaRequestAwsParameters getAws() {
+        return aws;
+    }
+
+    public void setAws(AttachedFreeIpaRequestAwsParameters aws) {
+        this.aws = aws;
+    }
 }

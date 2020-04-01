@@ -11,6 +11,9 @@ public class FreeIpaResponse {
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP)
     private Integer instanceCountByGroup = 1;
 
+    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_SPOT_PERCENTAGE)
+    private Integer spotPercentage;
+
     public Integer getInstanceCountByGroup() {
         return instanceCountByGroup;
     }
@@ -19,4 +22,11 @@ public class FreeIpaResponse {
         this.instanceCountByGroup = instanceCountByGroup;
     }
 
+    public Integer getSpotPercentage() {
+        return spotPercentage;
+    }
+
+    public void setSpotPercentage(Integer spotPercentage) {
+        this.spotPercentage = spotPercentage;
+    }
 }

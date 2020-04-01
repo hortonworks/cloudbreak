@@ -14,6 +14,7 @@ public class FreeIpaConverter {
         } else {
             FreeIpaResponse response = new FreeIpaResponse();
             response.setInstanceCountByGroup(freeIpaCreation.getInstanceCountByGroup());
+            response.setSpotPercentage(freeIpaCreation.getSpotPercentage());
             return response;
         }
     }

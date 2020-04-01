@@ -118,6 +118,7 @@ public class EnvironmentDtoConverter {
         environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
         environment.setCreateFreeIpa(creationDto.getFreeIpaCreation().getCreate());
         environment.setFreeIpaInstanceCountByGroup(creationDto.getFreeIpaCreation().getInstanceCountByGroup());
+        environment.setFreeIpaSpotPercentage(creationDto.getFreeIpaCreation().getSpotPercentage());
         environment.setAdminGroupName(creationDto.getAdminGroupName());
         environment.setCreated(System.currentTimeMillis());
         environment.setTags(getTags(creationDto));
@@ -176,8 +177,9 @@ public class EnvironmentDtoConverter {
 
     private FreeIpaCreationDto environmentToFreeIpaCreationDto(Environment environment) {
         FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder()
-                .withCreate(environment.isCreateFreeIpa());
-        doIfNotNull(environment.getFreeIpaInstanceCountByGroup(), freeIpaInstanceCountByGroup -> builder.withInstanceCountByGroup(freeIpaInstanceCountByGroup));
+                .withCreate(environment.isCreateFreeIpa())
+                .withSpotPercentage(environment.getFreeIpaSpotPercentage());
+        Optional.ofNullable(environment.getFreeIpaInstanceCountByGroup()).ifPresent(builder::withInstanceCountByGroup);
         return builder.build();
     }
 }

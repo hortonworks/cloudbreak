@@ -6,6 +6,8 @@ public class FreeIpaCreationDto {
 
     private int instanceCountByGroup = 1;
 
+    private Integer spotPercentage;
+
     private FreeIpaCreationDto() {
     }
 
@@ -25,11 +27,20 @@ public class FreeIpaCreationDto {
         return instanceCountByGroup;
     }
 
+    public Integer getSpotPercentage() {
+        return spotPercentage;
+    }
+
+    public void setSpotPercentage(Integer spotPercentage) {
+        this.spotPercentage = spotPercentage;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaCreationDto{" +
             "create='" + create + '\'' +
             "instanceCountByGroup='" + instanceCountByGroup + '\'' +
+            "spotPercentage='" + spotPercentage + '\'' +
             '}';
     }
 
@@ -42,6 +53,8 @@ public class FreeIpaCreationDto {
         private boolean create = true;
 
         private int instanceCountByGroup = 1;
+
+        private Integer spotPercentage;
 
         private Builder() {
         }
@@ -56,10 +69,16 @@ public class FreeIpaCreationDto {
             return this;
         }
 
+        public Builder withSpotPercentage(Integer spotPercentage) {
+            this.spotPercentage = spotPercentage;
+            return this;
+        }
+
         public FreeIpaCreationDto build() {
             FreeIpaCreationDto response = new FreeIpaCreationDto();
             response.create = create;
             response.instanceCountByGroup = instanceCountByGroup;
+            response.spotPercentage = spotPercentage;
             return response;
         }
     }

@@ -72,6 +72,10 @@ public class EnvironmentModelDescription {
     public static final String PARENT_ENVIRONMENT_NAME = "Parent environment name";
     public static final String PARENT_ENVIRONMENT_CLOUD_PLATFORM = "Parent environment cloud platform";
 
+    public static final String FREEIPA_AWS_PARAMETERS = "Aws specific FreeIpa parameters";
+    public static final String FREEIPA_AWS_SPOT_PARAMETERS = "Aws spot instance related parameters.";
+    public static final String FREEIPA_AWS_SPOT_PERCENTAGE = "Percentage of spot instances launched in FreeIpa instance group";
+
     private EnvironmentModelDescription() {
     }
 }

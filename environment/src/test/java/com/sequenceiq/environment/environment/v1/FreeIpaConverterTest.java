@@ -39,13 +39,15 @@ public class FreeIpaConverterTest {
         assertNotNull(result);
         assertNotNull(result.getInstanceCountByGroup());
         assertEquals(1, result.getInstanceCountByGroup());
+        assertNull(result.getSpotPercentage());
     }
 
     @Test
-    public void testConvertWithTwoInstances() {
+    public void testConvertWithTwoInstancesAndOnlySpotInstances() {
         // GIVEN
         FreeIpaCreationDto request = FreeIpaCreationDto.builder()
                 .withInstanceCountByGroup(2)
+                .withSpotPercentage(100)
                 .build();
         // WHEN
         FreeIpaResponse result = underTest.convert(request);
@@ -53,6 +55,7 @@ public class FreeIpaConverterTest {
         assertNotNull(result);
         assertNotNull(result.getInstanceCountByGroup());
         assertEquals(2, result.getInstanceCountByGroup());
+        assertEquals(100, result.getSpotPercentage());
     }
 
 }

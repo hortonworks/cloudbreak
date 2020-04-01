@@ -36,6 +36,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNe
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AttachedFreeIpaRequestAwsParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AttachedFreeIpaRequestAwsSpotParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -190,7 +192,12 @@ public class EnvironmentApiConverter {
         FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder();
         if (request != null) {
             builder.withCreate(request.getCreate());
-            NullUtil.doIfNotNull(request.getInstanceCountByGroup(), instanceCountByGroup -> builder.withInstanceCountByGroup(instanceCountByGroup));
+            Optional.ofNullable(request.getInstanceCountByGroup())
+                    .ifPresent(builder::withInstanceCountByGroup);
+            Optional.ofNullable(request.getAws())
+                    .map(AttachedFreeIpaRequestAwsParameters::getSpot)
+                    .map(AttachedFreeIpaRequestAwsSpotParameters::getPercentage)
+                    .ifPresent(builder::withSpotPercentage);
         }
         return builder.build();
     }
@@ -300,6 +307,7 @@ public class EnvironmentApiConverter {
                 .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withCreateFreeIpa(environmentDto.getFreeIpaCreation().getCreate())
+                .withFreeIpa(freeIpaConverter.convert(environmentDto.getFreeIpaCreation()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withCreator(environmentDto.getCreator())
                 .withAuthentication(authenticationDtoToResponse(environmentDto.getAuthentication()))
