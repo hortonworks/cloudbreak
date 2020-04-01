@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -77,10 +76,9 @@ public class ClusterUpgradeAvailabilityService {
     public UpgradeOptionsV4Response checkForNotAttachedClusters(StackViewV4Responses stackViewV4Responses, UpgradeOptionsV4Response upgradeOptions) {
 
         String notStoppedAttachedClusters = stackViewV4Responses.getResponses().stream()
-                .filter(stackViewV4Response ->
-                                !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getStatus())
-                                        || (stackViewV4Response.getCluster() != null
-                                        && !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getCluster().getStatus())))
+                .filter(stackViewV4Response -> !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getStatus())
+                        || (stackViewV4Response.getCluster() != null
+                                && !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getCluster().getStatus())))
                 .map(StackViewV4Response::getName).collect(Collectors.joining(","));
         if (!notStoppedAttachedClusters.isEmpty()) {
             upgradeOptions.setReason(String.format("There are attached Data Hub clusters in incorrect state: %s. "
@@ -96,8 +94,8 @@ public class ClusterUpgradeAvailabilityService {
             com.sequenceiq.cloudbreak.cloud.model.Image currentImage = getImage(stack);
             CloudbreakImageCatalogV2 imageCatalog = getImagesFromCatalog(currentImage.getImageCatalogUrl());
             Image image = getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
-            Images filteredImages = filterImages(imageCatalog, image, stack.cloudPlatform());
-            LOGGER.info(String.format("%d possible image found for stack upgrade.", filteredImages.getCdhImages().size()));
+            ImageFilterResult filteredImages = filterImages(imageCatalog, image, stack.cloudPlatform());
+            LOGGER.info(String.format("%d possible image found for stack upgrade.", filteredImages.getAvailableImages().getCdhImages().size()));
             upgradeOptions = createResponse(image, filteredImages, stack.getCloudPlatform(), stack.getRegion(), currentImage.getImageCatalogName());
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException | NotFoundException e) {
             LOGGER.warn("Failed to get images", e);
@@ -118,7 +116,7 @@ public class ClusterUpgradeAvailabilityService {
         return imageCatalogProvider.getImageCatalogV2(imageCatalogUrl);
     }
 
-    private Images filterImages(CloudbreakImageCatalogV2 imageCatalog, Image currentImage, String cloudPlatform) {
+    private ImageFilterResult filterImages(CloudbreakImageCatalogV2 imageCatalog, Image currentImage, String cloudPlatform) {
         return clusterUpgradeImageFilter.filter(getCdhImages(imageCatalog), imageCatalog.getVersions(), currentImage, cloudPlatform);
     }
 
@@ -126,7 +124,8 @@ public class ClusterUpgradeAvailabilityService {
         return imageCatalog.getImages().getCdhImages();
     }
 
-    private UpgradeOptionsV4Response createResponse(Image currentImage, Images filteredImages, String cloudPlatform, String region, String imageCatalogName) {
+    private UpgradeOptionsV4Response createResponse(Image currentImage, ImageFilterResult filteredImages, String cloudPlatform, String region,
+            String imageCatalogName) {
         return upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, cloudPlatform, region, imageCatalogName);
     }
 }

@@ -167,10 +167,10 @@ public class ClusterRepairService {
                 Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult;
                 if (hasPendingFlow(stackId)) {
                     repairStartResult = Result.error(RepairValidation
-                            .of("Repair cannot be performed because there is an active flow running."));
+                            .of("Action cannot be performed because there is an active flow running."));
                 } else if (hasStoppedNotSelectedInstance(stack, repairMode, selectedParts)) {
                     repairStartResult = Result.error(RepairValidation
-                            .of("Repair cannot be performed because there are stopped nodes in the cluster. " +
+                            .of("Action cannot be performed because there are stopped nodes in the cluster. " +
                                     "Please select them for repair or start the stopped nodes."));
                 } else if (reattachNotSupportedOnProvider(stack, reattach)) {
                     repairStartResult = Result.error(RepairValidation

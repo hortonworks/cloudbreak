@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -26,10 +28,6 @@ public class ClusterUpgradeImageFilter {
 
     private static final String STACK_PACKAGE_KEY = "stack";
 
-    private static final String CFM_PACKAGE_KEY = "cfm";
-
-    private static final String CSP_PACKAGE_KEY = "csp";
-
     private static final String SALT_PACKAGE_KEY = "salt";
 
     @Inject
@@ -38,11 +36,9 @@ public class ClusterUpgradeImageFilter {
     @Inject
     private UpgradePermissionProvider upgradePermissionProvider;
 
-    Images filter(List<Image> availableImages, Versions supportedVersions, Image currentImage, String cloudPlatform) {
-        return new Images(null, null, null, getImages(availableImages, supportedVersions, currentImage, cloudPlatform), null);
-    }
+    private String reason;
 
-    private List<Image> getImages(List<Image> images, Versions versions, Image currentImage, String cloudPlatform) {
+    ImageFilterResult filter(List<Image> images, Versions versions, Image currentImage, String cloudPlatform) {
         List<Image> imagesForCbVersion = getImagesForCbVersion(versions, images);
         LOGGER.debug("{} image(s) found for the given CB version", imagesForCbVersion.size());
         return filterImages(imagesForCbVersion, currentImage, cloudPlatform);
@@ -52,54 +48,50 @@ public class ClusterUpgradeImageFilter {
         return versionBasedImageFilter.getCdhImagesForCbVersion(supportedVersions, availableImages);
     }
 
-    private List<Image> filterImages(List<Image> availableImages, Image currentImage, String cloudPlatform) {
-        // I think the whole logic is broken, since we don't allow an upgrade if we shipped a new parcel extension...
-        return availableImages.stream()
-                .filter(ignoredCmVersion())
-                .filter(validateCmVersion(currentImage).or(validateStackVersion(currentImage)))
+    private ImageFilterResult filterImages(List<Image> availableImages, Image currentImage, String cloudPlatform) {
+        List<Image> images = availableImages.stream()
+                .filter(filterCurrentImage(currentImage))
+                .filter(filterNonCmImages())
+                .filter(filterIgnoredCmVersion())
+                .filter(validateCmAndStackVersion(currentImage))
                 .filter(validateCloudPlatform(cloudPlatform))
                 .filter(validateOsVersion(currentImage))
-                // We don't necessary need CFM and CSP since only SDX upgrade is supported
-                //.filter(validateCfmVersion(currentImage))
-                //.filter(validateCspVersion(currentImage))
                 .filter(validateSaltVersion(currentImage))
-                .filter(filterCurrentImage(currentImage))
                 .collect(Collectors.toList());
+
+        return new ImageFilterResult(new Images(null, null, null, images, null), getReason(images));
     }
 
-    private Predicate<Image> validateOsVersion(Image currentImage) {
-        return image -> isOsVersionsMatch(currentImage, image);
+    private Predicate<Image> filterCurrentImage(Image currentImage) {
+        return image -> {
+            boolean result = !image.getUuid().equals(currentImage.getUuid());
+            setReason(result, "Only your current image is available with the same package versions.");
+            return result;
+        };
     }
 
-    private boolean isOsVersionsMatch(Image currentImage, Image newImage) {
-        return newImage.getOs().equalsIgnoreCase(currentImage.getOs())
-                && newImage.getOsType().equalsIgnoreCase(currentImage.getOsType());
+    private Predicate<Image> filterIgnoredCmVersion() {
+        return image -> {
+            boolean result = !image.getPackageVersions().get(CM_PACKAGE_KEY).contains(IGNORED_CM_VERSION);
+            setReason(result, "There is no supported Cloudera Manager or CDP version.");
+            return result;
+        };
     }
 
-    private Predicate<Image> ignoredCmVersion() {
-        // There are some legacy CM versions that do not follow a proper versioning scheme, we must ignore them
-        return image -> image.getPackageVersions().get(CM_PACKAGE_KEY) != null &&
-                !image.getPackageVersions().get(CM_PACKAGE_KEY).contains(IGNORED_CM_VERSION);
+    private Predicate<Image> filterNonCmImages() {
+        return image -> {
+            boolean result = isNotEmpty(image.getPackageVersions().get(CM_PACKAGE_KEY));
+            setReason(result, "There are no images available with Cloudera Manager packages.");
+            return result;
+        };
     }
 
-    private Predicate<Image> validateCmVersion(Image currentImage) {
-        return image -> permitCmAndSatckUpgrade(currentImage, image, CM_PACKAGE_KEY);
-    }
-
-    private Predicate<Image> validateStackVersion(Image currentImage) {
-        return image -> permitCmAndSatckUpgrade(currentImage, image, STACK_PACKAGE_KEY);
-    }
-
-    private Predicate<Image> validateCloudPlatform(String cloudPlatform) {
-        return image -> image.getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(cloudPlatform));
-    }
-
-    private Predicate<Image> validateCfmVersion(Image currentImage) {
-        return image -> permitExtensionUpgrade(currentImage, image, CFM_PACKAGE_KEY);
-    }
-
-    private Predicate<Image> validateCspVersion(Image currentImage) {
-        return image -> permitExtensionUpgrade(currentImage, image, CSP_PACKAGE_KEY);
+    private Predicate<Image> validateCmAndStackVersion(Image currentImage) {
+        return image -> {
+            boolean result = permitCmAndSatckUpgrade(currentImage, image, CM_PACKAGE_KEY) || permitCmAndSatckUpgrade(currentImage, image, STACK_PACKAGE_KEY);
+            setReason(result, "There is no proper Cloudera Manager or CDP version to upgrade.");
+            return result;
+        };
     }
 
     private boolean permitCmAndSatckUpgrade(Image currentImage, Image image, String key) {
@@ -107,16 +99,43 @@ public class ClusterUpgradeImageFilter {
                 image.getPackageVersions().get(key));
     }
 
-    private boolean permitExtensionUpgrade(Image currentImage, Image image, String key) {
-        return upgradePermissionProvider.permitExtensionUpgrade(currentImage.getPackageVersions().get(STACK_PACKAGE_KEY),
-                image.getPackageVersions().get(key));
+    private Predicate<Image> validateCloudPlatform(String cloudPlatform) {
+        return image -> {
+            boolean result = image.getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(cloudPlatform));
+            if (!result) {
+                reason = String.format("There are no images available for %s cloud platform.", cloudPlatform);
+            }
+            return result;
+        };
+    }
+
+    private Predicate<Image> validateOsVersion(Image currentImage) {
+        return image -> {
+            boolean result = isOsVersionsMatch(currentImage, image);
+            setReason(result, "There are no other images with the same OS version.");
+            return result;
+        };
+    }
+
+    private boolean isOsVersionsMatch(Image currentImage, Image newImage) {
+        return newImage.getOs().equalsIgnoreCase(currentImage.getOs()) && newImage.getOsType().equalsIgnoreCase(currentImage.getOsType());
     }
 
     private Predicate<Image> validateSaltVersion(Image currentImage) {
-        return image -> image.getPackageVersions().get(SALT_PACKAGE_KEY).equals(currentImage.getPackageVersions().get(SALT_PACKAGE_KEY));
+        return image -> {
+            boolean result = image.getPackageVersions().get(SALT_PACKAGE_KEY).equals(currentImage.getPackageVersions().get(SALT_PACKAGE_KEY));
+            setReason(result, "There are no other images with the same salt version.");
+            return result;
+        };
     }
 
-    private Predicate<Image> filterCurrentImage(Image currentImage) {
-        return image -> !image.getUuid().equals(currentImage.getUuid());
+    private String getReason(List<Image> images) {
+        return images.isEmpty() ? reason : null;
+    }
+
+    private void setReason(boolean result, String reasonText) {
+        if (!result) {
+            reason = reasonText;
+        }
     }
 }

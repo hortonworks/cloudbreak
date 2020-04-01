@@ -20,6 +20,13 @@ public class UpgradeOptionsV4Response {
         this.upgradeCandidates = upgradeCandidates;
     }
 
+    public UpgradeOptionsV4Response(ImageInfoV4Response current,
+            List<ImageInfoV4Response> upgradeCandidates, String reason) {
+        this.current = current;
+        this.upgradeCandidates = upgradeCandidates;
+        this.reason = reason;
+    }
+
     public ImageInfoV4Response getCurrent() {
         return current;
     }

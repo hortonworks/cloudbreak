@@ -90,7 +90,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(result.isError()).thenReturn(false);
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
         when(imageCatalogProvider.getImageCatalogV2(CATALOG_URL)).thenReturn(imageCatalog);
-        Images filteredImages = createFilteredImages(properImage);
+        ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(clusterUpgradeImageFilter.filter(imageCatalog.getImages().getCdhImages(), imageCatalog.getVersions(), currentImageFromCatalog,
                 stack.getCloudPlatform())).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
@@ -178,7 +178,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         return new CloudbreakImageCatalogV2(new Images(null, null, null, images, null), new Versions(Collections.emptyList()));
     }
 
-    private Images createFilteredImages(com.sequenceiq.cloudbreak.cloud.model.catalog.Image image) {
-        return new Images(null, null, null, List.of(image), null);
+    private ImageFilterResult createFilteredImages(com.sequenceiq.cloudbreak.cloud.model.catalog.Image image) {
+        return new ImageFilterResult(new Images(null, null, null, List.of(image), null), null);
     }
 }
