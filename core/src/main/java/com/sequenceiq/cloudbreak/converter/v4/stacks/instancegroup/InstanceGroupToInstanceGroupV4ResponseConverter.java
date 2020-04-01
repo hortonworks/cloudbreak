@@ -30,7 +30,7 @@ public class InstanceGroupToInstanceGroupV4ResponseConverter extends AbstractCon
         if (source.getTemplate() != null) {
             instanceGroupResponse.setTemplate(getConversionService().convert(source.getTemplate(), InstanceTemplateV4Response.class));
         }
-        instanceGroupResponse.setMetadata(converterUtil.convertAllAsSet(source.getNotTerminatedInstanceMetaDataSet(), InstanceMetaDataV4Response.class));
+        instanceGroupResponse.setMetadata(converterUtil.convertAllAsSet(source.getNotDeletedInstanceMetaDataSet(), InstanceMetaDataV4Response.class));
         if (source.getSecurityGroup() != null) {
             instanceGroupResponse.setSecurityGroup(getConversionService().convert(source.getSecurityGroup(), SecurityGroupV4Response.class));
         }

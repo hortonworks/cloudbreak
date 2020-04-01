@@ -178,9 +178,9 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
     private List<InstanceGroupV4Response> getInstanceGroups(Stack stack) {
         var instanceGroups = new LinkedList<InstanceGroupV4Response>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            var instanceGroupResponse = getConversionService().convert(instanceGroup, InstanceGroupV4Response.class);
-            collectInformationsFromActualHostgroup(stack.getCluster(), instanceGroup, instanceGroupResponse);
-            instanceGroups.add(instanceGroupResponse);
+            var instanceGroupRequest = getConversionService().convert(instanceGroup, InstanceGroupV4Response.class);
+            collectInformationsFromActualHostgroup(stack.getCluster(), instanceGroup, instanceGroupRequest);
+            instanceGroups.add(instanceGroupRequest);
         }
         return instanceGroups;
     }
