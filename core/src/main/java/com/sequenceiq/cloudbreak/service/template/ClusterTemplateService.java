@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -132,6 +133,10 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     public ClusterTemplate createForLoggedInUser(ClusterTemplate resource, Long workspaceId, String accountId) {
         resource.setResourceCrn(createCRN(accountId));
         return super.createForLoggedInUser(resource, workspaceId);
+    }
+
+    public Set<ClusterTemplate> getTemplatesByBlueprint(Blueprint blueprint) {
+        return clusterTemplateRepository.getTemplatesByBlueprintId(blueprint.getId(), blueprint.getWorkspace().getId());
     }
 
     @Override
