@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT_DELETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
@@ -10,20 +13,27 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
+import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -61,6 +71,9 @@ public class BlueprintLoaderServiceTest {
 
     @Mock
     private BlueprintService blueprintService;
+
+    @Mock
+    private ClusterTemplateService clusterTemplateService;
 
     @Mock
     private Workspace workspace;
@@ -104,10 +117,22 @@ public class BlueprintLoaderServiceTest {
     }
 
     @Test
-    public void testWhenUserDeletedDefault() {
+    public void testWhenUserDeletedDefaultAndPresentedInCacheShouldReturnTrue() {
         Set<Blueprint> blueprints = generateBlueprintData(0);
         blueprints.add(createBlueprint(DEFAULT_DELETED, 0));
         Map<String, Blueprint> defaultBlueprints = generateCacheData(1);
+        when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
+
+        Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
+    }
+
+    @Test
+    public void testWhenUserDeletedDefaultAndNOTPresentedInCacheShouldReturnFalse() {
+        Set<Blueprint> blueprints = generateBlueprintData(0);
+        blueprints.add(createBlueprint(DEFAULT_DELETED, 0));
+        Map<String, Blueprint> defaultBlueprints = new HashMap<>();
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
@@ -151,14 +176,64 @@ public class BlueprintLoaderServiceTest {
     }
 
     @Test
-    public void testForTheSpecifiedUserWhenOneNewDefaultExistThenRepositoryShouldUpdateOnlyOneBlueprint() {
+    public void testForTheSpecifiedUserWhenNewDefaultsExistAndNeedsToRetireOldBlueprintsThenRepositoryShouldAddTwoNewBlueprintAndRetireTwoOld() {
+        Set<ClusterTemplate> emptyClusterTemplateList = Sets.newHashSet();
+        // We have a0, a1, a2 in the DB
         Set<Blueprint> blueprints = generateBlueprintData(3);
+        // We have a2, a3, a4 as defaults
         Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 2);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+        when(clusterTemplateService.getTemplatesByBlueprint(any(Blueprint.class))).thenReturn(emptyClusterTemplateList);
 
         Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
+
+        ArgumentCaptor<Iterable<Blueprint>> argument = ArgumentCaptor.forClass(Iterable.class);
+        verify(blueprintService).pureSaveAll(argument.capture());
+        verify(blueprintService, times(1)).pureSaveAll(any(Iterable.class));
+        Assert.assertEquals(2, Iterators.size(argument.getValue().iterator()));
         Assert.assertEquals(3L, resultSet.size());
+        Assert.assertTrue(CollectionUtils.isEqualCollection(Sets.newHashSet(
+                "multi-node-hdfs-yarn0", "multi-node-hdfs-yarn1", "multi-node-hdfs-yarn2"
+        ), collectBpNames(blueprints)));
+        Assert.assertTrue(CollectionUtils.isEqualCollection(Sets.newHashSet(
+                "multi-node-hdfs-yarn2", "multi-node-hdfs-yarn3", "multi-node-hdfs-yarn4"
+        ), defaultBlueprints.keySet()));
+        Assert.assertTrue(CollectionUtils.isEqualCollection(Sets.newHashSet(
+                "multi-node-hdfs-yarn2", "multi-node-hdfs-yarn3", "multi-node-hdfs-yarn4"
+        ), collectBpNames(resultSet)));
+    }
+
+    @Test
+    public void testForTheSpecifiedUserWhenNewDefaultsExistAndNONeedsToRetireOldBlueprintsThenRepositoryShouldUpdateAddTwoNewAndReturnWithFive() {
+        Set<ClusterTemplate> notEmptyClusterTemplateList = Sets.newHashSet(new ClusterTemplate());
+        // We have a0, a1, a2 in the DB
+        Set<Blueprint> blueprints = generateBlueprintData(3);
+        // We have a2, a3, a4 as defaults
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 2);
+        when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
+        when(clusterTemplateService.getTemplatesByBlueprint(any(Blueprint.class))).thenReturn(notEmptyClusterTemplateList);
+        Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
+
+        ArgumentCaptor<Iterable<Blueprint>> argument = ArgumentCaptor.forClass(Iterable.class);
+        verify(blueprintService).pureSaveAll(argument.capture());
+        verify(blueprintService, times(1)).pureSaveAll(any(Iterable.class));
+        Assert.assertEquals(0, Iterators.size(argument.getValue().iterator()));
+        Assert.assertEquals(5L, resultSet.size());
+        Assert.assertTrue(CollectionUtils.isEqualCollection(Sets.newHashSet(
+                "multi-node-hdfs-yarn0", "multi-node-hdfs-yarn1", "multi-node-hdfs-yarn2"
+        ), collectBpNames(blueprints)));
+        Assert.assertTrue(CollectionUtils.isEqualCollection(Sets.newHashSet(
+                "multi-node-hdfs-yarn2", "multi-node-hdfs-yarn3", "multi-node-hdfs-yarn4"
+        ), defaultBlueprints.keySet()));
+        Assert.assertTrue(CollectionUtils.isEqualCollection(Sets.newHashSet(
+                "multi-node-hdfs-yarn0", "multi-node-hdfs-yarn1", "multi-node-hdfs-yarn2", "multi-node-hdfs-yarn3", "multi-node-hdfs-yarn4"
+        ), collectBpNames(resultSet)));
+    }
+
+    public Set<String> collectBpNames(Collection<Blueprint> resultSet) {
+        return resultSet.stream().map(a -> a.getName()).collect(Collectors.toSet());
     }
 
     @Test

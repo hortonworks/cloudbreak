@@ -24,6 +24,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
@@ -35,6 +36,9 @@ public class BlueprintLoaderService {
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private ClusterTemplateService clusterTemplateService;
 
     public boolean isAddingDefaultBlueprintsNecessaryForTheUser(Collection<Blueprint> blueprints) {
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
@@ -71,6 +75,7 @@ public class BlueprintLoaderService {
         List<Blueprint> deletableDefaults = blueprintsInDatabase.stream()
                 .filter(blueprint -> blueprint.getStatus().equals(DEFAULT))
                 .filter(blueprint -> !defaultBlueprintCache.defaultBlueprints().containsKey(blueprint.getName()))
+                .filter(blueprint -> clusterTemplateService.getTemplatesByBlueprint(blueprint).isEmpty())
                 .collect(Collectors.toList());
 
         LOGGER.info("Put old default blueprints to DEFAULT_DELETED: " + deletableDefaults);
@@ -125,10 +130,8 @@ public class BlueprintLoaderService {
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
         for (Blueprint blueprintInDatabase : blueprintsInDatabase) {
             Blueprint defaultBlueprint = defaultBlueprints.get(blueprintInDatabase.getName());
-            if (isActiveDefaultBlueprint(blueprintInDatabase) && isBlueprintInTheDefaultCache(defaultBlueprint)
-                    && (defaultBlueprintNotSameAsNewTexts(blueprintInDatabase, defaultBlueprint.getBlueprintText())
-                    || defaultBlueprintContainsNewDescription(blueprintInDatabase, defaultBlueprint)
-                    || isBlueprintInDBSameNameButUserManaged(blueprintInDatabase, defaultBlueprint))) {
+            if (isActiveBlueprintMustBeUpdatedAndNotUserManaged(blueprintInDatabase, defaultBlueprint)
+                || isNotActiveAndMustComeBack(blueprintInDatabase, defaultBlueprint)) {
                 LOGGER.debug("Default blueprint '{}' needs to modify for the '{}' workspace because the validation text changed.",
                         blueprintInDatabase.getName(), workspace.getId());
                 resultList.add(prepareBlueprint(blueprintInDatabase, defaultBlueprint, workspace));
@@ -136,6 +139,14 @@ public class BlueprintLoaderService {
         }
         LOGGER.debug("Finished to Update default blueprints which are contains text modifications.");
         return resultList;
+    }
+
+    private boolean isActiveBlueprintMustBeUpdatedAndNotUserManaged(Blueprint blueprintInDatabase, Blueprint defaultBlueprint) {
+        return isActiveDefaultBlueprint(blueprintInDatabase)
+                && isBlueprintInTheDefaultCache(defaultBlueprint)
+                && (defaultBlueprintNotSameAsNewTexts(blueprintInDatabase, defaultBlueprint.getBlueprintText())
+                || defaultBlueprintContainsNewDescription(blueprintInDatabase, defaultBlueprint)
+                || isBlueprintInDBSameNameButUserManaged(blueprintInDatabase, defaultBlueprint));
     }
 
     private boolean isBlueprintInDBSameNameButUserManaged(Blueprint blueprintInDatabase, Blueprint defaultBlueprint) {
@@ -185,11 +196,25 @@ public class BlueprintLoaderService {
         return !cd.getDescription().equals(blueprint.getDescription());
     }
 
+    private boolean defaultBlueprintDefaultDeleted(Blueprint cd, Blueprint blueprint) {
+        return cd.getStatus().equals(DEFAULT_DELETED);
+    }
+
     private boolean isNewUserOrDeletedEveryDefaultBlueprint(Collection<Blueprint> blueprints) {
         return blueprints.isEmpty();
     }
 
     private boolean mustUpdateTheExistingBlueprint(Blueprint blueprintFromDatabase, Blueprint defaultBlueprint) {
+        return isActiveAndMustBeUpdated(blueprintFromDatabase, defaultBlueprint)
+                || isNotActiveAndMustComeBack(blueprintFromDatabase, defaultBlueprint);
+    }
+
+    private boolean isNotActiveAndMustComeBack(Blueprint blueprintFromDatabase, Blueprint defaultBlueprint) {
+        return defaultBlueprintDefaultDeleted(blueprintFromDatabase, defaultBlueprint)
+                && isBlueprintInTheDefaultCache(defaultBlueprint);
+    }
+
+    private boolean isActiveAndMustBeUpdated(Blueprint blueprintFromDatabase, Blueprint defaultBlueprint) {
         return isActiveDefaultBlueprint(blueprintFromDatabase)
                 && isBlueprintInTheDefaultCache(defaultBlueprint)
                 && (defaultBlueprintNotSameAsNewTexts(blueprintFromDatabase, defaultBlueprint.getBlueprintText())
