@@ -19,14 +19,13 @@ import org.springframework.beans.factory.annotation.Value;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
-import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -164,6 +163,12 @@ public class EnvironmentTestDto
     public EnvironmentTestDto withAuthentication() {
         EnvironmentAuthenticationTestDto authenticationTestDto = getTestContext().get(EnvironmentAuthenticationTestDto.class);
         getRequest().setAuthentication(authenticationTestDto.getRequest());
+        return this;
+    }
+
+    public EnvironmentTestDto withSecurityAccess() {
+        EnvironmentSecurityAccessTestDto securityAccessTestDto = getTestContext().get(EnvironmentSecurityAccessTestDto.class);
+        getRequest().setSecurityAccess(securityAccessTestDto.getRequest());
         return this;
     }
 
@@ -326,24 +331,6 @@ public class EnvironmentTestDto
 
     private EnvironmentTestDto withCloudplatform(String platform) {
         getRequest().setCloudPlatform(platform);
-        return this;
-    }
-
-    public EnvironmentTestDto withDefaultSecurityGroupId(String defaultSecurityGroupId) {
-        if (getRequest().getSecurityAccess() == null) {
-            getRequest().setSecurityAccess(new SecurityAccessRequest());
-        }
-
-        getRequest().getSecurityAccess().setDefaultSecurityGroupId(defaultSecurityGroupId);
-        return this;
-    }
-
-    public EnvironmentTestDto withSecurityGroupIdForKnox(String securityGroupIdForKnox) {
-        if (getRequest().getSecurityAccess() == null) {
-            getRequest().setSecurityAccess(new SecurityAccessRequest());
-        }
-
-        getRequest().getSecurityAccess().setSecurityGroupIdForKnox(securityGroupIdForKnox);
         return this;
     }
 }

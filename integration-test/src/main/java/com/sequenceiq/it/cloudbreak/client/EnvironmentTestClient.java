@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeCredentialAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeSecurityAccessAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteByNameAction;
@@ -62,5 +63,9 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> changeAuthentication() {
         return new EnvironmentChangeAuthenticationAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> changeSecurityAccess() {
+        return new EnvironmentChangeSecurityAccessAction();
     }
 }

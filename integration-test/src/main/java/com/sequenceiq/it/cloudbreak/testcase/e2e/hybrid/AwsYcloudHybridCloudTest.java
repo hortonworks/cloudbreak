@@ -1,11 +1,22 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.hybrid;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static org.testng.Assert.fail;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -19,24 +30,16 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.userauth.UserAuthException;
-import org.springframework.beans.factory.annotation.Value;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static org.testng.Assert.fail;
 
 public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
@@ -97,9 +100,12 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         //Use a pre-prepared security group what allows inbound connections from ycloud
-        testContext.given(EnvironmentTestDto.class)
-            .withDefaultSecurityGroupId(hybridCloudSecurityGroupID)
-            .withSecurityGroupIdForKnox(hybridCloudSecurityGroupID);
+        testContext
+                .given(EnvironmentSecurityAccessTestDto.class)
+                .withDefaultSecurityGroupId(hybridCloudSecurityGroupID)
+                .withSecurityGroupIdForKnox(hybridCloudSecurityGroupID)
+                .given(EnvironmentTestDto.class)
+                .withSecurityAccess();
         createEnvironmentWithNetworkAndFreeIPA(testContext);
 
         testContext.given(CHILD_ENVIRONMENT_CREDENTIAL_KEY, CredentialTestDto.class, CHILD_CLOUD_PLATFORM)

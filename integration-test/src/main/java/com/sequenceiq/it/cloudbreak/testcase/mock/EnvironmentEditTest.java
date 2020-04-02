@@ -12,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.CheckCount;
 import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
@@ -146,6 +147,30 @@ public class EnvironmentEditTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.changeAuthentication(), key("non-defined"))
                 .expect(BadRequestException.class, key("non-defined")
                         .withExpectedMessage("1. You should define publicKey or publicKeyId"))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "change authentication",
+            then = "get validation errors")
+    public void securityAccessEditValidationErrors(TestContext testContext) {
+        testContext
+                .given(EnvironmentTestDto.class)
+                .withCreateFreeIpa(false)
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+
+                .given(EnvironmentSecurityAccessTestDto.class)
+                .withCidr("cidr")
+                .given(EnvironmentTestDto.class)
+                .withSecurityAccess()
+                .when(environmentTestClient.changeSecurityAccess(), key("cidr-defined"))
+                .expect(BadRequestException.class, key("cidr-defined")
+                        .withExpectedMessage("1. Please add the default or knox security groups, we cannot edit with empty value.\n" +
+                                "2. The CIDR can be replaced with the default and knox security groups, please add to the request\n" +
+                                "3. The CIDR could not be updated in the environment"))
                 .validate();
     }
 }
