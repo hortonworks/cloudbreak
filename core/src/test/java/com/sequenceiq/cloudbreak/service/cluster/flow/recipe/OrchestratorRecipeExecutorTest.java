@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,11 +11,14 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -24,6 +28,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTi
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -77,6 +82,9 @@ public class OrchestratorRecipeExecutorTest {
     @Mock
     private Node node;
 
+    @Captor
+    private ArgumentCaptor<ExitCriteriaModel> exitCriteriaModelCaptor;
+
     @Test
     public void preClusterManagerStartRecipesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
             CloudbreakOrchestratorTimeoutException {
@@ -89,7 +97,7 @@ public class OrchestratorRecipeExecutorTest {
         when(stack.getCluster()).thenReturn(cluster);
         when(hostOrchestratorResolver.get(anyString())).thenReturn(hostOrchestrator);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
-        Set<Node> nodes = Set.of(this.node);
+        Set<Node> nodes = Set.of(node);
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
 
         underTest.preClusterManagerStartRecipes(stack);
@@ -144,5 +152,26 @@ public class OrchestratorRecipeExecutorTest {
         verify(gatewayConfigService).getPrimaryGatewayConfig(stack);
         verify(stackUtil).collectReachableNodes(stack);
         verify(hostOrchestrator).postInstallRecipes(eq(gatewayConfig), eq(nodes), any());
+    }
+
+    @Test
+    public void testPreTerminationRecipes() throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
+        Orchestrator orchestrator = new Orchestrator();
+        orchestrator.setType("ORCHESTRATOR_TYPE");
+        when(stack.getOrchestrator()).thenReturn(orchestrator);
+        Cluster cluster = new Cluster();
+        cluster.setId(2L);
+        when(stack.getCluster()).thenReturn(cluster);
+        when(hostOrchestratorResolver.get(anyString())).thenReturn(hostOrchestrator);
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        Set<Node> nodes = Set.of(node);
+        when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
+
+        underTest.preTerminationRecipes(stack, false);
+
+        verify(hostOrchestrator).preTerminationRecipes(eq(gatewayConfig), eq(Set.of(node)), exitCriteriaModelCaptor.capture(), eq(false));
+
+        ExitCriteriaModel exitCriteriaModel = exitCriteriaModelCaptor.getValue();
+        assertThat(exitCriteriaModel).isOfAnyClassIn(ClusterDeletionBasedExitCriteriaModel.class);
     }
 }
