@@ -10,6 +10,7 @@ logging:
 integrationtest:
   threadCount: 8
   parallel: methods
+  timeOut: 6000000
   imageValidation:
     sourceCatalogName: v3-dev
     sourceCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
