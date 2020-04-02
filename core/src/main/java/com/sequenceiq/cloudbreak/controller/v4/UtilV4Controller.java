@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.service.UmsAuthorizationService;
+import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckRightV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RenewCertificateV4Request;
@@ -68,7 +68,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     private NotificationSender notificationSender;
 
     @Inject
-    private UmsAuthorizationService umsAuthorizationService;
+    private UmsAccountAuthorizationService umsAccountAuthorizationService;
 
     @Inject
     private StackOperationService stackOperationService;
@@ -127,7 +127,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
         String userCrn = restRequestThreadLocalService.getCloudbreakUser().getUserCrn();
         return new CheckRightV4Response(checkRightV4Request.getRights().stream()
                 .map(rightReq -> new CheckRightV4SingleResponse(rightReq,
-                        umsAuthorizationService.hasRightOfUser(userCrn, rightReq.getResource(), rightReq.getAction())))
+                        umsAccountAuthorizationService.hasRightOfUser(userCrn, rightReq.getResource(), rightReq.getAction())))
                 .collect(Collectors.toList()));
     }
 

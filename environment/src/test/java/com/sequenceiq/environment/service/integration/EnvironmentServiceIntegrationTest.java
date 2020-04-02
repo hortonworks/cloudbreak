@@ -29,7 +29,8 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.authorization.service.UmsAuthorizationService;
+import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
+import com.sequenceiq.authorization.service.UmsResourceAuthorizationService;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -103,7 +104,10 @@ public class EnvironmentServiceIntegrationTest {
     private RequestProvider requestProvider;
 
     @MockBean
-    private UmsAuthorizationService umsAuthorizationService;
+    private UmsResourceAuthorizationService umsResourceAuthorizationService;
+
+    @MockBean
+    private UmsAccountAuthorizationService umsAccountAuthorizationService;
 
     @MockBean
     private EntitlementService entitlementService;
@@ -151,7 +155,7 @@ public class EnvironmentServiceIntegrationTest {
         doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
         Map<String, Boolean> rightCheckMap = Maps.newHashMap();
         rightCheckMap.put(credential.getResourceCrn(), true);
-        when(umsAuthorizationService.getRightOfUserOnResources(anyString(), any(), any(), anyList())).thenReturn(rightCheckMap);
+        when(umsResourceAuthorizationService.getRightOfUserOnResources(anyString(), any(), any(), anyList())).thenReturn(rightCheckMap);
     }
 
     @AfterEach

@@ -30,24 +30,27 @@ public class CommonPermissionCheckingUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonPermissionCheckingUtils.class);
 
     @Inject
-    private UmsAuthorizationService umsAuthorizationService;
+    private UmsAccountAuthorizationService umsAccountAuthorizationService;
+
+    @Inject
+    private UmsResourceAuthorizationService umsResourceAuthorizationService;
 
     public void checkPermissionForUser(AuthorizationResourceType resource, AuthorizationResourceAction action, String userCrn) {
-        umsAuthorizationService.checkRightOfUser(userCrn, resource, action);
+        umsAccountAuthorizationService.checkRightOfUser(userCrn, resource, action);
     }
 
     public void checkPermissionForUserOnResource(AuthorizationResourceType resource, AuthorizationResourceAction action, String userCrn, String resourceCrn) {
-        umsAuthorizationService.checkRightOfUserOnResource(userCrn, resource, action, resourceCrn);
+        umsResourceAuthorizationService.checkRightOfUserOnResource(userCrn, resource, action, resourceCrn);
     }
 
     public void checkPermissionForUserOnResources(AuthorizationResourceType resource, AuthorizationResourceAction action,
             String userCrn, Collection<String> resourceCrns) {
-        umsAuthorizationService.checkRightOfUserOnResources(userCrn, resource, action, resourceCrns);
+        umsResourceAuthorizationService.checkRightOfUserOnResources(userCrn, resource, action, resourceCrns);
     }
 
     public Map<String, Boolean> getPermissionsForUserOnResources(AuthorizationResourceType resource, AuthorizationResourceAction action,
             String userCrn, List<String> resourceCrns) {
-        return umsAuthorizationService.getRightOfUserOnResources(userCrn, resource, action, resourceCrns);
+        return umsResourceAuthorizationService.getRightOfUserOnResources(userCrn, resource, action, resourceCrns);
     }
 
     public Object proceed(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
