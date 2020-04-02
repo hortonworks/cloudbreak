@@ -13,7 +13,7 @@ import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.UmsAuthorizationService;
+import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.util.CheckedFunction;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
@@ -24,11 +24,11 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServicePrincipalRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.VaultCleanupRequest;
+import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
+import com.sequenceiq.freeipa.client.RetryableFreeIpaClientService;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.KeytabCreationException;
-import com.sequenceiq.freeipa.client.RetryableFreeIpaClientService;
-import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -54,7 +54,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     private UserKeytabService userKeytabService;
 
     @Inject
-    private UmsAuthorizationService umsAuthorizationService;
+    private UmsAccountAuthorizationService umsAccountAuthorizationService;
 
     @Inject
     private RetryableFreeIpaClientService retryableFreeIpaClientService;
@@ -127,7 +127,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         String actorCrn = checkActorCrn();
         LOGGER.debug("getUserKeytab() request for environmentCrn={} for targetUserCrn={} as actorCrn={}",
                 environmentCrn, actorCrn, targetUserCrn);
-        umsAuthorizationService.checkCallerIsSelfOrHasRight(actorCrn, targetUserCrn, AuthorizationResourceType.ENVIRONMENT,
+        umsAccountAuthorizationService.checkCallerIsSelfOrHasRight(actorCrn, targetUserCrn, AuthorizationResourceType.ENVIRONMENT,
                 AuthorizationResourceAction.GET_KEYTAB);
         return userKeytabService.getKeytabBase64(targetUserCrn, environmentCrn);
     }
