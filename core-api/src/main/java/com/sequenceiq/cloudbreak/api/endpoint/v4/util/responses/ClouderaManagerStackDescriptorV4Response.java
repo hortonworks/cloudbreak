@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ClouderaManagerStackRepoDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 
 public class ClouderaManagerStackDescriptorV4Response {
 
@@ -11,6 +15,8 @@ public class ClouderaManagerStackDescriptorV4Response {
     private ClouderaManagerStackRepoDetailsV4Response repository;
 
     private ClouderaManagerInfoV4Response clouderaManager;
+
+    private List<ClouderaManagerProductV4Response> products = new ArrayList<>();
 
     public String getVersion() {
         return version;
@@ -44,4 +50,11 @@ public class ClouderaManagerStackDescriptorV4Response {
         this.clouderaManager = clouderaManager;
     }
 
+    public List<ClouderaManagerProductV4Response> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<ClouderaManagerProductV4Response> products) {
+        this.products = products;
+    }
 }

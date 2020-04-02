@@ -16,9 +16,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerI
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.cm.ClouderaManagerProductToClouderaManagerProductV4Response;
 
 @Service
 public class StackMatrixService {
@@ -62,6 +64,9 @@ public class StackMatrixService {
         RepositoryInfo cmInfo = clouderaManagerRepoInfoEntries.getOrDefault(stackDescriptorV4.getMinCM(), new RepositoryInfo());
         ClouderaManagerInfoV4Response cmInfoJson = converterUtil.convert(cmInfo, ClouderaManagerInfoV4Response.class);
         stackDescriptorV4.setClouderaManager(cmInfoJson);
+        for (ClouderaManagerProduct parcel : stackInfo.getParcels()) {
+            stackDescriptorV4.getProducts().add(ClouderaManagerProductToClouderaManagerProductV4Response.convert(parcel));
+        }
         return stackDescriptorV4;
     }
 }
