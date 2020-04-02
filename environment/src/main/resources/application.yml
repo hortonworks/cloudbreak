@@ -132,7 +132,7 @@ cb:
     disabled.instance.types: c5d,f1,i3,m5d,p3dn,r5d,z1d
     hostkey.verify: false
     external.id: provision-ambari
-    role.session.name: hadoop-provisioning
+    role.session.name: cdp-provisioning
     cf.template.new.path: templates/aws-cf-stack.ftl
     cf.network.template.path: templates/aws-cf-network.ftl
     cf.template.newdb.path: templates/aws-cf-dbstack.ftl
