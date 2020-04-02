@@ -62,7 +62,10 @@ public final class Notes {
         public static final String CREATE_DATABASE =
             "Creates a new database on a database server. The database starts out empty. A new user with credentials "
             + "separate from the database server's administrative user is also created, with full rights to the new database.";
-
+        public static final String START =
+                "Start a previosly stopped database server.";
+        public static final String STOP =
+                "Stop a running database server.";
         private DatabaseServerNotes() {
         }
     }

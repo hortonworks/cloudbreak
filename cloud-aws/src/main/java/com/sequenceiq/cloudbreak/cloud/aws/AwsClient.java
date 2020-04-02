@@ -7,6 +7,8 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 
+import com.amazonaws.services.rds.AmazonRDS;
+import com.amazonaws.services.rds.AmazonRDSClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -169,6 +171,13 @@ public class AwsClient {
         return AmazonDynamoDBClientBuilder.standard()
                 .withClientConfiguration(getDynamoDbClientConfiguration())
                 .withCredentials(getCredentialProvider(awsCredential))
+                .withRegion(region)
+                .build();
+    }
+
+    public AmazonRDS createRdsClient(AwsCredentialView awsCredentialView, String region) {
+        return AmazonRDSClientBuilder.standard()
+                .withCredentials(getCredentialProvider(awsCredentialView))
                 .withRegion(region)
                 .build();
     }
