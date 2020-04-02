@@ -32,6 +32,7 @@ import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
+import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
 @Component
 public class StackToDescribeFreeIpaResponseConverter {
@@ -107,7 +108,7 @@ public class StackToDescribeFreeIpaResponseConverter {
     }
 
     private void decoreateFreeIpaServerResponseWithLoadBalancedHost(Stack stack, FreeIpaServerResponse freeIpaServerResponse, FreeIpa freeIpa) {
-        if (Objects.nonNull(freeIpaServerResponse)) {
+        if (Objects.nonNull(freeIpaServerResponse) && BalancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)) {
             freeIpaServerResponse.setFreeIpaHost(FreeIpaDomainUtils.getFreeIpaFqdn(freeIpa.getDomain()));
             freeIpaServerResponse.setFreeIpaPort(stack.getGatewayport());
         }

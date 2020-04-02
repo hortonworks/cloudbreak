@@ -46,6 +46,7 @@ class KerberosConfigRegisterServiceTest {
         stack.setEnvironmentCrn("env");
         stack.setAccountId("acc");
         stack.setName("name");
+        stack.setAppVersion("2.20.0");
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(InstanceGroupType.MASTER);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
