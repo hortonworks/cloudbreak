@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -116,6 +117,33 @@ public interface ResourceConnector<R> {
      * @throws Exception in case of any error
      */
     List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, boolean force) throws Exception;
+
+    /**
+     * Starts the database server. The caller does not need to wait/block until
+     * database server gets started.
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param dbInstanceIdentifier the database server instance identifier
+     * @throws Exception in case of any error
+     */
+    void startDatabaseServer(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) throws Exception;
+
+    /**
+     * Stops the database server. The caller does not need to wait/block until
+     * database server gets stopped.
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param dbInstanceIdentifier the database server instance identifier
+     * @throws Exception in case of any error
+     */
+    void stopDatabaseServer(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) throws Exception;
+
+    /**
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param dbInstanceIdentifier the server instance identifier
+     * @return The status of the given database server instance
+     * @throws Exception in case of any error
+     */
+    ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) throws Exception;
 
     /**
      * Update of infrastructure on Cloud platform. (e.g change Security groups). It does not need to wait/block until the infrastructure update is

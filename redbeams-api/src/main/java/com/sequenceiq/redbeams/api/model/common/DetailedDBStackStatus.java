@@ -16,7 +16,17 @@ public enum DetailedDBStackStatus {
     // The stack is available
     AVAILABLE(Status.AVAILABLE),
     // Wait for sync
-    WAIT_FOR_SYNC(Status.WAIT_FOR_SYNC);
+    WAIT_FOR_SYNC(Status.WAIT_FOR_SYNC),
+    //Start statuses
+    START_REQUESTED(Status.START_REQUESTED),
+    START_IN_PROGRESS(Status.START_IN_PROGRESS),
+    START_FAILED(Status.START_FAILED),
+    STARTED(Status.AVAILABLE),
+    //Stop statuses
+    STOP_REQUESTED(Status.STOP_REQUESTED),
+    STOP_IN_PROGRESS(Status.STOP_IN_PROGRESS),
+    STOP_FAILED(Status.STOP_FAILED),
+    STOPPED(Status.STOPPED);
 
     private final Status status;
 

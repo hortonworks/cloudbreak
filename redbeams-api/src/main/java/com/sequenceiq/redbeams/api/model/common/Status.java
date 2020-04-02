@@ -67,4 +67,16 @@ public enum Status {
     public static Set<Status> getDeletingStatuses() {
         return Set.of(PRE_DELETE_IN_PROGRESS, DELETE_REQUESTED, DELETE_FAILED, DELETE_IN_PROGRESS, DELETE_COMPLETED);
     }
+
+    public boolean isStopInProgressOrCompleted() {
+        return STOP_REQUESTED.equals(this)
+                || STOP_IN_PROGRESS.equals(this)
+                || STOPPED.equals(this);
+    }
+
+    public boolean isStartInProgressOrCompleted() {
+        return START_REQUESTED.equals(this)
+                || START_IN_PROGRESS.equals(this)
+                || isAvailable();
+    }
 }

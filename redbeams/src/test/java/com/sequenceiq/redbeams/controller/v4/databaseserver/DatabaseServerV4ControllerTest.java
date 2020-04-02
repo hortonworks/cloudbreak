@@ -30,6 +30,8 @@ import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
+import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
+import com.sequenceiq.redbeams.service.stack.RedbeamsStopService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 
 // import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
@@ -78,6 +80,12 @@ public class DatabaseServerV4ControllerTest {
 
     @Mock
     private ConverterUtil converterUtil;
+
+    @Mock
+    private RedbeamsStartService redbeamsStartService;
+
+    @Mock
+    private RedbeamsStopService redbeamsStopService;
 
     private DatabaseServerConfig server;
 
@@ -269,5 +277,19 @@ public class DatabaseServerV4ControllerTest {
         CreateDatabaseV4Response createResponse = underTest.createDatabase(createRequest);
 
         assertEquals("ok", createResponse.getResult());
+    }
+
+    @Test
+    public void testStart() {
+        underTest.start(SERVER_CRN);
+
+        verify(redbeamsStartService).startDatabaseServer(SERVER_CRN);
+    }
+
+    @Test
+    public void testStop() {
+        underTest.stop(SERVER_CRN);
+
+        verify(redbeamsStopService).stopDatabaseServer(SERVER_CRN);
     }
 }
