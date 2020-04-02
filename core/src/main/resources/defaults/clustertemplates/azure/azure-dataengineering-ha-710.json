@@ -10,35 +10,6 @@
     },
     "instanceGroups": [
       {
-        "nodeCount": 3,
-        "name": "quorum",
-        "type": "CORE",
-        "recoveryMode": "MANUAL",
-        "template": {
-          "azure": {
-            "availabilitySet": {
-              "name": "",
-              "faultDomainCount": 2,
-              "updateDomainCount": 20
-            }
-          },
-          "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          },
-          "attachedVolumes": [
-            {
-              "size": 100,
-              "count": 1,
-              "type": "StandardSSD_LRS"
-            }
-          ],
-          "cloudPlatform": "AZURE"
-        },
-        "recipeNames": [],
-        "cloudPlatform": "AZURE"
-      },
-      {
         "nodeCount": 1,
         "name": "manager",
         "type": "GATEWAY",
