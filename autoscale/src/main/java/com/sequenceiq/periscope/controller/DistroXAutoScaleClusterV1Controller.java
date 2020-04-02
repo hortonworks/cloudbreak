@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
@@ -31,6 +32,9 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     private AlertController alertController;
 
     @Inject
+    private TransactionService transactionService;
+
+    @Inject
     private DistroXAutoscaleClusterResponseConverter distroXAutoscaleClusterResponseConverter;
 
     @Override
@@ -40,7 +44,8 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
 
     @Override
     public DistroXAutoscaleClusterResponse getClusterByCrn(String clusterCrn) {
-        return createClusterJsonResponse(asClusterCommonService.getClusterByStackCrn(clusterCrn));
+        return createClusterJsonResponse(
+                asClusterCommonService.getClusterByStackCrn(clusterCrn));
     }
 
     @Override
@@ -62,14 +67,14 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     @Override
     public DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterCrn(String clusterCrn,
             DistroXAutoscaleClusterRequest autoscaleClusterRequest) throws ParseException {
-        Cluster cluster = clusterService.findOneByStackCrn(clusterCrn);
+        Cluster cluster = asClusterCommonService.getClusterByStackCrn(clusterCrn);
         return updateClusterAutoScaleConfig(cluster.getId(), autoscaleClusterRequest);
     }
 
     @Override
     public DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterName(String clusterName,
             DistroXAutoscaleClusterRequest autoscaleClusterRequest) throws ParseException {
-        Cluster cluster = clusterService.findOneByStackName(clusterName);
+        Cluster cluster = asClusterCommonService.getClusterByStackName(clusterName);
         return updateClusterAutoScaleConfig(cluster.getId(), autoscaleClusterRequest);
     }
 
@@ -78,15 +83,20 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     }
 
     private DistroXAutoscaleClusterResponse updateClusterAutoScaleConfig(Long clusterId,
-            DistroXAutoscaleClusterRequest autoscaleClusterRequest) throws ParseException {
+            DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
 
-        alertController.validateLoadAlertRequests(clusterId, autoscaleClusterRequest.getLoadAlertRequests());
-        alertController.validateTimeAlertRequests(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
-
-        clusterService.deleteAlertsForCluster(clusterId);
-        alertController.createLoadAlerts(clusterId, autoscaleClusterRequest.getLoadAlertRequests());
-        alertController.createTimeAlerts(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
-        clusterService.setAutoscaleState(clusterId, autoscaleClusterRequest.getEnableAutoscaling());
+        try {
+            transactionService.required(() -> {
+                clusterService.deleteAlertsForCluster(clusterId);
+                alertController.validateLoadAlertRequests(clusterId, autoscaleClusterRequest.getLoadAlertRequests());
+                alertController.validateTimeAlertRequests(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
+                alertController.createLoadAlerts(clusterId, autoscaleClusterRequest.getLoadAlertRequests());
+                alertController.createTimeAlerts(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
+                clusterService.setAutoscaleState(clusterId, autoscaleClusterRequest.getEnableAutoscaling());
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw e.getCause();
+        }
 
         return createClusterJsonResponse(clusterService.findById(clusterId));
     }

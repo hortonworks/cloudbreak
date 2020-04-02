@@ -77,14 +77,13 @@ public interface AlertEndpoint {
     @Path("time")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.TIME_BASED_POST, produces = MediaType.APPLICATION_JSON, notes = TIME_BASED_NOTES)
-    TimeAlertResponse createTimeAlert(@PathParam("clusterId") Long clusterId, @Valid TimeAlertRequest json) throws ParseException;
+    TimeAlertResponse createTimeAlert(@PathParam("clusterId") Long clusterId, @Valid TimeAlertRequest json);
 
     @PUT
     @Path("time/{alertId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.TIME_BASED_PUT, produces = MediaType.APPLICATION_JSON, notes = TIME_BASED_NOTES)
-    TimeAlertResponse updateTimeAlert(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId, @Valid TimeAlertRequest json)
-            throws ParseException;
+    TimeAlertResponse updateTimeAlert(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId, @Valid TimeAlertRequest json);
 
     @GET
     @Path("time")
@@ -139,14 +138,13 @@ public interface AlertEndpoint {
     @Path("load")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.LOAD_BASED_POST, produces = MediaType.APPLICATION_JSON, notes = LOAD_BASED_NOTES)
-    LoadAlertResponse createLoadAlert(@PathParam("clusterId") Long clusterId, @Valid LoadAlertRequest json) throws ParseException;
+    LoadAlertResponse createLoadAlert(@PathParam("clusterId") Long clusterId, @Valid LoadAlertRequest json);
 
     @PUT
     @Path("load/{alertId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.LOAD_BASED_PUT, produces = MediaType.APPLICATION_JSON, notes = LOAD_BASED_NOTES)
-    LoadAlertResponse updateLoadAlert(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId, @Valid LoadAlertRequest json)
-            throws ParseException;
+    LoadAlertResponse updateLoadAlert(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId, @Valid LoadAlertRequest json);
 
     @GET
     @Path("load")

@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.api.model.StateJson;
@@ -48,11 +50,19 @@ public class AutoScaleClusterCommonService {
     }
 
     public Cluster getClusterByStackCrn(String stackCrn) {
-        return clusterService.findOneByStackCrn(stackCrn);
+        return getClusterByCrnOrName(NameOrCrn.ofCrn(stackCrn));
     }
 
     public Cluster getClusterByStackName(String stackName) {
-        return clusterService.findOneByStackName(stackName);
+        return getClusterByCrnOrName(NameOrCrn.ofName(stackName));
+    }
+
+    public Cluster getClusterByCrnOrName(NameOrCrn nameOrCrn) {
+        return nameOrCrn.hasName() ?
+                clusterService.findOneByStackName(nameOrCrn.getName())
+                        .orElseThrow(NotFoundException.notFound("cluster", nameOrCrn.getName())) :
+                clusterService.findOneByStackCrn(nameOrCrn.getCrn())
+                        .orElseThrow(NotFoundException.notFound("cluster", nameOrCrn.getCrn()));
     }
 
     public void deleteCluster(Long clusterId) {
@@ -84,12 +94,12 @@ public class AutoScaleClusterCommonService {
     }
 
     public void deleteAlertsForClusterCrn(String stackCrn) {
-        Cluster cluster = clusterService.findOneByStackCrn(stackCrn);
+        Cluster cluster = getClusterByCrnOrName(NameOrCrn.ofCrn(stackCrn));
         clusterService.deleteAlertsForCluster(cluster.getId());
     }
 
     public void deleteAlertsForClusterName(String stackName) {
-        Cluster cluster = clusterService.findOneByStackName(stackName);
+        Cluster cluster = getClusterByCrnOrName(NameOrCrn.ofName(stackName));
         clusterService.deleteAlertsForCluster(cluster.getId());
     }
 }

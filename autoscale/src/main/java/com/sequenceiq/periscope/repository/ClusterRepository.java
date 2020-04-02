@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,9 +18,9 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     Cluster findByStackId(@Param("stackId") Long stackId);
 
-    Cluster findByStackCrn(@Param("stackCrn") String stackCrn);
+    Optional<Cluster> findByStackCrn(@Param("stackCrn") String stackCrn);
 
-    Cluster findByStackName(@Param("stackName") String stackName);
+    Optional<Cluster> findByStackName(@Param("stackName") String stackName);
 
     @Query("SELECT c.stackCrn FROM Cluster c WHERE c.id = :id")
     String findStackCrnById(@Param("id") Long id);
@@ -44,5 +45,4 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     @Modifying
     @Query("UPDATE Cluster c SET c.periscopeNodeId = NULL WHERE c.periscopeNodeId = :periscopeNodeId")
     void deallocateClustersOfNode(@Param("periscopeNodeId") String periscopeNodeId);
-
 }

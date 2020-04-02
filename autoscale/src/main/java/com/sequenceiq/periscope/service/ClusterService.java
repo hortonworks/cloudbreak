@@ -7,6 +7,7 @@ import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
@@ -129,11 +130,11 @@ public class ClusterService {
         return clusterRepository.findByStackId(stackId);
     }
 
-    public Cluster findOneByStackCrn(String stackCrn) {
+    public Optional<Cluster> findOneByStackCrn(String stackCrn) {
         return  clusterRepository.findByStackCrn(stackCrn);
     }
 
-    public Cluster findOneByStackName(String stackName) {
+    public Optional<Cluster> findOneByStackName(String stackName) {
         return  clusterRepository.findByStackName(stackName);
     }
 

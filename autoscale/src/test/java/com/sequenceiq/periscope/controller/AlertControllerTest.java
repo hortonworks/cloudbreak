@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
 import com.sequenceiq.periscope.api.model.ScalingPolicyRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertRequest;
@@ -23,6 +25,7 @@ import com.sequenceiq.periscope.converter.LoadAlertRequestConverter;
 import com.sequenceiq.periscope.converter.LoadAlertResponseConverter;
 import com.sequenceiq.periscope.converter.TimeAlertRequestConverter;
 import com.sequenceiq.periscope.converter.TimeAlertResponseConverter;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.service.AlertService;
@@ -95,8 +98,11 @@ public class AlertControllerTest {
         scalingPolicy.setHostGroup("compute");
         request.setScalingPolicy(scalingPolicy);
 
+        Cluster clusterMock = mock(Cluster.class);
         when(alertService.getLoadAlertsForClusterHostGroup(clusterId, "compute")).thenReturn(Set.of());
         when(loadAlertRequestConverter.convert(request)).thenReturn(new LoadAlert());
+        when(clusterService.findById(clusterId)).thenReturn(clusterMock);
+        when(clusterMock.getTunnel()).thenReturn(Tunnel.CLUSTER_PROXY);
 
         underTest.createLoadAlert(clusterId, request);
         verify(alertService).createLoadAlert(anyLong(), any(LoadAlert.class));
@@ -109,7 +115,24 @@ public class AlertControllerTest {
         scalingPolicy.setHostGroup("compute");
         request.setScalingPolicy(scalingPolicy);
 
+        Cluster clusterMock = mock(Cluster.class);
+        when(clusterService.findById(clusterId)).thenReturn(clusterMock);
+        when(clusterMock.getTunnel()).thenReturn(Tunnel.CLUSTER_PROXY);
         when(alertService.getLoadAlertsForClusterHostGroup(clusterId, "compute")).thenReturn(Set.of(new LoadAlert()));
+
+        underTest.createLoadAlert(clusterId, request);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testLoadAlertCreateTunnelDirect() throws Exception  {
+        LoadAlertRequest request = new LoadAlertRequest();
+        ScalingPolicyRequest scalingPolicy = new ScalingPolicyRequest();
+        scalingPolicy.setHostGroup("compute");
+        request.setScalingPolicy(scalingPolicy);
+
+        Cluster clusterMock = mock(Cluster.class);
+        when(clusterService.findById(clusterId)).thenReturn(clusterMock);
+        when(clusterMock.getTunnel()).thenReturn(Tunnel.DIRECT);
 
         underTest.createLoadAlert(clusterId, request);
     }

@@ -2,7 +2,6 @@ package com.sequenceiq.periscope.api.endpoint.v1;
 
 import static com.sequenceiq.periscope.doc.ApiDescription.CLUSTERS_DESCRIPTION;
 
-import java.text.ParseException;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -51,14 +50,14 @@ public interface DistroXAutoScaleClusterV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.CLUSTER_SET_AUTOSCALE_STATE, produces = MediaType.APPLICATION_JSON, notes = DistroXClusterNotes.NOTES)
     DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterCrn(@PathParam("crn") String clusterCrn,
-            @ValidDistroXAutoscaleRequest @Valid DistroXAutoscaleClusterRequest autoscaleClusterRequest) throws ParseException;
+            @ValidDistroXAutoscaleRequest @Valid DistroXAutoscaleClusterRequest autoscaleClusterRequest);
 
     @POST
     @Path("name/{name}/autoscaleconfig")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.CLUSTER_SET_AUTOSCALE_STATE, produces = MediaType.APPLICATION_JSON, notes = DistroXClusterNotes.NOTES)
     DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterName(@PathParam("name") String clusterName,
-            @ValidDistroXAutoscaleRequest @Valid DistroXAutoscaleClusterRequest autoscaleClusterRequest) throws ParseException;
+            @ValidDistroXAutoscaleRequest @Valid DistroXAutoscaleClusterRequest autoscaleClusterRequest);
 
     @DELETE
     @Path("name/{name}")
