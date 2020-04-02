@@ -17,6 +17,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
+import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
 @Service
 public class KerberosConfigRegisterService extends AbstractConfigRegister {
@@ -40,7 +41,6 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
             environmentCrn = stack.getEnvironmentCrn();
         }
         KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setAdminUrl(FreeIpaDomainUtils.getKerberosFqdn(freeIpa.getDomain()));
         kerberosConfig.setDomain(freeIpa.getDomain());
         kerberosConfig.setEnvironmentCrn(environmentCrn);
         kerberosConfig.setName(stack.getName());
@@ -51,10 +51,29 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
                 .flatMap(instanceGroup -> instanceGroup.getNotDeletedInstanceMetaDataSet().stream()).collect(Collectors.toSet());
         String allFreeIpaIpJoined = allNotDeletedInstances.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.joining(","));
         kerberosConfig.setNameServers(allFreeIpaIpJoined);
-        kerberosConfig.setUrl(FreeIpaDomainUtils.getKdcFqdn(freeIpa.getDomain()));
+        addServerAddress(freeIpa, stack, kerberosConfig, allNotDeletedInstances);
         kerberosConfig.setPassword(StringUtils.isBlank(password) ? freeIpa.getAdminPassword() : password);
         kerberosConfig.setClusterName(clusterName);
         return kerberosConfigService.createKerberosConfig(kerberosConfig, stack.getAccountId());
+    }
+
+    private void addServerAddress(FreeIpa freeIpa, Stack stack, KerberosConfig kerberosConfig, Set<InstanceMetaData> allNotDeletedInstances) {
+        if (BalancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)) {
+            kerberosConfig.setUrl(FreeIpaDomainUtils.getKdcFqdn(freeIpa.getDomain()));
+            kerberosConfig.setAdminUrl(FreeIpaDomainUtils.getKerberosFqdn(freeIpa.getDomain()));
+        } else {
+            addAddressForLegacy(stack, kerberosConfig, allNotDeletedInstances);
+        }
+    }
+
+    /**
+     * old FreeIPA instance doesn't have kerberos CNAME so we have to create the config differently
+     */
+    private void addAddressForLegacy(Stack stack, KerberosConfig kerberosConfig, Set<InstanceMetaData> allNotDeletedInstances) {
+        InstanceMetaData master = getMasterInstance(stack);
+        kerberosConfig.setAdminUrl(master.getDiscoveryFQDN());
+        String allNotDeletedIpaInstanceFQDNJoined = allNotDeletedInstances.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.joining(","));
+        kerberosConfig.setUrl(allNotDeletedIpaInstanceFQDNJoined);
     }
 
     @Override

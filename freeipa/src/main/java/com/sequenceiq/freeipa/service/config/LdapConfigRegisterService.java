@@ -14,6 +14,7 @@ import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.ldap.LdapConfig;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
+import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
 @Service
 public class LdapConfigRegisterService extends AbstractConfigRegister {
@@ -68,7 +69,7 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
         ldapConfig.setUserSearchBase(USER_SEARCH_BASE + domainComponent);
         ldapConfig.setGroupSearchBase(GROUP_SEARCH_BASE + domainComponent);
         ldapConfig.setUserDnPattern(USER_DN_PATTERN + domainComponent);
-        ldapConfig.setServerHost(FreeIpaDomainUtils.getLdapFqdn(freeIpa.getDomain()));
+        addServerHost(stack, freeIpa, ldapConfig);
         ldapConfig.setProtocol(PROTOCOL);
         ldapConfig.setServerPort(SERVER_PORT);
         ldapConfig.setDomain(freeIpa.getDomain());
@@ -81,6 +82,17 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
         ldapConfig.setGroupObjectClass(GROUP_OBJECT_CLASS);
         ldapConfig.setClusterName(clusterName);
         return ldapConfigService.createLdapConfig(ldapConfig, stack.getAccountId());
+    }
+
+    /**
+     * old FreeIPA instance doesn't have ldap CNAME so we have to create the config differently
+     */
+    private void addServerHost(Stack stack, FreeIpa freeIpa, LdapConfig ldapConfig) {
+        if (BalancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)) {
+            ldapConfig.setServerHost(FreeIpaDomainUtils.getLdapFqdn(freeIpa.getDomain()));
+        } else {
+            ldapConfig.setServerHost(getMasterInstance(stack).getDiscoveryFQDN());
+        }
     }
 
     private String generateDomainComponent(FreeIpa freeIpa) {
