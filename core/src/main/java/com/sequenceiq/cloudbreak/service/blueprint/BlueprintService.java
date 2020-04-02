@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT_DELETED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
@@ -26,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
@@ -222,9 +224,11 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     private Set<Blueprint> updateDefaultBlueprintCollection(Workspace workspace) {
         Set<Blueprint> blueprintsInDatabase = blueprintRepository.findAllByWorkspaceIdAndStatusIn(workspace.getId(),
-                Set.of(ResourceStatus.DEFAULT, ResourceStatus.DEFAULT_DELETED, ResourceStatus.USER_MANAGED));
+                Set.of(DEFAULT, DEFAULT_DELETED, USER_MANAGED));
         if (!blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(blueprintsInDatabase)) {
-            return blueprintsInDatabase.stream().filter(bp -> ResourceStatus.DEFAULT.equals(bp.getStatus())).collect(Collectors.toSet());
+            return blueprintsInDatabase.stream()
+                    .filter(bp -> DEFAULT.equals(bp.getStatus()) || DEFAULT_DELETED.equals(bp.getStatus()))
+                    .collect(Collectors.toSet());
         }
         LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
         Set<Blueprint> updatedBlueprints =
@@ -263,7 +267,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     public Blueprint delete(Blueprint blueprint) {
         LOGGER.debug("Deleting blueprint with name: {}", blueprint.getName());
         prepareDeletion(blueprint);
-        if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
+        if (USER_MANAGED.equals(blueprint.getStatus())) {
             blueprintRepository.delete(blueprint);
         } else {
             LOGGER.error("Tried to delete DEFAULT blueprint");
