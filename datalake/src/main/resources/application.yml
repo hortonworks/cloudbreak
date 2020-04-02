@@ -69,6 +69,10 @@ datalake:
       schema: public
       cert.file: database.crt
       ssl: false
+  runtimes:
+    default: 7.1.0
+    advertised:
+    supported: 7.1.0
 
 secret:
   application: sdx/shared
