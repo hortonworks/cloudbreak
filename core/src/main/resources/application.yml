@@ -162,7 +162,7 @@ cb:
         p3.8xlarge,
         r5d.4xlarge
     hostkey.verify: false
-    role.session.name: hadoop-provisioning
+    role.session.name: cdp-provisioning
     cf.template.new.path: templates/aws-cf-stack.ftl
     cf.network.template.path: templates/aws-cf-network.ftl
     cf.template.newdb.path: templates/aws-cf-dbstack.ftl
@@ -456,6 +456,11 @@ cb:
               - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-168/tars/parcel/NIFI-1.11.1.2.0.0.0-168.jar
               - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-168/tars/parcel/NIFICA-1.11.1.2.0.0.0-168.jar
               - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-168/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-168.jar
+          - name: SPARK3
+            parcel: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2411607/spark3/2.x/parcels
+            version: 3.0.0.2.99.0.0-49
+            csd:
+              - http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2411607/spark3/2.x/csd/SPARK3_ON_YARN-3.0.0.2.99.0.0-49.jar
         version: 7.1.0-1.cdh7.1.0.p0.1922354
         minCM: 7.1
         repo:
