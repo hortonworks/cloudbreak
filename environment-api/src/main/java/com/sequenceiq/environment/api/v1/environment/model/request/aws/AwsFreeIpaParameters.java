@@ -8,17 +8,17 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "AttachedFreeIpaRequestAwsParameters")
-public class AttachedFreeIpaRequestAwsParameters {
+public class AwsFreeIpaParameters {
 
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_SPOT_PARAMETERS)
-    private AttachedFreeIpaRequestAwsSpotParameters spot;
+    private AwsFreeIpaSpotParameters spot;
 
-    public AttachedFreeIpaRequestAwsSpotParameters getSpot() {
+    public AwsFreeIpaSpotParameters getSpot() {
         return spot;
     }
 
-    public void setSpot(AttachedFreeIpaRequestAwsSpotParameters spot) {
+    public void setSpot(AwsFreeIpaSpotParameters spot) {
         this.spot = spot;
     }
 }

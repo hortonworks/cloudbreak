@@ -10,19 +10,19 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "AttachedFreeIpaRequestAwsSpotParameters")
-public class AttachedFreeIpaRequestAwsSpotParameters {
+public class AwsFreeIpaSpotParameters {
 
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_SPOT_PERCENTAGE)
     @Min(value = 0, message = "Spot percentage must be between 0 and 100 percent")
     @Max(value = 100, message = "Spot percentage must be between 0 and 100 percent")
     @Digits(fraction = 0, integer = 3, message = "Spot percentage has to be a number")
-    private Integer percentage;
+    private int percentage;
 
-    public Integer getPercentage() {
+    public int getPercentage() {
         return percentage;
     }
 
-    public void setPercentage(Integer percentage) {
+    public void setPercentage(int percentage) {
         this.percentage = percentage;
     }
 }

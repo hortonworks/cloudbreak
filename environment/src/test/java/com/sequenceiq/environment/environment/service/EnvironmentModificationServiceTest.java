@@ -224,6 +224,34 @@ class EnvironmentModificationServiceTest {
     }
 
     @Test
+    void editByNameAwsFreeIpaSpotPercentageIsNotModified() {
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withParameters(ParametersDto.builder()
+                        .withAwsParameters(AwsParametersDto.builder()
+                                .withFreeIpaSpotPercentage(50)
+                                .build())
+                        .build())
+                .build();
+        Environment value = new Environment();
+        AwsParameters awsParameters = new AwsParameters();
+        int originalFreeIpaSpotPercentage = 100;
+        awsParameters.setFreeIpaSpotPercentage(originalFreeIpaSpotPercentage);
+        value.setParameters(awsParameters);
+        when(environmentService
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+
+        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+
+        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(environmentArgumentCaptor.capture());
+        Environment result = environmentArgumentCaptor.getValue();
+
+        AwsParameters newAwsParameters = (AwsParameters) result.getParameters();
+        assertEquals(originalFreeIpaSpotPercentage, newAwsParameters.getFreeIpaSpotPercentage());
+    }
+
+    @Test
     void editByCrn() {
         EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
                 .withAccountId(ACCOUNT_ID)

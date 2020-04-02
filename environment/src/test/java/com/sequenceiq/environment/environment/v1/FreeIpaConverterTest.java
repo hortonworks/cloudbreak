@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaResponse;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 
 public class FreeIpaConverterTest {
@@ -39,7 +41,7 @@ public class FreeIpaConverterTest {
         assertNotNull(result);
         assertNotNull(result.getInstanceCountByGroup());
         assertEquals(1, result.getInstanceCountByGroup());
-        assertNull(result.getSpotPercentage());
+        assertNull(result.getAws());
     }
 
     @Test
@@ -47,7 +49,11 @@ public class FreeIpaConverterTest {
         // GIVEN
         FreeIpaCreationDto request = FreeIpaCreationDto.builder()
                 .withInstanceCountByGroup(2)
-                .withSpotPercentage(100)
+                .withAws(FreeIpaCreationAwsParametersDto.builder()
+                        .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
+                                .withPercentage(100)
+                                .build())
+                        .build())
                 .build();
         // WHEN
         FreeIpaResponse result = underTest.convert(request);
@@ -55,7 +61,7 @@ public class FreeIpaConverterTest {
         assertNotNull(result);
         assertNotNull(result.getInstanceCountByGroup());
         assertEquals(2, result.getInstanceCountByGroup());
-        assertEquals(100, result.getSpotPercentage());
+        assertEquals(100, result.getAws().getSpot().getPercentage());
     }
 
 }

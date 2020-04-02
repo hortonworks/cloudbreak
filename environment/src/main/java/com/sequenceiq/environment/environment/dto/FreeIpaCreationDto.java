@@ -6,7 +6,7 @@ public class FreeIpaCreationDto {
 
     private int instanceCountByGroup = 1;
 
-    private Integer spotPercentage;
+    private FreeIpaCreationAwsParametersDto aws;
 
     private FreeIpaCreationDto() {
     }
@@ -27,12 +27,8 @@ public class FreeIpaCreationDto {
         return instanceCountByGroup;
     }
 
-    public Integer getSpotPercentage() {
-        return spotPercentage;
-    }
-
-    public void setSpotPercentage(Integer spotPercentage) {
-        this.spotPercentage = spotPercentage;
+    public FreeIpaCreationAwsParametersDto getAws() {
+        return aws;
     }
 
     @Override
@@ -40,7 +36,7 @@ public class FreeIpaCreationDto {
         return "FreeIpaCreationDto{" +
             "create='" + create + '\'' +
             "instanceCountByGroup='" + instanceCountByGroup + '\'' +
-            "spotPercentage='" + spotPercentage + '\'' +
+            "aws='" + aws + '\'' +
             '}';
     }
 
@@ -54,7 +50,7 @@ public class FreeIpaCreationDto {
 
         private int instanceCountByGroup = 1;
 
-        private Integer spotPercentage;
+        private FreeIpaCreationAwsParametersDto aws;
 
         private Builder() {
         }
@@ -69,8 +65,8 @@ public class FreeIpaCreationDto {
             return this;
         }
 
-        public Builder withSpotPercentage(Integer spotPercentage) {
-            this.spotPercentage = spotPercentage;
+        public Builder withAws(FreeIpaCreationAwsParametersDto aws) {
+            this.aws = aws;
             return this;
         }
 
@@ -78,7 +74,7 @@ public class FreeIpaCreationDto {
             FreeIpaCreationDto response = new FreeIpaCreationDto();
             response.create = create;
             response.instanceCountByGroup = instanceCountByGroup;
-            response.spotPercentage = spotPercentage;
+            response.aws = aws;
             return response;
         }
     }

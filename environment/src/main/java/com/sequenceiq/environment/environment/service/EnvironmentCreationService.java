@@ -179,6 +179,9 @@ public class EnvironmentCreationService {
         validationBuilder.ifError(() -> isCloudPlatformInvalid(creationDto.getCreator(), creationDto.getCloudPlatform()),
                 "Provisioning in Microsoft Azure is not enabled for this account.");
 
+        ValidationResult freeIpaCreationValidation = validatorService.validateFreeIpaCreation(creationDto.getFreeIpaCreation());
+        validationBuilder.merge(freeIpaCreationValidation);
+
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());

@@ -4,7 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.AttachedFreeIpaRequestAwsParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,7 +21,7 @@ public class AttachedFreeIpaRequest {
 
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_PARAMETERS)
-    private AttachedFreeIpaRequestAwsParameters aws;
+    private AwsFreeIpaParameters aws;
 
     public Boolean getCreate() {
         return create;
@@ -39,11 +39,11 @@ public class AttachedFreeIpaRequest {
         this.instanceCountByGroup = instanceCountByGroup;
     }
 
-    public AttachedFreeIpaRequestAwsParameters getAws() {
+    public AwsFreeIpaParameters getAws() {
         return aws;
     }
 
-    public void setAws(AttachedFreeIpaRequestAwsParameters aws) {
+    public void setAws(AwsFreeIpaParameters aws) {
         this.aws = aws;
     }
 }

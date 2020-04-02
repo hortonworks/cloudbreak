@@ -36,9 +36,9 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNe
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.AttachedFreeIpaRequestAwsParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.AttachedFreeIpaRequestAwsSpotParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
@@ -60,7 +60,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
-import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -134,7 +133,7 @@ public class EnvironmentApiConverter {
                 .withCloudPlatform(getCloudPlatform(request, accountId))
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
-                .withFreeIpaCreation(attachedFreeIpaRequestToDto(request.getFreeIpa()))
+                .withFreeIpaCreation(freeIpaConverter.convert(request.getFreeIpa()))
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                         accountTelemetryService.getOrDefault(accountId).getFeatures()))
@@ -148,7 +147,9 @@ public class EnvironmentApiConverter {
                         .withCloudStorageValidation(request.getCloudStorageValidation())
                         .withTunnel(tunnelConverter.convert(request.getTunnel()))
                         .build())
-                .withParameters(getIfNotNull(request.getAws(), this::awsParamsToParametersDto))
+                .withParameters(awsParamsToParametersDto(
+                        request.getAws(),
+                        Optional.ofNullable(request.getFreeIpa()).map(AttachedFreeIpaRequest::getAws).orElse(null)))
                 .withParentEnvironmentName(request.getParentEnvironmentName());
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
@@ -188,29 +189,25 @@ public class EnvironmentApiConverter {
                 .toString();
     }
 
-    private FreeIpaCreationDto attachedFreeIpaRequestToDto(AttachedFreeIpaRequest request) {
-        FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder();
-        if (request != null) {
-            builder.withCreate(request.getCreate());
-            Optional.ofNullable(request.getInstanceCountByGroup())
-                    .ifPresent(builder::withInstanceCountByGroup);
-            Optional.ofNullable(request.getAws())
-                    .map(AttachedFreeIpaRequestAwsParameters::getSpot)
-                    .map(AttachedFreeIpaRequestAwsSpotParameters::getPercentage)
-                    .ifPresent(builder::withSpotPercentage);
+    private ParametersDto awsParamsToParametersDto(AwsEnvironmentParameters aws, AwsFreeIpaParameters awsFreeIpa) {
+        if (Objects.isNull(aws) && Objects.isNull(awsFreeIpa)) {
+            return null;
         }
-        return builder.build();
-    }
-
-    private ParametersDto awsParamsToParametersDto(AwsEnvironmentParameters aws) {
         return ParametersDto.builder()
-                .withAwsParameters(awsParamsToAwsParameters(aws))
+                .withAwsParameters(awsParamsToAwsParameters(aws, awsFreeIpa))
                 .build();
     }
 
-    private AwsParametersDto awsParamsToAwsParameters(AwsEnvironmentParameters aws) {
+    private AwsParametersDto awsParamsToAwsParameters(AwsEnvironmentParameters aws, AwsFreeIpaParameters awsFreeIpa) {
         return AwsParametersDto.builder()
-                .withDynamoDbTableName(getIfNotNull(aws.getS3guard(), S3GuardRequestParameters::getDynamoDbTableName))
+                .withDynamoDbTableName(Optional.ofNullable(aws)
+                        .map(AwsEnvironmentParameters::getS3guard)
+                        .map(S3GuardRequestParameters::getDynamoDbTableName)
+                        .orElse(null))
+                .withFreeIpaSpotPercentage(Optional.ofNullable(awsFreeIpa)
+                        .map(AwsFreeIpaParameters::getSpot)
+                        .map(AwsFreeIpaSpotParameters::getPercentage)
+                        .orElse(0))
                 .build();
     }
 
@@ -313,7 +310,7 @@ public class EnvironmentApiConverter {
                 .withAuthentication(authenticationDtoToResponse(environmentDto.getAuthentication()))
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
-                .withTag(getIfNotNull(environmentDto.getTags(), this::environtmentTagsToTagResponse))
+                .withTag(getIfNotNull(environmentDto.getTags(), this::environmentTagsToTagResponse))
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
@@ -347,7 +344,7 @@ public class EnvironmentApiConverter {
                 .withCreated(environmentDto.getCreated())
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
-                .withTag(getIfNotNull(environmentDto.getTags(), this::environtmentTagsToTagResponse))
+                .withTag(getIfNotNull(environmentDto.getTags(), this::environmentTagsToTagResponse))
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
@@ -370,7 +367,7 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
-    private TagResponse environtmentTagsToTagResponse(EnvironmentTags tags) {
+    private TagResponse environmentTagsToTagResponse(EnvironmentTags tags) {
         TagResponse tagResponse = new TagResponse();
         tagResponse.setDefaults(tags.getDefaultTags());
         tagResponse.setUserDefined(tags.getUserDefinedTags());
@@ -433,7 +430,7 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                 accountTelemetryService.getOrDefault(accountId).getFeatures())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
-        NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams)));
+        NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams, null)));
         return builder.build();
     }
 

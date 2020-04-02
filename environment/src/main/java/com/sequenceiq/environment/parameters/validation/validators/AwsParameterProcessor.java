@@ -16,6 +16,10 @@ import com.sequenceiq.environment.parameters.service.ParametersService;
 @Component
 public class AwsParameterProcessor {
 
+    private static final int PERCENTAGE_MIN = 0;
+
+    private static final int PERCENTAGE_MAX = 100;
+
     private final NoSqlTableCreationModeDeterminerService noSqlTableCreationModeDeterminerService;
 
     private final ParametersService parametersService;
@@ -37,6 +41,9 @@ public class AwsParameterProcessor {
             } else {
                 determineAwsParameters(environmentDto, parametersDto);
             }
+        }
+        if (awsParametersDto.getFreeIpaSpotPercentage() < PERCENTAGE_MIN || awsParametersDto.getFreeIpaSpotPercentage() > PERCENTAGE_MAX) {
+            validationResultBuilder.error(String.format("FreeIpa spot percentage must be between %d and %d.", PERCENTAGE_MIN, PERCENTAGE_MAX));
         }
         return validationResultBuilder.build();
     }

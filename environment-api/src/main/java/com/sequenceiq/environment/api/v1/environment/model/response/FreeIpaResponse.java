@@ -2,6 +2,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -11,8 +12,8 @@ public class FreeIpaResponse {
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP)
     private Integer instanceCountByGroup = 1;
 
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_SPOT_PERCENTAGE)
-    private Integer spotPercentage;
+    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_PARAMETERS)
+    private AwsFreeIpaParameters aws;
 
     public Integer getInstanceCountByGroup() {
         return instanceCountByGroup;
@@ -22,11 +23,11 @@ public class FreeIpaResponse {
         this.instanceCountByGroup = instanceCountByGroup;
     }
 
-    public Integer getSpotPercentage() {
-        return spotPercentage;
+    public AwsFreeIpaParameters getAws() {
+        return aws;
     }
 
-    public void setSpotPercentage(Integer spotPercentage) {
-        this.spotPercentage = spotPercentage;
+    public void setAws(AwsFreeIpaParameters aws) {
+        this.aws = aws;
     }
 }

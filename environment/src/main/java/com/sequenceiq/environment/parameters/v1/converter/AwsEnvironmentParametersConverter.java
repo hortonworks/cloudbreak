@@ -37,6 +37,9 @@ public class AwsEnvironmentParametersConverter extends BaseEnvironmentParameters
         awsParameters.setS3guardTableCreation(awsParametersDto
                 .map(AwsParametersDto::getDynamoDbTableCreation)
                 .orElse(null));
+        awsParameters.setFreeIpaSpotPercentage(awsParametersDto
+                .map(AwsParametersDto::getFreeIpaSpotPercentage)
+                .orElse(0));
     }
 
     @Override
@@ -46,6 +49,7 @@ public class AwsEnvironmentParametersConverter extends BaseEnvironmentParameters
         builder.withAwsParameters(AwsParametersDto.builder()
                 .withDynamoDbTableName(awsParameters.getS3guardTableName())
                 .withDynamoDbTableCreation(awsParameters.getS3guardTableCreation())
+                .withFreeIpaSpotPercentage(awsParameters.getFreeIpaSpotPercentage())
                 .build());
     }
 }
