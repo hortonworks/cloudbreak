@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -54,6 +56,9 @@ public class ClusterKerberosServiceTest {
     @InjectMocks
     private ClusterKerberosService underTest;
 
+    @Mock
+    private Node node;
+
     private Stack stack;
 
     private Cluster cluster;
@@ -78,11 +83,13 @@ public class ClusterKerberosServiceTest {
     public void testAdLeave() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.isAdJoinable(any())).thenReturn(Boolean.TRUE);
+        when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of(node));
 
         underTest.leaveDomains(stack);
 
+        verify(stackUtil).collectReachableNodes(stack);
         verify(hostOrchestrator, times(1))
-                .leaveDomain(any(GatewayConfig.class), any(), eq("ad_member"), eq("ad_leave"), any(ExitCriteriaModel.class));
+                .leaveDomain(any(GatewayConfig.class), eq(Set.of(node)), eq("ad_member"), eq("ad_leave"), any(ExitCriteriaModel.class));
     }
 
     @Test

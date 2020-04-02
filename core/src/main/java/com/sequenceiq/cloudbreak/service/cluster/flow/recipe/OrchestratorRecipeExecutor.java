@@ -137,7 +137,7 @@ class OrchestratorRecipeExecutor {
     }
 
     public void preTerminationRecipes(Stack stack, boolean forced) throws CloudbreakException {
-        preTerminationRecipesOnNodes(stack, stackUtil.collectNodes(stack), forced);
+        preTerminationRecipesOnNodes(stack, stackUtil.collectReachableNodes(stack), forced);
     }
 
     public void preTerminationRecipes(Stack stack, Set<String> hostNames) throws CloudbreakException {

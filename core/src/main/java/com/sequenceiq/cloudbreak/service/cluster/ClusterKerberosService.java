@@ -42,7 +42,7 @@ public class ClusterKerberosService {
     private KerberosDetailService kerberosDetailService;
 
     public void leaveDomains(Stack stack) throws CloudbreakException {
-        leaveDomains(stack, stackUtil.collectNodes(stack));
+        leaveDomains(stack, stackUtil.collectReachableNodes(stack));
     }
 
     public void leaveDomains(Stack stack, Set<Node> nodes) throws CloudbreakException {
