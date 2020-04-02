@@ -353,6 +353,8 @@ class EnvironmentValidatorServiceTest {
                 Arguments.of(1, 0, true),
                 Arguments.of(1, 100, true),
                 Arguments.of(1, 50, false),
+                Arguments.of(2, 0, true),
+                Arguments.of(2, 100, true),
                 Arguments.of(2, 50, true)
         );
     }

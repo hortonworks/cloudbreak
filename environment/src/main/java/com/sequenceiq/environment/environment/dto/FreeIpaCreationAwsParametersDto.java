@@ -15,6 +15,13 @@ public class FreeIpaCreationAwsParametersDto {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return "FreeIpaCreationAwsParametersDto{" +
+                "spot=" + spot +
+                '}';
+    }
+
     public static class Builder {
 
         private FreeIpaCreationAwsSpotParametersDto spot;

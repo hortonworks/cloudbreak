@@ -15,6 +15,13 @@ public class FreeIpaCreationAwsSpotParametersDto {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return "FreeIpaCreationAwsSpotParametersDto{" +
+                "percentage=" + percentage +
+                '}';
+    }
+
     public static class Builder {
 
         private Integer percentage;

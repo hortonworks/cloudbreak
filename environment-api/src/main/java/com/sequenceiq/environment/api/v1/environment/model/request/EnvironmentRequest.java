@@ -68,6 +68,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)
     private EnvironmentAuthenticationRequest authentication;
 
+    @Valid
     @ApiModelProperty(EnvironmentModelDescription.FREE_IPA)
     private AttachedFreeIpaRequest freeIpa;
 
