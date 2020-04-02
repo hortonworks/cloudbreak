@@ -15,6 +15,7 @@ import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoin
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
+import com.sequenceiq.environment.api.v1.telemetry.endpoint.AccountTelemetryEndpoint;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 
@@ -71,5 +72,11 @@ public class EnvironmentApiClientConfig {
     @ConditionalOnBean(name = "environmentApiClientWebTarget")
     AccountTagEndpoint accountTagEndpoint(WebTarget environmentApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(environmentApiClientWebTarget, AccountTagEndpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "environmentApiClientWebTarget")
+    AccountTelemetryEndpoint accountTelemetryEndpoint(WebTarget environmentApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(environmentApiClientWebTarget, AccountTelemetryEndpoint.class);
     }
 }

@@ -14,8 +14,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.altus.AltusAnonymizationRulesService;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
+import com.sequenceiq.cloudbreak.service.environment.telemetry.AccountTelemetryClientService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
@@ -79,21 +79,21 @@ public class TelemetryDecorator {
 
     private final AltusMachineUserService altusMachineUserService;
 
-    private final AltusAnonymizationRulesService altusAnonymizationRulesService;
+    private final AccountTelemetryClientService accountTelemetryClientService;
 
     public TelemetryDecorator(DatabusConfigService databusConfigService,
             FluentConfigService fluentConfigService,
             MeteringConfigService meteringConfigService,
             MonitoringConfigService monitoringConfigService,
             AltusMachineUserService altusMachineUserService,
-            AltusAnonymizationRulesService altusAnonymizationRulesService,
+            AccountTelemetryClientService accountTelemetryClientService,
             @Value("${info.app.version:}") String version) {
         this.databusConfigService = databusConfigService;
         this.fluentConfigService = fluentConfigService;
         this.meteringConfigService = meteringConfigService;
         this.monitoringConfigService = monitoringConfigService;
         this.altusMachineUserService = altusMachineUserService;
-        this.altusAnonymizationRulesService = altusAnonymizationRulesService;
+        this.accountTelemetryClientService = accountTelemetryClientService;
         this.version = version;
     }
 
@@ -126,7 +126,7 @@ public class TelemetryDecorator {
                 .withPlatform(stack.getCloudPlatform())
                 .withVersion(version)
                 .build();
-        List<AnonymizationRule> rules = altusAnonymizationRulesService.getAnonymizationRules(stack);
+        List<AnonymizationRule> rules = accountTelemetryClientService.getAnonymizationRules();
         FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
                 databusConfigView.isEnabled(), meteringEnabled, telemetry, rules);
         if (fluentConfigView.isEnabled()) {

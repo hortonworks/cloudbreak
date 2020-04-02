@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
+import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -33,12 +34,12 @@ public class TelemetryApiConverter {
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
     }
 
-    public EnvironmentTelemetry convert(TelemetryRequest request) {
+    public EnvironmentTelemetry convert(TelemetryRequest request, Features accountFeatures) {
         EnvironmentTelemetry telemetry = null;
         if (request != null) {
             telemetry = new EnvironmentTelemetry();
             telemetry.setLogging(createLoggingFromRequest(request.getLogging()));
-            telemetry.setFeatures(createEnvironmentFeaturesFromRequest(request.getFeatures()));
+            telemetry.setFeatures(createEnvironmentFeaturesFromRequest(request.getFeatures(), accountFeatures));
             telemetry.setFluentAttributes(new HashMap<>(request.getFluentAttributes()));
         }
         return telemetry;
@@ -112,7 +113,7 @@ public class TelemetryApiConverter {
         return logging;
     }
 
-    private EnvironmentFeatures createEnvironmentFeaturesFromRequest(FeaturesRequest featuresRequest) {
+    private EnvironmentFeatures createEnvironmentFeaturesFromRequest(FeaturesRequest featuresRequest, Features accountFeatures) {
         EnvironmentFeatures features = null;
         if (featuresRequest != null) {
             features = new EnvironmentFeatures();
@@ -120,11 +121,17 @@ public class TelemetryApiConverter {
                 features.addUseSharedAltusredential(true);
             }
             if (clusterLogsCollection) {
+                if (accountFeatures.getClusterLogsCollection() != null) {
+                    features.setClusterLogsCollection(accountFeatures.getClusterLogsCollection());
+                }
                 if (featuresRequest.getClusterLogsCollection() != null) {
                     features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
                 } else {
                     features.addClusterLogsCollection(false);
                 }
+            }
+            if (accountFeatures.getWorkloadAnalytics() != null) {
+                features.setWorkloadAnalytics(accountFeatures.getWorkloadAnalytics());
             }
             if (featuresRequest.getWorkloadAnalytics() != null) {
                 features.setWorkloadAnalytics(featuresRequest.getWorkloadAnalytics());

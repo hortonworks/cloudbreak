@@ -26,8 +26,8 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.altus.AltusAnonymizationRulesService;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
+import com.sequenceiq.cloudbreak.service.environment.telemetry.AccountTelemetryClientService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
@@ -60,7 +60,7 @@ public class TelemetryDecoratorTest {
     private AltusMachineUserService altusMachineUserService;
 
     @Mock
-    private AltusAnonymizationRulesService altusAnonymizationRulesService;
+    private AccountTelemetryClientService accountTelemetryClientService;
 
     @Before
     public void setUp() {
@@ -70,7 +70,7 @@ public class TelemetryDecoratorTest {
                 .willReturn(Optional.of(altusCredential));
         underTest = new TelemetryDecorator(databusConfigService, fluentConfigService,
                 meteringConfigService, monitoringConfigService, altusMachineUserService,
-                altusAnonymizationRulesService, "1.0.0");
+                accountTelemetryClientService, "1.0.0");
     }
 
     @Test

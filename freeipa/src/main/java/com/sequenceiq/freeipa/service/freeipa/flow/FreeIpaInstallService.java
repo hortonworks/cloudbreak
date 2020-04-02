@@ -33,7 +33,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
-import com.sequenceiq.freeipa.service.AltusAnonymizationRulesService;
+import com.sequenceiq.freeipa.service.AccountTelemetryService;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigService;
@@ -64,7 +64,7 @@ public class FreeIpaInstallService {
     private DatabusConfigService databusConfigService;
 
     @Inject
-    private AltusAnonymizationRulesService altusAnonymizationRulesService;
+    private AccountTelemetryService accountTelemetryService;
 
     @Inject
     private AltusMachineUserService altusMachineUserService;
@@ -110,7 +110,7 @@ public class FreeIpaInstallService {
                     .withPlatform(stack.getCloudPlatform())
                     .withVersion(version)
                     .build();
-            List<AnonymizationRule> rules = altusAnonymizationRulesService.getAnonymizationRules();
+            List<AnonymizationRule> rules = accountTelemetryService.getAnonymizationRules();
             FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
                     databusEnabled, false, telemetry, rules);
             servicePillarConfig.put("fluent", new SaltPillarProperties("/fluent/init.sls", Collections.singletonMap("fluent", fluentConfigView.toMap())));
