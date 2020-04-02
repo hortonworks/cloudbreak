@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -68,20 +69,33 @@ public class AzureInstanceConnector implements InstanceConnector {
     public List<CloudVmInstanceStatus> reboot(AuthenticatedContext ac, List<CloudInstance> vms) {
         LOGGER.info("Rebooting vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-        List<Completable> rebootCompletables = new ArrayList<>();
-        for (CloudInstance vm : vms) {
-            String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), vm);
+        List<Completable> completables = new ArrayList<>();
+        List<CloudVmInstanceStatus> currentStatuses = check(ac, vms);
+        for (CloudVmInstanceStatus vm : currentStatuses) {
             AzureClient azureClient = ac.getParameter(AzureClient.class);
-            rebootCompletables.add(azureClient.rebootVirtualMachineAsync(resourceGroupName, vm.getInstanceId())
-                    .doOnError(throwable -> {
-                        LOGGER.error("Error happend on azure instance reboot: {}", vm, throwable);
-                        statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
-                    })
-                    .doOnCompleted(() -> statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STARTED)))
-                    .subscribeOn(Schedulers.io()));
+            String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), vm.getCloudInstance());
+            if (vm.getStatus() == InstanceStatus.STARTED) {
+                doReboot(completables, vm, statuses, () -> azureClient.rebootVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId()));
+            } else if (vm.getStatus() == InstanceStatus.STOPPED) {
+                doReboot(completables, vm, statuses, () -> azureClient.startVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId()));
+            } else {
+                LOGGER.error(String.format("Unable to reboot instance %s because of invalid status %s.",
+                        vm.getCloudInstance().getInstanceId(), vm.getStatus().toString()));
+            }
         }
-        Completable.merge(rebootCompletables).await();
+        Completable.merge(completables).await();
         return statuses;
+    }
+
+    private void doReboot(List<Completable> completables, CloudVmInstanceStatus vm, List<CloudVmInstanceStatus> statuses,
+            Supplier<Completable> asyncCallSupplier) {
+        completables.add(asyncCallSupplier.get()
+                .doOnError(throwable -> {
+                    LOGGER.error("Error happend on azure instance reboot: {}", vm, throwable);
+                    statuses.add(new CloudVmInstanceStatus(vm.getCloudInstance(), InstanceStatus.FAILED, throwable.getMessage()));
+                })
+                .doOnCompleted(() -> statuses.add(new CloudVmInstanceStatus(vm.getCloudInstance(), InstanceStatus.STARTED)))
+                .subscribeOn(Schedulers.io()));
     }
 
     @Override
