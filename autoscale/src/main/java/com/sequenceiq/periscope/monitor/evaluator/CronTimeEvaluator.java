@@ -81,7 +81,7 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
         Cluster cluster = clusterService.findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
         publishIfNeeded(alertRepository.findAllByCluster(clusterId));
-        LOGGER.debug("Finished cronTimeEvaluator for cluster {} in {} ms", clusterId, System.currentTimeMillis() - start);
+        LOGGER.debug("Finished cronTimeEvaluator for cluster {} in {} ms", cluster.getStackCrn(), System.currentTimeMillis() - start);
     }
 
     private void publishIfNeeded(List<TimeAlert> alerts) {

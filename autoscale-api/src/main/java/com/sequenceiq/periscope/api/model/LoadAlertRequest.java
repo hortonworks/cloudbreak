@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class LoadAlertRequest extends AbstractAlertJson {
 
     @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION)
-    private @Valid LoadAlertConfigurationRequest loadAlertConfiguration;
+    private @Valid @NotNull LoadAlertConfigurationRequest loadAlertConfiguration;
 
     @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
     private @Valid @NotNull ScalingPolicyRequest scalingPolicy;

@@ -43,9 +43,13 @@ public interface AutoscaleStack {
 
     String getUserId();
 
+    String getUserCrn();
+
     String getClusterManagerVariant();
 
     String getCrn();
+
+    String getCloudPlatform();
 
     StackType getType();
 

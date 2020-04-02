@@ -13,16 +13,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
-import com.sequenceiq.periscope.monitor.evaluator.cm.ClouderaManagerTotalHostsEvaluator;
+import com.sequenceiq.periscope.monitor.evaluator.ScalingConstants;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.utils.ClusterUtils;
-import com.sequenceiq.periscope.utils.TimeUtil;
+import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 @Component
 public class ScalingHandler implements ApplicationListener<ScalingEvent> {
@@ -43,62 +44,67 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     private RejectedThreadService rejectedThreadService;
 
     @Inject
-    private ClouderaManagerTotalHostsEvaluator totalHostsEvaluatorService;
+    private StackResponseUtils stackResponseUtils;
+
+    @Inject
+    private CloudbreakCommunicator cloudbreakCommunicator;
 
     @Override
     public void onApplicationEvent(ScalingEvent event) {
         BaseAlert alert = event.getAlert();
         Cluster cluster = clusterService.findById(alert.getCluster().getId());
         MDCBuilder.buildMdcContext(cluster);
-        scale(cluster, alert.getScalingPolicy());
-    }
+        ScalingPolicy policy = alert.getScalingPolicy();
 
-    private void scale(Cluster cluster, ScalingPolicy policy) {
-        long remainingTime = getRemainingCooldownTime(cluster);
-        if (remainingTime <= 0) {
-            int totalNodes = totalHostsEvaluatorService.getTotalHosts(cluster);
-            int desiredNodeCount = getDesiredNodeCount(cluster, policy, totalNodes);
-            if (totalNodes != desiredNodeCount) {
-                Runnable scalingRequest = (Runnable) applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
-                executorService.submit(scalingRequest);
-                rejectedThreadService.remove(cluster.getId());
-                cluster.setLastScalingActivityCurrent();
-                clusterService.save(cluster);
-            } else {
-                LOGGER.debug("No scaling activity required");
-            }
+        int hostGroupNodeCount = getHostGroupNodeCount(event, cluster, policy);
+        int desiredNodeCount = getDesiredNodeCount(event, hostGroupNodeCount);
+        if (hostGroupNodeCount != desiredNodeCount) {
+            Runnable scalingRequest = (Runnable) applicationContext.getBean("ScalingRequest", cluster, policy,
+                    hostGroupNodeCount, desiredNodeCount, event.getDecommissionNodeIds());
+
+            executorService.submit(scalingRequest);
+            rejectedThreadService.remove(cluster.getId());
+            cluster.setLastScalingActivityCurrent();
+            clusterService.save(cluster);
         } else {
-            LOGGER.debug("Cluster cannot be scaled for {} min(s)",
-                    ClusterUtils.TIME_FORMAT.format((double) remainingTime / TimeUtil.MIN_IN_MS));
+            LOGGER.debug("No scaling activity required for cluster crn {}", cluster.getStackCrn());
         }
     }
 
-    private long getRemainingCooldownTime(Cluster cluster) {
-        long coolDown = cluster.getCoolDown();
-        long lastScalingActivity = cluster.getLastScalingActivity();
-        return lastScalingActivity == 0L ? 0L : (coolDown * TimeUtil.MIN_IN_MS) - (System.currentTimeMillis() - lastScalingActivity);
-    }
-
-    private int getDesiredNodeCount(Cluster cluster, ScalingPolicy policy, int totalNodes) {
+    private int getDesiredNodeCount(ScalingEvent event, int hostGroupNodeCount) {
+        ScalingPolicy policy = event.getAlert().getScalingPolicy();
         int scalingAdjustment = policy.getScalingAdjustment();
-        int desiredNodeCount;
+        int desiredHostGroupNodeCount;
         switch (policy.getAdjustmentType()) {
             case NODE_COUNT:
-                desiredNodeCount = totalNodes + scalingAdjustment;
+                desiredHostGroupNodeCount = hostGroupNodeCount + scalingAdjustment;
                 break;
             case PERCENTAGE:
-                desiredNodeCount = totalNodes
-                        + (int) (ceil(totalNodes * ((double) scalingAdjustment / ClusterUtils.MAX_CAPACITY)));
+                desiredHostGroupNodeCount = hostGroupNodeCount
+                        + (int) (ceil(hostGroupNodeCount * ((double) scalingAdjustment / ClusterUtils.MAX_CAPACITY)));
                 break;
             case EXACT:
-                desiredNodeCount = policy.getScalingAdjustment();
+                desiredHostGroupNodeCount = policy.getScalingAdjustment();
+                break;
+            case LOAD_BASED:
+                desiredHostGroupNodeCount = hostGroupNodeCount + event.getScaleUpNodeCount()
+                        .orElseGet(() -> {
+                            return -1 * event.getDecommissionNodeIds().size();
+                        });
                 break;
             default:
-                desiredNodeCount = totalNodes;
+                desiredHostGroupNodeCount = hostGroupNodeCount;
         }
-        int minSize = cluster.getMinSize();
-        int maxSize = cluster.getMaxSize();
-        return desiredNodeCount < minSize ? minSize : desiredNodeCount > maxSize ? maxSize : desiredNodeCount;
+        int minSize = ScalingConstants.DEFAULT_HOSTGROUP_MIN_SIZE;
+        int maxSize = ScalingConstants.DEFAULT_HOSTGROUP_MAX_SIZE;
+
+        return desiredHostGroupNodeCount < minSize ? minSize : desiredHostGroupNodeCount > maxSize ? maxSize : desiredHostGroupNodeCount;
     }
 
+    private Integer getHostGroupNodeCount(ScalingEvent event, Cluster cluster, ScalingPolicy policy) {
+        return event.getHostGroupNodeCount().orElseGet(() -> {
+            StackV4Response stackV4Response = cloudbreakCommunicator.getByCrn(cluster.getStackCrn());
+            return stackResponseUtils.getNodeCountForHostGroup(stackV4Response, policy.getHostGroup());
+        });
+    }
 }

@@ -90,7 +90,8 @@ environment:
   enabledParentPlatforms: AWS, MOCK
   enabledChildPlatforms: YARN, MOCK
   tunnel:
-    default: DIRECT
+    default: CLUSTER_PROXY
+    ccm.validate.entitlement: false
   admin.group.default.prefix: cdp_
 
 cb:

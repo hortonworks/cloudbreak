@@ -121,10 +121,6 @@ public class ApiDescription {
         public static final String SCALING_CONFIGURATION = "Scaling configuration for the cluster";
     }
 
-    public static class DistroXClusterJsonsProperties {
-        public static final String DISTROX_SCALING_MODE = "Scaling Types supported for distrox clusters";
-    }
-
     public static class ScalingConfigurationJsonProperties {
         public static final String MINSIZE = "The minimum size of the cluster after scaling";
         public static final String MAXSIZE = "The maximum size of the cluster after scaling";

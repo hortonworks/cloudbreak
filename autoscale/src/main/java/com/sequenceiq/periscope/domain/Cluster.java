@@ -25,15 +25,10 @@ import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.converter.db.StackTypeAttributeConverter;
 import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.monitor.Monitored;
+import com.sequenceiq.periscope.monitor.evaluator.ScalingConstants;
 
 @Entity
 public class Cluster implements Monitored, Clustered {
-
-    private static final int DEFAULT_MIN_SIZE = 2;
-
-    private static final int DEFAULT_MAX_SIZE = 100;
-
-    private static final int DEFAULT_COOLDOWN = 30;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "cluster_generator")
@@ -53,7 +48,7 @@ public class Cluster implements Monitored, Clustered {
     @Enumerated(EnumType.STRING)
     private ClusterState state = ClusterState.PENDING;
 
-    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<MetricAlert> metricAlerts = new HashSet<>();
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -62,23 +57,26 @@ public class Cluster implements Monitored, Clustered {
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<LoadAlert> loadAlerts = new HashSet<>();
 
-    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<PrometheusAlert> prometheusAlerts = new HashSet<>();
 
     @Column(name = "min_size")
-    private Integer minSize = DEFAULT_MIN_SIZE;
+    private Integer minSize = ScalingConstants.DEFAULT_CLUSTER_MIN_SIZE;
 
     @Column(name = "max_size")
-    private Integer maxSize = DEFAULT_MAX_SIZE;
+    private Integer maxSize = ScalingConstants.DEFAULT_CLUSTER_MAX_SIZE;
 
     @Column(name = "cooldown")
-    private Integer coolDown = DEFAULT_COOLDOWN;
+    private Integer coolDown = ScalingConstants.DEFAULT_CLUSTER_COOLDOWN_MINS;
 
     @Column(name = "cb_stack_crn")
     private String stackCrn;
 
     @Column(name = "cb_stack_name")
     private String stackName;
+
+    @Column(name = "cloud_platform")
+    private String cloudPlatform;
 
     @Column(name = "cb_stack_type")
     @Convert(converter = StackTypeAttributeConverter.class)
@@ -329,6 +327,18 @@ public class Cluster implements Monitored, Clustered {
 
     public void setLoadAlerts(Set<LoadAlert> loadAlerts) {
         this.loadAlerts = loadAlerts;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
+    public Boolean getAutoscalingEnabled() {
+        return autoscalingEnabled;
     }
 }
 

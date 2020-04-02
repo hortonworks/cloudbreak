@@ -208,7 +208,7 @@ public class AlertService {
         Cluster cluster = clusterService.findById(clusterId);
         List<Map<String, Object>> ret = new ArrayList<>();
         AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
-        List<Map<String, String>> alertDefinitions = ambariRequestLogging.logging(ambariClient::getAlertDefinitions, "alertDefinition");
+        List<Map<String, String>> alertDefinitions = ambariRequestLogging.logResponseTime(ambariClient::getAlertDefinitions, "alertDefinition");
         for (Map<String, String> alertDefinition : alertDefinitions) {
             Map<String, Object> tmp = new HashMap<>();
             for (Entry<String, String> stringStringEntry : alertDefinition.entrySet()) {
