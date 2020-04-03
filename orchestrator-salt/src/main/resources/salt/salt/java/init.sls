@@ -19,7 +19,7 @@ set_dns_negativ_ttl:
     - name: {{ java_home }}/jre/lib/security/java.security
     - pattern: "#?networkaddress.cache.negative.ttl=.*"
     - repl: "networkaddress.cache.negative.ttl=0"
-    - unless: cat {{ java_home }}/lib/security/java.security | grep ^networkaddress.cache.negative.ttl=0$
+    - unless: cat {{ java_home }}/jre/lib/security/java.security | grep ^networkaddress.cache.negative.ttl=0$
 
 /etc/jmx_exporter:
   file.recurse:
