@@ -1,6 +1,14 @@
 name: "distrox-bigscale-tests"
 tests:
   - name: "distrox-bigscale-tests"
-    parameters: {hostgroup: worker, scale_up: 100, scale_down: 10, times: 10}
+    parameters: {
+      hostgroup: worker,
+      scale_up: 100,
+      scale_down: 10,
+      times: 10,
+      image_catalog: "rc-catalog",
+      image_catalog_url: "https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-rc-cb-image-catalog.json",
+      image_id: "bc98d75b-ebc9-4d64-57b9-3a931925e8bb"
+    }
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest

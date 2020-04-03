@@ -111,6 +111,13 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         return this;
     }
 
+    public DistroXTestDtoBase<T> withImageSettingsIf(boolean condition, String key) {
+        if (condition) {
+            return withImageSettings(key);
+        }
+        return this;
+    }
+
     public DistroXTestDtoBase<T> withImageSettings(DistroXImageTestDto imageSettings) {
         getRequest().setImage(imageSettings.getRequest());
         ImageCatalogTestDto imageCatalogTestDto = getTestContext().get(ImageCatalogTestDto.class);
