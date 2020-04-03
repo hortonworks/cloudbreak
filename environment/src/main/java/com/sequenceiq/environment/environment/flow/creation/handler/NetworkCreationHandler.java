@@ -30,6 +30,7 @@ import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentDto> {
@@ -48,13 +49,15 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final Set<String> enabledPlatforms;
 
+    private final EventBus eventBus;
+
     protected NetworkCreationHandler(EventSender eventSender,
             EnvironmentService environmentService,
             NetworkService networkService,
             EnvironmentNetworkService environmentNetworkService,
             CloudNetworkService cloudNetworkService,
             EnvironmentResourceService environmentResourceService,
-            @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
+            @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms, EventBus eventBus) {
         super(eventSender);
         this.environmentService = environmentService;
         this.networkService = networkService;
@@ -62,6 +65,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
         this.enabledPlatforms = enabledPlatforms;
         this.cloudNetworkService = cloudNetworkService;
         this.environmentResourceService = environmentResourceService;
+        this.eventBus = eventBus;
     }
 
     @Override
@@ -90,7 +94,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
                     environmentDto.getName(),
                     e,
                     environmentDto.getResourceCrn());
-            eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
+            eventBus.notify(failureEvent.selector(), new Event<>(environmentDtoEvent.getHeaders(), failureEvent));
         }
     }
 

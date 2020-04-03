@@ -16,6 +16,7 @@ import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class PublicKeyCreationHandler extends EventSenderAwareHandler<EnvironmentDto> {
@@ -26,11 +27,14 @@ public class PublicKeyCreationHandler extends EventSenderAwareHandler<Environmen
 
     private final EnvironmentResourceService environmentResourceService;
 
-    protected PublicKeyCreationHandler(EventSender eventSender, EnvironmentService environmentService, EnvironmentResourceService environmentResourceService) {
+    private final EventBus eventBus;
 
+    protected PublicKeyCreationHandler(EventSender eventSender, EnvironmentService environmentService, EnvironmentResourceService environmentResourceService,
+            EventBus eventBus) {
         super(eventSender);
         this.environmentService = environmentService;
         this.environmentResourceService = environmentResourceService;
+        this.eventBus = eventBus;
     }
 
     @Override
@@ -62,7 +66,8 @@ public class PublicKeyCreationHandler extends EventSenderAwareHandler<Environmen
         } catch (Exception e) {
             EnvCreationFailureEvent failedEvent =
                     new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), e, environmentDto.getResourceCrn());
-            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
+            Event<EnvCreationFailureEvent> ev = new Event<>(environmentDtoEvent.getHeaders(), failedEvent);
+            eventBus.notify(failedEvent.selector(), ev);
         }
     }
 

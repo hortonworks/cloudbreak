@@ -42,7 +42,6 @@ import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
-import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.TelemetryApiConverter;
@@ -56,6 +55,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIp
 
 import reactor.bus.Event;
 import reactor.bus.Event.Headers;
+import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaCreationHandlerTest {
@@ -102,6 +102,9 @@ public class FreeIpaCreationHandlerTest {
     @Mock
     private CloudPlatformConnectors connectors;
 
+    @Mock
+    private EventBus eventBus;
+
     private FreeIpaCreationHandler victim;
 
     @BeforeEach
@@ -117,7 +120,7 @@ public class FreeIpaCreationHandlerTest {
                 freeIpaServerRequestProvider,
                 telemetryApiConverter,
                 connectors,
-                Collections.singleton(CloudPlatform.YARN.name()));
+                eventBus, Collections.singleton(CloudPlatform.YARN.name()));
     }
 
     @Test
@@ -199,7 +202,7 @@ public class FreeIpaCreationHandlerTest {
 
         victim.accept(new Event<>(environmentDto));
 
-        verify(eventSender).sendEvent(any(EnvCreationFailureEvent.class), any(Headers.class));
+        verify(eventBus).notify(anyString(), any(Event.class));
 
         verify(environmentService, times(1)).findEnvironmentById(anyLong());
         verify(environmentService, times(1)).findEnvironmentById(environmentDto.getId());
