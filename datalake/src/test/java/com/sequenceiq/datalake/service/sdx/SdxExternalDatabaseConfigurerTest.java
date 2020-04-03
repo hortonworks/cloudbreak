@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,33 +36,34 @@ public class SdxExternalDatabaseConfigurerTest {
         underTest.configure(cloudPlatform, null, sdxCluster);
 
         assertEquals(true, sdxCluster.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
     }
 
     @Test
     public void whenPlatformIsAwsWithSkipCreateShouldNotCreateDatabase() {
         CloudPlatform cloudPlatform = CloudPlatform.AWS;
-        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
         SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
-        dbRequest.setCreate(false);
+        dbRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         SdxCluster sdxCluster = new SdxCluster();
 
         underTest.configure(cloudPlatform, dbRequest, sdxCluster);
 
         assertEquals(false, sdxCluster.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.NONE, sdxCluster.getDatabaseAvailabilityType());
     }
 
     @Test
     public void whenPlatformIsAwsAndCreateShouldCreateDatabase() {
         CloudPlatform cloudPlatform = CloudPlatform.AWS;
-        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
         when(platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)).thenReturn(true);
         SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
-        dbRequest.setCreate(true);
+        dbRequest.setAvailabilityType(SdxDatabaseAvailabilityType.HA);
         SdxCluster sdxCluster = new SdxCluster();
 
         underTest.configure(cloudPlatform, dbRequest, sdxCluster);
 
         assertEquals(true, sdxCluster.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
     }
 
     @Test
@@ -76,20 +78,21 @@ public class SdxExternalDatabaseConfigurerTest {
         underTest.configure(cloudPlatform, dbRequest, sdxCluster);
 
         assertEquals(true, sdxCluster.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
     }
 
     @Test
     public void whenPlatformIsAzureWithoutRuntimeVerionSetAndNoDbRequested() {
         CloudPlatform cloudPlatform = CloudPlatform.AZURE;
-        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(true);
         SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
-        dbRequest.setCreate(false);
+        dbRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("clusterName");
 
         underTest.configure(cloudPlatform, dbRequest, sdxCluster);
 
         assertEquals(false, sdxCluster.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.NONE, sdxCluster.getDatabaseAvailabilityType());
     }
 
     @Test
@@ -104,6 +107,7 @@ public class SdxExternalDatabaseConfigurerTest {
         underTest.configure(cloudPlatform, dbRequest, sdxCluster);
 
         assertEquals(false, sdxCluster.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.NONE, sdxCluster.getDatabaseAvailabilityType());
     }
 
     @Test
@@ -119,6 +123,7 @@ public class SdxExternalDatabaseConfigurerTest {
         underTest.configure(cloudPlatform, dbRequest, sdxCluster);
 
         assertEquals(true, sdxCluster.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
     }
 
     @Test
@@ -134,19 +139,20 @@ public class SdxExternalDatabaseConfigurerTest {
         underTest.configure(cloudPlatform, dbRequest, sdxCluster);
 
         assertEquals(true, sdxCluster.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
     }
 
     @Test
     public void whenPlatformIsYarnShouldNotAllowDatabase() {
         CloudPlatform cloudPlatform = CloudPlatform.YARN;
-        when(platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)).thenReturn(false);
         when(platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)).thenReturn(false);
         SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
-        dbRequest.setCreate(true);
+        dbRequest.setAvailabilityType(SdxDatabaseAvailabilityType.HA);
         SdxCluster sdxCluster = new SdxCluster();
 
         Assertions.assertThrows(BadRequestException.class, () -> underTest.configure(cloudPlatform, dbRequest, sdxCluster));
 
         assertEquals(true, sdxCluster.isCreateDatabase());
+        assertEquals(SdxDatabaseAvailabilityType.HA, sdxCluster.getDatabaseAvailabilityType());
     }
 }

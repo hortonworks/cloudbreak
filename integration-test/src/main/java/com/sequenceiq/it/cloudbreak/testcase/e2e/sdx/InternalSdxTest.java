@@ -12,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class InternalSdxTest extends PreconditionSdxE2ETest {
@@ -29,7 +30,7 @@ public class InternalSdxTest extends PreconditionSdxE2ETest {
             then = "SDX is created")
     public void testCreateInternalSdx(TestContext testContext) {
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setCreate(false);
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
         testContext.given(SdxInternalTestDto.class).withDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow(key(resourcePropertyProvider().getName()))

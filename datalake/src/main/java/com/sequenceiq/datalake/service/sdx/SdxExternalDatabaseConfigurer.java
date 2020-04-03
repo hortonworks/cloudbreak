@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @Component
@@ -33,36 +34,29 @@ public class SdxExternalDatabaseConfigurer {
         versionComparator = new VersionComparator();
     }
 
-    public void configure(CloudPlatform cloudPlatform, SdxDatabaseRequest sdxExternalDbRequest, SdxCluster sdxCluster) {
-        setPlatformDefaultForCreateDatabaseIfNeeded(sdxExternalDbRequest, sdxCluster, cloudPlatform);
-        setExperimentalForCreateDatabaseIfNeeded(sdxExternalDbRequest, sdxCluster, cloudPlatform);
+    public void configure(CloudPlatform cloudPlatform, SdxDatabaseRequest databaseRequest, SdxCluster sdxCluster) {
+        SdxDatabaseAvailabilityType databaseAvailabilityType = getDatabaseAvailabilityType(databaseRequest, cloudPlatform, sdxCluster);
+        sdxCluster.setDatabaseAvailabilityType(databaseAvailabilityType);
         validate(cloudPlatform, sdxCluster);
     }
 
-    private void validate(CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
-        if (sdxCluster.isCreateDatabase() && !platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)) {
-            String message = String.format("Cannot create external database for sdx: %s, for now only %s is/are supported", sdxCluster.getClusterName(),
-                    platformConfig.getSupportedExternalDatabasePlatforms());
-            LOGGER.debug(message);
-            throw new BadRequestException(message);
-        }
-    }
-
-    void setPlatformDefaultForCreateDatabaseIfNeeded(SdxDatabaseRequest sdxDatabaseRequest, SdxCluster sdxCluster, CloudPlatform cloudPlatform) {
-        if (platformConfig.isExternalDatabaseSupportedFor(cloudPlatform)
-                && !isExternalDbSkipped(sdxDatabaseRequest)
-                && isCMExternalDbSupported(cloudPlatform, sdxCluster)) {
-            sdxCluster.setCreateDatabase(true);
-        }
-    }
-
-    public boolean isExternalDbSkipped(SdxDatabaseRequest request) {
-        return request != null && request.getCreate() != null && !request.getCreate();
-    }
-
-    private void setExperimentalForCreateDatabaseIfNeeded(SdxDatabaseRequest sdxDatabaseRequest, SdxCluster sdxCluster, CloudPlatform cloudPlatform) {
-        if (sdxDatabaseRequest != null && sdxDatabaseRequest.getCreate() != null && sdxDatabaseRequest.getCreate()) {
-            sdxCluster.setCreateDatabase(true);
+    private SdxDatabaseAvailabilityType getDatabaseAvailabilityType(SdxDatabaseRequest dbRequest, CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
+        if (dbRequest == null || (dbRequest.getCreate() == null && dbRequest.getAvailabilityType() == null)) {
+            if (platformConfig.isExternalDatabaseSupportedFor(cloudPlatform) && isCMExternalDbSupported(cloudPlatform, sdxCluster)) {
+                return SdxDatabaseAvailabilityType.HA;
+            } else {
+                return SdxDatabaseAvailabilityType.NONE;
+            }
+        } else {
+            if (dbRequest.getCreate() == null) {
+                return dbRequest.getAvailabilityType();
+            } else {
+                if (Boolean.TRUE.equals(dbRequest.getCreate())) {
+                    return SdxDatabaseAvailabilityType.HA;
+                } else {
+                    return SdxDatabaseAvailabilityType.NONE;
+                }
+            }
         }
     }
 
@@ -83,5 +77,15 @@ public class SdxExternalDatabaseConfigurer {
     private boolean isVersionNewerOrEqualThan(Versioned currentVersion, Versioned baseVersion) {
         LOGGER.info("Compared: version {} with new version {}", currentVersion.getVersion(), baseVersion.getVersion());
         return versionComparator.compare(currentVersion, baseVersion) > -1;
+    }
+
+    private void validate(CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
+        if (sdxCluster.hasExternalDatabase()
+                && !platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)) {
+            String message = String.format("Cannot create external database for sdx: %s, for now only %s is/are supported", sdxCluster.getClusterName(),
+                    platformConfig.getSupportedExternalDatabasePlatforms());
+            LOGGER.debug(message);
+            throw new BadRequestException(message);
+        }
     }
 }

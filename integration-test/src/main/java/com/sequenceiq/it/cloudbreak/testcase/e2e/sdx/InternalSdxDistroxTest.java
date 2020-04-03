@@ -19,6 +19,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.externaldatabase.DistroXExternal
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class InternalSdxDistroxTest extends ImageValidatorE2ETest {
@@ -41,7 +42,7 @@ public class InternalSdxDistroxTest extends ImageValidatorE2ETest {
         String externalDB = resourcePropertyProvider().getName();
         String distrox = resourcePropertyProvider().getName();
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setCreate(false);
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
 
         testContext.given(SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequest)

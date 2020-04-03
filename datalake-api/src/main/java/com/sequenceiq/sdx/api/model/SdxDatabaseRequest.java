@@ -1,10 +1,10 @@
 package com.sequenceiq.sdx.api.model;
 
-import javax.validation.constraints.NotNull;
-
 public class SdxDatabaseRequest {
-    @NotNull
+
     private Boolean create;
+
+    private SdxDatabaseAvailabilityType availabilityType;
 
     public Boolean getCreate() {
         return create;
@@ -14,4 +14,11 @@ public class SdxDatabaseRequest {
         this.create = create;
     }
 
+    public SdxDatabaseAvailabilityType getAvailabilityType() {
+        return availabilityType;
+    }
+
+    public void setAvailabilityType(SdxDatabaseAvailabilityType availabilityType) {
+        this.availabilityType = availabilityType;
+    }
 }

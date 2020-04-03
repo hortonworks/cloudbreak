@@ -63,7 +63,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
         DetailedEnvironmentResponse env = rdsWaitRequest.getDetailedEnvironmentResponse();
         try {
             sdxClusterRepository.findById(sdxId).ifPresentOrElse(sdxCluster -> {
-                if (sdxCluster.isCreateDatabase()) {
+                if (sdxCluster.hasExternalDatabase()) {
                     validForDatabaseCreation(sdxId, env);
                     LOGGER.debug("start polling database for sdx: {}", sdxId);
                     DatabaseServerStatusV4Response db = databaseService.create(sdxCluster, env);

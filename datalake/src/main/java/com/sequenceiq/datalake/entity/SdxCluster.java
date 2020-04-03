@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "envname"}))
@@ -97,6 +98,9 @@ public class SdxCluster implements AccountIdAwareResource {
     private String lastCbFlowChainId;
 
     private String lastCbFlowId;
+
+    @Enumerated(EnumType.STRING)
+    private SdxDatabaseAvailabilityType databaseAvailabilityType;
 
     public Long getId() {
         return id;
@@ -230,6 +234,10 @@ public class SdxCluster implements AccountIdAwareResource {
         return createDatabase;
     }
 
+    /**
+     * @deprecated Kept only for backward compatibility. Use the {@link #setDatabaseAvailabilityType(SdxDatabaseAvailabilityType)} instead.
+     */
+    @Deprecated
     public void setCreateDatabase(Boolean createDatabase) {
         this.createDatabase = createDatabase;
     }
@@ -274,6 +282,31 @@ public class SdxCluster implements AccountIdAwareResource {
         this.lastCbFlowId = lastCbFlowId;
     }
 
+    public SdxDatabaseAvailabilityType getDatabaseAvailabilityType() {
+        if (databaseAvailabilityType != null) {
+            return databaseAvailabilityType;
+        } else {
+            if (createDatabase) {
+                return SdxDatabaseAvailabilityType.HA;
+            } else {
+                return SdxDatabaseAvailabilityType.NONE;
+            }
+        }
+    }
+
+    public boolean hasExternalDatabase() {
+        return !SdxDatabaseAvailabilityType.NONE.equals(getDatabaseAvailabilityType());
+    }
+
+    public void setDatabaseAvailabilityType(SdxDatabaseAvailabilityType databaseAvailabilityType) {
+        this.databaseAvailabilityType = databaseAvailabilityType;
+        if (SdxDatabaseAvailabilityType.NONE.equals(databaseAvailabilityType)) {
+            createDatabase = false;
+        } else {
+            createDatabase = true;
+        }
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -298,13 +331,15 @@ public class SdxCluster implements AccountIdAwareResource {
                 Objects.equals(created, that.created) &&
                 Objects.equals(databaseCrn, that.databaseCrn) &&
                 Objects.equals(cloudStorageBaseLocation, that.cloudStorageBaseLocation) &&
-                cloudStorageFileSystemType == that.cloudStorageFileSystemType;
+                cloudStorageFileSystemType == that.cloudStorageFileSystemType &&
+                databaseAvailabilityType == that.databaseAvailabilityType;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, initiatorUserCrn, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
-                stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType);
+                stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType,
+                databaseAvailabilityType);
     }
     //CHECKSTYLE:ON
 }
