@@ -115,7 +115,7 @@
           },
           "InstancesDistribution": {
             "OnDemandBaseCapacity": 0,
-            "OnDemandPercentageAboveBaseCapacity": 100,
+            "OnDemandPercentageAboveBaseCapacity": ${group.onDemandPercentage},
             "SpotAllocationStrategy": "capacity-optimized"
           }
         },

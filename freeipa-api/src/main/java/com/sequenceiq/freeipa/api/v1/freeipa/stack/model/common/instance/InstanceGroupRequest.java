@@ -14,6 +14,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InstanceGroupRequest extends InstanceGroupBase {
+
+    @Valid
     @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateRequest instanceTemplate;
 

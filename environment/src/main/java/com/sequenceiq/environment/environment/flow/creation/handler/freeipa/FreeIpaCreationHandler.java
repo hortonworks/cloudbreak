@@ -37,6 +37,8 @@ import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
@@ -53,8 +55,11 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
@@ -290,8 +295,24 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         instanceGroupRequest.setNodeCount(freeIpaCreation.getInstanceCountByGroup());
         instanceGroupRequest.setType(InstanceGroupType.MASTER);
         instanceGroupRequest.setSecurityGroup(securityGroupRequest);
+        instanceGroupRequest.setInstanceTemplateRequest(createInstanceTemplate(freeIpaCreation));
         instanceGroupRequests.add(instanceGroupRequest);
         return instanceGroupRequests;
+    }
+
+    private InstanceTemplateRequest createInstanceTemplate(FreeIpaCreationDto freeIpaCreation) {
+        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
+        Optional.ofNullable(freeIpaCreation.getAws())
+                .map(FreeIpaCreationAwsParametersDto::getSpot)
+                .map(FreeIpaCreationAwsSpotParametersDto::getPercentage)
+                .ifPresent(spotPercentage -> {
+                    AwsInstanceTemplateSpotParameters spot = new AwsInstanceTemplateSpotParameters();
+                    spot.setPercentage(spotPercentage);
+                    AwsInstanceTemplateParameters aws = new AwsInstanceTemplateParameters();
+                    aws.setSpot(spot);
+                    instanceTemplateRequest.setAws(aws);
+                });
+        return instanceTemplateRequest;
     }
 
     private SecurityRuleRequest createSecurityRuleRequest(String cidr) {

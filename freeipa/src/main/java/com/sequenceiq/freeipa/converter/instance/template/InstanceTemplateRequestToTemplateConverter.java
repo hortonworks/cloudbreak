@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.converter.instance.template;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -18,9 +20,12 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.freeipa.api.model.ResourceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
+import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceTypeProvider;
 
 @Component
 public class InstanceTemplateRequestToTemplateConverter {
@@ -33,12 +38,19 @@ public class InstanceTemplateRequestToTemplateConverter {
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
+    @Inject
+    private DefaultInstanceTypeProvider defaultInstanceTypeProvider;
+
     public Template convert(InstanceTemplateRequest source, CloudPlatform cloudPlatform) {
         Template template = new Template();
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
         setVolumesProperty(source.getAttachedVolumes(), template, cloudPlatform);
-        template.setInstanceType(source.getInstanceType() == null ? "" : source.getInstanceType());
+        template.setInstanceType(Objects.requireNonNullElse(source.getInstanceType(), defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name())));
+        Optional.ofNullable(source.getAws())
+                .map(AwsInstanceTemplateParameters::getSpot)
+                .map(AwsInstanceTemplateSpotParameters::getPercentage)
+                .ifPresent(spotPercentage -> template.setAttributes(new Json(Map.of("spotPercentage", spotPercentage))));
         return template;
     }
 
