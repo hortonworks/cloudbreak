@@ -63,6 +63,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentDto> {
@@ -93,6 +94,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final CloudPlatformConnectors connectors;
 
+    private final EventBus eventBus;
+
     private Set<String> enabledChildPlatforms;
 
     public FreeIpaCreationHandler(
@@ -106,7 +109,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             FreeIpaServerRequestProvider freeIpaServerRequestProvider,
             TelemetryApiConverter telemetryApiConverter,
             CloudPlatformConnectors connectors,
-            @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
+            EventBus eventBus, @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaService = freeIpaService;
@@ -117,6 +120,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         this.freeIpaServerRequestProvider = freeIpaServerRequestProvider;
         this.telemetryApiConverter = telemetryApiConverter;
         this.connectors = connectors;
+        this.eventBus = eventBus;
         this.enabledChildPlatforms = enabledChildPlatforms;
     }
 
@@ -138,7 +142,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             LOGGER.error(String.format("Error occurred during creating FreeIpa for environment %s.", environmentDto), ex);
             EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(),
                     environmentDto.getName(), ex, environmentDto.getResourceCrn());
-            eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
+            eventBus.notify(failureEvent.selector(), new Event<>(environmentDtoEvent.getHeaders(), failureEvent));
         }
     }
 

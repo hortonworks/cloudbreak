@@ -4,6 +4,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -35,6 +36,7 @@ import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 import reactor.bus.Event;
 import reactor.bus.Event.Headers;
+import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class PublicKeyCreationHandlerTest {
@@ -60,6 +62,9 @@ class PublicKeyCreationHandlerTest {
     @Mock
     private Headers headers;
 
+    @Mock
+    private EventBus eventBus;
+
     @InjectMocks
     private PublicKeyCreationHandler underTest;
 
@@ -68,6 +73,9 @@ class PublicKeyCreationHandlerTest {
 
     @Captor
     private ArgumentCaptor<Headers> headersArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<Event<EnvCreationFailureEvent>> envCreationFailureEventEvent;
 
     @BeforeEach
     void setUp() {
@@ -78,11 +86,11 @@ class PublicKeyCreationHandlerTest {
                 .build();
         when(environmentDtoEvent.getData()).thenReturn(eventDto);
         when(environmentDtoEvent.getHeaders()).thenReturn(headers);
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
     }
 
     @Test
     void acceptEnvironmentNotFound() {
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.empty());
 
         underTest.accept(environmentDtoEvent);
@@ -99,12 +107,13 @@ class PublicKeyCreationHandlerTest {
 
         underTest.accept(environmentDtoEvent);
 
-        verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
+        verify(eventBus).notify(anyString(), envCreationFailureEventEvent.capture());
         verifyEnvCreationFailedEvent(error);
     }
 
     @Test
     void acceptTestEnvironmentShouldBeUpdatedWhenSshKeyHasBeenCreated() {
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
         EnvironmentAuthentication authentication = new EnvironmentAuthentication();
         authentication.setManagedKey(true);
         Environment environment = new Environment();
@@ -121,6 +130,7 @@ class PublicKeyCreationHandlerTest {
 
     @Test
     void acceptTestEnvironmentShouldNotBeUpdatedWhenSshKeyHasNotBeenCreated() {
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
         EnvironmentAuthentication authentication = new EnvironmentAuthentication();
         authentication.setManagedKey(true);
         Environment environment = new Environment();
@@ -137,6 +147,7 @@ class PublicKeyCreationHandlerTest {
 
     @Test
     void acceptTestEnvironmentShouldNotBeUpdatedWhenAuthenticationDoesNotContainManagedKey() {
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
         EnvironmentAuthentication authentication = new EnvironmentAuthentication();
         authentication.setManagedKey(false);
         Environment environment = new Environment();
@@ -154,6 +165,7 @@ class PublicKeyCreationHandlerTest {
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
     void selector() {
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
         assertThat(underTest.selector()).isEqualTo("CREATE_PUBLICKEY_EVENT");
     }
 
@@ -171,7 +183,9 @@ class PublicKeyCreationHandlerTest {
     }
 
     private void verifyEnvCreationFailedEvent(Exception exceptionExpected) {
-        BaseNamedFlowEvent event = baseNamedFlowEvent.getValue();
+        //BaseNamedFlowEvent event = baseNamedFlowEvent.getValue();
+        Event<EnvCreationFailureEvent> value = envCreationFailureEventEvent.getValue();
+        EnvCreationFailureEvent event = value.getData();
         assertThat(event).isInstanceOf(EnvCreationFailureEvent.class);
 
         EnvCreationFailureEvent envCreateFailedEvent = (EnvCreationFailureEvent) event;
@@ -180,7 +194,5 @@ class PublicKeyCreationHandlerTest {
         assertThat(envCreateFailedEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
         assertThat(envCreateFailedEvent.selector()).isEqualTo(FAILED_ENV_CREATION_EVENT.selector());
         assertThat(envCreateFailedEvent.getException()).isSameAs(exceptionExpected);
-
-        assertThat(headersArgumentCaptor.getValue()).isSameAs(headers);
     }
 }

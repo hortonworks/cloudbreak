@@ -21,6 +21,7 @@ import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class EnvironmentValidationHandler extends EventSenderAwareHandler<EnvironmentDto> {
@@ -31,15 +32,18 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
 
     private final EnvironmentService environmentService;
 
+    private final EventBus eventBus;
+
     protected EnvironmentValidationHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
             EnvironmentFlowValidatorService validatorService,
-            WebApplicationExceptionMessageExtractor messageExtractor) {
+            WebApplicationExceptionMessageExtractor messageExtractor, EventBus eventBus) {
         super(eventSender);
         this.validatorService = validatorService;
         this.environmentService = environmentService;
         webApplicationExceptionMessageExtractor = messageExtractor;
+        this.eventBus = eventBus;
     }
 
     @Override
@@ -77,7 +81,8 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                 environmentDto.getName(),
                 new BadRequestException(message),
                 environmentDto.getResourceCrn());
-        eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
+
+        eventBus.notify(failureEvent.selector(), new Event<>(environmentDtoEvent.getHeaders(), failureEvent));
     }
 
     private ValidationResult validateAndDetermineAwsParameters(EnvironmentDto environment) {
