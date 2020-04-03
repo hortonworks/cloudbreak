@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 import org.springframework.util.CollectionUtils;
 
@@ -42,6 +44,8 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     protected static final String INSTANCEIDS = "INSTANCEIDS";
 
     private static final String ADJUSTMENT = "ADJUSTMENT";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStackDownscaleAction.class);
 
     @Inject
     private StackService stackService;
@@ -96,12 +100,15 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
             Set<Long> privateIds = CollectionUtils.isEmpty(ssc.getPrivateIds()) ? (Set<Long>) variables.get(ContextKeys.PRIVATE_IDS) : ssc.getPrivateIds();
             Set<String> instanceIds;
             if (CollectionUtils.isEmpty(privateIds)) {
+                LOGGER.info("No private IDs");
                 Map<String, String> unusedInstanceIds = stackScalingService.getUnusedInstanceIds(ssc.getInstanceGroup(), ssc.getAdjustment(), stack);
                 instanceIds = new HashSet<>(unusedInstanceIds.keySet());
+                LOGGER.info("Unused instance IDs: {}", instanceIds);
             } else {
                 Set<InstanceMetaData> imds = stack.getInstanceGroupByInstanceGroupName(ssc.getInstanceGroup()).getNotTerminatedInstanceMetaDataSet();
                 instanceIds = imds.stream().filter(imd -> privateIds.contains(imd.getPrivateId())).map(InstanceMetaData::getInstanceId)
                         .collect(Collectors.toSet());
+                LOGGER.info("Instance IDs for given private IDs: {}", instanceIds);
             }
             variables.put(INSTANCEIDS, instanceIds);
             return instanceIds;
