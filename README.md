@@ -227,9 +227,10 @@ After importing the `cloudbreak` repo root, launch the Periscope application by 
 -Dserver.port=8085
 -Daltus.ums.host=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
+-Dinstance.node.id=<NODE_ID>
 ````
 
-Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
+Replace `<VAULT_ROOT_TOKEN>` and `<NODE_ID>` with the value of `VAULT_ROOT_TOKEN` and `CB_INSTANCE_NODE_ID` respectively from the `Profile` file.
 
 ### Running Datalake in IDEA
 
@@ -241,9 +242,10 @@ After importing the `cloudbreak` repo root, launch the Datalake application by e
 -Ddatalake.cloudbreak.url=http://localhost:8080
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Dvault.addr=localhost
+-Dinstance.node.id=<NODE_ID>
 ````
 
-Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
+Replace `<VAULT_ROOT_TOKEN>` and `<NODE_ID>` with the value of `VAULT_ROOT_TOKEN` and `CB_INSTANCE_NODE_ID` respectively from the `Profile` file.
 
 ### Running FreeIPA in IDEA
 
@@ -253,9 +255,10 @@ After importing the `cloudbreak` repo root, launch the FreeIPA application by ex
 -Dfreeipa.db.addr=localhost
 -Dserver.port=8090
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
+-Dinstance.node.id=<NODE_ID>
 ````
 
-Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
+Replace `<VAULT_ROOT_TOKEN>` and `<NODE_ID>` with the value of `VAULT_ROOT_TOKEN` and `CB_INSTANCE_NODE_ID` respectively from the `Profile` file.
 
 then add these entries to the environment variables (the same values the you set in Profile):
 ```
@@ -276,9 +279,10 @@ After importing the `cloudbreak` repo root, launch the Redbeams application by e
 -Daltus.ums.host=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Dcb.enabledplatforms=AWS,AZURE,MOCK
-```
+-Dinstance.node.id=<NODE_ID>
+````
 
-Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
+Replace `<VAULT_ROOT_TOKEN>` and `<NODE_ID>` with the value of `VAULT_ROOT_TOKEN` and `CB_INSTANCE_NODE_ID` respectively from the `Profile` file.
 
 then add these entries to the environment variables (the same values the you set in Profile):
 ```
@@ -295,9 +299,10 @@ After importing the `cloudbreak` repo root, launch the Environment application b
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Denvironment.cloudbreak.url=http://localhost:8080
 -Denvironment.enabledplatforms="YARN,YCLOUD,AWS,AZURE,MOCK"
-```
+-Dinstance.node.id=<NODE_ID>
+````
 
-Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
+Replace `<VAULT_ROOT_TOKEN>` and `<NODE_ID>` with the value of `VAULT_ROOT_TOKEN` and `CB_INSTANCE_NODE_ID` respectively from the `Profile` file.
 
 then add these entries to the environment variables (the same values the you set in Profile):
 ```
