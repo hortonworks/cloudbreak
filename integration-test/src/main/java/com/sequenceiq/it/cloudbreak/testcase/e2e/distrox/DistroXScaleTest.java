@@ -12,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.externaldatabase.DistroXExternalDatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
 public class DistroXScaleTest extends AbstractE2ETest {
@@ -38,10 +39,18 @@ public class DistroXScaleTest extends AbstractE2ETest {
             when = "a valid DistroX create request is sent",
             then = "DistroX cluster with external database is created")
     public void testCreateAndScaleDistroX(TestContext testContext, ITestContext iTestContext) {
+        String imageSettings = resourcePropertyProvider().getName();
         DistroXScaleTestParameters params = new DistroXScaleTestParameters(iTestContext.getCurrentXmlTest().getAllParameters());
-        DistroXTestDto currentContext = testContext.given(DIX_EXTDB_KEY, DistroXExternalDatabaseTestDto.class)
-                .withAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA)
-                .given(DistroXTestDto.class)
+        DistroXExternalDatabaseTestDto dbTestContext = testContext.given(DIX_EXTDB_KEY, DistroXExternalDatabaseTestDto.class)
+                .withAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
+        if (params.isImageCatalogConfigured()) {
+            createImageCatalogWithUrl(testContext, params.getImageCatalogName(), params.getImageCatalogUrl());
+            dbTestContext.given(imageSettings, DistroXImageTestDto.class)
+                    .withImageCatalog(params.getImageCatalogName())
+                    .withImageId(params.getImageId());
+        }
+        DistroXTestDto currentContext = dbTestContext
+                .given(DistroXTestDto.class).withImageSettingsIf(params.isImageCatalogConfigured(), imageSettings)
                 .withExternalDatabase(DIX_EXTDB_KEY)
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE);

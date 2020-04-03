@@ -257,6 +257,15 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
+    protected void createImageCatalogWithUrl(TestContext testContext, String name, String url) {
+        testContext
+                .given(ImageCatalogTestDto.class)
+                .withName(name)
+                .withUrl(url)
+                .when(new ImageCatalogCreateRetryAction())
+                .validate();
+    }
+
     protected void createDefaultUser(TestContext testContext) {
         testContext.as();
     }
