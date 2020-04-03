@@ -199,6 +199,8 @@ integrationtest:
       volumeSize: 100
       volumeCount: 1
       volumeType: StandardSSD_LRS
+    baseimage:
+      imageId:
     cloudstorage:
       accountKey:
       accountName:
