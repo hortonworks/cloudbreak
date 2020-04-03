@@ -35,6 +35,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackReque
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @ExtendWith(MockitoExtension.class)
 public class DatabaseServiceTest {
@@ -103,7 +104,7 @@ public class DatabaseServiceTest {
     private DatabaseServerParameterSetter getDatabaseParameterSetter() {
         return new DatabaseServerParameterSetter() {
             @Override
-            public void setParameters(DatabaseServerV4StackRequest request) {
+            public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType) {
                 request.setAws(new AwsDatabaseServerV4Parameters());
             }
 

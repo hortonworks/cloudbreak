@@ -40,6 +40,7 @@ import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractClouderaManagerTest;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
@@ -426,7 +427,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
 
     private SdxDatabaseRequest sdxDatabaseRequestWithCreateTrue() {
         SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
-        dbRequest.setCreate(Boolean.TRUE);
+        dbRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
         return dbRequest;
     }
 

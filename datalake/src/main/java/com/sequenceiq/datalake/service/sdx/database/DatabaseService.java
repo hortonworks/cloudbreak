@@ -31,7 +31,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
-import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
 public class DatabaseService {
@@ -64,7 +63,7 @@ public class DatabaseService {
             dbResourceCrn = sdxCluster.getDatabaseCrn();
         } else {
             try {
-                dbResourceCrn = databaseServerV4Endpoint.create(getDatabaseRequest(sdxCluster.getClusterShape(), env))
+                dbResourceCrn = databaseServerV4Endpoint.create(getDatabaseRequest(sdxCluster, env))
                         .getResourceCrn();
                 sdxCluster.setDatabaseCrn(dbResourceCrn);
                 sdxClusterRepository.save(sdxCluster);
@@ -94,23 +93,24 @@ public class DatabaseService {
         }
     }
 
-    private AllocateDatabaseServerV4Request getDatabaseRequest(SdxClusterShape clusterShape, DetailedEnvironmentResponse env) {
+    private AllocateDatabaseServerV4Request getDatabaseRequest(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         req.setEnvironmentCrn(env.getCrn());
-        req.setDatabaseServer(getDatabaseServerRequest(CloudPlatform.valueOf(env.getCloudPlatform().toUpperCase(Locale.US)), clusterShape));
+        req.setDatabaseServer(getDatabaseServerRequest(CloudPlatform.valueOf(env.getCloudPlatform().toUpperCase(Locale.US)), sdxCluster));
         return req;
     }
 
-    private DatabaseServerV4StackRequest getDatabaseServerRequest(CloudPlatform cloudPlatform, SdxClusterShape clusterShape) {
-        DatabaseConfig databaseConfig = dbConfigs.get(new DatabaseConfigKey(cloudPlatform, clusterShape));
+    private DatabaseServerV4StackRequest getDatabaseServerRequest(CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
+        DatabaseConfig databaseConfig = dbConfigs.get(new DatabaseConfigKey(cloudPlatform, sdxCluster.getClusterShape()));
         if (databaseConfig == null) {
-            throw new BadRequestException("Database config for cloud platform " + cloudPlatform + ", cluster shape " + clusterShape + " not found");
+            throw new BadRequestException("Database config for cloud platform " + cloudPlatform + ", cluster shape "
+                    + sdxCluster.getClusterShape() + " not found");
         }
         DatabaseServerV4StackRequest req = new DatabaseServerV4StackRequest();
         req.setInstanceType(databaseConfig.getInstanceType());
         req.setDatabaseVendor(databaseConfig.getVendor());
         req.setStorageSize(databaseConfig.getVolumeSize());
-        databaseServerParameterSetterMap.get(cloudPlatform).setParameters(req);
+        databaseServerParameterSetterMap.get(cloudPlatform).setParameters(req, sdxCluster.getDatabaseAvailabilityType());
         return req;
     }
 
