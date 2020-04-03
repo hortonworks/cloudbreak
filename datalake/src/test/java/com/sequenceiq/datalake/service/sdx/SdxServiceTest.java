@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.common.api.type.InstanceGroupType.CORE;
 import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -65,6 +66,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.service.FlowCancelService;
+import com.sequenceiq.sdx.api.model.SdxAwsRequest;
+import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -256,6 +259,28 @@ class SdxServiceTest {
     }
 
     @Test
+    void testCreateSdxClusterWithSpotStackRequestContainsRequiredAttributes() throws IOException {
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        sdxClusterRequest.setEnvironment("envir");
+        setSpot(sdxClusterRequest);
+        long id = 10L;
+        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
+            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
+            sdxWithId.setId(id);
+            return sdxWithId;
+        });
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
+        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        SdxCluster createdSdxCluster = result.getLeft();
+        // AWS 7.1.0 light duty contains exactly 2 instance groups
+        assertThat(createdSdxCluster.getStackRequest())
+                .containsSubsequence("{\"aws\":{\"spot\":{\"percentage\":100}}", "{\"aws\":{\"spot\":{\"percentage\":100}}");
+    }
+
+    @Test
     void testCreateNOTInternalSdxClusterFromLightDutyTemplateWhenBaseLocationSpecifiedShouldCreateStackRequestWithSettedUpBaseLocation() throws IOException {
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
@@ -349,6 +374,14 @@ class SdxServiceTest {
         underTest.syncByCrn(USER_CRN, DATALAKE_CRN);
 
         verify(stackV4Endpoint, times(1)).sync(0L, CLUSTER_NAME);
+    }
+
+    private void setSpot(SdxClusterRequest sdxClusterRequest) {
+        SdxAwsRequest aws = new SdxAwsRequest();
+        SdxAwsSpotParameters spot = new SdxAwsSpotParameters();
+        spot.setPercentage(100);
+        aws.setSpot(spot);
+        sdxClusterRequest.setAws(aws);
     }
 
     private void mockCBCallForDistroXClusters(Set<StackViewV4Response> stackViews) {

@@ -3,6 +3,7 @@ package com.sequenceiq.sdx.api.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 public class SdxClusterRequest {
@@ -18,6 +19,9 @@ public class SdxClusterRequest {
     private SdxCloudStorageRequest cloudStorage;
 
     private SdxDatabaseRequest externalDatabase;
+
+    @Valid
+    private SdxAwsRequest aws;
 
     private Map<String, String> tags;
 
@@ -78,5 +82,13 @@ public class SdxClusterRequest {
 
     public void setExternalDatabase(SdxDatabaseRequest externalDatabase) {
         this.externalDatabase = externalDatabase;
+    }
+
+    public SdxAwsRequest getAws() {
+        return aws;
+    }
+
+    public void setAws(SdxAwsRequest aws) {
+        this.aws = aws;
     }
 }
