@@ -62,7 +62,9 @@ update_nginx_conf_manager_port:
   file.managed:
     - contents_pillar: gateway:userfacingkey
     - makedirs: True
-    - mode: 777
+    - user: root
+    - group: root
+    - mode: 600
     - require_in:
       - service: restart_nginx_after_ssl_reconfig_with_user_facing
 
@@ -70,7 +72,9 @@ update_nginx_conf_manager_port:
   file.managed:
     - contents_pillar: gateway:userfacingcert
     - makedirs: True
-    - mode: 777
+    - user: root
+    - group: root
+    - mode: 600
     - require_in:
       - service: restart_nginx_after_ssl_reconfig_with_user_facing
 
