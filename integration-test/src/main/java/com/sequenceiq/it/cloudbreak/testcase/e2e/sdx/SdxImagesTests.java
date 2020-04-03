@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.lang.String.format;
 
@@ -17,6 +19,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -68,6 +71,8 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
         String imageSettings = resourcePropertyProvider().getName();
         String imageCatalog = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
+        String masterInstanceGroup = "master";
+        String idbrokerInstanceGroup = "idbroker";
         AtomicReference<String> selectedImageID = new AtomicReference<>();
 
         testContext
@@ -78,8 +83,12 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                 })
                 .given(imageSettings, ImageSettingsTestDto.class)
                 .given(clouderaManager, ClouderaManagerTestDto.class)
-                .given(cluster, ClusterTestDto.class).withClouderaManager(clouderaManager)
+                .given(cluster, ClusterTestDto.class).withBlueprintName(getDefaultSDXBlueprintName()).withValidateBlueprint(Boolean.FALSE)
+                .withClouderaManager(clouderaManager)
+                .given(masterInstanceGroup, InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1)
+                .given(idbrokerInstanceGroup, InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1)
                 .given(stack, StackTestDto.class).withCluster(cluster).withImageSettings(imageSettings)
+                .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
