@@ -27,6 +27,7 @@ import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -47,6 +48,9 @@ public class FreeIpaClientFactory {
 
     @Inject
     private ClusterProxyService clusterProxyService;
+
+    @Inject
+    private GatewayConfigService gatewayConfigService;
 
     @Inject
     private StackService stackService;
@@ -150,6 +154,7 @@ public class FreeIpaClientFactory {
     }
 
     private FreeIpaClientBuilder getFreeIpaClientBuilderForClusterProxy(Stack stack) throws Exception {
+        InstanceMetaData primaryGwInstance = gatewayConfigService.getPrimaryGwInstance(stack.getNotDeletedInstanceMetaDataList());
         HttpClientConfig httpClientConfig = new HttpClientConfig(clusterProxyConfiguration.getClusterProxyHost());
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         String clusterProxyPath = toClusterProxyBasepath(stack.getResourceCrn());
@@ -157,7 +162,7 @@ public class FreeIpaClientFactory {
         return new FreeIpaClientBuilder(ADMIN_USER,
                 freeIpa.getAdminPassword(),
                 httpClientConfig,
-                clusterProxyConfiguration.getClusterProxyHost(),
+                primaryGwInstance.getDiscoveryFQDN(),
                 clusterProxyConfiguration.getClusterProxyPort(),
                 clusterProxyPath,
                 ADDITIONAL_CLUSTER_PROXY_HEADERS,
