@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,13 +53,17 @@ public class StackScalingService {
     }
 
     public Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
+        if (scalingAdjustment > 0) {
+            LOGGER.error("Scaling adjustment shouldn't be a positive number, we are trying to downscaling..");
+            return new HashMap<>();
+        }
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         List<InstanceMetaData> unattachedInstanceMetaDatas = new ArrayList<>(instanceGroup.getUnattachedInstanceMetaDataSet());
 
         return unattachedInstanceMetaDatas.stream()
                 .filter(instanceMetaData -> instanceMetaData.getInstanceId() != null && instanceMetaData.getDiscoveryFQDN() != null)
                 .sorted(Comparator.comparing(InstanceMetaData::getStartDate))
-                .limit(scalingAdjustment)
+                .limit(Math.abs(scalingAdjustment))
                 .collect(Collectors.toMap(InstanceMetaData::getInstanceId, InstanceMetaData::getDiscoveryFQDN));
     }
 
