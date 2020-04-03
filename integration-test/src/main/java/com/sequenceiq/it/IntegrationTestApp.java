@@ -63,11 +63,14 @@ public class IntegrationTestApp implements CommandLineRunner {
     @Value("${integrationtest.outputdir:.}")
     private String outputDirectory;
 
-    @Value("${integrationtest.threadCount:2}")
+    @Value("${integrationtest.threadCount:8}")
     private int threadCount;
 
     @Value("${integrationtest.parallel:methods}")
     private String parallel;
+
+    @Value("${integrationtest.timeOut:6000000}")
+    private String timeOut;
 
     @Inject
     private TestNG testng;
@@ -168,6 +171,7 @@ public class IntegrationTestApp implements CommandLineRunner {
             XmlSuite xmlSuite = parser.parse(suitePath, inputStream, true);
             xmlSuite.setParallel(XmlSuite.ParallelMode.getValidParallel(parallel));
             xmlSuite.setThreadCount(threadCount);
+            xmlSuite.setTimeOut(timeOut);
             LOG.info("Test are running in: {} type of parallel mode, thread count: {}", parallel.toUpperCase(), threadCount);
             return xmlSuite;
         }
