@@ -26,7 +26,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
@@ -58,6 +62,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.service.FlowCancelService;
+import com.sequenceiq.sdx.api.model.SdxAwsBase;
+import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -184,6 +190,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest, internalStackV4Request, cloudPlatform, runtimeVersion);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
+        prepareProviderSpecificParameters(stackRequest, sdxClusterRequest, cloudPlatform);
         try {
             sdxCluster.setStackRequest(JsonUtil.writeValueAsString(stackRequest));
         } catch (JsonProcessingException e) {
@@ -279,6 +286,46 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
                     return ruleRequest;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private void prepareProviderSpecificParameters(StackV4Request stackRequest, SdxClusterRequest sdxClusterRequest, CloudPlatform cloudPlatform) {
+        switch (cloudPlatform) {
+            case AWS:
+                useAwsSpotPercentageIfPresent(stackRequest, sdxClusterRequest);
+                break;
+            case GCP:
+            case AZURE:
+            case OPENSTACK:
+            case YARN:
+            case MOCK:
+            default:
+                break;
+        }
+    }
+
+    private void useAwsSpotPercentageIfPresent(StackV4Request stackRequest, SdxClusterRequest sdxClusterRequest) {
+        Optional.ofNullable(sdxClusterRequest.getAws())
+                .map(SdxAwsBase::getSpot)
+                .map(SdxAwsSpotParameters::getPercentage)
+                .ifPresent(percentage -> updateAwsSpotPercentage(stackRequest, percentage));
+    }
+
+    private void updateAwsSpotPercentage(StackV4Request stackRequest, Integer percentage) {
+        stackRequest.getInstanceGroups().stream()
+                .map(InstanceGroupV4Request::getTemplate)
+                .peek(template -> {
+                    if (template.getAws() == null) {
+                        template.setAws(new AwsInstanceTemplateV4Parameters());
+                    }
+                })
+                .map(InstanceTemplateV4Base::getAws)
+                .peek(aws -> {
+                    if (aws.getSpot() == null) {
+                        aws.setSpot(new AwsInstanceTemplateV4SpotParameters());
+                    }
+                })
+                .map(AwsInstanceTemplateV4Parameters::getSpot)
+                .forEach(spot -> spot.setPercentage(percentage));
     }
 
     @Override
