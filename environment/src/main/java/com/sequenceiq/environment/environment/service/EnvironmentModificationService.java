@@ -237,6 +237,8 @@ public class EnvironmentModificationService {
                 BaseParameters originalParameters = original.get();
                 parametersDto.setId(originalParameters.getId());
                 if (originalParameters instanceof AwsParameters) {
+                    AwsParameters awsOriginalParameters = (AwsParameters) originalParameters;
+                    parametersDto.getAwsParametersDto().setFreeIpaSpotPercentage(awsOriginalParameters.getFreeIpaSpotPercentage());
                     validateAwsParameters(environment, parametersDto);
                 }
             }

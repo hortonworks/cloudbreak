@@ -8,10 +8,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +30,9 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
@@ -324,4 +331,32 @@ class EnvironmentValidatorServiceTest {
 
         return environment;
     }
+
+    @ParameterizedTest
+    @MethodSource("freeIpaCreationArguments")
+    void shouldValidateFreeIpaCreation(int instanceCountByGroup, int spotPercentage, boolean valid) {
+        FreeIpaCreationDto freeIpaCreationDto = FreeIpaCreationDto.builder()
+                .withInstanceCountByGroup(instanceCountByGroup)
+                .withAws(FreeIpaCreationAwsParametersDto.builder()
+                        .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
+                                .withPercentage(spotPercentage)
+                                .build())
+                        .build())
+                .build();
+
+        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto);
+        assertEquals(!valid, validationResult.hasError());
+    }
+
+    private static Stream<Arguments> freeIpaCreationArguments() {
+        return Stream.of(
+                Arguments.of(1, 0, true),
+                Arguments.of(1, 100, true),
+                Arguments.of(1, 50, false),
+                Arguments.of(2, 0, true),
+                Arguments.of(2, 100, true),
+                Arguments.of(2, 50, true)
+        );
+    }
+
 }

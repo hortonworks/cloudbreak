@@ -9,11 +9,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -91,5 +95,33 @@ class AwsParameterProcessorTest {
         verify(noSqlTableCreationModeDeterminerService).determineCreationMode(any(), any());
         assertEquals(creation, awsParameters.getDynamoDbTableCreation());
         verify(parametersService, times(1)).saveParameters(ENV_ID, parametersDto);
+    }
+
+    @ParameterizedTest(name = "FreeIpa Spot percentage {0} is validated as {1}")
+    @MethodSource("freeIpaSpotPercentageParameters")
+    void validateFreeIpaSpotPercentage(int percentage, boolean hasError) {
+        AwsParametersDto awsParameters = AwsParametersDto.builder()
+                .withFreeIpaSpotPercentage(percentage)
+                .build();
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAwsParameters(awsParameters)
+                .build();
+
+        ValidationResult validationResult = underTest.processAwsParameters(environmentDto, parametersDto);
+
+        assertEquals(hasError, validationResult.hasError());
+        if (hasError) {
+            assertEquals("FreeIpa spot percentage must be between 0 and 100.", validationResult.getErrors().get(0));
+        }
+    }
+
+    private static Stream<Arguments> freeIpaSpotPercentageParameters() {
+        return Stream.of(
+                Arguments.of(-1, true),
+                Arguments.of(0, false),
+                Arguments.of(50, false),
+                Arguments.of(100, false),
+                Arguments.of(101, true)
+        );
     }
 }

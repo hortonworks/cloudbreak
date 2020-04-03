@@ -25,6 +25,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
 import com.sequenceiq.environment.tags.domain.AccountTag;
 import com.sequenceiq.environment.tags.service.AccountTagService;
@@ -177,7 +178,19 @@ public class EnvironmentDtoConverter {
     private FreeIpaCreationDto environmentToFreeIpaCreationDto(Environment environment) {
         FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder()
                 .withCreate(environment.isCreateFreeIpa());
-        doIfNotNull(environment.getFreeIpaInstanceCountByGroup(), freeIpaInstanceCountByGroup -> builder.withInstanceCountByGroup(freeIpaInstanceCountByGroup));
+        Optional.ofNullable(environment.getFreeIpaInstanceCountByGroup()).ifPresent(builder::withInstanceCountByGroup);
+
+        if (environment.getCloudPlatform().equals(CloudPlatform.AWS.name())) {
+            AwsParameters awsParameters = (AwsParameters) environment.getParameters();
+            if (Objects.nonNull(awsParameters)) {
+                builder.withAws(FreeIpaCreationAwsParametersDto.builder()
+                        .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
+                                .withPercentage(awsParameters.getFreeIpaSpotPercentage())
+                                .build())
+                        .build());
+            }
+        }
+
         return builder.build();
     }
 }

@@ -9,9 +9,12 @@ public class AwsParametersDto implements S3GuardParameters {
 
     private S3GuardTableCreation dynamoDbTableCreation;
 
+    private int freeIpaSpotPercentage;
+
     private AwsParametersDto(Builder builder) {
         dynamoDbTableName = builder.dynamoDbTableName;
         dynamoDbTableCreation = builder.dynamoDbTableCreation;
+        freeIpaSpotPercentage = builder.freeIpaSpotPercentage;
     }
 
     @Override
@@ -28,6 +31,14 @@ public class AwsParametersDto implements S3GuardParameters {
         this.dynamoDbTableCreation = dynamoDbTableCreation;
     }
 
+    public int getFreeIpaSpotPercentage() {
+        return freeIpaSpotPercentage;
+    }
+
+    public void setFreeIpaSpotPercentage(int freeIpaSpotPercentage) {
+        this.freeIpaSpotPercentage = freeIpaSpotPercentage;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -37,6 +48,8 @@ public class AwsParametersDto implements S3GuardParameters {
         private String dynamoDbTableName;
 
         private S3GuardTableCreation dynamoDbTableCreation;
+
+        private int freeIpaSpotPercentage;
 
         private Builder() {
         }
@@ -48,6 +61,11 @@ public class AwsParametersDto implements S3GuardParameters {
 
         public Builder withDynamoDbTableCreation(S3GuardTableCreation dynamoDbTableCreation) {
             this.dynamoDbTableCreation = dynamoDbTableCreation;
+            return this;
+        }
+
+        public Builder withFreeIpaSpotPercentage(int freeIpaSpotPercentage) {
+            this.freeIpaSpotPercentage = freeIpaSpotPercentage;
             return this;
         }
 

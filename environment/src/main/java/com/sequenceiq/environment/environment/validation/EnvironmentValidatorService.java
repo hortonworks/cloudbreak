@@ -29,6 +29,9 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
@@ -41,6 +44,10 @@ import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 public class EnvironmentValidatorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentValidatorService.class);
+
+    private static final int ALL_ON_DEMAND_PERCENTAGE = 0;
+
+    private static final int ALL_SPOT_PERCENTAGE = 100;
 
     private final EnvironmentRegionValidator environmentRegionValidator;
 
@@ -189,4 +196,20 @@ public class EnvironmentValidatorService {
         return cloudPlatforms.stream().anyMatch(p -> p.equalsIgnoreCase(cloudPlatform));
     }
 
+    public ValidationResult validateFreeIpaCreation(FreeIpaCreationDto freeIpaCreation) {
+        ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        if (freeIpaCreation.getInstanceCountByGroup() == 1 && !singleInstanceIsOnDemandOrSpot(freeIpaCreation)) {
+            validationResultBuilder.error(
+                    String.format("Single instance FreeIpa spot percentage must be either %d or %d.", ALL_ON_DEMAND_PERCENTAGE, ALL_SPOT_PERCENTAGE));
+        }
+        return validationResultBuilder.build();
+    }
+
+    private Boolean singleInstanceIsOnDemandOrSpot(FreeIpaCreationDto freeIpaCreation) {
+        return Optional.ofNullable(freeIpaCreation.getAws())
+                .map(FreeIpaCreationAwsParametersDto::getSpot)
+                .map(FreeIpaCreationAwsSpotParametersDto::getPercentage)
+                .map(spotPercentage -> spotPercentage == ALL_ON_DEMAND_PERCENTAGE || spotPercentage == ALL_SPOT_PERCENTAGE)
+                .orElse(true);
+    }
 }

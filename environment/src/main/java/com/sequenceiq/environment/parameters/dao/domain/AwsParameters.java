@@ -17,6 +17,9 @@ public class AwsParameters extends BaseParameters {
     @Enumerated(EnumType.STRING)
     private S3GuardTableCreation s3guardTableCreation;
 
+    @Column(name = "freeipa_spot_percentage")
+    private int freeIpaSpotPercentage;
+
     public String getS3guardTableName() {
         return s3guardTableName;
     }
@@ -31,5 +34,13 @@ public class AwsParameters extends BaseParameters {
 
     public void setS3guardTableCreation(S3GuardTableCreation s3guardTableCreation) {
         this.s3guardTableCreation = s3guardTableCreation;
+    }
+
+    public int getFreeIpaSpotPercentage() {
+        return freeIpaSpotPercentage;
+    }
+
+    public void setFreeIpaSpotPercentage(int freeIpaSpotPercentage) {
+        this.freeIpaSpotPercentage = freeIpaSpotPercentage;
     }
 }

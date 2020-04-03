@@ -143,6 +143,7 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(any())).thenReturn(environment);
@@ -185,6 +186,7 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(any())).thenReturn(environment);
@@ -240,6 +242,7 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(environmentArgumentCaptor.capture())).thenReturn(environment);
@@ -286,6 +289,7 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(validationResult);
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(validationResult);
+        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
         when(validationResult.merge(any())).thenReturn(ValidationResult.builder().error("nogood"));
         when(environmentService.save(any())).thenReturn(environment);
 
@@ -329,6 +333,7 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateRegionsAndLocation(any(), any(), any(), any())).thenReturn(validationResult);
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(validationResult);
+        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
         when(validationResult.merge(any())).thenReturn(ValidationResult.builder().error("nogood"));
         when(environmentService.save(any())).thenReturn(environment);
 

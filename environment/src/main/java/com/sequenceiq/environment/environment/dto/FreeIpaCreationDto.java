@@ -6,6 +6,8 @@ public class FreeIpaCreationDto {
 
     private int instanceCountByGroup = 1;
 
+    private FreeIpaCreationAwsParametersDto aws;
+
     private FreeIpaCreationDto() {
     }
 
@@ -25,11 +27,16 @@ public class FreeIpaCreationDto {
         return instanceCountByGroup;
     }
 
+    public FreeIpaCreationAwsParametersDto getAws() {
+        return aws;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaCreationDto{" +
             "create='" + create + '\'' +
             "instanceCountByGroup='" + instanceCountByGroup + '\'' +
+            "aws='" + aws + '\'' +
             '}';
     }
 
@@ -42,6 +49,8 @@ public class FreeIpaCreationDto {
         private boolean create = true;
 
         private int instanceCountByGroup = 1;
+
+        private FreeIpaCreationAwsParametersDto aws;
 
         private Builder() {
         }
@@ -56,10 +65,16 @@ public class FreeIpaCreationDto {
             return this;
         }
 
+        public Builder withAws(FreeIpaCreationAwsParametersDto aws) {
+            this.aws = aws;
+            return this;
+        }
+
         public FreeIpaCreationDto build() {
             FreeIpaCreationDto response = new FreeIpaCreationDto();
             response.create = create;
             response.instanceCountByGroup = instanceCountByGroup;
+            response.aws = aws;
             return response;
         }
     }
