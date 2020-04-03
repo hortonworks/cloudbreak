@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -48,6 +49,10 @@ public class GatewayConfigService {
 
     private InstanceMetaData getPrimaryGwInstance(Stack stack) {
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findAllInStack(stack.getId());
+        return getPrimaryGwInstance(instanceMetaDatas);
+    }
+
+    public InstanceMetaData getPrimaryGwInstance(Collection<InstanceMetaData> instanceMetaDatas) {
         return instanceMetaDatas.stream()
                 .filter(im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceMetadataType()))
                 .findFirst().orElseThrow(() -> new NotFoundException("Gateway instance does not found"));
