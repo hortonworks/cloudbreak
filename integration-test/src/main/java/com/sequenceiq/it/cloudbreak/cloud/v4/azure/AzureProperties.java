@@ -21,6 +21,8 @@ public class AzureProperties {
 
     private final Credential credential = new Credential();
 
+    private final Baseimage baseimage = new Baseimage();
+
     private final Instance instance = new Instance();
 
     private final Cloudstorage cloudstorage = new Cloudstorage();
@@ -61,6 +63,10 @@ public class AzureProperties {
 
     public Credential getCredential() {
         return credential;
+    }
+
+    public Baseimage getBaseimage() {
+        return baseimage;
     }
 
     public Instance getInstance() {
@@ -122,6 +128,18 @@ public class AzureProperties {
 
         public void setTenantId(String tenantId) {
             this.tenantId = tenantId;
+        }
+    }
+
+    public static class Baseimage {
+        private String imageId;
+
+        public String getImageId() {
+            return imageId;
+        }
+
+        public void setImageId(String imageId) {
+            this.imageId = imageId;
         }
     }
 

@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.azure;
 
+import static java.lang.String.format;
+
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -11,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -45,6 +49,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
 
@@ -115,11 +120,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public CloudFunctionality getCloudFunctionality() {
         return azureCloudFunctionality;
-    }
-
-    @Override
-    public void setImageId(String id) {
-        notImplementedException();
     }
 
     @Override
@@ -318,7 +318,9 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings.withImageCatalog(commonCloudProperties().getImageCatalogName());
+        return imageSettings
+                .withImageId(azureProperties.getBaseimage().getImageId())
+                .withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 
     @Override
@@ -328,7 +330,37 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return notImplementedException();
+        if (azureProperties.getBaseimage().getImageId() == null || azureProperties.getBaseimage().getImageId().isEmpty()) {
+            try {
+                List<BaseImageV4Response> images = cloudbreakClient
+                        .getCloudbreakClient()
+                        .imageCatalogV4Endpoint()
+                        .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
+                                CloudPlatform.AZURE.name()).getBaseImages();
+
+                BaseImageV4Response baseImage = images.get(images.size() - 1);
+                Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
+                Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
+                Log.log(LOGGER, format(" Selected Base Image Date: %s | ID: %s | Description: %s ", baseImage.getDate(),
+                        baseImage.getUuid(), baseImage.getDescription()));
+                azureProperties.getBaseimage().setImageId(baseImage.getUuid());
+
+                return baseImage.getUuid();
+            } catch (Exception e) {
+                LOGGER.error("Cannot fetch base images of {} image catalog, because of {}", imageCatalogTestDto.getRequest().getName(), e);
+                throw new TestFailException(" Cannot fetch base images of " + imageCatalogTestDto.getRequest().getName() + " image catalog, because of " + e);
+            }
+        } else {
+            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
+            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
+            Log.log(LOGGER, format(" Image ID for SDX create: %s ", azureProperties.getBaseimage().getImageId()));
+            return azureProperties.getBaseimage().getImageId();
+        }
+    }
+
+    @Override
+    public void setImageId(String id) {
+        azureProperties.getBaseimage().setImageId(id);
     }
 
     private String notImplementedException() {
