@@ -25,6 +25,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
@@ -112,6 +113,9 @@ public class Stack {
     private String appVersion;
 
     private String minaSshdServiceId;
+
+    @Version
+    private Long version;
 
     public Long getId() {
         return id;
@@ -383,6 +387,14 @@ public class Stack {
 
     public void setMinaSshdServiceId(String minaSshdServiceId) {
         this.minaSshdServiceId = minaSshdServiceId;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     @Override
