@@ -1,0 +1,95 @@
+{
+  "description": "7.2.0 - Streams Messaging Light Duty with Apache Kafka, Schema Registry, Streams Messaging Manager",
+  "blueprint": {
+    "cdhVersion": "7.2.0",
+    "displayName": "streams-messaging",
+    "services": [
+      {
+        "refName": "streams_messaging_manager",
+        "serviceType": "STREAMS_MESSAGING_MANAGER",
+        "roleConfigGroups": [
+          {
+            "refName": "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
+            "roleType": "STREAMS_MESSAGING_MANAGER_SERVER",
+            "base": true
+          },
+          {
+            "refName": "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE",
+            "roleType": "STREAMS_MESSAGING_MANAGER_UI",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "core_settings",
+        "serviceType": "CORE_SETTINGS",
+        "roleConfigGroups": [
+          {
+            "refName": "core_settings-STORAGEOPERATIONS-BASE",
+            "roleType": "STORAGEOPERATIONS",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "kafka",
+        "serviceType": "KAFKA",
+        "roleConfigGroups": [
+          {
+            "refName": "kafka-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "kafka-KAFKA_BROKER-BASE",
+            "roleType": "KAFKA_BROKER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "schemaregistry",
+        "serviceType": "SCHEMAREGISTRY",
+        "roleConfigGroups": [
+          {
+            "refName": "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
+            "roleType": "SCHEMA_REGISTRY_SERVER",
+            "base": true
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "master",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "core_settings-STORAGEOPERATIONS-BASE",
+          "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
+          "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
+          "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE"
+        ]
+      },
+      {
+        "refName": "broker",
+        "cardinality": 3,
+        "roleConfigGroupsRefNames": [
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "zookeeper-SERVER-BASE"
+        ]
+      }
+    ]
+  }
+}

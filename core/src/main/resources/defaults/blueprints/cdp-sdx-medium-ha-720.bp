@@ -1,0 +1,366 @@
+{
+  "tags": {
+    "shared_services_ready": true
+  },
+  "description": "7.2.0 - SDX-HA template with Atlas, HMS, Ranger and other services they are dependent on. Services like HDFS, HBASE have HA",
+  "blueprint": {
+    "cdhVersion": "7.2.0",
+    "displayName": "ha-datalake",
+    "hostTemplates": [
+      {
+        "cardinality": 2,
+        "refName": "master",
+        "roleConfigGroupsRefNames": [
+          "hdfs-DATANODE-BASE",
+          "hdfs-FAILOVERCONTROLLER-BASE",
+          "hdfs-JOURNALNODE-BASE",
+          "hdfs-NAMENODE-BASE",
+          "hive-HIVEMETASTORE-BASE",
+          "zookeeper-SERVER-BASE",
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "solr-SOLR_SERVER-BASE"
+        ]
+      },
+      {
+        "cardinality": 2,
+        "refName": "alpha",
+        "roleConfigGroupsRefNames": [
+          "ranger-RANGER_ADMIN-BASE",
+          "hdfs-DATANODE-BASE",
+          "hbase-REGIONSERVER-BASE",
+          "hbase-MASTER-BASE",
+          "atlas-ATLAS_SERVER-BASE"
+        ]
+      },
+      {
+        "cardinality": 1,
+        "refName": "gateway",
+        "roleConfigGroupsRefNames": [
+          "hdfs-BALANCER-BASE",
+          "hdfs-JOURNALNODE-BASE",
+          "knox-KNOX_GATEWAY-BASE",
+          "ranger-RANGER_USERSYNC-BASE",
+          "ranger-RANGER_TAGSYNC-BASE",
+          "zookeeper-SERVER-BASE"
+        ]
+      },
+      {
+        "cardinality": 2,
+        "refName": "idbroker",
+        "roleConfigGroupsRefNames": [
+          "knox-IDBROKER-BASE"
+        ]
+      }
+    ],
+    "services": [
+      {
+        "refName": "atlas",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "configs": [
+              {
+                "name": "atlas_authentication_method_file",
+                "value": "false"
+              }
+            ],
+            "refName": "atlas-ATLAS_SERVER-BASE",
+            "roleType": "ATLAS_SERVER"
+          }
+        ],
+        "serviceConfigs": [
+          {
+            "name": "solr_service",
+            "ref": "solr"
+          },
+          {
+            "name": "kafka_service",
+            "ref": "kafka"
+          },
+          {
+            "name": "hbase_service",
+            "ref": "hbase"
+          },
+          {
+            "name": "hdfs_service",
+            "ref": "hdfs"
+          }
+        ],
+        "serviceType": "ATLAS"
+      },
+      {
+        "refName": "hbase",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "configs": [
+              {
+                "name": "hbase_master_info_port",
+                "value": "22002"
+              },
+              {
+                "name": "hbase_master_port",
+                "value": "22001"
+              }
+            ],
+            "refName": "hbase-MASTER-BASE",
+            "roleType": "MASTER"
+          },
+          {
+            "base": true,
+            "configs": [
+              {
+                "name": "hbase_regionserver_java_opts",
+                "value": "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled -XX:ReservedCodeCacheSize=256m -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
+              },
+              {
+                "name": "hbase_regionserver_info_port",
+                "value": "22102"
+              },
+              {
+                "name": "hbase_regionserver_port",
+                "value": "22101"
+              }
+            ],
+            "refName": "hbase-REGIONSERVER-BASE",
+            "roleType": "REGIONSERVER"
+          }
+        ],
+        "serviceConfigs": [
+          {
+            "name": "hbase_enable_indexing",
+            "value": "true"
+          },
+          {
+            "name": "hbase_enable_replication",
+            "value": "true"
+          },
+          {
+            "name": "zookeeper_session_timeout",
+            "value": "30000"
+          }
+        ],
+        "serviceType": "HBASE"
+      },
+      {
+        "refName": "hdfs",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE"
+          },
+          {
+            "base": true,
+            "refName": "hdfs-FAILOVERCONTROLLER-BASE",
+            "roleType": "FAILOVERCONTROLLER"
+          },
+          {
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_journalnode_edits_dir",
+                "value": "/dfs/jn"
+              }
+            ],
+            "refName": "hdfs-JOURNALNODE-BASE",
+            "roleType": "JOURNALNODE"
+          },
+          {
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_datanode_failed_volumes_tolerated",
+                "value": "0"
+              },
+              {
+                "name": "dfs_data_dir_list",
+                "value": "/dfs/dn"
+              }
+            ],
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE"
+          },
+          {
+            "base": true,
+            "configs": [
+              {
+                "name": "fs_checkpoint_dir_list",
+                "value": "/should_not_be_required_in_HA_setup"
+              }
+            ],
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE"
+          },
+          {
+            "base": true,
+            "refName": "hdfs-BALANCER-BASE",
+            "roleType": "BALANCER"
+          }
+        ],
+        "serviceConfigs": [
+          {
+            "name": "redaction_policy_enabled",
+            "value": "false"
+          },
+          {
+              "name": "enable_ranger_authorization",
+              "value": "true"
+          }
+        ],
+        "serviceType": "HDFS"
+      },
+      {
+        "refName": "hive",
+        "displayName": "Hive Metastore",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "hive-HIVEMETASTORE-BASE",
+            "roleType": "HIVEMETASTORE"
+          }
+        ],
+        "serviceType": "HIVE"
+      },
+      {
+        "refName": "kafka",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "kafka-GATEWAY-BASE",
+            "roleType": "GATEWAY"
+          },
+          {
+            "base": true,
+            "refName": "kafka-KAFKA_BROKER-BASE",
+            "roleType": "KAFKA_BROKER"
+          }
+        ],
+        "serviceConfigs": [
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          },
+          {
+            "name": "offsets.topic.replication.factor",
+            "value": "1"
+          },
+          {
+            "name": "service_config_suppression_offsets.topic.replication.factor",
+            "value": "true"
+          },
+          {
+            "name": "service_config_suppression_transaction.state.log.replication.factor",
+            "value": "true"
+          },
+          {
+            "name": "service_config_suppression_kafka_broker_count_validator",
+            "value": "true"
+          }
+        ],
+        "serviceType": "KAFKA"
+      },
+      {
+        "refName": "ranger",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "ranger-RANGER_USERSYNC-BASE",
+            "roleType": "RANGER_USERSYNC"
+          },
+          {
+            "base": true,
+            "refName": "ranger-RANGER_TAGSYNC-BASE",
+            "roleType": "RANGER_TAGSYNC"
+
+          },
+          {
+            "base": true,
+            "refName": "ranger-RANGER_ADMIN-BASE",
+            "roleType": "RANGER_ADMIN"
+          }
+        ],
+        "serviceConfigs": [
+          {
+            "name": "hdfs_service",
+            "ref": "hdfs"
+          },
+          {
+            "name": "rangeradmin_user_password",
+            "value": "{{{ general.password }}}"
+          },
+          {
+            "name": "rangertagsync_user_password",
+            "value": "{{{ general.password }}}"
+          },
+          {
+            "name": "solr_service",
+            "ref": "solr"
+          },
+          {
+            "name": "rangerusersync_user_password",
+            "value": "{{{ general.password }}}"
+          },
+          {
+            "name": "keyadmin_user_password",
+            "value": "{{{ general.password }}}"
+          }
+        ],
+        "serviceType": "RANGER"
+      },
+      {
+        "refName": "solr",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "solr-SOLR_SERVER-BASE",
+            "roleType": "SOLR_SERVER"
+          }
+        ],
+        "serviceConfigs": [
+          {
+            "name": "hdfs_service",
+            "ref": "hdfs"
+          },
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          },
+          {
+            "name": "enable_ranger_authorization",
+            "value": "false"
+          }
+        ],
+        "serviceType": "SOLR"
+      },
+      {
+        "refName": "zookeeper",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER"
+          }
+        ],
+        "serviceType": "ZOOKEEPER"
+      },
+      {
+        "serviceType": "KNOX",
+        "refName": "knox",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "knox-KNOX_GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY"
+          },
+          {
+            "base": true,
+            "refName": "knox-IDBROKER-BASE",
+            "roleType": "IDBROKER"
+          }
+        ]
+      }
+    ]
+  }
+}

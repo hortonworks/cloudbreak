@@ -70,9 +70,9 @@ datalake:
       cert.file: database.crt
       ssl: false
   runtimes:
-    default: 7.1.0
-    advertised:
-    supported: 7.1.0
+    default: "7.1.0"
+    advertised: "7.1.0,7.1.1"
+    supported: "7.0.2,7.1.0,7.1.1,7.2.0"
 
 secret:
   application: sdx/shared
