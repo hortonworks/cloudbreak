@@ -37,9 +37,11 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -73,6 +75,9 @@ public class ClusterCommonService {
     @Inject
     private BlueprintService blueprintService;
 
+    @Inject
+    private EnvironmentService environmentService;
+
     public FlowIdentifier put(String crn, UpdateClusterV4Request updateJson) {
         Stack stack = stackService.getByCrn(crn);
         Long stackId = stack.getId();
@@ -92,6 +97,7 @@ public class ClusterCommonService {
                 throw new TransactionRuntimeExecutionException(e);
             }
         } else if (updateJson.getHostGroupAdjustment() != null) {
+            environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
             flowIdentifier = clusterHostgroupAdjustmentChange(stackId, updateJson, stack);
         } else {
             LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
