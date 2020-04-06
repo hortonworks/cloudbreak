@@ -294,17 +294,20 @@ public class WaitUtil {
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(redbeamsClient, crn, desiredStatus);
         }
+        DatabaseServerV4Response databaseServerResponse = redbeamsClient.getEndpoints().databaseServerV4Endpoint().getByCrn(crn);
         if (waitResult == WaitResult.FAILED) {
             StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
-            DatabaseServerV4Response databaseServerResponse = redbeamsClient.getEndpoints().databaseServerV4Endpoint().getByCrn(crn);
             if (databaseServerResponse != null && databaseServerResponse.getStatus() != null) {
                 builder.append("statusReason: ").append(databaseServerResponse.getStatusReason());
             }
-            throw new RuntimeException(builder.toString());
+            LOGGER.error(builder.toString());
+            throw new TestFailException(builder.toString());
         } else if (waitResult == WaitResult.TIMEOUT) {
-            throw new RuntimeException("Timeout happened");
+            LOGGER.error("Timeout happened while waiting for {} status at {}, the current status is {}", desiredStatus.name(), crn,
+                    databaseServerResponse.getStatus().name());
+            throw new TestFailException("Timeout happened while waiting for " + desiredStatus.name() + " status at " + crn + ", the current status is "
+                    + databaseServerResponse.getStatus().name());
         } else if (Status.DELETE_COMPLETED != desiredStatus) {
-            DatabaseServerV4Response databaseServerResponse = redbeamsClient.getEndpoints().databaseServerV4Endpoint().getByCrn(crn);
             if (databaseServerResponse != null) {
                 errors = Map.of("status", databaseServerResponse.getStatus().name());
             }
@@ -319,19 +322,21 @@ public class WaitUtil {
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(freeIPAClient, name, desiredStatus);
         }
+        DescribeFreeIpaResponse freeIpaResponse = freeIPAClient.getFreeIpaClient().getFreeIpaV1Endpoint()
+                .describe(name);
         if (waitResult == WaitResult.FAILED) {
             StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
-            DescribeFreeIpaResponse freeIpaResponse = freeIPAClient.getFreeIpaClient().getFreeIpaV1Endpoint()
-                    .describe(name);
             if (freeIpaResponse != null && freeIpaResponse.getStatus() != null) {
                 builder.append("statusReason: ").append(freeIpaResponse.getStatusReason());
             }
-            throw new RuntimeException(builder.toString());
+            LOGGER.error(builder.toString());
+            throw new TestFailException(builder.toString());
         } else if (waitResult == WaitResult.TIMEOUT) {
-            throw new RuntimeException("Timeout happened");
+            LOGGER.error("Timeout happened while waiting for {} status at {}, the current status is {}", desiredStatus.name(), name,
+                    freeIpaResponse.getStatus().name());
+            throw new TestFailException("Timeout happened while waiting for " + desiredStatus.name() + " status at " + name + ", the current status is "
+                    + freeIpaResponse.getStatus().name());
         } else if (com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED != desiredStatus) {
-            DescribeFreeIpaResponse freeIpaResponse = freeIPAClient.getFreeIpaClient().getFreeIpaV1Endpoint()
-                    .describe(name);
             if (freeIpaResponse != null) {
                 errors = Map.of("status", freeIpaResponse.getStatus().name());
             }
@@ -346,12 +351,18 @@ public class WaitUtil {
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(environmentClient, name, desiredStatus);
         }
+        DetailedEnvironmentResponse environmentResponse = environmentClient.getEnvironmentClient().environmentV1Endpoint().getByName(name);
         if (waitResult == WaitResult.FAILED) {
-            throw new RuntimeException("The creation of [" + name + "] environment has failed.");
+            LOGGER.error("Environment {} creation have been failed with {} status and reason: {}", name,
+                    environmentResponse.getEnvironmentStatus().name(), environmentResponse.getStatusReason());
+            throw new TestFailException("Environment " + name + " creation have been failed with " + environmentResponse.getEnvironmentStatus().name()
+                    + " status and reason: " + environmentResponse.getStatusReason());
         } else if (waitResult == WaitResult.TIMEOUT) {
-            throw new RuntimeException("Timeout happened");
+            LOGGER.error("Timeout happened while waiting for {} status at {}, the current status is {}", desiredStatus.name(), name,
+                    environmentResponse.getEnvironmentStatus().name());
+            throw new TestFailException("Timeout happened while waiting for " + desiredStatus.name() + " status at " + name + ", the current status is "
+                    + environmentResponse.getEnvironmentStatus().name());
         } else if (EnvironmentStatus.ARCHIVED != desiredStatus) {
-            DetailedEnvironmentResponse environmentResponse = environmentClient.getEnvironmentClient().environmentV1Endpoint().getByName(name);
             if (environmentResponse != null) {
                 errors = Map.of("status", environmentResponse.getEnvironmentStatus().name());
             }
@@ -366,13 +377,17 @@ public class WaitUtil {
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(sdxClient, name, desiredStatus);
         }
+        SdxClusterResponse sdxResponse = sdxClient.getSdxClient().sdxEndpoint().get(name);
         if (waitResult == WaitResult.FAILED) {
             StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
-            throw new RuntimeException(builder.toString());
+            LOGGER.error(builder.toString());
+            throw new TestFailException(builder.toString());
         } else if (waitResult == WaitResult.TIMEOUT) {
-            throw new RuntimeException("Timeout happened");
+            LOGGER.error("Timeout happened while waiting for {} status at {}, the current status is {}", desiredStatus.name(), name,
+                    sdxResponse.getStatus().name());
+            throw new TestFailException("Timeout happened while waiting for " + desiredStatus.name() + " status at " + name + ", the current status is "
+                    + sdxResponse.getStatus().name());
         } else if (DELETED != desiredStatus) {
-            SdxClusterResponse sdxResponse = sdxClient.getSdxClient().sdxEndpoint().get(name);
             if (sdxResponse != null) {
                 errors = Map.of("status", sdxResponse.getStatus().name());
             }
