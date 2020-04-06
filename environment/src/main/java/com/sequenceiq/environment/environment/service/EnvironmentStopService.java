@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -10,6 +11,9 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 
 @Service
@@ -45,6 +49,11 @@ public class EnvironmentStopService {
     }
 
     private void validateStoppable(EnvironmentDto environment, String accountId) {
+        validateNoChildEnvironmentIsRunning(environment, accountId);
+        validaFreeIpaIsNotRunningOnSpotInstances(environment);
+    }
+
+    private void validateNoChildEnvironmentIsRunning(EnvironmentDto environment, String accountId) {
         List<String> runningChildEnvironmentNames = environmentService.findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(accountId, environment.getId())
                 .stream()
                 .filter(childEnvironment -> EnvironmentStatus.ENV_STOPPED != childEnvironment.getStatus())
@@ -54,6 +63,19 @@ public class EnvironmentStopService {
             String message = String.format(
                     "The following child Environment(s) have to be stopped before Environment stop: [%s]",
                     String.join(", ", runningChildEnvironmentNames));
+            throw new BadRequestException(message);
+        }
+    }
+
+    private void validaFreeIpaIsNotRunningOnSpotInstances(EnvironmentDto environment) {
+        Integer freeIpaSpotPercentage = Optional.ofNullable(environment.getFreeIpaCreation())
+                .map(FreeIpaCreationDto::getAws)
+                .map(FreeIpaCreationAwsParametersDto::getSpot)
+                .map(FreeIpaCreationAwsSpotParametersDto::getPercentage)
+                .orElse(0);
+
+        if (freeIpaSpotPercentage != 0) {
+            String message = String.format("Environment [%s] can not be stopped because FreeIpa is running on spot instances.", environment.getName());
             throw new BadRequestException(message);
         }
     }
