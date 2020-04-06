@@ -383,6 +383,30 @@ cb:
           stack:
             repoid: CDH-6.2.0
             redhat7: https://archive.cloudera.com/cdh6/6.2.0/parcels/
+      "[7.0.1]":
+        version: 7.0.1-1.cdh7.0.1.p0.1454941
+        minCM: 7.0
+        repo:
+          stack:
+            repoid: CDH-7.0.1
+            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1454941/cdh/7.x/parcels/
+            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1454941/cdh/7.x/parcels/
+      "[7.0.2]":
+        version: 7.0.2-1.cdh7.0.2.p2.1711788
+        minCM: 7.0
+        repo:
+          stack:
+            repoid: CDH-7.0.2
+            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1711788/cdh/7.x/parcels/
+            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1711788/cdh/7.x/parcels/
+      "[7.1.0]":
+        version: 7.1.0-1.cdh7.1.0.p0.1922354
+        minCM: 7.1
+        repo:
+          stack:
+            repoid: CDH-7.1.0
+            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922354/cdh/7.x/parcels/
+            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922354/cdh/7.x/parcels/
 
   workspace.service.cache.ttl: 15
 
