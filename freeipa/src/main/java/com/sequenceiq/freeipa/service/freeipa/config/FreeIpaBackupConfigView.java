@@ -27,15 +27,18 @@ public class FreeIpaBackupConfigView {
 
     private final String azureInstanceMsi;
 
+    private final String proxyUrl;
+
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaBackupConfigView(FreeIpaBackupConfigView.Builder builder) {
-        this.enabled = builder.enabled;
-        this.monthlyFullEnabled = builder.monthlyFullEnabled;
-        this.hourlyEnabled = builder.hourlyEnabled;
-        this.initialFullEnabled = builder.initialFullEnabled;
-        this.location = builder.location;
-        this.platform = builder.platform;
-        this.azureInstanceMsi = builder.azureInstanceMsi;
+        enabled = builder.enabled;
+        monthlyFullEnabled = builder.monthlyFullEnabled;
+        hourlyEnabled = builder.hourlyEnabled;
+        initialFullEnabled = builder.initialFullEnabled;
+        location = builder.location;
+        platform = builder.platform;
+        azureInstanceMsi = builder.azureInstanceMsi;
+        proxyUrl = builder.proxyUrl;
     }
 
     public String getLocation() {
@@ -66,16 +69,21 @@ public class FreeIpaBackupConfigView {
         return azureInstanceMsi;
     }
 
+    public String getProxyUrl() {
+        return proxyUrl;
+    }
+
     @SuppressWarnings("ExecutableStatementCount")
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
-        map.put("enabled", this.enabled);
-        map.put("location", ObjectUtils.defaultIfNull(this.location, EMPTY_CONFIG_DEFAULT));
-        map.put("monthly_full_enabled", this.monthlyFullEnabled);
-        map.put("hourly_enabled", this.hourlyEnabled);
-        map.put("initial_full_enabled", this.initialFullEnabled);
-        map.put("platform", ObjectUtils.defaultIfNull(this.platform, EMPTY_CONFIG_DEFAULT));
-        map.put("azure_instance_msi", ObjectUtils.defaultIfNull(this.azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
+        map.put("enabled", enabled);
+        map.put("location", ObjectUtils.defaultIfNull(location, EMPTY_CONFIG_DEFAULT));
+        map.put("monthly_full_enabled", monthlyFullEnabled);
+        map.put("hourly_enabled", hourlyEnabled);
+        map.put("initial_full_enabled", initialFullEnabled);
+        map.put("platform", ObjectUtils.defaultIfNull(platform, EMPTY_CONFIG_DEFAULT));
+        map.put("azure_instance_msi", ObjectUtils.defaultIfNull(azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
+        map.put("http_proxy", ObjectUtils.defaultIfNull(proxyUrl, EMPTY_CONFIG_DEFAULT));
         return map;
     }
 
@@ -94,6 +102,8 @@ public class FreeIpaBackupConfigView {
         private String platform;
 
         private String azureInstanceMsi;
+
+        private String proxyUrl;
 
         public FreeIpaBackupConfigView build() {
             return new FreeIpaBackupConfigView(this);
@@ -131,6 +141,11 @@ public class FreeIpaBackupConfigView {
 
         public Builder withAzureInstanceMsi(String azureInstanceMsi) {
             this.azureInstanceMsi = azureInstanceMsi;
+            return this;
+        }
+
+        public Builder withProxyUrl(String proxyUrl) {
+            this.proxyUrl = proxyUrl;
             return this;
         }
     }

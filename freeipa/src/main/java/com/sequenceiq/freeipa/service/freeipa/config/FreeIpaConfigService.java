@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.config;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.freeipa.api.model.Backup;
@@ -75,7 +77,7 @@ public class FreeIpaConfigService {
         Backup backup = stack.getBackup();
         final FreeIpaBackupConfigView.Builder builder = new FreeIpaBackupConfigView.Builder();
         if (backup != null) {
-            builder.withEnabled(!proxyConfigDtoService.isProxyConfiguredForEnvironment(stack.getEnvironmentCrn()))
+            builder.withEnabled(true)
                     .withMonthlyFullEnabled(backup.isMonthlyFullEnabled())
                     .withHourlyEnabled(backup.isHourlyEnabled())
                     .withInitialFullEnabled(backup.isInitialFullEnabled())
@@ -87,6 +89,12 @@ public class FreeIpaConfigService {
                 builder.withPlatform(CloudPlatform.AZURE.name())
                         .withAzureInstanceMsi(backup.getAdlsGen2().getManagedIdentity());
                 LOGGER.debug("Backups will be configured to use Azure Blob storage");
+            }
+            Optional<ProxyConfig> proxyOpt = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
+            if (proxyOpt.isPresent()) {
+                ProxyConfig proxy = proxyOpt.get();
+                LOGGER.debug("Proxy will be configured for backup: {}", proxy.getName());
+                builder.withProxyUrl(proxy.getFullProxyUrl());
             }
         } else {
             builder.withEnabled(false);

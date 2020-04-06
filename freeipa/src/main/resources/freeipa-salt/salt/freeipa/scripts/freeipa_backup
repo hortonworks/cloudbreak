@@ -14,10 +14,12 @@ config=( # set default values in config array
     [azure_instance_msi]=""
     [logfile]="/var/log/ipabackup.log"
     [backup_path]="/var/lib/ipa/backup"
+    [http_proxy]=""
 )
 
+set +x
 # Override defaults with config file
-if [ -f $CONFIG_FILE ]; then
+if [[ -f $CONFIG_FILE ]]; then
     while read line
     do
         if echo $line | grep -F = &>/dev/null
@@ -27,6 +29,7 @@ if [ -f $CONFIG_FILE ]; then
         fi
     done < $CONFIG_FILE
 fi
+set -x
 
 while getopts "t:f:" OPTION; do
     case $OPTION in
@@ -51,21 +54,20 @@ then
     exit 1
 fi
 
-if [ -z "$TYPE" ] || [ -z "$FOLDER" ];
+if [[ -z "$TYPE" ]] || [[ -z "$FOLDER" ]];
 then
     echo "A type (-t) and a folder -f must be defined" >&2
     exit 1
 fi
-
 
 LOGFILE="${config[logfile]}"
 DATE_FOLDER="$(date -I)"
 BACKUP_PATH_POSTFIX="${FOLDER}"
 
 BACKUP_OPTIONS=""
-if [ "$TYPE" = "FULL" ]; then
+if [[ "$TYPE" = "FULL" ]]; then
     BACKUP_OPTIONS="-q"
-elif [ "$TYPE" = "DATA" ]; then
+elif [[ "$TYPE" = "DATA" ]]; then
     BACKUP_OPTIONS="-q --data --online"
 fi
 
@@ -94,6 +96,13 @@ remove_local_backups() {
 
 doLog "INFO Running ${TYPE} IPA backup."
 
+set +x
+if [[ -n "${config[http_proxy]}" ]]; then
+    doLog "INFO Configure HTTP proxy"
+    export HTTPS_PROXY="${config[http_proxy]}"
+fi
+set -x
+
 # Perform a backup
 /sbin/ipa-backup $BACKUP_OPTIONS >> $LOGFILE 2>&1 || error_exit "ipa-backup failed! Aborting!"
 BACKUPDIR=$(basename $(ls -td ${config[backup_path]}/ipa-* | head -1))
@@ -101,12 +110,12 @@ BACKUPDIR=$(basename $(ls -td ${config[backup_path]}/ipa-* | head -1))
 BACKUP_LOCATION="${config[backup_location]}/${BACKUP_PATH_POSTFIX}"
 doLog "DEBUG Uploading backup to ${BACKUP_LOCATION} on ${config[backup_platform]}"
 
-if [ "${config[backup_platform]}" = "AWS" ]; then
+if [[ "${config[backup_platform]}" = "AWS" ]]; then
     doLog "INFO Syncing backups to AWS S3"
     /usr/bin/aws s3 cp --recursive --sse AES256 --no-progress ${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR} >> $LOGFILE 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
     remove_local_backups
-elif [ "${config[backup_platform]}" = "AZURE" ]; then
-    doLog "INFO  Syncing backups to Azure Blog Storage"
+elif [[ "${config[backup_platform]}" = "AZURE" ]]; then
+    doLog "INFO Syncing backups to Azure Blog Storage"
     /bin/keyctl new_session >> $LOGFILE 2>&1 || error_exit "Unable to setup keyring session"
     /usr/local/bin/azcopy login --identity --identity-resource-id "${config[azure_instance_msi]}" >> $LOGFILE 2>&1 || error_exit "Unable to login to Azure!"
     /usr/local/bin/azcopy copy ${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION} --recursive=true >> $LOGFILE 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"

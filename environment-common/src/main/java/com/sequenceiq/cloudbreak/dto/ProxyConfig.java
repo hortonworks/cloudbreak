@@ -55,6 +55,15 @@ public class ProxyConfig implements Serializable {
         return Optional.ofNullable(proxyAuthentication);
     }
 
+    public String getFullProxyUrl() {
+        if (getProxyAuthentication().isPresent()) {
+            ProxyAuthentication auth = getProxyAuthentication().get();
+            return String.format("%s://%s:%s@%s:%d", protocol, auth.getUserName(), auth.getPassword(), serverHost, serverPort);
+        } else {
+            return String.format("%s://%s:%d", protocol, serverHost, serverPort);
+        }
+    }
+
     @Override
     public String toString() {
         return "ProxyConfig{" +
