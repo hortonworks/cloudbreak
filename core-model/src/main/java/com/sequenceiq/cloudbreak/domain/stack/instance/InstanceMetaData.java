@@ -211,7 +211,8 @@ public class InstanceMetaData implements ProvisionEntity {
     public boolean isReachable() {
         return !isTerminated()
                 && !isDeletedOnProvider()
-                && !isFailed()
+                && !InstanceStatus.ORCHESTRATION_FAILED.equals(instanceStatus)
+                && !InstanceStatus.FAILED.equals(instanceStatus)
                 && !InstanceStatus.STOPPED.equals(instanceStatus);
     }
 
