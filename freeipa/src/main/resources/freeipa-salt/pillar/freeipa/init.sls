@@ -12,3 +12,4 @@ freeipa:
     platform:
     location:
     azure_instance_msi:
+    http_proxy:
