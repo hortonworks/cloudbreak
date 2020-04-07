@@ -370,6 +370,7 @@ public class ClusterRepairServiceTest {
         instanceMetaData.setDiscoveryFQDN(hostName);
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setInstanceStatus(instanceStatus);
+        instanceMetaData.setInstanceId(hostName);
         instanceGroup.setInstanceMetaData(Collections.singleton(instanceMetaData));
 
         return instanceMetaData;
