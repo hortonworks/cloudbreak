@@ -259,9 +259,12 @@ public class WaitUtil {
             if (StringUtils.isNotBlank(flowChainId)) {
                 LOGGER.info("Waiting for flow chain {}, retry count {}", flowChainId, retryCount);
                 flowRunning = flowEndpoint.hasFlowRunningByChainId(flowChainId).getHasActiveFlow();
-            } else {
+            } else if (StringUtils.isNoneBlank(flowId)) {
                 LOGGER.info("Waiting for flow {}, retry count {}", flowId, retryCount);
                 flowRunning = flowEndpoint.hasFlowRunningByFlowId(flowId).getHasActiveFlow();
+            } else {
+                LOGGER.info("Flow id and flow chain id are empty so flow is not running");
+                flowRunning = false;
             }
             retryCount++;
         }
