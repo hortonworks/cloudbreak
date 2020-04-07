@@ -294,20 +294,22 @@ public class WaitUtil {
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(redbeamsClient, crn, desiredStatus);
         }
-        DatabaseServerV4Response databaseServerResponse = redbeamsClient.getEndpoints().databaseServerV4Endpoint().getByCrn(crn);
         if (waitResult == WaitResult.FAILED) {
             StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
+            DatabaseServerV4Response databaseServerResponse = getDatabaseServerResponse(redbeamsClient, crn);
             if (databaseServerResponse != null && databaseServerResponse.getStatus() != null) {
                 builder.append("statusReason: ").append(databaseServerResponse.getStatusReason());
             }
             LOGGER.error(builder.toString());
             throw new TestFailException(builder.toString());
         } else if (waitResult == WaitResult.TIMEOUT) {
+            DatabaseServerV4Response databaseServerResponse = getDatabaseServerResponse(redbeamsClient, crn);
             LOGGER.error("Timeout happened while waiting for {} status at {}, the current status is {}", desiredStatus.name(), crn,
                     databaseServerResponse.getStatus().name());
             throw new TestFailException("Timeout happened while waiting for " + desiredStatus.name() + " status at " + crn + ", the current status is "
                     + databaseServerResponse.getStatus().name());
         } else if (Status.DELETE_COMPLETED != desiredStatus) {
+            DatabaseServerV4Response databaseServerResponse = getDatabaseServerResponse(redbeamsClient, crn);
             if (databaseServerResponse != null) {
                 errors = Map.of("status", databaseServerResponse.getStatus().name());
             }
@@ -322,21 +324,22 @@ public class WaitUtil {
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(freeIPAClient, name, desiredStatus);
         }
-        DescribeFreeIpaResponse freeIpaResponse = freeIPAClient.getFreeIpaClient().getFreeIpaV1Endpoint()
-                .describe(name);
         if (waitResult == WaitResult.FAILED) {
             StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
+            DescribeFreeIpaResponse freeIpaResponse = getFreeIPAResponse(freeIPAClient, name);
             if (freeIpaResponse != null && freeIpaResponse.getStatus() != null) {
                 builder.append("statusReason: ").append(freeIpaResponse.getStatusReason());
             }
             LOGGER.error(builder.toString());
             throw new TestFailException(builder.toString());
         } else if (waitResult == WaitResult.TIMEOUT) {
+            DescribeFreeIpaResponse freeIpaResponse = getFreeIPAResponse(freeIPAClient, name);
             LOGGER.error("Timeout happened while waiting for {} status at {}, the current status is {}", desiredStatus.name(), name,
                     freeIpaResponse.getStatus().name());
             throw new TestFailException("Timeout happened while waiting for " + desiredStatus.name() + " status at " + name + ", the current status is "
                     + freeIpaResponse.getStatus().name());
         } else if (com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED != desiredStatus) {
+            DescribeFreeIpaResponse freeIpaResponse = getFreeIPAResponse(freeIPAClient, name);
             if (freeIpaResponse != null) {
                 errors = Map.of("status", freeIpaResponse.getStatus().name());
             }
@@ -351,18 +354,20 @@ public class WaitUtil {
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(environmentClient, name, desiredStatus);
         }
-        DetailedEnvironmentResponse environmentResponse = environmentClient.getEnvironmentClient().environmentV1Endpoint().getByName(name);
         if (waitResult == WaitResult.FAILED) {
-            LOGGER.error("Environment {} creation have been failed with {} status and reason: {}", name,
-                    environmentResponse.getEnvironmentStatus().name(), environmentResponse.getStatusReason());
+            DetailedEnvironmentResponse environmentResponse = getEnvironmentResponse(environmentClient, name);
+            LOGGER.error("Environment {} creation have been failed with {} status and reason: {}", name, environmentResponse.getEnvironmentStatus().name(),
+                    environmentResponse.getStatusReason());
             throw new TestFailException("Environment " + name + " creation have been failed with " + environmentResponse.getEnvironmentStatus().name()
                     + " status and reason: " + environmentResponse.getStatusReason());
         } else if (waitResult == WaitResult.TIMEOUT) {
+            DetailedEnvironmentResponse environmentResponse = getEnvironmentResponse(environmentClient, name);
             LOGGER.error("Timeout happened while waiting for {} status at {}, the current status is {}", desiredStatus.name(), name,
                     environmentResponse.getEnvironmentStatus().name());
             throw new TestFailException("Timeout happened while waiting for " + desiredStatus.name() + " status at " + name + ", the current status is "
                     + environmentResponse.getEnvironmentStatus().name());
         } else if (EnvironmentStatus.ARCHIVED != desiredStatus) {
+            DetailedEnvironmentResponse environmentResponse = getEnvironmentResponse(environmentClient, name);
             if (environmentResponse != null) {
                 errors = Map.of("status", environmentResponse.getEnvironmentStatus().name());
             }
@@ -377,17 +382,22 @@ public class WaitUtil {
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(sdxClient, name, desiredStatus);
         }
-        SdxClusterResponse sdxResponse = sdxClient.getSdxClient().sdxEndpoint().get(name);
         if (waitResult == WaitResult.FAILED) {
             StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
+            SdxClusterResponse sdxResponse = getSDXClusterResponse(sdxClient, name);
+            if (sdxResponse != null && sdxResponse.getStatus() != null) {
+                builder.append("statusReason: ").append(sdxResponse.getStatusReason());
+            }
             LOGGER.error(builder.toString());
             throw new TestFailException(builder.toString());
         } else if (waitResult == WaitResult.TIMEOUT) {
+            SdxClusterResponse sdxResponse = getSDXClusterResponse(sdxClient, name);
             LOGGER.error("Timeout happened while waiting for {} status at {}, the current status is {}", desiredStatus.name(), name,
                     sdxResponse.getStatus().name());
             throw new TestFailException("Timeout happened while waiting for " + desiredStatus.name() + " status at " + name + ", the current status is "
                     + sdxResponse.getStatus().name());
         } else if (DELETED != desiredStatus) {
+            SdxClusterResponse sdxResponse = getSDXClusterResponse(sdxClient, name);
             if (sdxResponse != null) {
                 errors = Map.of("status", sdxResponse.getStatus().name());
             }
@@ -533,4 +543,21 @@ public class WaitUtil {
             LOGGER.warn("Exception has been occurred during wait: ", e);
         }
     }
+
+    private SdxClusterResponse getSDXClusterResponse(SdxClient sdxClient, String sdxName) {
+        return sdxClient.getSdxClient().sdxEndpoint().get(sdxName);
+    }
+
+    private DatabaseServerV4Response getDatabaseServerResponse(RedbeamsClient redbeamsClient, String stackCRN) {
+        return redbeamsClient.getEndpoints().databaseServerV4Endpoint().getByCrn(stackCRN);
+    }
+
+    private DescribeFreeIpaResponse getFreeIPAResponse(FreeIPAClient freeIPAClient, String freeIPAName) {
+        return freeIPAClient.getFreeIpaClient().getFreeIpaV1Endpoint().describe(freeIPAName);
+    }
+
+    private DetailedEnvironmentResponse getEnvironmentResponse(EnvironmentClient environmentClient, String environmentName) {
+        return environmentClient.getEnvironmentClient().environmentV1Endpoint().getByName(environmentName);
+    }
+
 }
