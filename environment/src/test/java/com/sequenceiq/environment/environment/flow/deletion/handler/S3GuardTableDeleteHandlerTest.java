@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +32,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteRequest;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteResponse;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataRequest;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -149,6 +152,10 @@ class S3GuardTableDeleteHandlerTest {
         AwsParameters awsParameters = getAwsParameters(S3GuardTableCreation.CREATE_NEW);
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(awsParameters)));
 
+        when(noSql.getNoSqlTableMetaData(any(NoSqlTableMetadataRequest.class))).thenReturn(
+                NoSqlTableMetadataResponse.builder()
+                        .withStatus(ResponseStatus.OK)
+                        .build());
         Exception exception = new CloudConnectorException(String.format("Cannot delete NoSQL table %s. "
                 + "Provider error message: %s", DYNAMO_TABLE_NAME, "errorMessage"));
         when(noSql.deleteNoSqlTable(any(NoSqlTableDeleteRequest.class))).thenThrow(exception);
@@ -171,6 +178,10 @@ class S3GuardTableDeleteHandlerTest {
 
         AwsParameters awsParameters = getAwsParameters(S3GuardTableCreation.CREATE_NEW);
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(awsParameters)));
+        when(noSql.getNoSqlTableMetaData(any(NoSqlTableMetadataRequest.class))).thenReturn(
+                NoSqlTableMetadataResponse.builder()
+                        .withStatus(ResponseStatus.OK)
+                        .build());
         when(noSql.deleteNoSqlTable(any(NoSqlTableDeleteRequest.class))).thenReturn(NoSqlTableDeleteResponse.builder().withStatus(ResponseStatus.OK).build());
 
         underTest.accept(environmentDtoEvent);
@@ -178,6 +189,29 @@ class S3GuardTableDeleteHandlerTest {
         NoSqlTableDeleteRequest request = getNoSqlTableDeleteRequest(cloudCredential);
         verify(cloudPlatformConnectors).get(any(), any());
         verify(noSql).deleteNoSqlTable(request);
+        verify(eventSender).sendEvent(eventArgumentCaptor.capture(), headersArgumentCaptor.capture());
+        verifyEnvDeleteEvent();
+    }
+
+    @Test
+    void acceptTestEnvironmentSuccessWhenDynamoDbTableMissingOnAwsSide() {
+        when(cloudPlatformConnectors.get(any(), any())).thenReturn(cloudConnector);
+        when(cloudConnector.noSql()).thenReturn(noSql);
+        CloudCredential cloudCredential = new CloudCredential();
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(cloudCredential);
+
+        AwsParameters awsParameters = getAwsParameters(S3GuardTableCreation.CREATE_NEW);
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(createEnvironment(awsParameters)));
+        when(noSql.getNoSqlTableMetaData(any(NoSqlTableMetadataRequest.class))).thenReturn(
+                NoSqlTableMetadataResponse.builder()
+                        .withStatus(ResponseStatus.RESOURCE_NOT_FOUND)
+                        .build());
+
+        underTest.accept(environmentDtoEvent);
+
+        NoSqlTableDeleteRequest request = getNoSqlTableDeleteRequest(cloudCredential);
+        verify(cloudPlatformConnectors).get(any(), any());
+        verify(noSql, times(0)).deleteNoSqlTable(request);
         verify(eventSender).sendEvent(eventArgumentCaptor.capture(), headersArgumentCaptor.capture());
         verifyEnvDeleteEvent();
     }
