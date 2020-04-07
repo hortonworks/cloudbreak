@@ -52,7 +52,7 @@
     {
       "name": "HIVE_ON_TEZ",
       "displayName": "Hive on Tez",
-      "componentNameInParcel": "",
+      "componentNameInParcel": "tez",
       "components": [
         {
           "name": "HIVE_ON_TEZ",
@@ -195,7 +195,7 @@
     {
       "name": "YARN",
       "displayName": "Yarn",
-      "componentNameInParcel": "",
+      "componentNameInParcel": "hadoop-yarn",
       "components": [
         {
           "name": "JOBHISTORY",
@@ -222,7 +222,7 @@
     {
       "name": "SPARK_ON_YARN",
       "displayName": "Spark",
-      "componentNameInParcel": "",
+      "componentNameInParcel": "spark",
       "components": [
         {
           "name": "GATEWAY",
@@ -329,7 +329,7 @@
     {
       "name": "FLUME",
       "displayName": "Flume",
-      "componentNameInParcel": "",
+      "componentNameInParcel": "flume-ng",
       "components": [
         {
           "name": "AGENT",
@@ -342,7 +342,7 @@
     {
       "name": "RANGER",
       "displayName": "Ranger",
-      "componentNameInParcel": "",
+      "componentNameInParcel": "hadoop-hdfs",
       "components": [
         {
           "name": "RANGER_ADMIN",
@@ -365,7 +365,7 @@
     {
       "name": "ATLAS",
       "displayName": "Atlas",
-      "componentNameInParcel": "",
+      "componentNameInParcel": "hadoop-hdfs",
       "components": [
         {
           "name": "ATLAS_SERVER",
@@ -453,7 +453,7 @@
     {
       "name": "DAS",
       "displayName": "Data Analytics Studio",
-      "componentNameInParcel": "",
+      "componentNameInParcel": "cdp_data_analytics_studio",
       "components": [
         {
           "name": "DAS_EVENT_PROCESSOR",
@@ -471,6 +471,7 @@
     {
       "name": "PHOENIX",
       "displayName": "Phoenix",
+      "componentNameInParcel": "hadoop-hdfs",
       "components": [
         {
           "name": "PHOENIX_QUERY_SERVER",
@@ -483,6 +484,7 @@
     {
       "name": "QUEUEMANAGER",
       "displayName": "Queue Manager",
+      "componentNameInParcel": "hadoop-hdfs",
       "components": [
         {
           "name": "QUEUEMANAGER_WEBAPP",
