@@ -38,7 +38,13 @@ public class AwsContextService {
             List<CloudResource> groupInstances = getResourcesOfTypeInGroup(resources, group, ResourceType.AWS_INSTANCE);
             List<CloudResource> groupVolumeSets = getResourcesOfTypeInGroup(resources, group, ResourceType.AWS_VOLUMESET);
             for (int i = 0; i < ids.size(); i++) {
-                context.addComputeResources(ids.get(i), List.of(groupInstances.get(i), groupVolumeSets.get(i)));
+                if (i < groupInstances.size()) {
+                    if (i > groupVolumeSets.size() - 1) {
+                        context.addComputeResources(ids.get(i), List.of(groupInstances.get(i)));
+                    } else {
+                        context.addComputeResources(ids.get(i), List.of(groupInstances.get(i), groupVolumeSets.get(i)));
+                    }
+                }
             }
         });
     }
