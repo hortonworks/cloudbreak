@@ -226,6 +226,8 @@ cb:
         7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-710;
         7.1.0 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha-710;
         7.1.0 - Data Mart: Apache Impala, Hue=cdp-data-mart-710;
+        7.1.0 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small-710;
+        7.1.0 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-710;
         7.1.0 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart-710;
         7.1.0 - Operational Database: Apache HBase, Phoenix=cdp-opdb-710;
         7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-710;
@@ -250,6 +252,8 @@ cb:
         7.2.0 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-720;
         7.2.0 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-720;
         7.2.0 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-720;
+        7.2.0 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small-720;
+        7.2.0 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-720;
 
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
