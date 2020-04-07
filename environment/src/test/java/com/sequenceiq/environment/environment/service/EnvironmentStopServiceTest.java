@@ -18,6 +18,9 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,6 +81,24 @@ class EnvironmentStopServiceTest {
         Assertions.assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.stopByCrn(ENV_CRN)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining(childEnvironment.getName());
+    }
+
+    @Test
+    public void shouldThrowBadRequestExceptionGivenFreeIpaIsRunningOnSpotInstances() {
+        EnvironmentDto environmentDto = getEnvironmentDto();
+        environmentDto.setFreeIpaCreation(FreeIpaCreationDto.builder()
+                .withAws(FreeIpaCreationAwsParametersDto.builder()
+                        .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
+                                .withPercentage(100)
+                                .build())
+                        .build())
+                .build());
+        when(environmentService.getByCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(environmentDto);
+        when(environmentService.findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(ACCOUNT_ID, ENV_ID)).thenReturn(Lists.emptyList());
+
+        Assertions.assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.stopByCrn(ENV_CRN)))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Environment [name] can not be stopped because FreeIpa is running on spot instances.");
     }
 
     private EnvironmentDto getEnvironmentDto() {

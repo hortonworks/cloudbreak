@@ -31,7 +31,6 @@ public class InstanceMetaDataReachableTest {
                 InstanceStatus.DELETED_ON_PROVIDER_SIDE,
                 InstanceStatus.FAILED,
                 InstanceStatus.ORCHESTRATION_FAILED,
-                InstanceStatus.DECOMMISSION_FAILED,
                 InstanceStatus.STOPPED);
 
         return Arrays.stream(InstanceStatus.values())
