@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteRequest;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteResponse;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataRequest;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -104,14 +106,25 @@ public class S3GuardTableDeleteHandler extends EventSenderAwareHandler<Environme
         String location = locationAwareCredential.getLocation();
         NoSqlConnector noSqlConnector = getNoSqlConnector(cloudPlatform);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
-        NoSqlTableDeleteRequest request = NoSqlTableDeleteRequest.builder()
+        NoSqlTableMetadataRequest noSqlTableMetadataRequest = NoSqlTableMetadataRequest.builder()
                 .withCloudPlatform(cloudPlatform)
                 .withCredential(cloudCredential)
                 .withRegion(location)
                 .withTableName(dynamoDbTablename)
                 .build();
-        NoSqlTableDeleteResponse response = noSqlConnector.deleteNoSqlTable(request);
-        return response.getStatus();
+        NoSqlTableMetadataResponse noSqlTableMetaData = noSqlConnector.getNoSqlTableMetaData(noSqlTableMetadataRequest);
+        if (ResponseStatus.OK.equals(noSqlTableMetaData.getStatus())) {
+            NoSqlTableDeleteRequest request = NoSqlTableDeleteRequest.builder()
+                    .withCloudPlatform(cloudPlatform)
+                    .withCredential(cloudCredential)
+                    .withRegion(location)
+                    .withTableName(dynamoDbTablename)
+                    .build();
+            NoSqlTableDeleteResponse response = noSqlConnector.deleteNoSqlTable(request);
+            return response.getStatus();
+        } else {
+            return ResponseStatus.OK;
+        }
     }
 
     private NoSqlConnector getNoSqlConnector(String cloudPlatform) {
