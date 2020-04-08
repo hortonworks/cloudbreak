@@ -421,6 +421,20 @@
       "visibleForDatahub": false
     },
     {
+      "name": "DATA_DISCOVERY_SERVICE",
+      "displayName": "Data Discovery Service",
+      "serviceName": "DATA_DISCOVERY_SERVICE_AGENT",
+      "knoxService": "DATA-DISCOVERY-SERVICE-API",
+      "knoxUrl": "/data-discovery-service/",
+      "ssoSupported": false,
+      "port": 21600,
+      "tlsPort": 21600,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
+    },
+    {
       "name": "PROFILER_ADMIN",
       "displayName": "Profiler Admin",
       "serviceName": "PROFILER_ADMIN_AGENT",
