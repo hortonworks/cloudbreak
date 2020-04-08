@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.listener;
 
+import static com.sequenceiq.it.cloudbreak.log.Log.log;
+
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,7 +15,6 @@ import org.testng.TestListenerAdapter;
 import com.google.common.collect.Iterables;
 import com.sequenceiq.it.cloudbreak.context.MeasuredTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.search.KibanaSearchUrl;
 import com.sequenceiq.it.cloudbreak.search.SearchUrl;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
@@ -30,8 +31,7 @@ public class ReportListener extends TestListenerAdapter {
         super.onTestFailure(tr);
         logUrl(tr);
         logMeasurements(tr);
-        Throwable throwable = tr.getThrowable();
-        Log.log(throwable.getMessage());
+        log(tr);
     }
 
     @Override
