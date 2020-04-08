@@ -207,10 +207,20 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNames, newHealtyHostNames);
         if (!failedInstances.isEmpty()) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.AMBIGUOUS);
-        } else if (EnumSet.of(Status.AMBIGUOUS, Status.STOPPED).contains(stack.getCluster().getStatus())) {
+        } else if (statesFromAvailabeAllowed().contains(stack.getCluster().getStatus())) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         }
         syncInstances(stack, runningInstances, failedInstances, defaultState);
+    }
+
+    private EnumSet statesFromAvailabeAllowed() {
+        return EnumSet.of(
+                Status.AMBIGUOUS,
+                Status.STOPPED,
+                Status.START_FAILED,
+                Status.STOP_FAILED,
+                Status.UPDATE_FAILED,
+                Status.ENABLE_SECURITY_FAILED);
     }
 
     private boolean isClusterManagerRunning(Stack stack, ClusterApi connector) {
