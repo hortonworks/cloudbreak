@@ -43,6 +43,7 @@ public class GatewayViewTest {
             "SCHEMA_REGISTRY_SERVER",
             "IMPALAD",
             "IMPALA_DEBUG_UI",
+            "DATA_DISCOVERY_SERVICE_AGENT",
             "PROFILER_ADMIN_AGENT",
             "PROFILER_METRICS_AGENT",
             "PROFILER_SCHEDULER_AGENT",

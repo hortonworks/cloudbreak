@@ -45,6 +45,8 @@ public class CmCloudStorageConfigDetailsTest {
 
     private static final String HBASE_MASTER = "MASTER";
 
+    private static final String DATA_DISCOVERY_SERVICE_AGENT = "DATA_DISCOVERY_SERVICE_AGENT";
+
     private static final String PROFILER_ADMIN_AGENT = "PROFILER_ADMIN_AGENT";
 
     private static final String NAMENODE = "NAMENODE";
@@ -327,7 +329,7 @@ public class CmCloudStorageConfigDetailsTest {
 
     @Test
     public void testProfilerServicesWithAttachedCluster() {
-        prepareBlueprintProcessorFactoryMock(PROFILER_ADMIN_AGENT, PROFILER_METRICS_AGENT, PROFILER_SCHEDULER_AGENT, NAMENODE);
+        prepareBlueprintProcessorFactoryMock(DATA_DISCOVERY_SERVICE_AGENT, PROFILER_ADMIN_AGENT, PROFILER_METRICS_AGENT, PROFILER_SCHEDULER_AGENT, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
@@ -338,10 +340,17 @@ public class CmCloudStorageConfigDetailsTest {
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
         Assert.assertEquals(1L, bigCluster.size());
 
+        Set<ConfigQueryEntry> dataDiscoveryService = serviceEntry(bigCluster, DATA_DISCOVERY_SERVICE_AGENT);
         Set<ConfigQueryEntry> profilerAdmin = serviceEntry(bigCluster, PROFILER_ADMIN_AGENT);
         Set<ConfigQueryEntry> profilerMetrics = serviceEntry(bigCluster, PROFILER_METRICS_AGENT);
         Set<ConfigQueryEntry> profilerScheduler = serviceEntry(bigCluster, PROFILER_SCHEDULER_AGENT);
 
+        Assert.assertEquals(1, dataDiscoveryService.size());
+        Assert.assertTrue(dataDiscoveryService.stream().map(ConfigQueryEntry::getDefaultPath)
+                .anyMatch("hwx-remote/dpprofiler"::equals));
+        Assert.assertTrue(dataDiscoveryService.stream().map(ConfigQueryEntry::getPropertyName)
+                .anyMatch("file_system_uri"::equals));
+        
         Assert.assertEquals(1, profilerAdmin.size());
         Assert.assertTrue(profilerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/dpprofiler"::equals));
