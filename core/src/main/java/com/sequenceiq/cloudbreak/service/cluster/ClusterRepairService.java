@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -349,14 +350,13 @@ public class ClusterRepairService {
     }
 
     private void updateVolumesDeleteFlag(Stack stack, Predicate<Resource> resourceFilter, boolean deleteVolumes) {
-        resourceService.saveAll(stack.getDiskResources().stream()
+        List<Resource> volumes = stack.getDiskResources().stream()
                 .filter(resourceFilter)
                 .map(volumeSet -> updateDeleteVolumesFlag(deleteVolumes, volumeSet))
-                .collect(toList()));
-    }
-
-    private Predicate<Resource> inHostGroups(Set<String> instanceGroups) {
-        return resource -> instanceGroups.contains(resource.getInstanceGroup());
+                .collect(toList());
+        List<String> volumeNames = volumes.stream().map(Resource::getResourceName).collect(toList());
+        LOGGER.info("Update delete volume flag on {} to {}", volumeNames, deleteVolumes);
+        resourceService.saveAll(volumes);
     }
 
     private Predicate<Resource> inInstances(Set<String> instanceIds) {
@@ -375,11 +375,14 @@ public class ClusterRepairService {
     private void setStackStatusAndMarkDeletableVolumes(ManualClusterRepairMode repairMode, Set<String> selectedParts, boolean deleteVolumes, Stack stack,
             Map<HostGroupName, Set<InstanceMetaData>> nodesToRepair) {
         if (!ManualClusterRepairMode.DRY_RUN.equals(repairMode)) {
-            if (ManualClusterRepairMode.ALL.equals(repairMode) || ManualClusterRepairMode.HOST_GROUP.equals(repairMode)) {
-                updateVolumesDeleteFlag(stack, inHostGroups(nodesToRepair.keySet().stream().map(HostGroupName::value).collect(toSet())), deleteVolumes);
-            } else if (ManualClusterRepairMode.NODE_ID.equals(repairMode)) {
-                updateVolumesDeleteFlag(stack, inInstances(selectedParts), deleteVolumes);
-            }
+            LOGGER.info("Repair mode is not a dry run, {}", repairMode);
+            Predicate<Resource> updateVolumesPredicate = inInstances(nodesToRepair.values()
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .map(InstanceMetaData::getInstanceId)
+                    .collect(Collectors.toUnmodifiableSet()));
+            updateVolumesDeleteFlag(stack, updateVolumesPredicate, deleteVolumes);
+            LOGGER.info("Update stack status to REPAIR_IN_PROGRESS");
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS);
         }
     }
