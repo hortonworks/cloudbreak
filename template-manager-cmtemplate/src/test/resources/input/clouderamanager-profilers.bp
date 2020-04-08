@@ -187,6 +187,11 @@
       "serviceType": "PROFILER_MANAGER",
       "roleConfigGroups": [
         {
+          "refName": "profiler_manager-DATA_DISCOVERY_SERVICE_AGENT-BASE",
+          "roleType": "DATA_DISCOVERY_SERVICE_AGENT",
+          "base": true
+        },
+        {
           "refName": "profiler_manager-PROFILER_ADMIN_AGENT-BASE",
           "roleType": "PROFILER_ADMIN_AGENT",
           "base": true
@@ -230,6 +235,7 @@
         "yarn-JOBHISTORY-BASE",
         "yarn-RESOURCEMANAGER-BASE",
         "zookeeper-SERVER-BASE",
+        "profiler_manager-DATA_DISCOVERY_SERVICE_AGENT-BASE",
         "profiler_manager-PROFILER_ADMIN_AGENT-BASE",
         "profiler_manager-PROFILER_METRICS_AGENT-BASE",
         "profiler_scheduler-PROFILER_SCHEDULER_AGENT-BASE"

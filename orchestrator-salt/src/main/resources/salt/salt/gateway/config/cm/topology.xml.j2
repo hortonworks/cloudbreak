@@ -103,6 +103,10 @@
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
             <param>
+                <name>data-discovery-service-api.acl</name>
+                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
+            <param>
                 <name>profiler-admin-api.acl</name>
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
@@ -308,6 +312,12 @@
              {% if 'NIFI-REGISTRY' in exposed and 'NIFI_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>NIFI-REGISTRY</name>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+             </param>
+             {%- endif %}
+             {% if 'DATA-DISCOVERY-SERVICE-API' in exposed and 'DATA_DISCOVERY_SERVICE_AGENT' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>DATA-DISCOVERY-SERVICE-API</name>
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
              {%- endif %}
@@ -654,6 +664,17 @@
             </service>
         {%- endif %}
      {%- endif %}
+
+    {% if 'DATA_DISCOVERY_SERVICE_AGENT' in salt['pillar.get']('gateway:location') -%}
+    {% if 'DATA-DISCOVERY-SERVICE-API' in exposed -%}
+    <service>
+        <role>DATA-DISCOVERY-SERVICE-API</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['DATA_DISCOVERY_SERVICE_AGENT'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['DATA-DISCOVERY-SERVICE-API'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
 
     {% if 'PROFILER_ADMIN_AGENT' in salt['pillar.get']('gateway:location') -%}
     {% if 'PROFILER-ADMIN-API' in exposed -%}
