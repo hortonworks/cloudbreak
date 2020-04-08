@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.log;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
 import java.io.StringWriter;
 
@@ -82,6 +84,25 @@ public class Log<T extends CloudbreakTestDto> {
 
     public static void log(String message) {
         Reporter.log(message);
+    }
+
+    public static void log(ITestResult testResult) {
+        Throwable testResultException = testResult.getThrowable();
+        String methodName = testResult.getMethod().getMethodName();
+
+        if (testResultException != null) {
+            try {
+                String message = testResultException.getMessage() != null ? testResultException.getMessage() : testResultException.getCause().getMessage();
+
+                if (message == null || message.isEmpty()) {
+                    log(format(" Test Case: %s have been failed with empty test result! ", methodName));
+                } else {
+                    log(message);
+                }
+            } catch (Exception e) {
+                log(format(" Test Case: %s got Unexpected Exception: %s ", methodName, e.getMessage()));
+            }
+        }
     }
 
     private static TestContextReporter getReporter() {
