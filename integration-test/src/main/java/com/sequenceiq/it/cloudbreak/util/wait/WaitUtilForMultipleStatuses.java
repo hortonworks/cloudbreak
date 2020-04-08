@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.wait;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,7 +33,6 @@ public class WaitUtilForMultipleStatuses {
 
     public Map<String, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, Status> desiredStatuses,
             long pollingInterval) {
-        Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(cloudbreakClient, stackName, desiredStatuses, Math.max(this.pollingInterval, pollingInterval));
@@ -39,37 +40,7 @@ public class WaitUtilForMultipleStatuses {
                 break;
             }
         }
-        if (waitResult == WaitResult.FAILED) {
-            StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
-            StackStatusV4Response status = cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
-                    .getStatusByName(cloudbreakClient.getWorkspaceId(), stackName);
-            if (status != null) {
-                desiredStatuses.forEach((key, value) -> {
-                    Status subStatus = getStatus(status, key);
-                    if (subStatus != null) {
-                        errors.put(key, subStatus.name());
-                    }
-                });
-
-                errors.forEach((key, value) -> {
-                    builder.append(key).append(": ").append(value).append(System.lineSeparator());
-                });
-                builder.append("statusReason: ").append(status.getStatusReason());
-            }
-            throw new RuntimeException(builder.toString());
-        } else if (waitResult == WaitResult.TIMEOUT) {
-            throw new RuntimeException("Timeout happened");
-        } else if (!Status.DELETE_COMPLETED.equals(desiredStatuses.get("status"))) {
-            StackStatusV4Response status = cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
-                    .getStatusByName(cloudbreakClient.getWorkspaceId(), stackName);
-            if (status != null) {
-                String statusReason = status.getStatusReason();
-                if (statusReason != null) {
-                    errors.put("statusReason", statusReason);
-                }
-            }
-        }
-        return errors;
+        return getStackErrors(cloudbreakClient, desiredStatuses, waitResult, stackName);
     }
 
     private Status getStatus(StackStatusV4Response status, String fieldName) {
@@ -100,7 +71,7 @@ public class WaitUtilForMultipleStatuses {
                 StackStatusV4Response status = cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
                         .getStatusByName(cloudbreakClient.getWorkspaceId(), stackName);
                 for (String statusPath : desiredStatuses.keySet()) {
-                    Status currStatus = Status.DELETE_COMPLETED;
+                    Status currStatus = DELETE_COMPLETED;
                     if (status != null) {
                         currStatus = getStatus(status, statusPath);
                     }
@@ -108,9 +79,9 @@ public class WaitUtilForMultipleStatuses {
                 }
             } catch (NotFoundException notFoundException) {
                 desiredStatuses.entrySet().stream()
-                        .filter(entry -> Status.DELETE_COMPLETED.equals(entry.getValue()))
+                        .filter(entry -> DELETE_COMPLETED.equals(entry.getValue()))
                         .map(Map.Entry::getKey)
-                        .forEach(statusPath -> currentStatuses.put(statusPath, Status.DELETE_COMPLETED));
+                        .forEach(statusPath -> currentStatuses.put(statusPath, DELETE_COMPLETED));
                 break;
             } catch (RuntimeException ignore) {
                 continue;
@@ -170,7 +141,7 @@ public class WaitUtilForMultipleStatuses {
     }
 
     private boolean checkNotExpectedDelete(Map<String, Status> currentStatuses, Map<String, Status> desiredStatuses) {
-        return hasNoExpectedStatus(Status.DELETE_COMPLETED, currentStatuses, desiredStatuses);
+        return hasNoExpectedStatus(DELETE_COMPLETED, currentStatuses, desiredStatuses);
     }
 
     private boolean hasNoExpectedStatus(Status expectedState, Map<String, Status> currentStatuses, Map<String, Status> desiredStatuses) {
@@ -182,5 +153,46 @@ public class WaitUtilForMultipleStatuses {
             }
         }
         return result;
+    }
+
+    private Map<String, String> getStackErrors(CloudbreakClient cloudbreakClient, Map<String, Status> desiredStatuses, WaitResult waitResult, String name) {
+        Map<String, String> errors = new HashMap<>();
+        StackStatusV4Response statusResponse;
+
+        if (waitResult == WaitResult.FAILED) {
+            StringBuilder builder = new StringBuilder("SDX has failed: ").append(System.lineSeparator());
+            statusResponse = getStackStatus(cloudbreakClient, name);
+            for (Map.Entry<String, String> error : getStackStatusDetails(statusResponse).entrySet()) {
+                builder.append("status: ").append(error.getKey()).append(" - ").append("statusReason: ").append(error.getValue());
+            }
+            LOGGER.error(builder.toString());
+            errors = getStackStatusDetails(statusResponse);
+        } else if (waitResult == WaitResult.TIMEOUT) {
+            StringBuilder builder = new StringBuilder("Timeout happened while waiting for: ").append(System.lineSeparator());
+            statusResponse = getStackStatus(cloudbreakClient, name);
+            for (Map.Entry<String, Status> desiredStatus : desiredStatuses.entrySet()) {
+                builder.append(desiredStatus.getValue().name()).append(" status.").append(System.lineSeparator());
+                for (Map.Entry<String, String> error : getStackStatusDetails(statusResponse).entrySet()) {
+                    builder.append("The current status: ").append(error.getKey()).append(" with reason: ").append(error.getValue());
+                }
+            }
+            LOGGER.error(builder.toString());
+            errors = getStackStatusDetails(statusResponse);
+        } else if (!Status.DELETE_COMPLETED.equals(desiredStatuses.get("status"))) {
+            statusResponse = getStackStatus(cloudbreakClient, name);
+            if (statusResponse != null) {
+                errors = getStackStatusDetails(statusResponse);
+            }
+        }
+        return errors;
+    }
+
+    private Map<String, String> getStackStatusDetails(StackStatusV4Response stackStatusResponse) {
+        return Map.of("status", stackStatusResponse.getStatus().name(), "reason",
+                stackStatusResponse.getStatusReason() != null ? stackStatusResponse.getStatusReason() : "Stack Status Reason is not available");
+    }
+
+    private StackStatusV4Response getStackStatus(CloudbreakClient cloudbreakClient, String stackName) {
+        return cloudbreakClient.getCloudbreakClient().stackV4Endpoint().getStatusByName(cloudbreakClient.getWorkspaceId(), stackName);
     }
 }
