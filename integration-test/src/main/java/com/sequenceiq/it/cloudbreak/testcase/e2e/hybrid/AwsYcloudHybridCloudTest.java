@@ -141,7 +141,10 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .then((tc, testDto, client) -> waitUtil.waitForSdxInstancesStatus(testDto, client, instancesHealthy))
+                .then((tc, testDto, client) -> {
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, instancesHealthy);
+                    return testDto;
+                })
                 .then((tc, dto, client) -> {
                     for (InstanceGroupV4Response ig : dto.getResponse().getStackV4Response().getInstanceGroups()) {
                         for (InstanceMetaDataV4Response i : ig.getMetadata()) {

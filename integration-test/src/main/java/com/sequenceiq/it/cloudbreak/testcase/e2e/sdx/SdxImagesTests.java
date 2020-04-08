@@ -53,7 +53,8 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState());
+                    return testDto;
                 })
                 .validate();
     }
@@ -95,7 +96,8 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> {
-                    return waitUtil.waitForSdxInstancesStatus(testDto, client, getSdxInstancesHealthyState());
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState());
+                    return testDto;
                 })
                 .then((tc, dto, client) -> {
                     Log.log(LOGGER, format(" Image Catalog Name: %s ", dto.getResponse().getStackV4Response().getImage().getCatalogName()));
