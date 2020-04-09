@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyFullResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.CommandExecutionResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
@@ -83,6 +84,10 @@ public class SaltStates {
 
     public static String highstate(SaltConnector sc) {
         return sc.run(Glob.ALL, "state.highstate", LOCAL_ASYNC, ApplyResponse.class).getJid();
+    }
+
+    public static ApplyFullResponse showState(SaltConnector sc, String state) {
+        return sc.run(Glob.ALL, "state.show_sls", LOCAL, ApplyFullResponse.class, state);
     }
 
     public static Multimap<String, String> jidInfo(SaltConnector sc, String jid, Target<String> target, StateType stateType) {
