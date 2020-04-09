@@ -107,9 +107,6 @@ public class AwsTerminateServiceIntegrationTest {
     private CloudFormationStackUtil cfStackUtil;
 
     @Mock
-    private AwsElasticIpService awsElasticIpService;
-
-    @Mock
     private AwsCloudWatchService awsCloudWatchService;
 
     @Mock
@@ -175,7 +172,6 @@ public class AwsTerminateServiceIntegrationTest {
     @Test
     public void testTerminateWhenResourcesNull() {
         underTest.terminate(authenticatedContext(), cloudStack, null);
-        verify(awsElasticIpService, times(1)).releaseReservedIp(any(), any());
         verify(awsResourceConnector, times(1)).check(any(), any());
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
         verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
@@ -187,7 +183,6 @@ public class AwsTerminateServiceIntegrationTest {
     @Test
     public void testTerminateWhenResourcesEmpty() {
         List<CloudResourceStatus> result = underTest.terminate(authenticatedContext(), cloudStack, List.of());
-        verify(awsElasticIpService, times(1)).releaseReservedIp(any(), any());
         verify(awsResourceConnector, times(1)).check(any(), any());
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
         verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
@@ -200,7 +195,6 @@ public class AwsTerminateServiceIntegrationTest {
     public void testTerminateWhenResourcesHasNoCf() {
         List<CloudResourceStatus> result = underTest
                 .terminate(authenticatedContext(), cloudStack, List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build()));
-        verify(awsElasticIpService, times(1)).releaseReservedIp(any(), any());
         verify(awsResourceConnector, times(1)).check(any(), any());
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
         verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
@@ -225,7 +219,6 @@ public class AwsTerminateServiceIntegrationTest {
         List<CloudResourceStatus> result = underTest.terminate(authenticatedContext(), cloudStack, List.of(
                 new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(), cf, lc
         ));
-        verify(awsElasticIpService, times(1)).releaseReservedIp(any(), any());
         verify(awsResourceConnector, times(1)).check(any(), any());
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
         verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
@@ -255,7 +248,6 @@ public class AwsTerminateServiceIntegrationTest {
                 new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(), cf, lc
         ));
 
-        verify(awsElasticIpService, times(1)).releaseReservedIp(any(), any());
         verify(awsResourceConnector, times(1)).check(any(), any());
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
         verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());

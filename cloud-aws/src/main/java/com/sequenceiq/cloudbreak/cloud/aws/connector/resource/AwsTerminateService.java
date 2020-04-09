@@ -80,9 +80,6 @@ public class AwsTerminateService {
     private Retry retryService;
 
     @Inject
-    private AwsElasticIpService awsElasticIpService;
-
-    @Inject
     private AwsCloudWatchService awsCloudWatchService;
 
     public List<CloudResourceStatus> terminate(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
@@ -97,7 +94,6 @@ public class AwsTerminateService {
         waitAndDeleteCloudformationStack(ac, stack, resources, amazonCloudFormationClient);
         awsComputeResourceService.deleteComputeResources(ac, stack, resources);
         cleanupEncryptedResources(ac, resources, regionName, amazonEC2Client);
-        awsElasticIpService.releaseReservedIp(amazonEC2Client, resources);
         deleteKeyPair(ac, stack, amazonEC2Client, credentialView, regionName);
         deleteLaunchConfiguration(resources, ac);
         LOGGER.debug("Deleting stack finished");
