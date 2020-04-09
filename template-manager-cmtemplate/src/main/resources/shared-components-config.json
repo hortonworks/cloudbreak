@@ -2,5 +2,9 @@
   {
     "serviceType": "HDFS",
     "componentName": "JOURNALNODE"
+  },
+  {
+    "serviceType": "ZOOKEEPER",
+    "componentName": "SERVER"
   }
 ]
