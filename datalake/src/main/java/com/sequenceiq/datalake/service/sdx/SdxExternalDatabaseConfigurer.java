@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
@@ -24,6 +25,9 @@ public class SdxExternalDatabaseConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxExternalDatabaseConfigurer.class);
 
     private static final String AZURE_EXT_DB_MIN_RUNTIME_VERSION = "7.1.0";
+
+    @Value("${datalake.db.availability:HA}")
+    private SdxDatabaseAvailabilityType defaultDatabaseAvailability;
 
     @Inject
     private PlatformConfig platformConfig;
@@ -43,7 +47,7 @@ public class SdxExternalDatabaseConfigurer {
     private SdxDatabaseAvailabilityType getDatabaseAvailabilityType(SdxDatabaseRequest dbRequest, CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
         if (dbRequest == null || (dbRequest.getCreate() == null && dbRequest.getAvailabilityType() == null)) {
             if (platformConfig.isExternalDatabaseSupportedFor(cloudPlatform) && isCMExternalDbSupported(cloudPlatform, sdxCluster)) {
-                return SdxDatabaseAvailabilityType.HA;
+                return defaultDatabaseAvailability;
             } else {
                 return SdxDatabaseAvailabilityType.NONE;
             }
