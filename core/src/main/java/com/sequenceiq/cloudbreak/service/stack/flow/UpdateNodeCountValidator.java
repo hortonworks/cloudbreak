@@ -15,6 +15,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -37,6 +38,9 @@ public class UpdateNodeCountValidator {
 
     @Inject
     private CommonPermissionCheckingUtils permissionCheckingUtils;
+
+    @Inject
+    private CmTemplateValidator cmTemplateValidator;
 
     public void validataHostMetadataStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
@@ -67,6 +71,20 @@ public class UpdateNodeCountValidator {
         if (!stack.isAvailable()) {
             throw new BadRequestException(format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.",
                     stack.getName(), stack.getStatus()));
+        }
+    }
+
+    public void validateServiceRoles(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
+        String instanceGroup = instanceGroupAdjustmentJson.getInstanceGroup();
+        Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups()
+                .stream()
+                .filter(e -> e.getName().equals(instanceGroup))
+                .findFirst();
+        if (hostGroup.isPresent()) {
+            cmTemplateValidator.validateHostGroupScalingRequest(
+                    stack.getCluster().getBlueprint(),
+                    hostGroup.get(),
+                    instanceGroupAdjustmentJson.getScalingAdjustment());
         }
     }
 
