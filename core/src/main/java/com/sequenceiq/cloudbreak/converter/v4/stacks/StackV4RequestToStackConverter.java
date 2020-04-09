@@ -122,6 +122,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             convertAsStack(source, stack);
             updateCloudPlatformAndRelatedFields(source, stack, environment);
             setNetworkIfApplicable(source, stack, environment);
+            stack.getComponents().add(getTelemetryComponent(stack, source));
         }
         Map<String, Object> asMap = providerParameterCalculator.get(source).asMap();
         if (asMap != null) {
@@ -139,8 +140,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         measure(() -> updateCluster(source, stack, workspace),
                 LOGGER, "Converted cluster and updated the stack in {} ms for stack {}", source.getName());
-        stack.getComponents().add(getTelemetryComponent(stack, source));
-
         stack.setGatewayPort(source.getGatewayPort());
         stack.setUuid(UUID.randomUUID().toString());
         stack.setType(source.getType());
