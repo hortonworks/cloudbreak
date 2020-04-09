@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 
 import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static java.util.stream.Collectors.toSet;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collection;
@@ -79,7 +78,7 @@ public class CmTemplateValidatorTest {
     }
 
     @Test
-    public void testValidationIfKafkaPresentedThenShouldThrowBadRequest() {
+    public void testDownscaleValidationIfKafkaPresentedThenShouldThrowBadRequest() {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka.bp"));
 
@@ -90,14 +89,14 @@ public class CmTemplateValidatorTest {
     }
 
     @Test
-    public void testValidationIfKafkaNotPresentedThenValidationShouldRunSuccefully() {
+    public void testUpscaleValidationIfKafkaPresentedThenValidationShouldThrowBadRequest() {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka.bp"));
 
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("broker");
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, 2));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, 2));
     }
 
     @Test
