@@ -10,7 +10,7 @@ class DistroXStartStopTestParameters {
 
     private static final String STEP = "step";
 
-    private static final int DEFAULT_TIMES = 8;
+    private static final int DEFAULT_TIMES = 16;
 
     private static final int DEFAULT_STEP = 100;
 

@@ -1,8 +1,12 @@
 package com.sequenceiq.it.cloudbreak.action.v1.distrox;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
@@ -32,6 +36,10 @@ public class DistroXScaleAction implements Action<DistroXTestDto, CloudbreakClie
         client.getCloudbreakClient()
                 .distroXV1Endpoint()
                 .putScalingByName(testDto.getName(), scaleRequest);
+        StackV4Response stackV4Response = client.getCloudbreakClient()
+                .distroXV1Endpoint()
+                .getByName(testDto.getName(), new HashSet<>(Arrays.asList("hardware_info", "events")));
+        LOGGER.info("Hardware info for stack after upscale: {}", stackV4Response.getHardwareInfoGroups());
         return testDto;
     }
 }
