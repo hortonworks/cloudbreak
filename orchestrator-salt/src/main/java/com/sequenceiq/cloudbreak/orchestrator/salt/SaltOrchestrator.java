@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyFullResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.grain.GrainUploader;
@@ -234,6 +235,19 @@ public class SaltOrchestrator implements HostOrchestrator {
         } catch (Exception e) {
             LOGGER.info("Error occurred during telemetry agent stop", e);
             throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    @Override
+    public void checkIfClusterUpgradable(GatewayConfig primaryGatewayConfig)
+            throws CloudbreakOrchestratorFailedException {
+        SaltConnector sc = createSaltConnector(primaryGatewayConfig);
+        ApplyFullResponse applyFullResponse = SaltStates.showState(sc, "cloudera.agent.upgrade");
+        LOGGER.debug("Checking salt state response is: {}.", applyFullResponse.toString());
+        if (applyFullResponse.isError()) {
+            LOGGER.info("Checking the upgrade state failed {}", applyFullResponse.getResult());
+            throw new CloudbreakOrchestratorFailedException("Cluster is not upgradeable due to required Salt files not being present. "
+                    + "Please ensure that your cluster is up to date!");
         }
     }
 
