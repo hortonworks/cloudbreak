@@ -19,15 +19,6 @@ public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImageValidatorE2ETest.class);
 
-    @Value("${integrationtest.imageValidation.sdxTemplateName}")
-    protected String sdxTemplateName;
-
-    @Value("${integrationtest.imageValidation.distroxTemplateName}")
-    protected String distroxTemplateName;
-
-    @Value("${integrationtest.imageValidation.runtimeVersion}")
-    protected String runtimeVersion;
-
     @Value("${integrationtest.imageValidation.sourceCatalogName}")
     private String sourceImageCatalogName;
 

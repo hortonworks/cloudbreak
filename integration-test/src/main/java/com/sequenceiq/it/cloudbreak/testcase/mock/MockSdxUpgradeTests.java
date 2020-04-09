@@ -31,8 +31,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class MockSdxUpgradeTests extends AbstractIntegrationTest {
 
-    private static final String TEMPLATE_JSON = "classpath:/templates/sdx-cluster-template.json";
-
     @Inject
     private WaitUtil waitUtil;
 

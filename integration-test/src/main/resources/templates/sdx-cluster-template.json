@@ -5,7 +5,6 @@
     "databases": [],
     "cm": {},
     "executorType": "DEFAULT",
-    "blueprintName": "7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
     "validateBlueprint": false
   },
   "network": {

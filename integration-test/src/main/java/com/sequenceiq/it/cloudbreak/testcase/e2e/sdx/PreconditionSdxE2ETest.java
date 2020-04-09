@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -31,7 +32,8 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
 
     private static final String CREATE_FILE_RECIPE = "classpath:/recipes/post-install.sh";
 
-    private static final String DEFAULT_SDX_BLUEPRINT_NAME = "7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas";
+    @Value("${integrationtest.defaultSdxInternalTemplate}")
+    private String defaultTemplate;
 
     private Map<String, InstanceStatus> instancesHealthy = new HashMap<>() {{
         put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
@@ -84,7 +86,7 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
     }
 
     protected String getDefaultSDXBlueprintName() {
-        return DEFAULT_SDX_BLUEPRINT_NAME;
+        return defaultTemplate;
     }
 
     protected SdxTestDto compareVolumeIdsAfterRepair(SdxTestDto sdxTestDto, List<String> actualVolumeIds, List<String> expectedVolumeIds) {

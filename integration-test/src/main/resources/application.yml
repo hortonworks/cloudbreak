@@ -11,12 +11,11 @@ integrationtest:
   threadCount: 8
   parallel: methods
   timeOut: 6000000
+  defaultRuntimeVersion: 7.1.1
+  defaultSdxInternalTemplate: "7.1.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
   imageValidation:
     sourceCatalogName: v3-dev
     sourceCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
-    sdxTemplateName: "7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
-    distroxTemplateName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    runtimeVersion: 7.1.0
   spark:
     sparkPoolSize: 12
   command: suiteurls
@@ -146,8 +145,8 @@ integrationtest:
 
   # aws parameters
   aws:
-    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.1.0
+    defaultBlueprintName: "7.1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.1.1
     region: eu-central-1
     location: eu-central-1
     availabilityZone: eu-central-1a
@@ -178,8 +177,8 @@ integrationtest:
 
   # azure parameters
   azure:
-    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.1.0
+    defaultBlueprintName: "7.1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.1.1
     availabilityZone:
     region: West US
     location: West US
@@ -214,8 +213,8 @@ integrationtest:
 
   # gcp parameters
   gcp:
-    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.1.0
+    defaultBlueprintName: "7.1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.1.1
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2
@@ -235,8 +234,8 @@ integrationtest:
 
   # openstack parameters
   openstack:
-    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.1.0
+    defaultBlueprintName: "7.1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.1.1
     availabilityZone: nova
     region: RegionOne
     location: Texas
@@ -255,7 +254,7 @@ integrationtest:
 
   # yarn parameters
   yarn:
-    defaultBlueprintName: "7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
+    defaultBlueprintName: "7.1.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
     availabilityZone:
     region: default
     location: Frankfurt
@@ -273,7 +272,7 @@ integrationtest:
 
   # mock parameters
   mock:
-    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "7.1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     region: Europe
     location: London
     availabilityZone: London
