@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware;
 
 import java.util.Map;
+import java.util.StringJoiner;
 
 import javax.validation.constraints.NotNull;
 
@@ -236,4 +237,31 @@ public class HardwareInfoV4Response implements JsonEntity {
     public void setPackageVersions(Map<String, String> packageVersions) {
         this.packageVersions = packageVersions;
     }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", HardwareInfoV4Response.class.getSimpleName() + "[", "]")
+                .add("name='" + name + "'")
+                .add("groupName='" + groupName + "'")
+                .add("state='" + state + "'")
+                .add("privateIp='" + privateIp + "'")
+                .add("publicIp='" + publicIp + "'")
+                .add("sshPort=" + sshPort)
+                .add("instanceId='" + instanceId + "'")
+                .add("ambariServer=" + ambariServer)
+                .add("discoveryFQDN='" + discoveryFQDN + "'")
+                .add("instanceGroup='" + instanceGroup + "'")
+                .add("instanceStatus=" + instanceStatus)
+                .add("instanceMetadataType=" + instanceMetadataType)
+                .add("imageName='" + imageName + "'")
+                .add("os='" + os + "'")
+                .add("osType='" + osType + "'")
+                .add("imageCatalogUrl='" + imageCatalogUrl + "'")
+                .add("imageId='" + imageId + "'")
+                .add("imageCatalogName='" + imageCatalogName + "'")
+                .add("packageVersions=" + packageVersions)
+                .add("template=" + template)
+                .toString();
+    }
+
 }
