@@ -22,6 +22,10 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -57,6 +61,12 @@ public class ClusterUpgradeAvailabilityService {
     @Inject
     private ClusterRepairService clusterRepairService;
 
+    @Inject
+    private HostOrchestrator hostOrchestrator;
+
+    @Inject
+    private GatewayConfigService gatewayConfigService;
+
     public UpgradeOptionsV4Response checkForUpgradesByName(Long workspaceId, String stackName) {
         UpgradeOptionsV4Response upgradeOptions = new UpgradeOptionsV4Response();
         Stack stack = stackService.getByNameInWorkspace(stackName, workspaceId);
@@ -83,6 +93,18 @@ public class ClusterUpgradeAvailabilityService {
         if (!notStoppedAttachedClusters.isEmpty()) {
             upgradeOptions.setReason(String.format("There are attached Data Hub clusters in incorrect state: %s. "
                     + "Please stop those to be able to perform the upgrade.", notStoppedAttachedClusters));
+        }
+        return upgradeOptions;
+    }
+
+    public UpgradeOptionsV4Response checkIfClusterUpgradable(Long workspaceId, String stackName, UpgradeOptionsV4Response upgradeOptions) {
+
+        Stack stack = stackService.getByNameInWorkspaceWithLists(stackName, workspaceId).orElseThrow();
+        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        try {
+            hostOrchestrator.checkIfClusterUpgradable(primaryGatewayConfig);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            upgradeOptions.appendReason(e.getMessage());
         }
         return upgradeOptions;
     }
