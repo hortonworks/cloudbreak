@@ -259,13 +259,18 @@ public class EnvironmentApiConverter {
     private AuthenticationDto authenticationRequestToDto(EnvironmentAuthenticationRequest authentication) {
         AuthenticationDto.Builder builder = AuthenticationDto.builder();
         if (authentication != null && (StringUtils.hasLength(authentication.getPublicKey()) || StringUtils.hasLength(authentication.getPublicKeyId()))) {
-            String publicKey = nullIfBlank(authentication.getPublicKey());
+            String publicKey = getPublicKey(authentication);
             builder.withLoginUserName(authentication.getLoginUserName())
                     .withPublicKey(publicKey)
                     .withPublicKeyId(nullIfBlank(authentication.getPublicKeyId()))
                     .withManagedKey(Objects.nonNull(publicKey));
         }
         return builder.build();
+    }
+
+    private String getPublicKey(EnvironmentAuthenticationRequest authentication) {
+        String publicKey = nullIfBlank(authentication.getPublicKey());
+        return Optional.ofNullable(publicKey).map(key -> key.replaceAll("\n", "")).map(String::trim).orElse(null);
     }
 
     private String nullIfBlank(String value) {
