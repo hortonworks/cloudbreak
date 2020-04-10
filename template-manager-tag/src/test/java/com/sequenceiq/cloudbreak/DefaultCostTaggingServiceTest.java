@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak;
 
+import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,10 +84,10 @@ public class DefaultCostTaggingServiceTest {
         envMap.put("apple3", "apple3");
         envMap.put("apple4", "apple4");
         Map<String, String> requestTag = new HashMap<>();
-        envMap.put("pear1", "");
-        envMap.put("", "pear2");
-        envMap.put("pear3", "pear3");
-        envMap.put("pear4", "pear4");
+        requestTag.put("pear1", "");
+        requestTag.put("", "pear2");
+        requestTag.put("pear3", "pear3");
+        requestTag.put("pear4", "pear4");
 
         Map<String, String> result = underTest.mergeTags(mergeRequest("AWS", envMap, requestTag));
 
@@ -97,22 +98,62 @@ public class DefaultCostTaggingServiceTest {
         Assert.assertEquals("apple4", "apple4");
     }
 
+    @Test
+    public void testAccountTagUserTagEquality_noError() {
+        Map<String, String> envMap = new HashMap<>();
+        envMap.put("apple1", "apple1");
+        envMap.put("apple2", "apple2");
+        envMap.put("owner", "owner");
+        Map<String, String> requestTag = new HashMap<>();
+        requestTag.put("pear1", "pear1");
+        requestTag.put("owner", "owner");
+
+        CDPTagGenerationRequest tagRequest = tagRequest("AWS", new HashMap<>(), envMap, requestTag);
+        underTest.prepareDefaultTags(tagRequest);
+    }
+
+    @Test
+    public void testAccountTagUserTagConflict_error() {
+        Map<String, String> envMap = new HashMap<>();
+        envMap.put("apple1", "apple1");
+        envMap.put("apple2", "apple2");
+        envMap.put("owner", "owner");
+        Map<String, String> requestTag = new HashMap<>();
+        requestTag.put("pear1", "pear1");
+        requestTag.put("owner", "conflict");
+
+        CDPTagGenerationRequest tagRequest = tagRequest("AWS", new HashMap<>(), envMap, requestTag);
+        try {
+            underTest.prepareDefaultTags(tagRequest);
+            Assert.fail("Expected an exception due to conflicting account and user tags");
+        } catch (AccountTagValidationFailed e) {
+            Assert.assertEquals("The request must not contain tag(s) with key: 'owner', because"
+                + " with the same key tag has already been defined on account level!", e.getMessage());
+        }
+    }
+
     private CDPTagGenerationRequest tagRequest(String platform) {
         return tagRequest(platform, new HashMap<>(), new HashMap<>());
     }
 
     private CDPTagGenerationRequest tagRequest(String platform, Map<String, String> sourceMap, Map<String, String> accountTags) {
+        return tagRequest(platform, sourceMap, accountTags, new HashMap<>());
+    }
+
+    private CDPTagGenerationRequest tagRequest(String platform, Map<String, String> sourceMap,
+        Map<String, String> accountTags, Map<String, String> userTags) {
         return CDPTagGenerationRequest.Builder.builder()
-                .withEnvironmentCrn("environment-crn")
-                .withCreatorCrn("creator-crn")
-                .withResourceCrn("resource-crn")
-                .withUserName("apache1@apache.com")
-                .withPlatform(platform)
-                .withAccountId("pepsi")
-                .withIsInternalTenant(true)
-                .withSourceMap(sourceMap)
-                .withAccountTags(accountTags)
-                .build();
+            .withEnvironmentCrn("environment-crn")
+            .withCreatorCrn("creator-crn")
+            .withResourceCrn("resource-crn")
+            .withUserName("apache1@apache.com")
+            .withPlatform(platform)
+            .withAccountId("pepsi")
+            .withIsInternalTenant(true)
+            .withSourceMap(sourceMap)
+            .withAccountTags(accountTags)
+            .withUserDefinedTags(userTags)
+            .build();
     }
 
     private CDPTagMergeRequest mergeRequest(String platform, Map<String, String> envMap, Map<String, String> requestTag) {
