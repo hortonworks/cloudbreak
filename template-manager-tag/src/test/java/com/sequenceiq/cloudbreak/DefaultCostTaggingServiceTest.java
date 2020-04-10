@@ -102,7 +102,7 @@ public class DefaultCostTaggingServiceTest {
     }
 
     @Test
-    public void testAccountTagUserTagEquality_noError() {
+    public void testAccountTagUserTagEqualityNoError() {
         Map<String, String> envMap = new HashMap<>();
         envMap.put("apple1", "apple1");
         envMap.put("apple2", "apple2");
@@ -116,7 +116,7 @@ public class DefaultCostTaggingServiceTest {
     }
 
     @Test
-    public void testAccountTagUserTagConflict_error() {
+    public void testAccountTagUserTagConflictGeneartesError() {
         Map<String, String> envMap = new HashMap<>();
         envMap.put("apple1", "apple1");
         envMap.put("apple2", "apple2");
