@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision.action;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
@@ -9,8 +8,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_IMAGE_SETUP;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_ROLLBACK_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_TIME;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_METADATA_COLLECTED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_PROVISIONED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_PROVISIONING;
 import static java.lang.String.format;
 
@@ -171,7 +168,6 @@ public class StackCreationService {
         Stack stack = context.getStack();
         metadatSetupService.saveInstanceMetaData(stack, collectMetadataResult.getResults(), InstanceStatus.CREATED);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.TLS_SETUP, "TLS setup");
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_METADATA_COLLECTED);
         LOGGER.debug("Metadata setup DONE.");
         Stack stackWithMetadata = stackService.getByIdWithListsInTransaction(stack.getId());
         stackWithMetadata.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
@@ -200,7 +196,6 @@ public class StackCreationService {
     }
 
     public void stackCreationFinished(Stack stack) {
-        flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_PROVISIONED);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED, "Stack provisioned.");
     }
 

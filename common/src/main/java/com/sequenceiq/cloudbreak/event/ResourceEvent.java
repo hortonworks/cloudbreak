@@ -134,9 +134,7 @@ public enum ResourceEvent {
     STACK_DELETE_IN_PROGRESS("stack.delete.in.progress"),
     STACK_ADDING_INSTANCES("stack.adding.instances"),
     STACK_METADATA_EXTEND_WITH_COUNT("stack.metadata.extend.with.count"),
-    STACK_METADATA_EXTEND("stack.metadata.extend"),
     STACK_BOOTSTRAP_NEW_NODES("stack.bootstrap.new.nodes"),
-    STACK_UPSCALE_FINISHED("stack.upscale.finished"),
     STACK_INFRASTRUCTURE_UPDATE_FAILED("stack.infrastructure.update.failed"),
     STACK_IMAGE_UPDATE_STARTED("stack.image.update.started"),
     STACK_IMAGE_UPDATE_FINISHED("stack.image.update.finished"),
@@ -151,9 +149,6 @@ public enum ResourceEvent {
     STACK_REMOVING_INSTANCE_FINISHED("stack.removing.instance.finished"),
     STACK_REMOVING_INSTANCE_FAILED("stack.removing.instance.failed"),
     STACK_INFRASTRUCTURE_BOOTSTRAP("stack.infrastructure.bootstrap"),
-    STACK_INFRASTRUCTURE_CLUSTER_PROXY("stack.infrastructure.cluster.proxy.registration"),
-    STACK_INFRASTRUCTURE_CLUSTER_PROXY_GATEWAY_REGISTRATION("stack.infrastructure.cluster.proxy.gateway.registration"),
-    STACK_INFRASTRUCTURE_METADATA_SETUP("stack.infrastructure.metadata.setup"),
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.failed"),
     STACK_DOWNSCALE_INSTANCES("stack.downscale.instances"),
     STACK_DOWNSCALE_SUCCESS("stack.downscale.success"),
@@ -270,8 +265,6 @@ public enum ResourceEvent {
     CLUSTER_EXTERNAL_DATABASE_CREATION_FAILED("cluster.externaldatabase.creation.failed"),
     CLUSTER_EXTERNAL_DATABASE_CREATION_FINISHED("cluster.externaldatabase.creation.finished"),
 
-    STACK_METADATA_COLLECTED("stack.metadata.collected"),
-    STACK_PROVISIONED("stack.provisioned"),
     STACK_RETRY_FLOW_START("retry.flow.start"),
 
     MAINTENANCE_MODE_VALIDATION_STARTED("maintenance.mode.validation.started"),

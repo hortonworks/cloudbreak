@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.tag;
 
 public enum DefaultApplicationTag {
 
-    OWNER("Owner"),
     owner("owner"),
     CREATION_TIMESTAMP("creation-timestamp"),
     ENVIRONMENT_CRN("Cloudera-Environment-Resource-Name"),
