@@ -1,0 +1,31 @@
+# INSTALLED BY CLOUDBREAK - DO NOT EDIT
+
+RewriteEngine on
+
+# By default forward all requests to /ipa. If you don't want IPA
+# to be the default on your web server comment this line out.
+RewriteRule ^/$ https://{{ grains['fqdn'] }}/ipa/ui [L,NC,R=301]
+
+# Redirect to the fully-qualified hostname. Not redirecting to secure
+# port so configuration files can be retrieved without requiring SSL.
+RewriteCond %{SERVER_PORT}  !^443$
+RewriteCond %{HTTP_HOST}    !^{{ grains['fqdn'] }}$ [NC]
+RewriteRule ^/ipa/(.*)      http://{{ grains['fqdn'] }}/ipa/$1 [L,R=301]
+
+# Redirect to the secure port if not displaying an error or retrieving
+# configuration.
+RewriteCond %{SERVER_PORT}  !^443$
+RewriteCond %{REQUEST_URI}  !^/ipa/(errors|config|crl)
+RewriteCond %{REQUEST_URI}  !^/ipa/[^\?]+(\.js|\.css|\.png|\.gif|\.ico|\.woff|\.svg|\.ttf|\.eot)$
+RewriteRule ^/ipa/(.*)      https://{{ grains['fqdn'] }}/ipa/$1 [L,R=301,NC]
+
+# Rewrite for plugin index, make it like it's a static file
+RewriteRule ^/ipa/ui/js/freeipa/plugins.js$    /ipa/wsgi/plugins.py [PT]
+
+# Allow DNS load balanced domain names to be used
+RewriteCond %{HTTP_REFERER} freeipa\.{{ salt['pillar.get']('freeipa:domain') | replace(".","\.") }}/ipa [OR]
+RewriteCond %{HTTP_REFERER} kdc\.{{ salt['pillar.get']('freeipa:domain') | replace(".","\.") }}/ipa [OR]
+RewriteCond %{HTTP_REFERER} kerberos\.{{ salt['pillar.get']('freeipa:domain') | replace(".","\.") }}/ipa [OR]
+RewriteCond %{HTTP_REFERER} ldap\.{{ salt['pillar.get']('freeipa:domain') | replace(".","\.") }}/ipa
+RewriteRule ^ - [ENV=load-balanced-dns-referer:true]
+RequestHeader set Referer https://{{ grains['fqdn'] }}/ipa env=load-balanced-dns-referer
