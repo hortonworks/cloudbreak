@@ -51,4 +51,17 @@ restart_krb5kdc:
     - watch:
       - file: /etc/sysconfig/krb5kdc
 
+/etc/httpd/conf.d/ipa-rewrite.conf:
+  file.managed:
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: 644
+    - source: salt://freeipa/templates/ipa-rewrite.conf.j2
+
+restart_httpd:
+  service.running:
+    - name: httpd
+    - watch:
+      - file: /etc/httpd/conf.d/ipa-rewrite.conf
 
