@@ -62,8 +62,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Set<Stack> findByNameInAndWorkspaceId(@Param("names") Set<String> name, @Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.type = :type AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
+    @Query("SELECT s FROM Stack s WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.type = :type AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
     Optional<Stack> findByNameAndWorkspaceIdWithLists(@Param("name") String name, @Param("type") StackType type, @Param("workspaceId") Long workspaceId,
         @Param("showTerminated") Boolean showTerminated, @Param("terminatedAfter") Long terminatedAfter);
 
@@ -73,8 +72,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     List<StackStatusView> findByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn, @Param("type") StackType type);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE s.name= :name AND s.workspace.id= :workspaceId AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
+    @Query("SELECT s FROM Stack s WHERE s.name= :name AND s.workspace.id= :workspaceId AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
     Optional<Stack> findByNameAndWorkspaceIdWithLists(@Param("name") String name, @Param("workspaceId") Long workspaceId,
             @Param("showTerminated") Boolean showTerminated,
             @Param("terminatedAfter") Long terminatedAfter);
@@ -145,6 +143,32 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "LEFT JOIN s.stackStatus ss "
             + "WHERE s.resourceCrn = :crn")
     Optional<StackClusterStatusView> getStatusByCrn(@Param("crn") String crn);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT s.id as id, "
+            + "s.resourceCrn as crn, "
+            + "ss.status as status, "
+            + "ss.statusReason as statusReason, "
+            + "c.status as clusterStatus, "
+            + "c.statusReason as clusterStatusReason "
+            + "FROM Stack s "
+            + "LEFT JOIN s.cluster c "
+            + "LEFT JOIN s.stackStatus ss "
+            + "WHERE s.resourceCrn = :crn AND s.workspace.id= :workspaceId")
+    Optional<StackClusterStatusView> getStatusByCrnAndWorkspace(@Param("crn") String crn, @Param("workspaceId") Long workspaceId);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT s.id as id, "
+            + "s.resourceCrn as crn, "
+            + "ss.status as status, "
+            + "ss.statusReason as statusReason, "
+            + "c.status as clusterStatus, "
+            + "c.statusReason as clusterStatusReason "
+            + "FROM Stack s "
+            + "LEFT JOIN s.cluster c "
+            + "LEFT JOIN s.stackStatus ss "
+            + "WHERE s.name = :name AND s.workspace.id= :workspaceId")
+    Optional<StackClusterStatusView> getStatusByNameAndWorkspace(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s.id as id, "

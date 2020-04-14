@@ -132,7 +132,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @OneToOne(cascade = CascadeType.ALL)
     private StackStatus stackStatus;
 
-    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Resource> resources = new HashSet<>();
 
     @Column(nullable = false)
@@ -145,7 +145,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @OneToOne(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private SecurityConfig securityConfig;
 
-    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
 
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -209,6 +209,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setInstanceGroups(Set<InstanceGroup> instanceGroups) {
         this.instanceGroups = instanceGroups;
+    }
+
+    public Stack instanceGroups(Set<InstanceGroup> instanceGroups) {
+        this.instanceGroups.clear();
+        Optional.ofNullable(instanceGroups).ifPresent(this.instanceGroups::addAll);
+        return this;
     }
 
     public Long getId() {
@@ -289,6 +295,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setResources(Set<Resource> resources) {
         this.resources = resources;
+    }
+
+    public Stack resources(Set<Resource> resources) {
+        this.resources.clear();
+        Optional.ofNullable(resources).ifPresent(this.resources::addAll);
+        return this;
     }
 
     public int getConsulServers() {
