@@ -10,9 +10,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RUN_CONTAINE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RUN_SERVICES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_GATEWAY_CERTIFICATE_CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_BOOTSTRAP;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_CLUSTER_PROXY;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_CLUSTER_PROXY_GATEWAY_REGISTRATION;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_METADATA_SETUP;
 
 import javax.inject.Inject;
 
@@ -37,7 +34,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ClusterCreationService {
@@ -59,9 +55,6 @@ public class ClusterCreationService {
     private ClusterTerminationService clusterTerminationService;
 
     @Inject
-    private StackUtil stackUtil;
-
-    @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     @Inject
@@ -74,17 +67,14 @@ public class ClusterCreationService {
 
     public void registeringToClusterProxy(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REGISTERING_TO_CLUSTER_PROXY);
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_CLUSTER_PROXY);
     }
 
     public void registeringGatewayToClusterProxy(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REGISTERING_GATEWAY_TO_CLUSTER_PROXY);
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_CLUSTER_PROXY_GATEWAY_REGISTRATION);
     }
 
     public void collectingHostMetadata(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.COLLECTING_HOST_METADATA);
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_METADATA_SETUP);
     }
 
     public void bootstrapPublicEndpoints(Stack stack) {
@@ -115,19 +105,17 @@ public class ClusterCreationService {
     }
 
     public void installingCluster(StackView stack) {
-        String clusterManagerIP = stackUtil.extractClusterManagerIp(stack);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION,
-                String.format("Building the cluster. Cluster manager ip:%s", clusterManagerIP));
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_BUILDING, clusterManagerIP);
+                String.format("Building the cluster"));
+        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_BUILDING);
     }
 
     public void clusterInstallationFinished(StackView stackView) {
         try {
             transactionService.required(() -> {
-                String clusterManagerIp = stackUtil.extractClusterManagerIp(stackView);
                 clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
                 stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster creation finished.");
-                flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_BUILT, clusterManagerIp);
+                flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_BUILT);
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);

@@ -60,13 +60,11 @@ public class DefaultCostTaggingServiceTest {
         Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key().toLowerCase()));
         Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key().toLowerCase()));
         Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key().toLowerCase()));
-        Assert.assertNull(result.get(DefaultApplicationTag.OWNER.key()));
     }
 
     @Test
     public void testPrepareDefaultTagsForAZUREWhenOwnerPresentedShouldReturnAllDefaultMap() {
         Map<String, String> sourceMap = new HashMap<>();
-        sourceMap.put(DefaultApplicationTag.OWNER.key(), "appletree");
         sourceMap.put(DefaultApplicationTag.owner.key(), "appletree");
 
         Map<String, String> result = underTest.prepareDefaultTags(tagRequest("AZURE", sourceMap, new HashMap<>()));
@@ -75,7 +73,6 @@ public class DefaultCostTaggingServiceTest {
         Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
         Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
         Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
-        Assert.assertNull(result.get(DefaultApplicationTag.OWNER.key()));
     }
 
     @Test

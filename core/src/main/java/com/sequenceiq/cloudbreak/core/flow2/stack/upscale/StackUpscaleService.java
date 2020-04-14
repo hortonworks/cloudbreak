@@ -7,9 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_ADDING_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_BOOTSTRAP_NEW_NODES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_METADATA_EXTEND;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_METADATA_EXTEND_WITH_COUNT;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_FINISHED;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -124,8 +122,6 @@ public class StackUpscaleService {
                 flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_METADATA_EXTEND_WITH_COUNT, String.valueOf(newInstances),
                         String.valueOf(scalingAdjustment));
             }
-            flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_METADATA_EXTEND);
-
             return upscaleCandidateAddresses;
         });
     }
@@ -150,7 +146,6 @@ public class StackUpscaleService {
 
     public void finishExtendHostMetadata(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
-        flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_UPSCALE_FINISHED);
     }
 
     public void handleStackUpscaleFailure(Exception exception, Long stackId) {
