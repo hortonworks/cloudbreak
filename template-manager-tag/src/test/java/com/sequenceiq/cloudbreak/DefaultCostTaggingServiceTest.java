@@ -113,7 +113,7 @@ public class DefaultCostTaggingServiceTest {
     }
 
     @Test
-    public void testAccountTagUserTagConflictGeneartesError() {
+    public void testAccountTagUserTagConflictGeneratesError() {
         Map<String, String> envMap = new HashMap<>();
         envMap.put("apple1", "apple1");
         envMap.put("apple2", "apple2");
