@@ -1,8 +1,10 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -11,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
@@ -26,15 +27,18 @@ import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.util.ClusterProxyServiceAvailabilityChecker;
 import com.sequenceiq.freeipa.vault.FreeIpaCertVaultComponent;
 
 @Service
 public class ClusterProxyService {
 
-    public static final String FREEIPA_SERVICE_NAME = "freeipa";
+    private static final String FREEIPA_SERVICE_NAME = "freeipa";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyService.class);
 
@@ -70,15 +74,25 @@ public class ClusterProxyService {
     @Inject
     private SecurityConfigService securityConfigService;
 
+    @Inject
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Inject
+    private FreeIpaService freeIpaService;
+
     public Optional<ConfigRegistrationResponse> registerFreeIpa(String accountId, String environmentCrn) {
-        return registerFreeIpa(stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId));
+        return registerFreeIpa(stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId), false);
     }
 
-    public Optional<ConfigRegistrationResponse> registerFreeIpa(Long stackId) {
-        return registerFreeIpa(stackService.getStackById(stackId));
+    public Optional<ConfigRegistrationResponse> updateFreeIpaRegistration(Long stackId) {
+        return registerFreeIpa(stackService.getStackById(stackId), false);
     }
 
-    private Optional<ConfigRegistrationResponse> registerFreeIpa(Stack stack) {
+    public Optional<ConfigRegistrationResponse> registerBootstrapFreeIpa(Long stackId) {
+        return registerFreeIpa(stackService.getStackById(stackId), true);
+    }
+
+    private Optional<ConfigRegistrationResponse> registerFreeIpa(Stack stack, boolean bootstrap) {
 
         if (!clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
             LOGGER.debug("Cluster Proxy integration disabled. Skipping registering FreeIpa [{}]", stack);
@@ -88,17 +102,27 @@ public class ClusterProxyService {
         LOGGER.debug("Registering freeipa with cluster-proxy: Environment CRN = [{}], Stack CRN = [{}]", stack.getEnvironmentCrn(), stack.getResourceCrn());
 
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(
-                stack, primaryGatewayConfig.getGatewayUrl());
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotTerminatedGatewayConfigs(stack);
         ClientCertificate clientCertificate = clientCertificates(stack);
 
-        ClusterServiceConfig serviceConfig = createServiceConfig(stack, httpClientConfig, clientCertificate);
+        boolean usePrivateIpToTls = stack.getSecurityConfig().isUsePrivateIpToTls();
+        List<GatewayConfig> tunnelGatewayConfigs;
+        List<ClusterServiceConfig> serviceConfigs = new LinkedList<>();
+        serviceConfigs.add(createServiceConfig(stack, FREEIPA_SERVICE_NAME, primaryGatewayConfig, clientCertificate, usePrivateIpToTls));
 
-        List<ClusterServiceConfig> serviceConfigs = List.of(serviceConfig);
+        if (bootstrap) {
+            tunnelGatewayConfigs = List.of(primaryGatewayConfig);
+        } else if (ClusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack)) {
+            serviceConfigs.addAll(createDnsMappedServiceConfigs(stack, gatewayConfigs, clientCertificate, usePrivateIpToTls));
+            tunnelGatewayConfigs = gatewayConfigs;
+        } else {
+            tunnelGatewayConfigs = List.of();
+        }
+
         LOGGER.debug("Registering service configs [{}]", serviceConfigs);
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withServices(serviceConfigs)
-                .withTunnelEntries(createTunnelEntries(stack, httpClientConfig, primaryGatewayConfig))
+                .withTunnelEntries(createTunnelEntries(stack, tunnelGatewayConfigs))
                 .withAccountId(stack.getAccountId());
         ConfigRegistrationResponse response = clusterProxyRegistrationClient.registerConfig(requestBuilder.build());
 
@@ -139,21 +163,33 @@ public class ClusterProxyService {
         freeIpaCertVaultComponent.cleanupSecrets(stack);
     }
 
-    private ClusterServiceConfig createServiceConfig(Stack stack, HttpClientConfig httpClientConfig, ClientCertificate clientCertificate) {
-        return new ClusterServiceConfig(FREEIPA_SERVICE_NAME,
-                List.of(httpClientConfig.getApiAddress()),
+    private ClusterServiceConfig createServiceConfig(Stack stack, String serviceName, GatewayConfig gatewayConfig, ClientCertificate clientCertificate,
+            boolean usePrivateIpToTls) {
+        return new ClusterServiceConfig(serviceName,
+                List.of(getEndpointForRegistration(stack, gatewayConfig, usePrivateIpToTls)),
                 List.of(),
                 clientCertificate,
                 NO_TLS_STRICT_CHECK
         );
     }
 
-    private List<TunnelEntry> createTunnelEntries(Stack stack, HttpClientConfig httpClientConfig, GatewayConfig primaryGatewayConfig) {
+    private List<ClusterServiceConfig> createDnsMappedServiceConfigs(Stack stack, List<GatewayConfig> gatewayConfigs, ClientCertificate clientCertificate,
+            boolean usePrivateIpToTls) {
+        return gatewayConfigs.stream()
+                .map(gatewayConfig -> createServiceConfig(stack, gatewayConfig.getHostname(), gatewayConfig, clientCertificate, usePrivateIpToTls))
+                .collect(Collectors.toList());
+    }
+
+    private List<TunnelEntry> createTunnelEntries(Stack stack, List<GatewayConfig> gatewayConfigs) {
         if (stack.getTunnel().useCcm()) {
-            String tunnelKey = primaryGatewayConfig.getInstanceId();
-            String tunnelHost = primaryGatewayConfig.getPrivateAddress();
-            Integer tunnelPort = primaryGatewayConfig.getGatewayPort();
-            return List.of(new TunnelEntry(tunnelKey, GATEWAY_SERVICE_TYPE, tunnelHost, tunnelPort, stack.getMinaSshdServiceId()));
+            return gatewayConfigs.stream()
+                    .map(gatewayConfig -> new TunnelEntry(
+                            gatewayConfig.getInstanceId(),
+                            GATEWAY_SERVICE_TYPE,
+                            gatewayConfig.getPrivateAddress(),
+                            gatewayConfig.getGatewayPort(),
+                            stack.getMinaSshdServiceId()))
+                    .collect(Collectors.toList());
         } else {
             return List.of();
         }
@@ -161,6 +197,14 @@ public class ClusterProxyService {
 
     public String getProxyPath(String crn) {
         return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), crn, FREEIPA_SERVICE_NAME);
+    }
+
+    public String getProxyPath(Stack stack, String serviceName) {
+        if (ClusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack)) {
+            return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), stack.getResourceCrn(), serviceName);
+        } else {
+            return getProxyPath(stack.getResourceCrn());
+        }
     }
 
     private String vaultPath(String vaultSecretJsonString) {
@@ -181,6 +225,14 @@ public class ClusterProxyService {
             clientCertificate = new ClientCertificate(clientKeyRef, clientCertRef);
         }
         return clientCertificate;
+    }
+
+    private String getEndpointForRegistration(Stack stack, GatewayConfig gatewayConfig, boolean usePrivateIpToTls) {
+        String ipAddresss = gatewayConfig.getPublicAddress();
+        if (usePrivateIpToTls) {
+            ipAddresss = gatewayConfig.getPrivateAddress();
+        }
+        return String.format("https://%s:%d", ipAddresss, stack.getGatewayport());
     }
 
 }

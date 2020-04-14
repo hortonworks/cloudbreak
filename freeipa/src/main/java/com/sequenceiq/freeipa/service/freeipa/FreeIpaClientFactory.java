@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,14 +20,15 @@ import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.client.ClusterProxyErrorRpcListener;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientBuilder;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
@@ -61,6 +63,9 @@ public class FreeIpaClientFactory {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
+    @Inject
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+
     public FreeIpaClient getFreeIpaClientForStackId(Long stackId) throws FreeIpaClientException {
         LOGGER.debug("Retrieving stack for stack id {}", stackId);
 
@@ -74,24 +79,25 @@ public class FreeIpaClientFactory {
         return getFreeIpaClientForStack(stack);
     }
 
-    private String toClusterProxyBasepath(String freeIpaClusterCrn) {
-        return String.format("%s%s", clusterProxyService.getProxyPath(freeIpaClusterCrn), FreeIpaClientBuilder.DEFAULT_BASE_PATH);
+    private String toClusterProxyBasepath(Stack stack, String clusterProxyServiceName) {
+        return String.format("%s%s", clusterProxyService.getProxyPath(stack, clusterProxyServiceName), FreeIpaClientBuilder.DEFAULT_BASE_PATH);
     }
 
-    private FreeIpaClient getFreeIpaClient(Stack stack, boolean withPing) throws FreeIpaClientException {
+    private FreeIpaClient getFreeIpaClient(Stack stack, boolean withPing, Optional<String> freeIpaFqdn) throws FreeIpaClientException {
         stack = stackService.getByIdWithListsInTransaction(stack.getId());
         Status stackStatus = stack.getStackStatus().getStatus();
         if (!stackStatus.isFreeIpaUnreachableStatus()) {
             try {
-                if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
-                    try {
-                        return getFreeIpaClientBuilderForClusterProxy(stack).build(withPing);
-                    } catch (IOException e) {
-                        throw new RetryableFreeIpaClientException("Unable to connect to FreeIPA using cluster proxy", e);
-                    }
-                } else {
-                    return createClientForDirectConnection(stack, withPing);
+                Optional<FreeIpaClient> client = Optional.empty();
+                List<InstanceMetaData> instanceMetaDatas = getPriorityOrderedFreeIpaInstances(stack).stream()
+                        .filter(instanceMetaData -> freeIpaFqdn.isEmpty() || freeIpaFqdn.get().equals(instanceMetaData.getDiscoveryFQDN()))
+                        .collect(Collectors.toList());
+                for (Iterator<InstanceMetaData> instanceIterator = instanceMetaDatas.iterator();
+                        instanceIterator.hasNext() && client.isEmpty();) {
+                    InstanceMetaData instanceMetaData = instanceIterator.next();
+                    client = getFreeIpaClient(stack, instanceMetaData, withPing, !instanceIterator.hasNext());
                 }
+                return client.orElseThrow(() -> createFreeIpaUnableToBuildClient(new IllegalStateException("No FreeIPA client was available")));
             } catch (Exception e) {
                 throw createFreeIpaUnableToBuildClient(e);
             }
@@ -100,19 +106,14 @@ public class FreeIpaClientFactory {
         }
     }
 
-    private FreeIpaClient createClientForDirectConnection(Stack stack, boolean withPing) throws Exception {
-        Optional<FreeIpaClient> client = Optional.empty();
-        for (Iterator<InstanceMetaData> instanceIterator = getAllInstances(stack).iterator(); instanceIterator.hasNext() && client.isEmpty();) {
-            InstanceMetaData instanceMetaData = instanceIterator.next();
-            client = getFreeIpaClient(stack, instanceMetaData, withPing, !instanceIterator.hasNext());
-        }
-        return client.orElseThrow(() -> createFreeIpaUnableToBuildClient(new IllegalStateException("No FreeIPA client was available")));
-    }
-
     private Optional<FreeIpaClient> getFreeIpaClient(Stack stack, InstanceMetaData instanceMetaData, boolean withPing, boolean lastInstance) throws Exception {
         Optional<FreeIpaClient> client = Optional.empty();
         try {
-            client = Optional.of(getFreeIpaClientBuilder(stack, instanceMetaData).build(withPing));
+            if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
+                client = Optional.of(getFreeIpaClientBuilderForClusterProxy(stack, instanceMetaData).build(withPing));
+            } else {
+                client = Optional.of(getFreeIpaClientBuilderForDirectMode(stack, instanceMetaData).build(withPing));
+            }
         } catch (FreeIpaClientException e) {
             handleException(instanceMetaData, e, () -> canTryAnotherInstance(lastInstance, e));
         } catch (IOException e) {
@@ -138,38 +139,52 @@ public class FreeIpaClientFactory {
         return !lastInstance;
     }
 
-    private List<InstanceMetaData> getAllInstances(Stack stack) {
-        return stack.getInstanceGroups().stream().flatMap(instanceGroup ->
-                instanceGroup.getInstanceMetaData().stream()).collect(Collectors.toList());
+    private List<InstanceMetaData> getPriorityOrderedFreeIpaInstances(Stack stack) {
+        return instanceMetaDataRepository.findNotTerminatedForStack(stack.getId()).stream()
+                .filter(InstanceMetaData::isAvailable)
+                .sorted((l, r) -> {
+                    if (l.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY) {
+                        return -1;
+                    }
+                    if (r.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY) {
+                        return 1;
+                    }
+                    return Comparator.comparing(InstanceMetaData::getDiscoveryFQDN).compare(l, r);
+                })
+                .collect(Collectors.toList());
     }
 
     public FreeIpaClient getFreeIpaClientForStack(Stack stack) throws FreeIpaClientException {
         LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getResourceCrn());
-        return getFreeIpaClient(stack, false);
+        return getFreeIpaClient(stack, false, Optional.empty());
     }
 
-    public FreeIpaClient getFreeIpaClientForStackWithPing(Stack stack) throws Exception {
-        LOGGER.debug("Ping the login endpoint and creating FreeIpaClient for stack {}", stack.getResourceCrn());
-        return getFreeIpaClient(stack, true);
+    public FreeIpaClient getFreeIpaClientForStack(Stack stack, String freeIpaFqdn) throws FreeIpaClientException {
+        LOGGER.debug("Creating FreeIpaClient for stack {} for {}", stack.getResourceCrn(), freeIpaFqdn);
+        return getFreeIpaClient(stack, false, Optional.of(freeIpaFqdn));
     }
 
-    private FreeIpaClientBuilder getFreeIpaClientBuilderForClusterProxy(Stack stack) throws Exception {
-        InstanceMetaData primaryGwInstance = gatewayConfigService.getPrimaryGwInstance(stack.getNotDeletedInstanceMetaDataList());
+    public FreeIpaClient getFreeIpaClientForStackWithPing(Stack stack, String freeIpaFqdn) throws Exception {
+        LOGGER.debug("Ping the login endpoint and creating FreeIpaClient for stack {} for {}", stack.getResourceCrn(), freeIpaFqdn);
+        return getFreeIpaClient(stack, true, Optional.of(freeIpaFqdn));
+    }
+
+    private FreeIpaClientBuilder getFreeIpaClientBuilderForClusterProxy(Stack stack, InstanceMetaData instanceMetaData) throws Exception {
         HttpClientConfig httpClientConfig = new HttpClientConfig(clusterProxyConfiguration.getClusterProxyHost());
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        String clusterProxyPath = toClusterProxyBasepath(stack.getResourceCrn());
+        String clusterProxyPath = toClusterProxyBasepath(stack, instanceMetaData.getDiscoveryFQDN());
 
         return new FreeIpaClientBuilder(ADMIN_USER,
                 freeIpa.getAdminPassword(),
                 httpClientConfig,
-                primaryGwInstance.getDiscoveryFQDN(),
+                instanceMetaData.getDiscoveryFQDN(),
                 clusterProxyConfiguration.getClusterProxyPort(),
                 clusterProxyPath,
                 ADDITIONAL_CLUSTER_PROXY_HEADERS,
                 CLUSTER_PROXY_ERROR_LISTENER);
     }
 
-    private FreeIpaClientBuilder getFreeIpaClientBuilder(Stack stack, InstanceMetaData instanceMetaData) throws Exception {
+    private FreeIpaClientBuilder getFreeIpaClientBuilderForDirectMode(Stack stack, InstanceMetaData instanceMetaData) throws Exception {
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(
                 stack, instanceMetaData.getPublicIpWrapper(), instanceMetaData);
         FreeIpa freeIpa = freeIpaService.findByStack(stack);

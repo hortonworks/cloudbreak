@@ -45,16 +45,6 @@ public class HostMetadataSetup {
         instanceMetaDataService.saveAll(allInstanceMetaData);
     }
 
-    public void setupNewHostMetadata(Long stackId, Collection<String> newAddresses) throws CloudbreakOrchestratorException {
-        LOGGER.debug("Extending host metadata.");
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<InstanceMetaData> newInstanceMetadata = stack.getNotDeletedInstanceMetaDataSet().stream()
-                .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
-                .collect(Collectors.toSet());
-        updateWithHostData(stack, newInstanceMetadata);
-        instanceMetaDataService.saveAll(newInstanceMetadata);
-    }
-
     private void updateWithHostData(Stack stack, Collection<InstanceMetaData> metadataToUpdate) throws CloudbreakOrchestratorException {
         List<String> privateIps = metadataToUpdate.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);

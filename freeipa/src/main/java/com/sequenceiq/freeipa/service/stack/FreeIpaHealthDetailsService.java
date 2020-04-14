@@ -108,7 +108,7 @@ public class FreeIpaHealthDetailsService {
     }
 
     private RPCResponse<Boolean> checkFreeIpaHealth(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
-        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack, instance.getDiscoveryFQDN());
         return freeIpaClient.serverConnCheck(freeIpaClient.getHostname(), instance.getDiscoveryFQDN());
     }
 

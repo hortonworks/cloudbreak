@@ -138,7 +138,9 @@ public class FreeIpaClientBuilder {
                     .build()) {
                 URI target = getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/login_password").toURI();
                 LOGGER.debug("Ping at target: {}", target);
-                client.execute(new HttpHead(target));
+                HttpHead request = new HttpHead(target);
+                additionalHeaders.forEach(request::addHeader);
+                client.execute(request).close();
                 LOGGER.debug("Freeipa is reachable");
             }
         }
