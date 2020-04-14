@@ -29,8 +29,8 @@ public class GatewayConfigService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public List<GatewayConfig> getAllGatewayConfigs(Stack stack) {
-        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findAllInStack(stack.getId());
+    public List<GatewayConfig> getNotTerminatedGatewayConfigs(Stack stack) {
+        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
         return getGatewayConfigs(stack, instanceMetaDatas);
     }
 
@@ -58,21 +58,8 @@ public class GatewayConfigService {
                 .findFirst().orElseThrow(() -> new NotFoundException("Gateway instance does not found"));
     }
 
-    public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance) {
+    private GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance) {
         return tlsSecurityService.buildGatewayConfig(stack, gatewayInstance, getSaltClientConfig(stack), false);
-    }
-
-    public String getPrimaryGatewayIp(Stack stack) {
-        InstanceMetaData gatewayInstance = getPrimaryGwInstance(stack);
-        return gatewayInstance == null ? null : getGatewayIp(stack, gatewayInstance);
-    }
-
-    public String getGatewayIp(Stack stack, InstanceMetaData gatewayInstance) {
-        String gatewayIP = gatewayInstance.getPublicIpWrapper();
-        if (stack.getSecurityConfig().isUsePrivateIpToTls()) {
-            gatewayIP = gatewayInstance.getPrivateIp();
-        }
-        return gatewayIP;
     }
 
     private SaltClientConfig getSaltClientConfig(Stack stack) {

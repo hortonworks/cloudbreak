@@ -29,7 +29,6 @@ import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
-import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -40,9 +39,6 @@ public class ProviderChecker {
 
     @Inject
     private InstanceStateQuery instanceStateQuery;
-
-    @Inject
-    private GatewayConfigService gatewayConfigService;
 
     @Inject
     private CredentialService credentialService;

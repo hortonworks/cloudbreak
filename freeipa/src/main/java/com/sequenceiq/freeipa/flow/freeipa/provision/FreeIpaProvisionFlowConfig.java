@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.freeipa.provision;
 
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.BOOTSTRAP_MACHINES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.BOOTSTRAP_MACHINES_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.CLUSTER_PROXY_UPDATE_REGISTRATION_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.CLUSTER_PROXY_UPDATE_REGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.FREEIPA_INSTALL_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.FREEIPA_INSTALL_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.FREEIPA_POST_INSTALL_FAILED_EVENT;
@@ -13,6 +15,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEven
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.HOST_METADATASETUP_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.HOST_METADATASETUP_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.BOOTSTRAPPING_MACHINES_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.CLUSTERPROXY_UPDATE_REGISTRATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.COLLECTING_HOST_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.FREEIPA_INSTALL_STATE;
@@ -43,7 +46,10 @@ public class FreeIpaProvisionFlowConfig extends AbstractFlowConfiguration<FreeIp
                     .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
             .from(COLLECTING_HOST_METADATA_STATE).to(FREEIPA_INSTALL_STATE).event(HOST_METADATASETUP_FINISHED_EVENT)
                     .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
-            .from(FREEIPA_INSTALL_STATE).to(FREEIPA_POST_INSTALL_STATE).event(FREEIPA_INSTALL_FINISHED_EVENT).failureEvent(FREEIPA_INSTALL_FAILED_EVENT)
+            .from(FREEIPA_INSTALL_STATE).to(CLUSTERPROXY_UPDATE_REGISTRATION_STATE)
+                    .event(FREEIPA_INSTALL_FINISHED_EVENT).failureEvent(FREEIPA_INSTALL_FAILED_EVENT)
+            .from(CLUSTERPROXY_UPDATE_REGISTRATION_STATE).to(FREEIPA_POST_INSTALL_STATE)
+                    .event(CLUSTER_PROXY_UPDATE_REGISTRATION_FINISHED_EVENT).failureEvent(CLUSTER_PROXY_UPDATE_REGISTRATION_FAILED_EVENT)
             .from(FREEIPA_POST_INSTALL_STATE).to(FREEIPA_PROVISION_FINISHED_STATE).event(FREEIPA_POST_INSTALL_FINISHED_EVENT)
                     .failureEvent(FREEIPA_POST_INSTALL_FAILED_EVENT)
             .from(FREEIPA_PROVISION_FINISHED_STATE).to(FINAL_STATE).event(FREEIPA_PROVISION_FINISHED_EVENT).defaultFailureEvent()

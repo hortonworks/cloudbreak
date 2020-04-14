@@ -15,6 +15,8 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationRequest;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaRequest;
@@ -91,12 +93,29 @@ public class FreeIpaProvisionActions {
         };
     }
 
-    @Bean(name = "FREEIPA_POST_INSTALL_STATE")
-    public Action<?, ?> postInstallFreeIpa() {
+    @Bean(name = "CLUSTERPROXY_UPDATE_REGISTRATION_STATE")
+    public Action<?, ?> updateClusterProxyRegistrationAction() {
         return new AbstractStackProvisionAction<>(InstallFreeIpaServicesSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, InstallFreeIpaServicesSuccess payload, Map<Object, Object> variables) throws Exception {
+                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.UPDATE_CLUSTER_PROXY_REGISTRATION,
+                        "Updating cluster proxy registration.");
+                sendEvent(context);
+            }
 
             @Override
-            protected void doExecute(StackContext context, InstallFreeIpaServicesSuccess payload, Map<Object, Object> variables) {
+            protected Selectable createRequest(StackContext context) {
+                return new ClusterProxyUpdateRegistrationRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "FREEIPA_POST_INSTALL_STATE")
+    public Action<?, ?> postInstallFreeIpa() {
+        return new AbstractStackProvisionAction<>(ClusterProxyUpdateRegistrationSuccess.class) {
+
+            @Override
+            protected void doExecute(StackContext context, ClusterProxyUpdateRegistrationSuccess payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.POSTINSTALL_FREEIPA_CONFIGURATION,
                         "Performing FreeIPA post-install configuration");
                 sendEvent(context);

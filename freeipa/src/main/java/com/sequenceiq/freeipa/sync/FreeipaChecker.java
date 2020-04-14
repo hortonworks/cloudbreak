@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.sync;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,7 @@ import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Component
 public class FreeipaChecker {
@@ -31,28 +34,38 @@ public class FreeipaChecker {
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
 
-    private RPCResponse<Boolean> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances) throws Exception {
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
+
+    private List<RPCResponse<Boolean>> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances) throws Exception {
         return checkedMeasure(() -> {
-            FreeIpaClient freeIpaClient = checkedMeasure(() -> freeIpaClientFactory.getFreeIpaClientForStackWithPing(stack), LOGGER,
-                    ":::Auto sync::: freeipa client is created in {}ms");
-            String hostname = getPrimaryHostname(checkableInstances);
-            return checkedMeasure(() -> freeIpaClient.serverConnCheck(freeIpaClient.getHostname(), hostname), LOGGER,
-                    ":::Auto sync::: freeipa server_conncheck ran in {}ms");
+            List<RPCResponse<Boolean>> statuses = new LinkedList<>();
+            for (InstanceMetaData instanceMetaData : checkableInstances) {
+                String hostname = instanceMetaData.getDiscoveryFQDN();
+                FreeIpaClient freeIpaClient = checkedMeasure(() ->
+                                freeIpaClientFactory.getFreeIpaClientForStackWithPing(stack, hostname), LOGGER,
+                        ":::Auto sync::: freeipa client is created in {}ms");
+                statuses.add(checkedMeasure(() -> freeIpaClient.serverConnCheck(freeIpaClient.getHostname(), hostname), LOGGER,
+                        ":::Auto sync::: freeipa server_conncheck ran in {}ms"));
+            }
+            return statuses;
         }, LOGGER, ":::Auto sync::: freeipa server status is checked in {}ms");
     }
 
     public SyncResult getStatus(Stack stack, Set<InstanceMetaData> checkableInstances) {
         try {
-            RPCResponse<Boolean> response = checkStatus(stack, checkableInstances);
+            Set<InstanceMetaData> notTermiatedStackInstances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
+            List<RPCResponse<Boolean>> responses = checkStatus(stack, checkableInstances);
             DetailedStackStatus status;
             String postFix = "";
-            if (response.getResult()) {
+            Boolean result = !responses.isEmpty() && responses.stream().allMatch(RPCResponse::getResult);
+            if (result && responses.size() == notTermiatedStackInstances.size()) {
                 status = DetailedStackStatus.PROVISIONED;
             } else {
                 status = DetailedStackStatus.UNHEALTHY;
                 postFix = "Freeipa is unhealthy, ";
             }
-            return new SyncResult(postFix + getMessage(response), status, response.getResult());
+            return new SyncResult(postFix + getMessages(responses), status, result);
         } catch (HttpHostConnectException | ConnectTimeoutException e) {
             return new SyncResult("Freeipa is unreachable: " + e.getMessage(), DetailedStackStatus.UNREACHABLE, false);
         } catch (FreeIpaClientException e) {
@@ -64,12 +77,10 @@ public class FreeipaChecker {
         }
     }
 
-    private String getMessage(RPCResponse<Boolean> response) {
-        if (response == null) {
-            return "Cannot parse component status from Freeipa response, because it is null.";
-        }
-        return response.getMessages()
-                .stream()
+    private String getMessages(List<RPCResponse<Boolean>> responses) {
+        return responses.stream()
+                .map(RPCResponse::getMessages)
+                .flatMap(List::stream)
                 .map(m -> m.getName() + ": " + m.getMessage())
                 .collect(Collectors.joining(", "));
     }
