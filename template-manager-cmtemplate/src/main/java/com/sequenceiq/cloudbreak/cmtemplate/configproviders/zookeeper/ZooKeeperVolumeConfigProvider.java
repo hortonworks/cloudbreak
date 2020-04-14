@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
@@ -39,4 +40,8 @@ public class ZooKeeperVolumeConfigProvider implements CmHostGroupRoleConfigProvi
         return Set.of(ZooKeeperRoles.ZOOKEEPER_SERVER);
     }
 
+    @Override
+    public boolean shouldSplit(ServiceComponent serviceComponent) {
+        return !serviceComponent.getComponent().equals("SERVER");
+    }
 }

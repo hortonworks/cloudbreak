@@ -1,0 +1,110 @@
+{
+    "cdhVersion": "7.1.0",
+    "displayName": "testcluster",
+    "cmVersion": "6.1.0",
+    "services": [
+        {
+            "refName": "zookeeper",
+            "serviceType": "ZOOKEEPER",
+            "serviceConfigs": null,
+            "roleConfigGroups": [
+                {
+                    "refName": "zookeeper-SERVER-BASE",
+                    "roleType": "SERVER",
+                    "configs": null,
+                    "base": true
+                }
+            ]
+        },
+        {
+            "refName": "hdfs",
+            "serviceType": "HDFS",
+            "serviceConfigs": null,
+            "roleConfigGroups": [
+                {
+                    "refName": "hdfs-JOURNALNODE-BASE",
+                    "roleType": "JOURNALNODE",
+                    "configs": null,
+                    "base": true
+                },
+                {
+                    "refName": "hdfs-NAMENODE-BASE",
+                    "roleType": "NAMENODE",
+                    "configs": null,
+                    "base": true
+                }
+            ]
+        }
+    ],
+    "hostTemplates": [
+        {
+            "refName": "gateway",
+            "cardinality": 1,
+            "roleConfigGroupsRefNames": [
+            ]
+        },
+        {
+            "refName": "master1",
+            "cardinality": 1,
+            "roleConfigGroupsRefNames": [
+                "hdfs-NAMENODE-BASE",
+                "hdfs-JOURNALNODE-BASE",
+                "zookeeper-SERVER-BASE"
+            ]
+        },
+        {
+            "refName": "master2",
+            "cardinality": 1,
+            "roleConfigGroupsRefNames": [
+                "hdfs-NAMENODE-BASE",
+                "hdfs-JOURNALNODE-BASE",
+                "zookeeper-SERVER-BASE"
+            ]
+        },
+        {
+            "refName": "worker",
+            "cardinality": 3,
+            "roleConfigGroupsRefNames": [
+            ]
+        },
+        {
+            "refName": "compute",
+            "cardinality": 0,
+            "roleConfigGroupsRefNames": [
+            ]
+        },
+        {
+            "refName": "quorum",
+            "cardinality": 1,
+            "roleConfigGroupsRefNames": [
+                "hdfs-JOURNALNODE-BASE",
+                "zookeeper-SERVER-BASE"
+            ]
+        }
+    ],
+    "tags": null,
+    "instantiator": {
+        "clusterName": "testcluster",
+        "hosts": [
+            {
+                "hostName": "host3",
+                "hostTemplateRefName": "worker"
+            },
+            {
+                "hostName": "host4",
+                "hostTemplateRefName": "worker"
+            },
+            {
+                "hostName": "host1",
+                "hostTemplateRefName": "master"
+            },
+            {
+                "hostName": "host2",
+                "hostTemplateRefName": "master"
+            }
+        ],
+        "variables":null,
+        "roleConfigGroups": null,
+        "lenient": null
+    }
+}
