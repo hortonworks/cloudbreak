@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.telemetry.service;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -102,15 +103,18 @@ public class AccountTelemetryService {
         List<AnonymizationRule> defaultRules = new ArrayList<>();
 
         AnonymizationRule creditCardWithSepRule = new AnonymizationRule();
-        creditCardWithSepRule.setValue(CREDIT_CARD_PATTERN);
+        creditCardWithSepRule.setValue(
+                Base64.getEncoder().encodeToString(CREDIT_CARD_PATTERN.getBytes()));
         creditCardWithSepRule.setReplacement(CREDIT_CARD_REPLACEMENT);
 
         AnonymizationRule ssnWithSepRule = new AnonymizationRule();
-        ssnWithSepRule.setValue(SSN_PATTERN);
+        ssnWithSepRule.setValue(
+                Base64.getEncoder().encodeToString(SSN_PATTERN.getBytes()));
         ssnWithSepRule.setReplacement(SSN_REPLACEMENT);
 
         AnonymizationRule emailRule = new AnonymizationRule();
-        emailRule.setValue(EMAIL_PATTERN);
+        emailRule.setValue(
+                Base64.getEncoder().encodeToString(EMAIL_PATTERN.getBytes()));
         emailRule.setReplacement(EMAIL_REPLACEMENT);
 
         defaultRules.add(creditCardWithSepRule);

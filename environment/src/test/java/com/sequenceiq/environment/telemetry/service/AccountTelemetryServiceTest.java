@@ -2,6 +2,7 @@ package com.sequenceiq.environment.telemetry.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Base64;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +45,8 @@ public class AccountTelemetryServiceTest {
     private void testPatternWithOutput(AnonymizationRule rule, String input, String startsWith) {
         if (rule.getReplacement().startsWith(startsWith)) {
             // TODO: for now, it can work with java regex - use jregex in the future
-            Pattern p = Pattern.compile(rule.getValue());
+            Pattern p = Pattern.compile(
+                    new String(Base64.getDecoder().decode(rule.getValue().getBytes())));
             boolean found = p.matcher(input).find();
             assertThat(found).isEqualTo(true);
         }
