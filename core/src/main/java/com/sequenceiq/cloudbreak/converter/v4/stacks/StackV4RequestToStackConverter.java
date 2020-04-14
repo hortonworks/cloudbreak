@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -69,6 +70,15 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 public class StackV4RequestToStackConverter extends AbstractConversionServiceAwareConverter<StackV4Request, Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackV4RequestToStackConverter.class);
+
+    @Value("${cb.ambari.username:cloudbreak}")
+    private String ambariUserName;
+
+    @Value("${cb.cm.mgmt.username:cmmgmt}")
+    private String cmMgmtUsername;
+
+    @Value("${cb.cm.monitoring.username:cmmonitoring}")
+    private String cmMonitoringUser;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -315,6 +325,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         if (source.getCluster() != null) {
             source.getCluster().setName(stack.getName());
             Cluster cluster = getConversionService().convert(source.getCluster(), Cluster.class);
+            fillCredentialValues(source, cluster);
             Set<HostGroup> hostGroups = source.getInstanceGroups().stream()
                     .map(ig -> {
                         HostGroup hostGroup = getConversionService().convert(ig, HostGroup.class);
@@ -324,6 +335,19 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                     .collect(Collectors.toSet());
             cluster.setHostGroups(hostGroups);
             stack.setCluster(cluster);
+        }
+    }
+
+    private void fillCredentialValues(StackV4Request source, Cluster cluster) {
+        if (source.getType() != StackType.TEMPLATE) {
+            cluster.setUserName(source.getCluster().getUserName());
+            cluster.setPassword(source.getCluster().getPassword());
+            cluster.setCloudbreakUser(ambariUserName);
+            cluster.setCloudbreakPassword(PasswordUtil.generatePassword());
+            cluster.setCloudbreakClusterManagerMonitoringUser(cmMonitoringUser);
+            cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
+            cluster.setDpUser(cmMgmtUsername);
+            cluster.setDpPassword(PasswordUtil.generatePassword());
         }
     }
 
