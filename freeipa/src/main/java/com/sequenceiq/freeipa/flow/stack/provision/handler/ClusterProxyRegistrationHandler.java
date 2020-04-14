@@ -38,10 +38,10 @@ public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProx
         ClusterProxyRegistrationRequest request = event.getData();
         Selectable response;
         try {
-            clusterProxyService.registerFreeIpa(request.getResourceId());
+            clusterProxyService.registerBootstrapFreeIpa(request.getResourceId());
             response = new ClusterProxyRegistrationSuccess(request.getResourceId());
         } catch (Exception e) {
-            LOGGER.error("Cluster Proxy registration has failed", e);
+            LOGGER.error("Cluster Proxy bootstrap registration has failed", e);
             response = new ClusterProxyRegistrationFailed(request.getResourceId(), e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
