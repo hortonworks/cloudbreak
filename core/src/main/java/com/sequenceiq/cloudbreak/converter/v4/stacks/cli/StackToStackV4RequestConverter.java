@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.DatabaseAvailabilityTypeToExternalDatabaseRequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
@@ -64,6 +65,9 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
     @Inject
     private TelemetryConverter telemetryConverter;
 
+    @Inject
+    private DatabaseAvailabilityTypeToExternalDatabaseRequestConverter databaseAvailabilityTypeToExternalDatabaseRequestConverter;
+
     @Override
     public StackV4Request convert(Stack source) {
         StackV4Request stackV4Request = new StackV4Request();
@@ -74,6 +78,8 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         stackV4Request.setAuthentication(getConversionService().convert(source.getStackAuthentication(), StackAuthenticationV4Request.class));
         stackV4Request.setNetwork(getConversionService().convert(source.getNetwork(), NetworkV4Request.class));
         stackV4Request.setCluster(getConversionService().convert(source.getCluster(), ClusterV4Request.class));
+        stackV4Request.setExternalDatabase(getIfNotNull(source.getExternalDatabaseCreationType(),
+                databaseAvailabilityTypeToExternalDatabaseRequestConverter::convert));
         stackV4Request.setInstanceGroups(getInstanceGroups(source));
         prepareImage(source, stackV4Request);
         prepareTags(source, stackV4Request);
