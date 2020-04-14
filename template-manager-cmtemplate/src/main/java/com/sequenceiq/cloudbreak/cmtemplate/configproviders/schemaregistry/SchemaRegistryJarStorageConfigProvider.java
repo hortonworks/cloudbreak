@@ -8,12 +8,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
@@ -55,5 +56,10 @@ public class SchemaRegistryJarStorageConfigProvider implements CmHostGroupRoleCo
     @Override
     public Set<String> getRoleTypes() {
         return Set.of(SchemaRegistryRoles.SCHEMA_REGISTRY_SERVER);
+    }
+
+    @Override
+    public boolean shouldSplit(ServiceComponent serviceComponent) {
+        return true;
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
@@ -57,4 +58,8 @@ public class HdfsVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
         return Set.of(HdfsRoles.DATANODE, HdfsRoles.JOURNALNODE, HdfsRoles.NAMENODE, HdfsRoles.SECONDARYNAMENODE);
     }
 
+    @Override
+    public boolean shouldSplit(ServiceComponent serviceComponent) {
+        return !serviceComponent.getComponent().equals("JOURNALNODE");
+    }
 }
