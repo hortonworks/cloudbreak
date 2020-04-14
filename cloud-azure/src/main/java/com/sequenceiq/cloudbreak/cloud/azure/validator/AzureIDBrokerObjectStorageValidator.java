@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,8 @@ import com.gs.collections.impl.factory.Sets;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
 import com.microsoft.azure.management.msi.Identity;
+import com.microsoft.azure.management.resources.fluentcore.arm.ResourceId;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
@@ -37,6 +40,9 @@ public class AzureIDBrokerObjectStorageValidator {
 
     @Inject
     private AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
+
+    @Inject
+    private AzureStorage azureStorage;
 
     public ValidationResult validateObjectStorage(AzureClient client,
             SpiFileSystem spiFileSystem,
@@ -65,13 +71,13 @@ public class AzureIDBrokerObjectStorageValidator {
         return resultBuilder.build();
     }
 
-    private void validateIDBroker(AzureClient client, PagedList<RoleAssignmentInner> roleAssignments,  Identity identity,
+    private void validateIDBroker(AzureClient client, PagedList<RoleAssignmentInner> roleAssignments, Identity identity,
             CloudAdlsGen2View cloudFileSystem, ValidationResultBuilder resultBuilder) {
         LOGGER.debug(String.format("Validating IDBroker identity %s", identity.principalId()));
 
         Set<Identity> allMappedExistingIdentity = validateAllMappedIdentities(client, cloudFileSystem, resultBuilder);
         validateRoleAssigment(roleAssignments, resultBuilder, allMappedExistingIdentity);
-        validateRoleAssigmentAndScope(roleAssignments, resultBuilder, identity, "/subscriptions/" + client.getCurrentSubscription().subscriptionId());
+        validateRoleAssigmentAndScope(roleAssignments, resultBuilder, identity, List.of("/subscriptions/" + client.getCurrentSubscription().subscriptionId()));
         LOGGER.debug("Validating IDBroker identity is finished");
 
     }
@@ -81,15 +87,33 @@ public class AzureIDBrokerObjectStorageValidator {
         LOGGER.debug(String.format("Validating logger identity %s", identity.principalId()));
 
         List<StorageLocationBase> locations = cloudFileSystem.getLocations();
-        if (Objects.nonNull(locations) && locations.size() > 0) {
+        if (Objects.nonNull(locations) && !locations.isEmpty()) {
             AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(locations.get(0).getValue());
-            String account = adlsGen2Config.getAccount();
-            validateRoleAssigmentAndScope(roleAssignments, resultBuilder, identity, account);
-
+            String storageAccountName = adlsGen2Config.getAccount();
+            Optional<String> storageAccountIdOptional = azureStorage.findStorageAccountIdInVisibleSubscriptions(client, storageAccountName);
+            if (storageAccountIdOptional.isEmpty()) {
+                LOGGER.debug("Storage account {} not found or insufficient permission to list subscriptions and / or storage accounts.", storageAccountName);
+                addError(resultBuilder, String.format("Storage account with name %s not found.", storageAccountName));
+                return;
+            }
+            ResourceId storageAccountResourceId = ResourceId.fromString(storageAccountIdOptional.get());
+            PagedList<RoleAssignmentInner> roleAssignmentsForSubscription =
+                    getRoleAssignmentsOfSubscription(roleAssignments, storageAccountResourceId.subscriptionId(), client);
+            validateRoleAssigmentAndScope(roleAssignmentsForSubscription, resultBuilder, identity,
+                    List.of(storageAccountName, storageAccountResourceId.resourceGroupName(), storageAccountResourceId.subscriptionId()));
         } else {
             LOGGER.debug("There is no storage location set for logger identity, this should not happen!");
         }
         LOGGER.info("Validating logger identity is finished");
+    }
+
+    private PagedList<RoleAssignmentInner> getRoleAssignmentsOfSubscription(
+            PagedList<RoleAssignmentInner> roleAssignmentsOfCurrentSubscription, String targetSubscriptionId, AzureClient client) {
+        if (client.getCurrentSubscription().subscriptionId().equals(targetSubscriptionId)) {
+            return roleAssignmentsOfCurrentSubscription;
+        }
+
+        return client.listRoleAssignmentsBySubscription(targetSubscriptionId);
     }
 
     private Set<Identity> validateAllMappedIdentities(AzureClient client, CloudFileSystemView cloudFileSystemView,
@@ -97,7 +121,7 @@ public class AzureIDBrokerObjectStorageValidator {
         Set<Identity> validMappedIdentities = Collections.emptySet();
         AccountMappingBase accountMappings = cloudFileSystemView.getAccountMapping();
         if (accountMappings != null) {
-            Set<String>  mappedIdentityIds = new HashSet<>();
+            Set<String> mappedIdentityIds = new HashSet<>();
             mappedIdentityIds.addAll(accountMappings.getUserMappings().values());
             mappedIdentityIds.addAll(accountMappings.getGroupMappings().values());
             PagedList<Identity> existingIdentities = client.listIdentities();
@@ -105,7 +129,7 @@ public class AzureIDBrokerObjectStorageValidator {
             Set<String> existingIdentityIds = existingIdentities.stream().map(Identity::id).collect(Collectors.toSet());
             MutableSet<String> nonExistingIdentityIds = Sets.difference(mappedIdentityIds, existingIdentityIds);
             nonExistingIdentityIds.stream().forEach(identityId ->
-                addError(resultBuilder, String.format("Identity with id %s does not exist in the given Azure subscription.", identityId))
+                    addError(resultBuilder, String.format("Identity with id %s does not exist in the given Azure subscription.", identityId))
             );
             Set<String> validMappedIdentityIds = Sets.difference(mappedIdentityIds, nonExistingIdentityIds);
             validMappedIdentities = existingIdentities.stream().filter(identity -> validMappedIdentityIds.contains(identity.id())).collect(Collectors.toSet());
@@ -124,19 +148,26 @@ public class AzureIDBrokerObjectStorageValidator {
     }
 
     private void validateRoleAssigmentAndScope(PagedList<RoleAssignmentInner> roleAssignments, ValidationResultBuilder resultBuilder, Identity identity,
-            String scope) {
-        if (Objects.nonNull(roleAssignments) && roleAssignments.size() > 0) {
-            long numberOfMatchingRoles = roleAssignments.stream()
-                    .filter(roleAssignment -> roleAssignment.principalId().equals(identity.principalId())
-                            && roleAssignment.scope().contains(scope))
-                    .count();
-            if (numberOfMatchingRoles == 0) {
+            List<String> scopes) {
+        if (Objects.nonNull(roleAssignments) && !roleAssignments.isEmpty()) {
+            if (!hasMatchingRoles(roleAssignments, identity, scopes)) {
                 addError(resultBuilder,
-                        String.format("Identity with id %s has no role assignment on scope %s.", identity.id(), scope));
+                        String.format("Identity with id %s has no role assignment on scope(s) %s.", identity.id(), scopes));
             }
         } else {
             addError(resultBuilder, "There are no role assignments for the given Azure subscription.");
         }
+    }
+
+    private boolean hasMatchingRoles(PagedList<RoleAssignmentInner> roleAssignments, Identity identity, List<String> scopes) {
+        long numberOfMatchingRoles = 0;
+        for (String scope : scopes) {
+            numberOfMatchingRoles += roleAssignments.stream()
+                    .filter(roleAssignment -> roleAssignment.principalId().equals(identity.principalId())
+                            && roleAssignment.scope().contains(scope))
+                    .count();
+        }
+        return numberOfMatchingRoles > 0;
     }
 
     private void addError(ValidationResultBuilder resultBuilder, String msg) {

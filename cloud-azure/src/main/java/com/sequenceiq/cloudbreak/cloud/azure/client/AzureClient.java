@@ -66,6 +66,7 @@ import com.microsoft.azure.management.storage.StorageAccount.DefinitionStages.Wi
 import com.microsoft.azure.management.storage.StorageAccountKey;
 import com.microsoft.azure.management.storage.StorageAccountSkuType;
 import com.microsoft.azure.management.storage.StorageAccounts;
+import com.microsoft.azure.management.storage.implementation.StorageAccountInner;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
@@ -241,6 +242,13 @@ public class AzureClient {
                 .filter(account -> account.kind().equals(accountKind)
                         && account.name().equalsIgnoreCase(storageName))
                 .findAny());
+    }
+
+    public Optional<StorageAccountInner> getStorageAccountBySubscription(String storageName, String subscriptionId, Kind accountKind) {
+        return
+                azure.storageAccounts().manager().inner().withSubscriptionId(subscriptionId).storageAccounts().list().stream()
+                        .filter(account -> account.kind().equals(accountKind) && account.name().equalsIgnoreCase(storageName))
+                        .findAny();
     }
 
     public void deleteContainerInStorage(String resourceGroup, String storageName, String containerName) {
@@ -688,8 +696,12 @@ public class AzureClient {
     }
 
     public PagedList<RoleAssignmentInner> listRoleAssignments() {
+        return listRoleAssignmentsBySubscription(getCurrentSubscription().subscriptionId());
+    }
+
+    public PagedList<RoleAssignmentInner> listRoleAssignmentsBySubscription(String subscriptionId) {
         return handleAuthException(() ->
-                getRoleAssignments().manager().roleInner().withSubscriptionId(getCurrentSubscription().subscriptionId()).roleAssignments().list());
+                getRoleAssignments().manager().roleInner().withSubscriptionId(subscriptionId).roleAssignments().list());
     }
 
     public PagedList<RoleAssignmentInner> listRoleAssignmentsByPrincipalId(String principalId) {
@@ -705,5 +717,9 @@ public class AzureClient {
 
     public Subscription getCurrentSubscription() {
         return azure.getCurrentSubscription();
+    }
+
+    public PagedList<Subscription> listSubscriptions() {
+        return azure.subscriptions().list();
     }
 }

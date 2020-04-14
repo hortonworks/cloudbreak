@@ -3,7 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -15,9 +18,13 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.microsoft.azure.CloudException;
+import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
+import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azure.management.storage.StorageAccounts;
+import com.microsoft.azure.management.storage.implementation.StorageAccountInner;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.storage.SkuTypeResolver;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -192,6 +199,26 @@ public class AzureStorage {
         }
         return false;
     }
+
+    public Optional<String> findStorageAccountIdInVisibleSubscriptions(AzureClient client, String account) {
+        Optional<StorageAccount> storageAccount = client.getStorageAccount(account, Kind.STORAGE_V2);
+        LOGGER.debug("checking current subscription for storage account");
+        if (storageAccount.isPresent()) {
+            return storageAccount.map(HasId::id);
+        }
+
+        List<String> subscriptionIds = client.listSubscriptions().stream().map(Subscription::subscriptionId).collect(Collectors.toList());
+        LOGGER.debug("Checking other subscriptions for storage account: {}", String.join(",", subscriptionIds));
+        for (String subscriptionId : subscriptionIds) {
+            Optional<StorageAccountInner> storageAccountInner = client.getStorageAccountBySubscription(account, subscriptionId, Kind.STORAGE_V2);
+            if (storageAccountInner.isPresent()) {
+                return storageAccountInner.map(s -> s.id());
+            }
+        }
+
+        return Optional.empty();
+    }
+
 }
 
 
