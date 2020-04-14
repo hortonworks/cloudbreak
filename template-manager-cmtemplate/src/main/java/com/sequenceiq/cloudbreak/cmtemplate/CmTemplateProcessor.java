@@ -330,8 +330,28 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         }
 
         Map<String, ApiClusterTemplateConfig> configMap = mapByName(service.getServiceConfigs());
-        newConfigs.forEach(config -> configMap.putIfAbsent(config.getName(), config));
+        newConfigs.forEach(config -> chooseApiClusterTemplateConfig(configMap, config));
         setServiceConfigs(service, configMap.values());
+    }
+
+    private void chooseApiClusterTemplateConfig(Map<String, ApiClusterTemplateConfig> existingConfigs, ApiClusterTemplateConfig newConfig) {
+        String configName = newConfig.getName();
+        ApiClusterTemplateConfig existingApiClusterTemplateConfig = existingConfigs.get(configName);
+        if (existingApiClusterTemplateConfig != null) {
+            // OPSAPS-54706 Let's honor the safety valve settings in both bp and generated.
+            if (configName.endsWith("_safety_valve")) {
+                String oldConfigValue = existingApiClusterTemplateConfig.getValue();
+                String newConfigValue = newConfig.getValue();
+
+                // By CB-1452 append the bp config at the end of generated config to give precendece to it. Add a newline in between for it to be safe
+                // with property file safety valves and command line safety valves.
+                newConfig.setValue(newConfigValue + '\n' + oldConfigValue);
+            } else {
+                // Again by CB-1452 we need to give precedence to the value given in bp.
+                return;
+            }
+        }
+        existingConfigs.put(configName, newConfig);
     }
 
     public Map<String, ApiClusterTemplateConfig> mapByName(Collection<ApiClusterTemplateConfig> configs) {
@@ -370,7 +390,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         }
 
         Map<String, ApiClusterTemplateConfig> configMap = mapByName(configGroup.getConfigs());
-        newConfigs.forEach(config -> configMap.putIfAbsent(config.getName(), config));
+        newConfigs.forEach(config -> chooseApiClusterTemplateConfig(configMap, config));
         setRoleConfigs(configGroup, configMap.values());
     }
 
