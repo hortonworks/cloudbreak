@@ -88,6 +88,20 @@
         "refName": "hive",
         "serviceType": "HIVE_ON_TEZ",
         "displayName": "Hive",
+        "serviceConfigs": [
+          {
+            "name": "tez_container_size",
+            "value": "4096"
+          },
+          {
+            "name": "tez_auto_reducer_parallelism",
+            "value": "false"
+          },
+          {
+            "name": "hive_service_config_safety_valve",
+            "value": "<property><name>hive.hook.proto.file.per.event</name><value>true</value></property><property><name>hive.server2.tez.sessions.per.default.queue</name><value>4</value></property>"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "hive-GATEWAY-BASE",
@@ -185,7 +199,7 @@
               },
               {
                 "name": "resourcemanager_capacity_scheduler_configuration",
-                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property><property><name>yarn.scheduler.capacity.per-node-heartbeat.maximum-offswitch-assignments</name><value>4</value></property></configuration>"
+                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property></configuration>"
               }
             ]
           },
@@ -203,6 +217,21 @@
             "refName": "yarn-JOBHISTORY-BASE",
             "roleType": "JOBHISTORY",
             "base": true
+          },
+          {
+            "refName": "yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true,
+            "configs": [
+              {
+                "name": "mapreduce_map_memory_mb",
+                "value": 4096
+              },
+              {
+                "name": "mapreduce_reduce_memory_mb",
+                "value": 4096
+              }
+            ]
           }
         ]
       },
@@ -323,7 +352,8 @@
           "hms-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
-          "tez-GATEWAY-BASE"
+          "tez-GATEWAY-BASE",
+          "yarn-GATEWAY-BASE"
         ]
       },
       {
@@ -343,7 +373,8 @@
           "tez-GATEWAY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
           "hdfs-JOURNALNODE-BASE",
-          "zookeeper-SERVER-BASE"
+          "zookeeper-SERVER-BASE",
+          "yarn-GATEWAY-BASE"
         ]
       },
       {
@@ -366,7 +397,8 @@
           "das-DAS_WEBAPP",
           "knox-KNOX_GATEWAY-BASE",
           "hdfs-JOURNALNODE-BASE",
-          "zookeeper-SERVER-BASE"
+          "zookeeper-SERVER-BASE",
+          "yarn-GATEWAY-BASE"
         ]
       },
       {
@@ -379,7 +411,8 @@
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
-          "yarn-NODEMANAGER-WORKER"
+          "yarn-NODEMANAGER-WORKER",
+          "yarn-GATEWAY-BASE"
         ]
       },
       {
@@ -391,7 +424,8 @@
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
-          "yarn-NODEMANAGER-COMPUTE"
+          "yarn-NODEMANAGER-COMPUTE",
+          "yarn-GATEWAY-BASE"
         ]
       }
     ]
