@@ -16,9 +16,9 @@ import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.environment.api.v1.telemetry.endpoint.AccountTelemetryEndpoint;
 import com.sequenceiq.environment.api.v1.telemetry.model.request.AccountTelemetryRequest;
-import com.sequenceiq.environment.api.v1.telemetry.model.request.TestAnonymizationRulesRequest;
+import com.sequenceiq.environment.api.v1.telemetry.model.request.TestAnonymizationRuleRequest;
 import com.sequenceiq.environment.api.v1.telemetry.model.response.AccountTelemetryResponse;
-import com.sequenceiq.environment.api.v1.telemetry.model.response.TestAnonymizationRulesResponse;
+import com.sequenceiq.environment.api.v1.telemetry.model.response.TestAnonymizationRuleResponse;
 import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 import com.sequenceiq.environment.telemetry.v1.converter.AccountTelemetryConverter;
@@ -85,8 +85,9 @@ public class AccountTelemetryController extends NotificationController implement
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
-    public TestAnonymizationRulesResponse testRulePattern(TestAnonymizationRulesRequest request) {
-        // TODO: test patterns in the request
-        return new TestAnonymizationRulesResponse();
+    public TestAnonymizationRuleResponse testRulePattern(TestAnonymizationRuleRequest request) {
+        TestAnonymizationRuleResponse response = new TestAnonymizationRuleResponse();
+        response.setOutput(accountTelemetryService.testRulePattern(request.getRule(), request.getInput()));
+        return response;
     }
 }

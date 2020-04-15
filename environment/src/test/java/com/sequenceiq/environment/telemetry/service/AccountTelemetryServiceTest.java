@@ -1,9 +1,9 @@
 package com.sequenceiq.environment.telemetry.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Base64;
-import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,9 +11,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.repository.AccountTelemetryRepository;
+
+import jregex.Pattern;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountTelemetryServiceTest {
@@ -26,6 +30,53 @@ public class AccountTelemetryServiceTest {
     @BeforeEach
     public void setUp() {
         underTest = new AccountTelemetryService(accountTelemetryRepository);
+    }
+
+    @Test
+    public void testRulePattern() {
+        // GIVEN
+        String input = "My email card number is: 1111-2222-3333-4444";
+        AnonymizationRule rule = new AnonymizationRule();
+        rule.setReplacement("[REDACTED]");
+        String pattern = "\\d{4}[^\\w]\\d{4}[^\\w]\\d{4}[^\\w]\\d{4}";
+        String encodedPattern = new String(Base64.getEncoder().encode(pattern.getBytes()));
+        rule.setValue(encodedPattern);
+        // WHEN
+        String output = underTest.testRulePattern(rule, input);
+        // THEN
+        assertThat(output).isEqualTo("My email card number is: [REDACTED]");
+    }
+
+    @Test
+    public void testRulePatternNoMatch() {
+        // GIVEN
+        String input = "My email card number is: 1111-2222-3333-4444";
+        AnonymizationRule rule = new AnonymizationRule();
+        rule.setReplacement("[REDACTED]");
+        String pattern = "\\d{8}[^\\w]\\d{8}[^\\w]\\d{8}[^\\w]\\d{8}";
+        String encodedPattern = new String(Base64.getEncoder().encode(pattern.getBytes()));
+        rule.setValue(encodedPattern);
+        // THEN
+        assertThrows(NotFoundException.class, () -> {
+            // WHEN
+            underTest.testRulePattern(rule, input);
+        });
+    }
+
+    @Test
+    public void testRulePatternWithInvalidPattern() {
+        // GIVEN
+        String input = "My email card number is: 1111-2222-3333-4444";
+        AnonymizationRule rule = new AnonymizationRule();
+        rule.setReplacement("[REDACTED]");
+        String pattern = "\\d{8}[^[[";
+        String encodedPattern = new String(Base64.getEncoder().encode(pattern.getBytes()));
+        rule.setValue(encodedPattern);
+        // THEN
+        assertThrows(BadRequestException.class, () -> {
+            // WHEN
+            underTest.testRulePattern(rule, input);
+        });
     }
 
     @Test
@@ -44,8 +95,7 @@ public class AccountTelemetryServiceTest {
 
     private void testPatternWithOutput(AnonymizationRule rule, String input, String startsWith) {
         if (rule.getReplacement().startsWith(startsWith)) {
-            // TODO: for now, it can work with java regex - use jregex in the future
-            Pattern p = Pattern.compile(
+            Pattern p = new Pattern(
                     new String(Base64.getDecoder().decode(rule.getValue().getBytes())));
             boolean found = p.matcher(input).find();
             assertThat(found).isEqualTo(true);

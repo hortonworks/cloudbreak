@@ -13,10 +13,16 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.repository.AccountTelemetryRepository;
+
+import jregex.Pattern;
+import jregex.PatternSyntaxException;
+import jregex.Replacer;
 
 @Service
 public class AccountTelemetryService {
@@ -126,6 +132,24 @@ public class AccountTelemetryService {
         defaultTelemetry.setRules(defaultRules);
         defaultTelemetry.setFeatures(defaultFeatures);
         return defaultTelemetry;
+    }
+
+    public String testRulePattern(AnonymizationRule rule, String input) {
+        String decodedRule = new String(Base64.getDecoder().decode(rule.getValue().getBytes()));
+        Pattern p;
+        try {
+            p = new Pattern(decodedRule);
+        } catch (PatternSyntaxException e) {
+            LOGGER.debug("Anonymization regex pattern is invalid: ", e);
+            throw new BadRequestException(e.getMessage());
+        }
+        boolean match = p.matcher(input).find();
+        if (match) {
+            Replacer replacer = p.replacer(rule.getReplacement());
+            return replacer.replace(input);
+        } else {
+            throw new NotFoundException(String.format("Not found any matches for provided input with rule: %s", decodedRule));
+        }
     }
 
     private String createCRN(String accountId) {
