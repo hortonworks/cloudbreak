@@ -6,6 +6,7 @@
 [![Licence](https://img.shields.io/github/license/hortonworks/cloudbreak.svg)](https://github.com/hortonworks/cloudbreak/blob/fix-readme/LICENSE)
 
 * Documentation: https://docs.cloudera.com/management-console/cloud/index.html
+xx
 
 # Local Development Setup
 As of now this document focuses on setting up your development environment on macOS. You'll need Homebrew to install certain components in case you don't have them already. To get Homebrew please follow the install instructions on the Homebrew homepage: https://brew.sh
