@@ -46,10 +46,8 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyFullResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.CommandExecutionResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FullNodeResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
@@ -329,30 +327,6 @@ public class SaltStatesTest {
         Map<String, String> actualResult = SaltStates.runCommand(saltConnector, "command");
         // THEN
         assertEquals(commandOutputs, actualResult);
-    }
-
-    @Test
-    public void testSaltStatesAreMissing() {
-        // GIVEN
-        ApplyFullResponse applyResponse = new ApplyFullResponse();
-        List<Map<String, FullNodeResponse>> result = new ArrayList<>();
-        Map<String, FullNodeResponse> nodes = new HashMap<>();
-        FullNodeResponse goodResponse = new FullNodeResponse();
-        goodResponse.setRetcode(0);
-        FullNodeResponse badResponse = new FullNodeResponse();
-        badResponse.setRetcode(1);
-
-        nodes.put("10-0-0-1.example.com", goodResponse);
-        nodes.put("10-0-0-2.example.com", badResponse);
-        result.add(nodes);
-        applyResponse.setResult(result);
-        when(saltConnector.run(Glob.ALL, "state.show_sls", LOCAL, ApplyFullResponse.class, "STATE-TO-CHECK")).thenReturn(applyResponse);
-
-        // WHEN
-        ApplyFullResponse actualResult = SaltStates.showState(saltConnector, "STATE-TO-CHECK");
-
-        // THEN
-        assertEquals(applyResponse, actualResult);
     }
 
     @Test

@@ -219,13 +219,11 @@ public class StackOperations implements ResourceBasedCrnProvider {
 
     public UpgradeOptionsV4Response checkForClusterUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         if (nameOrCrn.hasName()) {
-            String stackName = nameOrCrn.getName();
-            UpgradeOptionsV4Response upgradeOptionsV4Response = clusterUpgradeAvailabilityService.checkForUpgradesByName(workspaceId, stackName);
+            UpgradeOptionsV4Response upgradeOptionsV4Response = clusterUpgradeAvailabilityService.checkForUpgradesByName(workspaceId, nameOrCrn.getName());
             if (StringUtils.isEmpty(upgradeOptionsV4Response.getReason())) {
-                String environmentCrn = getResourceCrnByResourceName(stackName);
-                StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, environmentCrn, List.of(StackType.WORKLOAD));
-                clusterUpgradeAvailabilityService.checkForNotAttachedClusters(stackViewV4Responses, upgradeOptionsV4Response);
-                clusterUpgradeAvailabilityService.checkIfClusterUpgradable(workspaceId, stackName, upgradeOptionsV4Response);
+                Stack stack = getStackByName(nameOrCrn.getName());
+                StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
+                upgradeOptionsV4Response = clusterUpgradeAvailabilityService.checkForNotAttachedClusters(stackViewV4Responses, upgradeOptionsV4Response);
             }
             return upgradeOptionsV4Response;
         } else {

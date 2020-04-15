@@ -140,7 +140,6 @@ public class SaltConnector implements Closeable {
         Form form = new Form();
         form = addAuth(form)
                 .param("fun", fun)
-                .param("full_return",  "True")
                 .param("client", clientType.getType());
         if (target != null) {
             form = form.param("tgt", target.getTarget())

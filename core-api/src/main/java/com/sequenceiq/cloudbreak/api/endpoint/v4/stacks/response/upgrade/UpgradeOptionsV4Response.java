@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 
 public class UpgradeOptionsV4Response {
@@ -53,20 +51,4 @@ public class UpgradeOptionsV4Response {
         this.reason = reason;
     }
 
-    public void appendReason(String reason) {
-        if (StringUtils.isNotEmpty(this.reason)) {
-            this.reason += reason;
-        } else {
-            setReason(reason);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "UpgradeOptionsV4Response{" +
-                "current=" + current +
-                ", upgradeCandidates=" + upgradeCandidates +
-                ", reason='" + reason + '\'' +
-                '}';
-    }
 }
