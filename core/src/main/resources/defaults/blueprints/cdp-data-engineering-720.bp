@@ -23,14 +23,14 @@
             "refName": "hdfs-NAMENODE-BASE",
             "roleType": "NAMENODE",
             "base": true,
-	    "configs": [
+            "configs": [
               {
                 "name": "fs_trash_interval",
                 "value": "0"
               },
-	      {
-	        "name": "fs_trash_checkpoint_interval",
-	        "value": "0"
+              {
+                "name": "fs_trash_checkpoint_interval",
+                "value": "0"
               }
             ]
           },
@@ -66,10 +66,10 @@
             "roleType": "RESOURCEMANAGER",
             "base": true,
             "configs": [
-            	{
-	   		        "name": "resourcemanager_config_safety_valve",
-	   		        "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>file</value></property>"
-	   	   	    },
+              {
+                "name": "resourcemanager_config_safety_valve",
+                "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>zk</value></property>"
+              },
               {
                 "name": "yarn_resourcemanager_scheduler_class",
                 "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
@@ -133,15 +133,15 @@
             "name": "tez.am.container.reuse.locality.delay-allocation-millis",
             "value": "0"
           },
-	  {
+          {
             "name": "tez.am.launch.cmd-opts",
             "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
-	  },
-	  {
+          },
+          {
             "name": "tez.task.launch.cmd-opts",
-	    "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
-	  }
-	],
+            "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "tez-GATEWAY-BASE",
@@ -205,8 +205,8 @@
             "base": true,
             "configs": [
               {
-                 "name": "hive_server2_transport_mode",
-                 "value": "http"
+                "name": "hive_server2_transport_mode",
+                "value": "http"
               }
             ]
           }
@@ -307,6 +307,28 @@
             "base": true
           }
         ]
+      },
+      {
+        "refName": "queuemanager",
+        "serviceType": "QUEUEMANAGER",
+        "serviceConfigs": [
+          {
+            "name": "kerberos.auth.enabled",
+            "value": "true"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-QUEUEMANAGER_WEBAPP-BASE",
+            "roleType": "QUEUEMANAGER_WEBAPP",
+            "base": true
+          },
+          {
+            "refName": "yarn-QUEUEMANAGER_STORE-BASE",
+            "roleType": "QUEUEMANAGER_STORE",
+            "base": true
+          }
+        ]
       }
     ],
     "hostTemplates": [
@@ -333,7 +355,9 @@
           "yarn-RESOURCEMANAGER-BASE",
           "zookeeper-SERVER-BASE",
           "das-DAS_WEBAPP",
-          "das-DAS_EVENT_PROCESSOR"
+          "das-DAS_EVENT_PROCESSOR",
+          "yarn-QUEUEMANAGER_WEBAPP-BASE",
+          "yarn-QUEUEMANAGER_STORE-BASE"
         ]
       },
       {
