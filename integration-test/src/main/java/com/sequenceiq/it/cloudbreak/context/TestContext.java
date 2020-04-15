@@ -387,7 +387,7 @@ public abstract class TestContext implements ApplicationContextAware {
             key = attribute.getClass().getSimpleName();
         }
 
-        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             LOGGER.info("Should be skipped beacause of previous error. select: attr: [{}], finder: [{}]", attribute, finder);
             return entity;
         }
@@ -406,7 +406,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 LOGGER.error("select (key={}, attribute: [{}], finder: [{}]) is failed: {}, name: {}",
                         key, attribute, finder, ResponseUtil.getErrorMessage(e), entity.getName());
             }
-            exceptionMap.put(key, e);
+            getExceptionMap().put(key, e);
         }
         return entity;
     }
@@ -418,7 +418,7 @@ public abstract class TestContext implements ApplicationContextAware {
             key = entity.getClass().getSimpleName();
         }
 
-        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             LOGGER.info("Should be skipped beacause of previous error. capture [{}]", attribute);
             return entity;
         }
@@ -434,7 +434,7 @@ public abstract class TestContext implements ApplicationContextAware {
             if (runningParameter.isLogError()) {
                 LOGGER.error("capture [{}] is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), entity.getName());
             }
-            exceptionMap.put(key, e);
+            getExceptionMap().put(key, e);
         }
         return entity;
     }
@@ -446,7 +446,7 @@ public abstract class TestContext implements ApplicationContextAware {
             key = attribute.getClass().getSimpleName();
         }
 
-        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             LOGGER.info("Should be skipped beacause of previous error. verify [{}]", attribute);
             return entity;
         }
@@ -467,7 +467,7 @@ public abstract class TestContext implements ApplicationContextAware {
             if (runningParameter.isLogError()) {
                 LOGGER.error("verify [key={}] is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), entity.getName(), e);
             }
-            exceptionMap.put(key, e);
+            getExceptionMap().put(key, e);
         }
         return entity;
     }
@@ -520,7 +520,7 @@ public abstract class TestContext implements ApplicationContextAware {
     public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
         checkShutdown();
 
-        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
             return entity;
         }
@@ -541,7 +541,7 @@ public abstract class TestContext implements ApplicationContextAware {
             if (runningParameter.isLogError()) {
                 LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
             }
-            exceptionMap.put("await " + entity + " for desired statuses" + desiredStatuses, e);
+            getExceptionMap().put("await " + entity + " for desired statuses" + desiredStatuses, e);
         }
         return entity;
     }
@@ -582,7 +582,7 @@ public abstract class TestContext implements ApplicationContextAware {
             RunningParameter runningParameter, long pollingInterval) {
         checkShutdown();
 
-        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
             return entity;
         }
@@ -606,7 +606,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
                         entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
-            exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
+            getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
         }
         return entity;
     }
@@ -620,7 +620,7 @@ public abstract class TestContext implements ApplicationContextAware {
             RunningParameter runningParameter, long pollingInterval) {
         checkShutdown();
 
-        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
             return entity;
         }
@@ -644,7 +644,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
                         entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
-            exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
+            getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
         }
         return entity;
     }
@@ -658,7 +658,7 @@ public abstract class TestContext implements ApplicationContextAware {
             RunningParameter runningParameter, long pollingInterval) {
         checkShutdown();
 
-        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
             return entity;
         }
@@ -683,7 +683,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
                         entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
-            exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
+            getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
         }
         return entity;
     }
@@ -697,7 +697,7 @@ public abstract class TestContext implements ApplicationContextAware {
             RunningParameter runningParameter, long pollingInterval) {
         checkShutdown();
 
-        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
             return entity;
         }
@@ -721,7 +721,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
                         entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
-            exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
+            getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
         }
         return entity;
     }
@@ -735,7 +735,7 @@ public abstract class TestContext implements ApplicationContextAware {
             RunningParameter runningParameter, long pollingInterval) {
         checkShutdown();
 
-        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
             return entity;
         }
@@ -759,7 +759,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
                         entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
-            exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
+            getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
         }
         return entity;
     }
@@ -773,7 +773,7 @@ public abstract class TestContext implements ApplicationContextAware {
             RunningParameter runningParameter, long pollingInterval) {
         checkShutdown();
 
-        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
             return entity;
         }
@@ -797,7 +797,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
                         entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
-            exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
+            getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
         }
         return entity;
     }
@@ -805,24 +805,24 @@ public abstract class TestContext implements ApplicationContextAware {
     public <E extends Exception, T extends CloudbreakTestDto> T expect(T entity, Class<E> expectedException, RunningParameter runningParameter) {
         checkShutdown();
         String key = getKey(entity.getClass(), runningParameter);
-        Exception exception = exceptionMap.get(key);
+        Exception exception = getExceptionMap().get(key);
         if (exception == null) {
             String message = "Expected an exception but cannot find with key: " + key;
-            exceptionMap.put("expect", new RuntimeException(message));
+            getExceptionMap().put("expect", new RuntimeException(message));
             Log.expect(LOGGER, message);
         } else {
             if (!exception.getClass().equals(expectedException)) {
                 String message = String.format("Expected exception (%s) does not match with the actual exception (%s).",
                         expectedException, exception.getClass());
-                exceptionMap.put("expect", new RuntimeException(message));
+                getExceptionMap().put("expect", new RuntimeException(message));
                 Log.expect(LOGGER, message);
             } else if (!isMessageEquals(exception, runningParameter)) {
                 String message = String.format("Expected exception message (%s) does not match with the actual exception message (%s).",
                         runningParameter.getExpectedMessage(), ResponseUtil.getErrorMessage(exception));
-                exceptionMap.put("expect", new RuntimeException(message));
+                getExceptionMap().put("expect", new RuntimeException(message));
                 Log.expect(LOGGER, message);
             } else {
-                exceptionMap.remove(key);
+                getExceptionMap().remove(key);
                 Log.expect(LOGGER, "Expected exception conditions have met, exception: " + expectedException
                         + ", message: " + runningParameter.getExpectedMessage());
             }
@@ -849,6 +849,7 @@ public abstract class TestContext implements ApplicationContextAware {
             collectStructuredEvents(builder);
             exceptionsDuringTest.clear();
             if (!silently) {
+                Log.error(LOGGER, builder.toString());
                 throw new TestFailException(builder.toString());
             }
         }
