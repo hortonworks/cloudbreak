@@ -1,14 +1,18 @@
 package com.sequenceiq.cloudbreak.telemetry.fluent;
 
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
@@ -68,8 +72,24 @@ public class FluentConfigService {
         return builder
                 .withEnabled(enabled)
                 .withClusterDetails(clusterDetails)
-                .withAnonymizationRules(anonymizationRules)
+                .withAnonymizationRules(decodeRules(anonymizationRules))
                 .build();
+    }
+
+    @VisibleForTesting
+    List<AnonymizationRule> decodeRules(List<AnonymizationRule> rules) {
+        return Optional.ofNullable(rules)
+                .orElse(new ArrayList<>())
+                .stream()
+                .filter(rule -> StringUtils.isNotBlank(rule.getValue()))
+                .map(rule -> {
+                    AnonymizationRule newRule = new AnonymizationRule();
+                    newRule.setReplacement(rule.getReplacement());
+                    newRule.setValue(new String(Base64.getDecoder().decode(
+                            rule.getValue().getBytes())));
+                    return newRule;
+                })
+                .collect(Collectors.toList());
     }
 
     private boolean determineAndSetLogging(FluentConfigView.Builder builder, Telemetry telemetry, boolean databusEnabled,

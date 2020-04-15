@@ -4,6 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,6 +17,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -276,6 +281,24 @@ public class FluentConfigServiceTest {
         telemetry.setLogging(logging);
         // WHEN
         underTest.createFluentConfigs(DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
+    }
+
+    @Test
+    public void testDecodeAnonymizationRule() {
+        // GIVEN
+        List<AnonymizationRule> rules = new ArrayList<>();
+        AnonymizationRule rule1 = new AnonymizationRule();
+        rule1.setReplacement("replace1");
+        AnonymizationRule rule2 = new AnonymizationRule();
+        rule2.setReplacement("replace2");
+        rule2.setValue(Base64.getEncoder().encodeToString("value2".getBytes()));
+        rules.add(rule1);
+        rules.add(rule2);
+        // WHEN
+        List<AnonymizationRule> finalRules = underTest.decodeRules(rules);
+        // THEN
+        assertEquals(finalRules.size(), 1);
+        assertEquals(finalRules.get(0).getValue(), "value2");
     }
 
     private void setMetering(Telemetry telemetry) {
