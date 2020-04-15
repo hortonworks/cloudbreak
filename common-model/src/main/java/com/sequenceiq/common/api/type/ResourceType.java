@@ -60,7 +60,9 @@ public enum ResourceType {
     YARN_APPLICATION(CommonResourceType.TEMPLATE),
 
     // MOCK
-    MOCK_INSTANCE;
+    MOCK_INSTANCE,
+    MOCK_TEMPLATE,
+    MOCK_VOLUME;
 
     private static final List<ResourceType> INSTANCE_TYPES = List.of(GCP_INSTANCE, OPENSTACK_INSTANCE, MOCK_INSTANCE);
 
