@@ -76,7 +76,6 @@ public class DefaultInternalAccountTagService {
                 accountTagResponses.add(response);
             }
         }
-
     }
 
     public void validate(List<AccountTag> accountTags) {
