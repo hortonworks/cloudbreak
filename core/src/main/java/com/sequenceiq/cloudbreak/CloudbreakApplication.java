@@ -23,6 +23,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableAutoConfiguration(exclude = WebMvcMetricsAutoConfiguration.class)
 public class CloudbreakApplication {
     public static void main(String[] args) {
+
+        //DynamicInstrumentationLoader.waitForInitialized(); //dynamically attach java agent to jvm if not already present
+        //DynamicInstrumentationLoader.initLoadTimeWeavingContext(); //weave all classes before they are loaded as beans
+
         if (!versionedApplication().showVersionInfo(args)) {
             if (args.length == 0) {
                 SpringApplication.run(CloudbreakApplication.class);

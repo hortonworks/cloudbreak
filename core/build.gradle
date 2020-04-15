@@ -224,6 +224,9 @@ dependencies {
 
   implementation group: 'io.springfox',                       name: 'springfox-boot-starter'
 
+  compile group: 'org.springframework', name: 'spring-instrument', version: springFrameworkVersion
+  compile group: 'org.aspectj',         name: 'aspectjweaver',     version: '1.9.5'
+
   implementation     ('io.swagger:swagger-jersey2-jaxrs') {
     exclude group: 'org.yaml'
   }

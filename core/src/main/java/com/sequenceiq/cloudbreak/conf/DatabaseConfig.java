@@ -115,7 +115,7 @@ public class DatabaseConfig {
         if (nodeConfig.isNodeIdSpecified()) {
             config.addDataSourceProperty("ApplicationName", nodeConfig.getId());
         }
-        config.setDriverClassName("io.opentracing.contrib.jdbc.TracingDriver");
+        config.setDriverClassName("com.sequenceiq.cloudbreak.circuitbreaker.jdbc.CircuitBreakerDriver");
         config.setJdbcUrl(String.format("jdbc:tracing:postgresql://%s/%s?currentSchema=%s&traceWithActiveSpanOnly=true", databaseAddress, dbName, dbSchemaName));
         config.setUsername(dbUser);
         config.setPassword(dbPassword);
