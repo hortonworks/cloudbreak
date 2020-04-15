@@ -27,13 +27,17 @@ import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.common.json.Json;
+
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -133,6 +137,9 @@ public class StackOperationService {
         if (!isStopNeeded(stack)) {
             return FlowIdentifier.notTriggered();
         }
+        if (isStackRunsOnSpotInstances(stack)) {
+            throw new BadRequestException(format("Cannot update the status of stack '%s' to STOPPED, because it runs on spot instances", stack.getName()));
+        }
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.stoppable());
         if (cluster != null && !cluster.isStopped() && !stack.isStopFailed()) {
             if (!updateCluster) {
@@ -149,6 +156,16 @@ public class StackOperationService {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
             return flowManager.triggerStackStop(stack.getId());
         }
+    }
+
+    private boolean isStackRunsOnSpotInstances(Stack stack) {
+        return stack.getInstanceGroups().stream()
+                .map(InstanceGroup::getTemplate)
+                .map(Template::getAttributes)
+                .map(Json::getMap)
+                .map(attributes -> attributes.getOrDefault("spotPercentage", 0))
+                .map(spotPercentage -> Integer.parseInt(spotPercentage.toString()))
+                .anyMatch(spotPercentage -> spotPercentage != 0);
     }
 
     private FlowIdentifier repairFailedNodes(Stack stack, User user) {

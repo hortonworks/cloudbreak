@@ -384,6 +384,16 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Optional<StackClusterStatusView> getStatusByCrnAndWorkspace(String crn, Long workspaceId) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<StackClusterStatusView> getStatusByNameAndWorkspace(String name, Long workspaceId) {
+            return Optional.empty();
+        }
+
+        @Override
         public Set<AutoscaleStack> findAliveOnesWithAmbari() {
             return null;
         }
