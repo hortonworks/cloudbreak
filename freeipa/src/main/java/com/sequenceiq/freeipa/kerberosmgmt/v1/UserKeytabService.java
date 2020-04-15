@@ -59,6 +59,13 @@ public class UserKeytabService {
         }
     }
 
+    private void validateHasCredentials(GetActorWorkloadCredentialsResponse actorCredentialsResponse) {
+        List<ActorKerberosKey> keyList = actorCredentialsResponse.getKerberosKeysList();
+        if (keyList == null || keyList.isEmpty()) {
+            throw new NotFoundException("Could not retrieve workload credentials. A workload password may not have been set for this user or machine user.");
+        }
+    }
+
     private void validateFreeIPAState(String workloadUsername, String environmentCrn) {
         String accountId = Crn.safeFromString(environmentCrn).getAccountId();
         FreeIpaClient freeIpaClient;
@@ -84,6 +91,9 @@ public class UserKeytabService {
 
         GetActorWorkloadCredentialsResponse getActorWorkloadCredentialsResponse =
                 grpcUmsClient.getActorWorkloadCredentials(INTERNAL_ACTOR_CRN, userCrn, MDCUtils.getRequestId());
+
+        validateHasCredentials(getActorWorkloadCredentialsResponse);
+
         String workloadUsername = getActorWorkloadCredentialsResponse.getWorkloadUsername();
 
         validateFreeIPAState(workloadUsername, environmentCrn);

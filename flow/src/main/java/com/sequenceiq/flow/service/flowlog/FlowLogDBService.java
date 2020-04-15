@@ -219,7 +219,10 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     public List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long id) {
-        return flowLogRepository.findAllByResourceIdOrderByCreatedDesc(id);
+        return flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(id)
+                .map(FlowLog::getFlowId)
+                .map(flowLogRepository::findAllByFlowIdOrderByCreatedDesc)
+                .orElse(List.of());
     }
 
     public List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long id) {
