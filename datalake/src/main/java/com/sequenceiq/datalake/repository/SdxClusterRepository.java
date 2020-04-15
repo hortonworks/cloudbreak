@@ -19,7 +19,8 @@ public interface SdxClusterRepository extends CrudRepository<SdxCluster, Long> {
 
     @Query("SELECT s.id as id, s.stackCrn as stackCrn " +
             "FROM SdxCluster s " +
-            "WHERE deleted is null")
+            "WHERE s.deleted is null " +
+            "AND s.stackCrn is not null")
     List<SdxClusterIdView> findAllAliveView();
 
     Optional<SdxCluster> findByAccountIdAndClusterNameAndDeletedIsNull(String accountId, String clusterName);

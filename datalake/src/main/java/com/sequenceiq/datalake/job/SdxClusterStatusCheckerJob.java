@@ -43,6 +43,11 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     @Override
     protected void executeInternal(JobExecutionContext context) {
         LOGGER.debug("Sdx StatusChecker Job is running for datalake: '{}'", getLocalId());
+        if (unschedulable()) {
+            jobService.unschedule(getLocalId());
+            LOGGER.debug("Sdx StatusChecker Job is unscheduled for datalake: '{}'", getLocalId());
+            return;
+        }
         Optional<SdxCluster> cluster = sdxClusterRepository.findById(Long.valueOf(getLocalId()));
         cluster.ifPresent(sdx -> {
             buildMdcContext(sdx);
@@ -70,6 +75,10 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             }
         });
         MDCBuilder.cleanupMdc();
+    }
+
+    private boolean unschedulable() {
+        return getRemoteResourceCrn() == null;
     }
 
     private void buildMdcContext(SdxCluster sdx) {
