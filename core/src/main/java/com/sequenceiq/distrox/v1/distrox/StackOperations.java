@@ -249,15 +249,13 @@ public class StackOperations implements ResourceBasedCrnProvider {
     }
 
     public StackStatusV4Response getStatus(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        return converterUtil.convert(stack, StackStatusV4Response.class);
+        StackClusterStatusView stackStatusView = stackService.getStatusByNameOrCrn(nameOrCrn, workspaceId);
+        return converterUtil.convert(stackStatusView, StackStatusV4Response.class);
     }
 
     public StackStatusV4Response getStatusByCrn(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
-        Stack stack = nameOrCrn.hasName()
-                ? stackService.getByNameInWorkspace(nameOrCrn.getName(), workspaceId)
-                : stackService.getByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId);
-        return converterUtil.convert(stack, StackStatusV4Response.class);
+        StackClusterStatusView stackStatusView = stackService.getStatusByNameOrCrn(nameOrCrn, workspaceId);
+        return converterUtil.convert(stackStatusView, StackStatusV4Response.class);
     }
 
     public StackStatusV4Response getStatus(@NotNull String crn) {

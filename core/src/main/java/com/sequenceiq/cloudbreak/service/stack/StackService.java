@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -86,6 +87,7 @@ import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
@@ -187,6 +189,9 @@ public class StackService implements ResourceIdProvider {
     @Inject
     private AccountTagClientService accountTagClientService;
 
+    @Inject
+    private ResourceService resourceService;
+
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
 
@@ -247,6 +252,13 @@ public class StackService implements ResourceIdProvider {
 
     public StackClusterStatusView getStatusByCrn(String crn) {
         return stackRepository.getStatusByCrn(crn).orElseThrow(notFound("stack", crn));
+    }
+
+    public StackClusterStatusView getStatusByNameOrCrn(NameOrCrn nameOrCrn, Long workspaceId) {
+        Optional<StackClusterStatusView> foundStack = nameOrCrn.hasName()
+                ? stackRepository.getStatusByNameAndWorkspace(nameOrCrn.getName(), workspaceId)
+                : stackRepository.getStatusByCrnAndWorkspace(nameOrCrn.getCrn(), workspaceId);
+        return foundStack.orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn)));
     }
 
     @PreAuthorize("hasRole('AUTOSCALE')")
@@ -603,23 +615,23 @@ public class StackService implements ResourceIdProvider {
 
     @Override
     public Long getResourceIdByResourceCrn(String resourceCrn) {
-        return getByCrn(resourceCrn).getId();
+        Long workspaceId = workspaceService.getForCurrentUser().getId();
+        return Optional.ofNullable(getIdByCrnInWorkspace(resourceCrn, workspaceId)).orElseThrow(notFound("Stack", resourceCrn));
     }
 
     @Override
     public Long getResourceIdByResourceName(String resourceName) {
         Long workspaceId = workspaceService.getForCurrentUser().getId();
-        Optional<Stack> stackByNameAndWorkspaceId = findStackByNameAndWorkspaceId(resourceName, workspaceId);
-        if (stackByNameAndWorkspaceId.isPresent()) {
-            return stackByNameAndWorkspaceId.get().getId();
-        }
-        throw new NotFoundException(format("Not found stack in the user's workspace with name %s", resourceName));
+        return Optional.ofNullable(getIdByNameInWorkspace(resourceName, workspaceId)).orElseThrow(notFound("Stack", resourceName));
     }
 
     private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
-        return stackType == null
+        Optional<Stack> stack = stackType == null
                 ? stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId, config.isActive(), config.showAfterMillisecs())
                 : stackRepository.findByNameAndWorkspaceIdWithLists(name, stackType, workspaceId, config.isActive(), config.showAfterMillisecs());
+
+        return stack.map(st -> st.resources(new HashSet<>(resourceService.getAllByStackId(st.getId()))))
+                .map(st -> st.instanceGroups(instanceGroupService.findNotTerminatedByStackId(st.getId())));
     }
 
     private Optional<Stack> findByCrnAndWorkspaceIdWithLists(String crn, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
@@ -766,6 +778,10 @@ public class StackService implements ResourceIdProvider {
 
     public Long getIdByNameInWorkspace(String name, Long workspaceId) {
         return stackRepository.findIdByNameAndWorkspaceId(name, workspaceId).orElseThrow(notFound("Stack", name));
+    }
+
+    public Long getIdByCrnInWorkspace(String crn, Long workspaceId) {
+        return stackRepository.findIdByCrnAndWorkspaceId(crn, workspaceId).orElseThrow(notFound("Stack", crn));
     }
 
     public Set<StackIdView> findClustersConnectedToDatalake(Long stackId) {

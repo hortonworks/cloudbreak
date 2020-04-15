@@ -35,6 +35,10 @@ public class InstanceGroupService {
         return repository.findByStackId(stackId);
     }
 
+    public Set<InstanceGroup> findNotTerminatedByStackId(Long stackId) {
+        return repository.findNotTerminatedByStackId(stackId);
+    }
+
     public Set<InstanceGroup> saveAll(Set<InstanceGroup> instanceGroups, Workspace workspace) {
         return instanceGroups.stream()
                 .filter(ig -> ig.getSecurityGroup() != null)
