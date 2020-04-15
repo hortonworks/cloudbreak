@@ -2,6 +2,8 @@ package com.sequenceiq.environment.api.v1.telemetry.endpoint;
 
 import java.util.List;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -15,9 +17,9 @@ import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.environment.api.doc.telemetry.AccountTelemetryDescription;
 import com.sequenceiq.environment.api.v1.telemetry.model.request.AccountTelemetryRequest;
-import com.sequenceiq.environment.api.v1.telemetry.model.request.TestAnonymizationRulesRequest;
+import com.sequenceiq.environment.api.v1.telemetry.model.request.TestAnonymizationRuleRequest;
 import com.sequenceiq.environment.api.v1.telemetry.model.response.AccountTelemetryResponse;
-import com.sequenceiq.environment.api.v1.telemetry.model.response.TestAnonymizationRulesResponse;
+import com.sequenceiq.environment.api.v1.telemetry.model.response.TestAnonymizationRuleResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -74,6 +76,6 @@ public interface AccountTelemetryEndpoint {
     @Path("/rules/test")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AccountTelemetryDescription.TEST, produces = MediaType.APPLICATION_JSON,
-            notes = AccountTelemetryDescription.TEST_NOTES, nickname = "testRulesV1")
-    TestAnonymizationRulesResponse testRulePattern(TestAnonymizationRulesRequest request);
+            notes = AccountTelemetryDescription.TEST_NOTES, nickname = "testRuleV1")
+    TestAnonymizationRuleResponse testRulePattern(@NotNull @Valid TestAnonymizationRuleRequest request);
 }

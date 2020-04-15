@@ -13,7 +13,7 @@ public class AccountTelemetryDescription {
     public static final String POST = "update account specific telemetry settings";
     public static final String POST_NOTES = "Update account level telemetry settings - will override already existing settings and archive old one";
     public static final String TEST = "test anonymization pattern";
-    public static final String TEST_NOTES = "Testing anonymization patterns - check the patterns are valid and found matches";
+    public static final String TEST_NOTES = "Testing anonymization pattern - check the pattern is valid against an input and found matches";
 
     private AccountTelemetryDescription() {
     }
