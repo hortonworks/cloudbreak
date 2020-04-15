@@ -159,7 +159,8 @@ public class FlowLogDBServiceTest {
     @Test
     public void testGetFlowLogs() {
         when(resourceIdProvider.getResourceIdByResourceCrn(anyString())).thenReturn(1L);
-        when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(anyLong())).thenReturn(Lists.newArrayList(new FlowLog()));
+        when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(anyLong())).thenReturn(Optional.of(createFlowLog("1")));
+        when(flowLogRepository.findAllByFlowIdOrderByCreatedDesc(anyString())).thenReturn(Lists.newArrayList(new FlowLog()));
 
         assertEquals(1, underTest.getFlowLogsByResourceCrnOrName(CLOUDBREAK_STACK_CRN).size());
 
@@ -177,7 +178,6 @@ public class FlowLogDBServiceTest {
     @Test
     public void testGetLastFlowLogWhenThereIsNoFlow() {
         when(resourceIdProvider.getResourceIdByResourceCrn(anyString())).thenReturn(1L);
-        when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(anyLong())).thenReturn(Lists.newArrayList());
 
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("Flow log for resource not found!");
@@ -188,7 +188,8 @@ public class FlowLogDBServiceTest {
     @Test
     public void testGetLastFlowLog() {
         when(resourceIdProvider.getResourceIdByResourceCrn(anyString())).thenReturn(1L);
-        when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(anyLong())).thenReturn(Lists.newArrayList(createFlowLog("1"), createFlowLog("2")));
+        when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(anyLong())).thenReturn(Optional.of(createFlowLog("1")));
+        when(flowLogRepository.findAllByFlowIdOrderByCreatedDesc(anyString())).thenReturn(Lists.newArrayList(createFlowLog("1"), createFlowLog("2")));
 
         assertEquals("1", underTest.getLastFlowLogByResourceCrnOrName(CLOUDBREAK_STACK_CRN).getFlowId());
 
