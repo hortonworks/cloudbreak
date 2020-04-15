@@ -128,7 +128,7 @@ public class DefaultCostTaggingServiceTest {
         CDPTagGenerationRequest tagRequest = tagRequest("AWS", new HashMap<>(), envMap, requestTag);
         try {
             underTest.prepareDefaultTags(tagRequest);
-            Assert.fail("Expected an exception due to conflicting account and user tags");
+            Assert.fail("Expected an exception due to conflicting account and user tags.");
         } catch (AccountTagValidationFailed e) {
             Assert.assertEquals("The request must not contain tag(s) with key: 'owner', because"
                 + " with the same key tag has already been defined on account level!", e.getMessage());
