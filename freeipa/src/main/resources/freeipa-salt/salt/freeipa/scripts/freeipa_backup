@@ -64,7 +64,7 @@ fi
 
 if [[ -z "$TYPE" ]] || [[ -z "$FOLDER" ]];
 then
-    echo "A type (-t) and a folder -f must be defined" >&2
+    echo "A type (-t) and a folder (-f) must be defined" >&2
     exit 1
 fi
 
