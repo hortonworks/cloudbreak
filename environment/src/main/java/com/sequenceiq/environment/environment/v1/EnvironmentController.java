@@ -38,6 +38,8 @@ import com.sequenceiq.environment.environment.service.EnvironmentModificationSer
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStartService;
 import com.sequenceiq.environment.environment.service.EnvironmentStopService;
+import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
+import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 
 @Controller
 @InternalReady
@@ -46,6 +48,8 @@ import com.sequenceiq.environment.environment.service.EnvironmentStopService;
 public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentApiConverter environmentApiConverter;
+
+    private final EnvironmentResponseConverter environmentResponseConverter;
 
     private final EnvironmentService environmentService;
 
@@ -63,6 +67,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
+            EnvironmentResponseConverter environmentResponseConverter,
             EnvironmentService environmentService,
             EnvironmentCreationService environmentCreationService,
             EnvironmentDeletionService environmentDeletionService,
@@ -71,6 +76,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentStopService environmentStopService,
             CredentialService credentialService) {
         this.environmentApiConverter = environmentApiConverter;
+        this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
         this.environmentCreationService = environmentCreationService;
         this.environmentDeletionService = environmentDeletionService;
@@ -85,7 +91,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public DetailedEnvironmentResponse post(@Valid EnvironmentRequest request) {
         EnvironmentCreationDto environmentCreationDto = environmentApiConverter.initCreationDto(request);
         EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto);
-        return environmentApiConverter.dtoToDetailedResponse(envDto);
+        return environmentResponseConverter.dtoToDetailedResponse(envDto);
     }
 
     @Override
@@ -93,7 +99,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public DetailedEnvironmentResponse getByName(String environmentName) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(environmentName, accountId);
-        return environmentApiConverter.dtoToDetailedResponse(environmentDto);
+        return environmentResponseConverter.dtoToDetailedResponse(environmentDto);
     }
 
     @Override
@@ -109,7 +115,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public DetailedEnvironmentResponse getByCrn(@TenantAwareParam String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
-        return environmentApiConverter.dtoToDetailedResponse(environmentDto);
+        return environmentResponseConverter.dtoToDetailedResponse(environmentDto);
     }
 
     @Override
@@ -118,7 +124,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         EnvironmentDto environmentDto = environmentDeletionService.deleteByNameAndAccountId(environmentName, accountId, actualUserCrn, forced);
-        return environmentApiConverter.dtoToSimpleResponse(environmentDto);
+        return environmentResponseConverter.dtoToSimpleResponse(environmentDto);
     }
 
     @Override
@@ -127,7 +133,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         EnvironmentDto environmentDto = environmentDeletionService.deleteByCrnAndAccountId(crn, accountId, actualUserCrn, forced);
-        return environmentApiConverter.dtoToSimpleResponse(environmentDto);
+        return environmentResponseConverter.dtoToSimpleResponse(environmentDto);
     }
 
     @Override
@@ -137,7 +143,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<EnvironmentDto> environmentDtos = environmentDeletionService.deleteMultipleByNames(environmentNames, accountId, actualUserCrn, forced);
         Set<SimpleEnvironmentResponse> responses = environmentDtos.stream()
-                .map(environmentApiConverter::dtoToSimpleResponse).collect(Collectors.toSet());
+                .map(environmentResponseConverter::dtoToSimpleResponse).collect(Collectors.toSet());
         return new SimpleEnvironmentResponses(responses);
     }
 
@@ -148,7 +154,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<EnvironmentDto> environmentDtos = environmentDeletionService.deleteMultipleByCrns(crns, accountId, actualUserCrn, forced);
         Set<SimpleEnvironmentResponse> responses = environmentDtos.stream()
-                .map(environmentApiConverter::dtoToSimpleResponse).collect(Collectors.toSet());
+                .map(environmentResponseConverter::dtoToSimpleResponse).collect(Collectors.toSet());
         return new SimpleEnvironmentResponses(responses);
     }
 
@@ -157,7 +163,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public DetailedEnvironmentResponse editByName(String environmentName, @NotNull EnvironmentEditRequest request) {
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
         EnvironmentDto result = environmentModificationService.editByName(environmentName, editDto);
-        return environmentApiConverter.dtoToDetailedResponse(result);
+        return environmentResponseConverter.dtoToDetailedResponse(result);
     }
 
     @Override
@@ -165,7 +171,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public DetailedEnvironmentResponse editByCrn(String crn, @NotNull EnvironmentEditRequest request) {
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
         EnvironmentDto result = environmentModificationService.editByCrn(crn, editDto);
-        return environmentApiConverter.dtoToDetailedResponse(result);
+        return environmentResponseConverter.dtoToDetailedResponse(result);
     }
 
     @Override
@@ -173,7 +179,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public SimpleEnvironmentResponses list() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         List<EnvironmentDto> environmentDtos = environmentService.listByAccountId(accountId);
-        List<SimpleEnvironmentResponse> responses = environmentDtos.stream().map(environmentApiConverter::dtoToSimpleResponse)
+        List<SimpleEnvironmentResponse> responses = environmentDtos.stream().map(environmentResponseConverter::dtoToSimpleResponse)
                 .collect(Collectors.toList());
         return new SimpleEnvironmentResponses(responses);
     }
@@ -184,7 +190,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentChangeCredentialDto dto = environmentApiConverter.convertEnvironmentChangeCredentialDto(request);
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentName(accountId, environmentName, dto);
-        return environmentApiConverter.dtoToDetailedResponse(result);
+        return environmentResponseConverter.dtoToDetailedResponse(result);
     }
 
     @Override
@@ -193,7 +199,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentCrn(accountId, crn,
                 environmentApiConverter.convertEnvironmentChangeCredentialDto(request));
-        return environmentApiConverter.dtoToDetailedResponse(result);
+        return environmentResponseConverter.dtoToDetailedResponse(result);
     }
 
     @Override

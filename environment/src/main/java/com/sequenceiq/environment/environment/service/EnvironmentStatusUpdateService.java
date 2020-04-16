@@ -12,7 +12,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
+import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
 import com.sequenceiq.notification.NotificationService;
@@ -26,14 +26,14 @@ public class EnvironmentStatusUpdateService {
 
     private final NotificationService notificationService;
 
-    private final EnvironmentApiConverter environmentApiConverter;
+    private final EnvironmentResponseConverter environmentResponseConverter;
 
     public EnvironmentStatusUpdateService(EnvironmentService environmentService,
             NotificationService notificationService,
-            EnvironmentApiConverter environmentApiConverter) {
+            EnvironmentResponseConverter environmentResponseConverter) {
         this.environmentService = environmentService;
         this.notificationService = notificationService;
-        this.environmentApiConverter = environmentApiConverter;
+        this.environmentResponseConverter = environmentResponseConverter;
     }
 
     public EnvironmentDto updateEnvironmentStatusAndNotify(CommonContext context, Payload payload, EnvironmentStatus environmentStatus,
@@ -45,7 +45,7 @@ public class EnvironmentStatusUpdateService {
                     environment.setStatus(environmentStatus);
                     Environment env = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-                    SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                     notificationService.send(resourceEvent, simpleResponse, context.getFlowTriggerUserCrn());
                     return environmentDto;
                 }).orElseThrow(() -> new IllegalStateException(
@@ -63,7 +63,7 @@ public class EnvironmentStatusUpdateService {
                     environment.setStatusReason(failedFlowEvent.getException().getMessage());
                     Environment env = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-                    SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                     notificationService.send(resourceEvent, simpleResponse, context.getFlowTriggerUserCrn());
                     return environmentDto;
                 }).orElseThrow(() -> new IllegalStateException(
@@ -76,7 +76,7 @@ public class EnvironmentStatusUpdateService {
         environment.setStatus(environmentStatus);
         Environment env = environmentService.save(environment);
         EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-        SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+        SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
         notificationService.send(resourceEvent, List.of(environmentStatus), simpleResponse, env.getCreator());
     }
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.v1;
+package com.sequenceiq.environment.environment.v1.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

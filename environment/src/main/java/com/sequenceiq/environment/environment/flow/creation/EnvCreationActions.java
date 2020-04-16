@@ -29,7 +29,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFai
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
-import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
+import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.AbstractAction;
@@ -46,17 +46,17 @@ public class EnvCreationActions {
 
     private final NotificationService notificationService;
 
-    private final EnvironmentApiConverter environmentApiConverter;
+    private final EnvironmentResponseConverter environmentResponseConverter;
 
     private final EnvironmentMetricService metricService;
 
     private final EnvironmentJobService environmentJobService;
 
     public EnvCreationActions(EnvironmentService environmentService, NotificationService notificationService,
-            EnvironmentApiConverter environmentApiConverter, EnvironmentMetricService metricService, EnvironmentJobService environmentJobService) {
+            EnvironmentResponseConverter environmentResponseConverter, EnvironmentMetricService metricService, EnvironmentJobService environmentJobService) {
         this.environmentService = environmentService;
         this.notificationService = notificationService;
-        this.environmentApiConverter = environmentApiConverter;
+        this.environmentResponseConverter = environmentResponseConverter;
         this.metricService = metricService;
         this.environmentJobService = environmentJobService;
     }
@@ -71,7 +71,7 @@ public class EnvCreationActions {
                     environment.setStatus(EnvironmentStatus.ENVIRONMENT_VALIDATION_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                     notificationService.send(ResourceEvent.ENVIRONMENT_VALIDATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
                     sendEvent(context, VALIDATE_ENVIRONMENT_EVENT.selector(), environmentDto);
                 }, () -> {
@@ -98,7 +98,7 @@ public class EnvCreationActions {
                     environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                     notificationService.send(ResourceEvent.ENVIRONMENT_NETWORK_CREATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
                     sendEvent(context, CREATE_NETWORK_EVENT.selector(), environmentDto);
                 }, () -> {
@@ -125,7 +125,7 @@ public class EnvCreationActions {
                     environment.setStatus(EnvironmentStatus.PUBLICKEY_CREATE_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                     notificationService.send(ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
                     sendEvent(context, CREATE_PUBLICKEY_EVENT.selector(), environmentDto);
                 }, () -> {
@@ -152,7 +152,7 @@ public class EnvCreationActions {
                     environment.setStatus(EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                     notificationService.send(ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
                     sendEvent(context, CREATE_FREEIPA_EVENT.selector(), environmentDto);
                 }, () -> {
@@ -182,7 +182,7 @@ public class EnvCreationActions {
                             Environment result = environmentService.save(environment);
                             environmentJobService.schedule(result);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
-                            SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                            SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                             metricService.incrementMetricCounter(MetricType.ENV_CREATION_FINISHED, environmentDto);
                             notificationService.send(ResourceEvent.ENVIRONMENT_CREATION_FINISHED, simpleResponse, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
@@ -207,7 +207,7 @@ public class EnvCreationActions {
                             environment.setStatus(EnvironmentStatus.CREATE_FAILED);
                             environmentService.save(environment);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                            SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                            SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                             metricService.incrementMetricCounter(MetricType.ENV_CREATION_FAILED, environmentDto, exception);
                             notificationService.send(ResourceEvent.ENVIRONMENT_CREATION_FAILED, simpleResponse, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "

@@ -41,7 +41,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
-import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
+import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -81,7 +81,7 @@ class EnvDeleteActionsTest {
     private NotificationService notificationService;
 
     @Mock
-    private EnvironmentApiConverter environmentApiConverter;
+    private EnvironmentResponseConverter environmentResponseConverter;
 
     @Mock
     private StateContext context;
@@ -174,7 +174,7 @@ class EnvDeleteActionsTest {
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentApiConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
+        verify(environmentResponseConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
         verify(notificationService, never()).send(any(ResourceEvent.class), any(SimpleEnvironmentResponse.class), anyString());
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
     }
