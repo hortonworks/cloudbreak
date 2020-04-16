@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
@@ -221,6 +222,13 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto withName(String name) {
         setName(name);
+        return this;
+    }
+
+    public SdxInternalTestDto withImageCatalogNameOnly(String imageCatalogName) {
+        ImageSettingsV4Request image = new ImageSettingsV4Request();
+        image.setCatalog(imageCatalogName);
+        getRequest().getStackV4Request().setImage(image);
         return this;
     }
 
