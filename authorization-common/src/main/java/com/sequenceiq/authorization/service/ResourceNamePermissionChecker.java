@@ -39,7 +39,7 @@ public class ResourceNamePermissionChecker implements PermissionChecker<CheckPer
     }
 
     @Override
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
+    public <T extends Annotation> void checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
         CheckPermissionByResourceName methodAnnotation = (CheckPermissionByResourceName) rawMethodAnnotation;
         String resourceName = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, ResourceName.class, String.class);
@@ -47,7 +47,6 @@ public class ResourceNamePermissionChecker implements PermissionChecker<CheckPer
         AuthorizationResourceAction action = methodAnnotation.action();
         checkActionType(resourceType, action);
         commonPermissionCheckingUtils.checkPermissionForUserOnResource(resourceType, action, userCrn, resourceCrn);
-        return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
 
     @Override

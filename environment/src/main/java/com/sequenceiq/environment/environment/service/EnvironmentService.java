@@ -277,6 +277,12 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
     }
 
     @Override
+    public List<String> getResourceCrnsInAccount() {
+        return environmentRepository.findByAccountId(ThreadBasedUserCrnProvider.getAccountId()).stream()
+                .map(env -> env.getResourceCrn()).collect(Collectors.toList());
+    }
+
+    @Override
     public AuthorizationResourceType getResourceType() {
         return AuthorizationResourceType.ENVIRONMENT;
     }

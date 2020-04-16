@@ -10,7 +10,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 public interface PermissionChecker<T extends Annotation> {
 
-    <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resource, String userCrn,
+    <T extends Annotation> void checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resource, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime);
 
     Class<T> supportedAnnotation();

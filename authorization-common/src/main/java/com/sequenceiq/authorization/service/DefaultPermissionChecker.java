@@ -23,13 +23,12 @@ public class DefaultPermissionChecker implements PermissionChecker<CheckPermissi
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
     @Override
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resource, String userCrn,
+    public <T extends Annotation> void checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resource, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
         CheckPermissionByAccount methodAnnotation = (CheckPermissionByAccount) rawMethodAnnotation;
         AuthorizationResourceAction action = methodAnnotation.action();
         checkActionType(resource, action);
         commonPermissionCheckingUtils.checkPermissionForUser(resource, action, userCrn);
-        return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
 
     @Override

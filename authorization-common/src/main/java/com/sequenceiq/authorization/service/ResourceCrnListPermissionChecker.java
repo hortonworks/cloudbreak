@@ -25,7 +25,7 @@ public class ResourceCrnListPermissionChecker implements PermissionChecker<Check
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
     @Override
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
+    public <T extends Annotation> void checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
         CheckPermissionByResourceCrnList methodAnnotation = (CheckPermissionByResourceCrnList) rawMethodAnnotation;
         Collection<String> resourceCrns = commonPermissionCheckingUtils
@@ -33,7 +33,6 @@ public class ResourceCrnListPermissionChecker implements PermissionChecker<Check
         AuthorizationResourceAction action = methodAnnotation.action();
         checkActionType(resourceType, action);
         commonPermissionCheckingUtils.checkPermissionForUserOnResources(resourceType, action, userCrn, resourceCrns);
-        return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
 
     @Override

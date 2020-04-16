@@ -1,7 +1,6 @@
 package com.sequenceiq.authorization.service;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -37,7 +36,6 @@ public class ResourceCrnListPermissionCheckerTest {
 
     @Test
     public void testCheckPermissions() {
-        when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
         doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResources(any(), any(), anyString(), any());
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(Lists.newArrayList(USER_CRN, USER_CRN));
 
@@ -45,7 +43,7 @@ public class ResourceCrnListPermissionCheckerTest {
 
             @Override
             public AuthorizationResourceAction action() {
-                return AuthorizationResourceAction.EDIT;
+                return AuthorizationResourceAction.EDIT_CREDENTIAL;
             }
 
             @Override
@@ -55,10 +53,9 @@ public class ResourceCrnListPermissionCheckerTest {
         };
         underTest.checkPermissions(rawMethodAnnotation, AuthorizationResourceType.CREDENTIAL, USER_CRN, null, null, 0L);
 
-        verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceCrnList.class), eq(Collection.class));
         verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), any(), anyString());
         verify(commonPermissionCheckingUtils).checkPermissionForUserOnResources(eq(AuthorizationResourceType.CREDENTIAL),
-                eq(AuthorizationResourceAction.EDIT), eq(USER_CRN), any());
+                eq(AuthorizationResourceAction.EDIT_CREDENTIAL), eq(USER_CRN), any());
     }
 }

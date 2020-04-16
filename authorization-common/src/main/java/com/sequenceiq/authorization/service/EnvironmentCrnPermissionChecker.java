@@ -39,14 +39,13 @@ public class EnvironmentCrnPermissionChecker implements PermissionChecker<CheckP
     }
 
     @Override
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
+    public <T extends Annotation> void checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
         CheckPermissionByEnvironmentCrn methodAnnotation = (CheckPermissionByEnvironmentCrn) rawMethodAnnotation;
         String environmentCrn = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, EnvironmentCrn.class, String.class);
         String resourceCrn = resourceBasedCrnProviderMap.get(resourceType).getResourceCrnByEnvironmentCrn(environmentCrn);
         AuthorizationResourceAction action = methodAnnotation.action();
         commonPermissionCheckingUtils.checkPermissionForUserOnResource(resourceType, action, userCrn, resourceCrn);
-        return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
 
     @Override

@@ -4,7 +4,7 @@ Every controller class should be annotated with `@Controller`.
 
 Every controller should be annotated with `@AuthorizationResource` (or `DisabledCheckPermissions` if no need for authorization on that API).
 
-Every method of a controller should be annotated with one of the mentioned annotations below.
+Every method of a controller should be annotated with one (or more if necessary) of the mentioned annotations below.
 
 ## Account level authorization
 - you can annotate your API endpoint with `@CheckPermissionByAccount(action = ResourceAction.WRITE)` and permission check will be done only based on tenant, resource will not be taken into consideration in this case ([DefaultPermissionChecker](src/main/java/com/sequenceiq/authorization/service/DefaultPermissionChecker.java))
