@@ -41,7 +41,7 @@ public class ResourceNameListPermissionChecker implements PermissionChecker<Chec
     }
 
     @Override
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
+    public <T extends Annotation> void checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
         CheckPermissionByResourceNameList methodAnnotation = (CheckPermissionByResourceNameList) rawMethodAnnotation;
         Collection<String> resourceNames = commonPermissionCheckingUtils
@@ -50,7 +50,6 @@ public class ResourceNameListPermissionChecker implements PermissionChecker<Chec
         AuthorizationResourceAction action = methodAnnotation.action();
         checkActionType(resourceType, action);
         commonPermissionCheckingUtils.checkPermissionForUserOnResources(resourceType, action, userCrn, resourceCrnList);
-        return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
 
     @Override

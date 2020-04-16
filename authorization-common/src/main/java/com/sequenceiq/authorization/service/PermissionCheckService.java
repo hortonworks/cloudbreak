@@ -1,7 +1,5 @@
 package com.sequenceiq.authorization.service;
 
-import static java.lang.String.format;
-
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.List;
@@ -20,8 +18,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
@@ -37,6 +36,9 @@ public class PermissionCheckService {
 
     @Inject
     private List<PermissionChecker<? extends Annotation>> permissionCheckers;
+
+    @Inject
+    private ListPermissionChecker listPermissionChecker;
 
     private final Map<Class<? extends Annotation>, PermissionChecker<? extends Annotation>> permissionCheckerMap = new HashMap<>();
 
@@ -71,34 +73,28 @@ public class PermissionCheckService {
 
         List<? extends Annotation> annotations = AuthorizationAnnotationUtils.getPossibleMethodAnnotations().stream()
                 .map(c -> methodSignature.getMethod().getAnnotation(c))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        Optional<Annotation> methodAnnotation = validateNumberOfAnnotations(annotations);
-        if (!methodAnnotation.isPresent()) {
+        if (annotations.isEmpty()) {
             LOGGER.warn("Your Controller ({}) method {} does not have any authorization related annotation, " +
                             "thus we are checking write permission on current account.",
                     proceedingJoinPoint.getTarget().getClass().getSimpleName(), methodSignature.getMethod().getName());
             commonPermissionCheckingUtils.checkPermissionForUser(resource, AuthorizationResourceAction.WRITE, userCrn);
             return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
-        } else if (methodAnnotation.get() instanceof DisableCheckPermissions) {
+        } else if (annotations.stream().anyMatch(annotation -> annotation instanceof DisableCheckPermissions)) {
             return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
+        } else if (annotations.stream().anyMatch(annotation -> annotation instanceof FilterListBasedOnPermissions)) {
+            FilterListBasedOnPermissions listFilterAnnotation = (FilterListBasedOnPermissions) annotations.stream()
+                    .filter(annotation -> annotation instanceof FilterListBasedOnPermissions).findFirst().get();
+            return listPermissionChecker.checkPermissions(listFilterAnnotation, resource, userCrn, proceedingJoinPoint, methodSignature, startTime);
         }
 
-        PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(methodAnnotation.get().annotationType());
-        return permissionChecker.checkPermissions(methodAnnotation.get(), resource, userCrn, proceedingJoinPoint, methodSignature, startTime);
-    }
-
-    private Optional<Annotation> validateNumberOfAnnotations(List<? extends Annotation> annotations) {
-        annotations = annotations.stream().filter(Objects::nonNull).collect(Collectors.toList());
-        if (annotations.isEmpty()) {
-            return Optional.empty();
-        } else if (annotations.size() > 1) {
-            String annotationsMessage = annotations.stream()
-                    .map(a -> a.getClass().getSimpleName())
-                    .collect(Collectors.joining(",\n"));
-            throw new IllegalStateException(format("Only one of these annotations can be added to method: %s", annotationsMessage));
-        }
-        return Optional.of(annotations.iterator().next());
+        annotations.stream().forEach(annotation -> {
+            PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(annotation.annotationType());
+            permissionChecker.checkPermissions(annotation, resource, userCrn, proceedingJoinPoint, methodSignature, startTime);
+        });
+        return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
 
     private AccessDeniedException getAccessDeniedAndLogMissingAnnotation(Class<?> repositoryClass) {

@@ -1,6 +1,5 @@
 package com.sequenceiq.authorization.service;
 
-import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +24,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 
 @Component
-public class ListPermissionChecker implements PermissionChecker<FilterListBasedOnPermissions> {
+public class ListPermissionChecker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ListPermissionChecker.class);
 
@@ -43,10 +42,8 @@ public class ListPermissionChecker implements PermissionChecker<FilterListBasedO
                 resourceBasedCrnProviderMap.put(resourceBasedCrnProvider.getResourceType(), resourceBasedCrnProvider));
     }
 
-    @Override
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
+    public Object checkPermissions(FilterListBasedOnPermissions methodAnnotation, AuthorizationResourceType resourceType, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
-        FilterListBasedOnPermissions methodAnnotation = (FilterListBasedOnPermissions) rawMethodAnnotation;
         AuthorizationResourceAction action = methodAnnotation.action();
         List<String> allResourceCrns = resourceBasedCrnProviderMap.get(resourceType).getResourceCrnsInAccount();
         Set<String> filteredResourceCrns = commonPermissionCheckingUtils.getPermissionsForUserOnResources(resourceType, action, userCrn, allResourceCrns)
@@ -102,15 +99,5 @@ public class ListPermissionChecker implements PermissionChecker<FilterListBasedO
                         "ResourceCrnAwareApiModel interface");
             }
         };
-    }
-
-    @Override
-    public Class<FilterListBasedOnPermissions> supportedAnnotation() {
-        return FilterListBasedOnPermissions.class;
-    }
-
-    @Override
-    public AuthorizationResourceAction.ActionType actionType() {
-        return AuthorizationResourceAction.ActionType.RESOURCE_DEPENDENT;
     }
 }

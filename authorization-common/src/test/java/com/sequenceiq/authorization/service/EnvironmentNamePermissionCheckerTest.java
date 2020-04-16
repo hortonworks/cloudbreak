@@ -1,7 +1,6 @@
 package com.sequenceiq.authorization.service;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -45,7 +44,6 @@ public class EnvironmentNamePermissionCheckerTest {
     @Test
     public void testCheckPermissions() {
         resourceBasedCrnProviders.add(resourceBasedCrnProvider);
-        when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
         doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), any(), anyString(), anyString());
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn("resource");
         when(resourceBasedCrnProvider.getResourceCrnByEnvironmentName(any())).thenReturn(USER_CRN);
@@ -67,7 +65,6 @@ public class EnvironmentNamePermissionCheckerTest {
         underTest.populateResourceBasedCrnProviderMap();
         underTest.checkPermissions(rawMethodAnnotation, AuthorizationResourceType.CREDENTIAL, USER_CRN, null, null, 0L);
 
-        verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(EnvironmentName.class), eq(String.class));
         verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), any(), anyString());
         verify(commonPermissionCheckingUtils)

@@ -42,7 +42,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     private String description;
 
     @ResourceObjectField(type = AuthorizationResourceType.CREDENTIAL,
-            action = AuthorizationResourceAction.RD_READ, variableType = AuthorizationVariableType.NAME)
+            action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL, variableType = AuthorizationVariableType.NAME)
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_NAME_REQUEST)
     private String credentialName;
 

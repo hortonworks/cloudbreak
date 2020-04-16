@@ -32,7 +32,7 @@ public abstract class CredentialBase implements Serializable {
             message = "The name of the credential can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true, allowableValues = "length range[5, 100]")
-    @ResourceObjectField(action = AuthorizationResourceAction.RD_WRITE,
+    @ResourceObjectField(action = AuthorizationResourceAction.EDIT_CREDENTIAL,
             type = AuthorizationResourceType.CREDENTIAL, variableType = AuthorizationVariableType.NAME)
     private String name;
 

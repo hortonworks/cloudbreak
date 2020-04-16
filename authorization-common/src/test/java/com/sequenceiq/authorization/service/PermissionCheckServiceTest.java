@@ -115,13 +115,10 @@ public class PermissionCheckServiceTest {
         }));
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("tooManyAnnotation"));
 
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage("Only one of these annotations can be added to method");
-
         underTest.hasPermission(proceedingJoinPoint);
 
         verify(permissionChecker, times(0)).checkPermissions(any(), any(), anyString(), any(), any(), anyLong());
-        verify(commonPermissionCheckingUtils, times(0)).proceed(any(), any(), anyLong());
+        verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
     }
 
     @Test
@@ -167,13 +164,14 @@ public class PermissionCheckServiceTest {
         }));
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("correctMethod"));
         when(permissionChecker.supportedAnnotation()).thenReturn(CheckPermissionByAccount.class);
-        when(permissionChecker.checkPermissions(any(), any(), any(), any(), any(), anyLong())).thenReturn(null);
+        doNothing().when(permissionChecker).checkPermissions(any(), any(), any(), any(), any(), anyLong());
+        when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
 
         underTest.populatePermissionCheckMap();
         underTest.hasPermission(proceedingJoinPoint);
 
         verify(permissionChecker).checkPermissions(any(), eq(AuthorizationResourceType.CREDENTIAL), any(), any(), any(), anyLong());
-        verify(commonPermissionCheckingUtils, times(0)).proceed(any(), any(), anyLong());
+        verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
     }
 
     private static class ExampleClass {
