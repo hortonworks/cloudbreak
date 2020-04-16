@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.v1;
+package com.sequenceiq.environment.environment.v1.converter;
 
 import java.util.HashMap;
 

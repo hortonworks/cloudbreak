@@ -19,7 +19,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.start.EnvStartState;
-import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
+import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.notification.NotificationService;
@@ -34,7 +34,7 @@ public class EnvironmentStatusUpdateServiceTest {
     private NotificationService notificationService;
 
     @Mock
-    private EnvironmentApiConverter environmentApiConverter;
+    private EnvironmentResponseConverter environmentResponseConverter;
 
     @InjectMocks
     private EnvironmentStatusUpdateService underTest;
@@ -49,7 +49,7 @@ public class EnvironmentStatusUpdateServiceTest {
         when(environmentService.findEnvironmentById(environmentDto.getResourceId())).thenReturn(Optional.of(environment));
         when(environmentService.save(environment)).thenReturn(environment);
         when(environmentService.getEnvironmentDto(environment)).thenReturn(environmentDto);
-        when(environmentApiConverter.dtoToSimpleResponse(environmentDto)).thenReturn(simpleEnvironmentResponse);
+        when(environmentResponseConverter.dtoToSimpleResponse(environmentDto)).thenReturn(simpleEnvironmentResponse);
 
         EnvironmentDto actual = underTest.updateEnvironmentStatusAndNotify(commonContext, environmentDto, EnvironmentStatus.STOP_DATAHUB_FAILED,
                 ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, EnvStartState.ENV_START_FINISHED_STATE);

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.v1;
+package com.sequenceiq.environment.environment.v1.converter;
 
 import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
