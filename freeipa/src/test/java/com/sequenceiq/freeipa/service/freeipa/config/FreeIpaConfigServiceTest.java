@@ -19,7 +19,6 @@ import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.freeipa.api.model.Backup;
@@ -70,9 +69,6 @@ public class FreeIpaConfigServiceTest {
     @Mock
     private FreeIpaClientFactory freeIpaClientFactory;
 
-    @Mock
-    private ProxyConfigDtoService proxyConfigDtoService;
-
     @InjectMocks
     private FreeIpaConfigService freeIpaConfigService;
 
@@ -102,7 +98,7 @@ public class FreeIpaConfigServiceTest {
         Set<Object> expectedHosts = ImmutableSet.of(expectedHost);
 
         FreeIpaConfigView freeIpaConfigView = freeIpaConfigService.createFreeIpaConfigs(
-                stack, ImmutableSet.of(node));
+                stack, ImmutableSet.of(node), null);
 
         assertEquals(DOMAIN.toUpperCase(), freeIpaConfigView.getRealm());
         assertEquals(DOMAIN, freeIpaConfigView.getDomain());
