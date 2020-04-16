@@ -48,6 +48,7 @@ public class InternalSdxDistroxTest extends ImageValidatorE2ETest {
                 .withDatabase(sdxDatabaseRequest)
                 .withTemplate(sdxTemplateName)
                 .withRuntimeVersion(runtimeVersion)
+                .withImageCatalogNameOnly(sourceImageCatalogName)
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
