@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionsV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -39,6 +40,9 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 public class ClusterUpgradeAvailabilityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeAvailabilityService.class);
+
+    @Inject
+    private TransactionService transactionService;
 
     @Inject
     private StackService stackService;
@@ -88,7 +92,7 @@ public class ClusterUpgradeAvailabilityService {
         String notStoppedAttachedClusters = stackViewV4Responses.getResponses().stream()
                 .filter(stackViewV4Response -> !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getStatus())
                         || (stackViewV4Response.getCluster() != null
-                                && !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getCluster().getStatus())))
+                        && !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getCluster().getStatus())))
                 .map(StackViewV4Response::getName).collect(Collectors.joining(","));
         if (!notStoppedAttachedClusters.isEmpty()) {
             upgradeOptions.setReason(String.format("There are attached Data Hub clusters in incorrect state: %s. "
@@ -98,15 +102,22 @@ public class ClusterUpgradeAvailabilityService {
     }
 
     public UpgradeOptionsV4Response checkIfClusterUpgradable(Long workspaceId, String stackName, UpgradeOptionsV4Response upgradeOptions) {
-
-        Stack stack = stackService.getByNameInWorkspaceWithLists(stackName, workspaceId).orElseThrow();
-        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
-            hostOrchestrator.checkIfClusterUpgradable(primaryGatewayConfig);
-        } catch (CloudbreakOrchestratorFailedException e) {
-            upgradeOptions.appendReason(e.getMessage());
+            GatewayConfig primaryGatewayConfig = transactionService.required(() -> {
+                Stack stack = stackService.getByNameInWorkspaceWithLists(stackName, workspaceId).orElseThrow();
+                return gatewayConfigService.getPrimaryGatewayConfig(stack);
+            });
+
+            try {
+                hostOrchestrator.checkIfClusterUpgradable(primaryGatewayConfig);
+            } catch (CloudbreakOrchestratorFailedException e) {
+                upgradeOptions.appendReason(e.getMessage());
+            }
+            return upgradeOptions;
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
         }
-        return upgradeOptions;
+
     }
 
     private UpgradeOptionsV4Response checkForUpgrades(Stack stack) {
