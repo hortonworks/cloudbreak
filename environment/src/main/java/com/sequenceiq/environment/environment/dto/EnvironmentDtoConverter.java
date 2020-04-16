@@ -3,9 +3,11 @@ package com.sequenceiq.environment.environment.dto;
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
+import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -29,6 +32,8 @@ import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
 import com.sequenceiq.environment.tags.domain.AccountTag;
 import com.sequenceiq.environment.tags.service.AccountTagService;
+import com.sequenceiq.environment.tags.service.DefaultInternalAccountTagService;
+import com.sequenceiq.environment.tags.v1.converter.AccountTagToAccountTagResponsesConverter;
 
 @Component
 public class EnvironmentDtoConverter {
@@ -47,6 +52,10 @@ public class EnvironmentDtoConverter {
 
     private final AccountTagService accountTagService;
 
+    private final DefaultInternalAccountTagService defaultInternalAccountTagService;
+
+    private final AccountTagToAccountTagResponsesConverter accountTagToAccountTagResponsesConverter;
+
     private final CostTagging costTagging;
 
     public EnvironmentDtoConverter(Map<CloudPlatform,
@@ -56,6 +65,8 @@ public class EnvironmentDtoConverter {
             CredentialViewConverter credentialViewConverter,
             CostTagging costTagging,
             EntitlementService entitlementService,
+            DefaultInternalAccountTagService defaultInternalAccountTagService,
+            AccountTagToAccountTagResponsesConverter accountTagToAccountTagResponsesConverter,
             AccountTagService accountTagService) {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.environmentParamsConverterMap = environmentParamsConverterMap;
@@ -64,6 +75,8 @@ public class EnvironmentDtoConverter {
         this.costTagging = costTagging;
         this.entitlementService = entitlementService;
         this.accountTagService = accountTagService;
+        this.defaultInternalAccountTagService = defaultInternalAccountTagService;
+        this.accountTagToAccountTagResponsesConverter = accountTagToAccountTagResponsesConverter;
     }
 
     public EnvironmentDto environmentToDto(Environment environment) {
@@ -151,9 +164,12 @@ public class EnvironmentDtoConverter {
     private Json getTags(EnvironmentCreationDto creationDto) {
         boolean internalTenant = entitlementService.internalTenant(creationDto.getCreator(), creationDto.getAccountId());
         Map<String, String> userDefinedTags = creationDto.getTags();
-        Map<String, String> accountTags = accountTagService.get(creationDto.getAccountId())
+        Set<AccountTag> accountTags = accountTagService.get(creationDto.getAccountId());
+        List<AccountTagResponse> accountTagResponses = accountTagToAccountTagResponsesConverter.convert(accountTags);
+        defaultInternalAccountTagService.merge(accountTagResponses);
+        Map<String, String> accountTagsMap = accountTagResponses
                 .stream()
-                .collect(Collectors.toMap(AccountTag::getTagKey, AccountTag::getTagValue));
+                .collect(Collectors.toMap(AccountTagResponse::getKey, AccountTagResponse::getValue));
         CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                 .withCreatorCrn(creationDto.getCreator())
                 .withEnvironmentCrn(creationDto.getCrn())
@@ -162,7 +178,7 @@ public class EnvironmentDtoConverter {
                 .withResourceCrn(creationDto.getCrn())
                 .withIsInternalTenant(internalTenant)
                 .withUserName(getUserFromCrn(creationDto.getCreator()))
-                .withAccountTags(accountTags)
+                .withAccountTags(accountTagsMap)
                 .withUserDefinedTags(userDefinedTags)
                 .build();
 

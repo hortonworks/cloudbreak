@@ -156,13 +156,25 @@
         {
           "refName": "spark_on_yarn-GATEWAY-BASE",
           "roleType": "GATEWAY",
-          "base": true
+          "base": true,
+          "configs": [
+              {
+                "name": "spark-conf/spark-defaults.conf_client_config_safety_valve",
+                "value": "spark.yarn.access.hadoopFileSystems=s3a://expn-cis-sandbox-prod-cdp-us-east-1"
+              }
+          ]
         }
       ]
     },
     {
       "refName": "hive",
       "serviceType": "HIVE",
+      "serviceConfigs": [
+        {
+            "name": "hive_service_config_safety_valve",
+            "value": "<property><name>hive.metastore.server.filter.enabled</name><value>true</value></property> <property><name>hive.metastore.filter.hook</name><value>org.apache.hadoop.hive.ql.security.authorization.plugin.metastore.HiveMetaStoreAuthorizer</value></property>"
+        }
+      ],
       "roleConfigGroups": [
         {
           "refName": "hive-GATEWAY-BASE",
