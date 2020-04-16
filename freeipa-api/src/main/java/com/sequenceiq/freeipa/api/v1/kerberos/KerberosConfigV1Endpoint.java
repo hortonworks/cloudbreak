@@ -44,7 +44,7 @@ public interface KerberosConfigV1Endpoint {
     @ApiOperation(value = KerberosConfigOperationDescription.GET_BY_ENV_FOR_CLUSTER, produces = MediaType.APPLICATION_JSON, notes = KERBEROS_CONFIG_NOTES,
             nickname = "getKerberosConfigForClusterV1")
     DescribeKerberosConfigResponse getForCluster(@QueryParam("environmentCrn") @NotEmpty String environmentCrn,
-            @QueryParam("clusterName") @NotEmpty String clusterName) throws Exception;
+            @QueryParam("clusterName") @NotEmpty String clusterName);
 
     @POST
     @Path("")
