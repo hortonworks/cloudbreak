@@ -73,6 +73,44 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
+    public void addExistingSafetyValveConfigs() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"));
+        List<ApiClusterTemplateConfig> configs = new ArrayList<>();
+        configs.add(new ApiClusterTemplateConfig()
+                            .name("hive_service_config_safety_valve")
+                            .value("<property><name>testkey</name><value>testvalue</value></property>"));
+
+        underTest.addServiceConfigs("HIVE", List.of("GATEWAY", "HIVEMETASTORE"), configs);
+
+        ApiClusterTemplateService service = underTest.getTemplate().getServices().stream().filter(srv -> "HIVE".equals(srv.getServiceType())).findAny().get();
+        List<ApiClusterTemplateConfig> serviceConfigs = service.getServiceConfigs();
+        assertEquals(1, serviceConfigs.size());
+        assertEquals("hive_service_config_safety_valve", serviceConfigs.get(0).getName());
+        assertTrue(serviceConfigs.get(0).getValue().startsWith("<property><name>testkey</name><value>testvalue</value></property>"));
+        assertTrue(serviceConfigs.get(0).getValue().endsWith(
+                "<property><name>hive.metastore.server.filter.enabled</name><value>true</value></property> " +
+                "<property><name>hive.metastore.filter.hook</name>" +
+                "<value>org.apache.hadoop.hive.ql.security.authorization.plugin.metastore.HiveMetaStoreAuthorizer</value></property>"));
+        assertTrue(serviceConfigs.get(0).getValue().contains("\n"));
+
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = new HashMap<>();
+        roleConfigs.put("spark_on_yarn-GATEWAY-BASE",
+                List.of(new ApiClusterTemplateConfig().name("spark-conf/spark-defaults.conf_client_config_safety_valve").value("testkey=testvalue")));
+
+        underTest.addRoleConfigs("SPARK_ON_YARN", roleConfigs);
+
+        service = underTest.getTemplate().getServices().stream().filter(srv -> "SPARK_ON_YARN".equals(srv.getServiceType())).findAny().get();
+        ApiClusterTemplateRoleConfigGroup gw = service.getRoleConfigGroups().stream().filter(rcg -> "GATEWAY".equals(rcg.getRoleType())).findAny().get();
+        List<ApiClusterTemplateConfig> gwConfigs = gw.getConfigs();
+
+        assertEquals(1, gwConfigs.size());
+        assertEquals("spark-conf/spark-defaults.conf_client_config_safety_valve", gwConfigs.get(0).getName());
+        assertTrue(gwConfigs.get(0).getValue().startsWith("testkey=testvalue"));
+        assertTrue(gwConfigs.get(0).getValue().endsWith("spark.yarn.access.hadoopFileSystems=s3a://expn-cis-sandbox-prod-cdp-us-east-1"));
+        assertTrue(gwConfigs.get(0).getValue().contains("\n"));
+    }
+
+    @Test
     public void testAddRoleConfigs() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();

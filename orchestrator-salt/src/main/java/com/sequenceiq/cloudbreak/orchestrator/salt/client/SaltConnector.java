@@ -145,6 +145,9 @@ public class SaltConnector implements Closeable {
             form = form.param("tgt", target.getTarget())
                     .param("expr_form", target.getType());
         }
+        if ("state.show_sls".equals(fun)) {
+            form.param("full_return",  "True");
+        }
         if (arg != null) {
             if (clientType.equals(SaltClientType.LOCAL) || clientType.equals(SaltClientType.LOCAL_ASYNC)) {
                 for (String a : arg) {

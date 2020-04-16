@@ -1,7 +1,12 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
@@ -19,7 +25,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
@@ -29,6 +38,10 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -72,6 +85,15 @@ public class ClusterUpgradeAvailabilityServiceTest {
 
     @Mock
     private ClusterRepairService clusterRepairService;
+
+    @Mock
+    private HostOrchestrator hostOrchestrator;
+
+    @Mock
+    private GatewayConfigService gatewayConfigService;
+
+    @Mock
+    private GatewayConfig gatewayConfig;
 
     @Test
     public void testCheckForUpgradesByNameShouldReturnsImagesWhenThereAreAvailableImages()
@@ -154,6 +176,92 @@ public class ClusterUpgradeAvailabilityServiceTest {
         assertNull(actual.getCurrent());
         assertNull(actual.getUpgradeCandidates());
         assertEquals(validationError, actual.getReason());
+    }
+
+    @Test
+    public void testRunningDataHubsAttached() {
+        StackViewV4Response datahubStack1 = new StackViewV4Response();
+        datahubStack1.setStatus(Status.AVAILABLE);
+        datahubStack1.setName("stack-1");
+        ClusterViewV4Response datahubCluster1 = new ClusterViewV4Response();
+        datahubCluster1.setStatus(Status.AVAILABLE);
+        datahubStack1.setCluster(datahubCluster1);
+        StackViewV4Response datahubStack2 = new StackViewV4Response();
+        datahubStack2.setStatus(Status.DELETE_COMPLETED);
+        datahubStack2.setName("stack-2");
+        ClusterViewV4Response datahubCluster2 = new ClusterViewV4Response();
+        datahubCluster2.setStatus(Status.DELETE_COMPLETED);
+        datahubStack2.setCluster(datahubCluster2);
+        StackViewV4Response datahubStack3 = new StackViewV4Response();
+        datahubStack3.setStatus(Status.STOPPED);
+        datahubStack3.setName("stack-3");
+        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(datahubStack1, datahubStack2, datahubStack3));
+        UpgradeOptionsV4Response response = new UpgradeOptionsV4Response();
+        UpgradeOptionsV4Response actual = underTest.checkForNotAttachedClusters(stackViewV4Responses, response);
+
+        assertNull(actual.getUpgradeCandidates());
+        assertEquals("There are attached Data Hub clusters in incorrect state: stack-1. Please stop those to be able to perform the upgrade.",
+                actual.getReason());
+
+    }
+
+    @Test
+    public void testNotRunningDataHubsAttached() {
+        StackViewV4Response datahubStack1 = new StackViewV4Response();
+        datahubStack1.setStatus(Status.STOPPED);
+        ClusterViewV4Response datahubCluster1 = new ClusterViewV4Response();
+        datahubCluster1.setStatus(Status.STOPPED);
+        datahubStack1.setCluster(datahubCluster1);
+        StackViewV4Response datahubStack2 = new StackViewV4Response();
+        datahubStack2.setStatus(Status.DELETE_COMPLETED);
+        ClusterViewV4Response datahubCluster2 = new ClusterViewV4Response();
+        datahubCluster2.setStatus(Status.DELETE_COMPLETED);
+        datahubStack2.setCluster(datahubCluster2);
+        StackViewV4Response datahubStack3 = new StackViewV4Response();
+        datahubStack3.setStatus(Status.STOPPED);
+        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(datahubStack1, datahubStack2, datahubStack3));
+        UpgradeOptionsV4Response response = new UpgradeOptionsV4Response();
+        UpgradeOptionsV4Response actual = underTest.checkForNotAttachedClusters(stackViewV4Responses, response);
+
+        assertNull(actual.getReason());
+    }
+
+    @Test
+    public void tesDataHubsNotAttached() {
+
+        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of());
+        UpgradeOptionsV4Response response = new UpgradeOptionsV4Response();
+        UpgradeOptionsV4Response actual = underTest.checkForNotAttachedClusters(stackViewV4Responses, response);
+
+        assertNull(actual.getReason());
+    }
+
+    @Test
+    public void testSaltStatesArePresent() {
+        UpgradeOptionsV4Response response = new UpgradeOptionsV4Response();
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(stackService.getByNameInWorkspaceWithLists(anyString(), anyLong())).thenReturn(Optional.of(createStack(createStackStatus(Status.AVAILABLE))));
+        UpgradeOptionsV4Response actual = underTest.checkIfClusterUpgradable(WORKSPACE_ID, STACK_NAME, response);
+        assertNull(actual.getReason());
+    }
+
+    @Test
+    public void testSaltStatesAreMissing() throws CloudbreakOrchestratorFailedException {
+
+        UpgradeOptionsV4Response response = new UpgradeOptionsV4Response();
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(stackService.getByNameInWorkspaceWithLists(anyString(), anyLong())).thenReturn(Optional.of(createStack(createStackStatus(Status.AVAILABLE))));
+
+        doThrow(new CloudbreakOrchestratorFailedException("Cluster is not upgradeable due to required Salt files not being present. "
+                        + "Please ensure that your cluster is up to date!"))
+                .when(hostOrchestrator).
+                checkIfClusterUpgradable(any());
+
+        UpgradeOptionsV4Response actual = underTest.checkIfClusterUpgradable(WORKSPACE_ID, STACK_NAME, response);
+
+        assertNotNull(actual.getReason());
+        assertEquals("Cluster is not upgradeable due to required Salt files not being present. "
+                + "Please ensure that your cluster is up to date!", actual.getReason());
     }
 
     private StackStatus createStackStatus(Status status) {

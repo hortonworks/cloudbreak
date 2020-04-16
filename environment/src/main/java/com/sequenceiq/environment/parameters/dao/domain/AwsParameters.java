@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.parameters.dao.domain;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -40,7 +42,7 @@ public class AwsParameters extends BaseParameters {
         return freeIpaSpotPercentage;
     }
 
-    public void setFreeIpaSpotPercentage(int freeIpaSpotPercentage) {
-        this.freeIpaSpotPercentage = freeIpaSpotPercentage;
+    public void setFreeIpaSpotPercentage(Integer freeIpaSpotPercentage) {
+        this.freeIpaSpotPercentage = Objects.requireNonNullElse(freeIpaSpotPercentage, 0);
     }
 }

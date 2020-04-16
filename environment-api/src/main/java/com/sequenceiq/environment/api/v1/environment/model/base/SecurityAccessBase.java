@@ -23,6 +23,7 @@ public abstract class SecurityAccessBase {
     private String defaultSecurityGroupId;
 
     @ValidCidrList
+    @Size(min = 5, max = 255, message = "The list of CIDRs must consist of characters between 9 and 255")
     @ApiModelProperty(EnvironmentModelDescription.SECURITY_CIDR)
     private String cidr;
 
