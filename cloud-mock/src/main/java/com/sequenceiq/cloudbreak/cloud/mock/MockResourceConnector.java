@@ -4,7 +4,10 @@ import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED;
 import static java.util.Collections.emptyList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -16,6 +19,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -26,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -37,23 +42,31 @@ public class MockResourceConnector implements ResourceConnector<Object> {
 
     public static final String MOCK_RDS_HOST = "mockrdshost";
 
+    public static final int VOLUME_COUNT_PER_MOCK_INSTANCE = 5;
+
     @Inject
     private MockCredentialViewFactory mockCredentialViewFactory;
+
+    @Inject
+    private PersistenceNotifier resourceNotifier;
+
+    @Inject
+    private CloudResourceHelper cloudResourceHelper;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
             AdjustmentType adjustmentType, Long threshold) {
         List<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
+        CloudContext cloudContext = authenticatedContext.getCloudContext();
         for (Group group : stack.getGroups()) {
             for (int i = 0; i < group.getInstancesSize(); i++) {
-                CloudResource cloudResource = new Builder()
-                        .type(ResourceType.MOCK_INSTANCE)
-                        .status(CommonStatus.CREATED)
-                        .name("cloudinstance" + cloudResourceStatuses.size())
-                        .reference("")
-                        .persistent(true)
-                        .build();
-                cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, CREATED));
+                CloudResource instanceResource = generateResource("cloudvolume" + cloudResourceStatuses.size(), cloudContext,
+                        group.getName(), ResourceType.MOCK_INSTANCE);
+                generateResource("cloudvolume" + cloudResourceStatuses.size(), cloudContext, group.getName(), ResourceType.MOCK_TEMPLATE);
+                for (int j = 0; j < VOLUME_COUNT_PER_MOCK_INSTANCE; j++) {
+                    generateResource("cloudvolume" + cloudResourceStatuses.size(), cloudContext, group.getName(), ResourceType.MOCK_VOLUME);
+                }
+                cloudResourceStatuses.add(new CloudResourceStatus(instanceResource, CREATED));
             }
         }
         return cloudResourceStatuses;
@@ -109,26 +122,40 @@ public class MockResourceConnector implements ResourceConnector<Object> {
             CloudResourceStatus cloudResourceStatus = new CloudResourceStatus(cloudResource, CREATED);
             cloudResourceStatuses.add(cloudResourceStatus);
         }
-        int createResourceCount = 0;
-        for (int i = 0; i < stack.getGroups().size(); i++) {
-            createResourceCount += stack.getGroups().get(i).getInstancesSize();
-        }
-        createResourceCount -= resources.size();
-        if (createResourceCount > 0) {
-            for (int i = 0; i < createResourceCount; i++) {
-                CloudResource cloudResource = new Builder()
-                        .type(ResourceType.MOCK_INSTANCE)
-                        .status(CommonStatus.CREATED)
-                        .name("cloudinstance" + cloudResourceStatuses.size())
-                        .reference("")
-                        .persistent(true)
-                        .build();
-
-                cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, CREATED));
+        CloudContext cloudContext = authenticatedContext.getCloudContext();
+        List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
+        for (Group scaledGroup : scaledGroups) {
+            for (int i = 0; i < scaledGroup.getInstances().size(); i++) {
+                CloudResource instanceResource = generateResource("cloudvolume" + cloudResourceStatuses.size(), cloudContext,
+                        scaledGroup.getName(), ResourceType.MOCK_INSTANCE);
+                generateResource("cloudvolume" + cloudResourceStatuses.size(), cloudContext, scaledGroup.getName(), ResourceType.MOCK_TEMPLATE);
+                for (int j = 0; j < VOLUME_COUNT_PER_MOCK_INSTANCE; j++) {
+                    generateResource("cloudvolume" + cloudResourceStatuses.size(), cloudContext, scaledGroup.getName(), ResourceType.MOCK_VOLUME);
+                }
+                cloudResourceStatuses.add(new CloudResourceStatus(instanceResource, CREATED));
             }
         }
 
         return cloudResourceStatuses;
+    }
+
+    private CloudResource generateResource(String name, CloudContext cloudContext, String group, ResourceType type) {
+        String generatedRandom = new Random().ints(97, 123)
+                .limit(100000)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+        Map<String, Object> params = new HashMap<>();
+        params.put("generated", generatedRandom);
+        CloudResource resource = new Builder()
+                .type(type)
+                .status(CommonStatus.CREATED)
+                .group(group)
+                .name(name)
+                .params(params)
+                .persistent(true)
+                .build();
+        resourceNotifier.notifyAllocation(resource, cloudContext);
+        return resource;
     }
 
     @Override
