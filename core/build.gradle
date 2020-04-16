@@ -114,12 +114,6 @@ dependencyManagement {
       entry 'bcpkix-jdk15on'
     }
 
-    dependencySet(group: 'org.mapstruct', version: mapstructVersion) {
-      entry 'mapstruct-jdk8'
-      entry 'mapstruct-processor'
-      entry 'mapstruct-processor'
-    }
-
     dependencySet(group: 'com.jayway.restassured',  version: '2.3.4') {
       entry 'rest-assured'
       entry 'json-path'
@@ -202,9 +196,6 @@ dependencies {
   compile group: 'org.bouncycastle',                   name: 'bcpkix-jdk15on'
   compile group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart'
   compile group: 'org.mybatis',                        name: 'mybatis-migrations'
-  compile group: 'org.mapstruct',                      name: 'mapstruct-jdk8'
-
-  compileOnly group: 'org.mapstruct',                  name: 'mapstruct-processor'
 
   compile group: 'com.google.oauth-client',            name: 'google-oauth-client-jetty'
   compile group: 'com.google.code.findbugs',           name: 'annotations'
@@ -232,8 +223,6 @@ dependencies {
   }
 
   implementation      group: 'com.dyngr',              name: 'polling',                                 version: '1.1.3'
-
-  annotationProcessor group: 'org.mapstruct',          name: 'mapstruct-processor'
 
   compile project(':core-model')
   compile project(':orchestrator-api')
@@ -314,24 +303,6 @@ sourceSets {
 }
 
 compileJava.dependsOn buildInfo
-compileJava {
-    options.compilerArgs = [
-            '-Amapstruct.unmappedTargetPolicy=ERROR',
-            '-Amapstruct.suppressGeneratorTimestamp=true',
-            '-Amapstruct.suppressGeneratorVersionInfoComment=true'
-    ]
-
-    options.annotationProcessorGeneratedSourcesDirectory = file("$projectDir/src/main/generated")
-}
-
-compileJava.doFirst {
-    def path = "${projectDir}/src/main/generated"
-    if (new File(path).exists()) {
-        delete fileTree(path) {
-            include '**/*.java'
-        }
-    }
-}
 
 class BuildInfoTask extends DefaultTask {
     File destination = new File("build.info")

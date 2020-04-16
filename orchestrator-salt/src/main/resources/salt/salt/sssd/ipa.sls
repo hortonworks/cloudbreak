@@ -19,7 +19,7 @@ join_ipa:
           {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
           --no-sshd --no-ssh \
           {%- endif %}
-          --password $PW --unattended --force-join --ssh-trust-dns --no-ntp
+          --password $PW --unattended --force-join --ssh-trust-dns --no-ntp && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/ipa-join-executed
 {% else %}
     - name: |
         runuser -l root -c 'ipa-client-install --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
@@ -27,9 +27,9 @@ join_ipa:
           {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
           --no-sshd --no-ssh \
           {%- endif %}
-          --password "{{salt['pillar.get']('sssd-ipa:password')}}" --unattended --force-join --ssh-trust-dns --no-ntp'
+          --password "{{salt['pillar.get']('sssd-ipa:password')}}" --unattended --force-join --ssh-trust-dns --no-ntp && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/ipa-join-executed'
 {% endif %}
-    - unless: echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa env
+    - unless: test -f /var/log/ipa-join-executed || { echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa env; }
     - runas: root
     - failhard: True
     - env:
