@@ -266,7 +266,7 @@ integrationtest:
       memory: 8192
       volumeSize: 0
       volumeCount: 0
-    queue: cloudbreak-tests
+    queue: infrastructure-services
     networkCidr: 172.27.0.0/16
     baseimage:
       imageId:
