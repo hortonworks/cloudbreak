@@ -29,7 +29,7 @@ public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
     protected String runtimeVersion;
 
     @Value("${integrationtest.imageValidation.sourceCatalogName}")
-    private String sourceImageCatalogName;
+    protected String sourceImageCatalogName;
 
     @Value("${integrationtest.imageValidation.sourceCatalogUrl}")
     private String sourceImageCatalogUrl;

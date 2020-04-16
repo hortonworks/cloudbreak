@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
@@ -47,4 +48,14 @@ public class HardwareInfoGroupV4Response implements JsonEntity {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", HardwareInfoGroupV4Response.class.getSimpleName() + "[", "]")
+                .add("recoveryMode=" + recoveryMode)
+                .add("name='" + name + "'")
+                .add("hardwareInfos=" + hardwareInfos)
+                .toString();
+    }
+
 }
