@@ -18,6 +18,7 @@ dependencies {
     compile project(':orchestrator-api')
     compile project(':cloud-common')
 
+    compile group: 'org.yaml',                      name: 'snakeyaml',                      version: '1.23'
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
 

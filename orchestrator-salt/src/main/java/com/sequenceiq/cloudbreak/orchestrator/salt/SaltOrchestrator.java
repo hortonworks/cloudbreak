@@ -128,6 +128,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Inject
     private GrainUploader grainUploader;
 
+    @Inject
+    private SaltErrorResolver saltErrorResolver;
+
     private ExitCriteria exitCriteria;
 
     @Override
@@ -486,7 +489,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 .filter(gwc -> !gwc.getHostname().equals(primaryGateway.getHostname()))
                 .map(GatewayConfig::getHostname).collect(Collectors.toSet());
 
-        try (SaltConnector sc = createSaltConnector(primaryGateway)) {
+        try (SaltConnector sc = createSaltConnector(primaryGateway, saltErrorResolver)) {
             LOGGER.debug("Set primary FreeIPA: {}", primaryServerHostname);
             saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(primaryServerHostname, allNodes, "freeipa_primary"), exitCriteriaModel, exitCriteria);
             runNewService(sc, new HighStateRunner(primaryServerHostname, allNodes), exitCriteriaModel);
@@ -494,6 +497,9 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.debug("Set replica FreeIPA: {}", replicaServersHostnames);
             saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(replicaServersHostnames, allNodes, "freeipa_replica"), exitCriteriaModel, exitCriteria);
             runNewService(sc, new HighStateRunner(replicaServersHostnames, allNodes), exitCriteriaModel);
+        } catch (CloudbreakOrchestratorException e) {
+            LOGGER.warn("CloudbreakOrchestratorException occurred during FreeIPA installation", e);
+            throw e;
         } catch (ExecutionException e) {
             LOGGER.warn("Error occurred during FreeIPA installation", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
@@ -885,7 +891,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.info("Unknown error occurred during executing highstate (for recipes).", e);
             throw new CloudbreakOrchestratorFailedException(e);
         } finally {
-            try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
+            try (SaltConnector sc = new SaltConnector(gatewayConfig, saltErrorResolver, restDebug)) {
                 // remove 'recipe' grain from all nodes
                 Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
                 saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel,
@@ -961,7 +967,11 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private SaltConnector createSaltConnector(GatewayConfig gatewayConfig) {
-        return new SaltConnector(gatewayConfig, restDebug);
+        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug);
+    }
+
+    private SaltConnector createSaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver) {
+        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug);
     }
 
     private Set<Node> getResponsiveNodes(Set<Node> nodes, SaltConnector sc) {
