@@ -35,21 +35,21 @@ public interface DnsV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_ZONE_FOR_SUBNETS, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "addDnsZoneForSubnetsV1")
-    AddDnsZoneForSubnetsResponse addDnsZoneForSubnets(@Valid AddDnsZoneForSubnetsRequest request) throws Exception;
+    AddDnsZoneForSubnetsResponse addDnsZoneForSubnets(@Valid AddDnsZoneForSubnetsRequest request);
 
     @POST
     @Path("zone/id")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_ZONE_FOR_SUBNET_IDS, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "addDnsZoneForSubnetIdsV1")
-    AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@Valid AddDnsZoneForSubnetIdsRequest request) throws Exception;
+    AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@Valid AddDnsZoneForSubnetIdsRequest request);
 
     @GET
     @Path("zone")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DnsOperationDescriptions.LIST_DNS_ZONES, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "listDnsZonesV1")
-    Set<String> listDnsZones(@QueryParam("environment") @NotEmpty String environmentCrn) throws Exception;
+    Set<String> listDnsZones(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @DELETE
     @Path("zone/cidr")
@@ -59,7 +59,7 @@ public interface DnsV1Endpoint {
     void deleteDnsZoneBySubnet(@QueryParam("environment") @NotEmpty String environmentCrn,
             @QueryParam("subnet") @NotEmpty
             @Pattern(regexp = "(^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([0-9]|[1-2][0-9]|3[0-2]))$)",
-                    message = "Must be in valid CIDR format eg. 192.168.1.0/24") String subnet) throws Exception;
+                    message = "Must be in valid CIDR format eg. 192.168.1.0/24") String subnet);
 
     @DELETE
     @Path("zone/id")
@@ -67,12 +67,12 @@ public interface DnsV1Endpoint {
     @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_ZONE_BY_SUBNET_ID, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "deleteDnsZoneBySubnetIdV1")
     void deleteDnsZoneBySubnetId(@QueryParam("environment") @NotEmpty String environmentCrn, @QueryParam("networkId") @NotEmpty String networkId,
-            @QueryParam("subnetId") @NotEmpty String subnetId) throws Exception;
+            @QueryParam("subnetId") @NotEmpty String subnetId);
 
     @DELETE
     @Path("record")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DnsOperationDescriptions.DELETE_DNS_RECORD_BY_FQDN, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "deleteDnsRecordByFqdnV1")
-    void deleteDnsRecordsByFqdn(@QueryParam("environment") @NotEmpty String environmentCrn, @QueryParam("fqdn") @NotEmpty List<String> fqdns) throws Exception;
+    void deleteDnsRecordsByFqdn(@QueryParam("environment") @NotEmpty String environmentCrn, @QueryParam("fqdn") @NotEmpty List<String> fqdns);
 }

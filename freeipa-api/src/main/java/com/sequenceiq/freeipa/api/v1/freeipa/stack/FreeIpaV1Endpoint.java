@@ -82,7 +82,7 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.REBOOT, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "rebootV1")
-    void rebootInstances(@Valid RebootInstancesRequest request) throws Exception;
+    void rebootInstances(@Valid RebootInstancesRequest request);
 
     @GET
     @Path("ca.crt")
@@ -103,7 +103,7 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.CLEANUP, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "cleanupV1")
-    OperationStatus cleanup(@Valid CleanupRequest request) throws Exception;
+    OperationStatus cleanup(@Valid CleanupRequest request);
 
     @PUT
     @Path("start")

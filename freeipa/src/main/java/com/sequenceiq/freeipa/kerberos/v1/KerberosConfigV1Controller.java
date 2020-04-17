@@ -10,8 +10,8 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.util.CrnService;
 import com.sequenceiq.notification.NotificationController;
@@ -47,9 +49,13 @@ public class KerberosConfigV1Controller extends NotificationController implement
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public DescribeKerberosConfigResponse getForCluster(@NotEmpty @TenantAwareParam String environmentCrn,
-            @NotEmpty String clusterName) throws Exception {
+            @NotEmpty String clusterName) {
         String accountId = crnService.getCurrentAccountId();
-        return kerberosConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
+        try {
+            return kerberosConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
+        } catch (FreeIpaClientException e) {
+            throw new FreeIpaClientExceptionWrapper(e);
+        }
     }
 
     @Override

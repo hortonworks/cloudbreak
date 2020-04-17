@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.jerseyclient;
 
-import javax.inject.Inject;
+import java.lang.reflect.Field;
 
+import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
+
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -11,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricTag;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
@@ -26,6 +31,9 @@ public class RetryAndMetricsJerseyClientAspect {
 
     @Inject
     private MetricService metricService;
+
+    @Inject
+    private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
     @Pointcut("within(@com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics *)")
     public void beanAnnotatedWithRetryAndMetrics() {
@@ -51,14 +59,34 @@ public class RetryAndMetricsJerseyClientAspect {
                     MetricTag.TARGET_API.name(), invokedApi,
                     MetricTag.TARGET_METHOD.name(), invokedMethod);
             return result;
+        } catch (WebApplicationException webApplicationException) {
+            throw handleWebApplicationException(invokedApi, invokedMethod, webApplicationException);
         } catch (Exception e) {
-            LOGGER.error("Failed to execute REST API call with retries.", e);
-            metricService.incrementMetricCounter(MetricType.REST_OPERATION_FAILED,
-                    MetricTag.TARGET_API.name(), invokedApi,
-                    MetricTag.TARGET_METHOD.name(), invokedMethod,
-                    MetricTag.EXCEPTION_TYPE.name(), e.getClass().getName());
+            handleExceptionCommonPart(invokedApi, invokedMethod, e);
             throw e;
         }
     }
 
+    private WebApplicationException handleWebApplicationException(String invokedApi, String invokedMethod, WebApplicationException webApplicationException) {
+        handleExceptionCommonPart(invokedApi, invokedMethod, webApplicationException);
+        try {
+            String errorMessage = exceptionMessageExtractor.getErrorMessage(webApplicationException);
+            if (StringUtils.isNotBlank(errorMessage)) {
+                Field detailMessage = Throwable.class.getDeclaredField("detailMessage");
+                detailMessage.trySetAccessible();
+                detailMessage.set(webApplicationException, errorMessage);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Couldn't extract message from exception", e);
+        }
+        return webApplicationException;
+    }
+
+    private void handleExceptionCommonPart(String invokedApi, String invokedMethod, Exception e) {
+        LOGGER.error("Failed to execute REST API call with retries.", e);
+        metricService.incrementMetricCounter(MetricType.REST_OPERATION_FAILED,
+                MetricTag.TARGET_API.name(), invokedApi,
+                MetricTag.TARGET_METHOD.name(), invokedMethod,
+                MetricTag.EXCEPTION_TYPE.name(), e.getClass().getName());
+    }
 }
