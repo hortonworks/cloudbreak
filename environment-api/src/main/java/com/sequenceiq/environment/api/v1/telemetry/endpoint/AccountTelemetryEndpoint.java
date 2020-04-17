@@ -42,7 +42,7 @@ public interface AccountTelemetryEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AccountTelemetryDescription.POST, produces = MediaType.APPLICATION_JSON,
             notes = AccountTelemetryDescription.POST_NOTES, nickname = "updateAccountTelemetryV1")
-    AccountTelemetryResponse update(AccountTelemetryRequest request);
+    AccountTelemetryResponse update(@Valid AccountTelemetryRequest request);
 
     @GET
     @Path("/default")

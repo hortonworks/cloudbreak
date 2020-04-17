@@ -13,7 +13,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -51,6 +50,7 @@ public class AccountTelemetryService {
 
     public AccountTelemetry create(AccountTelemetry telemetry, String accountId) {
         try {
+            validateAnonymizationRules(telemetry);
             LOGGER.debug("Creating account telemetry for account: {}", accountId);
             accountTelemetryRepository.archiveAll(accountId);
             String newCrn = createCRN(accountId);
@@ -134,22 +134,35 @@ public class AccountTelemetryService {
         return defaultTelemetry;
     }
 
-    public String testRulePattern(AnonymizationRule rule, String input) {
-        String decodedRule = new String(Base64.getDecoder().decode(rule.getValue().getBytes()));
+    public String testRulePatterns(List<AnonymizationRule> rules, String input) {
+        String output = input;
+        for (AnonymizationRule rule : rules) {
+            String decodedRule = new String(Base64.getDecoder().decode(rule.getValue().getBytes()));
+            Pattern p = createAndCheckPattern(decodedRule);
+            Replacer replacer = p.replacer(rule.getReplacement());
+            output = replacer.replace(output);
+        }
+        return output;
+    }
+
+    void validateAnonymizationRules(AccountTelemetry telemetry) {
+        Optional.ofNullable(telemetry.getRules()).orElse(new ArrayList<>())
+                .forEach(rule -> {
+                    String decodedRule = new String(Base64.getDecoder().decode(rule.getValue().getBytes()));
+                    createAndCheckPattern(decodedRule);
+                });
+    }
+
+    private Pattern createAndCheckPattern(String decodedRule) {
         Pattern p;
         try {
             p = new Pattern(decodedRule);
         } catch (PatternSyntaxException e) {
-            LOGGER.debug("Anonymization regex pattern is invalid: ", e);
-            throw new BadRequestException(e.getMessage());
+            String errorMessage = String.format("Anonymization regex pattern is invalid: %s", decodedRule);
+            LOGGER.debug(errorMessage, e);
+            throw new BadRequestException(errorMessage);
         }
-        boolean match = p.matcher(input).find();
-        if (match) {
-            Replacer replacer = p.replacer(rule.getReplacement());
-            return replacer.replace(input);
-        } else {
-            throw new NotFoundException(String.format("Not found any matches for provided input with rule: %s", decodedRule));
-        }
+        return p;
     }
 
     private String createCRN(String accountId) {
