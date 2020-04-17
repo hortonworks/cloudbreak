@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.publicendpoint;
+package com.sequenceiq.cloudbreak.service.publicendpoint.dns;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,27 +12,25 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaRoles;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.publicendpoint.BasePublicEndpointManagementService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
-@Service
-public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManagementService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaBrokerPublicDnsEntryService.class);
+public abstract class BaseDnsEntryService extends BasePublicEndpointManagementService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseDnsEntryService.class);
 
     @Inject
     private EnvironmentClientService environmentClientService;
 
-    @Inject
-    private ComponentLocatorService componentLocatorService;
+    protected abstract Map<String, List<String>> getComponentLocation(Stack stack);
+
+    protected abstract String logName();
 
     public Map<String, String> createOrUpdate(Stack stack) {
         return doActionOnStack(stack, null, this::createOrUpdateDnsEntries);
@@ -56,13 +54,11 @@ public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManageme
             BiFunction<Map<String, String>, String, Map<String, String>> action) {
 
         Map<String, String> result = new HashMap<>();
-        //TODO include indicator flag in the condition
         if (stack.getCluster() != null && manageCertificateAndDnsInPem()) {
-            LOGGER.info("Modifying DNS entries for Kafka Brokers on stack '{}'", stack.getName());
-            Cluster cluster = stack.getCluster();
-            Map<String, String> ipsByFqdn = getBrokerIpsByFqdn(stack, cluster);
+            LOGGER.info("Modifying DNS entries for {} on stack '{}'", logName(), stack.getName());
+            Map<String, String> ipsByFqdn = getBrokerIpsByFqdn(stack);
             if (!CollectionUtils.isEmpty(candidateAddressesByFqdn)) {
-                LOGGER.info("Modifying DNS entries for Kafka Brokers on stack '{}', whitelist of candidates for the update: '{}'", stack.getName(),
+                LOGGER.info("Modifying DNS entries for {} on stack '{}', whitelist of candidates for the update: '{}'", logName(), stack.getName(),
                         String.join(",", candidateAddressesByFqdn.keySet()));
                 ipsByFqdn = ipsByFqdn.entrySet().stream()
                         .filter(entry -> candidateAddressesByFqdn.containsKey(entry.getKey()))
@@ -73,8 +69,8 @@ public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManageme
         return result;
     }
 
-    private Map<String, String> getBrokerIpsByFqdn(Stack stack, Cluster cluster) {
-        Map<String, List<String>> componentLocation = componentLocatorService.getComponentLocation(cluster, List.of(KafkaRoles.KAFKA_BROKER));
+    private Map<String, String> getBrokerIpsByFqdn(Stack stack) {
+        Map<String, List<String>> componentLocation = getComponentLocation(stack);
         final Set<InstanceMetaData> runningInstanceMetaData = stack.getNotDeletedInstanceMetaDataSet();
         final InstanceMetaData primaryGatewayInstanceMetadata = stack.getPrimaryGatewayInstance();
         return componentLocation
@@ -86,7 +82,7 @@ public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManageme
     }
 
     private Map<String, String> createOrUpdateDnsEntries(Map<String, String> ipsByFqdn, String environmentCrn) {
-        LOGGER.info("Register DNS entries for Kafka brokers for FQDNs: '{}'", String.join(",", ipsByFqdn.keySet()));
+        LOGGER.info("Register DNS entries for {} for FQDNs: '{}'", logName(), String.join(",", ipsByFqdn.keySet()));
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
@@ -100,7 +96,7 @@ public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManageme
     }
 
     private Map<String, String> doDeregister(Map<String, String> ipsByFqdn, String environmentCrn) {
-        LOGGER.info("Deregister DNS entries for Kafka brokers for FQDNs: '{}'", String.join(",", ipsByFqdn.keySet()));
+        LOGGER.info("Deregister DNS entries for {} for FQDNs: '{}'", logName(), String.join(",", ipsByFqdn.keySet()));
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
@@ -118,5 +114,9 @@ public class KafkaBrokerPublicDnsEntryService extends BasePublicEndpointManageme
             return null;
         }
         return fqdn.split("\\.")[0];
+    }
+
+    protected void setCertGenerationEnabled(boolean enabled) {
+        super.setCertGenerationEnabled(enabled);
     }
 }

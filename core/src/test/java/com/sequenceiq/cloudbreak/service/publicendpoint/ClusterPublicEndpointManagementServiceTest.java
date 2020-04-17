@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.service.publicendpoint;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.publicendpoint.dns.BaseDnsEntryService;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterPublicEndpointManagementServiceTest {
@@ -23,7 +27,7 @@ class ClusterPublicEndpointManagementServiceTest {
     private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
 
     @Mock
-    private KafkaBrokerPublicDnsEntryService kafkaBrokerPublicDnsEntryService;
+    private List<BaseDnsEntryService> dnsEntryServices;
 
     @InjectMocks
     private ClusterPublicEndpointManagementService underTest;
@@ -34,7 +38,7 @@ class ClusterPublicEndpointManagementServiceTest {
 
         underTest.start(stack);
 
-        verifyZeroInteractions(gatewayPublicEndpointManagementService, kafkaBrokerPublicDnsEntryService);
+        verifyZeroInteractions(gatewayPublicEndpointManagementService, dnsEntryServices);
     }
 
     @Test
@@ -44,6 +48,6 @@ class ClusterPublicEndpointManagementServiceTest {
         underTest.start(stack);
 
         verify(gatewayPublicEndpointManagementService, times(1)).updateDnsEntry(stack, null);
-        verify(kafkaBrokerPublicDnsEntryService, times(1)).createOrUpdate(stack);
+        verify(dnsEntryServices, times(1)).forEach(any());
     }
 }

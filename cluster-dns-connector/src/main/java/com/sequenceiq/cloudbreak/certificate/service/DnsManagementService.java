@@ -30,7 +30,7 @@ public class DnsManagementService {
             LOGGER.info("DNS entry has been created with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString);
             return true;
         } catch (Exception e) {
-            LOGGER.info("Failed to create DNS entry with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString);
+            LOGGER.warn("Failed to create DNS entry with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString, e);
         }
         return false;
     }
@@ -44,7 +44,7 @@ public class DnsManagementService {
             LOGGER.info("DNS entry has been deleted with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString);
             return true;
         } catch (Exception e) {
-            LOGGER.info("Failed to delete DNS entry with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString);
+            LOGGER.warn("Failed to delete DNS entry with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString, e);
         }
         return false;
     }
