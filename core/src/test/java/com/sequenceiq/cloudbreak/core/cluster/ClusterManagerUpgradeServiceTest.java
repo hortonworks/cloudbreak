@@ -33,9 +33,6 @@ public class ClusterManagerUpgradeServiceTest {
     private GatewayConfigService gatewayConfigService;
 
     @Mock
-    private HostOrchestrator hostOrchestrator;
-
-    @Mock
     private StackService stackService;
 
     @Mock
@@ -49,6 +46,9 @@ public class ClusterManagerUpgradeServiceTest {
 
     @Mock
     private ClusterApi clusterApi;
+
+    @Mock
+    private HostOrchestrator hostOrchestrator;
 
     @InjectMocks
     private ClusterManagerUpgradeService underTest;

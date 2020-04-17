@@ -182,4 +182,9 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier upgradeClusterByName(Long workspaceId, String name, String imageId) {
         return stackOperations.upgradeCluster(NameOrCrn.ofName(name), workspaceId, imageId);
     }
+
+    @Override
+    public FlowIdentifier updateSaltByName(Long workspaceId, String name) {
+        return stackOperations.updateSalt(NameOrCrn.ofName(name), workspaceId);
+    }
 }

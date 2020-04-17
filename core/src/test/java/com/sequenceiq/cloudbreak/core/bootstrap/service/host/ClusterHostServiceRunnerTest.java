@@ -50,9 +50,6 @@ public class ClusterHostServiceRunnerTest {
     private StackService stackService;
 
     @Mock
-    private HostOrchestratorResolver hostOrchestratorResolver;
-
-    @Mock
     private GatewayConfigService gatewayConfigService;
 
     @Mock

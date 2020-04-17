@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,15 +16,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabilityCheckerTask;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -66,13 +62,7 @@ public class ClusterBootstrapperTest {
     private ClusterBootstrapperErrorHandler clusterBootstrapperErrorHandler;
 
     @Mock
-    private HostOrchestratorResolver hostOrchestratorResolver;
-
-    @Mock
     private GatewayConfigService gatewayConfigService;
-
-    @Mock
-    private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @Mock
     private HostDiscoveryService hostDiscoveryService;
@@ -114,21 +104,15 @@ public class ClusterBootstrapperTest {
         when(stack.getId()).thenReturn(1L);
         when(stack.getReachableInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData));
         when(stack.getCustomDomain()).thenReturn("CUSTOM_DOMAIN");
-        Orchestrator orchestrator = new Orchestrator();
-        orchestrator.setType("ORCHESTRATOR_TYPE");
-        when(stack.getOrchestrator()).thenReturn(orchestrator);
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
-        when(orchestratorTypeResolver.resolveType(anyString())).thenReturn(OrchestratorType.HOST);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
-        when(hostOrchestratorResolver.get(anyString())).thenReturn(hostOrchestrator);
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"), List.of("host1"));
 
         verify(stack).getReachableInstanceMetaDataSet();
-        verify(orchestratorTypeResolver).resolveType("ORCHESTRATOR_TYPE");
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
         verify(componentConfigProviderService).getImage(1L);
     }

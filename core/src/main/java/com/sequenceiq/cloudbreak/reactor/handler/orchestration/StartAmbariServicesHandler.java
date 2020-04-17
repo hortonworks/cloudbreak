@@ -40,7 +40,7 @@ public class StartAmbariServicesHandler implements EventHandler<StartAmbariServi
             clusterServiceRunner.runAmbariServices(stackId);
             response = new StartClusterManagerServicesSuccess(stackId);
         } catch (Exception e) {
-            LOGGER.info("Start ambari services failed!", e);
+            LOGGER.info("Start cluster manager services failed!", e);
             response = new StartAmbariServicesFailed(stackId, e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));

@@ -35,14 +35,13 @@ import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
-import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.core.flow2.service.TerminationTriggerService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 import reactor.rx.Promise;
 
@@ -52,9 +51,6 @@ public class ReactorFlowManagerTest {
     private static final Long STACK_ID = 1L;
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:tenantName:user:userName";
-
-    @Mock
-    private StackService stackService;
 
     @Mock
     private ReactorNotifier reactorNotifier;
@@ -78,7 +74,6 @@ public class ReactorFlowManagerTest {
         reset(reactorNotifier);
         stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
         when(asyncTaskExecutor.submit(captor.capture())).then(invocation -> {
             captor.getValue().run();
@@ -126,6 +121,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
         underTest.triggerClusterCertificationRenewal(STACK_ID);
         underTest.triggerDatalakeClusterUpgrade(STACK_ID, null);
+        underTest.triggerSaltUpdate(STACK_ID);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

@@ -494,4 +494,8 @@ public class ClusterOperationService {
     public FlowIdentifier triggerMaintenanceModeValidation(Stack stack) {
         return flowManager.triggerMaintenanceModeValidationFlow(stack.getId());
     }
+
+    public FlowIdentifier updateSalt(Stack stack) {
+        return flowManager.triggerSaltUpdate(stack.getId());
+    }
 }

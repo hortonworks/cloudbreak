@@ -4,19 +4,11 @@ import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformResult;
 
 public class ClusterTerminationResult extends ClusterPlatformResult<ClusterTerminationRequest> {
 
-    private final Boolean operationAllowed;
-
-    public ClusterTerminationResult(ClusterTerminationRequest request, Boolean operationAllowed) {
+    public ClusterTerminationResult(ClusterTerminationRequest request) {
         super(request);
-        this.operationAllowed = operationAllowed;
     }
 
     public ClusterTerminationResult(String statusReason, Exception errorDetails, ClusterTerminationRequest request) {
         super(statusReason, errorDetails, request);
-        operationAllowed = Boolean.TRUE;
-    }
-
-    public Boolean isOperationAllowed() {
-        return operationAllowed;
     }
 }
