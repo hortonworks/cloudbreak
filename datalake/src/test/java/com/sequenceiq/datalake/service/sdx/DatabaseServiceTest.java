@@ -4,12 +4,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.model.common.Status;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +42,8 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @ExtendWith(MockitoExtension.class)
 public class DatabaseServiceTest {
+
+    private static final String DATABASE_CRN = "database crn";
 
     @Captor
     public ArgumentCaptor<AllocateDatabaseServerV4Request> captor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
@@ -95,6 +100,36 @@ public class DatabaseServiceTest {
         verifyZeroInteractions(sdxClusterRepository);
         verifyZeroInteractions(sdxStatusService);
         verifyZeroInteractions(notificationService);
+    }
+
+    @Test
+    public void shouldCallStartAndWaitForAvailableStatus() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setDatabaseCrn(DATABASE_CRN);
+
+        DatabaseServerV4Response databaseServerV4Response = mock(DatabaseServerV4Response.class);
+
+        when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
+        when(databaseServerV4Response.getStatus()).thenReturn(Status.AVAILABLE);
+
+        underTest.start(cluster);
+
+        verify(databaseServerV4Endpoint).start(DATABASE_CRN);
+    }
+
+    @Test
+    public void shouldCallStopAndWaitForStoppedStatus() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setDatabaseCrn(DATABASE_CRN);
+
+        DatabaseServerV4Response databaseServerV4Response = mock(DatabaseServerV4Response.class);
+
+        when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
+        when(databaseServerV4Response.getStatus()).thenReturn(Status.STOPPED);
+
+        underTest.stop(cluster);
+
+        verify(databaseServerV4Endpoint).stop(DATABASE_CRN);
     }
 
     private DatabaseConfig getDatabaseConfig() {

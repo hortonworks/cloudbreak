@@ -5,6 +5,7 @@ import static com.sequenceiq.datalake.flow.start.SdxStartState.INIT_STATE;
 import static com.sequenceiq.datalake.flow.start.SdxStartState.SDX_START_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.start.SdxStartState.SDX_START_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.start.SdxStartState.SDX_START_IN_PROGRESS_STATE;
+import static com.sequenceiq.datalake.flow.start.SdxStartState.SDX_START_RDS_START_STATE;
 import static com.sequenceiq.datalake.flow.start.SdxStartState.SDX_START_START_STATE;
 import static com.sequenceiq.datalake.flow.start.SdxStartState.SDX_START_SYNC_STATE;
 
@@ -21,8 +22,11 @@ public class SdxStartFlowConfig extends AbstractFlowConfiguration<SdxStartState,
     private static final List<Transition<SdxStartState, SdxStartEvent>> TRANSITIONS = new Transition.Builder<SdxStartState, SdxStartEvent>()
             .defaultFailureEvent(SdxStartEvent.SDX_START_FAILED_EVENT)
 
-            .from(INIT_STATE).to(SDX_START_SYNC_STATE)
-            .event(SdxStartEvent.SDX_START_EVENT).noFailureEvent()
+            .from(INIT_STATE).to(SDX_START_RDS_START_STATE)
+            .event(SdxStartEvent.SDX_START_EVENT).defaultFailureEvent()
+
+            .from(SDX_START_RDS_START_STATE).to(SDX_START_SYNC_STATE)
+            .event(SdxStartEvent.SDX_START_RDS_FINISHED_EVENT).defaultFailureEvent()
 
             .from(SDX_START_SYNC_STATE).to(SDX_START_START_STATE)
             .event(SdxStartEvent.SDX_SYNC_FINISHED_EVENT).noFailureEvent()

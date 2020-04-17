@@ -93,6 +93,28 @@ public class DatabaseService {
         }
     }
 
+    public void start(SdxCluster sdxCluster) {
+        LOGGER.info("Starting databaseServer of SDX {}", sdxCluster.getClusterName());
+        String databaseCrn = sdxCluster.getDatabaseCrn();
+        try {
+            databaseServerV4Endpoint.start(databaseCrn);
+            waitAndGetDatabase(sdxCluster, databaseCrn, SdxDatabaseOperation.START, false);
+        } catch (NotFoundException notFoundException) {
+            LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
+        }
+    }
+
+    public void stop(SdxCluster sdxCluster) {
+        LOGGER.info("Stopping databaseServer of SDX {}", sdxCluster.getClusterName());
+        String databaseCrn = sdxCluster.getDatabaseCrn();
+        try {
+            databaseServerV4Endpoint.stop(databaseCrn);
+            waitAndGetDatabase(sdxCluster, databaseCrn, SdxDatabaseOperation.STOP, false);
+        } catch (NotFoundException notFoundException) {
+            LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
+        }
+    }
+
     private AllocateDatabaseServerV4Request getDatabaseRequest(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         req.setEnvironmentCrn(env.getCrn());
