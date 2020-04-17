@@ -24,7 +24,13 @@
     headers                          app:{{ fluent.clusterType }}
     stream_name                      Metering
     partition_key                    "#{Socket.gethostname}"
-
+    {%- if fluent.proxyUrl %}
+    proxy_url                        "{{ fluent.proxyUrl }}"
+    {%- if fluent.proxyAuth %}
+    proxy_username                   "{{ fluent.proxyUser }}"
+    proxy_password                   "{{ fluent.proxyPassword }}"
+    {% endif %}
+    {% endif %}
     <buffer tag,time>
       @type file
       path /var/log/td-agent/metering_databus
