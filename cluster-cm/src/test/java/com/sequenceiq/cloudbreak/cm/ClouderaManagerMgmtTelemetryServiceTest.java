@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 
@@ -122,6 +124,34 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
     }
 
     @Test
+    public void testBuildTelemetryConfigListWithProxyConfig() {
+        // GIVEN
+        Stack stack = new Stack();
+        Cluster cluster = new Cluster();
+        cluster.setId(1L);
+        cluster.setName("cl1");
+        stack.setCluster(cluster);
+        WorkloadAnalytics wa = new WorkloadAnalytics();
+        ProxyConfig proxyConfig = ProxyConfig.builder()
+                .withProtocol("https")
+                .withServerHost("proxyServer")
+                .withServerPort(80)
+                .withProxyAuthentication(ProxyAuthentication.builder()
+                        .withUserName("proxyUser")
+                        .withPassword("proxyPassword")
+                        .build())
+                .build();
+        // WHEN
+        ApiConfigList result = underTest.buildTelemetryConfigList(stack, wa, null, null, proxyConfig);
+        // THEN
+        assertTrue(containsConfigWithValue(result, "telemetrypublisher_proxy_server", "proxyServer"));
+        assertTrue(containsConfigWithValue(result, "telemetrypublisher_proxy_port", "80"));
+        assertTrue(containsConfigWithValue(result, "telemetrypublisher_proxy_enabled", "true"));
+        assertTrue(containsConfigWithValue(result, "telemetrypublisher_proxy_user", "proxyUser"));
+        assertTrue(containsConfigWithValue(result, "telemetrypublisher_proxy_password", "proxyPassword"));
+    }
+
+    @Test
     public void testBuildTelemetryConfigList() {
         // GIVEN
         Stack stack = new Stack();
@@ -131,7 +161,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         stack.setCluster(cluster);
         WorkloadAnalytics wa = new WorkloadAnalytics();
         // WHEN
-        ApiConfigList result = underTest.buildTelemetryConfigList(stack, wa, null, null);
+        ApiConfigList result = underTest.buildTelemetryConfigList(stack, wa, null, null, null);
         // THEN
         assertEquals(1, result.getItems().size());
         assertTrue(result.getItems().get(0).getValue().contains("cluster.type=DATALAKE"));

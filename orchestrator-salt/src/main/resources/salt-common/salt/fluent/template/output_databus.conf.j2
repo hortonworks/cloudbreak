@@ -15,7 +15,13 @@
     event_message_field              message
     stream_name                      LogCollection
     partition_key                    "#{Socket.gethostname}"
-
+    {%- if fluent.proxyUrl %}
+    proxy_url                        "{{ fluent.proxyUrl }}"
+    {%- if fluent.proxyAuth %}
+    proxy_username                   "{{ fluent.proxyUser }}"
+    proxy_password                   "{{ fluent.proxyPassword }}"
+    {% endif %}
+    {% endif %}
     <buffer tag,time>
       @type file
       path /var/log/td-agent/databus_service_logs
