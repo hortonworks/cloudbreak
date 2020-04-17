@@ -1,7 +1,0 @@
-[GRAFANA]
-name=Grafana
-baseurl={{ salt['pillar.get']('grafana:repo:baseUrl') }}
-gpgcheck=1
-gpgkey={{ salt['pillar.get']('grafana:repo:gpgKeyUrl') }}
-enabled=1
-priority=1
