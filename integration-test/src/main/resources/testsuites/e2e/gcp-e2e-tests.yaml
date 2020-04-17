@@ -1,11 +1,5 @@
 name: "gcp-e2e-tests"
 tests:
-  - name: "gcp basic stack tests"
-    classes:
-      - com.sequenceiq.it.cloudbreak.testcase.e2e.stack.BasicStackTests
-        includedMethods:
-          - testCreateStopAndStartCluster
-          - testCreateAndScaleCluster
   - name: "gcp encryption tests"
     classes:
       - com.sequenceiq.it.cloudbreak.testcase.e2e.stack.GcpEncryptionTests

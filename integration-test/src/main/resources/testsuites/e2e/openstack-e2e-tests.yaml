@@ -1,7 +1,0 @@
-name: "openstack-e2e-tests"
-tests:
-  - name: "openstack e2e tests"
-    classes:
-      - BasicStackTests
-    packages:
-      - com.sequenceiq.it.cloudbreak.testcase.e2e.openstack.*
