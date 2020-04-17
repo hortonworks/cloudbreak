@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.dns.EnvironmentBasedDomainNameProvider;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
-public class BasePublicEndpointManagementService {
+public abstract class BasePublicEndpointManagementService {
 
     @Value("${gateway.cert.generation.enabled:false}")
     private boolean certGenerationEnabled;
@@ -52,5 +52,9 @@ public class BasePublicEndpointManagementService {
         Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
         UserManagementProto.Account account = grpcUmsClient.getAccountDetails(actorCrn, Crn.safeFromString(actorCrn).getAccountId(), requestIdOptional);
         return account.getWorkloadSubdomain();
+    }
+
+    protected void setCertGenerationEnabled(boolean enabled) {
+        this.certGenerationEnabled = enabled;
     }
 }

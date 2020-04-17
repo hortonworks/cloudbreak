@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.publicendpoint;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.service.publicendpoint.dns.BaseDnsEntryService;
 
 @Service
 public class ClusterPublicEndpointManagementService {
@@ -20,27 +22,26 @@ public class ClusterPublicEndpointManagementService {
     private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
 
     @Inject
-    private KafkaBrokerPublicDnsEntryService kafkaBrokerPublicDnsEntryService;
+    private List<BaseDnsEntryService> dnsEntryServices;
 
     public boolean provision(Stack stack) {
-        boolean certGenerationWasSuccessful = false;
-        certGenerationWasSuccessful = gatewayPublicEndpointManagementService.generateCertAndSaveForStackAndUpdateDnsEntry(stack);
-        kafkaBrokerPublicDnsEntryService.createOrUpdate(stack);
+        boolean certGenerationWasSuccessful = gatewayPublicEndpointManagementService.generateCertAndSaveForStackAndUpdateDnsEntry(stack);
+        dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdate(stack));
         return certGenerationWasSuccessful;
     }
 
     public void terminate(Stack stack) {
         gatewayPublicEndpointManagementService.deleteDnsEntry(stack, null);
-        kafkaBrokerPublicDnsEntryService.deregister(stack);
+        dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.deregister(stack));
     }
 
-    public Map<String, String> upscale(Stack stack, Map<String, String> newAddressesByFqdn) {
+    public void upscale(Stack stack, Map<String, String> newAddressesByFqdn) {
         changeGatewayAddress(stack, newAddressesByFqdn);
-        return kafkaBrokerPublicDnsEntryService.createOrUpdateCandidates(stack, newAddressesByFqdn);
+        dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdateCandidates(stack, newAddressesByFqdn));
     }
 
-    public Map<String, String> downscale(Stack stack, Map<String, String> downscaledAddressesByFqdn) {
-        return kafkaBrokerPublicDnsEntryService.deregister(stack, downscaledAddressesByFqdn);
+    public void downscale(Stack stack, Map<String, String> downscaledAddressesByFqdn) {
+        dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.deregister(stack, downscaledAddressesByFqdn));
     }
 
     public boolean changeGateway(Stack stack, String newGatewayIp) {
@@ -64,7 +65,7 @@ public class ClusterPublicEndpointManagementService {
             try {
                 LOGGER.info("Updating DNS entries of a restarted cluster: '{}'", stack.getName());
                 gatewayPublicEndpointManagementService.updateDnsEntry(stack, null);
-                kafkaBrokerPublicDnsEntryService.createOrUpdate(stack);
+                dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdate(stack));
             } catch (Exception ex) {
                 LOGGER.warn("Failed to update DNS entries of cluster in Public Endpoint Management service:", ex);
             }

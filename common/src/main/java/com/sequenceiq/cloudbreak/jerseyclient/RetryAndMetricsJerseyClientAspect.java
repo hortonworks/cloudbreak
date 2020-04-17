@@ -62,13 +62,13 @@ public class RetryAndMetricsJerseyClientAspect {
         } catch (WebApplicationException webApplicationException) {
             throw handleWebApplicationException(invokedApi, invokedMethod, webApplicationException);
         } catch (Exception e) {
-            handleExceptionCommonPart(invokedApi, invokedMethod, e);
+            incrementMetricCounter(invokedApi, invokedMethod, e);
             throw e;
         }
     }
 
     private WebApplicationException handleWebApplicationException(String invokedApi, String invokedMethod, WebApplicationException webApplicationException) {
-        handleExceptionCommonPart(invokedApi, invokedMethod, webApplicationException);
+        incrementMetricCounter(invokedApi, invokedMethod, webApplicationException);
         try {
             String errorMessage = exceptionMessageExtractor.getErrorMessage(webApplicationException);
             if (StringUtils.isNotBlank(errorMessage)) {
@@ -82,7 +82,7 @@ public class RetryAndMetricsJerseyClientAspect {
         return webApplicationException;
     }
 
-    private void handleExceptionCommonPart(String invokedApi, String invokedMethod, Exception e) {
+    private void incrementMetricCounter(String invokedApi, String invokedMethod, Exception e) {
         LOGGER.error("Failed to execute REST API call with retries.", e);
         metricService.incrementMetricCounter(MetricType.REST_OPERATION_FAILED,
                 MetricTag.TARGET_API.name(), invokedApi,
