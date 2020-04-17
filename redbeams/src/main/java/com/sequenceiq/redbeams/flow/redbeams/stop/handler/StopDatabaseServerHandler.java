@@ -62,7 +62,7 @@ public class StopDatabaseServerHandler implements EventHandler<StopDatabaseServe
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
 
             ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatus(ac, request.getDbInstanceIdentifier());
-            if (status.isTransient()) {
+            if (status != null && status.isTransient()) {
                 LOGGER.debug("Database server '{}' is in '{}' status. Start waiting for a permanent status.", request.getDbInstanceIdentifier(), status);
 
                 PollTask<ExternalDatabaseStatus> task = statusCheckFactory.newPollPermanentExternalDatabaseStateTask(ac, request.getDbInstanceIdentifier());
