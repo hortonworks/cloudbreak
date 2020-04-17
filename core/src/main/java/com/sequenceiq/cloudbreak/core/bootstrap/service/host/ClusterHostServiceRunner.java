@@ -119,7 +119,7 @@ public class ClusterHostServiceRunner {
     private StackService stackService;
 
     @Inject
-    private HostOrchestratorResolver hostOrchestratorResolver;
+    private HostOrchestrator hostOrchestrator;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -199,7 +199,6 @@ public class ClusterHostServiceRunner {
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
         try {
             Set<Node> nodes = stackUtil.collectReachableNodes(stack);
-            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
@@ -236,7 +235,7 @@ public class ClusterHostServiceRunner {
             GatewayConfig newPrimary = newPrimaryCandidate.get();
             Set<Node> allNodes = stackUtil.collectNodes(stack);
             try {
-                hostOrchestratorResolver.get(stack.getOrchestrator().getType()).changePrimaryGateway(formerPrimaryGatewayConfig, newPrimary, gatewayConfigs,
+                hostOrchestrator.changePrimaryGateway(formerPrimaryGatewayConfig, newPrimary, gatewayConfigs,
                         allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
                 return newPrimary.getHostname();
             } catch (CloudbreakOrchestratorException ex) {

@@ -18,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -35,9 +34,6 @@ import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 public class ClusterKerberosServiceTest {
-    @Mock
-    private HostOrchestratorResolver hostOrchestratorResolver;
-
     @Mock
     private GatewayConfigService gatewayConfigService;
 
@@ -75,7 +71,6 @@ public class ClusterKerberosServiceTest {
         cluster = spy(new Cluster());
         stack.setCluster(cluster);
         kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().build();
-        when(hostOrchestratorResolver.get(anyString())).thenReturn(hostOrchestrator);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(new GatewayConfig("a", "a", "a", 1, "a", false));
     }
 

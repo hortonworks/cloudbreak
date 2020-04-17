@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -40,31 +38,24 @@ public class HostMetadataSetup {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private HostOrchestratorResolver hostOrchestratorResolver;
-
-    @Inject
-    private OrchestratorTypeResolver orchestratorTypeResolver;
+    private HostOrchestrator hostOrchestrator;
 
     public void setupHostMetadata(Long stackId) throws CloudbreakException {
         LOGGER.debug("Setting up host metadata for the cluster.");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
-            Set<InstanceMetaData> allInstanceMetaData = stack.getNotDeletedInstanceMetaDataSet();
-            updateWithHostData(stack, stack.getNotDeletedInstanceMetaDataSet());
-            instanceMetaDataService.saveAll(allInstanceMetaData);
-        }
+        Set<InstanceMetaData> allInstanceMetaData = stack.getNotDeletedInstanceMetaDataSet();
+        updateWithHostData(stack, stack.getNotDeletedInstanceMetaDataSet());
+        instanceMetaDataService.saveAll(allInstanceMetaData);
     }
 
     public void setupNewHostMetadata(Long stackId, Collection<String> newAddresses) throws CloudbreakException {
         LOGGER.info("Extending host metadata: {}", newAddresses);
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
-            Set<InstanceMetaData> newInstanceMetadata = stack.getNotDeletedInstanceMetaDataSet().stream()
-                    .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
-                    .collect(Collectors.toSet());
-            updateWithHostData(stack, newInstanceMetadata);
-            instanceMetaDataService.saveAll(newInstanceMetadata);
-        }
+        Set<InstanceMetaData> newInstanceMetadata = stack.getNotDeletedInstanceMetaDataSet().stream()
+                .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
+                .collect(Collectors.toSet());
+        updateWithHostData(stack, newInstanceMetadata);
+        instanceMetaDataService.saveAll(newInstanceMetadata);
     }
 
     private void updateWithHostData(Stack stack, Collection<InstanceMetaData> metadataToUpdate) throws CloudbreakSecuritySetupException {
@@ -75,7 +66,6 @@ public class HostMetadataSetup {
                     .collect(Collectors.toList());
             if (!privateIps.isEmpty()) {
                 GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-                HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
                 Map<String, String> members = hostOrchestrator.getMembers(gatewayConfig, privateIps);
                 LOGGER.info("Received host names from hosts: {}, original targets: {}", members.values(), privateIps);
                 for (InstanceMetaData instanceMetaData : metadataToUpdate) {

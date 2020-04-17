@@ -109,11 +109,7 @@ public class ClusterTerminationActions {
         return new AbstractClusterAction<>(ClusterTerminationResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterTerminationResult payload, Map<Object, Object> variables) {
-                if (payload.isOperationAllowed()) {
-                    clusterTerminationFlowService.finishClusterTerminationAllowed(context, payload);
-                } else {
-                    clusterTerminationFlowService.finishClusterTerminationNotAllowed(context, payload);
-                }
+                clusterTerminationFlowService.finishClusterTerminationAllowed(context, payload);
                 sendEvent(context);
             }
 

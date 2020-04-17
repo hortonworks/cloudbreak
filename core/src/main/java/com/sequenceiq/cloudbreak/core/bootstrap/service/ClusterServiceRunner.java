@@ -11,10 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -40,9 +38,6 @@ public class ClusterServiceRunner {
     private ClusterService clusterService;
 
     @Inject
-    private OrchestratorTypeResolver orchestratorTypeResolver;
-
-    @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
@@ -66,19 +61,13 @@ public class ClusterServiceRunner {
 
         generateGatewaySignKeys(cluster);
 
-        Orchestrator orchestrator = stack.getOrchestrator();
         MDCBuilder.buildMdcContext(cluster);
-        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
-        if (orchestratorType.hostOrchestrator()) {
-            hostRunner.runClusterServices(stack, cluster, List.of());
-            updateAmbariClientConfig(stack, cluster);
-            for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaDataSet()) {
-                instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.SERVICES_RUNNING);
-            }
-        } else {
-            LOGGER.info("Please implement {} orchestrator because it is not on classpath.", orchestrator.getType());
-            throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
+        hostRunner.runClusterServices(stack, cluster, List.of());
+        updateAmbariClientConfig(stack, cluster);
+        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaDataSet()) {
+            instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.SERVICES_RUNNING);
         }
+
     }
 
     private void generateGatewaySignKeys(Cluster cluster) {
@@ -98,24 +87,14 @@ public class ClusterServiceRunner {
 
     public void updateSaltState(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Orchestrator orchestrator = stack.getOrchestrator();
-        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
-        if (orchestratorType.containerOrchestrator()) {
-            LOGGER.debug("Container orchestrator is not supported for this action.");
-        } else {
-            Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId())
-                    .orElseThrow(NotFoundException.notFound("cluster", stack.getId()));
-            hostRunner.runClusterServices(stack, cluster, List.of());
-        }
+        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId())
+                .orElseThrow(NotFoundException.notFound("cluster", stack.getId()));
+        hostRunner.runClusterServices(stack, cluster, List.of());
     }
 
     public String changePrimaryGateway(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Orchestrator orchestrator = stack.getOrchestrator();
-        if (orchestratorTypeResolver.resolveType(orchestrator.getType()).hostOrchestrator()) {
-            return hostRunner.changePrimaryGateway(stack);
-        }
-        throw new CloudbreakException(String.format("Change primary gateway is not supported on orchestrator %s", orchestrator.getType()));
+        return hostRunner.changePrimaryGateway(stack);
     }
 
     private HttpClientConfig buildAmbariClientConfig(Stack stack, String gatewayPublicIp) {

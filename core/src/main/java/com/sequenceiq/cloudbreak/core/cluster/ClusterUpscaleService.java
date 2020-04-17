@@ -16,11 +16,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
-import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -44,9 +41,6 @@ public class ClusterUpscaleService {
 
     @Inject
     private ClusterService clusterService;
-
-    @Inject
-    private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @Inject
     private ClusterHostServiceRunner hostRunner;
@@ -73,25 +67,20 @@ public class ClusterUpscaleService {
             throws CloudbreakException, ClusterClientInitException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Start adding cluster containers");
-        Orchestrator orchestrator = stack.getOrchestrator();
-        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
-        if (orchestratorType.hostOrchestrator()) {
-            Map<String, String> hosts = hostRunner.addClusterServices(stackId, hostGroupName, scalingAdjustment);
-            if (primaryGatewayChanged) {
-                clusterServiceRunner.updateAmbariClientConfig(stack, stack.getCluster());
-            }
-            for (String hostName : hosts.keySet()) {
-                if (!hostsPerHostGroup.containsKey(hostGroupName)) {
-                    hostsPerHostGroup.put(hostGroupName, new ArrayList<>());
-                }
-                hostsPerHostGroup.get(hostGroupName).add(hostName);
-            }
-            clusterService.updateInstancesToRunning(stack.getCluster().getId(), hostsPerHostGroup);
-        } else {
-            LOGGER.info("Please implement {} orchestrator because it is not on classpath.", orchestrator.getType());
-            throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
+
+        Map<String, String> hosts = hostRunner.addClusterServices(stackId, hostGroupName, scalingAdjustment);
+        if (primaryGatewayChanged) {
+            clusterServiceRunner.updateAmbariClientConfig(stack, stack.getCluster());
         }
+        for (String hostName : hosts.keySet()) {
+            if (!hostsPerHostGroup.containsKey(hostGroupName)) {
+                hostsPerHostGroup.put(hostGroupName, new ArrayList<>());
+            }
+            hostsPerHostGroup.get(hostGroupName).add(hostName);
+        }
+        clusterService.updateInstancesToRunning(stack.getCluster().getId(), hostsPerHostGroup);
+
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         connector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId).getRunningInstanceMetaDataSet());
     }

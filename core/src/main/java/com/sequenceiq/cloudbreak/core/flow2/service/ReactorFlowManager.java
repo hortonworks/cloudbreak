@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.service;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrenew.ClusterCertificateRenewEvent.CLUSTER_CERTIFICATE_REISSUE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_UPSCALE_TRIGGER_EVENT;
@@ -50,7 +51,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralCluste
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -64,9 +64,6 @@ import reactor.rx.Promise;
 @Service
 public class ReactorFlowManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactorFlowManager.class);
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private TerminationTriggerService terminationTriggerService;
@@ -230,9 +227,8 @@ public class ReactorFlowManager {
     }
 
     public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, boolean removeOnly) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stack.getId(), failedNodesMap, removeOnly));
+                new ClusterRepairTriggerEvent(stackId, failedNodesMap, removeOnly));
     }
 
     public FlowIdentifier triggerStackImageUpdate(Long stackId, String newImageId, String imageCatalogName, String imageCatalogUrl) {
@@ -263,4 +259,8 @@ public class ReactorFlowManager {
         });
     }
 
+    public FlowIdentifier triggerSaltUpdate(Long stackId) {
+        String selector = SALT_UPDATE_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
+    }
 }

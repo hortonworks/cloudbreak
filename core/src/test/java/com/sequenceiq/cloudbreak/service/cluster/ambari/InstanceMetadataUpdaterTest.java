@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataTyp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -50,9 +49,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class InstanceMetadataUpdaterTest {
-
-    @Mock
-    private HostOrchestratorResolver hostOrchestratorResolver;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -78,7 +74,6 @@ public class InstanceMetadataUpdaterTest {
     @Before
     public void setUp() throws CloudbreakException, JsonProcessingException, CloudbreakOrchestratorFailedException {
         MockitoAnnotations.initMocks(this);
-        when(hostOrchestratorResolver.get(anyString())).thenReturn(hostOrchestrator);
         when(gatewayConfigService.getGatewayConfig(any(Stack.class), any(InstanceMetaData.class), anyBoolean())).thenReturn(gatewayConfig);
 
         InstanceMetadataUpdater.Package packageByName = new InstanceMetadataUpdater.Package();

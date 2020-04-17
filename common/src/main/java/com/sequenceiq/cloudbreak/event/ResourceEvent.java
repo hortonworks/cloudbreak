@@ -238,6 +238,9 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_DISTRIBUTE_PARCEL("cluster.upgrade.distribute.parcel"),
     CLUSTER_UPGRADE_START_UPGRADE("cluster.upgrade.start.upgrade"),
     CLUSTER_UPGRADE_FAILED("cluster.upgrade.failed"),
+
+    CLUSTER_SALT_UPDATE_FAILED("cluster.salt.update.failed"),
+    CLUSTER_SALT_UPDATE_FINISHED("cluster.salt.update.finished"),
     CLUSTER_STOPPING("cluster.stopping"),
     CLUSTER_STOPPED("cluster.stopped"),
     CLUSTER_STOP_FAILED("cluster.stop.failed"),

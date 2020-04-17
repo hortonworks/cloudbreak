@@ -15,9 +15,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -47,13 +46,10 @@ public class MountDisksTest {
     private GatewayConfigService gatewayConfigService;
 
     @Mock
-    private HostOrchestratorResolver hostOrchestratorResolver;
-
-    @Mock
-    private OrchestratorTypeResolver orchestratorTypeResolver;
-
-    @Mock
     private ComponentConfigProviderService componentConfigProviderService;
+
+    @Mock
+    private HostOrchestrator hostOrchestrator;
 
     @InjectMocks
     private MountDisks underTest;

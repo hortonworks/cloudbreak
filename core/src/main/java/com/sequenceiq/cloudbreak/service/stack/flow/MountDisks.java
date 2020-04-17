@@ -22,14 +22,11 @@ import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
-import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -64,10 +61,7 @@ public class MountDisks {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private HostOrchestratorResolver hostOrchestratorResolver;
-
-    @Inject
-    private OrchestratorTypeResolver orchestratorTypeResolver;
+    private HostOrchestrator hostOrchestrator;
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
@@ -97,15 +91,8 @@ public class MountDisks {
     }
 
     private void mountDisks(Stack stack, Set<Node> nodes, Set<Node> allNodes) throws CloudbreakException {
-        Orchestrator orchestrator = stack.getOrchestrator();
-        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
-        if (orchestratorType.containerOrchestrator()) {
-            return;
-        }
-
         Cluster cluster = stack.getCluster();
         try {
-            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(orchestrator.getType());
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
 
@@ -131,8 +118,8 @@ public class MountDisks {
                     }
                 }
             });
-        } catch (Exception e) {
-            LOGGER.error("Failed to get orchestrator by type: {}", orchestrator.getType());
+        } catch (CloudbreakOrchestratorFailedException e) {
+            LOGGER.error("Failed to mount disks", e);
             throw new CloudbreakSecuritySetupException(e);
         }
     }
