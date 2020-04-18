@@ -17,6 +17,7 @@ import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
@@ -27,7 +28,6 @@ import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.SecurityConfig;
@@ -131,9 +131,10 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
     private void createCluster(AutoscaleStackV4Response stack, MonitoredStack monitoredStack) {
         LOGGER.debug("Creating cluster for Cloudera Manager host: {}", monitoredStack.getClusterManager().getHost());
         Cluster cluster = clusterService.create(monitoredStack, RUNNING,
-                new ClusterPertain(stack.getTenant(), stack.getWorkspaceId(), stack.getUserId()));
+                new ClusterPertain(stack.getTenant(), stack.getWorkspaceId(), stack.getUserId(), stack.getUserCrn()));
         MDCBuilder.buildMdcContext(cluster);
         History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
+
         notificationSender.send(cluster, history);
     }
 
@@ -156,7 +157,7 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
         }
         ClusterManager clusterManager =
                 new ClusterManager(host, gatewayPort, stack.getUserNamePath(), stack.getPasswordPath(), ClusterManagerVariant.CLOUDERA_MANAGER);
-        return new MonitoredStack(clusterManager, stack.getName(), stack.getStackCrn(), stack.getStackType(),
+        return new MonitoredStack(clusterManager, stack.getName(), stack.getStackCrn(), stack.getCloudPlatform(), stack.getStackType(),
                 stack.getStackId(), securityConfig, stack.getTunnel());
     }
 
@@ -170,7 +171,7 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
             String pass = secretService.get(cm.getPass());
             ApiClient client = clouderaManagerApiClientProvider.getClient(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);
             ClouderaManagerResourceApi resourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
-            Boolean healthCheckResult = requestLogging.logging(() -> {
+            Boolean healthCheckResult = requestLogging.logResponseTime(() -> {
                 try {
                     ApiVersionInfo version = resourceApi.getVersion();
                     return StringUtils.isNotEmpty(version.getVersion());

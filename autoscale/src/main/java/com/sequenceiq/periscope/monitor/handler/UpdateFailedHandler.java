@@ -30,6 +30,8 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
 
     private static final String DELETE_STATUSES_PREFIX = "DELETE_";
 
+    private static final String STOPPED_STATUSES_PREFIX = "STOP";
+
     private static final String AVAILABLE = "AVAILABLE";
 
     private static final int RETRY_THRESHOLD = 5;
@@ -58,42 +60,42 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         }
         MDCBuilder.buildMdcContext(cluster);
         StackV4Response stackResponse = getStackById(cluster.getStackCrn());
-        if (stackResponse == null) {
-            LOGGER.debug("Suspending cluster {}", autoscaleClusterId);
+        String stackStatus = getStackStatus(stackResponse);
+        if (stackResponse == null || stackStatus.startsWith(STOPPED_STATUSES_PREFIX)) {
+            LOGGER.debug("Suspending cluster '{}', Cloudbreak stack status '{}'", cluster.getStackCrn(), stackStatus);
             suspendCluster(cluster);
             return;
         }
-        String stackStatus = getStackStatus(stackResponse);
         if (stackStatus.startsWith(DELETE_STATUSES_PREFIX)) {
             clusterService.removeById(autoscaleClusterId);
-            LOGGER.debug("Delete cluster {} due to failing update attempts and Cloudbreak stack status.", autoscaleClusterId);
+            LOGGER.debug("Delete cluster '{}' due to failing update attempts and Cloudbreak stack status.", cluster.getStackCrn());
             return;
         }
         Integer failed = updateFailures.get(autoscaleClusterId);
         if (failed == null) {
-            LOGGER.debug("New failed cluster id: [{}]", autoscaleClusterId);
+            LOGGER.debug("New failed cluster : [{}]", cluster.getStackCrn());
             updateFailures.put(autoscaleClusterId, 1);
         } else if (RETRY_THRESHOLD - 1 == failed) {
             Status clusterStatus = stackResponse.getCluster().getStatus();
             if (stackStatus.equals(AVAILABLE) && clusterStatus != null && clusterStatus.name().equals(AVAILABLE)) {
                 // Cluster manager server is unreacheable but the stack and cluster statuses are "AVAILABLE"
                 reportClusterManagerServerFailure(cluster, stackResponse);
-                LOGGER.debug("Suspend cluster monitoring for cluster {} due to failing update attempts and Cloudbreak stack status {}",
-                        autoscaleClusterId, stackStatus);
+                LOGGER.debug("Suspend cluster monitoring for cluster '{}' due to failing update attempts and Cloudbreak stack status '{}'",
+                        cluster.getStackCrn(), stackStatus);
             } else {
-                LOGGER.debug("Suspend cluster monitoring for cluster {}", autoscaleClusterId);
+                LOGGER.debug("Suspend cluster monitoring for cluster '{}'", cluster.getStackCrn());
             }
             suspendCluster(cluster);
             updateFailures.remove(autoscaleClusterId);
         } else {
             int value = failed + 1;
-            LOGGER.debug("Increase failed count[{}] for cluster id: [{}]", value, autoscaleClusterId);
+            LOGGER.debug("Increase failed count[{}] for cluster id: [{}]", value, cluster.getStackCrn());
             updateFailures.put(autoscaleClusterId, value);
         }
     }
 
     private String getStackStatus(StackV4Response stackResponse) {
-        return stackResponse.getStatus() != null ? stackResponse.getStatus().name() : "";
+        return stackResponse != null && stackResponse.getStatus() != null ? stackResponse.getStatus().name() : "";
     }
 
     private StackV4Response getStackById(String stackCrn) {

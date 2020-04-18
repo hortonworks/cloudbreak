@@ -21,12 +21,14 @@ public class AutoscaleStackToAutoscaleStackResponseJsonConverter extends Abstrac
         result.setTenant(source.getTenantName());
         result.setWorkspaceId(source.getWorkspaceId());
         result.setUserId(source.getUserId());
+        result.setUserCrn(source.getUserCrn());
         result.setStackId(source.getId());
         result.setName(source.getName());
         result.setGatewayPort(source.getGatewayPort());
         result.setCreated(source.getCreated());
         result.setStatus(source.getStackStatus());
         result.setStackCrn(source.getCrn());
+        result.setCloudPlatform(source.getCloudPlatform());
         result.setStackType(source.getType());
         result.setTunnel(source.getTunnel());
 

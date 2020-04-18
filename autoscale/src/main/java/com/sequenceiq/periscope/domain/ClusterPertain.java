@@ -20,13 +20,16 @@ public class ClusterPertain {
 
     private String userId;
 
+    private String userCrn;
+
     public ClusterPertain() {
     }
 
-    public ClusterPertain(String tenant, Long workspaceId, String userId) {
+    public ClusterPertain(String tenant, Long workspaceId, String userId, String userCrn) {
         this.tenant = tenant;
         this.workspaceId = workspaceId;
         this.userId = userId;
+        this.userCrn = userCrn;
     }
 
     public Long getId() {
@@ -59,5 +62,13 @@ public class ClusterPertain {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getUserCrn() {
+        return userCrn;
+    }
+
+    public void setUserCrn(String userCrn) {
+        this.userCrn = userCrn;
     }
 }

@@ -1,5 +1,9 @@
 package com.sequenceiq.periscope.domain;
 
+import java.util.concurrent.TimeUnit;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class LoadAlertConfiguration {
 
     private Integer minResourceValue;
@@ -26,6 +30,11 @@ public class LoadAlertConfiguration {
 
     public Integer getCoolDownMinutes() {
         return coolDownMinutes;
+    }
+
+    @JsonIgnore
+    public Long getCoolDownMillis() {
+        return TimeUnit.MILLISECONDS.convert(coolDownMinutes, TimeUnit.MINUTES);
     }
 
     public void setCoolDownMinutes(Integer coolDownMinutes) {

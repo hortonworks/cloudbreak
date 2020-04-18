@@ -75,5 +75,4 @@ public abstract class BaseAlert implements Clustered {
     public void setCluster(Cluster cluster) {
         this.cluster = cluster;
     }
-
 }

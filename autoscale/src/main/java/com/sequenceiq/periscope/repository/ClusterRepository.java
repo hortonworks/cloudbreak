@@ -28,11 +28,23 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     @Query("SELECT c.id FROM Cluster c WHERE c.stackCrn = :stackCrn")
     Long findIdStackCrn(@Param("stackCrn") String stackCrn);
 
+    @Query("SELECT c FROM Cluster c WHERE c.id IN :clusterIds")
+    List<Cluster> findClustersByClusterIds(@Param("clusterIds") List<Long> clusterIds);
+
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain WHERE c.clusterPertain.userId = :userId")
     List<Cluster> findByUserId(@Param("userId") String userId);
 
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain WHERE c.clusterPertain.userId = :userId and c.stackType = :stackType")
     List<Cluster> findByUserIdAndStackType(@Param("userId") String userId, @Param("stackType") StackType stackType);
+
+    @Query("SELECT distinct c.id FROM Cluster c JOIN c.loadAlerts loadalert WHERE c.stackType = :stackType " +
+            " and c.autoscalingEnabled = :autoScalingEnabled" +
+            " and c.state = :clusterState  " +
+            " and (:periscopeNodeId IS NULL or c.periscopeNodeId = :periscopeNodeId) ")
+    List<Long> findByLoadAlertAndStackTypeAndClusterStateAndAutoscaling(@Param("stackType") StackType stackType,
+            @Param("clusterState") ClusterState clusterState,
+            @Param("autoScalingEnabled") Boolean autoScalingEnabled,
+            @Param("periscopeNodeId") String periscopeNodeId);
 
     List<Cluster> findByStateAndPeriscopeNodeId(ClusterState state, String nodeId);
 

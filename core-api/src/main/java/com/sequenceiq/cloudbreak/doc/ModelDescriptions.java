@@ -128,6 +128,7 @@ public class ModelDescriptions {
         public static final String TYPE = "the typeof the resource";
         public static final String WORKSPACE_ID = "id of the workspace";
         public static final String USER_ID = "id of the user";
+        public static final String USER_CRN = "crn of the user";
         public static final String STACK_ID = "id of the stack";
         public static final String CUSTOM = "AmbariKerberosDescriptor parameters as a json";
         public static final String ENTRIES = "Entries parameters as a json";

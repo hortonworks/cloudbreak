@@ -9,7 +9,7 @@ management:
     web:
       base-path: "/"
       exposure:
-        include: info,health,prometheus
+        include: info,health,prometheus,metrics
       path-mapping:
         prometheus: metrics
   endpoint:
@@ -32,6 +32,7 @@ management:
 periscope:
   cert:
     dir: /certs/
+
   db:
     env:
       user: postgres
@@ -44,6 +45,18 @@ periscope:
       addr: localhost
       port: 5432
   cloudbreak.url: http://localhost:9091
+  enabledPlatforms: AZURE,AWS
+  enabledAutoscaleMonitors:
+    time-monitor:
+      enabled: true
+    load-monitor:
+      enabled: true
+    cluster-manager-host-health-monitor:
+      enabled: true
+    metric-monitor:
+      enabled: false
+    prometheus-monitor:
+      enabled: false
 
 cb:
   server:

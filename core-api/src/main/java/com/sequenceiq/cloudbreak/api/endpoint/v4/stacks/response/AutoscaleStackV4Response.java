@@ -27,6 +27,9 @@ public class AutoscaleStackV4Response {
     @ApiModelProperty(StackModelDescription.USER_ID)
     private String userId;
 
+    @ApiModelProperty(StackModelDescription.USER_CRN)
+    private String userCrn;
+
     @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long stackId;
 
@@ -62,6 +65,9 @@ public class AutoscaleStackV4Response {
 
     @ApiModelProperty(StackModelDescription.CRN)
     private String stackCrn;
+
+    @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
+    private String cloudPlatform;
 
     @ApiModelProperty(StackModelDescription.TYPE)
     private StackType stackType;
@@ -195,5 +201,21 @@ public class AutoscaleStackV4Response {
 
     public void setStackType(StackType stackType) {
         this.stackType = stackType;
+    }
+
+    public String getUserCrn() {
+        return userCrn;
+    }
+
+    public void setUserCrn(String userCrn) {
+        this.userCrn = userCrn;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 }

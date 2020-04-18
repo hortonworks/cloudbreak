@@ -7,6 +7,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
@@ -57,6 +59,7 @@ public class AutoScaleClusterCommonService {
         return getClusterByCrnOrName(NameOrCrn.ofName(stackName));
     }
 
+    @Retryable(value = NotFoundException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     protected Cluster getClusterByCrnOrName(NameOrCrn nameOrCrn) {
         return nameOrCrn.hasName() ?
                 clusterService.findOneByStackName(nameOrCrn.getName())

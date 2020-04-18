@@ -199,7 +199,7 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
         when(evaluatorContext.getData()).thenReturn(stack);
         when(securityConfigService.getSecurityConfig(anyLong())).thenReturn(new SecurityConfig());
         when(clusterService.findOneByStackId(anyLong())).thenReturn(cluster);
-        when(requestLogging.logging(any(), any())).thenReturn(healthy);
+        when(requestLogging.logResponseTime(any(), any())).thenReturn(healthy);
         if (cluster != null) {
             when(historyService.createEntry(any(), anyString(), anyInt(), any(Cluster.class))).thenReturn(history);
         }
