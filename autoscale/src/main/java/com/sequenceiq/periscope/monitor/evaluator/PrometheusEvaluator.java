@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
+import static com.sequenceiq.periscope.monitor.evaluator.ScalingConstants.DEFAULT_CLUSTER_COOLDOWN_MINS;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -77,8 +79,11 @@ public class PrometheusEvaluator extends EvaluatorExecutor {
         long start = System.currentTimeMillis();
         try {
             Cluster cluster = clusterService.findById(clusterId);
-            MDCBuilder.buildMdcContext(cluster);
+            if (!isCoolDownTimeElapsed(cluster.getStackCrn(), DEFAULT_CLUSTER_COOLDOWN_MINS, cluster.getLastScalingActivity())) {
+                return;
+            }
 
+            MDCBuilder.buildMdcContext(cluster);
             TlsConfiguration tlsConfig = tlsSecurityService.getTls(clusterId);
             Client client = RestClientUtil.createClient(tlsConfig.getServerCert(),
                     tlsConfig.getClientCert(), tlsConfig.getClientKey(), true);

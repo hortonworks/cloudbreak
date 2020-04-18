@@ -74,6 +74,9 @@ public class ClusterService {
         cluster.setStackId(stack.getStackId());
         cluster.setStackType(stack.getStackType());
         cluster.setTunnel(stack.getTunnel());
+        if (stack.getCloudPlatform() != null) {
+            cluster.setCloudPlatform(stack.getCloudPlatform().toUpperCase());
+        }
         if (clusterState != null) {
             cluster.setState(clusterState);
         }
@@ -207,6 +210,15 @@ public class ClusterService {
 
     public List<Cluster> findAllForNode(ClusterState state, boolean autoscalingEnabled, String nodeId) {
         return clusterRepository.findByStateAndAutoscalingEnabledAndPeriscopeNodeId(state, autoscalingEnabled, nodeId);
+    }
+
+    public List<Cluster> findClustersByClusterIds(List<Long> clusterIds) {
+        return clusterRepository.findClustersByClusterIds(clusterIds);
+    }
+
+    public List<Long> findLoadAlertClustersForNode(StackType stackType, ClusterState state,
+            boolean autoscalingEnabled, String nodeId) {
+        return clusterRepository.findByLoadAlertAndStackTypeAndClusterStateAndAutoscaling(stackType, state, autoscalingEnabled, nodeId);
     }
 
     public void validateClusterUniqueness(MonitoredStack stack) {

@@ -26,7 +26,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner.Silent;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -52,8 +52,9 @@ import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 
-@RunWith(Silent.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 @SpringBootTest(classes = SpringConfig.class)
+@Ignore("Ignored since ClusterManagerHostHealthMonitor is disabled by default.")
 public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadContext {
 
     @Inject

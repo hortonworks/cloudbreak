@@ -2,14 +2,21 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.util.List;
+import java.util.Set;
+
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
 import com.cloudera.cdp.shaded.javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
@@ -86,8 +93,23 @@ public interface AutoscaleV4Endpoint {
             nickname = "getCertificateStackForAutoscale")
     CertificateV4Response getCertificate(@PathParam("crn") String crn);
 
+    @DELETE
+    @Path("/stack/crn/{crn}/instances")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "decommissionInstancesForClusterCrn")
+    void decommissionInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
+            @QueryParam("workspaceId") @Valid Long workspaceId,
+            @QueryParam("instanceId") @NotEmpty List<String> instanceIds,
+            @QueryParam("forced") @DefaultValue("false") Boolean forced);
+
     @GET
     @Path("clusterproxy")
     @Produces(MediaType.APPLICATION_JSON)
     ClusterProxyConfiguration getClusterProxyconfiguration();
+
+    @GET
+    @Path("distroXInstanceTypes/{cloudPlatform}")
+    @Produces(MediaType.APPLICATION_JSON)
+    Set<String> getSupportedDistroXInstanceTypes(@PathParam("cloudPlatform") String cloudPlatform);
 }

@@ -58,7 +58,7 @@ public class AmbariAgentHealthEvaluator implements ClusterManagerSpecificHostHea
             MDCBuilder.buildMdcContext(cluster);
             LOGGER.debug("Checking '{}' alerts for cluster {}.", AMBARI_AGENT_HEARTBEAT, clusterId);
             AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
-            return ambariRequestLogging.logging(() -> ambariClient.getAlert(AMBARI_AGENT_HEARTBEAT_DEF_NAME), "alert")
+            return ambariRequestLogging.logResponseTime(() -> ambariClient.getAlert(AMBARI_AGENT_HEARTBEAT_DEF_NAME), "alert")
                     .stream()
                     .filter(history -> {
                         String currentState = (String) history.get(ALERT_STATE);

@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
+import static com.sequenceiq.periscope.monitor.evaluator.ScalingConstants.DEFAULT_CLUSTER_COOLDOWN_MINS;
+
 import java.util.List;
 import java.util.Map;
 
@@ -77,12 +79,16 @@ public class MetricEvaluator extends EvaluatorExecutor {
         long start = System.currentTimeMillis();
         try {
             Cluster cluster = clusterService.findById(clusterId);
+            if (!isCoolDownTimeElapsed(cluster.getStackCrn(), DEFAULT_CLUSTER_COOLDOWN_MINS, cluster.getLastScalingActivity())) {
+                return;
+            }
+
             MDCBuilder.buildMdcContext(cluster);
             AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
             for (MetricAlert alert : alertRepository.findAllByCluster(clusterId)) {
                 String alertName = alert.getName();
                 LOGGER.debug("Checking metric based alert: '{}'", alertName);
-                List<Map<String, Object>> alertHistory = requestLogging.logging(() ->
+                List<Map<String, Object>> alertHistory = requestLogging.logResponseTime(() ->
                         ambariClient.getAlertHistory(alert.getDefinitionName(), 1), "alertHistory");
                 int historySize = alertHistory.size();
                 if (historySize > 1) {

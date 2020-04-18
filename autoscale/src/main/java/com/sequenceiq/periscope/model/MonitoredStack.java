@@ -15,6 +15,8 @@ public final class MonitoredStack {
 
     private final StackType stackType;
 
+    private final String cloudPlatform;
+
     private final Long stackId;
 
     private final SecurityConfig securityConfig;
@@ -22,7 +24,7 @@ public final class MonitoredStack {
     private final Tunnel tunnel;
 
     @SuppressWarnings("checkstyle:ExecutableStatementCount")
-    public MonitoredStack(ClusterManager clusterManager, String stackName, String stackCrn,
+    public MonitoredStack(ClusterManager clusterManager, String stackName, String stackCrn, String cloudPlatform,
             StackType stackType, Long stackId, SecurityConfig securityConfig, Tunnel tunnel) {
         this.clusterManager = clusterManager;
         this.securityConfig = securityConfig;
@@ -30,6 +32,7 @@ public final class MonitoredStack {
         this.stackId = stackId;
         this.stackName = stackName;
         this.stackCrn = stackCrn;
+        this.cloudPlatform = cloudPlatform;
         this.stackType = stackType;
     }
 
@@ -47,6 +50,10 @@ public final class MonitoredStack {
 
     public StackType getStackType() {
         return stackType;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
     }
 
     public Long getStackId() {

@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.BadRequestException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.endpoint.v1.AlertEndpoint;
@@ -47,6 +48,9 @@ import com.sequenceiq.periscope.service.NotFoundException;
 
 @Component
 public class AlertController implements AlertEndpoint {
+
+    @Value("${periscope.enabledPlatforms:}")
+    private Set<String> supportedCloudPlatforms;
 
     @Inject
     private AlertService alertService;
@@ -214,8 +218,20 @@ public class AlertController implements AlertEndpoint {
         return loadAlertResponseConverter.convert(loadAlert);
     }
 
+    private void validateCloudPlatform(Cluster cluster) {
+        if (!supportedCloudPlatforms.contains(cluster.getCloudPlatform())) {
+            throw new BadRequestException(String.format("Autoscaling for CloudPlatform '%s' is not supported, Cluster '%s'",
+                    cluster.getCloudPlatform(), cluster.getStackCrn()));
+        }
+    }
+
     private void validateTimeAlert(Long clusterId, Optional<Long> alertId, TimeAlertRequest json) {
-        alertId.ifPresent(alert -> validateAlertForUpdate(clusterId, alert, AlertType.TIME));
+        Cluster cluster = clusterService.findById(clusterId);
+        alertId.ifPresentOrElse(updateAlert -> {
+                    validateAlertForUpdate(clusterId, updateAlert, AlertType.TIME);
+                }, () -> {
+                    validateCloudPlatform(cluster);
+                });
         try {
             dateService.validateTimeZone(json.getTimeZone());
             dateService.getCronExpression(json.getCron());
@@ -230,6 +246,8 @@ public class AlertController implements AlertEndpoint {
                 updateAlert -> {
                     validateAlertForUpdate(clusterId, updateAlert, AlertType.LOAD);
                 }, () -> {
+                    validateCloudPlatform(cluster);
+
                     if (!cluster.getTunnel().useClusterProxy()) {
                         throw new BadRequestException(String.format("Cluster '%s' is not configured with Cluster Proxy Tunnel, " +
                                 "Cluster Tunnel is %s. Load Based Scaling not supported", cluster.getStackCrn(), cluster.getTunnel()));

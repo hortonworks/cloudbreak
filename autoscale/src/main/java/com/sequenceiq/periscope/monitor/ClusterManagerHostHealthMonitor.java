@@ -2,13 +2,15 @@ package com.sequenceiq.periscope.monitor;
 
 import java.util.List;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterManagerHostHealthEvaluator;
 
-@Component
+@Component("ClusterManagerHostHealthMonitor")
+@ConditionalOnProperty(prefix = "periscope.enabledAutoscaleMonitors.cluster-manager-host-health-monitor", name = "enabled", havingValue = "true")
 public class ClusterManagerHostHealthMonitor extends ClusterMonitor {
 
     @Override
@@ -18,7 +20,7 @@ public class ClusterManagerHostHealthMonitor extends ClusterMonitor {
 
     @Override
     public String getTriggerExpression() {
-        return MonitorUpdateRate.EVERY_MIN_RATE_CRON;
+        return MonitorUpdateRate.EVERY_FIVE_MIN_RATE_CRON;
     }
 
     @Override

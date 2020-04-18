@@ -113,7 +113,7 @@ public class AmbariClusterCreationEvaluator extends ClusterCreationEvaluator {
     private void createCluster(AutoscaleStackV4Response stack, MonitoredStack resolvedAmbari) {
         LOGGER.debug("Creating cluster for Ambari host: {}", resolvedAmbari.getClusterManager().getHost());
         Cluster cluster = clusterService.create(resolvedAmbari, null,
-                new ClusterPertain(stack.getTenant(), stack.getWorkspaceId(), stack.getUserId()));
+                new ClusterPertain(stack.getTenant(), stack.getWorkspaceId(), stack.getUserId(), stack.getUserCrn()));
         MDCBuilder.buildMdcContext(cluster);
         History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
         notificationSender.send(cluster, history);
@@ -137,7 +137,7 @@ public class AmbariClusterCreationEvaluator extends ClusterCreationEvaluator {
             securityConfig = securityConfigService.getSecurityConfig(clusterId);
         }
         ClusterManager clusterManager = new ClusterManager(host, gatewayPort, stack.getUserNamePath(), stack.getPasswordPath(), ClusterManagerVariant.AMBARI);
-        return new MonitoredStack(clusterManager, stack.getName(), stack.getStackCrn(), stack.getStackType(),
+        return new MonitoredStack(clusterManager, stack.getName(), stack.getStackCrn(), stack.getCloudPlatform(), stack.getStackType(),
                 stack.getStackId(), securityConfig, stack.getTunnel());
     }
 
@@ -145,7 +145,7 @@ public class AmbariClusterCreationEvaluator extends ClusterCreationEvaluator {
         String host = ambariStack.getClusterManager().getHost();
         try {
             AmbariClient client = ambariClientProvider.createAmbariClient(new Cluster(ambariStack));
-            String healthCheckResult = ambariRequestLogging.logging(() -> {
+            String healthCheckResult = ambariRequestLogging.logResponseTime(() -> {
                 try {
                     return client.healthCheck();
                 } catch (IOException | URISyntaxException e) {

@@ -393,7 +393,7 @@ public class MetricTest {
     }
 
     private ClusterPertain getClusterPertain() {
-        return new ClusterPertain("tenant", 1L, "user");
+        return new ClusterPertain("tenant", 1L, "user", "userCrn");
     }
 
     private Cluster getACluster(ClusterState clusterState) {

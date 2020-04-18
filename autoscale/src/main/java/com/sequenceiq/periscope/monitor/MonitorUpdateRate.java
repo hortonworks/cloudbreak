@@ -8,11 +8,6 @@ public final class MonitorUpdateRate {
     public static final String APP_REPORT_UPDATE_RATE_CRON = "0 0/2 * * * ?";
 
     /**
-     * Every 20 seconds.
-     */
-    public static final String YARN_UPDATE_RATE_CRON = "0/20 * * * * ?";
-
-    /**
      * Every 30 seconds.
      */
     public static final String METRIC_UPDATE_RATE_CRON = "0/30 * * * * ?";
@@ -36,6 +31,16 @@ public final class MonitorUpdateRate {
      * Every minutes.
      */
     public static final String EVERY_MIN_RATE_CRON = "0 * * * * ?";
+
+    /**
+     * Every 2 minutes.
+     */
+    public static final String EVERY_TWO_MIN_RATE_CRON = "0 0/2 * * * ?";
+
+    /**
+     * Every 5 minutes.
+     */
+    public static final String EVERY_FIVE_MIN_RATE_CRON = "0 0/5 * * * ?";
 
     /**
      * Every minutes.
