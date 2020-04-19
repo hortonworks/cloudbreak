@@ -78,8 +78,9 @@ public class EncryptedImageCopyService {
                 .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getImageId()));
         if (!imageIdByGroupName.isEmpty()) {
             Collection<String> imageIds = new HashSet<>(imageIdByGroupName.values());
-            LOGGER.debug("Start polling the availability of the created AMIs: '{}'", String.join(",", imageIds));
+            LOGGER.debug("Start polling the availability of the created encrypted AMIs: '{}'", String.join(",", imageIds));
             checkBooleanPollTask(awsPollTaskFactory.newAMICopyStatusCheckerTask(ac, imageIds, client));
+            LOGGER.info("All created encrypted AMIs are available: '{}'", String.join(",", imageIds));
         }
         return imageIdByGroupName;
     }
@@ -121,6 +122,7 @@ public class EncryptedImageCopyService {
             AuthenticatedContext ac, PersistenceNotifier resourceNotifier) {
 
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
+        LOGGER.debug("Create an encrypted copy of the source AMI '{}' in region: '{}'", selectedAMIName, regionName);
         CopyImageResult copyImageResult = client.copyImage(createCopyImageRequest(selectedAMIName, regionName, awsInstanceView));
         String imageId = copyImageResult.getImageId();
         CloudResource cloudResource = new Builder()
@@ -185,12 +187,12 @@ public class EncryptedImageCopyService {
                 .collect(Collectors.toSet());
     }
 
-    private void deleteImage(AmazonEC2Client client, CloudResource encryptedImage, Image imageOptional, String regionName) {
+    private void deleteImage(AmazonEC2Client client, CloudResource encryptedImage, Image image, String regionName) {
         LOGGER.debug("Deregister encrypted AMI: '{}', in region: '{}'", encryptedImage.getName(), regionName);
         DeregisterImageRequest deregisterImageRequest = new DeregisterImageRequest().withImageId(encryptedImage.getName());
         client.deregisterImage(deregisterImageRequest);
 
-        imageOptional.getBlockDeviceMappings()
+        image.getBlockDeviceMappings()
                 .stream()
                 .filter(deviceMapping -> deviceMapping.getEbs() != null && isNotEmpty(deviceMapping.getEbs().getSnapshotId()))
                 .forEach(deviceMapping -> deleteSnapshot(client, deviceMapping, encryptedImage, regionName));

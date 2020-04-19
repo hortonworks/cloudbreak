@@ -15,14 +15,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
@@ -40,6 +45,7 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
@@ -65,6 +71,9 @@ public class StackRequestManifester {
 
     @Inject
     private SecurityAccessManifester securityAccessManifester;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public void configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxCluster, environment);
@@ -119,6 +128,7 @@ public class StackRequestManifester {
             prepareTelemetryForStack(stackRequest, environment, sdxCluster);
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
             cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment, new ValidationResult.ValidationResultBuilder());
+            setupInstanceVolumeEncryption(stackRequest, environment.getCloudPlatform(), Crn.safeFromString(environment.getCrn()).getAccountId());
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse JSON to stack request");
@@ -220,6 +230,7 @@ public class StackRequestManifester {
         }
     }
 
+    @VisibleForTesting
     void setupCloudStorageAccountMapping(StackV4Request stackRequest, String environmentCrn, IdBrokerMappingSource mappingSource, String cloudPlatform) {
         String stackName = stackRequest.getName();
         CloudStorageRequest cloudStorage = stackRequest.getCluster().getCloudStorage();
@@ -228,13 +239,12 @@ public class StackRequestManifester {
             // getAccountMapping() == null means we need to fetch mappings from IDBMMS.
             if (mappingSource == IdBrokerMappingSource.IDBMMS) {
                 LOGGER.info("Fetching account mappings from IDBMMS associated with environment {} for stack {}.", environmentCrn, stackName);
-                // Must pass the internal actor here as this operation is internal-use only; requests with other actors will be always rejected.
                 MappingsConfig mappingsConfig;
                 try {
+                    // Must pass the internal actor here as this operation is internal-use only; requests with other actors will be always rejected.
                     mappingsConfig = idbmmsClient.getMappingsConfig(INTERNAL_ACTOR_CRN, environmentCrn, Optional.empty());
                 } catch (IdbmmsOperationException e) {
-                    throw new BadRequestException(String.format("Unable to get mappings: %s",
-                            e.getMessage()), e);
+                    throw new BadRequestException(String.format("Unable to get mappings: %s", e.getMessage()), e);
                 }
                 AccountMappingBase accountMapping = new AccountMappingBase();
                 accountMapping.setGroupMappings(mappingsConfig.getGroupMappings());
@@ -253,4 +263,23 @@ public class StackRequestManifester {
                     stackName, environmentCrn);
         }
     }
+
+    @VisibleForTesting
+    void setupInstanceVolumeEncryption(StackV4Request stackRequest, String cloudPlatform, String accountId) {
+        if (CloudPlatform.AWS.name().equals(cloudPlatform) && entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+            stackRequest.getInstanceGroups().forEach(ig -> {
+                AwsInstanceTemplateV4Parameters aws = ig.getTemplate().createAws();
+                AwsEncryptionV4Parameters encryption = aws.getEncryption();
+                if (encryption == null) {
+                    encryption = new AwsEncryptionV4Parameters();
+                    aws.setEncryption(encryption);
+                }
+                if (encryption.getType() == null) {
+                    // FIXME Enable EBS encryption with appropriate KMS key
+                    encryption.setType(EncryptionType.DEFAULT);
+                }
+            });
+        }
+    }
+
 }

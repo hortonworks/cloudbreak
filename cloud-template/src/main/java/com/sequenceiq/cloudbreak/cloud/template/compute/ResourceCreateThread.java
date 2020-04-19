@@ -77,14 +77,16 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     public ResourceRequestResult<List<CloudResourceStatus>> call() {
         List<CloudResourceStatus> results = new ArrayList<>();
 
+        String stackName = auth.getCloudContext().getName();
         for (CloudInstance instance : instances) {
-            LOGGER.debug("Create all compute resources for instance: {}", instance);
+            LOGGER.debug("Create all compute resources for instance: '{}' stack: '{}'", instance, stackName);
             Collection<CloudResource> buildableResources = new ArrayList<>();
             Long privateId = instance.getTemplate().getPrivateId();
             try {
                 List<ComputeResourceBuilder<ResourceBuilderContext>> compute = resourceBuilders.compute(auth.getCloudContext().getPlatform());
                 for (ComputeResourceBuilder<ResourceBuilderContext> builder : compute) {
-                    LOGGER.info("Building {} resources of {} instance group", builder.resourceType(), group.getName());
+                    LOGGER.info("Start building '{} ({})' resources of '{}' instance group of '{}' stack", builder.resourceType(),
+                            builder.getClass().getSimpleName(), group.getName(), stackName);
                     List<CloudResource> cloudResources = builder.create(context, privateId, auth, group, cloudStack.getImage());
                     if (!CollectionUtils.isEmpty(cloudResources)) {
                         buildableResources.addAll(cloudResources);
@@ -111,16 +113,19 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
                             results.addAll(pollerResult);
                         }
                     }
+                    LOGGER.info("Finished building '{} ({})' resources of '{}' instance group of '{}' stack", builder.resourceType(),
+                            builder.getClass().getSimpleName(), group.getName(), stackName);
                 }
             } catch (CancellationException e) {
                 throw e;
             } catch (Exception e) {
-                LOGGER.error("Failed to create resources for instance: {}", instance, e);
+                LOGGER.error(format("Failed to create resources for instance: '%s'", instance), e);
                 results.removeIf(crs -> crs.getPrivateId().equals(privateId));
                 for (CloudResource buildableResource : buildableResources) {
                     results.add(new CloudResourceStatus(buildableResource, ResourceStatus.FAILED, e.getMessage(), privateId));
                 }
             }
+            LOGGER.debug("Finished creating all compute resources for instance: '{}' stack: '{}'", instance, stackName);
         }
 
         return new ResourceRequestResult<>(FutureResult.SUCCESS, results);
