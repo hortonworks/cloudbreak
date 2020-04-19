@@ -182,9 +182,11 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_CLOUD_STORAGE_VALIDATION = "CDP_CLOUD_STORAGE_VALIDATION";
 
+    private static final String CDP_RUNTIME_UPGRADE = "CDP_RUNTIME_UPGRADE";
+
     private static final String CDP_RAZ_ENABLEMENT = "CDP_RAZ";
 
-    private static final String RUNTIME_UPGRADE = "CDP_RUNTIME_UPGRADE";
+    private static final String CDP_FREEIPA_DL_EBS_ENCRYPTION = "CDP_FREEIPA_DL_EBS_ENCRYPTION";
 
     private static final String MOCK_RESOURCE = "mock_resource";
 
@@ -234,6 +236,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.raz.enable}")
     private boolean razEnabled;
+
+    @Value("${auth.mock.freeipadlebsencryption.enable}")
+    private boolean enableFreeIpaDlEbsEncryption;
 
     private String cbLicense;
 
@@ -483,10 +488,13 @@ public class MockUserManagementService extends UserManagementImplBase {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION));
         }
         if (runtimeUpgradeEnabled) {
-            builder.addEntitlements(createEntitlement(RUNTIME_UPGRADE));
+            builder.addEntitlements(createEntitlement(CDP_RUNTIME_UPGRADE));
         }
         if (razEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RAZ_ENABLEMENT));
+        }
+        if (enableFreeIpaDlEbsEncryption) {
+            builder.addEntitlements(createEntitlement(CDP_FREEIPA_DL_EBS_ENCRYPTION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

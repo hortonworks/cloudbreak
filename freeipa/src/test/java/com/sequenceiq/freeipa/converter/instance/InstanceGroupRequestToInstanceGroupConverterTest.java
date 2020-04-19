@@ -1,19 +1,21 @@
 package com.sequenceiq.freeipa.converter.instance;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
 import com.sequenceiq.freeipa.converter.instance.template.InstanceTemplateRequestToTemplateConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -22,12 +24,10 @@ import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class InstanceGroupRequestToInstanceGroupConverterTest {
 
     private static final String ACCOUNT_ID = "account_id";
-
-    private static final String CLOUD_PLATFORM = "MOCK";
 
     private static final String NAME = "NAME";
 
@@ -60,16 +60,32 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         given(defaultInstanceGroupProvider.createDefaultTemplate(eq(MOCK), eq(ACCOUNT_ID))).willReturn(template);
         given(securityGroupConverter.convert(eq(securityGroupRequest))).willReturn(securityGroup);
         // WHEN
-        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, CLOUD_PLATFORM);
+        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name());
         // THEN
-        assertEquals(NAME, result.getGroupName());
-        assertEquals(InstanceGroupType.MASTER, result.getInstanceGroupType());
-        assertEquals(securityGroup, result.getSecurityGroup());
-        assertEquals(nodeCount, result.getNodeCount());
-        assertEquals(nodeCount, result.getInstanceMetaData().size());
+        assertThat(result).isNotNull();
+        assertThat(result.getGroupName()).isEqualTo(NAME);
+        assertThat(result.getInstanceGroupType()).isEqualTo(InstanceGroupType.MASTER);
+        assertThat(result.getSecurityGroup()).isEqualTo(securityGroup);
+        assertThat(result.getNodeCount()).isEqualTo(nodeCount);
+        assertThat(result.getInstanceMetaData().size()).isEqualTo(nodeCount);
         for (InstanceMetaData instanceMetaData : result.getInstanceMetaData()) {
-            assertEquals(result, instanceMetaData.getInstanceGroup());
+            assertThat(instanceMetaData.getInstanceGroup()).isEqualTo(result);
         }
+    }
+
+    @Test
+    void convertTestTemplateConversion() {
+        InstanceGroupRequest request = new InstanceGroupRequest();
+
+        InstanceTemplateRequest instanceTemplateRequest = mock(InstanceTemplateRequest.class);
+        request.setInstanceTemplateRequest(instanceTemplateRequest);
+        Template template = mock(Template.class);
+        when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID)).thenReturn(template);
+
+        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name());
+
+        assertThat(result).isNotNull();
+        assertThat(result.getTemplate()).isSameAs(template);
     }
 
 }

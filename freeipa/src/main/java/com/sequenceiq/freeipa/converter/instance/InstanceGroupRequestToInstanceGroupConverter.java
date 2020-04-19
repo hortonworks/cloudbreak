@@ -31,7 +31,7 @@ public class InstanceGroupRequestToInstanceGroupConverter {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(cloudPlatformString);
         instanceGroup.setTemplate(source.getInstanceTemplate() == null
                 ? defaultInstanceGroupProvider.createDefaultTemplate(cloudPlatform, accountId)
-                : templateConverter.convert(source.getInstanceTemplate(), cloudPlatform));
+                : templateConverter.convert(source.getInstanceTemplate(), cloudPlatform, accountId));
         instanceGroup.setSecurityGroup(securityGroupConverter.convert(source.getSecurityGroup()));
         instanceGroup.setGroupName(source.getName());
         instanceGroup.setInstanceGroupType(source.getType());
