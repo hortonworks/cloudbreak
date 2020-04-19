@@ -56,7 +56,7 @@ public class DataDiscoveryServiceCloudStorageRoleConfigProviderTest {
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> dataDiscoveryServiceConfigs = roleConfigs.get("profiler_manager-DATA_DISCOVERY_SERVICE_AGENT-BASE");
 
-        assertEquals(0, dataDiscoveryService.size());
+        assertEquals(0, dataDiscoveryServiceConfigs.size());
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(boolean includeLocations) {
