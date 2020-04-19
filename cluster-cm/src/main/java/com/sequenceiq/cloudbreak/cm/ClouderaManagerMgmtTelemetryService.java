@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 
@@ -60,16 +59,6 @@ public class ClouderaManagerMgmtTelemetryService {
     private static final String TELEMETRY_ALTUS_URL = "telemetry_altus_url";
 
     private static final String TELEMETRY_SAFETY_VALVE = "telemetrypublisher_safety_valve";
-
-    private static final String TELEMETRY_PROXY_ENABLED = "telemetrypublisher_proxy_enabled";
-
-    private static final String TELEMETRY_PROXY_SERVER = "telemetrypublisher_proxy_server";
-
-    private static final String TELEMETRY_PROXY_PORT = "telemetrypublisher_proxy_port";
-
-    private static final String TELEMETRY_PROXY_USER = "telemetrypublisher_proxy_user";
-
-    private static final String TELEMETRY_PROXY_PASSWORD = "telemetrypublisher_proxy_password";
 
     // Telemetry publisher - Safety valve settings
     private static final String DATABUS_HEADER_SDX_ID = "databus.header.sdx.id";
@@ -115,20 +104,17 @@ public class ClouderaManagerMgmtTelemetryService {
     }
 
     public void updateTelemetryConfigs(final Stack stack, final ApiClient client,
-            final Telemetry telemetry, final String sdxContextName,
-            final String sdxStackCrn, final ProxyConfig proxyConfig) throws ApiException {
+            final Telemetry telemetry, final String sdxContextName, final String sdxStackCrn) throws ApiException {
         if (isWorkflowAnalyticsEnabled(stack, telemetry)) {
             MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = new MgmtRoleConfigGroupsResourceApi(client);
-            ApiConfigList configList = buildTelemetryConfigList(stack, telemetry.getWorkloadAnalytics(),
-                    sdxContextName, sdxStackCrn, proxyConfig);
+            ApiConfigList configList = buildTelemetryConfigList(stack, telemetry.getWorkloadAnalytics(), sdxContextName, sdxStackCrn);
             mgmtRoleConfigGroupsResourceApi.updateConfig(String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, TELEMETRYPUBLISHER),
                     "Set configs for Telemetry publisher by CB", configList);
         }
     }
 
     @VisibleForTesting
-    ApiConfigList buildTelemetryConfigList(Stack stack, WorkloadAnalytics wa, String sdxContextName,
-            String sdxCrn, ProxyConfig proxyConfig) {
+    ApiConfigList buildTelemetryConfigList(Stack stack, WorkloadAnalytics wa, String sdxContextName, String sdxCrn) {
         final Map<String, String> configsToUpdate = new HashMap<>();
         Map<String, String> telemetrySafetyValveMap = new HashMap<>();
         telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER,
@@ -136,15 +122,6 @@ public class ClouderaManagerMgmtTelemetryService {
         enrichWithSdxData(sdxContextName, sdxCrn, stack, wa, telemetrySafetyValveMap);
         telemetrySafetyValveMap.put(TELEMETRY_UPLOAD_LOGS, "true");
         configsToUpdate.put(TELEMETRY_SAFETY_VALVE, createStringFromSafetyValveMap(telemetrySafetyValveMap));
-        if (proxyConfig != null) {
-            configsToUpdate.put(TELEMETRY_PROXY_ENABLED, "true");
-            configsToUpdate.put(TELEMETRY_PROXY_SERVER, proxyConfig.getServerHost());
-            configsToUpdate.put(TELEMETRY_PROXY_PORT, String.valueOf(proxyConfig.getServerPort()));
-            proxyConfig.getProxyAuthentication().ifPresent(auth -> {
-                configsToUpdate.put(TELEMETRY_PROXY_USER, auth.getUserName());
-                configsToUpdate.put(TELEMETRY_PROXY_PASSWORD, auth.getPassword());
-            });
-        }
         return makeApiConfigList(configsToUpdate);
     }
 

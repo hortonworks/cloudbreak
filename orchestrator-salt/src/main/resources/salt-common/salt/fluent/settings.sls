@@ -72,7 +72,7 @@
 {% set cloudera_public_gem_repo = 'https://repository.cloudera.com/cloudera/api/gems/cloudera-gems/' %}
 {% set cloudera_azure_plugin_version = '1.0.1' %}
 {% set cloudera_azure_gen2_plugin_version = '0.2.7' %}
-{% set cloudera_databus_plugin_version = '1.0.4' %}
+{% set cloudera_databus_plugin_version = '1.0.3' %}
 {% set redaction_plugin_version = '0.1.2' %}
 {% set platform = salt['pillar.get']('fluent:platform') %}
 
@@ -99,20 +99,6 @@
 {% set anonymization_rules=[] %}
 {% if salt['pillar.get']('fluent:anonymizationRules') %}
 {%   set anonymization_rules = salt['pillar.get']('fluent:anonymizationRules') %}
-{% endif %}
-
-{% if salt['pillar.get']('proxy:host') %}
-  {% set proxy_host = salt['pillar.get']('proxy:host') %}
-  {% set proxy_port = salt['pillar.get']('proxy:port')|string %}
-  {% set proxy_protocol = salt['pillar.get']('proxy:protocol') %}
-  {% set proxy_url = proxy_protocol + "://" + proxy_host + ":" + proxy_port %}
-  {% if salt['pillar.get']('proxy:user') and salt['pillar.get']('proxy:password') %}
-    {% set proxy_auth = True %}
-    {% set proxy_user = salt['pillar.get']('proxy:user') %}
-    {% set proxy_password = salt['pillar.get']('proxy:password') %}
-  {% else %}
-    {% set proxy_auth = False %}
-  {% endif %}
 {% endif %}
 
 {% do fluent.update({
@@ -156,9 +142,5 @@
     "clusterLogsCollectionWorkerIndex": cluster_logs_collection_worker_index,
     "anonymizationRules": anonymization_rules,
     "region": region,
-    "platform": platform,
-    "proxyUrl": proxy_url,
-    "proxyAuth": proxy_auth,
-    "proxyUser": proxy_user,
-    "proxyPassword": proxy_password
+    "platform": platform
 }) %}
