@@ -350,7 +350,7 @@ public class CmCloudStorageConfigDetailsTest {
                 .anyMatch("hwx-remote/dpprofiler"::equals));
         Assert.assertTrue(dataDiscoveryService.stream().map(ConfigQueryEntry::getPropertyName)
                 .anyMatch("file_system_uri"::equals));
-        
+
         Assert.assertEquals(1, profilerAdmin.size());
         Assert.assertTrue(profilerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/dpprofiler"::equals));
