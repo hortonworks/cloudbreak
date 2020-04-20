@@ -116,6 +116,14 @@
               {
                 "name": "hive_server2_transport_mode",
                 "value": "http"
+              },
+              {
+                 "name": "hiveserver2_mv_files_thread",
+                 "value": 20
+              },
+              {
+                 "name": "hiveserver2_load_dynamic_partitions_thread_count",
+                 "value": 20
               }
             ]
           }
