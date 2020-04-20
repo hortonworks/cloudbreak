@@ -207,13 +207,14 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public Cluster buildCluster(
-        Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup,
-        TemplatePreparationObject templatePreparationObject,
-        String sdxContext,
-        String sdxStackCrn,
-        Telemetry telemetry,
-        KerberosConfig kerberosConfig,
-        String template) {
+            Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup,
+            TemplatePreparationObject templatePreparationObject,
+            String sdxContext,
+            String sdxStackCrn,
+            Telemetry telemetry,
+            KerberosConfig kerberosConfig,
+            ProxyConfig proxyConfig,
+            String template) {
         Cluster cluster = stack.getCluster();
         Long clusterId = cluster.getId();
         try {
@@ -222,7 +223,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             clouderaManagerLicenseService.validateClouderaManagerLicense(stack.getCreator());
             String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
 
-            configureCmMgmtServices(templatePreparationObject, sdxStackCrn, telemetry, sdxContextName);
+            configureCmMgmtServices(templatePreparationObject, sdxStackCrn, telemetry, sdxContextName, proxyConfig);
             configureCmSupportTag(templatePreparationObject);
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
             ApiClusterTemplate apiClusterTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
@@ -270,14 +271,15 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     private void configureCmMgmtServices(TemplatePreparationObject templatePreparationObject, String sdxCrn, Telemetry telemetry,
-            String sdxContextName) throws ApiException {
+            String sdxContextName, ProxyConfig proxyConfig) throws ApiException {
         Optional<ApiHost> optionalCmHost = getCmHost(templatePreparationObject, apiClient);
         if (optionalCmHost.isPresent()) {
             ApiHost cmHost = optionalCmHost.get();
             ApiHostRef cmHostRef = new ApiHostRef();
             cmHostRef.setHostId(cmHost.getHostId());
             cmHostRef.setHostname(cmHost.getHostname());
-            mgmtSetupService.setupMgmtServices(stack, apiClient, cmHostRef, templatePreparationObject.getRdsConfigs(), telemetry, sdxContextName, sdxCrn);
+            mgmtSetupService.setupMgmtServices(stack, apiClient, cmHostRef, templatePreparationObject.getRdsConfigs(),
+                    telemetry, sdxContextName, sdxCrn, proxyConfig);
         } else {
             LOGGER.warn("Unable to determine Cloudera Manager host. Skipping management services installation.");
         }
