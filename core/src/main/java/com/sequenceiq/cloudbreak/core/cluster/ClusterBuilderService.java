@@ -134,8 +134,7 @@ public class ClusterBuilderService {
         clusterService.updateCluster(cluster);
         final Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
 
-        Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByCrnWithEnvironmentFallback(cluster.getProxyConfigCrn(), cluster.getEnvironmentCrn());
-        setupProxy(connector, proxyConfig.orElse(null));
+        setupProxy(connector, cluster);
         Set<DatalakeResources> datalakeResources = datalakeResourcesService
                 .findDatalakeResourcesByWorkspaceAndEnvironment(stack.getWorkspace().getId(), stack.getEnvironmentCrn());
 
@@ -169,7 +168,6 @@ public class ClusterBuilderService {
                 sdxStackCrn,
                 telemetry,
                 kerberosConfig,
-                proxyConfig.orElse(null),
                 template);
         clusterService.save(cluster);
         recipeEngine.executePostInstallRecipes(stack);
@@ -190,13 +188,14 @@ public class ClusterBuilderService {
         }
     }
 
-    private void setupProxy(ClusterApi connector, ProxyConfig proxyConfig) {
-        if (proxyConfig != null) {
-            LOGGER.info("proxyConfig is not null, setup proxy for cluster: {}", proxyConfig);
-            connector.clusterSetupService().setupProxy(proxyConfig);
-        } else {
-            LOGGER.info("proxyConfig was not found by proxyConfigCrn");
-        }
+    private void setupProxy(ClusterApi connector, Cluster cluster) {
+        Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByCrnWithEnvironmentFallback(cluster.getProxyConfigCrn(), cluster.getEnvironmentCrn());
+        proxyConfig.ifPresentOrElse(
+                pc -> {
+                    LOGGER.info("proxyConfig is not null, setup proxy for cluster: {}", pc);
+                    connector.clusterSetupService().setupProxy(pc);
+                },
+                () -> LOGGER.info("proxyConfig was not found by proxyConfigCrn"));
     }
 
     private Map<HostGroup, List<InstanceMetaData>> loadInstanceMetadataForHostGroups(Iterable<HostGroup> hostGroups) {

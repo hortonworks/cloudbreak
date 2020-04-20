@@ -28,14 +28,13 @@ public interface ClusterSetupService {
         KerberosConfig kerberosConfig);
 
     Cluster buildCluster(
-            Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup,
-            TemplatePreparationObject templatePreparationObject,
-            String sdxContext,
-            String sdxStackCrn,
-            Telemetry telemetry,
-            KerberosConfig kerberosConfig,
-            ProxyConfig proxyConfig,
-            String template);
+        Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup,
+        TemplatePreparationObject templatePreparationObject,
+        String sdxContext,
+        String sdxStackCrn,
+        Telemetry telemetry,
+        KerberosConfig kerberosConfig,
+        String template);
 
     void waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException;
 

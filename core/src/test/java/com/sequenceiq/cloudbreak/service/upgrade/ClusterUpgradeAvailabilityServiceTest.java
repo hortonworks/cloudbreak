@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -14,8 +12,8 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -64,6 +63,9 @@ public class ClusterUpgradeAvailabilityServiceTest {
 
     @InjectMocks
     private ClusterUpgradeAvailabilityService underTest;
+
+    @Mock
+    private TransactionService transactionService;
 
     @Mock
     private StackService stackService;
@@ -237,10 +239,9 @@ public class ClusterUpgradeAvailabilityServiceTest {
     }
 
     @Test
-    public void testSaltStatesArePresent() {
+    public void testSaltStatesArePresent() throws TransactionService.TransactionExecutionException {
         UpgradeOptionsV4Response response = new UpgradeOptionsV4Response();
-        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
-        when(stackService.getByNameInWorkspaceWithLists(anyString(), anyLong())).thenReturn(Optional.of(createStack(createStackStatus(Status.AVAILABLE))));
+        when(transactionService.required(any(Supplier.class))).thenReturn(gatewayConfig);
         UpgradeOptionsV4Response actual = underTest.checkIfClusterUpgradable(WORKSPACE_ID, STACK_NAME, response);
         assertNull(actual.getReason());
     }
@@ -249,8 +250,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
     public void testSaltStatesAreMissing() throws CloudbreakOrchestratorFailedException {
 
         UpgradeOptionsV4Response response = new UpgradeOptionsV4Response();
-        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
-        when(stackService.getByNameInWorkspaceWithLists(anyString(), anyLong())).thenReturn(Optional.of(createStack(createStackStatus(Status.AVAILABLE))));
 
         doThrow(new CloudbreakOrchestratorFailedException("Cluster is not upgradeable due to required Salt files not being present. "
                         + "Please ensure that your cluster is up to date!"))

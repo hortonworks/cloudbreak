@@ -12,7 +12,6 @@ import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
-import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
@@ -40,7 +39,6 @@ public class TelemetryApiConverter {
         if (request != null) {
             telemetry = new EnvironmentTelemetry();
             telemetry.setLogging(createLoggingFromRequest(request.getLogging()));
-            telemetry.setWorkloadAnalytics(createWorkloadAnalyticsFromRequest(request.getWorkloadAnalytics()));
             telemetry.setFeatures(createEnvironmentFeaturesFromRequest(request.getFeatures(), accountFeatures));
             telemetry.setFluentAttributes(new HashMap<>(request.getFluentAttributes()));
         }
@@ -140,15 +138,6 @@ public class TelemetryApiConverter {
             }
         }
         return features;
-    }
-
-    private EnvironmentWorkloadAnalytics createWorkloadAnalyticsFromRequest(WorkloadAnalyticsRequest request) {
-        EnvironmentWorkloadAnalytics wa = null;
-        if (request != null) {
-            wa = new EnvironmentWorkloadAnalytics();
-            wa.setAttributes(request.getAttributes());
-        }
-        return wa;
     }
 
     private S3CloudStorageParameters convertS3(S3CloudStorageV1Parameters s3) {

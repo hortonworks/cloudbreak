@@ -1,9 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
-import static java.util.Collections.singletonMap;
-
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
-import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -26,7 +22,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
@@ -49,10 +44,6 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 public class FreeIpaInstallService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaInstallService.class);
-
-    private static final String PROXY_KEY = "proxy";
-
-    private static final String PROXY_SLS_PATH = "/proxy/proxy.sls";
 
     @Value("${info.app.version:}")
     private String version;
@@ -81,9 +72,6 @@ public class FreeIpaInstallService {
     @Inject
     private FreeIpaConfigService freeIpaConfigService;
 
-    @Inject
-    private ProxyConfigDtoService proxyConfigDtoService;
-
     public void installFreeIpa(Long stackId) throws CloudbreakOrchestratorException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDatas = stack.getNotDeletedInstanceMetaDataSet();
@@ -100,31 +88,14 @@ public class FreeIpaInstallService {
         }
 
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        ProxyConfig proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn()).orElse(null);
 
         SaltConfig saltConfig = new SaltConfig();
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
-        FreeIpaConfigView freeIpaConfigView = freeIpaConfigService.createFreeIpaConfigs(stack, allNodes, proxyConfig);
+        FreeIpaConfigView freeIpaConfigView = freeIpaConfigService.createFreeIpaConfigs(stack, allNodes);
         servicePillarConfig.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", Collections.singletonMap("freeipa", freeIpaConfigView.toMap())));
         decoratePillarsWithTelemetryConfigs(stack, servicePillarConfig);
-        decoratePillarsWithProxyConfig(proxyConfig, servicePillarConfig);
         hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
         hostOrchestrator.installFreeIPA(primaryGatewayConfig, gatewayConfigs, allNodes, new StackBasedExitCriteriaModel(stackId));
-    }
-
-    private void decoratePillarsWithProxyConfig(ProxyConfig proxyConfig,
-            Map<String, SaltPillarProperties> servicePillarConfig) {
-        if (proxyConfig != null) {
-            Map<String, Object> proxy = new HashMap<>();
-            proxy.put("host", proxyConfig.getServerHost());
-            proxy.put("port", proxyConfig.getServerPort());
-            proxy.put("protocol", proxyConfig.getProtocol());
-            proxyConfig.getProxyAuthentication().ifPresent(auth -> {
-                proxy.put("user", auth.getUserName());
-                proxy.put("password", auth.getPassword());
-            });
-            servicePillarConfig.put(PROXY_KEY, new SaltPillarProperties(PROXY_SLS_PATH, singletonMap(PROXY_KEY, proxy)));
-        }
     }
 
     private void decoratePillarsWithTelemetryConfigs(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
