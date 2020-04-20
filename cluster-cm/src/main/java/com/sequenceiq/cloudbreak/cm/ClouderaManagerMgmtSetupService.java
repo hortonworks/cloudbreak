@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvide
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 /**
@@ -92,10 +93,12 @@ public class ClouderaManagerMgmtSetupService {
      * @param telemetry  telemetry (logging/workload/billing etc.) details
      * @param sdxContextName sdx name holder
      * @param sdxStackCrn sdx stack crn holder
+     * @param proxyConfig ccm proxy configuration holder
      * @throws ApiException if there's a problem setting up management services
      */
     public void setupMgmtServices(Stack stack, ApiClient apiClient, ApiHostRef cmHostRef,
-            Set<RDSConfig> rdsConfigs, Telemetry telemetry, String sdxContextName, String sdxStackCrn)
+            Set<RDSConfig> rdsConfigs, Telemetry telemetry, String sdxContextName, String sdxStackCrn,
+            ProxyConfig proxyConfig)
             throws ApiException {
         LOGGER.debug("Setting up Cloudera Management Services.");
         licenseService.validateClouderaManagerLicense(stack.getCreator());
@@ -123,7 +126,7 @@ public class ClouderaManagerMgmtSetupService {
         cmConfigService.setConfigs(stack, mgmtRoles);
         telemetryService.setupTelemetryRole(stack, apiClient, cmHostRef, mgmtRoles, telemetry);
         createMgmtRoles(mgmtRolesResourceApi, mgmtRoles);
-        telemetryService.updateTelemetryConfigs(stack, apiClient, telemetry, sdxContextName, sdxStackCrn);
+        telemetryService.updateTelemetryConfigs(stack, apiClient, telemetry, sdxContextName, sdxStackCrn, proxyConfig);
         createMgmtDatabases(apiClient, rdsConfigs);
         waitForGenerateCredentialsToFinish(stack, apiClient);
         setUpAutoConfiguration(mgmtServiceResourceApi);
