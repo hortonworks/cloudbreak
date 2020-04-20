@@ -1,5 +1,17 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.Map;
+
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
@@ -7,16 +19,6 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.AzureCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.GcpCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.OpenstackCloudProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.Map;
 
 public class CredentialProviderSpecTests extends CloudbreakTest {
 
@@ -131,32 +133,6 @@ public class CredentialProviderSpecTests extends CloudbreakTest {
                 .withCloudPlatform(OpenstackCloudProvider.OPENSTACK_CAPITAL)
                 .withParameters(openstackCloudProvider.openstackCredentialDetailsInvalidEndpoint()), "OpenStack endpoint is not valid credential request.");
         when(Credential.post(), "OpenStack endpoint is not valid credential request has been posted.");
-    }
-
-    @Test(groups = { "credentials", "os" })
-    public void testModifyOSKiloToEngineering() throws Exception {
-        OpenstackCloudProvider provider = new OpenstackCloudProvider(getTestParameter());
-
-        given(CloudbreakClient.created());
-        given(provider.aValidCredential()
-                .withName(VALID_OSKILO_CRED_NAME), VALID_OSKILO_CRED_NAME + " credential is created.");
-        given(Credential.request()
-                .withName(VALID_OSKILO_CRED_NAME)
-                .withParameters(provider.openstackCredentialDetailsEngineering())
-                .withCloudPlatform(provider.getPlatform()), VALID_OSKILO_CRED_NAME + " credential Engineering OpenStack modification is requested.");
-        when(Credential.put(), VALID_OSKILO_CRED_NAME + " credential has been modified.");
-        then(Credential.assertThis(
-                (credential, t) -> {
-                    for (Map.Entry<String, Object> parameterMapping : credential.getResponse().getParameters().entrySet()) {
-                        LOGGER.debug("Parameter is ::: {}", parameterMapping.getKey());
-                        LOGGER.debug("Value is ::: {}", parameterMapping.getValue());
-                        if ("endpoint".equalsIgnoreCase(parameterMapping.getKey())) {
-                            Assert.assertEquals(parameterMapping.getValue(), provider.engOpenStackEndpoint(),
-                                    "Engineering OpenStack URL should be present as Endpoint in response!");
-                        }
-                    }
-                }), "Credential Parameter Mapping should be part of the response."
-        );
     }
 
     @Test(groups = { "credentials", "aws" })
