@@ -8,6 +8,8 @@ install-cloudera-manager-server:
       - cloudera-manager-daemons
       - cloudera-manager-agent
       - cloudera-manager-server
+    - unless:
+      - rpm -q cloudera-manager-daemons cloudera-manager-agent cloudera-manager-server
 
 /etc/cloudera-scm-server/cm.settings:
   file.managed:

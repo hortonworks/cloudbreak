@@ -3,3 +3,5 @@ install_network_packages:
     - pkgs:
       - net-tools
       - wget
+    - unless:
+      - rpm -q net-tools wget
