@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -178,8 +177,6 @@ public class CredentialService extends AbstractCredentialService implements Reso
         try {
             return transactionService.required(() -> {
                 Credential created = repository.save(credentialAdapter.verify(credential, accountId).getCredential());
-                String credentialOwnerCrn = grpcUmsClient.getBuiltInCredentialOwnerResourceRoleCrn();
-                grpcUmsClient.assignResourceRole(creatorUserCrn, credentialCrn, credentialOwnerCrn, MDCUtils.getRequestId());
                 sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
                 return created;
             });
