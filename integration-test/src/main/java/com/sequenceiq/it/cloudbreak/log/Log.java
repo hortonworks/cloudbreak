@@ -44,6 +44,14 @@ public class Log<T extends CloudbreakTestDto> {
         }
     }
 
+    public static void error(Logger logger, String message, Object... args) {
+        String format = String.format(message, args);
+        log(format);
+        if (logger != null) {
+            logger.error(format);
+        }
+    }
+
     private static void log(Logger logger, String step, String message) {
         log(logger, step, message, null);
     }
