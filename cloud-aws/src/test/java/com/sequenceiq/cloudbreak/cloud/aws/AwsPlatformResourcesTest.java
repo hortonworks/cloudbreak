@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 import java.util.Date;
@@ -124,6 +124,7 @@ public class AwsPlatformResourcesTest {
         ReflectionTestUtils.setField(underTest, "vmTypes",
                 Collections.singletonMap(region("eu-central-1"), Collections.singleton(VmType.vmType("m5.2xlarge"))));
         ReflectionTestUtils.setField(underTest, "fetchMaxItems", 500);
+        ReflectionTestUtils.setField(underTest, "deniedAZs", List.of("us-east-1e"));
     }
 
     @Test

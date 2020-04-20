@@ -160,6 +160,9 @@ public class AwsPlatformResources implements PlatformResources {
     @Value("${cb.aws.distrox.enabled.instance.types:}")
     private List<String> enabledDistroxInstanceTypes;
 
+    @Value("${cb.aws.denied.azs: us-east-1e}")
+    private List<String> deniedAZs;
+
     @Value("${cb.aws.fetch.max.items:500}")
     private Integer fetchMaxItems;
 
@@ -189,6 +192,9 @@ public class AwsPlatformResources implements PlatformResources {
         regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-coordinates"));
         regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
         readVmTypes();
+        if (deniedAZs == null) {
+            deniedAZs = new ArrayList<>();
+        }
     }
 
     private String getDefinition(String parameter, String type) {
@@ -380,6 +386,8 @@ public class AwsPlatformResources implements PlatformResources {
                     : describeSubnetsResult.getNextToken());
             describeSubnetsResult = ec2Client.describeSubnets(describeSubnetsRequest);
             awsSubnets.addAll(describeSubnetsResult.getSubnets());
+            awsSubnets = awsSubnets.stream().filter(subnet -> !deniedAZs.contains(subnet.getAvailabilityZone()))
+                    .collect(Collectors.toList());
         }
         return awsSubnets;
     }
@@ -535,7 +543,9 @@ public class AwsPlatformResources implements PlatformResources {
 
                     List<AvailabilityZone> tmpAz = new ArrayList<>();
                     for (com.amazonaws.services.ec2.model.AvailabilityZone availabilityZone : describeAvailabilityZonesResult.getAvailabilityZones()) {
-                        tmpAz.add(availabilityZone(availabilityZone.getZoneName()));
+                        if (!deniedAZs.contains(availabilityZone.getZoneName())) {
+                            tmpAz.add(availabilityZone(availabilityZone.getZoneName()));
+                        }
                     }
                     regionListMap.put(region(awsRegion.getRegionName()), tmpAz);
 
