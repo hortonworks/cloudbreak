@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.api.v1.telemetry.model.request;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -14,7 +16,7 @@ public class TestAnonymizationRuleRequest implements Serializable {
     private String input;
 
     @NotNull
-    private AnonymizationRule rule;
+    private List<AnonymizationRule> rules = new ArrayList<>();
 
     public String getInput() {
         return input;
@@ -24,11 +26,11 @@ public class TestAnonymizationRuleRequest implements Serializable {
         this.input = input;
     }
 
-    public AnonymizationRule getRule() {
-        return rule;
+    public void setRules(List<AnonymizationRule> rules) {
+        this.rules = rules;
     }
 
-    public void setRule(AnonymizationRule rule) {
-        this.rule = rule;
+    public List<AnonymizationRule> getRules() {
+        return rules;
     }
 }

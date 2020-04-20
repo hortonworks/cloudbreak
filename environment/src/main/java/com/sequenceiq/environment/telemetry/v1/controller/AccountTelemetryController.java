@@ -87,7 +87,7 @@ public class AccountTelemetryController extends NotificationController implement
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public TestAnonymizationRuleResponse testRulePattern(TestAnonymizationRuleRequest request) {
         TestAnonymizationRuleResponse response = new TestAnonymizationRuleResponse();
-        response.setOutput(accountTelemetryService.testRulePattern(request.getRule(), request.getInput()));
+        response.setOutput(accountTelemetryService.testRulePatterns(request.getRules(), request.getInput()));
         return response;
     }
 }
