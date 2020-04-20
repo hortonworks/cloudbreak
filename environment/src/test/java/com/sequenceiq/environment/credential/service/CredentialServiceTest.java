@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -287,12 +286,10 @@ class CredentialServiceTest {
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection()))
                 .thenReturn(Optional.empty());
         when(credentialAdapter.verify(any(), anyString())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
-        doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
         credentialServiceUnderTest.create(CREDENTIAL, ACCOUNT_ID, USER_ID);
         verify(credentialValidator).validateCredentialCloudPlatform(eq(PLATFORM), eq(USER_ID));
         verify(credentialValidator).validateParameters(any(), any());
         verify(repository).save(any());
-        verify(grpcUmsClient).assignResourceRole(any(), any(), any(), any());
     }
 
     @Test
