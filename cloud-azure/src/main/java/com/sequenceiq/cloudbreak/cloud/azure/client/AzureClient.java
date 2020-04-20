@@ -490,6 +490,10 @@ public class AzureClient {
         return handleAuthException(() -> azure.networkInterfaces().getByResourceGroup(resourceGroup, networkInterfaceName));
     }
 
+    public Observable<NetworkInterface> getNetworkInterfaceAsync(String resourceGroup, String networkInterfaceName) {
+        return handleAuthException(() -> azure.networkInterfaces().getByResourceGroupAsync(resourceGroup, networkInterfaceName));
+    }
+
     public NetworkInterface getNetworkInterfaceById(String networkInterfaceId) {
         return handleAuthException(() -> azure.networkInterfaces().getById(networkInterfaceId));
     }
