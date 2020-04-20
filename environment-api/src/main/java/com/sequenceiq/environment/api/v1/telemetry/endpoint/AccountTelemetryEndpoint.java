@@ -72,7 +72,7 @@ public interface AccountTelemetryEndpoint {
             notes = AccountTelemetryDescription.GET_NOTES, nickname = "listRulesV1")
     List<AnonymizationRule> listRules();
 
-    @GET
+    @POST
     @Path("/rules/test")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AccountTelemetryDescription.TEST, produces = MediaType.APPLICATION_JSON,
