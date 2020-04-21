@@ -46,7 +46,7 @@
         },
         "skuName": {
             "type": "string",
-            "defaultValue": "${skuName!"GP_Gen5_2"}",
+            "defaultValue": "${skuName!"GP_Gen5_8"}",
             "allowedValues": [
                 "GP_Gen5_2",
                 "GP_Gen5_4",
