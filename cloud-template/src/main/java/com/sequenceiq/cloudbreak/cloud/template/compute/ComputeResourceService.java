@@ -88,7 +88,12 @@ public class ComputeResourceService {
 
     public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
             Iterable<Group> groups) {
-        return new ResourceBuilder(ctx, auth).buildResources(cloudStack, groups, true, AdjustmentType.BEST_EFFORT, null);
+        return buildResourcesForUpscale(ctx, auth, cloudStack, groups, AdjustmentType.BEST_EFFORT, null);
+    }
+
+    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
+            Iterable<Group> groups, AdjustmentType adjustmentType, Long threshold) {
+        return new ResourceBuilder(ctx, auth).buildResources(cloudStack, groups, true, adjustmentType, threshold);
     }
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context, AuthenticatedContext auth,
