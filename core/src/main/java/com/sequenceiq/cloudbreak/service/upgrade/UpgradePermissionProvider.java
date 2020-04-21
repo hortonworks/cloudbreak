@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.cloud.PrefixMatchLength.MAINTENANCE;
 import static com.sequenceiq.cloudbreak.cloud.PrefixMatchLength.MINOR;
 
 import org.springframework.stereotype.Service;
@@ -10,7 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.VersionPrefix;
 @Service
 public class UpgradePermissionProvider {
 
-    public boolean permitCmAndSatckUpgrade(String currentVersion, String newVersion) {
+    public boolean permitCmAndStackUpgrade(String currentVersion, String newVersion) {
         boolean result = false;
         if (currentVersion != null && newVersion != null) {
             VersionPrefix prefixMatcher = new VersionPrefix();
@@ -18,6 +19,15 @@ public class UpgradePermissionProvider {
                 VersionComparator comparator = new VersionComparator();
                 result = comparator.compare(() -> currentVersion, () -> newVersion) < 0;
             }
+        }
+        return result;
+    }
+
+    public boolean permitSaltUpgrade(String currentVersion, String newVersion) {
+        boolean result = false;
+        if (currentVersion != null && newVersion != null) {
+            VersionPrefix prefixMatcher = new VersionPrefix();
+            result = prefixMatcher.prefixMatch(() -> currentVersion, () -> newVersion, MAINTENANCE);
         }
         return result;
     }
