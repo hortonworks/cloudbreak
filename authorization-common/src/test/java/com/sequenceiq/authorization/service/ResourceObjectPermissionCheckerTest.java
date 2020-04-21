@@ -98,7 +98,7 @@ public class ResourceObjectPermissionCheckerTest {
         verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
         verify(commonPermissionCheckingUtils).checkPermissionForUserOnResource(eq(AuthorizationResourceType.CREDENTIAL),
-                eq(AuthorizationResourceAction.RD_WRITE), eq(USER_CRN), eq(RESOURCE_CRN));
+                eq(AuthorizationResourceAction.EDIT), eq(USER_CRN), eq(RESOURCE_CRN));
         verify(resourceBasedCrnProvider, times(0)).getResourceCrnByResourceName(anyString());
     }
 
@@ -116,7 +116,7 @@ public class ResourceObjectPermissionCheckerTest {
         verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
         verify(commonPermissionCheckingUtils).checkPermissionForUserOnResource(eq(AuthorizationResourceType.CREDENTIAL),
-                eq(AuthorizationResourceAction.RD_WRITE), eq(USER_CRN), eq(RESOURCE_CRN));
+                eq(AuthorizationResourceAction.EDIT), eq(USER_CRN), eq(RESOURCE_CRN));
         verify(resourceBasedCrnProvider).getResourceCrnByResourceName(eq("resource"));
     }
 
@@ -138,7 +138,7 @@ public class ResourceObjectPermissionCheckerTest {
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
         verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), any(), anyString());
         verify(commonPermissionCheckingUtils).checkPermissionForUserOnResource(eq(AuthorizationResourceType.CREDENTIAL),
-                eq(AuthorizationResourceAction.RD_WRITE), eq(USER_CRN), eq(RESOURCE_CRN));
+                eq(AuthorizationResourceAction.EDIT), eq(USER_CRN), eq(RESOURCE_CRN));
         verify(resourceBasedCrnProvider).getResourceCrnByResourceName(eq("resource"));
     }
 
@@ -161,7 +161,7 @@ public class ResourceObjectPermissionCheckerTest {
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
         verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), any(), anyString());
         verify(commonPermissionCheckingUtils).checkPermissionForUserOnResource(eq(AuthorizationResourceType.CREDENTIAL),
-                eq(AuthorizationResourceAction.RD_WRITE), eq(USER_CRN), eq(RESOURCE_CRN));
+                eq(AuthorizationResourceAction.EDIT), eq(USER_CRN), eq(RESOURCE_CRN));
         verify(resourceBasedCrnProvider).getResourceCrnByResourceName(eq("resource"));
     }
 
@@ -184,7 +184,7 @@ public class ResourceObjectPermissionCheckerTest {
     }
 
     private static class ResourceObjectWithNameAnnotation {
-        @ResourceObjectField(action = AuthorizationResourceAction.RD_WRITE, type = AuthorizationResourceType.CREDENTIAL,
+        @ResourceObjectField(action = AuthorizationResourceAction.EDIT, type = AuthorizationResourceType.CREDENTIAL,
                 variableType = AuthorizationVariableType.NAME)
         private String field = "resource";
 
@@ -194,7 +194,7 @@ public class ResourceObjectPermissionCheckerTest {
     }
 
     private static class ResourceObjectWithCrnAnnotation {
-        @ResourceObjectField(action = AuthorizationResourceAction.RD_WRITE, type = AuthorizationResourceType.CREDENTIAL,
+        @ResourceObjectField(action = AuthorizationResourceAction.EDIT, type = AuthorizationResourceType.CREDENTIAL,
                 variableType = AuthorizationVariableType.CRN)
         private String field = RESOURCE_CRN;
 
@@ -204,7 +204,7 @@ public class ResourceObjectPermissionCheckerTest {
     }
 
     private static class ResourceObjectWithNonStringAnnotation {
-        @ResourceObjectField(action = AuthorizationResourceAction.RD_WRITE, type = AuthorizationResourceType.CREDENTIAL,
+        @ResourceObjectField(action = AuthorizationResourceAction.EDIT, type = AuthorizationResourceType.CREDENTIAL,
                 variableType = AuthorizationVariableType.CRN)
         private Object field;
 
