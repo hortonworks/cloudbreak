@@ -183,7 +183,7 @@ public class ListPermissionCheckerTest {
 
             @Override
             public AuthorizationResourceAction action() {
-                return AuthorizationResourceAction.RD_READ;
+                return AuthorizationResourceAction.DESCRIBE;
             }
         };
     }
