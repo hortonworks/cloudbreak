@@ -1,3 +1,6 @@
+include:
+  - recipes.runner
+
 {% set timeout = salt['pillar.get']('recipes:timeout') %}
 create_recipe_log_dir_pre_start:
   file.directory:
