@@ -189,7 +189,7 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
-        assertEquals("There are no other images with the same salt version.", actual.getReason());
+        assertEquals("There are no images with compatible Salt version.", actual.getReason());
     }
 
     @Test
