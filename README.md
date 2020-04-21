@@ -132,6 +132,10 @@ export PUBLIC_IP=127.0.0.1
 
 Go to https://github.com/hortonworks/cloudbreak, either clone or download the repository, use SSH which is described here: https://help.github.com/articles/connecting-to-github-with-ssh/
 
+**Important**: update `~/.gradle/gradle.properties` file with the two following properties in order to download artifacts from the internal repository. Ask us for details in the [#eng_cb_dev_internal](https://cloudera.slack.com/archives/CF66M7WP6) Slack channel.
+- `defaultCmPrivateRepoUser`
+- `defaultCmPrivateRepoPassword`
+
 ### Project settings in IDEA
 
 In IDEA set your SDK to your Java version under:
@@ -332,6 +336,12 @@ To run Cloudbreak from the command line first set the the AWS environment variab
 export AWS_ACCESS_KEY_ID=...
 export AWS_SECRET_ACCESS_KEY=...
 export CB_AWS_ACCOUNT_ID=...
+```
+
+Set the CM repository credentials in order to download artifacts from the internal repository. Ask us for details in the [#eng_cb_dev_internal](https://cloudera.slack.com/archives/CF66M7WP6) Slack channel. 
+```
+export CM_PRIVATE_REPO_USER=
+export CM_PRIVATE_REPO_PASSWORD=
 ```
 
 then run the following Gradle command:
