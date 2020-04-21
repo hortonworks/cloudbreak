@@ -8,7 +8,9 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 
 public class AwsGroupView {
 
-    public static final String AUTSCALING_GROUP_NAME_PREFIX = "AmbariNodes";
+    public static final String AUTOSCALING_GROUP_NAME_PREFIX = "AmbariNodes";
+
+    public static final String LAUNCH_TEMPLATE_NAME_PREFIX = "ClusterManagerNodeLaunchTemplate";
 
     private final Integer instanceCount;
 
@@ -38,6 +40,8 @@ public class AwsGroupView {
 
     private final String autoScalingGroupName;
 
+    private final String launchTemplateName;
+
     private final Boolean useNetworkCidrAsSourceForDefaultRules;
 
     private final Boolean hasInstanceProfile;
@@ -63,6 +67,7 @@ public class AwsGroupView {
         this.encryptedAMI = encryptedAMI;
         this.volumeCounts = volumeCounts;
         autoScalingGroupName = getAutoScalingGroupName(groupName);
+        launchTemplateName = getLaunchTemplateName(groupName);
         this.useNetworkCidrAsSourceForDefaultRules = useNetworkCidrAsSourceForDefaultRules;
         this.instanceProfile = instanceProfile;
         hasInstanceProfile = instanceProfile != null;
@@ -70,7 +75,15 @@ public class AwsGroupView {
     }
 
     public static String getAutoScalingGroupName(String groupName) {
-        return AUTSCALING_GROUP_NAME_PREFIX + groupName.replaceAll("_", "");
+        return AUTOSCALING_GROUP_NAME_PREFIX + sanitizeGroupName(groupName);
+    }
+
+    public static String getLaunchTemplateName(String groupName) {
+        return LAUNCH_TEMPLATE_NAME_PREFIX + sanitizeGroupName(groupName);
+    }
+
+    private static String sanitizeGroupName(String groupName) {
+        return groupName.replaceAll("_", "");
     }
 
     public Integer getInstanceCount() {
@@ -139,6 +152,10 @@ public class AwsGroupView {
 
     public String getAutoScalingGroupName() {
         return autoScalingGroupName;
+    }
+
+    public String getLaunchTemplateName() {
+        return launchTemplateName;
     }
 
     public Boolean getUseNetworkCidrAsSourceForDefaultRules() {
