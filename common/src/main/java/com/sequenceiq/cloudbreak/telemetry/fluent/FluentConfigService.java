@@ -64,6 +64,10 @@ public class FluentConfigService {
                 );
             }
             enabled = determineAndSetLogging(builder, telemetry, databusEnabled, meteringEnabled);
+            if (telemetry.isClusterLogsCollectionEnabled()) {
+                LOGGER.debug("Set anonymization rules (only for cluster log collection)");
+                builder.withAnonymizationRules(decodeRules(anonymizationRules));
+            }
         }
         if (!enabled) {
             LOGGER.debug("Fluent based logging is disabled");
@@ -72,7 +76,6 @@ public class FluentConfigService {
         return builder
                 .withEnabled(enabled)
                 .withClusterDetails(clusterDetails)
-                .withAnonymizationRules(decodeRules(anonymizationRules))
                 .build();
     }
 
