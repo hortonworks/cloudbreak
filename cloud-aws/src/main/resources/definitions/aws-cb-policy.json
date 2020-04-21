@@ -14,7 +14,8 @@
       "Sid": "CloudWatchMetric",
       "Action": [
         "cloudwatch:PutMetricAlarm",
-        "cloudwatch:DeleteAlarms"
+        "cloudwatch:DeleteAlarms",
+        "cloudwatch:DescribeAlarms"
       ],
       "Effect": "Allow",
       "Resource": [
