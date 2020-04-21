@@ -7,7 +7,7 @@ public enum PrefixMatchLength {
     // First two digits must match  e.g. 1.0.x / 1.0.x
     MAINTENANCE(2),
 
-    // First two digits must match  e.g. 1.0.x / 1.0.x
+    // First three digits must match  e.g. 1.0.0.x / 1.0.0.x
     PATCH(3);
 
     private final int matchLength;
