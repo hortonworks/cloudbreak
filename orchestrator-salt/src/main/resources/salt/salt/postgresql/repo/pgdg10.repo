@@ -1,0 +1,9 @@
+[pgdg10]
+name=PostgreSQL 10
+baseurl=https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64
+enabled=1
+priority=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-10
+skip_if_unavailable = 1
+keepcache = 0
