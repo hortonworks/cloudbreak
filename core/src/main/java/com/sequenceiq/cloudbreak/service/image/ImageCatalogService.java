@@ -6,8 +6,11 @@ import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.partitioningBy;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,7 +37,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
@@ -59,7 +65,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @Component
-public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> {
+public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> implements ResourceBasedCrnProvider {
 
     public static final String UNDEFINED = "";
 
@@ -231,7 +237,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             List<Image> matchingVersionImages = images.stream().filter(img -> {
                 String[] repoIdParts = img.getStackDetails().getRepo().getStack().get("repoid").split("-");
                 return repoIdParts.length > 1 && repoIdParts[1].equals(clusterVersion);
-            }).collect(Collectors.toList());
+            }).collect(toList());
             selectedImage = getLatestImageDefaultPreferred(matchingVersionImages);
         }
         return selectedImage;
@@ -337,18 +343,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return isEnvDefault(name) ? getDefaultCatalog(name) : getByNameForWorkspaceId(name, workspaceId);
     }
 
-    public ImageCatalog setAsDefault(Long workspaceId, String name) {
-        User user = getLoggedInUser();
-        removeDefaultFlag(user);
-        if (!isEnvDefault(name)) {
-            ImageCatalog imageCatalog = get(workspaceId, name);
-            checkImageCatalog(imageCatalog, name);
-            setImageCatalogAsDefault(imageCatalog, user);
-            return imageCatalog;
-        }
-        return getCloudbreakDefaultImageCatalog();
-    }
-
     public boolean isEnvDefault(String name) {
         return CDP_DEFAULT_CATALOG_NAME.equals(name)
                 || (legacyCatalogEnabled && CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(name));
@@ -391,6 +385,14 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(CDP_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
+        imageCatalog.setResourceCrn(Crn.builder()
+                .setResource(CLOUDBREAK_DEFAULT_CATALOG_NAME)
+                .setPartition(Crn.Partition.CDP)
+                .setService(Crn.Service.DATAHUB)
+                .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
+                .setResourceType(Crn.ResourceType.IMAGE_CATALOG)
+                .build()
+                .toString());
         return imageCatalog;
     }
 
@@ -398,6 +400,14 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
+        imageCatalog.setResourceCrn(Crn.builder()
+                .setResource(CDP_DEFAULT_CATALOG_NAME)
+                .setPartition(Crn.Partition.CDP)
+                .setService(Crn.Service.DATAHUB)
+                .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
+                .setResourceType(Crn.ResourceType.IMAGE_CATALOG)
+                .build()
+                .toString());
         return imageCatalog;
     }
 
@@ -434,9 +444,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             List<CloudbreakVersion> cloudbreakVersions = imageCatalogV2.getVersions().getCloudbreakVersions();
             String cbv = versionFilter.isVersionUnspecified(imageFilter.getCbVersion())
                     ? versionFilter.latestCloudbreakVersion(cloudbreakVersions)
-                            : imageFilter.getCbVersion();
+                    : imageFilter.getCbVersion();
             List<CloudbreakVersion> exactMatchedImgs = cloudbreakVersions.stream()
-                    .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().contains(cbv)).collect(Collectors.toList());
+                    .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().contains(cbv)).collect(toList());
 
             if (!exactMatchedImgs.isEmpty()) {
                 for (CloudbreakVersion exactMatchedImg : exactMatchedImgs) {
@@ -471,7 +481,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                     imageFilter.getImageCatalog().getName());
         } else {
             LOGGER.warn("Image catalog {} not found, returning empty response", imageFilter.getImageCatalog());
-                    images = statedImages(emptyImages(),
+            images = statedImages(emptyImages(),
                     imageFilter.getImageCatalog().getImageCatalogUrl(),
                     imageFilter.getImageCatalog().getName());
         }
@@ -520,7 +530,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     private List<Image> filterImagesByPlatforms(Collection<String> platforms, Collection<Image> images, Collection<String> vMImageUUIDs) {
         return images.stream()
                 .filter(isPlatformMatching(platforms, vMImageUUIDs))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     private static Predicate<Image> isPlatformMatching(Collection<String> platforms, Collection<String> vMImageUUIDs) {
@@ -533,7 +543,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         Map<Boolean, List<Image>> partitionedImages = images
                 .stream()
                 .filter(imageFilter)
-                .collect(Collectors.partitioningBy(isMatchingOs(operatingSystems)));
+                .collect(partitioningBy(isMatchingOs(operatingSystems)));
         if (!partitionedImages.get(false).isEmpty()) {
             LOGGER.debug("Used filter OS: | {} | Images filtered: {}", operatingSystems,
                     partitionedImages.get(false).stream().map(Image::shortOsDescriptionFormat).collect(Collectors.joining(", ")));
@@ -579,9 +589,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                 .map(CloudbreakVersion::getVersions)
                 .flatMap(List::stream)
                 .distinct()
-                .collect(Collectors.toList());
+                .collect(toList());
 
-        versions = versions.stream().sorted((o1, o2) -> new VersionComparator().compare(() -> o2, () -> o1)).collect(Collectors.toList());
+        versions = versions.stream().sorted((o1, o2) -> new VersionComparator().compare(() -> o2, () -> o1)).collect(toList());
 
         Predicate<String> ealierVersionPredicate = ver -> new VersionComparator().compare(() -> ver, () -> releasedVersion) < 0;
         Predicate<String> releaseVersionPredicate = ver -> versionFilter.extractExtendedUnreleasedVersion(ver).equals(ver);
@@ -641,7 +651,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     private Optional<Image> getLatestImageDefaultPreferred(List<Image> images) {
-        List<Image> defaultImages = images.stream().filter(Image::isDefaultImage).collect(Collectors.toList());
+        List<Image> defaultImages = images.stream().filter(Image::isDefaultImage).collect(toList());
         return defaultImages.isEmpty() ? images.stream().max(getImageComparing(images)) : defaultImages.stream().max(getImageComparing(defaultImages));
     }
 
@@ -689,6 +699,61 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();
+    }
+
+    @Override
+    public String getResourceCrnByResourceName(String resourceName) {
+        if (CDP_DEFAULT_CATALOG_NAME.equals(resourceName)) {
+            return getCloudbreakDefaultImageCatalog().getResourceCrn();
+        } else if (legacyCatalogEnabled && CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(resourceName)) {
+            return getCloudbreakLegacyDefaultImageCatalog().getResourceCrn();
+        } else {
+            return imageCatalogRepository.findResourceCrnByNameAndTenantId(resourceName, ThreadBasedUserCrnProvider.getAccountId())
+                    .orElseThrow(() -> NotFoundException.notFoundException("Image catalog", resourceName));
+        }
+    }
+
+    @Override
+    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+        Map<Boolean, List<String>> catalogs = resourceNames.stream()
+                .collect(partitioningBy(name ->
+                        CDP_DEFAULT_CATALOG_NAME.equals(name) || (legacyCatalogEnabled && CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(name))));
+        List<String> result = new ArrayList<>();
+
+        List<String> defaultCatalogs = catalogs.get(true);
+        if (!CollectionUtils.isEmpty(defaultCatalogs)) {
+            result.addAll(defaultCatalogs.stream().map(this::getResourceCrnByResourceName).collect(toList()));
+        }
+
+        List<String> notDefaultCatalogs = catalogs.get(false);
+        if (!CollectionUtils.isEmpty(notDefaultCatalogs)) {
+            result.addAll(imageCatalogRepository.findAllResourceCrnsByNamesAndTenantId(notDefaultCatalogs, ThreadBasedUserCrnProvider.getAccountId()));
+        }
+        return result;
+    }
+
+    @Override
+    public List<String> getResourceCrnsInAccount() {
+        List<String> crns = new ArrayList<>();
+        crns.add(getCloudbreakDefaultImageCatalog().getResourceCrn());
+        if (legacyCatalogEnabled) {
+            crns.add(getCloudbreakLegacyDefaultImageCatalog().getResourceCrn());
+        }
+        crns.addAll(imageCatalogRepository.findAllResourceCrnsByTenantId(ThreadBasedUserCrnProvider.getAccountId()));
+        return crns;
+    }
+
+    public List<ImageCatalog> getDefaultImageCatalogs() {
+        if (legacyCatalogEnabled) {
+            return List.of(getCloudbreakDefaultImageCatalog(), getCloudbreakLegacyDefaultImageCatalog());
+        } else {
+            return List.of(getCloudbreakDefaultImageCatalog());
+        }
+    }
+
+    @Override
+    public AuthorizationResourceType getResourceType() {
+        return AuthorizationResourceType.IMAGE_CATALOG;
     }
 
     private static class PrefixMatchImages {

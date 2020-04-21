@@ -94,13 +94,6 @@ public interface ImageCatalogV4Endpoint {
             nickname = "updateImageCatalogInWorkspace")
     ImageCatalogV4Response update(@PathParam("workspaceId") Long workspaceId, @Valid UpdateImageCatalogV4Request request);
 
-    @PUT
-    @Path("{name}/set_default")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.PUT_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "setDefaultImageCatalogByNameInWorkspace")
-    ImageCatalogV4Response setDefault(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
-
     @GET
     @Path("{name}/request")
     @Produces(MediaType.APPLICATION_JSON)

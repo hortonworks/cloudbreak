@@ -221,7 +221,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .when(imageCatalogTestClient.deleteV4(), key(catalogKey))
                 .when(imageCatalogTestClient.getImagesByNameV4(), key(imgCatalogName))
                 .expect(NotFoundException.class, key(imgCatalogName)
-                        .withExpectedMessage("catalog does not exist or does not belongs to your account"))
+                        .withExpectedMessage("not found"))
                 .validate();
     }
 

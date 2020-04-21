@@ -46,6 +46,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
@@ -460,7 +461,13 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetWhenEnvDefault() {
         String name = "cdp-default";
-        ImageCatalog actual = underTest.get(ORG_ID, name);
+        ImageCatalog actual = ThreadBasedUserCrnProvider.doAs(Crn.builder()
+                .setAccountId("ACCOUNT_ID")
+                .setResourceType(Crn.ResourceType.USER)
+                .setService(Crn.Service.DATAHUB)
+                .setPartition(Crn.Partition.CDP)
+                .setResource("USER")
+                .build().toString(), () -> underTest.get(ORG_ID, name));
 
         verify(imageCatalogRepository, times(0)).findByNameAndWorkspace(eq(name), any(Workspace.class));
 

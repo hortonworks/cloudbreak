@@ -131,3 +131,7 @@ In this case we are calling the method `getResourceCrnByEnvironmentName` of the 
 In this case we are calling the method `getResourceCrnByEnvironmentCrn` of the current implementation of `ResourceBasedCrnProvider` to get resource CRN by environment CRN.
 
 [EnvironmentCrnPermissionChecker](src/main/java/com/sequenceiq/authorization/service/EnvironmentCrnPermissionChecker.java)
+
+### I have some default resources and I want to exclude them from the auth authorization process. How can I do that?
+
+You need to implement the [DefaultResourceChecker](src/main/java/com/sequenceiq/authorization/service/DefaultResourceChecker.java) interface where you can mark different resources as defaults so that the framework won't go to UMS.

@@ -3,21 +3,28 @@ package com.sequenceiq.authorization.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.Assert;
-import org.junit.Rule;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -37,10 +44,24 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 @RunWith(MockitoJUnitRunner.class)
 public class CommonPermissionCheckingUtilsTest {
 
+    private static final String USER_CRN = "USER_CRN";
+
+    private static final String RESOURCE_CRN = "RESOURCE_CRN";
+
+    private static final String DEFAULT_RESOURCE_CRN = "DEFAULT_RESOURCE_CRN";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonPermissionCheckingUtilsTest.class);
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    @Mock
+    private UmsAccountAuthorizationService umsAccountAuthorizationService;
+
+    @Mock
+    private UmsResourceAuthorizationService umsResourceAuthorizationService;
+
+    @Mock
+    private DefaultResourceChecker defaultResourceChecker;
+
+    private Optional<List<DefaultResourceChecker>> defaultResourceCheckers = Optional.of(new ArrayList<>());
 
     @InjectMocks
     private CommonPermissionCheckingUtils underTest;
@@ -51,6 +72,21 @@ public class CommonPermissionCheckingUtilsTest {
     @Mock
     private MethodSignature methodSignature;
 
+    @Before
+    public void setUp() throws IllegalAccessException {
+        defaultResourceCheckers.map(checkers -> checkers.add(defaultResourceChecker));
+        FieldUtils.writeField(underTest, "defaultResourceCheckers", defaultResourceCheckers, true);
+        when(defaultResourceChecker.getResourceType()).thenReturn(AuthorizationResourceType.IMAGE_CATALOG);
+        lenient().when(defaultResourceChecker.isDefault(RESOURCE_CRN)).thenReturn(false);
+        lenient().when(defaultResourceChecker.isDefault(DEFAULT_RESOURCE_CRN)).thenReturn(true);
+        lenient().when(defaultResourceChecker.isAllowedAction(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)).thenReturn(true);
+        lenient().when(defaultResourceChecker.getDefaultResourceCrns(any())).thenReturn(CrnsByCategory.newBuilder()
+                .defaultResourceCrns(List.of(DEFAULT_RESOURCE_CRN))
+                .notDefaultResourceCrns(List.of(RESOURCE_CRN))
+                .build());
+        underTest.init();
+    }
+
     @Test
     //CHECKSTYLE:OFF
     public void testProceedWhenProceedingJoinPointProceedThrowsUncheckedExceptionThenAccessDeniedExceptionComes() throws Throwable {
@@ -58,10 +94,8 @@ public class CommonPermissionCheckingUtilsTest {
         String exceptionMessage = "somethingHappened!!!";
         doThrow(new RuntimeException(exceptionMessage)).when(proceedingJoinPoint).proceed();
 
-        thrown.expect(RuntimeException.class);
-        thrown.expectMessage(exceptionMessage);
-
-        underTest.proceed(proceedingJoinPoint, methodSignature, 0L);
+        RuntimeException exception = Assert.assertThrows(RuntimeException.class, () -> underTest.proceed(proceedingJoinPoint, methodSignature, 0L));
+        assertEquals(exception.getMessage(), exceptionMessage);
         verify(proceedingJoinPoint, times(1)).proceed();
     }
 
@@ -72,10 +106,8 @@ public class CommonPermissionCheckingUtilsTest {
         String exceptionMessage = "somethingHappened!!!";
         doThrow(new FileNotFoundException(exceptionMessage)).when(proceedingJoinPoint).proceed();
 
-        thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage(exceptionMessage);
-
-        underTest.proceed(proceedingJoinPoint, methodSignature, 0L);
+        RuntimeException exception = Assert.assertThrows(RuntimeException.class, () -> underTest.proceed(proceedingJoinPoint, methodSignature, 0L));
+        assertEquals(exception.getMessage(), exceptionMessage);
         verify(proceedingJoinPoint, times(1)).proceed();
     }
 
@@ -152,11 +184,12 @@ public class CommonPermissionCheckingUtilsTest {
         when(methodSignature.getMethod())
                 .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithParamAnnotation", String.class, String.class));
 
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage("Your controller method exampleMethodWithParamAnnotation should " +
+        IllegalStateException exception =
+                Assert.assertThrows(IllegalStateException.class, () -> {
+                    underTest.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
+                });
+        assertEquals(exception.getMessage(), "Your controller method exampleMethodWithParamAnnotation should " +
                 "have one and only one parameter with the annotation ResourceCrn");
-
-        underTest.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
     }
 
     @Test
@@ -165,10 +198,10 @@ public class CommonPermissionCheckingUtilsTest {
                 .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithParamAnnotation", String.class, String.class));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[]{0L, "other"});
 
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage("The type of the annotated parameter does not match with the expected type String");
-
-        underTest.getParameter(proceedingJoinPoint, methodSignature, ResourceName.class, String.class);
+        IllegalStateException exception = Assert.assertThrows(IllegalStateException.class, () -> {
+            underTest.getParameter(proceedingJoinPoint, methodSignature, ResourceName.class, String.class);
+        });
+        assertEquals("The type of the annotated parameter does not match with the expected type String", exception.getMessage());
     }
 
     @Test
@@ -176,11 +209,11 @@ public class CommonPermissionCheckingUtilsTest {
         when(methodSignature.getMethod())
                 .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithoutParamAnnotation", String.class, String.class));
 
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage("Your controller method exampleMethodWithoutParamAnnotation should " +
-                "have one and only one parameter with the annotation ResourceCrn");
-
-        underTest.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
+        IllegalStateException exception = Assert.assertThrows(IllegalStateException.class, () -> {
+            underTest.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
+        });
+        assertEquals("Your controller method exampleMethodWithoutParamAnnotation should " +
+                "have one and only one parameter with the annotation ResourceCrn", exception.getMessage());
     }
 
     @Test
@@ -188,11 +221,89 @@ public class CommonPermissionCheckingUtilsTest {
         when(methodSignature.getMethod())
                 .thenReturn(ExampleAuthorizationResourceClass.class.getMethod("exampleMethodWithTooManyParamAnnotation", String.class, String.class));
 
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage("Your controller method exampleMethodWithTooManyParamAnnotation should " +
-                "have one and only one parameter with the annotation ResourceCrn");
+        IllegalStateException exception = Assert.assertThrows(IllegalStateException.class, () -> {
+            underTest.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
+        });
+        assertEquals("Your controller method exampleMethodWithTooManyParamAnnotation should " +
+                "have one and only one parameter with the annotation ResourceCrn", exception.getMessage());
+    }
 
-        underTest.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
+    @Test
+    public void testCheckPermissionForUserOnDefaultResource() {
+        underTest.checkPermissionForUserOnResource(AuthorizationResourceType.IMAGE_CATALOG,
+                AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, USER_CRN, DEFAULT_RESOURCE_CRN);
+
+        verify(defaultResourceChecker).isDefault(DEFAULT_RESOURCE_CRN);
+        verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG);
+        verifyZeroInteractions(umsResourceAuthorizationService);
+    }
+
+    @Test
+    public void testCheckPermissionFailForUserOnDefaultResource() {
+        AccessDeniedException exception = Assert.assertThrows(AccessDeniedException.class, () -> {
+            underTest.checkPermissionForUserOnResource(AuthorizationResourceType.IMAGE_CATALOG,
+                    AuthorizationResourceAction.EDIT_IMAGE_CATALOG, USER_CRN, DEFAULT_RESOURCE_CRN);
+        });
+
+        assertEquals(exception.getMessage(), "You have no right to perform environments/editImageCatalog on resources [DEFAULT_RESOURCE_CRN]");
+        verify(defaultResourceChecker).isDefault(DEFAULT_RESOURCE_CRN);
+        verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.EDIT_IMAGE_CATALOG);
+        verifyZeroInteractions(umsResourceAuthorizationService);
+    }
+
+    @Test
+    public void testCheckPermissionForUserOnNotDefaultResource() {
+        underTest.checkPermissionForUserOnResource(AuthorizationResourceType.IMAGE_CATALOG,
+                AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, RESOURCE_CRN);
+
+        verify(defaultResourceChecker).isDefault(RESOURCE_CRN);
+        verify(umsResourceAuthorizationService).checkRightOfUserOnResource(USER_CRN, AuthorizationResourceType.IMAGE_CATALOG,
+                AuthorizationResourceAction.DELETE_IMAGE_CATALOG, RESOURCE_CRN);
+        verify(defaultResourceChecker, times(0)).isAllowedAction(any());
+    }
+
+    @Test
+    public void testCheckPermissionForUserOnMixedResources() {
+        List<String> resourceCrns = List.of(DEFAULT_RESOURCE_CRN, RESOURCE_CRN);
+
+        underTest.checkPermissionForUserOnResources(AuthorizationResourceType.IMAGE_CATALOG,
+                AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, USER_CRN, resourceCrns);
+
+        verify(defaultResourceChecker).getDefaultResourceCrns(resourceCrns);
+        verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG);
+        verify(umsResourceAuthorizationService).checkRightOfUserOnResources(USER_CRN, AuthorizationResourceType.IMAGE_CATALOG,
+                AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, List.of(RESOURCE_CRN));
+    }
+
+    @Test
+    public void testCheckPermissionFailForUserOnMixedResources() {
+        List<String> resourceCrns = List.of(DEFAULT_RESOURCE_CRN, RESOURCE_CRN);
+
+        AccessDeniedException exception = Assert.assertThrows(AccessDeniedException.class, () -> {
+            underTest.checkPermissionForUserOnResources(AuthorizationResourceType.IMAGE_CATALOG,
+                    AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, resourceCrns);
+        });
+
+        assertEquals(exception.getMessage(), "You have no right to perform environments/deleteImageCatalog on resources " +
+                "[DEFAULT_RESOURCE_CRN,RESOURCE_CRN]");
+        verify(defaultResourceChecker).getDefaultResourceCrns(resourceCrns);
+        verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DELETE_IMAGE_CATALOG);
+        verifyZeroInteractions(umsResourceAuthorizationService);
+    }
+
+    @Test
+    public void testGetPermissionForUserOnMixedResources() {
+        List<String> resourceCrns = List.of(DEFAULT_RESOURCE_CRN, RESOURCE_CRN);
+        when(umsResourceAuthorizationService.getRightOfUserOnResources(anyString(), any(), any(), any())).thenReturn(Map.of(RESOURCE_CRN, true));
+
+        Map<String, Boolean> result = underTest.getPermissionsForUserOnResources(AuthorizationResourceType.IMAGE_CATALOG,
+                AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, USER_CRN, resourceCrns);
+
+        assertEquals(Map.of(DEFAULT_RESOURCE_CRN, true, RESOURCE_CRN, true), result);
+        verify(defaultResourceChecker).getDefaultResourceCrns(resourceCrns);
+        verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG);
+        verify(umsResourceAuthorizationService).getRightOfUserOnResources(USER_CRN, AuthorizationResourceType.IMAGE_CATALOG,
+                AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, List.of(RESOURCE_CRN));
     }
 
     @AuthorizationResource(type = AuthorizationResourceType.CREDENTIAL)
