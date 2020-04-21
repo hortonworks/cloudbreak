@@ -243,11 +243,6 @@ public class AlertController implements AlertEndpoint {
                 }, () -> {
                     validateCloudPlatform(cluster);
 
-                    if (!cluster.getTunnel().useClusterProxy()) {
-                        throw new BadRequestException(String.format("Cluster '%s' is not configured with Cluster Proxy Tunnel, " +
-                                "Cluster Tunnel is %s. Load Based Scaling not supported", cluster.getStackCrn(), cluster.getTunnel()));
-                    }
-
                     String hostGroup = json.getScalingPolicy().getHostGroup();
                     if (!alertService.getLoadAlertsForClusterHostGroup(clusterId, hostGroup).isEmpty()) {
                         String stackCrn = clusterService.findStackCrnById(clusterId);

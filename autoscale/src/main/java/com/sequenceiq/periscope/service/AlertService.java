@@ -257,6 +257,9 @@ public class AlertService {
         LoadAlert alert = loadAlertRepository.findByCluster(alertId, clusterId);
         alert.setName(loadAlertForUpdate.getName());
         alert.setDescription(loadAlertForUpdate.getDescription());
+        if (loadAlertForUpdate.getLoadAlertConfiguration() != null) {
+            alert.setLoadAlertConfiguration(loadAlertForUpdate.getLoadAlertConfiguration());
+        }
         if (loadAlertForUpdate.getScalingPolicy() != null) {
             alert.getScalingPolicy().setName(loadAlertForUpdate.getScalingPolicy().getName());
             alert.getScalingPolicy().setAdjustmentType(loadAlertForUpdate.getScalingPolicy().getAdjustmentType());

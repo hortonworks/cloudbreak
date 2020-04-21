@@ -4,6 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.periscope.api.endpoint.validator.ValidLoadAlertConfiguration;
 import com.sequenceiq.periscope.doc.ApiDescription.LoadAlertJsonProperties;
@@ -18,18 +19,21 @@ public class LoadAlertConfigurationRequest implements Json {
     @Min(value = 0)
     @Max(value = 200)
     @Digits(fraction = 0, integer = 3)
+    @NotNull
     private @Valid Integer minResourceValue;
 
     @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_MAX_RESOUCE_VALUE)
     @Min(value = 0)
     @Max(value = 200)
     @Digits(fraction = 0, integer = 3)
+    @NotNull
     private @Valid Integer maxResourceValue;
 
     @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_COOL_DOWN_MINS_VALUE)
     @Min(value = 2)
     @Max(value = 180)
     @Digits(fraction = 0, integer = 3)
+    @NotNull
     private @Valid Integer coolDownMinutes;
 
     public Integer getMinResourceValue() {

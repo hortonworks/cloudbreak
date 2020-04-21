@@ -137,17 +137,6 @@ public class AlertControllerTest {
         underTest.createLoadAlert(clusterId, request);
     }
 
-    @Test(expected = BadRequestException.class)
-    public void testLoadAlertCreateTunnelDirect() {
-        LoadAlertRequest request = getALoadAlertRequest();
-
-        Cluster aCluster = getACluster();
-        aCluster.setTunnel(Tunnel.DIRECT);
-        when(clusterService.findById(clusterId)).thenReturn(aCluster);
-
-        underTest.createLoadAlert(clusterId, request);
-    }
-
     @Test
     public void testTimeAlertCreate() {
         TimeAlertRequest request = new TimeAlertRequest();

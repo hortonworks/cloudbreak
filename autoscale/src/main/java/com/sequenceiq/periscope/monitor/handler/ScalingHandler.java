@@ -87,7 +87,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
                 desiredHostGroupNodeCount = policy.getScalingAdjustment();
                 break;
             case LOAD_BASED:
-                desiredHostGroupNodeCount = hostGroupNodeCount + event.getScaleUpNodeCount()
+                desiredHostGroupNodeCount = hostGroupNodeCount + event.getScalingNodeCount()
                         .orElseGet(() -> {
                             return -1 * event.getDecommissionNodeIds().size();
                         });

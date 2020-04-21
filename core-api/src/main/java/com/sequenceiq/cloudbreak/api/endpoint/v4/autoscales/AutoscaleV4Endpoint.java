@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -11,7 +10,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -19,7 +17,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import com.cloudera.cdp.shaded.javax.ws.rs.core.MediaType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
@@ -54,13 +51,6 @@ public interface AutoscaleV4Endpoint {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putClusterForAutoscale")
     void putCluster(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateClusterV4Request updateRequest);
-
-    @POST
-    @Path("ambari")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_BY_AMBARI_ADDRESS, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "getStackForAmbariForAutoscale")
-    StackV4Response getStackForAmbari(@Valid AmbariAddressV4Request json);
 
     @GET
     @Path("stack/all")
@@ -107,9 +97,4 @@ public interface AutoscaleV4Endpoint {
     @Path("clusterproxy")
     @Produces(MediaType.APPLICATION_JSON)
     ClusterProxyConfiguration getClusterProxyconfiguration();
-
-    @GET
-    @Path("distroXInstanceTypes/{cloudPlatform}")
-    @Produces(MediaType.APPLICATION_JSON)
-    Set<String> getSupportedDistroXInstanceTypes(@PathParam("cloudPlatform") String cloudPlatform);
 }

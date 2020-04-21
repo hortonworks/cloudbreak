@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.utils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,33 +14,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 public class StackResponseUtilsTest {
 
     private StackResponseUtils underTest = new StackResponseUtils();
-
-    @Test
-    public void testGetHostGroupInstanceTypeWhenFound() {
-        String hostGroup = "compute";
-        String instanceType = "m5.10large";
-
-        String cloudInstanceType = underTest
-                .getHostGroupInstanceType(getMockStackV4Response(hostGroup, instanceType), hostGroup);
-        assertEquals("Retrieved HostGroup Instance Type should match,", instanceType, cloudInstanceType);
-    }
-
-    @Test
-    public void testGetHostGroupInstanceTypeWhenNotFound() {
-        String hostGroup = "compute";
-        String instanceType = "m5.10large";
-        String testHostGroup = "computeNotFound";
-
-        RuntimeException exceptionThrown = assertThrows(RuntimeException.class,
-                () -> {
-                    underTest.getHostGroupInstanceType(
-                            getMockStackV4Response(hostGroup, instanceType), testHostGroup);
-                });
-
-        assertEquals("HostGroup Instance Type Not Found,",
-                "HostGroup computeNotFound InstanceTemplateV4Response not found for cluster test-crn.",
-                exceptionThrown.getMessage());
-    }
 
     @Test
     public void getGetCloudInstanceIdsForHostGroup() {

@@ -13,7 +13,7 @@ public class ScalingEvent extends ApplicationEvent {
 
     private List<String> decommissionNodeIds;
 
-    private transient Optional<Integer> scaleUpNodeCount = Optional.empty();
+    private transient Optional<Integer> scalingNodeCount = Optional.empty();
 
     private transient Optional<Integer> hostGroupNodeCount = Optional.empty();
 
@@ -33,12 +33,12 @@ public class ScalingEvent extends ApplicationEvent {
         this.decommissionNodeIds = decommissionNodeIds;
     }
 
-    public Optional<Integer> getScaleUpNodeCount() {
-        return scaleUpNodeCount;
+    public Optional<Integer> getScalingNodeCount() {
+        return scalingNodeCount;
     }
 
-    public void setScaleUpNodeCount(Optional<Integer> scaleUpNodeCount) {
-        this.scaleUpNodeCount = scaleUpNodeCount;
+    public void setScalingNodeCount(Optional<Integer> scalingNodeCount) {
+        this.scalingNodeCount = scalingNodeCount;
     }
 
     public Optional<Integer> getHostGroupNodeCount() {

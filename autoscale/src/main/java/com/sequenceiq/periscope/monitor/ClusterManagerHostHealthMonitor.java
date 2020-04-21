@@ -20,7 +20,7 @@ public class ClusterManagerHostHealthMonitor extends ClusterMonitor {
 
     @Override
     public String getTriggerExpression() {
-        return MonitorUpdateRate.EVERY_FIVE_MIN_RATE_CRON;
+        return MonitorUpdateRate.EVERY_MIN_RATE_CRON;
     }
 
     @Override

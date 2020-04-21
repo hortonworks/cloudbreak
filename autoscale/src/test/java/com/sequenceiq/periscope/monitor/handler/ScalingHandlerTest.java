@@ -199,7 +199,7 @@ public class ScalingHandlerTest {
         when(scalingEventMock.getAlert()).thenReturn(baseAlertMock);
         if (LOAD_BASED.equals(adjustmentType)) {
             when(scalingEventMock.getHostGroupNodeCount()).thenReturn(Optional.of(currentHostGroupCount));
-            when(scalingEventMock.getScaleUpNodeCount()).thenReturn(Optional.of(scalingAdjument));
+            when(scalingEventMock.getScalingNodeCount()).thenReturn(Optional.of(scalingAdjument));
         } else {
             when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(stackV4ResponseMock);
             when(stackResponseUtils.getNodeCountForHostGroup(stackV4ResponseMock, testHostGroup))

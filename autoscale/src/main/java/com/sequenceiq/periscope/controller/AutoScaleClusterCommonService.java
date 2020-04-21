@@ -62,9 +62,9 @@ public class AutoScaleClusterCommonService {
     @Retryable(value = NotFoundException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     protected Cluster getClusterByCrnOrName(NameOrCrn nameOrCrn) {
         return nameOrCrn.hasName() ?
-                clusterService.findOneByStackName(nameOrCrn.getName())
+                clusterService.findOneByStackNameAndUserId(nameOrCrn.getName(), restRequestThreadLocalService.getCloudbreakUser())
                         .orElseThrow(NotFoundException.notFound("cluster", nameOrCrn.getName())) :
-                clusterService.findOneByStackCrn(nameOrCrn.getCrn())
+                clusterService.findOneByStackCrnAndUserId(nameOrCrn.getCrn(), restRequestThreadLocalService.getCloudbreakUser())
                         .orElseThrow(NotFoundException.notFound("cluster", nameOrCrn.getCrn()));
     }
 

@@ -18,9 +18,13 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     Cluster findByStackId(@Param("stackId") Long stackId);
 
-    Optional<Cluster> findByStackCrn(@Param("stackCrn") String stackCrn);
+    @Query(" SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain " +
+            " WHERE c.stackCrn = :stackCrn and c.clusterPertain.userId = :userId")
+    Optional<Cluster> findByStackCrnAndUserId(@Param("stackCrn") String stackCrn, @Param("userId") String userId);
 
-    Optional<Cluster> findByStackName(@Param("stackName") String stackName);
+    @Query(" SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain " +
+            " WHERE c.stackName = :stackName and c.clusterPertain.userId = :userId")
+    Optional<Cluster> findByStackNameAndUserId(@Param("stackName") String stackName, @Param("userId") String userId);
 
     @Query("SELECT c.stackCrn FROM Cluster c WHERE c.id = :id")
     String findStackCrnById(@Param("id") Long id);

@@ -23,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -97,7 +96,6 @@ import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
-import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -261,18 +259,6 @@ public class StackService implements ResourceIdProvider {
         return foundStack.orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn)));
     }
 
-    @PreAuthorize("hasRole('AUTOSCALE')")
-    public Long getWorkspaceId(String crn) {
-        return stackRepository.findWorkspaceIdByCrn(crn);
-    }
-
-    @PreAuthorize("hasRole('AUTOSCALE')")
-    public Tenant getTenant(String crn) {
-        Workspace workspace = stackRepository.findWorkspaceByCrn(crn).orElseThrow(notFound("workspace", crn));
-        return workspace.getTenant();
-    }
-
-    @PreAuthorize("hasRole('AUTOSCALE')")
     public Set<AutoscaleStackV4Response> getAllForAutoscale() {
         try {
             return transactionService.required(() -> {
