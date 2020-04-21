@@ -124,14 +124,9 @@ public class FreeIpaCreationService {
         stack.setTelemetry(telemetry);
 
         Backup backup = stack.getBackup();
-        cloudBackupFolderResolverService.updateStorageLocation(backup,
+        backup = cloudBackupFolderResolverService.updateStorageLocation(backup,
                 BackupClusterType.FREEIPA.value(), stack.getName(), stack.getResourceCrn());
-        if (backup != null) {
-            backup.setHourlyEnabled(true);
-            backup.setInitialFullEnabled(true);
-            backup.setMonthlyFullEnabled(true);
-            stack.setBackup(backup);
-        }
+        stack.setBackup(backup);
 
         fillInstanceMetadata(stack);
 
