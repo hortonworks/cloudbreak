@@ -4,6 +4,8 @@ import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 
 public enum RecipeExecutionPhase {
 
+    PRE("pre"),
+    POST("post"),
     PRE_CLOUDERA_MANAGER_START("pre-cloudera-manager-start"),
     PRE_TERMINATION("pre-termination"),
     POST_CLOUDERA_MANAGER_START("post-cloudera-manager-start"),
@@ -31,7 +33,13 @@ public enum RecipeExecutionPhase {
     }
 
     public boolean isPreRecipe() {
-        return this != POST_CLUSTER_INSTALL;
+        switch (this) {
+            case POST_CLUSTER_INSTALL:
+            case POST:
+                return false;
+            default:
+                return true;
+        }
     }
 
     public boolean isPostRecipe() {
