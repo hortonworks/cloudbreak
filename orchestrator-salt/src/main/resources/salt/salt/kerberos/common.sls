@@ -1,5 +1,7 @@
 haveged:
-  pkg.installed: []
+  pkg.installed:
+    - unless:
+      - rpm -q haveged
   service.running:
     - enable: True
 
@@ -21,6 +23,8 @@ install_kerberos:
       - krb5-server
       - krb5-libs
       - krb5-workstation
+    - unless:
+      - rpm -q krb5-server krb5-libs krb5-workstation
 {% endif %}
 
 {% if grains['os_family'] == 'Suse' %}

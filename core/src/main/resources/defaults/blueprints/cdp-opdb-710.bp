@@ -183,6 +183,12 @@
       {
         "refName": "yarn",
         "serviceType": "YARN",
+        "serviceConfigs": [
+          {
+            "name": "yarn_log_aggregation_IFile_remote_app_log_dir_suffix",
+            "value": ""
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "yarn-RESOURCEMANAGER-BASE",
