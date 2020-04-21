@@ -23,7 +23,7 @@ public class CloudBackupFolderResolverService {
         this.adlsGen2BackupConfigGenerator = adlsGen2BackupConfigGenerator;
     }
 
-    public void updateStorageLocation(Backup backup, String clusterType,
+    public Backup updateStorageLocation(Backup backup, String clusterType,
             String clusterName, String clusterCrn) {
         LOGGER.debug("Updating/enriching backup storage locations with cluster data.");
         if (backup != null  && StringUtils.isNotEmpty(backup.getStorageLocation())) {
@@ -42,6 +42,7 @@ public class CloudBackupFolderResolverService {
         } else {
             LOGGER.debug("Backup is not set, skipping cloud storage location updates.");
         }
+        return backup;
     }
 
     public String resolveS3Location(String location, String clusterType,
