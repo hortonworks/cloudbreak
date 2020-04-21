@@ -1,6 +1,7 @@
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
 
 include:
+  - postgresql.repo
   - cloudera.repo
 
 stop-cloudera-scm-server:
