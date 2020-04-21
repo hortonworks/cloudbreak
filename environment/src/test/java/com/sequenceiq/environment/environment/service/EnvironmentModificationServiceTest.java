@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,6 +40,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
@@ -535,6 +538,44 @@ class EnvironmentModificationServiceTest {
         verify(environmentResourceService, times(1)).createAndUpdateSshKey(environment);
         verify(environmentResourceService, times(0)).deletePublicKey(environment, "old-public-key-id");
         assertEquals(environment.getAuthentication().getPublicKey(), "original-ssh-key");
+    }
+
+    @Test
+    public void testChangeTelemetryFeaturesByEnvironmentName() {
+        String accountId = "myAccountId";
+        String envName = "myEnvName";
+        EnvironmentFeatures featuresInput = new EnvironmentFeatures();
+        featuresInput.addClusterLogsCollection(true);
+        Environment environment = new Environment();
+        environment.setTelemetry(new EnvironmentTelemetry());
+        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(envName, accountId))
+                .thenReturn(Optional.of(environment));
+        when(environmentService.save(environment)).thenReturn(environment);
+        when(environmentDtoConverter.environmentToDto(environment)).thenReturn(new EnvironmentDto());
+
+        environmentModificationServiceUnderTest.changeTelemetryFeaturesByEnvironmentName(accountId, envName, featuresInput);
+
+        verify(environmentService).save(any());
+        assertTrue(environment.getTelemetry().getFeatures().getClusterLogsCollection().isEnabled());
+    }
+
+    @Test
+    public void testChangeTelemetryFeaturesByEnvironmentCrn() {
+        String accountId = "myAccountId";
+        String envCrn = "myEnvCrn";
+        EnvironmentFeatures featuresInput = new EnvironmentFeatures();
+        featuresInput.addClusterLogsCollection(true);
+        Environment environment = new Environment();
+        environment.setTelemetry(new EnvironmentTelemetry());
+        when(environmentService.findByResourceCrnAndAccountIdAndArchivedIsFalse(envCrn, accountId))
+                .thenReturn(Optional.of(environment));
+        when(environmentService.save(environment)).thenReturn(environment);
+        when(environmentDtoConverter.environmentToDto(environment)).thenReturn(new EnvironmentDto());
+
+        environmentModificationServiceUnderTest.changeTelemetryFeaturesByEnvironmentCrn(accountId, envCrn, featuresInput);
+
+        verify(environmentService).save(any());
+        assertTrue(environment.getTelemetry().getFeatures().getClusterLogsCollection().isEnabled());
     }
 
     @Configuration

@@ -19,6 +19,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
@@ -91,6 +92,13 @@ public interface EnvironmentEndpoint {
             nickname = "changeCredentialInEnvironmentV1")
     DetailedEnvironmentResponse changeCredentialByEnvironmentName(@PathParam("name") String environmentName, @Valid EnvironmentChangeCredentialRequest request);
 
+    @PUT
+    @Path("/name/{name}/change_telemetry_features")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.CHANGE_TELEMETRY_FEATURES_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "changeTelemetryFeaturesInEnvironmentV1ByName")
+    DetailedEnvironmentResponse changeTelemetryFeaturesByEnvironmentName(@PathParam("name") String environmentName, @Valid FeaturesRequest request);
+
     @POST
     @Path("/name/{name}/cli_create")
     @Produces(MediaType.APPLICATION_JSON)
@@ -132,6 +140,13 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "changeCredentialInEnvironmentV1ByCrn")
     DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(@PathParam("crn") String crn, @Valid EnvironmentChangeCredentialRequest request);
+
+    @PUT
+    @Path("/crn/{crn}/change_telemetry_features")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.CHANGE_TELEMETRY_FEATURES_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "changeTelemetryFeaturesInEnvironmentV1ByCrn")
+    DetailedEnvironmentResponse changeTelemetryFeaturesByEnvironmentCrn(@PathParam("crn") String crn, @Valid FeaturesRequest request);
 
     @POST
     @Path("/name/{name}/start")

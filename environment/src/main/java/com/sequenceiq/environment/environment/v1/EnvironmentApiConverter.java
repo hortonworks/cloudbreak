@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.NullUtil;
+import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
@@ -62,6 +63,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -71,8 +73,8 @@ import com.sequenceiq.environment.network.dto.YarnParams;
 import com.sequenceiq.environment.network.service.SubnetIdProvider;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
-import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
+import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 
 @Component
 public class EnvironmentApiConverter {
@@ -476,5 +478,12 @@ public class EnvironmentApiConverter {
         response.setEnvironmentName(environmentName);
         response.setEnvironmentCrn(crn);
         return response;
+    }
+
+    public EnvironmentFeatures convertToEnvironmentTelemetryFeatures(FeaturesRequest featuresRequest) {
+        EnvironmentFeatures features = new EnvironmentFeatures();
+        features.setWorkloadAnalytics(featuresRequest.getWorkloadAnalytics());
+        features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
+        return features;
     }
 }
