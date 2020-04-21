@@ -12,16 +12,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.model.CloudInstanceType;
+import com.sequenceiq.periscope.model.InstanceConfig;
 import com.sequenceiq.periscope.model.TlsConfiguration;
-import com.sequenceiq.periscope.model.yarn.YarnScalingServiceV1Request.HostGroupInstanceType;
 import com.sequenceiq.periscope.model.yarn.YarnScalingServiceV1Request;
+import com.sequenceiq.periscope.model.yarn.YarnScalingServiceV1Request.HostGroupInstanceType;
 import com.sequenceiq.periscope.model.yarn.YarnScalingServiceV1Response;
-import com.sequenceiq.periscope.service.configuration.CloudInstanceTypeService;
 import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
 
@@ -44,17 +43,17 @@ public class YarnMetricsClient {
     private ClusterProxyConfigurationService clusterProxyConfigurationService;
 
     @Inject
-    private CloudInstanceTypeService cloudInstanceTypeService;
-
-    @Inject
     private RequestLogging requestLogging;
 
-    public YarnScalingServiceV1Response getYarnMetricsForCluster(Cluster cluster,
-            String hostGroupInstanceType,
-            CloudPlatform cloudPlatform) throws Exception {
+    @Inject
+    private YarnServiceConfigClient yarnServiceConfigClient;
+
+    public YarnScalingServiceV1Response getYarnMetricsForCluster(Cluster cluster, StackV4Response stackV4Response,
+            String hostGroup) throws Exception {
 
         TlsConfiguration tlsConfig = tlsSecurityService.getTls(cluster.getId());
         Optional<String> clusterProxyUrl = clusterProxyConfigurationService.getClusterProxyUrl();
+
         if (!clusterProxyUrl.isPresent() || !cluster.getTunnel().useClusterProxy()) {
             String msg = String.format("ClusterProxy Not Configured for Cluster {}, cannot query YARN Metrics.", cluster.getStackCrn());
             throw new RuntimeException(msg);
@@ -62,20 +61,15 @@ public class YarnMetricsClient {
 
         Client restClient = RestClientUtil.createClient(tlsConfig.getServerCert(),
                 tlsConfig.getClientCert(), tlsConfig.getClientKey(), true);
-
         String yarnApiUrl = String.format(YARN_API_URL, clusterProxyUrl.get(), cluster.getStackCrn());
+
+        InstanceConfig instanceConfig = yarnServiceConfigClient.getInstanceConfigFromCM(cluster, stackV4Response, hostGroup);
         YarnScalingServiceV1Request yarnScalingServiceV1Request = new YarnScalingServiceV1Request();
-
-        CloudInstanceType cloudInstanceType = cloudInstanceTypeService.getCloudVMInstanceType(cloudPlatform, hostGroupInstanceType)
-                .orElseThrow(() -> new RuntimeException(String.format("CloudVmType not found for CloudPlatform %s, " +
-                        " InstanceType %s, Cluster %s ", cloudPlatform, hostGroupInstanceType, cluster.getStackCrn())));
-
         yarnScalingServiceV1Request.setInstanceTypes(List.of(
-                new HostGroupInstanceType(cloudInstanceType.getInstanceName(),
-                        cloudInstanceType.getMemoryInMB(), cloudInstanceType.getCoreCPU())));
+                new HostGroupInstanceType(instanceConfig.getInstanceName(),
+                        instanceConfig.getMemoryInMb().intValue(), instanceConfig.getCoreCPU())));
 
         String clusterCreatorCrn = cluster.getClusterPertain().getUserCrn();
-
         YarnScalingServiceV1Response yarnResponse = requestLogging.logResponseTime(() -> {
             return restClient.target(yarnApiUrl)
                     .queryParam(PARAM_UPSCALE_FACTOR_NODE_RESOURCE_TYPE, DEFAULT_UPSCALE_RESOURCE_TYPE)
@@ -88,4 +82,5 @@ public class YarnMetricsClient {
         LOGGER.info("YarnScalingAPI reponse for cluster crn '{}',  response '{}'", cluster.getStackCrn(), yarnResponse);
         return yarnResponse;
     }
+
 }

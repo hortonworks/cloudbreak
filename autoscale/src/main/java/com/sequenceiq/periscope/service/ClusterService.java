@@ -133,12 +133,12 @@ public class ClusterService {
         return clusterRepository.findByStackId(stackId);
     }
 
-    public Optional<Cluster> findOneByStackCrn(String stackCrn) {
-        return  clusterRepository.findByStackCrn(stackCrn);
+    public Optional<Cluster> findOneByStackCrnAndUserId(String stackCrn, CloudbreakUser cloudbreakUser) {
+        return  clusterRepository.findByStackCrnAndUserId(stackCrn, cloudbreakUser.getUserId());
     }
 
-    public Optional<Cluster> findOneByStackName(String stackName) {
-        return  clusterRepository.findByStackName(stackName);
+    public Optional<Cluster> findOneByStackNameAndUserId(String stackName, CloudbreakUser cloudbreakUser) {
+        return  clusterRepository.findByStackNameAndUserId(stackName, cloudbreakUser.getUserId());
     }
 
     public Cluster save(Cluster cluster) {

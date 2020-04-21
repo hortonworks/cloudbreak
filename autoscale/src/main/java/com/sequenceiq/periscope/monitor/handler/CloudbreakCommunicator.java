@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.monitor.handler;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -25,11 +26,12 @@ public class CloudbreakCommunicator {
     }
 
     public void decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
-        requestLogging.logRequestTime(() -> {
+        requestLogging.logResponseTime(() -> {
             cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint()
                     .decommissionInstancesForClusterCrn(cluster.getStackCrn(),
                             cluster.getClusterPertain().getWorkspaceId(),
                             decommissionNodeIds, false);
+            return Optional.empty();
         }, String.format("DecommissionInstancesForCluster query for cluster crn %s, NodeIds %s",
                 cluster.getStackCrn(), decommissionNodeIds));
     }

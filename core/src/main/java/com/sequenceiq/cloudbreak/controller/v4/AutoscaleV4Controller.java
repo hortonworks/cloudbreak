@@ -5,14 +5,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
@@ -32,7 +30,6 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
@@ -48,12 +45,6 @@ import com.sequenceiq.distrox.v1.distrox.StackOperations;
 @Transactional(TxType.NEVER)
 @InternalReady
 public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
-
-    @Value("${cb.aws.distrox.enabled.instance.types:}")
-    private List<String> awsDistroxInstanceTypes;
-
-    @Value("${cb.azure.distrox.enabled.instance.types:}")
-    private List<String> azureDistroxInstanceTypes;
 
     @Inject
     private StackService stackService;
@@ -136,18 +127,6 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     public ClusterProxyConfiguration getClusterProxyconfiguration() {
         return clusterProxyService.getClusterProxyConfigurationForAutoscale();
-    }
-
-    @Override
-    public Set<String> getSupportedDistroXInstanceTypes(String cloudPlatform) {
-        switch (cloudPlatform) {
-            case "aws":
-                return awsDistroxInstanceTypes.stream().collect(Collectors.toSet());
-            case "azure":
-                return azureDistroxInstanceTypes.stream().collect(Collectors.toSet());
-            default:
-                throw new BadRequestException(String.format("Unknown CloudPlatform %s", cloudPlatform));
-        }
     }
 
     @Override

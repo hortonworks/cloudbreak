@@ -1,17 +1,22 @@
 package com.sequenceiq.periscope.utils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.cloudera.api.swagger.model.ApiClusterTemplate;
+import com.cloudera.api.swagger.model.ApiClusterTemplateHostTemplate;
+import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
+import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Service
 public class StackResponseUtils {
@@ -23,20 +28,11 @@ public class StackResponseUtils {
         ).findFirst();
     }
 
-    public String getHostGroupInstanceType(StackV4Response stackResponse, String hostGroup) {
-        return stackResponse.getInstanceGroups().stream()
-                .filter(instanceGroupV4Response -> instanceGroupV4Response.getName().equalsIgnoreCase(hostGroup))
-                .findFirst()
-                .map(InstanceGroupV4Response::getTemplate)
-                .map(InstanceTemplateV4Response::getInstanceType)
-                .orElseThrow(() -> new RuntimeException(
-                        String.format("HostGroup %s InstanceTemplateV4Response not found for cluster %s.", hostGroup, stackResponse.getCrn())));
-    }
-
     public Map<String, String> getCloudInstanceIdsForHostGroup(StackV4Response stackResponse, String hostGroup) {
         return stackResponse.getInstanceGroups().stream()
                 .filter(instanceGroupV4Response -> instanceGroupV4Response.getName().equalsIgnoreCase(hostGroup))
                 .flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
+                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                 .collect(Collectors.toMap(InstanceMetaDataV4Response::getDiscoveryFQDN,
                         InstanceMetaDataV4Response::getInstanceId));
     }
@@ -48,5 +44,32 @@ public class StackResponseUtils {
                 .map(InstanceMetaDataV4Response::getDiscoveryFQDN)
                 .collect(Collectors.counting())
                 .intValue();
+    }
+
+    public String getRoleConfigNameForHostGroup(StackV4Response stackResponse, String hostGroupName, String serviceType, String roleType)
+            throws Exception {
+        String template = stackResponse.getCluster().getBlueprint().getBlueprint();
+        ApiClusterTemplate cmTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
+
+        Set<String> hostGroupRoleConfigNames = cmTemplate.getHostTemplates().stream()
+                .filter(clusterTemplate -> clusterTemplate.getRefName().equalsIgnoreCase(hostGroupName))
+                .findFirst().map(ApiClusterTemplateHostTemplate::getRoleConfigGroupsRefNames).orElse(List.of())
+                .stream()
+                .collect(Collectors.toSet());
+
+        String roleReferenceName = cmTemplate.getServices().stream()
+                .filter(s -> s.getServiceType().equalsIgnoreCase(serviceType))
+                .findFirst()
+                .map(ApiClusterTemplateService::getRoleConfigGroups).orElse(List.of())
+                .stream()
+                .filter(rcg -> rcg.getRoleType().equalsIgnoreCase(roleType))
+                .filter(rcg -> hostGroupRoleConfigNames.contains(rcg.getRefName()))
+                .map(ApiClusterTemplateRoleConfigGroup::getRefName)
+                .findFirst()
+                .orElseThrow(
+                        () -> new Exception(String.format("Unable to retrieve RoleConfigGroupRefName for Service '%s', RoleType '%s'," +
+                                " HostGroup '%s', Cluster '%s'", serviceType, roleType, hostGroupName, stackResponse.getCrn())));
+
+        return roleReferenceName;
     }
 }

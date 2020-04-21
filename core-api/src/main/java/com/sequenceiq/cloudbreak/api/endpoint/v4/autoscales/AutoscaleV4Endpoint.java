@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -107,9 +106,4 @@ public interface AutoscaleV4Endpoint {
     @Path("clusterproxy")
     @Produces(MediaType.APPLICATION_JSON)
     ClusterProxyConfiguration getClusterProxyconfiguration();
-
-    @GET
-    @Path("distroXInstanceTypes/{cloudPlatform}")
-    @Produces(MediaType.APPLICATION_JSON)
-    Set<String> getSupportedDistroXInstanceTypes(@PathParam("cloudPlatform") String cloudPlatform);
 }

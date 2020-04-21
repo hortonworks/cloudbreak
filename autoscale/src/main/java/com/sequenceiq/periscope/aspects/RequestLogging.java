@@ -17,10 +17,4 @@ public class RequestLogging {
         LOGGER.info("Request '{}' finished in '{}' ms.", requestName, System.currentTimeMillis() - start);
         return response;
     }
-
-    public void logRequestTime(Runnable callback, String requestName) {
-        long start = System.currentTimeMillis();
-        callback.run();
-        LOGGER.info("Request '{}' finished in '{}' ms.", requestName, System.currentTimeMillis() - start);
-    }
 }
