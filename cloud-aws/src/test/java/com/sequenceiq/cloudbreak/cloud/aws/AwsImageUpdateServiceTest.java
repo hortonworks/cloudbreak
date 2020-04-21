@@ -3,16 +3,21 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -21,6 +26,9 @@ import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
+import com.amazonaws.services.cloudformation.model.GetTemplateResult;
+import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
+import com.github.jknack.handlebars.internal.Files;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -28,10 +36,12 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.api.type.ResourceType;
 
 public class AwsImageUpdateServiceTest {
@@ -39,6 +49,8 @@ public class AwsImageUpdateServiceTest {
     private static final String USER_ID = "horton@hortonworks.com";
 
     private static final Long WORKSPACE_ID = 1L;
+
+    private static final String IMAGE_NAME = "imageName";
 
     @Mock
     private AwsClient awsClient;
@@ -67,6 +79,9 @@ public class AwsImageUpdateServiceTest {
     @Mock
     private Image image;
 
+    @Mock
+    private AwsStackRequestHelper awsStackRequestHelper;
+
     @InjectMocks
     private AwsImageUpdateService underTest;
 
@@ -81,14 +96,14 @@ public class AwsImageUpdateServiceTest {
         CloudCredential cc = new CloudCredential("crn", "cc");
         ac = new AuthenticatedContext(cloudContext, cc);
         when(stack.getImage()).thenReturn(image);
-        when(image.getImageName()).thenReturn("imageName");
+        when(image.getImageName()).thenReturn(IMAGE_NAME);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(cloudFormationClient);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(autoScalingClient);
         when(encryptedImageCopyService.createEncryptedImages(ac, stack, resourceNotifier)).thenReturn(Collections.emptyMap());
     }
 
     @Test
-    public void testUpdateImage() {
+    public void testUpdateImageWithLaunchConfiguration() {
         String lcName = "lcName";
         CloudResource cfResource = CloudResource.builder()
                 .type(ResourceType.CLOUDFORMATION_STACK)
@@ -98,6 +113,7 @@ public class AwsImageUpdateServiceTest {
         Map<AutoScalingGroup, String> scalingGroupStringMap =
                 Collections.singletonMap(new AutoScalingGroup().withLaunchConfigurationName(lcName)
                         .withAutoScalingGroupName(autoScalingGroupName), autoScalingGroupName);
+        when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody("AWS::AutoScaling::LaunchConfiguration"));
         when(autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource))
                 .thenReturn(scalingGroupStringMap);
         List<LaunchConfiguration> oldLaunchConfigs = Collections.singletonList(new LaunchConfiguration().withLaunchConfigurationName(lcName));
@@ -117,5 +133,53 @@ public class AwsImageUpdateServiceTest {
                 autoScalingGroupName, oldLaunchConfigs.get(0), newLCName);
         verify(launchConfigurationHandler, times(1)).removeOldLaunchConfiguration(oldLaunchConfigs.get(0), autoScalingClient,
                 ac.getCloudContext());
+    }
+
+    @Test
+    public void testUpdateImageWithLaunchTemplate() {
+        String cfStackName = "cf";
+        CloudResource cfResource = CloudResource.builder()
+                .type(ResourceType.CLOUDFORMATION_STACK)
+                .name(cfStackName)
+                .build();
+        String cfTemplateBody = "AWS::EC2::LaunchTemplate";
+        when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
+
+        UpdateStackRequest updateStackRequest = new UpdateStackRequest();
+        when(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cfStackName, cfTemplateBody)).thenReturn(updateStackRequest);
+
+        underTest.updateImage(ac, stack, cfResource);
+
+        verify(awsStackRequestHelper).createUpdateStackRequest(ac, stack, cfStackName, cfTemplateBody);
+        verify(cloudFormationClient).updateStack(updateStackRequest);
+    }
+
+    @Test
+    public void testUpdateImageWithLaunchTemplateAndEncryptedImage() throws IOException {
+        Group group = mock(Group.class);
+        when(group.getName()).thenReturn("GroupName");
+        when(stack.getGroups()).thenReturn(List.of(group));
+
+        String cfStackName = "cf";
+        CloudResource cfResource = CloudResource.builder()
+                .type(ResourceType.CLOUDFORMATION_STACK)
+                .name(cfStackName)
+                .build();
+        String template = Files.read(new File("src/test/resources/json/aws-cf-template.json"));
+        String cfTemplateBody = new Json(String.format(template, "ami-old")).getValue();
+        when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
+
+        UpdateStackRequest updateStackRequest = new UpdateStackRequest();
+        ArgumentCaptor<String> cfTemplateBodyCaptor = ArgumentCaptor.forClass(String.class);
+        when(awsStackRequestHelper.createUpdateStackRequest(eq(ac), eq(stack), eq(cfStackName), any())).thenReturn(updateStackRequest);
+
+        underTest.updateImage(ac, stack, cfResource);
+
+        verify(awsStackRequestHelper).createUpdateStackRequest(eq(ac), eq(stack), eq(cfStackName), cfTemplateBodyCaptor.capture());
+        String newImageName = new Json(cfTemplateBodyCaptor.getValue())
+                .getValue("Resources.ClusterManagerNodeLaunchTemplateGroupName.Properties.LaunchTemplateData.ImageId")
+                .toString();
+        Assertions.assertThat(newImageName).isEqualTo(IMAGE_NAME);
+        verify(cloudFormationClient).updateStack(updateStackRequest);
     }
 }
