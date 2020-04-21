@@ -13,5 +13,6 @@ upgrade-cloudera-agent:
         - cloudera-manager-agent
         - cloudera-manager-daemons
     - refresh: True
+    - failhard: True
     - require:
         - sls: cloudera.repo
