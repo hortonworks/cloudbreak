@@ -134,7 +134,16 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
     }
 
     private String formatToLine(ApiCommand s) {
-        return s.getName() + "(" + s.getServiceRef().getServiceName() + "): " + s.getResultMessage();
+        LOGGER.debug("ApiCommand to format: {}", s);
+        String ret = "";
+        if (s != null) {
+            ret += s.getName();
+            if (s.getServiceRef() != null) {
+                ret += "(" + s.getServiceRef().getServiceName() + "): ";
+            }
+            ret += s.getResultMessage();
+        }
+        return ret;
     }
 
     protected abstract String getCommandName();
