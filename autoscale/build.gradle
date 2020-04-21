@@ -66,10 +66,9 @@ dependencyManagement {
             entry 'spring-boot-starter-freemarker'
         }
 
-        dependencySet(group: 'io.springfox', version: '2.9.2') {
+        dependencySet(group: 'io.springfox', version: springFoxSwagger) {
             entry 'springfox-swagger2'
             entry 'springfox-core'
-            entry 'springfox-swagger-ui'
         }
 
         dependencySet (group: 'org.powermock', version: powermockVersion) {
@@ -80,6 +79,7 @@ dependencyManagement {
         }
 
         dependency group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
+        dependency group: 'org.webjars',                   name: 'swagger-ui',                     version: '3.25.0'
         dependency group: 'javax.mail',                    name: 'mail',                           version: '1.5.0-b01'
         dependency group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
         dependency group: 'javax.xml.bind',                name: 'jaxb-api',                       version: '2.3.0'
@@ -133,7 +133,7 @@ dependencies {
 
     compile group: 'io.springfox',                  name: 'springfox-swagger2'
     compile group: 'io.springfox',                  name: 'springfox-core'
-    compile group: 'io.springfox',                  name: 'springfox-swagger-ui'
+    compile group: 'org.webjars',                   name: 'swagger-ui'
 
     compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs'
 
