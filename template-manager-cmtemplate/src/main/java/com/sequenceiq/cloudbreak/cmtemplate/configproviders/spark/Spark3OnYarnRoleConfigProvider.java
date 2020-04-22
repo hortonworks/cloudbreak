@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class Spark3OnYarnRoleConfigProvider extends AbstractRoleConfigProvider {
 
-    private static final String SPARK3_CONF_CLIENT_SAFETY_VALVE = "spark-conf/spark-defaults.conf_client_config_safety_valve";
+    private static final String SPARK3_CONF_CLIENT_SAFETY_VALVE = "spark3-conf/spark-defaults.conf_client_config_safety_valve";
 
     private static final String SPARK3_YARN_ACCESS_DIR_PARAM = "spark.kerberos.access.hadoopFileSystems=";
 

@@ -257,7 +257,7 @@
       "displayName": "HBase UI",
       "serviceName": "MASTER",
       "knoxService": "HBASEUI",
-      "knoxUrl": "/hbase/webui/master/",
+      "knoxUrl": "/hbase/webui/master",
       "ssoSupported": true,
       "port": 16010,
       "tlsPort": 16010,

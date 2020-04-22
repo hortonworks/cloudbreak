@@ -1,6 +1,7 @@
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
 
 include:
+  - postgresql.repo
   - cloudera.repo
 
 stop-cloudera-scm-server:
@@ -13,5 +14,6 @@ upgrade-cloudera-server:
         - cloudera-manager-server
         - cloudera-manager-daemons
     - refresh: True
+    - failhard: True
     - require:
         - sls: cloudera.repo

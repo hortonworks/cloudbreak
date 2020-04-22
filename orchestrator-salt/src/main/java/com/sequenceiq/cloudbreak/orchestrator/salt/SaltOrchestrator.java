@@ -867,11 +867,9 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel, maxRetry,
                     exitCriteria);
-            saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(targetHostnames, allNodes), exitCriteriaModel, maxRetry, exitCriteria);
-            StateAllRunner stateAllRunner = new StateAllRunner(targetHostnames, allNodes, "recipes." + phase.value());
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateAllRunner);
-            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, false);
-            saltJobRunBootstrapRunner.call();
+            Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+            saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, exitCriteria);
+            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
         } catch (CloudbreakOrchestratorTimeoutException e) {
             LOGGER.info("Recipe execution timeout. {}", phase, e);
             throw e;
