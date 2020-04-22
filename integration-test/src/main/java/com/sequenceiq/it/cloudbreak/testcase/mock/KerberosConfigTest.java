@@ -149,7 +149,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
                 List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
                 verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
-                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(3));
+                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(5));
                 return verifications;
             }
 
@@ -176,7 +176,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
                 List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
                 verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
-                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(3));
+                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(5));
                 return verifications;
             }
 
@@ -201,7 +201,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
                 List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
                 verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
-                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(3));
+                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(5));
                 return verifications;
             }
 
