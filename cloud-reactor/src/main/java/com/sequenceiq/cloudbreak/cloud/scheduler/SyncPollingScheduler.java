@@ -22,7 +22,7 @@ public class SyncPollingScheduler<T> {
     private static final int FAILURE_TOLERANT_ATTEMPT = 3;
 
     public T schedule(PollTask<T> task) throws Exception {
-        return schedule(task, POLLING_INTERVAL, 1, FAILURE_TOLERANT_ATTEMPT);
+        return schedule(task, POLLING_INTERVAL, MAX_POLLING_ATTEMPT, FAILURE_TOLERANT_ATTEMPT);
     }
 
     public T schedule(PollTask<T> task, int interval, int maxAttempt, int maxFailureTolerant) throws Exception {
@@ -50,7 +50,7 @@ public class SyncPollingScheduler<T> {
                         return AttemptResults.justContinue();
                     });
         } catch (PollerStoppedException e) {
-            throw new TimeoutException(String.format("Task (%s) did not finished within %d seconds", task.getClass().getSimpleName(), interval * maxAttempt));
+            throw new TimeoutException(String.format("Task (%s) did not finish within %d seconds", task.getClass().getSimpleName(), interval * maxAttempt));
         } catch (UserBreakException e) {
             throw (Exception) e.getCause();
         }
