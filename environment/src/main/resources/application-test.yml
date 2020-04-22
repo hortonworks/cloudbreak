@@ -99,7 +99,7 @@ cb:
   yarn:
     domain: default.com
     defaultQueue: "default"
-    defaultLifeTime: -1
+    defaultLifeTime: 604800
   os:
     enable.autoimport: true
     import:

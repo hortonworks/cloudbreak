@@ -74,6 +74,9 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     @Value("${cb.yarn.defaultQueue}")
     private String defaultQueue;
 
+    /**
+     * Default life time in seconds
+     */
     @Value("${cb.yarn.defaultLifeTime:}")
     private int defaultLifeTime;
 
