@@ -1,0 +1,64 @@
+{
+  "cdhVersion": "7.2.0",
+  "displayName": "datalake-ranger-only",
+  "hostTemplates": [
+    {
+      "cardinality": 1,
+      "refName": "master",
+      "roleConfigGroupsRefNames": [
+        "ranger-RANGER_ADMIN-BASE",
+        "ranger-RANGER_TAGSYNC-BASE",
+        "ranger-RANGER_USERSYNC-BASE"
+      ]
+    }
+  ],
+  "services": [
+    {
+      "refName": "ranger",
+      "roleConfigGroups": [
+        {
+          "base": true,
+          "refName": "ranger-RANGER_USERSYNC-BASE",
+          "roleType": "RANGER_USERSYNC"
+        },
+        {
+          "base": true,
+          "refName": "ranger-RANGER_TAGSYNC-BASE",
+          "roleType": "RANGER_TAGSYNC"
+        },
+        {
+          "base": true,
+          "refName": "ranger-RANGER_ADMIN-BASE",
+          "roleType": "RANGER_ADMIN"
+        }
+      ],
+      "serviceConfigs": [
+        {
+          "name": "hdfs_service",
+          "ref": "hdfs"
+        },
+        {
+          "name": "rangeradmin_user_password",
+          "value": "{{{ general.password }}}"
+        },
+        {
+          "name": "rangertagsync_user_password",
+          "value": "{{{ general.password }}}"
+        },
+        {
+          "name": "solr_service",
+          "ref": "solr"
+        },
+        {
+          "name": "rangerusersync_user_password",
+          "value": "{{{ general.password }}}"
+        },
+        {
+          "name": "keyadmin_user_password",
+          "value": "{{{ general.password }}}"
+        }
+      ],
+      "serviceType": "RANGER"
+    }
+  ]
+}
