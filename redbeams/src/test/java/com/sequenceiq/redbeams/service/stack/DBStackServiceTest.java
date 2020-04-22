@@ -5,7 +5,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -14,6 +16,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.repository.DBStackRepository;
@@ -74,5 +77,15 @@ public class DBStackServiceTest {
 
         assertEquals(dbStack, underTest.save(dbStack));
         verify(dbStackRepository).save(dbStack);
+    }
+
+    @Test
+    public void testFindAllForAutoSync() {
+        Set<DBStack> expected = Collections.emptySet();
+        when(dbStackRepository.findAllDbStackByStatusIn(Status.getAutoSyncStatuses())).thenReturn(expected);
+
+        assertEquals(expected, underTest.findAllForAutoSync());
+
+
     }
 }

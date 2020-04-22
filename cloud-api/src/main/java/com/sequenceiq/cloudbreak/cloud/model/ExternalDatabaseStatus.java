@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 public enum ExternalDatabaseStatus {
+    START_IN_PROGRESS(StatusGroup.TRANSIENT),
     STARTED(StatusGroup.PERMANENT),
+    STOP_IN_PROGRESS(StatusGroup.TRANSIENT),
     STOPPED(StatusGroup.PERMANENT),
     UPDATE_IN_PROGRESS(StatusGroup.TRANSIENT);
 

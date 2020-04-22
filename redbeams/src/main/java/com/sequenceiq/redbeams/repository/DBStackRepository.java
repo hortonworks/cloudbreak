@@ -25,4 +25,7 @@ public interface DBStackRepository extends JpaRepository<DBStack, Long> {
 
     @Query("SELECT d.id FROM DBStack d LEFT JOIN d.dbStackStatus dss WHERE d.id IN :dbStackIds AND dss.status IN :statuses")
     Set<Long> findAllByIdInAndStatusIn(@Param("dbStackIds") Set<Long> dbStackIds, @Param("statuses") Set<Status> statuses);
+
+    @Query("SELECT d FROM DBStack d LEFT JOIN d.dbStackStatus dss WHERE dss.status IN :statuses")
+    Set<DBStack> findAllDbStackByStatusIn(@Param("statuses") Set<Status> statuses);
 }

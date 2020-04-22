@@ -42,6 +42,7 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: springBootVersion
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }
@@ -86,7 +87,8 @@ dependencies {
   implementation project(':cloud-reactor')
   implementation project(':cloud-reactor-api')
   implementation project(':environment-api')
-  
+  implementation project(':status-checker')
+
   compile project(':cloud-common')
   compile project(':secret-engine')
   compile project(':common')

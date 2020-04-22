@@ -55,6 +55,10 @@ public class DBStackService {
         return dbStackRepository.findAllByIdInAndStatusIn(dbStackIds, Status.getDeletingStatuses());
     }
 
+    public Set<DBStack> findAllForAutoSync() {
+        return dbStackRepository.findAllDbStackByStatusIn(Status.getAutoSyncStatuses());
+    }
+
     public DBStack save(DBStack dbStack) {
         return dbStackRepository.save(dbStack);
     }
