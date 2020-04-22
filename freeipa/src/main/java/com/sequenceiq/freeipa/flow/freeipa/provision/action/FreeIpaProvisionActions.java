@@ -31,6 +31,7 @@ import com.sequenceiq.freeipa.metrics.FreeIpaMetricService;
 import com.sequenceiq.freeipa.metrics.MetricType;
 import com.sequenceiq.freeipa.service.config.AbstractConfigRegister;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
+import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 @Configuration
 public class FreeIpaProvisionActions {
@@ -115,11 +116,15 @@ public class FreeIpaProvisionActions {
             @Inject
             private Set<AbstractConfigRegister> configRegisters;
 
+            @Inject
+            private FreeipaJobService freeipaJobService;
+
             @Override
             protected void doExecute(StackContext context, PostInstallFreeIpaSuccess payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
                 metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FINISHED, context.getStack());
+                freeipaJobService.schedule(context.getStack());
                 sendEvent(context);
             }
 
