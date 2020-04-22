@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
+import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.convert;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 
@@ -869,7 +870,16 @@ public class SaltOrchestrator implements HostOrchestrator {
                     exitCriteria);
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, exitCriteria);
-            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
+            if (phase == PRE_CLOUDERA_MANAGER_START) {
+                // Execute highstate before recipe. Otherwise ipa domain names will not be resolvable in recipe scripts.
+                runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
+            } else {
+                // Skip highstate and just execute other recipes for performace.
+                StateAllRunner stateAllRunner = new StateAllRunner(targetHostnames, allNodes, "recipes." + phase.value());
+                OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateAllRunner);
+                Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, false);
+                saltJobRunBootstrapRunner.call();
+            }
         } catch (CloudbreakOrchestratorTimeoutException e) {
             LOGGER.info("Recipe execution timeout. {}", phase, e);
             throw e;
