@@ -5,6 +5,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 public abstract class AbstractClouderaManagerCommandCheckerTask<T extends ClouderaManagerPollerObject> extends ClusterBasedStatusCheckerTask<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractClouderaManagerCommandCheckerTask.class);
+
+    private static final String[] COMMON_ERROR_MESSAGES = {"fail", "error"};
 
     private static final int TOLERATED_ERROR_LIMIT = 5;
 
@@ -109,7 +112,7 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
             return true;
         } else {
             String resultMessage = apiCommand.getResultMessage();
-            List<String> detailedMessages = parseResultMessageFromChildren(apiCommand.getChildren());
+            List<String> detailedMessages = detailedErrorMessage(apiCommand.getChildren());
             String message = "Command [" + getCommandName() + "] failed: " + resultMessage + ". Detailed messages: " + String.join("\n", detailedMessages);
             LOGGER.info(message);
             throw new ClouderaManagerOperationFailedException(message);
@@ -117,7 +120,15 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
     }
 
     @VisibleForTesting
-    List<String> parseResultMessageFromChildren(ApiCommandList apiCommandList) {
+    List<String> detailedErrorMessage(ApiCommandList apiCommandList) {
+        List<String> ret = parseResultMessageFromChildren(apiCommandList);
+        List<String> failed = ret.stream().filter(s -> isMessageFailed(s)).collect(Collectors.toList());
+        // If we have services that failed we can return them to avoid confusion
+        LOGGER.debug("Detailed error message from CM: failed: {}, all: {}", failed, ret);
+        return failed.isEmpty() ? ret : failed;
+    }
+
+    private List<String> parseResultMessageFromChildren(ApiCommandList apiCommandList) {
         if (CollectionUtils.isEmpty(apiCommandList.getItems())) {
             return Collections.emptyList();
         }
@@ -139,11 +150,25 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
         if (s != null) {
             ret += s.getName();
             if (s.getServiceRef() != null) {
-                ret += "(" + s.getServiceRef().getServiceName() + "): ";
+                ret += " (" + s.getServiceRef().getServiceName() + "):";
             }
-            ret += s.getResultMessage();
+            ret += " " + s.getResultMessage();
         }
         return ret;
+    }
+
+    private boolean isMessageFailed(String message) {
+        boolean failed = false;
+        if (message != null) {
+            String lowerCaseMessage = message.toLowerCase();
+            for (String errorMessage : COMMON_ERROR_MESSAGES) {
+                failed = lowerCaseMessage.contains(errorMessage);
+                if (failed) {
+                    break;
+                }
+            }
+        }
+        return failed;
     }
 
     protected abstract String getCommandName();
