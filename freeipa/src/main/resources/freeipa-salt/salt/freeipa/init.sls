@@ -18,16 +18,6 @@ net.ipv6.conf.lo.disable_ipv6:
       - {{ host['fqdn'] }}
 {% endfor %}
 
-{% if salt['pillar.get']('freeipa:hosts') > 1 %}
-/cdp/ipahealthagent/freeipa_cluster_node:
-  file.managed:
-    - makedirs: True
-    - user: root
-    - group: root
-    - mode: 700
-    - source: salt://freeipa/scripts/freeipa_cluster_node
-{% endif %}
-
 /opt/salt/scripts/freeipa_install.sh:
   file.managed:
     - makedirs: True
@@ -52,27 +42,3 @@ net.ipv6.conf.lo.disable_ipv6:
     - group: root
     - mode: 700
     - source: salt://freeipa/scripts/update_cnames.sh
-
-/opt/salt/scripts/freeipa_healthagent_setup.sh:
-  file.managed:
-    - makedirs: True
-    - user: root
-    - group: root
-    - mode: 700
-    - source: salt://freeipa/scripts/freeipa_healthagent_setup.sh
-
-/opt/salt/scripts/freeipa_check_replication.sh:
-  file.managed:
-    - makedirs: True
-    - user: root
-    - group: root
-    - mode: 700
-    - source: salt://freeipa/scripts/freeipa_check_replication.sh
-
-/cdp/ipahealthagent/freeipa_healthagent_getcerts.sh:
-  file.managed:
-    - makedirs: True
-    - user: root
-    - group: root
-    - mode: 700
-    - source: salt://freeipa/scripts/freeipa_healthagent_getcerts.sh
