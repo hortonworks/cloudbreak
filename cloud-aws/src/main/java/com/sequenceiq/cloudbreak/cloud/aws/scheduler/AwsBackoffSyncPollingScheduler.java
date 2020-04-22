@@ -68,7 +68,7 @@ public class AwsBackoffSyncPollingScheduler<T> {
                 }
             }
         }
-        throw new TimeoutException(String.format("Task (%s) did not finished within %d seconds", task.getClass().getSimpleName(), interval * maxAttempt));
+        throw new TimeoutException(String.format("Task (%s) did not finish within %d seconds", task.getClass().getSimpleName(), interval * maxAttempt));
     }
 
     public ListenableScheduledFuture<T> schedule(Callable<T> task, int interval) {
