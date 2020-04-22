@@ -157,9 +157,9 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             nodesWithErrors = ((CloudbreakOrchestratorException) actualException).getNodesWithErrors();
         }
         if (retryCount >= maxRetryCount) {
-            throw new CloudbreakOrchestratorTimeoutException(errorMessage, nodesWithErrors, elapsedTimeRounded);
+            throw new CloudbreakOrchestratorTimeoutException(cause, nodesWithErrors, elapsedTimeRounded);
         } else {
-            throw new CloudbreakOrchestratorFailedException(errorMessage, nodesWithErrors);
+            throw new CloudbreakOrchestratorFailedException(cause, nodesWithErrors);
         }
     }
 

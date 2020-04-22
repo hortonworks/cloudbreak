@@ -26,6 +26,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.NetworkService;
@@ -98,6 +100,22 @@ public class EnvironmentModificationService {
         return changeCredential(accountId, crn, dto, environment);
     }
 
+    public EnvironmentDto changeTelemetryFeaturesByEnvironmentName(String accountId, String environmentName,
+            EnvironmentFeatures features) {
+        Environment environment = environmentService
+                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
+        return changeTelemetryFeatures(features, environment);
+    }
+
+    public EnvironmentDto changeTelemetryFeaturesByEnvironmentCrn(String accountId, String crn,
+            EnvironmentFeatures features) {
+        Environment environment = environmentService
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("No environment found with CRN '%s'", crn)));
+        return changeTelemetryFeatures(features, environment);
+    }
+
     private EnvironmentDto edit(EnvironmentEditDto editDto, Environment env) {
         editDescriptionIfChanged(env, editDto);
         editTelemetryIfChanged(env, editDto);
@@ -120,6 +138,37 @@ public class EnvironmentModificationService {
         Credential credential = credentialService.getByNameForAccountId(dto.getCredentialName(), accountId);
         environment.setCredential(credential);
         LOGGER.debug("About to change credential on environment \"{}\"", environmentName);
+        Environment saved = environmentService.save(environment);
+        return environmentDtoConverter.environmentToDto(saved);
+    }
+
+    private EnvironmentDto changeTelemetryFeatures(EnvironmentFeatures features, Environment environment) {
+        EnvironmentTelemetry telemetry = environment.getTelemetry();
+        if (telemetry != null) {
+            EnvironmentFeatures actualFeatures = telemetry.getFeatures();
+            if (actualFeatures != null) {
+                if (features.getClusterLogsCollection() != null) {
+                    actualFeatures.setClusterLogsCollection(features.getClusterLogsCollection());
+                    LOGGER.debug("Updating cluster log collection (environment telemetry feature): {}.",
+                            features.getClusterLogsCollection().isEnabled());
+                }
+                if (features.getWorkloadAnalytics() != null) {
+                    actualFeatures.setWorkloadAnalytics(features.getWorkloadAnalytics());
+                    LOGGER.debug("Updating workload analytics (environment telemetry feature): {}.",
+                            features.getWorkloadAnalytics().isEnabled());
+                }
+                telemetry.setFeatures(actualFeatures);
+                // required to re-set as telemetry is saved as a JSON string
+                environment.setTelemetry(telemetry);
+            } else if (features != null) {
+                telemetry.setFeatures(features);
+                // required to re-set as telemetry is saved as a JSON string
+                environment.setTelemetry(telemetry);
+                LOGGER.debug("Adding new feature object for environment level telemetry.");
+            } else {
+                LOGGER.debug("No telemetry feature related changes has been made.");
+            }
+        }
         Environment saved = environmentService.save(environment);
         return environmentDtoConverter.environmentToDto(saved);
     }

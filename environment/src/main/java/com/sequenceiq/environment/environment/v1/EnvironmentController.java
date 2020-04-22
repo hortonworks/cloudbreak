@@ -18,6 +18,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
@@ -32,6 +33,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.service.EnvironmentCreationService;
 import com.sequenceiq.environment.environment.service.EnvironmentDeletionService;
 import com.sequenceiq.environment.environment.service.EnvironmentModificationService;
@@ -195,11 +197,29 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public DetailedEnvironmentResponse changeTelemetryFeaturesByEnvironmentName(String name, @Valid FeaturesRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        EnvironmentFeatures features = environmentApiConverter.convertToEnvironmentTelemetryFeatures(request);
+        EnvironmentDto result = environmentModificationService.changeTelemetryFeaturesByEnvironmentName(accountId, name, features);
+        return environmentApiConverter.dtoToDetailedResponse(result);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(String crn, @Valid EnvironmentChangeCredentialRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentCrn(accountId, crn,
                 environmentApiConverter.convertEnvironmentChangeCredentialDto(request));
         return environmentResponseConverter.dtoToDetailedResponse(result);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public DetailedEnvironmentResponse changeTelemetryFeaturesByEnvironmentCrn(String crn, @Valid FeaturesRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        EnvironmentFeatures features = environmentApiConverter.convertToEnvironmentTelemetryFeatures(request);
+        EnvironmentDto result = environmentModificationService.changeTelemetryFeaturesByEnvironmentCrn(accountId, crn, features);
+        return environmentApiConverter.dtoToDetailedResponse(result);
     }
 
     @Override

@@ -13,6 +13,8 @@ public class EnvironmentOpDescription {
     public static final String DELETE_MULTIPLE_BY_CRN = "Delete multiple environment by CRNs. Only possible if no cluster is running in the environments.";
     public static final String CHANGE_CREDENTIAL_BY_NAME = "Changes the credential of the environment and the clusters in the environment of a given name.";
     public static final String CHANGE_CREDENTIAL_BY_CRN = "Changes the credential of the environment and the clusters in the environment of a given CRN.";
+    public static final String CHANGE_TELEMETRY_FEATURES_BY_NAME = "Changes telemetry features(s) of the environment in the environment of a given name.";
+    public static final String CHANGE_TELEMETRY_FEATURES_BY_CRN = "Changes telemetry features(s) of the environment in the environment of a given CRN.";
     public static final String CHANGE_NETWORK = "Changes the network of the environment.";
     public static final String REGISTER_EXTERNAL_DATALAKE = "Register external datalake.";
     public static final String EDIT_BY_NAME = "Edit an environment by name. Location, regions and description can be changed.";
