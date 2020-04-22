@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
@@ -272,10 +272,10 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public StatedImage getImage(String catalogUrl, String catalogName, String imageId) throws CloudbreakImageNotFoundException,
             CloudbreakImageCatalogException {
-        Images images = imageCatalogProvider.getImageCatalogV2(catalogUrl).getImages();
+        Images images = imageCatalogProvider.getImageCatalogV3(catalogUrl).getImages();
         Optional<? extends Image> image = getImage(imageId, images);
         if (image.isEmpty()) {
-            images = imageCatalogProvider.getImageCatalogV2(catalogUrl, true).getImages();
+            images = imageCatalogProvider.getImageCatalogV3(catalogUrl, true).getImages();
             image = getImage(imageId, images);
         }
         if (image.isEmpty()) {
@@ -424,7 +424,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                 imageFilter.getImageCatalog().getImageCatalogUrl(), imageFilter.getPlatforms(), imageFilter.getCbVersion());
         StatedImages images;
         validateRequestPlatforms(imageFilter.getPlatforms());
-        CloudbreakImageCatalogV2 imageCatalogV2 = imageCatalogProvider.getImageCatalogV2(imageFilter.getImageCatalog().getImageCatalogUrl());
+        CloudbreakImageCatalogV3 imageCatalogV2 = imageCatalogProvider.getImageCatalogV3(imageFilter.getImageCatalog().getImageCatalogUrl());
         Set<String> suppertedVersions;
         if (imageCatalogV2 != null) {
             LOGGER.info("Image catalog found, filtering the images..");

@@ -5,14 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CloudbreakImageCatalogV2 {
+public class CloudbreakImageCatalogV3 {
 
     private final Images images;
 
     private final Versions versions;
 
     @JsonCreator
-    public CloudbreakImageCatalogV2(
+    public CloudbreakImageCatalogV3(
             @JsonProperty(value = "images", required = true) Images images,
             @JsonProperty(value = "versions", required = true) Versions versions) {
         this.images = images;

@@ -51,7 +51,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -396,12 +396,12 @@ public class ImageCatalogServiceTest {
         ImageCatalog ret = new ImageCatalog();
         ret.setImageCatalogUrl("");
         when(imageCatalogRepository.findByNameAndWorkspaceId("name", ORG_ID)).thenReturn(Optional.of(ret));
-        when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(null);
+        when(imageCatalogProvider.getImageCatalogV3("")).thenReturn(null);
         underTest.getImages(ORG_ID, "name", "aws");
 
         verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
         verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
-        verify(imageCatalogProvider, times(1)).getImageCatalogV2("");
+        verify(imageCatalogProvider, times(1)).getImageCatalogV3("");
 
     }
 
@@ -416,7 +416,7 @@ public class ImageCatalogServiceTest {
 
         verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
         verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
-        verify(imageCatalogProvider, times(0)).getImageCatalogV2("");
+        verify(imageCatalogProvider, times(0)).getImageCatalogV3("");
     }
 
     @Test
@@ -639,9 +639,9 @@ public class ImageCatalogServiceTest {
 
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
-        CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
+        CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
         when(imageCatalog.getImageCatalogUrl()).thenReturn(catalogUrl);
-        when(imageCatalogProvider.getImageCatalogV2(catalogUrl)).thenReturn(catalog);
+        when(imageCatalogProvider.getImageCatalogV3(catalogUrl)).thenReturn(catalog);
     }
 
     private void setupUserProfileService() {

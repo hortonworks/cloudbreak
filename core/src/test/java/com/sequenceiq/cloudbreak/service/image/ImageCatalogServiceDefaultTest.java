@@ -25,7 +25,7 @@ import org.mockito.Spy;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
@@ -128,8 +128,8 @@ public class ImageCatalogServiceDefaultTest {
     public void beforeTest() throws Exception {
         MockitoAnnotations.initMocks(this);
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
-        CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
-        when(imageCatalogProvider.getImageCatalogV2(catalogFile)).thenReturn(catalog);
+        CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
+        when(imageCatalogProvider.getImageCatalogV3(catalogFile)).thenReturn(catalog);
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
 
         when(userProfileService.getOrCreate(user)).thenReturn(new UserProfile());
