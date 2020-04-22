@@ -62,7 +62,7 @@ public class Spark3OnYarnRoleConfigProviderTest {
         List<ApiClusterTemplateConfig> sparkOnYarnConfigs = roleConfigs.get("spark3_on_yarn-GATEWAY-BASE");
 
         assertEquals(1, sparkOnYarnConfigs.size());
-        assertEquals("spark-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.get(0).getName());
+        assertEquals("spark3-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.get(0).getName());
         assertEquals("spark.kerberos.access.hadoopFileSystems=" + clientConfigDirLocation, sparkOnYarnConfigs.get(0).getValue());
     }
 
