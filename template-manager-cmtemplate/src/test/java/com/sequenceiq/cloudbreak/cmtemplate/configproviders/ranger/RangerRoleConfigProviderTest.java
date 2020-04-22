@@ -65,20 +65,20 @@ public class RangerRoleConfigProviderTest {
 
     @Test
     public void testGetRangerAdminDefaultPolicyGroups() {
-        validateGetRangerAdminDefaultPolicyGroups("6.9.0", 5);
-        validateGetRangerAdminDefaultPolicyGroups("6.x.0", 5);
-        validateGetRangerAdminDefaultPolicyGroups("7.0.0", 5);
-        validateGetRangerAdminDefaultPolicyGroups("", 5);
+        validateGetRangerAdminDefaultPolicyGroups("6.9.0", 5, 0);
+        validateGetRangerAdminDefaultPolicyGroups("6.x.0", 5, 0);
+        validateGetRangerAdminDefaultPolicyGroups("7.0.0", 5, 0);
+        validateGetRangerAdminDefaultPolicyGroups("", 5, 0);
 
-        validateGetRangerAdminDefaultPolicyGroups("7.x.0", 6);
-        validateGetRangerAdminDefaultPolicyGroups("7.0.1", 6);
-        validateGetRangerAdminDefaultPolicyGroups("7.1.0", 6);
-        validateGetRangerAdminDefaultPolicyGroups("7.2.0", 6);
-        validateGetRangerAdminDefaultPolicyGroups("7.3.1", 6);
-        validateGetRangerAdminDefaultPolicyGroups("8.1.0", 6);
+        validateGetRangerAdminDefaultPolicyGroups("7.0.1", 6, 0);
+        validateGetRangerAdminDefaultPolicyGroups("7.1.0", 6, 0);
+        validateGetRangerAdminDefaultPolicyGroups("7.1.x", 6, 0);
+        validateGetRangerAdminDefaultPolicyGroups("7.2.0", 1, 6);
+        validateGetRangerAdminDefaultPolicyGroups("7.3.1", 1, 6);
+        validateGetRangerAdminDefaultPolicyGroups("8.1.0", 1, 6);
     }
 
-    private void validateGetRangerAdminDefaultPolicyGroups(String cdhVersion, int expectedConfigCount) {
+    private void validateGetRangerAdminDefaultPolicyGroups(String cdhVersion, int expectedRoleConfigCount, int expectedSvcConfigCount) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
@@ -101,9 +101,12 @@ public class RangerRoleConfigProviderTest {
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> masterRangerAdmin = roleConfigs.get("ranger-RANGER_ADMIN-BASE");
-        assertEquals(expectedConfigCount, masterRangerAdmin.size());
+        assertEquals(expectedRoleConfigCount, masterRangerAdmin.size());
 
-        if (expectedConfigCount == 6) {
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+        assertEquals(expectedSvcConfigCount, serviceConfigs.size());
+
+        if (expectedRoleConfigCount == 6) {
             assertEquals("ranger.default.policy.groups", masterRangerAdmin.get(5).getName());
             assertEquals(ldapAdminGroup, masterRangerAdmin.get(5).getValue());
         }
@@ -144,6 +147,41 @@ public class RangerRoleConfigProviderTest {
 
         assertEquals("ranger_database_password", masterRangerAdmin.get(4).getName());
         assertEquals("iamsoosecure", masterRangerAdmin.get(4).getValue());
+    }
+
+    @Test
+    public void validateRangerServiceConfigPost72() {
+        String inputJson = getBlueprintText("input/cb6720.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
+
+        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master))
+            .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
+            .withRdsConfigs(Set.of(rdsConfig(DatabaseType.RANGER)))
+            .build();
+
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+
+        assertEquals(6, serviceConfigs.size());
+
+        assertEquals("ranger_database_host", serviceConfigs.get(0).getName());
+        assertEquals("10.1.1.1", serviceConfigs.get(0).getValue());
+
+        assertEquals("ranger_database_name", serviceConfigs.get(1).getName());
+        assertEquals("ranger", serviceConfigs.get(1).getValue());
+
+        assertEquals("ranger_database_type", serviceConfigs.get(2).getName());
+        assertEquals("PostgreSQL", serviceConfigs.get(2).getValue());
+
+        assertEquals("ranger_database_user", serviceConfigs.get(3).getName());
+        assertEquals("heyitsme", serviceConfigs.get(3).getValue());
+
+        assertEquals("ranger_database_password", serviceConfigs.get(4).getName());
+        assertEquals("iamsoosecure", serviceConfigs.get(4).getValue());
+
+        assertEquals("ranger_database_port", serviceConfigs.get(5).getName());
+        assertEquals("5432", serviceConfigs.get(5).getValue());
     }
 
     @Test
