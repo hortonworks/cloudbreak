@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.controller.validation.stack.PaywallCredentialValidator;
 import com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
@@ -81,6 +82,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private PaywallCredentialValidator paywallCredentialValidator;
 
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Blueprint", id));
@@ -136,7 +140,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprints, workspace, this::saveDefaultsWithReadRight);
             LOGGER.info("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
-        return blueprintViewRepository.findAllByNotDeletedInWorkspace(workspace.getId());
+        return paywallCredentialValidator.filterAvailableBlueprints(blueprintViewRepository.findAllByNotDeletedInWorkspace(workspace.getId()));
     }
 
     public Set<Blueprint> getAllAvailableInWorkspace(Workspace workspace) {

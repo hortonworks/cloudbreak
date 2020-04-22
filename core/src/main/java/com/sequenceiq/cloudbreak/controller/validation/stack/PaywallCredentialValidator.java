@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -15,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.service.DefaultAmbariRepoService;
 import com.sequenceiq.cloudbreak.service.credential.PaywallCredentialService;
 
@@ -43,6 +46,16 @@ public class PaywallCredentialValidator {
         } else if (isStackPaywallProtected(clusterRequest, stackInfo) && noPaywallCredentialAvailable) {
             throwException();
         }
+    }
+
+    public Set<BlueprintView> filterAvailableBlueprints(Set<BlueprintView> blueprintViews) {
+        return blueprintViews.stream().filter(bp -> isStackVersionAvailable(bp.getStackType(), bp.getStackVersion())).collect(Collectors.toSet());
+    }
+
+    private boolean isStackVersionAvailable(String stackType, String stackVersion) {
+        StackInfo stackInfo = getStackInfo(stackType, stackVersion);
+        return stackInfo == null || !stackInfo.isPaywallProtected()
+                || (stackInfo.isPaywallProtected() && paywallCredentialService.paywallCredentialAvailable());
     }
 
     private StackInfo getStackInfo(String stackType, String stackVersion) {
