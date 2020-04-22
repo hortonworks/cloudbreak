@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.NullUtil;
+import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
@@ -42,6 +43,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
@@ -241,5 +243,12 @@ public class EnvironmentApiConverter {
         response.setEnvironmentName(environmentName);
         response.setEnvironmentCrn(crn);
         return response;
+    }
+
+    public EnvironmentFeatures convertToEnvironmentTelemetryFeatures(FeaturesRequest featuresRequest) {
+        EnvironmentFeatures features = new EnvironmentFeatures();
+        features.setWorkloadAnalytics(featuresRequest.getWorkloadAnalytics());
+        features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
+        return features;
     }
 }
