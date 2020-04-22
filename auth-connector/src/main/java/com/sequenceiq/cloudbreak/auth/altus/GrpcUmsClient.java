@@ -4,6 +4,7 @@ import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -370,10 +371,13 @@ public class GrpcUmsClient {
             return Arrays.asList(values);
         }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
-            List<Boolean> retVal = client.hasRights(requestId.orElse(UUID.randomUUID().toString()), memberCrn, rightChecks);
-            LOGGER.info("member {} has rights {}", memberCrn, retVal);
-            return retVal;
+            if (!rightChecks.isEmpty()) {
+                AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
+                List<Boolean> retVal = client.hasRights(requestId.orElse(UUID.randomUUID().toString()), memberCrn, rightChecks);
+                LOGGER.info("member {} has rights {}", memberCrn, retVal);
+                return retVal;
+            }
+            return Collections.emptyList();
         }
     }
 
