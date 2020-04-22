@@ -195,7 +195,7 @@
             "configs": [
               {
                 "name": "resourcemanager_config_safety_valve",
-                "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>file</value></property>"
+                "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>zk</value></property>"
               },
               {
                 "name": "yarn_resourcemanager_scheduler_class",
@@ -349,6 +349,28 @@
             "base": true
           }
         ]
+      },
+      {
+        "refName": "queuemanager",
+        "serviceType": "QUEUEMANAGER",
+        "serviceConfigs": [
+          {
+            "name": "kerberos.auth.enabled",
+            "value": "true"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-QUEUEMANAGER_WEBAPP-BASE",
+            "roleType": "QUEUEMANAGER_WEBAPP",
+            "base": true
+          },
+          {
+            "refName": "yarn-QUEUEMANAGER_STORE-BASE",
+            "roleType": "QUEUEMANAGER_STORE",
+            "base": true
+          }
+        ]
       }
     ],
     "hostTemplates": [
@@ -406,6 +428,8 @@
           "knox-KNOX_GATEWAY-BASE",
           "hdfs-JOURNALNODE-BASE",
           "zookeeper-SERVER-BASE",
+          "yarn-QUEUEMANAGER_WEBAPP-BASE",
+          "yarn-QUEUEMANAGER_STORE-BASE",
           "yarn-GATEWAY-BASE"
         ]
       },

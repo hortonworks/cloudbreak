@@ -9,6 +9,8 @@ ipa_packages_install:
         - ipa-client
         - openldap
         - openldap-clients
+    - unless:
+      - rpm -q ipa-client openldap openldap-clients
 
 join_ipa:
   cmd.run:

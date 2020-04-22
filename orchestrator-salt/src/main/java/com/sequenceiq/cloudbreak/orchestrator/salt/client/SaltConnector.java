@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
+import com.sequenceiq.cloudbreak.orchestrator.salt.SaltErrorResolver;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
@@ -75,7 +76,9 @@ public class SaltConnector implements Closeable {
 
     private final String signatureKey;
 
-    public SaltConnector(GatewayConfig gatewayConfig, boolean debug) {
+    private final SaltErrorResolver saltErrorResolver;
+
+    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug) {
         try {
             restClient = RestClientUtil.createClient(
                     gatewayConfig.getServerCert(), gatewayConfig.getClientCert(), gatewayConfig.getClientKey(), debug);
@@ -86,6 +89,7 @@ public class SaltConnector implements Closeable {
                     .register(new SetProxyTimeoutFeature(PROXY_TIMEOUT));
             saltPassword = Optional.ofNullable(gatewayConfig.getSaltPassword()).orElse(SALT_PASSWORD);
             signatureKey = gatewayConfig.getSignatureKey();
+            this.saltErrorResolver = saltErrorResolver;
         } catch (Exception e) {
             throw new RuntimeException("Failed to create rest client with 2-way-ssl config", e);
         }
@@ -268,6 +272,10 @@ public class SaltConnector implements Closeable {
 
     public String getSaltPassword() {
         return saltPassword;
+    }
+
+    public SaltErrorResolver getSaltErrorResolver() {
+        return saltErrorResolver;
     }
 
     private String toJson(Object target) {

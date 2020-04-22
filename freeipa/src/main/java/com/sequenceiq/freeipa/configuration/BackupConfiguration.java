@@ -12,7 +12,7 @@ public class BackupConfiguration {
     private final boolean hourlyEnabled;
 
     public BackupConfiguration(
-            @Value("${freeipa.backup.full.monthly:true}") boolean monthlyFullEnabled,
+            @Value("${freeipa.backup.full.monthly:false}") boolean monthlyFullEnabled,
             @Value("${freeipa.backup.full.after_install:true}") boolean runInitialFullAfterInstall,
             @Value("${freeipa.backup.hourly.enabled:true}") boolean hourlyEnabled) {
         this.monthlyFullEnabled = monthlyFullEnabled;

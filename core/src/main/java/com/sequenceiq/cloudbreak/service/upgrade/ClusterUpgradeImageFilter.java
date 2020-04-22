@@ -88,14 +88,14 @@ public class ClusterUpgradeImageFilter {
 
     private Predicate<Image> validateCmAndStackVersion(Image currentImage) {
         return image -> {
-            boolean result = permitCmAndSatckUpgrade(currentImage, image, CM_PACKAGE_KEY) || permitCmAndSatckUpgrade(currentImage, image, STACK_PACKAGE_KEY);
+            boolean result = permitCmAndStackUpgrade(currentImage, image, CM_PACKAGE_KEY) || permitCmAndStackUpgrade(currentImage, image, STACK_PACKAGE_KEY);
             setReason(result, "There is no proper Cloudera Manager or CDP version to upgrade.");
             return result;
         };
     }
 
-    private boolean permitCmAndSatckUpgrade(Image currentImage, Image image, String key) {
-        return upgradePermissionProvider.permitCmAndSatckUpgrade(currentImage.getPackageVersions().get(STACK_PACKAGE_KEY),
+    private boolean permitCmAndStackUpgrade(Image currentImage, Image image, String key) {
+        return upgradePermissionProvider.permitCmAndStackUpgrade(currentImage.getPackageVersions().get(STACK_PACKAGE_KEY),
                 image.getPackageVersions().get(key));
     }
 
@@ -123,8 +123,9 @@ public class ClusterUpgradeImageFilter {
 
     private Predicate<Image> validateSaltVersion(Image currentImage) {
         return image -> {
-            boolean result = image.getPackageVersions().get(SALT_PACKAGE_KEY).equals(currentImage.getPackageVersions().get(SALT_PACKAGE_KEY));
-            setReason(result, "There are no other images with the same salt version.");
+            boolean result = upgradePermissionProvider.permitSaltUpgrade(currentImage.getPackageVersions().get(SALT_PACKAGE_KEY),
+                    image.getPackageVersions().get(SALT_PACKAGE_KEY));
+            setReason(result, "There are no images with compatible Salt version.");
             return result;
         };
     }

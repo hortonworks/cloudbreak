@@ -128,6 +128,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Inject
     private GrainUploader grainUploader;
 
+    @Inject
+    private SaltErrorResolver saltErrorResolver;
+
     private ExitCriteria exitCriteria;
 
     @Override
@@ -486,7 +489,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 .filter(gwc -> !gwc.getHostname().equals(primaryGateway.getHostname()))
                 .map(GatewayConfig::getHostname).collect(Collectors.toSet());
 
-        try (SaltConnector sc = createSaltConnector(primaryGateway)) {
+        try (SaltConnector sc = createSaltConnector(primaryGateway, saltErrorResolver)) {
             LOGGER.debug("Set primary FreeIPA: {}", primaryServerHostname);
             saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(primaryServerHostname, allNodes, "freeipa_primary"), exitCriteriaModel, exitCriteria);
             runNewService(sc, new HighStateRunner(primaryServerHostname, allNodes), exitCriteriaModel);
@@ -494,6 +497,9 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.debug("Set replica FreeIPA: {}", replicaServersHostnames);
             saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(replicaServersHostnames, allNodes, "freeipa_replica"), exitCriteriaModel, exitCriteria);
             runNewService(sc, new HighStateRunner(replicaServersHostnames, allNodes), exitCriteriaModel);
+        } catch (CloudbreakOrchestratorException e) {
+            LOGGER.warn("CloudbreakOrchestratorException occurred during FreeIPA installation", e);
+            throw e;
         } catch (ExecutionException e) {
             LOGGER.warn("Error occurred during FreeIPA installation", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
@@ -855,50 +861,32 @@ public class SaltOrchestrator implements HostOrchestrator {
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     private void executeRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, RecipeExecutionPhase phase, boolean forced)
             throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
-        boolean postRecipe = phase.isPostRecipe();
         int maxRetry = forced ? maxRetryRecipeForced : maxRetryRecipe;
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
             // add 'recipe' grain to all nodes
             Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel, maxRetry,
                     exitCriteria);
-
-            // Add Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
-            if (postRecipe) {
-                saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", RecipeExecutionPhase.POST.value()),
-                        exitCriteriaModel, maxRetry, exitCriteria);
-            } else {
-                saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", RecipeExecutionPhase.PRE.value()),
-                        exitCriteriaModel, maxRetry, exitCriteria);
-            }
-
-            Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, exitCriteria);
-            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
+            saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(targetHostnames, allNodes), exitCriteriaModel, maxRetry, exitCriteria);
+            StateAllRunner stateAllRunner = new StateAllRunner(targetHostnames, allNodes, "recipes." + phase.value());
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateAllRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, false);
+            saltJobRunBootstrapRunner.call();
         } catch (CloudbreakOrchestratorTimeoutException e) {
             LOGGER.info("Recipe execution timeout. {}", phase, e);
             throw e;
         } catch (CloudbreakOrchestratorFailedException e) {
-            LOGGER.info("Orchestration error occurred during executing highstate (for recipes).", e);
+            LOGGER.info("Orchestration error occurred during execution of recipes.", e);
             throw e;
         } catch (Exception e) {
-            LOGGER.info("Unknown error occurred during executing highstate (for recipes).", e);
+            LOGGER.info("Unknown error occurred during execution of recipes.", e);
             throw new CloudbreakOrchestratorFailedException(e);
         } finally {
-            try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
+            try (SaltConnector sc = new SaltConnector(gatewayConfig, saltErrorResolver, restDebug)) {
                 // remove 'recipe' grain from all nodes
                 Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
                 saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel,
                         maxRetry, exitCriteria);
-
-                // Remove Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
-                if (postRecipe) {
-                    saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(
-                            targetHostnames, allNodes, "recipes", RecipeExecutionPhase.POST.value()), exitCriteriaModel, maxRetry, exitCriteria);
-                } else {
-                    saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(
-                            targetHostnames, allNodes, "recipes", RecipeExecutionPhase.PRE.value()), exitCriteriaModel, maxRetry, exitCriteria);
-                }
             } catch (Exception e) {
                 LOGGER.info("Error occurred during removing recipe roles.", e);
                 throw new CloudbreakOrchestratorFailedException(e);
@@ -961,7 +949,11 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private SaltConnector createSaltConnector(GatewayConfig gatewayConfig) {
-        return new SaltConnector(gatewayConfig, restDebug);
+        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug);
+    }
+
+    private SaltConnector createSaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver) {
+        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug);
     }
 
     private Set<Node> getResponsiveNodes(Set<Node> nodes, SaltConnector sc) {

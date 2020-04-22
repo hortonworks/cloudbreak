@@ -8,6 +8,8 @@ install-cloudera-manager-agent:
     - pkgs:
       - cloudera-manager-daemons
       - cloudera-manager-agent
+    - unless:
+      - rpm -q cloudera-manager-daemons cloudera-manager-agent
 
 install-psycopg2:
   cmd.run:

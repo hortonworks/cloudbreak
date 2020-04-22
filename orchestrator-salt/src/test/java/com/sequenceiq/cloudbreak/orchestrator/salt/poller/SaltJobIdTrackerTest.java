@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +37,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorInProgressException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTerminateException;
+import com.sequenceiq.cloudbreak.orchestrator.salt.SaltErrorResolver;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId;
@@ -78,7 +80,8 @@ public class SaltJobIdTrackerTest {
             saltJobIdTracker.call();
             fail("should throw exception");
         } catch (CloudbreakOrchestratorInProgressException e) {
-            assertThat(e.getMessage(), both(containsString("jobId='" + jobId + '\'')).and(containsString("is running")));
+            assertThat(e.getMessage(), allOf(containsString("Target:"), containsString("10.0.0.1"),
+                    containsString("10.0.0.2"), containsString("10.0.0.3")));
         }
         PowerMockito.verifyStatic(SaltStates.class);
         SaltStates.jobIsRunning(any(), eq(jobId));
@@ -98,18 +101,24 @@ public class SaltJobIdTrackerTest {
         when(saltJobRunner.getJobState()).thenCallRealMethod();
         doCallRealMethod().when(saltJobRunner).setJobState(any());
 
+        Set<String> targets = new HashSet<>();
+        targets.add("10.0.0.1");
+        targets.add("10.0.0.3");
+        when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
         when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
         saltJobRunner.setJobState(JobState.FAILED);
+        Multimap<String, String> multimap = ArrayListMultimap.create();
+        multimap.put("10.0.0.1", "some error");
+        when(saltJobRunner.getNodesWithError()).thenReturn(multimap);
 
-        SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(saltConnector, saltJobRunner);
+        SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(saltConnector, saltJobRunner, false);
         try {
             saltJobIdTracker.call();
             fail("should throw exception");
-        } catch (CloudbreakOrchestratorInProgressException e) {
-            assertThat(e.getMessage(), both(containsString("jobId='" + jobId + '\'')).and(containsString("is running")));
+        } catch (CloudbreakOrchestratorTerminateException e) {
+            assertThat(e.getMessage(), allOf(containsString("Target:"), containsString("10.0.0.1"), containsString("10.0.0.3"),
+                    containsString("Node: 10.0.0.1 Error(s): some error")));
         }
-        PowerMockito.verifyStatic(SaltStates.class);
-        SaltStates.jobIsRunning(any(), eq(jobId));
     }
 
     private void checkTargets(Set<String> targets, List<Target<String>> allValues) {
@@ -146,7 +155,8 @@ public class SaltJobIdTrackerTest {
         try {
             saltJobIdTracker.call();
         } catch (CloudbreakOrchestratorInProgressException e) {
-            assertThat(e.getMessage(), both(containsString("jobId='" + jobId + '\'')).and(containsString("is running")));
+            assertThat(e.getMessage(), allOf(containsString("Target:"), containsString("10.0.0.1"), containsString("10.0.0.2"),
+                    containsString("10.0.0.3")));
         }
 
         PowerMockito.verifyStatic(SaltStates.class);
@@ -164,6 +174,9 @@ public class SaltJobIdTrackerTest {
         when(saltJobRunner.getJobState()).thenCallRealMethod();
         doCallRealMethod().when(saltJobRunner).setJobState(any());
 
+        SaltErrorResolver saltErrorResolver = Mockito.mock(SaltErrorResolver.class);
+        when(saltConnector.getSaltErrorResolver()).thenReturn(saltErrorResolver);
+
         when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
         saltJobRunner.setJobState(JobState.IN_PROGRESS);
 
@@ -178,6 +191,7 @@ public class SaltJobIdTrackerTest {
 
         Multimap<String, String> missingNodesWithReason = ArrayListMultimap.create();
         PowerMockito.when(SaltStates.jidInfo(any(), any(), any(), any())).thenReturn(missingNodesWithReason);
+        when(saltErrorResolver.resolveErrorMessages(missingNodesWithReason)).thenReturn(missingNodesWithReason);
 
         SaltJobIdTracker underTest = new SaltJobIdTracker(saltConnector, saltJobRunner);
         assertTrue(underTest.call());
@@ -201,6 +215,8 @@ public class SaltJobIdTrackerTest {
             when(saltJobRunner.getNodesWithError()).thenCallRealMethod();
             doCallRealMethod().when(saltJobRunner).setNodesWithError(any());
             when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
+            SaltErrorResolver saltErrorResolver = Mockito.mock(SaltErrorResolver.class);
+            when(saltConnector.getSaltErrorResolver()).thenReturn(saltErrorResolver);
             saltJobRunner.setJobState(JobState.IN_PROGRESS);
 
             Set<String> targets = new HashSet<>();
@@ -211,8 +227,9 @@ public class SaltJobIdTrackerTest {
 
             Multimap<String, String> missingNodesWithReason = ArrayListMultimap.create();
             String missingMachine = "10.0.0.1";
-            String errorMessage = "error happened";
+            String errorMessage = "Name: some-script.sh";
             missingNodesWithReason.put(missingMachine, errorMessage);
+            when(saltErrorResolver.resolveErrorMessages(missingNodesWithReason)).thenReturn(missingNodesWithReason);
 
             PowerMockito.mockStatic(SaltStates.class);
             PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
@@ -222,7 +239,8 @@ public class SaltJobIdTrackerTest {
                 new SaltJobIdTracker(saltConnector, saltJobRunner).call();
                 fail("should throw exception");
             } catch (CloudbreakOrchestratorFailedException e) {
-                assertThat(e.getMessage(), both(containsString(missingMachine)).and(containsString(errorMessage)));
+                assertThat(e.getMessage(), allOf(containsString("Node: 10.0.0.1 Error(s): Name: some-script.sh"), containsString("Target:"),
+                        containsString("10.0.0.1"), containsString("10.0.0.2"), containsString("10.0.0.3")));
             }
 
             PowerMockito.verifyStatic(SaltStates.class);
@@ -243,7 +261,7 @@ public class SaltJobIdTrackerTest {
 
             Multimap<String, String> missingNodesWithReason = ArrayListMultimap.create();
             String missingMachine = "10.0.0.1";
-            String errorMessage = "error happened";
+            String errorMessage = "Name: some-script.sh";
             missingNodesWithReason.put(missingMachine, errorMessage);
             when(saltJobRunner.getNodesWithError()).thenReturn(missingNodesWithReason);
             when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);

@@ -54,7 +54,9 @@ public class AwsComputeResourceService {
             contextResources.addAll(reattachableVolumeSets);
             awsContextService.addResourcesToContext(contextResources, context, groupsWithNewInstances);
         }
-        return computeResourceService.buildResourcesForUpscale(context, ac, stack, groupsWithNewInstances);
+
+        Long threshold = (long) newInstances.size();
+        return computeResourceService.buildResourcesForUpscale(context, ac, stack, groupsWithNewInstances, AdjustmentType.EXACT, threshold);
     }
 
     public List<CloudResourceStatus> deleteComputeResources(AuthenticatedContext ac, CloudStack stack, List<CloudResource> cloudResources) {

@@ -29,8 +29,10 @@ remove_cm_service_account:
 leave-ipa:
   cmd.run:
 {% if metadata.platform != 'YARN' %}
-    - name: ipa host-del {{ salt['grains.get']('fqdn') }} --updatedns && ipa-client-install --uninstall -U
+    - name: echo $PW | kinit {{ salt['pillar.get']('sssd-ipa:principal') }} && ipa host-del {{ salt['grains.get']('fqdn') }} --updatedns && ipa-client-install --uninstall -U
 {% else %}
-    - name: runuser -l root -c 'ipa host-del {{ salt['grains.get']('fqdn') }} --updatedns && ipa-client-install --uninstall -U'
+    - name: runuser -l root -c 'echo $PW | kinit {{ salt['pillar.get']('sssd-ipa:principal') }} && ipa host-del {{ salt['grains.get']('fqdn') }} --updatedns && ipa-client-install --uninstall -U'
 {% endif %}
     - onlyif: ipa env
+    - env:
+        - PW: "{{salt['pillar.get']('sssd-ipa:password')}}"

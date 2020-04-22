@@ -59,8 +59,9 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
             return call();
         }
         if (JobState.IN_PROGRESS.equals(saltJobRunner.getJobState())) {
-            String jobIsRunningMessage = String.format("Job: %s is running currently. Details: %s", saltJobRunner.getJid(), buildErrorMessage());
-            throw new CloudbreakOrchestratorInProgressException(jobIsRunningMessage, saltJobRunner.getNodesWithError());
+            String errorMessage = buildErrorMessage();
+            LOGGER.warn(String.format("Job: %s is running currently. Details: %s", saltJobRunner.getJid(), errorMessage));
+            throw new CloudbreakOrchestratorInProgressException(errorMessage, saltJobRunner.getNodesWithError());
         }
         if (JobState.FAILED == saltJobRunner.getJobState() || JobState.AMBIGUOUS == saltJobRunner.getJobState()) {
             throw new CloudbreakOrchestratorFailedException(buildErrorMessage(), saltJobRunner.getNodesWithError());
@@ -83,7 +84,8 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
     private String buildErrorMessage() {
         String jobId = saltJobRunner.getJid().getJobId();
         StringBuilder errorMessageBuilder = new StringBuilder();
-        errorMessageBuilder.append(String.format("There are missing nodes from job (jid: %s), target: %s", jobId, saltJobRunner.getTargetHostnames()));
+        LOGGER.warn(String.format("There are missing nodes from job (jid: %s), target: %s", jobId, saltJobRunner.getTargetHostnames()));
+        errorMessageBuilder.append(String.format("Target: %s", saltJobRunner.getTargetHostnames()));
         if (saltJobRunner.getNodesWithError() != null) {
             for (String host : saltJobRunner.getNodesWithError().keySet()) {
                 Collection<String> errorMessages = saltJobRunner.getNodesWithError().get(host);
@@ -96,13 +98,15 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
     private void checkJobFinishedWithSuccess() throws CloudbreakOrchestratorFailedException {
         String jobId = saltJobRunner.getJid().getJobId();
         try {
-            Multimap<String, String> missingNodesWithReason = SaltStates.jidInfo(saltConnector, jobId, new HostList(saltJobRunner.getTargetHostnames()),
-                    saltJobRunner.stateType());
-            if (!missingNodesWithReason.isEmpty()) {
-                LOGGER.debug("There are missing nodes after the job (jid: {}) completion: {}", jobId, String.join(",", missingNodesWithReason.keySet()));
+            Multimap<String, String> missingNodesWithReason = SaltStates.jidInfo(
+                    saltConnector, jobId, new HostList(saltJobRunner.getTargetHostnames()), saltJobRunner.stateType());
+            Multimap<String, String> missingNodesWithReplacedReasons = saltConnector.getSaltErrorResolver().resolveErrorMessages(missingNodesWithReason);
+            if (!missingNodesWithReplacedReasons.isEmpty()) {
+                LOGGER.debug("There are missing nodes after the job (jid: {}) completion: {}",
+                        jobId, String.join(",", missingNodesWithReplacedReasons.keySet()));
                 saltJobRunner.setJobState(JobState.FAILED);
-                saltJobRunner.setNodesWithError(missingNodesWithReason);
-                saltJobRunner.setTargetHostnames(missingNodesWithReason.keySet());
+                saltJobRunner.setNodesWithError(missingNodesWithReplacedReasons);
+                saltJobRunner.setTargetHostnames(missingNodesWithReplacedReasons.keySet());
             } else {
                 LOGGER.debug("The job (jid: {}) completed successfully on every node.", jobId);
                 saltJobRunner.setJobState(JobState.FINISHED);
