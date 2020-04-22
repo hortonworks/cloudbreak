@@ -32,6 +32,7 @@ import com.sequenceiq.redbeams.metrics.MetricType;
 import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
+import com.sequenceiq.redbeams.sync.DBStackJobService;
 
 @Configuration
 public class RedbeamsTerminationActions {
@@ -47,6 +48,9 @@ public class RedbeamsTerminationActions {
     @Inject
     private RedbeamsMetricService metricService;
 
+    @Inject
+    private DBStackJobService dbStackJobService;
+
     @Bean(name = "DEREGISTER_DATABASE_SERVER_STATE")
     public Action<?, ?> deregisterDatabaseServer() {
         return new AbstractRedbeamsTerminationAction<>(TerminateDatabaseServerSuccess.class) {
@@ -58,6 +62,7 @@ public class RedbeamsTerminationActions {
 
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
+                dbStackJobService.unschedule(context.getDBStack());
                 return new DeregisterDatabaseServerRequest(context.getCloudContext(), context.getDatabaseStack(),
                         context.getDBStack());
             }
@@ -99,6 +104,7 @@ public class RedbeamsTerminationActions {
                 // through the termination
                 metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FINISHED, context.getDBStack());
                 dbStackService.delete(context.getDBStack());
+
                 return new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_FINISHED_EVENT.name(), 0L);
             }
         };

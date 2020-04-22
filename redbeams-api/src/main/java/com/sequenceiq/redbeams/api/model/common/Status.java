@@ -79,4 +79,15 @@ public enum Status {
                 || START_IN_PROGRESS.equals(this)
                 || isAvailable();
     }
+
+    public static Set<Status> getAutoSyncStatuses() {
+        return Set.of(
+                START_REQUESTED,
+                START_IN_PROGRESS,
+                AVAILABLE,
+                STOP_REQUESTED,
+                STOP_IN_PROGRESS,
+                STOPPED
+        );
+    }
 }

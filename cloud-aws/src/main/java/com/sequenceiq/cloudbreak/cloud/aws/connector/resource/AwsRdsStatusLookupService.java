@@ -40,7 +40,9 @@ public class AwsRdsStatusLookupService {
 
     private ExternalDatabaseStatus getExternalDatabaseStatus(String dbInstanceStatus) {
         switch (dbInstanceStatus.toLowerCase()) {
+            case "starting": return ExternalDatabaseStatus.START_IN_PROGRESS;
             case "available": return ExternalDatabaseStatus.STARTED;
+            case "stopping": return ExternalDatabaseStatus.STOP_IN_PROGRESS;
             case "stopped": return ExternalDatabaseStatus.STOPPED;
             default: return ExternalDatabaseStatus.UPDATE_IN_PROGRESS;
         }
