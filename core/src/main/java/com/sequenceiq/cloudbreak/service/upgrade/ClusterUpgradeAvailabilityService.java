@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionsV4Response;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -125,7 +125,7 @@ public class ClusterUpgradeAvailabilityService {
         try {
             LOGGER.info(String.format("Retrieving images for upgrading stack %s", stack.getName()));
             com.sequenceiq.cloudbreak.cloud.model.Image currentImage = getImage(stack);
-            CloudbreakImageCatalogV2 imageCatalog = getImagesFromCatalog(currentImage.getImageCatalogUrl());
+            CloudbreakImageCatalogV3 imageCatalog = getImagesFromCatalog(currentImage.getImageCatalogUrl());
             Image image = getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
             ImageFilterResult filteredImages = filterImages(imageCatalog, image, stack.cloudPlatform());
             LOGGER.info(String.format("%d possible image found for stack upgrade.", filteredImages.getAvailableImages().getCdhImages().size()));
@@ -137,7 +137,7 @@ public class ClusterUpgradeAvailabilityService {
         return upgradeOptions;
     }
 
-    private Image getCurrentImageFromCatalog(String currentImageId, CloudbreakImageCatalogV2 imageCatalog) throws CloudbreakImageNotFoundException {
+    private Image getCurrentImageFromCatalog(String currentImageId, CloudbreakImageCatalogV3 imageCatalog) throws CloudbreakImageNotFoundException {
         return imageProvider.getCurrentImageFromCatalog(currentImageId, imageCatalog);
     }
 
@@ -145,15 +145,15 @@ public class ClusterUpgradeAvailabilityService {
         return imageService.getImage(stack.getId());
     }
 
-    private CloudbreakImageCatalogV2 getImagesFromCatalog(String imageCatalogUrl) throws CloudbreakImageCatalogException {
-        return imageCatalogProvider.getImageCatalogV2(imageCatalogUrl);
+    private CloudbreakImageCatalogV3 getImagesFromCatalog(String imageCatalogUrl) throws CloudbreakImageCatalogException {
+        return imageCatalogProvider.getImageCatalogV3(imageCatalogUrl);
     }
 
-    private ImageFilterResult filterImages(CloudbreakImageCatalogV2 imageCatalog, Image currentImage, String cloudPlatform) {
+    private ImageFilterResult filterImages(CloudbreakImageCatalogV3 imageCatalog, Image currentImage, String cloudPlatform) {
         return clusterUpgradeImageFilter.filter(getCdhImages(imageCatalog), imageCatalog.getVersions(), currentImage, cloudPlatform);
     }
 
-    private List<Image> getCdhImages(CloudbreakImageCatalogV2 imageCatalog) {
+    private List<Image> getCdhImages(CloudbreakImageCatalogV3 imageCatalog) {
         return imageCatalog.getImages().getCdhImages();
     }
 
