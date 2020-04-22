@@ -37,7 +37,6 @@ public class SimpleOrchestratorBootstrapRunnerTest {
         try {
             result = runner.call();
         } catch (CloudbreakOrchestratorTimeoutException exception) {
-            assertTrue(exception.getMessage().contains("Failed: Orchestrator component went failed in"));
             assertTrue(exception.getMessage().contains(EXCEPTION_MESSAGE));
         }
         assertNull(result);

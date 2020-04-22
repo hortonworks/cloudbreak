@@ -1,0 +1,1 @@
+'/usr/local/bin/freeipa_backup': 'Failed to upload freeipa backup to object storage, please check the assigned permissions to the instance'
