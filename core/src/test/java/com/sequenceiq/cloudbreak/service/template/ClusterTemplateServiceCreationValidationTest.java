@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -15,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -33,6 +36,8 @@ class ClusterTemplateServiceCreationValidationTest {
 
     private static final String ACCOUNT_ID = "someAccountId";
 
+    private static final String CREATOR_ID = "someUserId";
+
     @Mock
     private ClusterTemplateRepository clusterTemplateRepository;
 
@@ -48,12 +53,26 @@ class ClusterTemplateServiceCreationValidationTest {
     @Mock
     private BlueprintService blueprintService;
 
+    @Mock
+    private TransactionService transactionService;
+
+    @Mock
+    private GrpcUmsClient grpcUmsClient;
+
     @InjectMocks
     private ClusterTemplateService underTest;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
+        try {
+            when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
+                Supplier<ClusterTemplate> arg = (Supplier<ClusterTemplate>) invocation.getArguments()[0];
+                return arg.get();
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            //could not happen, mocked
+        }
     }
 
     @Test
@@ -65,7 +84,8 @@ class ClusterTemplateServiceCreationValidationTest {
         clusterTemplate.setStatus(ResourceStatus.USER_MANAGED);
         when(clusterTemplateRepository.findByNameAndWorkspace(any(), any())).thenReturn(Optional.empty());
 
-        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate, WORKSPACE_ID, ACCOUNT_ID));
+        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
+                WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
         Assert.assertEquals("Stack template in cluster definition should contain a – valid – cluster request!", e.getMessage());
     }
 
@@ -80,7 +100,8 @@ class ClusterTemplateServiceCreationValidationTest {
         clusterTemplate.setStatus(ResourceStatus.DEFAULT);
         when(clusterTemplateRepository.findByNameAndWorkspace(any(), any())).thenReturn(Optional.empty());
 
-        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate, WORKSPACE_ID, ACCOUNT_ID));
+        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
+                WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
         Assert.assertEquals("Cluster definition should contain a cluster template!", e.getMessage());
     }
 
@@ -100,7 +121,8 @@ class ClusterTemplateServiceCreationValidationTest {
         when(clusterTemplateRepository.findByNameAndWorkspace(any(), any())).thenReturn(Optional.empty());
         when(blueprintService.getAllAvailableInWorkspace(workspace)).thenReturn(Collections.emptySet());
 
-        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate, WORKSPACE_ID, ACCOUNT_ID));
+        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
+                WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
         Assert.assertEquals("The cluster template (aka blueprint) in the cluster definition should be an existing one!", e.getMessage());
     }
 

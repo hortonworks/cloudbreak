@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
@@ -46,12 +47,20 @@ public class EnvironmentResourceDeletionService {
 
     public void deleteClusterDefinitionsOnCloudbreak(String environmentCrn) {
         try {
-            clusterTemplateV4Endpoint.deleteMultiple(TEMP_WORKSPACE_ID, null, null, environmentCrn);
+            Set<String> names = getClusterDefinitionNamesInEnvironment(TEMP_WORKSPACE_ID, environmentCrn);
+            clusterTemplateV4Endpoint.deleteMultiple(TEMP_WORKSPACE_ID, names, null, environmentCrn);
         } catch (WebApplicationException e) {
             propagateException("Failed to delete cluster definition(s) from Cloudbreak due to:", e);
         } catch (ProcessingException | UnableToDeleteClusterDefinitionException e) {
             propagateException("Failed to delete cluster definition(s) from Cloudbreak due to:", e);
         }
+    }
+
+    private Set<String> getClusterDefinitionNamesInEnvironment(long tempWorkspaceId, String environmentCrn) {
+        return clusterTemplateV4Endpoint.list(TEMP_WORKSPACE_ID).getResponses().stream()
+                .filter(clusterTemplate -> environmentCrn.equals(clusterTemplate.getEnvironmentCrn()))
+                .map(ClusterTemplateViewV4Response::getName)
+                .collect(Collectors.toSet());
     }
 
     public Set<String> getAttachedSdxClusterCrns(Environment environment) {
