@@ -19,6 +19,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
+import com.sequenceiq.freeipa.client.FreeIpaHostNotAvailableException;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -42,8 +44,7 @@ public class FreeipaChecker {
             List<RPCResponse<Boolean>> statuses = new LinkedList<>();
             for (InstanceMetaData instanceMetaData : checkableInstances) {
                 String hostname = instanceMetaData.getDiscoveryFQDN();
-                FreeIpaClient freeIpaClient = checkedMeasure(() ->
-                                freeIpaClientFactory.getFreeIpaClientForStackWithPing(stack, hostname), LOGGER,
+                FreeIpaClient freeIpaClient = checkedMeasure(() -> freeIpaClientFactory.getFreeIpaClientForStackWithPing(stack, hostname), LOGGER,
                         ":::Auto sync::: freeipa client is created in {}ms");
                 statuses.add(checkedMeasure(() -> freeIpaClient.serverConnCheck(freeIpaClient.getHostname(), hostname), LOGGER,
                         ":::Auto sync::: freeipa server_conncheck ran in {}ms"));
@@ -66,10 +67,12 @@ public class FreeipaChecker {
                 postFix = "Freeipa is unhealthy, ";
             }
             return new SyncResult(postFix + getMessages(responses), status, result);
-        } catch (HttpHostConnectException | ConnectTimeoutException e) {
-            return new SyncResult("Freeipa is unreachable: " + e.getMessage(), DetailedStackStatus.UNREACHABLE, false);
         } catch (FreeIpaClientException e) {
             LOGGER.info("FreeIpaClientException occurred during status fetch: " + e.getMessage(), e);
+            Throwable t = FreeIpaClientExceptionUtil.getAncestorCauseBeforeFreeIpaClientExceptions(e);
+            if (t instanceof HttpHostConnectException || t instanceof ConnectTimeoutException || t instanceof FreeIpaHostNotAvailableException) {
+                return new SyncResult("Freeipa is unreachable: " + t.getMessage(), DetailedStackStatus.UNREACHABLE, false);
+            }
             return new SyncResult("Freeipa is unhealthy, error occurred: " + e.getMessage(), DetailedStackStatus.UNHEALTHY, false);
         } catch (Exception e) {
             LOGGER.info("Error occurred during status fetch: " + e.getMessage(), e);

@@ -99,14 +99,24 @@ class FreeIpaClientFactoryTest {
     }
 
     @Test
-    void getFreeIpaClientForStackWithPingShouldThrowExceptionWhenStackStatusIsUnreachable() {
+    void getFreeIpaClientForStackWithPingShouldReturnClientWhenStackStatusIsUnreachable() {
         Stack stack = createStack();
+        stack.setGatewayport(80);
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setAdminPassword(new Secret("", ""));
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         when(stackService.getByIdWithListsInTransaction(stack.getId())).thenReturn(stack);
+        when(tlsSecurityService.buildTLSClientConfig(any(), any(), any())).thenReturn(new HttpClientConfig(FREEIPP_FQDN));
         Status unreachableState = Status.FREEIPA_UNREACHABLE_STATUSES.stream().findAny().get();
         StackStatus stackStatus = new StackStatus(stack, unreachableState, "The FreeIPA instance is unreachable.", DetailedStackStatus.UNREACHABLE);
         stack.setStackStatus(stackStatus);
 
-        Assertions.assertThrows(FreeIpaClientException.class, () -> underTest.getFreeIpaClientForStackWithPing(stack, FREEIPP_FQDN));
+        FreeIpaClientException exception = Assertions.assertThrows(FreeIpaClientException.class, () ->
+                underTest.getFreeIpaClientForStackWithPing(stack, FREEIPP_FQDN));
+
+        verify(clusterProxyService, times(1)).isCreateConfigForClusterProxy(stack);
+        verify(tlsSecurityService, times(1)).buildTLSClientConfig(any(), any(), any());
+        Assertions.assertEquals(FreeIpaClientException.class, exception.getCause().getClass());
     }
 
     @Test
@@ -122,8 +132,8 @@ class FreeIpaClientFactoryTest {
         StackStatus stackStatus = new StackStatus(stack, unreachableState, "The FreeIPA instance is reachable.", DetailedStackStatus.AVAILABLE);
         stack.setStackStatus(stackStatus);
 
-        FreeIpaClientException exception =
-                Assertions.assertThrows(FreeIpaClientException.class, () -> underTest.getFreeIpaClientForStackWithPing(stack, FREEIPP_FQDN));
+        FreeIpaClientException exception = Assertions.assertThrows(FreeIpaClientException.class, () ->
+                underTest.getFreeIpaClientForStackWithPing(stack, FREEIPP_FQDN));
 
         verify(clusterProxyService, times(1)).isCreateConfigForClusterProxy(stack);
         verify(tlsSecurityService, times(1)).buildTLSClientConfig(any(), any(), any());
