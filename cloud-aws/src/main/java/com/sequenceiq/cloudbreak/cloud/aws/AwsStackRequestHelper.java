@@ -16,6 +16,7 @@ import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.OnFailure;
 import com.amazonaws.services.cloudformation.model.Parameter;
+import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
@@ -69,6 +70,13 @@ public class AwsStackRequestHelper {
                 .withTags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
                 .withCapabilities(CAPABILITY_IAM)
                 .withParameters(getStackParameters(ac, stack));
+    }
+
+    public UpdateStackRequest createUpdateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String cfTemplate) {
+        return new UpdateStackRequest()
+                .withStackName(cFStackName)
+                .withParameters(getStackParameters(ac, stack, cFStackName, null))
+                .withTemplateBody(cfTemplate);
     }
 
     public DeleteStackRequest createDeleteStackRequest(String cFStackName) {
