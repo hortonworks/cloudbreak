@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -22,6 +23,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -29,11 +32,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.projection.ClusterTemplateStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
@@ -60,9 +65,12 @@ import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
-public class ClusterTemplateService extends AbstractWorkspaceAwareResourceService<ClusterTemplate> {
+public class ClusterTemplateService extends AbstractWorkspaceAwareResourceService<ClusterTemplate> implements ResourceBasedCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateService.class);
+
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
 
     @Inject
     private ClusterTemplateRepository clusterTemplateRepository;
@@ -130,9 +138,20 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         }
     }
 
-    public ClusterTemplate createForLoggedInUser(ClusterTemplate resource, Long workspaceId, String accountId) {
+    public ClusterTemplate createForLoggedInUser(ClusterTemplate resource, Long workspaceId, String accountId, String creator) {
         resource.setResourceCrn(createCRN(accountId));
-        return super.createForLoggedInUser(resource, workspaceId);
+        try {
+            return transactionService.required(() -> {
+                ClusterTemplate created = super.createForLoggedInUser(resource, workspaceId);
+                grpcUmsClient.assignResourceOwnerRoleIfEntitled(creator, resource.getResourceCrn(), accountId);
+                return created;
+            });
+        } catch (TransactionExecutionException e) {
+            if (e.getCause() instanceof BadRequestException) {
+                throw e.getCause();
+            }
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
     }
 
     public Set<ClusterTemplate> getTemplatesByBlueprint(Blueprint blueprint) {
@@ -371,14 +390,44 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return names.stream().map(name -> deleteByName(name, workspaceId)).collect(toSet());
     }
 
-    private String createCRN(String accountId) {
+    public String createCRN(String accountId) {
         return Crn.builder()
                 .setService(Crn.Service.DATAHUB)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.CLUSTER_TEMPLATE)
+                .setResourceType(Crn.ResourceType.CLUSTER_DEFINITION)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();
+    }
+
+    @Override
+    public String getResourceCrnByResourceName(String resourceName) {
+        return clusterTemplateRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    public List<String> getResourceCrnsInAccount() {
+        return clusterTemplateRepository.findAllResourceCrnsByAccountId(ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+        return resourceNames.stream()
+                .map(resourceName -> clusterTemplateRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()))
+                .collect(Collectors.toList());
+    }
+
+    public ClusterTemplate getByResourceCrn(String resourceCrn) {
+        return clusterTemplateRepository.findByResourceCrn(resourceCrn);
+    }
+
+    public ClusterTemplateStatusView getStatusViewByResourceCrn(String resourceCrn) {
+        return clusterTemplateRepository.findViewByResourceCrn(resourceCrn);
+    }
+
+    @Override
+    public AuthorizationResourceType getResourceType() {
+        return AuthorizationResourceType.CLUSTER_DEFINITION;
     }
 
 }

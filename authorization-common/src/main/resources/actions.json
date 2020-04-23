@@ -142,5 +142,41 @@
     "resourceType": "IMAGE_CATALOG",
     "actionType": "RESOURCE_DEPENDENT",
     "legacyRight": "datahub/write"
+  },
+  "CREATE_CLUSTER_DEFINITION": {
+    "right": "environments/createClusterDefinitions",
+    "resourceType": "CLUSTER_DEFINITION",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "DESCRIBE_CLUSTER_DEFINITION": {
+    "right": "environments/describeClusterDefinitions",
+    "resourceType": "CLUSTER_DEFINITION",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/read"
+  },
+  "DELETE_CLUSTER_DEFINITION": {
+    "right": "environments/deleteClusterDefinitions",
+    "resourceType": "CLUSTER_DEFINITION",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "CREATE_CLUSTER_TEMPLATE": {
+    "right": "datahub/createClusterTemplate",
+    "resourceType": "CLUSTER_TEMPLATE",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "DESCRIBE_CLUSTER_TEMPLATE": {
+    "right": "datahub/describeClusterTemplate",
+    "resourceType": "CLUSTER_TEMPLATE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/read"
+  },
+  "DELETE_CLUSTER_TEMPLATE": {
+    "right": "datahub/deleteClusterTemplate",
+    "resourceType": "CLUSTER_TEMPLATE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
   }
 }

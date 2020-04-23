@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.projection.BlueprintStatusView;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
@@ -28,4 +30,14 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
 
     Optional<Blueprint> findByResourceCrnAndWorkspaceId(String resourceCrn, Long workspaceId);
 
+    Blueprint findByResourceCrn(String resourceCrn);
+
+    @Query("SELECT b.resourceCrn FROM Blueprint b WHERE b.name = :name AND b.workspace.tenant.name = :accountId")
+    String findResourceCrnByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
+
+    @Query("SELECT b.resourceCrn FROM Blueprint b WHERE b.workspace.tenant.name = :accountId")
+    List<String> findAllResourceCrnsByAccountId(@Param("accountId") String accountId);
+
+    @Query("SELECT b.status as status FROM Blueprint b WHERE b.resourceCrn = :resourceCrn")
+    BlueprintStatusView findViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
 }

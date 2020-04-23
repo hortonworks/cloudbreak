@@ -15,7 +15,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
+import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.authorization.annotation.ResourceName;
+import com.sequenceiq.authorization.annotation.ResourceNameList;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
@@ -24,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -36,7 +46,7 @@ import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 @Controller
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(ClusterTemplate.class)
-@DisableCheckPermissions
+@AuthorizationResource
 public class ClusterTemplateV4Controller extends NotificationController implements ClusterTemplateV4Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateV4Controller.class);
@@ -57,12 +67,17 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     private EnvironmentServiceDecorator environmentServiceDecorator;
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CLUSTER_DEFINITION)
     public ClusterTemplateV4Response post(Long workspaceId, @Valid ClusterTemplateV4Request request) {
-        ClusterTemplate clusterTemplate = clusterTemplateService.createForLoggedInUser(converterUtil.convert(request, ClusterTemplate.class), workspaceId);
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String creator = ThreadBasedUserCrnProvider.getUserCrn();
+        ClusterTemplate clusterTemplate = clusterTemplateService.createForLoggedInUser(converterUtil.convert(request, ClusterTemplate.class), workspaceId,
+                accountId, creator);
         return getByName(workspaceId, clusterTemplate.getName());
     }
 
     @Override
+    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_DEFINITION)
     public ClusterTemplateViewV4Responses list(Long workspaceId) {
         blueprintService.updateDefaultBlueprintCollection(workspaceId);
         clusterTemplateService.updateDefaultClusterTemplates(workspaceId);
@@ -71,7 +86,8 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     }
 
     @Override
-    public ClusterTemplateV4Response getByName(Long workspaceId, String name) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_DEFINITION)
+    public ClusterTemplateV4Response getByName(Long workspaceId, @ResourceName String name) {
         try {
             ClusterTemplate clusterTemplate = transactionService.required(() -> clusterTemplateService.getByNameForWorkspaceId(name, workspaceId));
             ClusterTemplateV4Response response = transactionService.required(() -> converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class));
@@ -84,13 +100,15 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     }
 
     @Override
-    public ClusterTemplateV4Response deleteByName(Long workspaceId, String name) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_CLUSTER_DEFINITION)
+    public ClusterTemplateV4Response deleteByName(Long workspaceId, @ResourceName String name) {
         ClusterTemplate clusterTemplate = clusterTemplateService.deleteByName(name, workspaceId);
         return converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class);
     }
 
     @Override
-    public ClusterTemplateV4Response getByCrn(Long workspaceId, String crn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_DEFINITION)
+    public ClusterTemplateV4Response getByCrn(Long workspaceId, @ResourceCrn String crn) {
         try {
             ClusterTemplate clusterTemplate = transactionService.required(() -> clusterTemplateService.getByCrn(crn, workspaceId));
             ClusterTemplateV4Response response = transactionService.required(() -> converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class));
@@ -103,13 +121,15 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     }
 
     @Override
-    public ClusterTemplateV4Response deleteByCrn(Long workspaceId, String crn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_CLUSTER_DEFINITION)
+    public ClusterTemplateV4Response deleteByCrn(Long workspaceId, @ResourceCrn String crn) {
         ClusterTemplate clusterTemplate = clusterTemplateService.deleteByCrn(crn, workspaceId);
         return converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class);
     }
 
     @Override
-    public ClusterTemplateV4Responses deleteMultiple(Long workspaceId, Set<String> names, String environmentName, String environmentCrn) {
+    @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.DELETE_CLUSTER_DEFINITION)
+    public ClusterTemplateV4Responses deleteMultiple(Long workspaceId, @ResourceNameList Set<String> names, String environmentName, String environmentCrn) {
         Set<ClusterTemplate> clusterTemplates;
         if (Objects.nonNull(names) && !names.isEmpty()) {
             clusterTemplates = clusterTemplateService.deleteMultiple(names, workspaceId);

@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.config.ConversionConfig;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
 import com.sequenceiq.cloudbreak.init.clustertemplate.DefaultClusterTemplateCache;
+import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AllowedInstanceTypeTest.TestAppContext.class)
@@ -80,6 +81,9 @@ public class AllowedInstanceTypeTest {
             ConverterUtil.class})
     @PropertySource("classpath:application.yml")
     static class TestAppContext {
+
+        @MockBean
+        private ClusterTemplateService clusterTemplateService;
 
         @MockBean
         private DefaultClusterTemplateV4RequestToClusterTemplateConverter converter;
