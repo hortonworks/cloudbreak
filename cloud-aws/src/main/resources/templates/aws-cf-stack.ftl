@@ -312,7 +312,7 @@
       }
     },
 
-    "ClusterManagerNodeLaunchTemplate${group.groupName?replace('_', '')}"  : {
+    "${group.launchTemplateName}"  : {
       "Type" : "AWS::EC2::LaunchTemplate",
       "Properties" : {
         "LaunchTemplateData": {

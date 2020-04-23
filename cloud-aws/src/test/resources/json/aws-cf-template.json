@@ -1,0 +1,12 @@
+{
+  "Resources": {
+    "ClusterManagerNodeLaunchTemplateGroupName"  : {
+      "Type": "AWS::EC2::LaunchTemplate",
+      "Properties": {
+        "LaunchTemplateData": {
+          "ImageId": %s
+        }
+      }
+    }
+  }
+}

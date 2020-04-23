@@ -5,6 +5,7 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -121,8 +122,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         kerberosMgmtV1Service.cleanupByEnvironment(environmentCrn, accountId);
     }
 
-    @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @DisableCheckPermissions
     public String getUserKeytab(@NotEmpty String environmentCrn, @NotEmpty String targetUserCrn) {
         String actorCrn = checkActorCrn();
         LOGGER.debug("getUserKeytab() request for environmentCrn={} for targetUserCrn={} as actorCrn={}",

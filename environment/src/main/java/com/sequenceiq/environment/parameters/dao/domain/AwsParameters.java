@@ -20,7 +20,7 @@ public class AwsParameters extends BaseParameters {
     private S3GuardTableCreation s3guardTableCreation;
 
     @Column(name = "freeipa_spot_percentage")
-    private int freeIpaSpotPercentage;
+    private Integer freeIpaSpotPercentage;
 
     public String getS3guardTableName() {
         return s3guardTableName;
@@ -39,7 +39,7 @@ public class AwsParameters extends BaseParameters {
     }
 
     public int getFreeIpaSpotPercentage() {
-        return freeIpaSpotPercentage;
+        return Objects.requireNonNullElse(freeIpaSpotPercentage, 0);
     }
 
     public void setFreeIpaSpotPercentage(Integer freeIpaSpotPercentage) {

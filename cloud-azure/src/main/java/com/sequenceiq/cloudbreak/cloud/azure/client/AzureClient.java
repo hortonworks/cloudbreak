@@ -216,7 +216,8 @@ public class AzureClient {
                     .withRegion(storageLocation)
                     .withExistingResourceGroup(resourceGroup)
                     .withTags(tags)
-                    .withSku(accType);
+                    .withSku(accType)
+                    .withOnlyHttpsTraffic();
             if (encryted) {
                 withCreate.withBlobEncryption();
             }
