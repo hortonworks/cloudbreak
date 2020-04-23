@@ -19,10 +19,10 @@ public class RebootInstancesRequest {
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
-    @ApiModelProperty(value = ModelDescriptions.FORCE_REBOOT, required = false)
+    @ApiModelProperty(ModelDescriptions.FORCE_REBOOT)
     private boolean forceReboot;
 
-    @ApiModelProperty(value = ModelDescriptions.INSTANCE_ID, required = false)
+    @ApiModelProperty(ModelDescriptions.INSTANCE_ID)
     private List<String> instanceIds;
 
     public String getEnvironmentCrn() {
