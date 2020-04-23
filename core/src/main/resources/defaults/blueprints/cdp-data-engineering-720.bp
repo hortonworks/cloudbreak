@@ -213,7 +213,7 @@
           },
           {
             "name": "hive_service_config_safety_valve",
-            "value": "<property><name>hive.hook.proto.file.per.event</name><value>true</value></property><property><name>hive.server2.tez.sessions.per.default.queue</name><value>4</value></property>"
+            "value": "<property><name>hive.server2.tez.sessions.per.default.queue</name><value>4</value></property>"
           }
         ],
         "roleConfigGroups": [
