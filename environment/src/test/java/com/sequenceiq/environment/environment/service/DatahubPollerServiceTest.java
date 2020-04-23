@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.poller.ClusterPollerResultEvaluator;
 import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
 import com.sequenceiq.environment.environment.service.datahub.DatahubPollerService;
@@ -43,7 +42,7 @@ class DatahubPollerServiceTest {
 
     private DatahubPollerProvider datahubPollerProvider = new DatahubPollerProvider(datahubService, new ClusterPollerResultEvaluator());
 
-    private DatahubPollerService underTest = new DatahubPollerService(datahubService, datahubPollerProvider, new WebApplicationExceptionMessageExtractor());
+    private DatahubPollerService underTest = new DatahubPollerService(datahubService, datahubPollerProvider);
 
     @BeforeEach
     void setup() {

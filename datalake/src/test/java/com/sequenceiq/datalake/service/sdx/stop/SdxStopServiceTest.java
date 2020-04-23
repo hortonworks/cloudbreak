@@ -33,7 +33,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -73,9 +72,6 @@ public class SdxStopServiceTest {
 
     @Mock
     private CloudbreakFlowService cloudbreakFlowService;
-
-    @Mock
-    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @InjectMocks
     private SdxStopService underTest;
@@ -118,7 +114,6 @@ public class SdxStopServiceTest {
     public void testStopWhenClientErrorException() {
         SdxCluster sdxCluster = sdxCluster();
         ClientErrorException clientErrorException = mock(ClientErrorException.class);
-        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
         doThrow(clientErrorException).when(stackV4Endpoint).putStop(0L, CLUSTER_NAME);
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
@@ -130,7 +125,6 @@ public class SdxStopServiceTest {
     public void testStopWhenWebApplicationException() {
         SdxCluster sdxCluster = sdxCluster();
         WebApplicationException clientErrorException = mock(WebApplicationException.class);
-        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("error");
         doThrow(clientErrorException).when(stackV4Endpoint).putStop(0L, CLUSTER_NAME);
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 

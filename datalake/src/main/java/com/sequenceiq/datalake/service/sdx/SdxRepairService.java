@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -63,9 +62,6 @@ public class SdxRepairService {
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
 
-    @Inject
-    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
     public FlowIdentifier triggerRepairByCrn(String userCrn, String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         MDCBuilder.buildMdcContext(cluster);
@@ -95,7 +91,7 @@ public class SdxRepairService {
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (ClientErrorException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String errorMessage = e.getMessage();
             LOGGER.info("Can not repair stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
             throw new RuntimeException("Can not repair stack, client error happened on Cloudbreak side: " + errorMessage);
         } catch (WebApplicationException e) {

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.environment.exception.DatahubOperationFailedException;
@@ -23,19 +22,15 @@ public class DatahubService {
 
     private final DistroXV1Endpoint distroXV1Endpoint;
 
-    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
-    public DatahubService(DistroXV1Endpoint distroXV1Endpoint,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
+    public DatahubService(DistroXV1Endpoint distroXV1Endpoint) {
         this.distroXV1Endpoint = distroXV1Endpoint;
-        this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
     }
 
     public StackViewV4Responses list(String environmentCrn) {
         try {
             return distroXV1Endpoint.list(null, environmentCrn);
         } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String errorMessage = e.getMessage();
             LOGGER.error(String.format("Failed to list Datahub clusters for environment '%s' due to: '%s'.", environmentCrn, errorMessage), e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }
@@ -45,7 +40,7 @@ public class DatahubService {
         try {
             return distroXV1Endpoint.getByCrn(crn, entries);
         } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String errorMessage = e.getMessage();
             LOGGER.error(String.format("Failed to get Datahub cluster by crn %s due to: '%s'.", crn, errorMessage), e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }
@@ -55,7 +50,7 @@ public class DatahubService {
         try {
             distroXV1Endpoint.putStartByCrns(crns);
         } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String errorMessage = e.getMessage();
             LOGGER.error(String.format("Failed start Datahub clusters for environment %s due to: '%s'.", environmentCrn, errorMessage), e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }
@@ -65,7 +60,7 @@ public class DatahubService {
         try {
             distroXV1Endpoint.putStopByCrns(crns);
         } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String errorMessage = e.getMessage();
             LOGGER.error(String.format("Failed stop Datahub clusters for environment %s due to: '%s'.", environmentCrn, errorMessage), e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }
@@ -75,7 +70,7 @@ public class DatahubService {
         try {
             distroXV1Endpoint.deleteMultiple(multiDeleteRequest, forced);
         } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String errorMessage = e.getMessage();
             LOGGER.error(String.format("Failed delete multiple Datahub clusters for environment %s due to: '%s'.", environmentCrn, errorMessage), e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }

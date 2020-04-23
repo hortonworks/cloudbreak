@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.model.StatusKind;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -61,9 +60,6 @@ public class ProvisionerService {
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
 
-    @Inject
-    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
     private AttemptResult<StackV4Response> sdxCreationFailed(SdxCluster sdxCluster, String statusReason) {
         LOGGER.info("SDX creation failed, statusReason: " + statusReason);
         return AttemptResults.breakFor("SDX creation failed '" + sdxCluster.getClusterName() + "', " + statusReason);
@@ -85,7 +81,7 @@ public class ProvisionerService {
             } catch (NotFoundException e) {
                 LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
             } catch (ClientErrorException e) {
-                String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+                String errorMessage = e.getMessage();
                 LOGGER.info("Can not delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
                 throw new RuntimeException("Cannot delete stack, client error happened on Cloudbreak side: " + errorMessage);
             } catch (ProcessingException e) {
@@ -177,7 +173,7 @@ public class ProvisionerService {
                 cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, stackV4Response.getFlowIdentifier());
                 LOGGER.info("Sdx cluster updated");
             } catch (ClientErrorException e) {
-                String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+                String errorMessage = e.getMessage();
                 LOGGER.info("Can not start provisioning: {}", errorMessage, e);
                 throw new RuntimeException("Can not start provisioning, client error happened on Cloudbreak side: " + errorMessage);
             } catch (IOException e) {

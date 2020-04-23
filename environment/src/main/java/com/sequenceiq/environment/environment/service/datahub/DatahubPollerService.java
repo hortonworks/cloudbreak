@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
 
 @Service
@@ -33,13 +32,9 @@ public class DatahubPollerService {
 
     private final DatahubPollerProvider datahubPollerProvider;
 
-    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
-    public DatahubPollerService(DatahubService datahubService, DatahubPollerProvider datahubPollerProvider,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
+    public DatahubPollerService(DatahubService datahubService, DatahubPollerProvider datahubPollerProvider) {
         this.datahubService = datahubService;
         this.datahubPollerProvider = datahubPollerProvider;
-        this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
     }
 
     public void startAttachedDatahubClusters(Long envId, String envCrn) {

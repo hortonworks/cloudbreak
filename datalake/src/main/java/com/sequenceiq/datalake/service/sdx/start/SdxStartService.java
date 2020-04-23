@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -58,9 +57,6 @@ public class SdxStartService {
     private SdxStatusService sdxStatusService;
 
     @Inject
-    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
-    @Inject
     private FreeipaService freeipaService;
 
     @Inject
@@ -82,11 +78,11 @@ public class SdxStartService {
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (ClientErrorException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String errorMessage = e.getMessage();
             LOGGER.info("Can not start stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
             throw new RuntimeException("Can not start stack, client error happened on Cloudbreak side: " + errorMessage);
         } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String errorMessage = e.getMessage();
             LOGGER.info("Can not start stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
             throw new RuntimeException("Can not start stack, web application error happened on Cloudbreak side: " + errorMessage);
         }

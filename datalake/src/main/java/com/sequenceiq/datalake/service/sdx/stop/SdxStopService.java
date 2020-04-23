@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -67,9 +66,6 @@ public class SdxStopService {
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
 
-    @Inject
-    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
     public FlowIdentifier triggerStopIfClusterNotStopped(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
         checkFreeipaRunning(cluster.getEnvCrn());
@@ -86,11 +82,11 @@ public class SdxStopService {
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (ClientErrorException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String errorMessage = e.getMessage();
             LOGGER.info("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
             throw new RuntimeException("Can not stop stack, client error happened on Cloudbreak side: " + errorMessage);
         } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String errorMessage = e.getMessage();
             LOGGER.info("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
             throw new RuntimeException("Can not stop stack, web application error happened on Cloudbreak side: " + errorMessage);
         }

@@ -7,7 +7,6 @@ import javax.ws.rs.WebApplicationException;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -26,8 +25,6 @@ import reactor.bus.EventBus;
 @Component
 public class EnvironmentValidationHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
     private final EnvironmentFlowValidatorService validatorService;
 
     private final EnvironmentService environmentService;
@@ -37,12 +34,10 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
     protected EnvironmentValidationHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
-            EnvironmentFlowValidatorService validatorService,
-            WebApplicationExceptionMessageExtractor messageExtractor, EventBus eventBus) {
+            EnvironmentFlowValidatorService validatorService, EventBus eventBus) {
         super(eventSender);
         this.validatorService = validatorService;
         this.environmentService = environmentService;
-        webApplicationExceptionMessageExtractor = messageExtractor;
         this.eventBus = eventBus;
     }
 
@@ -65,7 +60,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                                     goToNetworkCreationState(environmentDtoEvent, environmentDto);
                                 }
                             } catch (WebApplicationException e) {
-                                String responseMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+                                String responseMessage = e.getMessage();
                                 goToFailedState(environmentDtoEvent, e.getMessage() + ". " + responseMessage);
                             } catch (Exception e) {
                                 goToFailedState(environmentDtoEvent, e.getMessage());

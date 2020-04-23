@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.exception.PollerException;
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.poller.SdxPollerProvider;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -42,13 +41,9 @@ public class SdxPollerService {
 
     private final SdxPollerProvider sdxPollerProvider;
 
-    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
-    public SdxPollerService(SdxService sdxService, SdxPollerProvider sdxPollerProvider,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
+    public SdxPollerService(SdxService sdxService, SdxPollerProvider sdxPollerProvider) {
         this.sdxService = sdxService;
         this.sdxPollerProvider = sdxPollerProvider;
-        this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
     }
 
     public void startAttachedDatalake(Long envId, String environmentName) {
@@ -72,12 +67,12 @@ public class SdxPollerService {
         } catch (PollerException e) {
             if (e.getCause() != null && e.getCause() instanceof WebApplicationException) {
                 WebApplicationException wae = (WebApplicationException) e.getCause();
-                String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(wae);
+                String errorMessage = e.getMessage();
                 throw new EnvironmentServiceException(errorMessage, e);
             }
             throw e;
         } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String errorMessage = e.getMessage();
             throw new EnvironmentServiceException(errorMessage, e);
         }
     }
