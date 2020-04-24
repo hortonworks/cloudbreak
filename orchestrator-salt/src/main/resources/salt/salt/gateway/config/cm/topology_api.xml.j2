@@ -115,7 +115,7 @@
             <role>ha</role>
             <name>HaProvider</name>
             <enabled>true</enabled>
-            {% if 'ATLAS' in exposed and 'ATLAS_SERVER' in salt['pillar.get']('gateway:location') -%}
+            {% if 'ATLAS_API' in exposed and 'ATLAS_SERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>ATLAS-API</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
@@ -215,11 +215,11 @@
     </gateway>
 
     {% if 'ATLAS_SERVER' in salt['pillar.get']('gateway:location') -%}
-    {% if 'ATLAS' in exposed -%}
+    {% if 'ATLAS_API' in exposed -%}
     <service>
         <role>ATLAS-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['ATLAS_API'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}

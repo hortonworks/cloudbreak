@@ -82,6 +82,7 @@ class ExposedServiceCollectorTest {
         assertThat(underTest.getAllServiceNames()).containsExactlyInAnyOrder(
                 "ALL",
                 "ATLAS_SERVER",
+                "ATLAS_SERVER",
                 "CM-API",
                 "CM-UI",
                 "DAS_WEBAPP",
@@ -124,6 +125,7 @@ class ExposedServiceCollectorTest {
         underTest.init();
         assertThat(underTest.getAllKnoxExposed()).containsExactlyInAnyOrder(
                 "ATLAS",
+                "ATLAS_API",
                 "AVATICA",
                 "CM-API",
                 "CM-UI",
@@ -166,6 +168,7 @@ class ExposedServiceCollectorTest {
         underTest.init();
         assertThat(underTest.getAllServicePorts(false)).containsOnly(
                 Map.entry("ATLAS", 21000),
+                Map.entry("ATLAS_API", 21000),
                 Map.entry("AVATICA", 8765),
                 Map.entry("CM-API", 7180),
                 Map.entry("CM-UI", 7180),
@@ -208,6 +211,7 @@ class ExposedServiceCollectorTest {
         underTest.init();
         assertThat(underTest.getAllServicePorts(true)).containsOnly(
                 Map.entry("ATLAS", 31443),
+                Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
                 Map.entry("CM-API", 7183),
                 Map.entry("CM-UI", 7183),
@@ -266,9 +270,10 @@ class ExposedServiceCollectorTest {
     void getKnoxServicesForComponentsReturnsCMServicesAndForImpalaDebugUIAsWell() {
         underTest.init();
         Collection<ExposedService> components = underTest.knoxServicesForComponents(Set.of("ATLAS_SERVER", "IMPALAD"));
-        assertThat(components).hasSize(5);
+        assertThat(components).hasSize(6);
         assertThat(components.stream().map(ExposedService::getName)).containsExactlyInAnyOrder(
                 "ATLAS",
+                "ATLAS_API",
                 "CLOUDERA_MANAGER",
                 "CLOUDERA_MANAGER_UI",
                 "IMPALA",
