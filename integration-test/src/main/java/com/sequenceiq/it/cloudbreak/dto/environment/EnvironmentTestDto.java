@@ -294,11 +294,15 @@ public class EnvironmentTestDto
         EnvironmentEndpoint credentialEndpoint = client.getEnvironmentClient().environmentV1Endpoint();
         credentialEndpoint.deleteByName(entity.getName(), false);
         setName(entity.getName());
-        testContext.await(this, ARCHIVED, emptyRunningParameter());
+        await(this, ARCHIVED, emptyRunningParameter());
     }
 
     public EnvironmentTestDto await(EnvironmentStatus status) {
         return await(status, emptyRunningParameter());
+    }
+
+    public EnvironmentTestDto await(EnvironmentTestDto entity, EnvironmentStatus status, RunningParameter runningParameter) {
+        return getTestContext().await(entity, status, runningParameter);
     }
 
     public EnvironmentTestDto await(EnvironmentStatus status, RunningParameter runningParameter) {

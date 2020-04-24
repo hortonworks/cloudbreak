@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.plac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
@@ -220,11 +221,11 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    public FreeIPATestDto await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status status) {
+    public FreeIPATestDto await(Status status) {
         return await(status, emptyRunningParameter());
     }
 
-    public FreeIPATestDto await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status status, RunningParameter runningParameter) {
+    public FreeIPATestDto await(Status status, RunningParameter runningParameter) {
         return getTestContext().await(this, status, runningParameter);
     }
 

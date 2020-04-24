@@ -31,6 +31,9 @@ import com.sequenceiq.it.cloudbreak.performance.MeasureAll;
 import com.sequenceiq.it.cloudbreak.performance.PerformanceIndicator;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.spark.SparkServer;
+import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
+import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class MeasuredTestContext extends MockedTestContext {
@@ -87,6 +90,16 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public WaitService<EnvironmentWaitObject> getEnvironmentWaitService() {
+        return wrappedTestContext.getEnvironmentWaitService();
+    }
+
+    @Override
+    public WaitService<FreeIpaWaitObject> getFreeIpaWaitService() {
+        return wrappedTestContext.getFreeIpaWaitService();
+    }
+
+    @Override
     protected void checkShutdown() {
         wrappedTestContext.checkShutdown();
     }
@@ -129,6 +142,11 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     public Map<String, String> getStatuses() {
         return wrappedTestContext.getStatuses();
+    }
+
+    @Override
+    public void setStatuses(Map<String, String> statusMap) {
+        wrappedTestContext.setStatuses(statusMap);
     }
 
     @Override
@@ -202,12 +220,18 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
+    public <T extends FreeIPATestDto, E extends com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status> T await(T entity, E desiredStatus,
+            RunningParameter runningParameter) {
+        return wrappedTestContext.await(entity, desiredStatus, runningParameter);
     }
 
     @Override
-    public EnvironmentTestDto await(EnvironmentTestDto entity, EnvironmentStatus desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
+    public <T extends EnvironmentTestDto, E extends EnvironmentStatus> T await(T entity, E desiredStatus, RunningParameter runningParameter) {
+        return wrappedTestContext.await(entity, desiredStatus, runningParameter);
+    }
+
+    @Override
+    public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
         return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
     }
 
@@ -230,12 +254,6 @@ public class MeasuredTestContext extends MockedTestContext {
 
     @Override
     public SdxRepairTestDto await(SdxRepairTestDto entity, SdxClusterStatusResponse desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
-    }
-
-    @Override
-    public FreeIPATestDto await(FreeIPATestDto entity, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatuses,
-            RunningParameter runningParameter, long pollingInterval) {
         return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
     }
 
@@ -328,6 +346,11 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     protected <T extends CloudbreakTestDto> T getEntityFromEntityClass(Class<T> entityClass, RunningParameter runningParameter) {
         return wrappedTestContext.getEntityFromEntityClass(entityClass, runningParameter);
+    }
+
+    @Override
+    public CloudbreakUser getWho(RunningParameter runningParameter) {
+        return wrappedTestContext.getWho(runningParameter);
     }
 
     @Override
