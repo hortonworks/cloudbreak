@@ -43,7 +43,7 @@ public interface LdapConfigV1Endpoint {
     @ApiOperation(value = LdapConfigOpDescription.GET_BY_ENV_FOR_CLUSTER, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
             nickname = "getLdapConfigForClusterV1")
     DescribeLdapConfigResponse getForCluster(@QueryParam("environmentCrn") @NotEmpty String environmentCrn,
-            @QueryParam("clusterName") @NotEmpty String clusterName);
+            @QueryParam("clusterName") @NotEmpty String clusterName) throws Exception;
 
     @POST
     @Path("")

@@ -174,7 +174,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
-    public OperationStatus cleanup(@Valid CleanupRequest request) {
+    public OperationStatus cleanup(@Valid CleanupRequest request) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
         return cleanupService.cleanup(accountId, request);
     }
@@ -185,7 +185,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void rebootInstances(@Valid RebootInstancesRequest request) {
+    public void rebootInstances(@Valid RebootInstancesRequest request) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
         rebootInstancesService.rebootInstances(accountId, request);
     }
