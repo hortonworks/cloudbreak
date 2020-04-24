@@ -24,7 +24,6 @@ public class SdxNotificationService {
 
     public void send(ResourceEvent resourceEvent, SdxCluster sdx) {
         LOGGER.info("SDX Notification has been sent: {}", resourceEvent);
-        // This is disabled since it causes confusion in the event log, because they are not persisted
-        // notificationService.send(resourceEvent, sdxClusterConverter.sdxClusterToResponse(sdx), sdx.getInitiatorUserCrn());
+        notificationService.send(resourceEvent, sdxClusterConverter.sdxClusterToResponse(sdx), sdx.getInitiatorUserCrn());
     }
 }
