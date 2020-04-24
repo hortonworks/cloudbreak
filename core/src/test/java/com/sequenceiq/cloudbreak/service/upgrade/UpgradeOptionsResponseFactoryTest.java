@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -54,7 +54,7 @@ public class UpgradeOptionsResponseFactoryTest {
         when(imageService.determineImageName(CLOUD_PLATFORM, REGION, currentImage)).thenReturn(IMAGE_NAME);
         when(imageService.determineImageName(CLOUD_PLATFORM, REGION, availableImages.getAvailableImages().getCdhImages().get(0))).thenReturn(IMAGE_NAME);
 
-        UpgradeOptionsV4Response actual = underTest.createV4Response(currentImage, availableImages, CLOUD_PLATFORM, REGION, IMAGE_CATALOG_NAME);
+        UpgradeV4Response actual = underTest.createV4Response(currentImage, availableImages, CLOUD_PLATFORM, REGION, IMAGE_CATALOG_NAME);
 
         assertEquals(IMAGE_ID, actual.getCurrent().getImageId());
         assertEquals(IMAGE_CATALOG_NAME, actual.getCurrent().getImageCatalogName());

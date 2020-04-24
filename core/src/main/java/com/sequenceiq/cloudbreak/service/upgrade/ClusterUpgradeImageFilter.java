@@ -3,11 +3,13 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -38,22 +40,26 @@ public class ClusterUpgradeImageFilter {
 
     private String reason;
 
-    ImageFilterResult filter(List<Image> images, Versions versions, Image currentImage, String cloudPlatform) {
-        List<Image> imagesForCbVersion = getImagesForCbVersion(versions, images);
-        LOGGER.debug("{} image(s) found for the given CB version", imagesForCbVersion.size());
-        return filterImages(imagesForCbVersion, currentImage, cloudPlatform);
+    ImageFilterResult filter(List<Image> images, Versions versions, Image currentImage, String cloudPlatform, boolean lockComponents) {
+        ImageFilterResult imagesForCbVersion = getImagesForCbVersion(versions, images);
+        List<Image> imageList = imagesForCbVersion.getAvailableImages().getCdhImages();
+        if (CollectionUtils.isEmpty(imageList)) {
+            return imagesForCbVersion;
+        }
+        LOGGER.debug("{} image(s) found for the given CB version", imageList.size());
+        return filterImages(imageList, currentImage, cloudPlatform, lockComponents);
     }
 
-    private List<Image> getImagesForCbVersion(Versions supportedVersions, List<Image> availableImages) {
+    private ImageFilterResult getImagesForCbVersion(Versions supportedVersions, List<Image> availableImages) {
         return versionBasedImageFilter.getCdhImagesForCbVersion(supportedVersions, availableImages);
     }
 
-    private ImageFilterResult filterImages(List<Image> availableImages, Image currentImage, String cloudPlatform) {
+    private ImageFilterResult filterImages(List<Image> availableImages, Image currentImage, String cloudPlatform, boolean lockComponents) {
         List<Image> images = availableImages.stream()
                 .filter(filterCurrentImage(currentImage))
                 .filter(filterNonCmImages())
                 .filter(filterIgnoredCmVersion())
-                .filter(validateCmAndStackVersion(currentImage))
+                .filter(validateCmAndStackVersion(currentImage, lockComponents))
                 .filter(validateCloudPlatform(cloudPlatform))
                 .filter(validateOsVersion(currentImage))
                 .filter(validateSaltVersion(currentImage))
@@ -65,7 +71,7 @@ public class ClusterUpgradeImageFilter {
     private Predicate<Image> filterCurrentImage(Image currentImage) {
         return image -> {
             boolean result = !image.getUuid().equals(currentImage.getUuid());
-            setReason(result, "Only your current image is available with the same package versions.");
+            setReason(result, "There are no newer compatible images available.");
             return result;
         };
     }
@@ -73,7 +79,7 @@ public class ClusterUpgradeImageFilter {
     private Predicate<Image> filterIgnoredCmVersion() {
         return image -> {
             boolean result = !image.getPackageVersions().get(CM_PACKAGE_KEY).contains(IGNORED_CM_VERSION);
-            setReason(result, "There is no supported Cloudera Manager or CDP version.");
+            setReason(result, "There are no eligible images with supported Cloudera Manager or CDP version.");
             return result;
         };
     }
@@ -81,21 +87,30 @@ public class ClusterUpgradeImageFilter {
     private Predicate<Image> filterNonCmImages() {
         return image -> {
             boolean result = isNotEmpty(image.getPackageVersions().get(CM_PACKAGE_KEY));
-            setReason(result, "There are no images available with Cloudera Manager packages.");
+            setReason(result, "There are no eligible images to upgrade available with Cloudera Manager packages.");
             return result;
         };
     }
 
-    private Predicate<Image> validateCmAndStackVersion(Image currentImage) {
+    private Predicate<Image> validateCmAndStackVersion(Image currentImage, boolean lockComponents) {
         return image -> {
-            boolean result = permitCmAndStackUpgrade(currentImage, image, CM_PACKAGE_KEY) || permitCmAndStackUpgrade(currentImage, image, STACK_PACKAGE_KEY);
+            boolean result = lockComponents ? (permitLockedComponentsUpgrade(currentImage, image))
+            : (permitCmAndStackUpgrade(currentImage, image, CM_PACKAGE_KEY)
+                        || permitCmAndStackUpgrade(currentImage, image, STACK_PACKAGE_KEY));
+
             setReason(result, "There is no proper Cloudera Manager or CDP version to upgrade.");
             return result;
         };
     }
 
+    private boolean permitLockedComponentsUpgrade(Image currentImage, Image image) {
+        Map<String, String> currentImagePackageVersions = currentImage.getPackageVersions();
+        Map<String, String> imagePackageVersions = image.getPackageVersions();
+        return currentImagePackageVersions.equals(imagePackageVersions);
+    }
+
     private boolean permitCmAndStackUpgrade(Image currentImage, Image image, String key) {
-        return upgradePermissionProvider.permitCmAndStackUpgrade(currentImage.getPackageVersions().get(STACK_PACKAGE_KEY),
+        return upgradePermissionProvider.permitCmAndStackUpgrade(currentImage.getPackageVersions().get(key),
                 image.getPackageVersions().get(key));
     }
 
@@ -103,7 +118,7 @@ public class ClusterUpgradeImageFilter {
         return image -> {
             boolean result = image.getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(cloudPlatform));
             if (!result) {
-                reason = String.format("There are no images available for %s cloud platform.", cloudPlatform);
+                reason = String.format("There are no eligible images to upgrade for %s cloud platform.", cloudPlatform);
             }
             return result;
         };
@@ -112,7 +127,7 @@ public class ClusterUpgradeImageFilter {
     private Predicate<Image> validateOsVersion(Image currentImage) {
         return image -> {
             boolean result = isOsVersionsMatch(currentImage, image);
-            setReason(result, "There are no other images with the same OS version.");
+            setReason(result, "There are no eligible images to upgrade with the same OS version.");
             return result;
         };
     }

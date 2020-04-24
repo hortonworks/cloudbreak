@@ -34,7 +34,7 @@ public class VersionBasedImageFilterTest {
         Image properImage = createImage(PROPER_IMAGE_ID);
         Image otherImage = createImage(OTHER_IMAGE_ID);
 
-        List<Image> actual = underTest.getCdhImagesForCbVersion(versions, List.of(properImage, otherImage));
+        List<Image> actual = underTest.getCdhImagesForCbVersion(versions, List.of(properImage, otherImage)).getAvailableImages().getCdhImages();
 
         assertTrue(actual.contains(properImage));
         assertEquals(1, actual.size());
@@ -47,7 +47,7 @@ public class VersionBasedImageFilterTest {
         Image properImage = createImage(PROPER_IMAGE_ID);
         Image otherImage = createImage(OTHER_IMAGE_ID);
 
-        List<Image> actual = underTest.getCdhImagesForCbVersion(versions, List.of(properImage, otherImage));
+        List<Image> actual = underTest.getCdhImagesForCbVersion(versions, List.of(properImage, otherImage)).getAvailableImages().getCdhImages();
 
         assertTrue(actual.isEmpty());
     }
@@ -60,7 +60,7 @@ public class VersionBasedImageFilterTest {
         Image properImage2 = createImage(PROPER_IMAGE_ID_2);
         Image otherImage = createImage(OTHER_IMAGE_ID);
 
-        List<Image> actual = underTest.getCdhImagesForCbVersion(versions, List.of(properImage1, otherImage, properImage2));
+        List<Image> actual = underTest.getCdhImagesForCbVersion(versions, List.of(properImage1, otherImage, properImage2)).getAvailableImages().getCdhImages();
 
         assertTrue(actual.contains(properImage1));
         assertTrue(actual.contains(properImage2));

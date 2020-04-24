@@ -111,4 +111,12 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
         }
         return ret;
     }
+
+    @Override
+    public String toString() {
+        return "ImageInfoV4Response{" +
+                "imageName='" + imageName + '\'' +
+                ", imageId='" + imageId + '\'' +
+                '}';
+    }
 }

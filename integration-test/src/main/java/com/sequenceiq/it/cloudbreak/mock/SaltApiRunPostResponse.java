@@ -87,6 +87,9 @@ public class SaltApiRunPostResponse extends ITResponse {
         if (body.contains("key.delete")) {
             return "";
         }
+        if (body.contains("cloudera.agent.upgrade")) {
+            return responseFromJsonFile("saltapi/show_states.json");
+        }
         if (body.contains("cmd.run")) {
             Pattern pattern = Pattern.compile("&tgt=([\\w\\.-]+)&");
             Matcher matcher = pattern.matcher(body);
