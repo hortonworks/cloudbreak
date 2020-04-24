@@ -20,7 +20,6 @@ import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigRespo
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.util.CrnService;
 import com.sequenceiq.notification.NotificationController;
@@ -48,13 +47,9 @@ public class LdapConfigV1Controller extends NotificationController implements Ld
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public DescribeLdapConfigResponse getForCluster(@TenantAwareParam String environmentCrn, String clusterName) {
+    public DescribeLdapConfigResponse getForCluster(@TenantAwareParam String environmentCrn, String clusterName) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
-        try {
-            return ldapConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
-        } catch (FreeIpaClientException e) {
-            throw new FreeIpaClientExceptionWrapper(e);
-        }
+        return ldapConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
     }
 
     @Override

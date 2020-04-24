@@ -20,7 +20,6 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsRecordService;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsZoneService;
@@ -40,13 +39,9 @@ public class DnsV1Controller implements DnsV1Endpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
-    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnets(AddDnsZoneForSubnetsRequest request) {
+    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnets(AddDnsZoneForSubnetsRequest request) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
-        try {
-            return dnsZoneService.addDnsZonesForSubnets(request, accountId);
-        } catch (FreeIpaClientException e) {
-            throw new FreeIpaClientExceptionWrapper(e);
-        }
+        return dnsZoneService.addDnsZonesForSubnets(request, accountId);
     }
 
     @Override
@@ -55,13 +50,9 @@ public class DnsV1Controller implements DnsV1Endpoint {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@Valid AddDnsZoneForSubnetIdsRequest request) {
+    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@Valid AddDnsZoneForSubnetIdsRequest request) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
-        try {
-            return dnsZoneService.addDnsZonesForSubnetIds(request, accountId);
-        } catch (FreeIpaClientException e) {
-            throw new FreeIpaClientExceptionWrapper(e);
-        }
+        return dnsZoneService.addDnsZonesForSubnetIds(request, accountId);
     }
 
     @Override
@@ -70,13 +61,9 @@ public class DnsV1Controller implements DnsV1Endpoint {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public Set<String> listDnsZones(String environmentCrn) {
+    public Set<String> listDnsZones(String environmentCrn) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
-        try {
-            return dnsZoneService.listDnsZones(environmentCrn, accountId);
-        } catch (FreeIpaClientException e) {
-            throw new FreeIpaClientExceptionWrapper(e);
-        }
+        return dnsZoneService.listDnsZones(environmentCrn, accountId);
     }
 
     @Override
@@ -85,13 +72,9 @@ public class DnsV1Controller implements DnsV1Endpoint {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void deleteDnsZoneBySubnet(String environmentCrn, String subnet) {
+    public void deleteDnsZoneBySubnet(String environmentCrn, String subnet) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
-        try {
-            dnsZoneService.deleteDnsZoneBySubnet(environmentCrn, accountId, subnet);
-        } catch (FreeIpaClientException e) {
-            throw new FreeIpaClientExceptionWrapper(e);
-        }
+        dnsZoneService.deleteDnsZoneBySubnet(environmentCrn, accountId, subnet);
     }
 
     @Override
@@ -100,13 +83,9 @@ public class DnsV1Controller implements DnsV1Endpoint {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void deleteDnsZoneBySubnetId(String environmentCrn, String networkId, String subnetId) {
+    public void deleteDnsZoneBySubnetId(String environmentCrn, String networkId, String subnetId) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
-        try {
-            dnsZoneService.deleteDnsZoneBySubnetId(environmentCrn, accountId, networkId, subnetId);
-        } catch (FreeIpaClientException e) {
-            throw new FreeIpaClientExceptionWrapper(e);
-        }
+        dnsZoneService.deleteDnsZoneBySubnetId(environmentCrn, accountId, networkId, subnetId);
     }
 
     @Override
@@ -115,12 +94,8 @@ public class DnsV1Controller implements DnsV1Endpoint {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void deleteDnsRecordsByFqdn(@NotEmpty String environmentCrn, @NotEmpty List<String> fqdns) {
+    public void deleteDnsRecordsByFqdn(@NotEmpty String environmentCrn, @NotEmpty List<String> fqdns) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
-        try {
-            dnsRecordService.deleteDnsRecordByFqdn(environmentCrn, accountId, fqdns);
-        } catch (FreeIpaClientException e) {
-            throw new FreeIpaClientExceptionWrapper(e);
-        }
+        dnsRecordService.deleteDnsRecordByFqdn(environmentCrn, accountId, fqdns);
     }
 }
