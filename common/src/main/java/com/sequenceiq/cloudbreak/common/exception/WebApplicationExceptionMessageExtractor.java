@@ -19,6 +19,7 @@ public class WebApplicationExceptionMessageExtractor {
 
     public String getErrorMessage(WebApplicationException exception) {
         try (Response response = exception.getResponse()) {
+            response.bufferEntity();
             String errorResponse = response.readEntity(String.class);
             LOGGER.info("Client error response is " + errorResponse);
             try {

@@ -710,4 +710,11 @@ public class ModelDescriptions {
         public static final String AZURE_NO_PUBLIC_IP = "Subnet ids of the specified networks";
         public static final String AZURE_NO_FIREWALL_RULES = "Subnet ids of the specified networks";
     }
+
+    public static class UpgradeModelDescription {
+        public static final String IMAGE_ID = "UUID of the image to upgrade";
+        public static final String RUNTIME = "Cloudera Runtime version";
+        public static final String LOCK_COMPONENTS = "Upgrades to image with the same version of stack and clustermanager, if available";
+        public static final String DRY_RUN = "Checks the eligibility of an image to upgrade";
+    }
 }

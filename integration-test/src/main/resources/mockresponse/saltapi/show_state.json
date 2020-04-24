@@ -1,0 +1,17 @@
+{
+  "error": false,
+  "return": [
+    {
+      "10-0-0-1.example.com": {
+        "jid": null,
+        "retcode": 0,
+        "ret": null
+      },
+      "10-0-0-2.example.com": {
+        "jid": null,
+        "retcode": 1,
+        "ret": null
+      }
+    }
+  ]
+}

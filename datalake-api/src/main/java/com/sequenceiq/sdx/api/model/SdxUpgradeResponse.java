@@ -1,12 +1,13 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade;
+package com.sequenceiq.sdx.api.model;
 
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
-public class UpgradeOptionsV4Response {
+public class SdxUpgradeResponse {
 
     private ImageInfoV4Response current;
 
@@ -14,19 +15,21 @@ public class UpgradeOptionsV4Response {
 
     private String reason;
 
-    public UpgradeOptionsV4Response() {
+    private FlowIdentifier flowIdentifier;
+
+    public SdxUpgradeResponse() {
     }
 
-    public UpgradeOptionsV4Response(ImageInfoV4Response current, List<ImageInfoV4Response> upgradeCandidates) {
-        this.current = current;
-        this.upgradeCandidates = upgradeCandidates;
-    }
-
-    public UpgradeOptionsV4Response(ImageInfoV4Response current,
-            List<ImageInfoV4Response> upgradeCandidates, String reason) {
+    public SdxUpgradeResponse(ImageInfoV4Response current, List<ImageInfoV4Response> upgradeCandidates, String reason, FlowIdentifier flowIdentifier) {
         this.current = current;
         this.upgradeCandidates = upgradeCandidates;
         this.reason = reason;
+        this.flowIdentifier = flowIdentifier;
+    }
+
+    public SdxUpgradeResponse(String reason, FlowIdentifier flowIdentifier) {
+        this.reason = reason;
+        this.flowIdentifier = flowIdentifier;
     }
 
     public ImageInfoV4Response getCurrent() {
@@ -59,6 +62,14 @@ public class UpgradeOptionsV4Response {
         } else {
             setReason(reason);
         }
+    }
+
+    public FlowIdentifier getFlowIdentifier() {
+        return flowIdentifier;
+    }
+
+    public void setFlowIdentifier(FlowIdentifier flowIdentifier) {
+        this.flowIdentifier = flowIdentifier;
     }
 
     @Override

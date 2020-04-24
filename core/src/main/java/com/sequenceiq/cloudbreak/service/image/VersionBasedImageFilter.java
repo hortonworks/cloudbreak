@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
+import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterResult;
 
 @Component
 public class VersionBasedImageFilter {
@@ -20,12 +22,14 @@ public class VersionBasedImageFilter {
     @Value("${info.app.version:}")
     private String cbVersion;
 
-    public List<Image> getCdhImagesForCbVersion(Versions versions, List<Image> availableImages) {
+    public ImageFilterResult getCdhImagesForCbVersion(Versions versions, List<Image> availableImages) {
         List<String> imageIds = getImageIds(versions);
         LOGGER.debug("{} image id(s) found for Cloudbreak version: {}", imageIds.size(), cbVersion);
-        return availableImages.stream()
+        String message = String.format("%d image id(s) found for Cloudbreak version: %s", imageIds.size(), cbVersion);
+        List<Image> images = availableImages.stream()
                 .filter(image -> imageIds.contains(image.getUuid()))
                 .collect(Collectors.toList());
+        return new ImageFilterResult(new Images(null, null, null, images, null), message);
     }
 
     private List<String> getImageIds(Versions versions) {

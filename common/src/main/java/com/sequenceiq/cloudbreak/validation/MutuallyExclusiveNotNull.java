@@ -23,15 +23,20 @@ public @interface MutuallyExclusiveNotNull {
 
     Class<?>[] groups() default {};
 
+    boolean allowAllGroupsNull() default false;
+
     Class<? extends Payload>[] payload() default {};
 
     class MutuallyExclusiveNotNullValidator implements ConstraintValidator<MutuallyExclusiveNotNull, Object> {
 
         private String[] fieldGroups;
 
+        private boolean allowAllGroupsNull;
+
         @Override
         public void initialize(MutuallyExclusiveNotNull constraintAnnotation) {
             fieldGroups = constraintAnnotation.fieldGroups();
+            allowAllGroupsNull = constraintAnnotation.allowAllGroupsNull();
         }
 
         @Override
@@ -43,18 +48,18 @@ public @interface MutuallyExclusiveNotNull {
             try {
                 for (String fieldGroup : fieldGroups) {
                     String[] fieldNames = fieldGroup.split(",");
-                    Boolean groupNullity = null;
+                    Boolean groupNull = null;
                     for (String fieldName : fieldNames) {
                         Object fieldValue = getFieldValue(value, fieldName);
-                        if (groupNullity == null) {
-                            groupNullity = fieldValue == null;
+                        if (groupNull == null) {
+                            groupNull = fieldValue == null;
                         } else {
-                            if (groupNullity != (fieldValue == null)) {
+                            if (groupNull != (fieldValue == null)) {
                                 return false;
                             }
                         }
                     }
-                    if (!ObjectUtils.defaultIfNull(groupNullity, true)) {
+                    if (!ObjectUtils.defaultIfNull(groupNull, true)) {
                         if (!hasNotNullGroup) {
                             hasNotNullGroup = true;
                         } else {
@@ -65,7 +70,7 @@ public @interface MutuallyExclusiveNotNull {
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
-            return hasNotNullGroup;
+            return allowAllGroupsNull || hasNotNullGroup;
         }
 
         private Object getFieldValue(Object value, String fieldName) throws NoSuchFieldException, IllegalAccessException {

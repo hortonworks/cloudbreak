@@ -17,6 +17,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
 import com.sequenceiq.cloudbreak.service.image.VersionBasedImageFilter;
 
@@ -61,6 +62,8 @@ public class ClusterUpgradeImageFilterTest {
 
     private Image properImage;
 
+    private boolean lockComponents;
+
     @Before
     public void before() {
         currentImage = createCurrentImage();
@@ -70,10 +73,11 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnTheAvailableImage() {
         List<Image> properImages = List.of(properImage);
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, properImages, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImages)).thenReturn(properImages);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImages)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(properImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        ImageFilterResult actual = underTest.filter(properImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
 
         assertTrue(actual.getAvailableImages().getCdhImages().contains(this.properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
@@ -83,10 +87,11 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldReturnTheProperImageWhenTheCloudPlatformIsNotMatches() {
         Image availableImages = createImageWithDifferentPlatform();
         List<Image> allImage = List.of(availableImages, properImage);
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, allImage, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(allImage);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
 
         assertTrue(actual.getAvailableImages().getCdhImages().contains(properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
@@ -95,49 +100,53 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnReasonMessageWhenTheCloudPlatformIsNotMatches() {
         List<Image> allImage = List.of(createImageWithDifferentPlatform());
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, allImage, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(allImage);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
-        assertEquals("There are no images available for aws cloud platform.", actual.getReason());
+        assertEquals("There are no eligible images to upgrade for aws cloud platform.", actual.getReason());
     }
 
     @Test
     public void testFilterShouldReturnReasonMessageWhenTheOsIsNotMatches() {
         List<Image> allImage = List.of(createImageWithDifferentOs());
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, allImage, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(allImage);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
-        assertEquals("There are no other images with the same OS version.", actual.getReason());
+        assertEquals("There are no eligible images to upgrade with the same OS version.", actual.getReason());
     }
 
     @Test
     public void testFilterShouldReturnReasonMessageWhenTheVersioningIsNotSupported() {
         List<Image> allImage = List.of(createImageWithDifferentStackVersioning());
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, allImage, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(allImage);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
-        assertEquals("There is no supported Cloudera Manager or CDP version.", actual.getReason());
+        assertEquals("There are no eligible images with supported Cloudera Manager or CDP version.", actual.getReason());
     }
 
     @Test
     public void testFilterShouldReturnReasonMessageWhenCmVersionIsNotAvailable() {
         List<Image> allImage = List.of(createImageWithoutCmVersion());
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, allImage, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(allImage);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
-        assertEquals("There are no images available with Cloudera Manager packages.", actual.getReason());
+        assertEquals("There are no eligible images to upgrade available with Cloudera Manager packages.", actual.getReason());
     }
 
     @Test
@@ -145,10 +154,11 @@ public class ClusterUpgradeImageFilterTest {
         Image lowerCmImage = createImageWithLowerCmVersion();
         Image lowerCmAndCdpImage = createImageWithLowerCmAndCdpVersion();
         List<Image> availableImages = List.of(properImage, lowerCmImage, lowerCmAndCdpImage);
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
 
         assertTrue(actual.getAvailableImages().getCdhImages().contains(properImage));
         assertTrue(actual.getAvailableImages().getCdhImages().contains(lowerCmImage));
@@ -158,35 +168,38 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnReasonMessageWhenTheStackVersionIsNotGreater() {
         List<Image> availableImages = List.of(createImageWithSameStackAndCmVersion());
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There is no proper Cloudera Manager or CDP version to upgrade.", actual.getReason());
     }
 
     @Test
-    public void testFilterShouldReturnTheProperImageWhenTheSaltVersionIsNotMatches() {
+    public void testFilterShouldReturnTheProperImageWhenTheSaltVersionDoesNotMatch() {
         Image differentSaltVersionImage = createImageWithDifferentSaltVersion();
         List<Image> availableImages = List.of(properImage, differentSaltVersionImage);
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
 
         assertTrue(actual.getAvailableImages().getCdhImages().contains(properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
     }
 
     @Test
-    public void testFilterShouldReturnReasonMessageWhenTheSaltVersionIsNotMatches() {
+    public void testFilterShouldReturnReasonMessageWhenTheSaltVersionDoesNotMatch() {
         List<Image> availableImages = List.of(createImageWithDifferentSaltVersion());
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no images with compatible Salt version.", actual.getReason());
@@ -196,10 +209,11 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldReturnTheProperImageWhenTheCurrentImageIsAlsoAvailable() {
         Image imageWithSameId = createImageWithCurrentImageId();
         List<Image> availableImages = List.of(properImage, imageWithSameId);
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
 
         assertTrue(actual.getAvailableImages().getCdhImages().contains(properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
@@ -208,13 +222,28 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnReasonMessageWhenOnlyTheCurrentImageIsAvailable() {
         List<Image> availableImages = List.of(createImageWithCurrentImageId());
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(availableImages);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM);
+        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
-        assertEquals("Only your current image is available with the same package versions.", actual.getReason());
+        assertEquals("There are no newer compatible images available.", actual.getReason());
+    }
+
+    @Test
+    public void testFilterShouldReturnOnlyOneImageWhenLockComponentsIsSet() {
+        List<Image> availableImages =
+                List.of(createImageWithSameStackAndCmVersion(), createImageWithSameStackAndCmVersion(), createImageWithDifferentStackVersioning());
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
+        lockComponents = true;
+
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
+
+        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
+
+        assertEquals(2, actual.getAvailableImages().getCdhImages().size());
     }
 
     private Image createCurrentImage() {

@@ -1,27 +1,35 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -40,9 +48,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 public class ClusterUpgradeAvailabilityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeAvailabilityService.class);
-
-    @Inject
-    private TransactionService transactionService;
 
     @Inject
     private StackService stackService;
@@ -71,23 +76,23 @@ public class ClusterUpgradeAvailabilityService {
     @Inject
     private GatewayConfigService gatewayConfigService;
 
-    public UpgradeOptionsV4Response checkForUpgradesByName(Long workspaceId, String stackName) {
-        UpgradeOptionsV4Response upgradeOptions = new UpgradeOptionsV4Response();
+    public UpgradeV4Response checkForUpgradesByName(Long workspaceId, String stackName, boolean lockComponents) {
+        UpgradeV4Response upgradeOptions = new UpgradeV4Response();
         Stack stack = stackService.getByNameInWorkspace(stackName, workspaceId);
-        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.checkRepairAll(stack);
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.repairWithDryRun(stack.getId());
         if (!stack.getStatus().isAvailable()) {
-            upgradeOptions.setReason(String.format("Cannot upgrade cluster because its in %s state.", stack.getStatus()));
+            upgradeOptions.setReason(String.format("Cannot upgrade cluster because it is in %s state.", stack.getStatus()));
             LOGGER.warn(upgradeOptions.getReason());
         } else if (validationResult.isError()) {
             upgradeOptions.setReason(String.join(",", validationResult.getError().getValidationErrors()));
             LOGGER.warn(String.format("Cannot upgrade cluster because: %s", upgradeOptions.getReason()));
         } else {
-            upgradeOptions = checkForUpgrades(stack);
+            upgradeOptions = checkForUpgrades(stack, lockComponents);
         }
         return upgradeOptions;
     }
 
-    public UpgradeOptionsV4Response checkForNotAttachedClusters(StackViewV4Responses stackViewV4Responses, UpgradeOptionsV4Response upgradeOptions) {
+    public UpgradeV4Response checkForNotAttachedClusters(StackViewV4Responses stackViewV4Responses, UpgradeV4Response upgradeOptions) {
 
         String notStoppedAttachedClusters = stackViewV4Responses.getResponses().stream()
                 .filter(stackViewV4Response -> !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getStatus())
@@ -101,12 +106,10 @@ public class ClusterUpgradeAvailabilityService {
         return upgradeOptions;
     }
 
-    public UpgradeOptionsV4Response checkIfClusterUpgradable(Long workspaceId, String stackName, UpgradeOptionsV4Response upgradeOptions) {
-        try {
-            GatewayConfig primaryGatewayConfig = transactionService.required(() -> {
-                Stack stack = stackService.getByNameInWorkspaceWithLists(stackName, workspaceId).orElseThrow();
-                return gatewayConfigService.getPrimaryGatewayConfig(stack);
-            });
+    public UpgradeV4Response checkIfClusterUpgradable(Long workspaceId, String stackName, UpgradeV4Response upgradeOptions) {
+
+        Stack stack = stackService.getByNameInWorkspaceWithLists(stackName, workspaceId).orElseThrow();
+        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfigWithoutLists(stack);
 
             try {
                 hostOrchestrator.checkIfClusterUpgradable(primaryGatewayConfig);
@@ -114,20 +117,45 @@ public class ClusterUpgradeAvailabilityService {
                 upgradeOptions.appendReason(e.getMessage());
             }
             return upgradeOptions;
-        } catch (TransactionService.TransactionExecutionException e) {
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
-        }
-
     }
 
-    private UpgradeOptionsV4Response checkForUpgrades(Stack stack) {
-        UpgradeOptionsV4Response upgradeOptions = new UpgradeOptionsV4Response();
+    public void filterUpgradeOptions(UpgradeV4Response upgradeOptions, UpgradeV4Request upgradeRequest) {
+        List<ImageInfoV4Response> upgradeCandidates = upgradeOptions.getUpgradeCandidates();
+        List<ImageInfoV4Response> filteredUpgradeCandidates;
+        // We would like to upgrade to latest available if no request params exist
+        if (Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty()) {
+            filteredUpgradeCandidates = List.of(upgradeCandidates.stream().max(getComparator()).orElseThrow());
+            LOGGER.info("No request param, defaulting to latest image {}", filteredUpgradeCandidates);
+        } else {
+            String requestImageId = upgradeRequest.getImageId();
+            String runtime = upgradeRequest.getRuntime();
+            boolean lockComponents = Boolean.TRUE.equals(upgradeRequest.getLockComponents());
+
+            // Image id param exists
+            if (StringUtils.isNotEmpty(requestImageId)) {
+                filteredUpgradeCandidates = validateImageId(upgradeCandidates, requestImageId);
+                LOGGER.info("Image successfully validated by imageId {}", requestImageId);
+            // We would like to upgrade to latest available image with given runtime
+            } else if (StringUtils.isNotEmpty(runtime)) {
+                filteredUpgradeCandidates = validateRuntime(upgradeCandidates, runtime);
+                LOGGER.info("Image successfully filtered by runtime ({}): {}", runtime, filteredUpgradeCandidates);
+            } else if (lockComponents) {
+                filteredUpgradeCandidates = List.of(upgradeCandidates.stream().max(getComparator()).orElseThrow());
+            } else {
+                filteredUpgradeCandidates = upgradeCandidates;
+            }
+        }
+        upgradeOptions.setUpgradeCandidates(filteredUpgradeCandidates);
+    }
+
+    private UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents) {
+        UpgradeV4Response upgradeOptions = new UpgradeV4Response();
         try {
             LOGGER.info(String.format("Retrieving images for upgrading stack %s", stack.getName()));
             com.sequenceiq.cloudbreak.cloud.model.Image currentImage = getImage(stack);
             CloudbreakImageCatalogV2 imageCatalog = getImagesFromCatalog(currentImage.getImageCatalogUrl());
             Image image = getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
-            ImageFilterResult filteredImages = filterImages(imageCatalog, image, stack.cloudPlatform());
+            ImageFilterResult filteredImages = filterImages(imageCatalog, image, stack.cloudPlatform(), lockComponents);
             LOGGER.info(String.format("%d possible image found for stack upgrade.", filteredImages.getAvailableImages().getCdhImages().size()));
             upgradeOptions = createResponse(image, filteredImages, stack.getCloudPlatform(), stack.getRegion(), currentImage.getImageCatalogName());
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException | NotFoundException e) {
@@ -149,16 +177,49 @@ public class ClusterUpgradeAvailabilityService {
         return imageCatalogProvider.getImageCatalogV2(imageCatalogUrl);
     }
 
-    private ImageFilterResult filterImages(CloudbreakImageCatalogV2 imageCatalog, Image currentImage, String cloudPlatform) {
-        return clusterUpgradeImageFilter.filter(getCdhImages(imageCatalog), imageCatalog.getVersions(), currentImage, cloudPlatform);
+    private ImageFilterResult filterImages(CloudbreakImageCatalogV2 imageCatalog, Image currentImage, String cloudPlatform, boolean lockComponents) {
+        return clusterUpgradeImageFilter.filter(getCdhImages(imageCatalog), imageCatalog.getVersions(), currentImage, cloudPlatform, lockComponents);
     }
 
     private List<Image> getCdhImages(CloudbreakImageCatalogV2 imageCatalog) {
         return imageCatalog.getImages().getCdhImages();
     }
 
-    private UpgradeOptionsV4Response createResponse(Image currentImage, ImageFilterResult filteredImages, String cloudPlatform, String region,
+    private UpgradeV4Response createResponse(Image currentImage, ImageFilterResult filteredImages, String cloudPlatform, String region,
             String imageCatalogName) {
         return upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, cloudPlatform, region, imageCatalogName);
+    }
+
+    private List<ImageInfoV4Response> validateRuntime(List<ImageInfoV4Response> upgradeCandidates, String runtime) {
+        Supplier<Stream<ImageInfoV4Response>> imagesWithMatchingRuntime = () ->  upgradeCandidates.stream().filter(
+                imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp()));
+        boolean hasCompatbileImageWithRuntime = imagesWithMatchingRuntime.get().anyMatch(e -> true);
+        if (!hasCompatbileImageWithRuntime) {
+            String availableRuntimes = upgradeCandidates
+                    .stream()
+                    .map(ImageInfoV4Response::getComponentVersions)
+                    .map(ImageComponentVersions::getCdp)
+                    .distinct()
+                    .collect(Collectors.joining(","));
+            throw new BadRequestException(String.format("There is no image eligible for upgrading the cluster with runtime: %s. "
+                    + "Please choose a runtime from the following image(s): %s", runtime, availableRuntimes));
+        } else {
+            return imagesWithMatchingRuntime.get().collect(Collectors.toList());
+        }
+    }
+
+    private List<ImageInfoV4Response> validateImageId(List<ImageInfoV4Response> upgradeCandidates, String requestImageId) {
+        if (upgradeCandidates.stream().noneMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equalsIgnoreCase(requestImageId))) {
+            String candidates = upgradeCandidates.stream().map(ImageInfoV4Response::getImageId).collect(Collectors.joining(","));
+            throw new BadRequestException(String.format("The given image (%s) is not eligible for upgrading the cluster. "
+                    + "Please choose an id from the following image(s): %s", requestImageId, candidates));
+        } else {
+            return upgradeCandidates.stream().filter(imageInfoV4Response ->
+                    imageInfoV4Response.getImageId().equalsIgnoreCase(requestImageId)).collect(Collectors.toList());
+        }
+    }
+
+    private Comparator<ImageInfoV4Response> getComparator() {
+        return Comparator.comparing(ImageInfoV4Response::getCreated);
     }
 }
