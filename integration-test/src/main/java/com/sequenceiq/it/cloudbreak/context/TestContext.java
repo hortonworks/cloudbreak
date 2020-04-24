@@ -57,6 +57,11 @@ import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtilForMultipleStatuses;
+import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
+import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentAwait;
+import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaAwait;
+import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public abstract class TestContext implements ApplicationContextAware {
@@ -100,11 +105,29 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("${integrationtest.testsuite.cleanUp:true}")
     private boolean cleanUp;
 
+    @Value("${integrationtest.testsuite.pollingInterval:1000}")
+    private long pollingInterval;
+
+    @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:2700}}")
+    private int maxRetry;
+
     @Inject
     private CloudProviderProxy cloudProvider;
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private EnvironmentAwait environmentAwait;
+
+    @Inject
+    private FreeIpaAwait freeIpaAwait;
+
+    @Inject
+    private WaitService<EnvironmentWaitObject> environmentWaitService;
+
+    @Inject
+    private WaitService<FreeIpaWaitObject> freeIpaWaitService;
 
     private DefaultModel model;
 
@@ -137,6 +160,14 @@ public abstract class TestContext implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    public WaitService<EnvironmentWaitObject> getEnvironmentWaitService() {
+        return environmentWaitService;
+    }
+
+    public WaitService<FreeIpaWaitObject> getFreeIpaWaitService() {
+        return freeIpaWaitService;
     }
 
     public <T extends CloudbreakTestDto, U extends MicroserviceClient> T when(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,
@@ -355,6 +386,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public Map<String, String> getStatuses() {
         return statuses;
+    }
+
+    public void setStatuses(Map<String, String> statusMap) {
+        statuses.putAll(statusMap);
     }
 
     public Map<String, Exception> getErrors() {
@@ -578,79 +613,28 @@ public abstract class TestContext implements ApplicationContextAware {
         return entity;
     }
 
-    public FreeIPATestDto await(FreeIPATestDto entity, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatuses,
-            RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, -1);
-    }
-
-    public FreeIPATestDto await(FreeIPATestDto entity, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatuses,
-            RunningParameter runningParameter, long pollingInterval) {
+    public <T extends EnvironmentTestDto, E extends EnvironmentStatus> T await(T entity, E desiredStatus, RunningParameter runningParameter) {
         checkShutdown();
-
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        FreeIPATestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format("%s for %s", key, desiredStatuses));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
-            }
-
-            FreeIPAClient freeIPAClient = getMicroserviceClient(FreeIPAClient.class, getWho(runningParameter).getAccessKey());
-            String environmentCrn = awaitEntity.getRequest().getEnvironmentCrn();
-            statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(freeIPAClient, environmentCrn, desiredStatuses, pollingInterval));
-            if (!desiredStatuses.equals(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED)) {
-                awaitEntity.refresh(getTestContext(), null);
-            }
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
-                Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
-                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
-            }
-            getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
-        }
-        return entity;
-    }
-
-    public EnvironmentTestDto await(EnvironmentTestDto entity, EnvironmentStatus desiredStatuses,
-            RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, -1);
-    }
-
-    public EnvironmentTestDto await(EnvironmentTestDto entity, EnvironmentStatus desiredStatuses,
-            RunningParameter runningParameter, long pollingInterval) {
-        checkShutdown();
-
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
+            Log.await(LOGGER, String.format("Environment await should be skipped beacause of previous error. await [%s]", desiredStatus));
             return entity;
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         EnvironmentTestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format("%s for %s", key, desiredStatuses));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
-            }
+        environmentAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, pollingInterval, maxRetry);
+        return entity;
+    }
 
-            EnvironmentClient environmentClient = getMicroserviceClient(EnvironmentClient.class, getWho(runningParameter).getAccessKey());
-            String environmentName = awaitEntity.getResponse().getName();
-            statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(environmentClient, environmentName, desiredStatuses, pollingInterval));
-            if (!desiredStatuses.equals(EnvironmentStatus.ARCHIVED)) {
-                awaitEntity.refresh(getTestContext(), null);
-            }
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
-                Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
-                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
-            }
-            getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
+    public <T extends FreeIPATestDto, E extends com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status> T await(T entity, E desiredStatus,
+            RunningParameter runningParameter) {
+        checkShutdown();
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
+            Log.await(LOGGER, String.format("FreeIpa await should be skipped beacause of previous error. await [%s]", desiredStatus));
+            return entity;
         }
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        FreeIPATestDto awaitEntity = get(key);
+        freeIpaAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, pollingInterval, maxRetry);
         return entity;
     }
 
@@ -875,7 +859,7 @@ public abstract class TestContext implements ApplicationContextAware {
         return entity;
     }
 
-    private CloudbreakUser getWho(RunningParameter runningParameter) {
+    public CloudbreakUser getWho(RunningParameter runningParameter) {
         Actor actor = runningParameter.getWho();
         if (actor == null) {
             LOGGER.info("Run with acting user. {}", getActingUser());
