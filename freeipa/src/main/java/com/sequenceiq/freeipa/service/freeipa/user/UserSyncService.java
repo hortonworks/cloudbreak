@@ -402,6 +402,16 @@ public class UserSyncService {
         validateCrnFilter(environmentCrnFilter, Crn.ResourceType.ENVIRONMENT);
         validateCrnFilter(userCrnFilter, Crn.ResourceType.USER);
         validateCrnFilter(machineUserCrnFilter, Crn.ResourceType.MACHINE_USER);
+        validateSameAccount(accountId, Iterables.concat(environmentCrnFilter, userCrnFilter, machineUserCrnFilter));
+    }
+
+    private void validateSameAccount(String accountId, Iterable<String> crns) {
+        crns.forEach(crnString -> {
+            Crn crn = Crn.safeFromString(crnString);
+            if (!accountId.equals(crn.getAccountId())) {
+                throw new BadRequestException(String.format("Crn %s is not in the expected account %s", crnString, accountId));
+            }
+        });
     }
 
     @VisibleForTesting

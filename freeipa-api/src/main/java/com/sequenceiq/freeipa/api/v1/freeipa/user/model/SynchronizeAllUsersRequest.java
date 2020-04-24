@@ -18,6 +18,9 @@ public class SynchronizeAllUsersRequest extends SynchronizeOperationRequestBase 
     @ApiModelProperty(value = UserModelDescriptions.USERSYNC_USER_CRNS)
     private Set<String> users = new HashSet<>();
 
+    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ACCOUNT_ID)
+    private String accountId;
+
     public SynchronizeAllUsersRequest() {
     }
 
@@ -42,11 +45,20 @@ public class SynchronizeAllUsersRequest extends SynchronizeOperationRequestBase 
         this.users = users;
     }
 
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
     @Override
     public String toString() {
         return "SynchronizeAllUsersRequest{"
                 + "machineUsers=" + machineUsers
                 + ", users=" + users
+                + ", accountId=" + accountId
                 + ", " + super.fieldsToString()
                 + '}';
     }

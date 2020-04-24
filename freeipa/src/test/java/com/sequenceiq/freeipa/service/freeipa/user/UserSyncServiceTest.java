@@ -114,6 +114,14 @@ class UserSyncServiceTest {
     }
 
     @Test
+    void testValidateParametersWrongAccount() {
+        String differentAccount = UUID.randomUUID().toString();
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            underTest.validateParameters(differentAccount, USER_CRN, Set.of(ENV_CRN), Set.of(), Set.of());
+        });
+    }
+
+    @Test
     void testValidateCrnFilter() {
         underTest.validateCrnFilter(Set.of(ENV_CRN), Crn.ResourceType.ENVIRONMENT);
     }

@@ -5,8 +5,10 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -76,7 +78,8 @@ public class UserV1Controller implements UserV1Endpoint {
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String userCrn = checkUserCrn();
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String accountId = determineAccountId(userCrn, request.getAccountId());
+
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
         return checkOperationRejected(
@@ -105,6 +108,17 @@ public class UserV1Controller implements UserV1Endpoint {
         LOGGER.debug("getSyncOperationStatus() requested for operation '{}' in account '{}'", operationId, accountId);
         return operationToSyncOperationStatus.convert(
                 operationService.getOperationForAccountIdAndOperationId(accountId, operationId));
+    }
+
+    private String determineAccountId(String callingActor, String requestedAccountId) {
+        if (requestedAccountId == null) {
+            return ThreadBasedUserCrnProvider.getAccountId();
+        }
+        String callingActorAccountId = Crn.safeFromString(callingActor).getAccountId();
+        if (!callingActorAccountId.equals(requestedAccountId) && !InternalCrnBuilder.isInternalCrn(callingActor)) {
+            throw new AccessDeniedException(String.format("Actor %s does not belong to the request account %s", callingActor, requestedAccountId));
+        }
+        return requestedAccountId;
     }
 
     private SyncOperationStatus checkOperationRejected(SyncOperationStatus syncOperationStatus) {

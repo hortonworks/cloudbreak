@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,11 +32,14 @@ import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
+import org.springframework.security.access.AccessDeniedException;
 
 @ExtendWith(MockitoExtension.class)
 public class UserV1ControllerTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
+
+    private static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
@@ -116,6 +121,35 @@ public class UserV1ControllerTest {
         assertEquals(status, ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.synchronizeAllUsers(request)));
 
         verify(userSyncService, times(1)).synchronizeUsers(ACCOUNT_ID, USER_CRN, environments, users, machineUsers);
+    }
+
+    @Test
+    void synchronizeAllUsersAsInternalActor() {
+        Set<String> environments = Set.of(ENV_CRN);
+        Set<String> users = Set.of(USER_CRN);
+        Set<String> machineUsers = Set.of(MACHINE_USER_CRN);
+        SynchronizeAllUsersRequest request = new SynchronizeAllUsersRequest();
+        request.setEnvironments(environments);
+        request.setUsers(users);
+        request.setMachineUsers(machineUsers);
+        request.setAccountId(ACCOUNT_ID);
+
+        Operation operation = mock(Operation.class);
+        when(userSyncService.synchronizeUsers(any(), any(), any(), any(), any())).thenReturn(operation);
+        SyncOperationStatus status = mock(SyncOperationStatus.class);
+        when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
+
+        assertEquals(status, ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> underTest.synchronizeAllUsers(request)));
+
+        verify(userSyncService, times(1)).synchronizeUsers(ACCOUNT_ID, INTERNAL_ACTOR_CRN, environments, users, machineUsers);
+    }
+
+    @Test
+    void synchronizeAllUsersUnauthorizedAccountId() {
+        SynchronizeAllUsersRequest request = new SynchronizeAllUsersRequest();
+        request.setAccountId(ACCOUNT_ID);
+        String actorInDifferentAccount = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
+        assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(actorInDifferentAccount, () -> underTest.synchronizeAllUsers(request)));
     }
 
     @Test
