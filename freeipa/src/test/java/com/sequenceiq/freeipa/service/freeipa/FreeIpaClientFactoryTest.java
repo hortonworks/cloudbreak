@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaHostNotAvailableException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -116,7 +117,7 @@ class FreeIpaClientFactoryTest {
 
         verify(clusterProxyService, times(1)).isCreateConfigForClusterProxy(stack);
         verify(tlsSecurityService, times(1)).buildTLSClientConfig(any(), any(), any());
-        Assertions.assertEquals(FreeIpaClientException.class, exception.getCause().getClass());
+        Assertions.assertEquals(FreeIpaHostNotAvailableException.class, exception.getCause().getClass());
     }
 
     @Test
@@ -137,7 +138,7 @@ class FreeIpaClientFactoryTest {
 
         verify(clusterProxyService, times(1)).isCreateConfigForClusterProxy(stack);
         verify(tlsSecurityService, times(1)).buildTLSClientConfig(any(), any(), any());
-        Assertions.assertEquals(FreeIpaClientException.class, exception.getCause().getClass());
+        Assertions.assertEquals(FreeIpaHostNotAvailableException.class, exception.getCause().getClass());
     }
 
     @Test
