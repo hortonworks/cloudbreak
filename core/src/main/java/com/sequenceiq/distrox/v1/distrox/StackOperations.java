@@ -25,13 +25,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Requ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
@@ -217,17 +218,19 @@ public class StackOperations implements ResourceBasedCrnProvider {
         }
     }
 
-    public UpgradeOptionsV4Response checkForClusterUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+    public UpgradeV4Response checkForClusterUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request) {
         if (nameOrCrn.hasName()) {
             String stackName = nameOrCrn.getName();
-            UpgradeOptionsV4Response upgradeOptionsV4Response = clusterUpgradeAvailabilityService.checkForUpgradesByName(workspaceId, stackName);
-            if (StringUtils.isEmpty(upgradeOptionsV4Response.getReason())) {
+            UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(workspaceId, stackName,
+                    Boolean.TRUE.equals(request.getLockComponents()));
+            if (StringUtils.isEmpty(upgradeResponse.getReason())) {
+                clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request);
                 String environmentCrn = getResourceCrnByResourceName(stackName);
                 StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, environmentCrn, List.of(StackType.WORKLOAD));
-                clusterUpgradeAvailabilityService.checkForNotAttachedClusters(stackViewV4Responses, upgradeOptionsV4Response);
-                clusterUpgradeAvailabilityService.checkIfClusterUpgradable(workspaceId, stackName, upgradeOptionsV4Response);
+                clusterUpgradeAvailabilityService.checkForNotAttachedClusters(stackViewV4Responses, upgradeResponse);
+                clusterUpgradeAvailabilityService.checkIfClusterUpgradable(workspaceId, stackName, upgradeResponse);
             }
-            return upgradeOptionsV4Response;
+            return upgradeResponse;
         } else {
             LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
             throw new BadRequestException("Please provide a stack name for upgrade");

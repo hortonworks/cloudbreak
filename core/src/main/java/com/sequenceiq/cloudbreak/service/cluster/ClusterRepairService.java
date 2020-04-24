@@ -146,15 +146,11 @@ public class ClusterRepairService {
     }
 
     public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairWithDryRun(Long stackId) {
-        return repair(ManualClusterRepairMode.DRY_RUN, stackId, Set.of(), false);
-    }
-
-    public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> checkRepairAll(Stack stack) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                repair(ManualClusterRepairMode.DRY_RUN, stack.getId(), Set.of(), NOT_DELETE_VOLUMES);
+                repair(ManualClusterRepairMode.DRY_RUN, stackId, Set.of(), NOT_DELETE_VOLUMES);
         boolean repairable = repairStart.isSuccess();
         if (!repairable) {
-            LOGGER.info("Stack {} is not repairable. {}", stack.getId(), repairStart.getError().getValidationErrors());
+            LOGGER.info("Stack {} is not repairable. {}", stackId, repairStart.getError().getValidationErrors());
         }
         return repairStart;
     }
@@ -299,10 +295,10 @@ public class ClusterRepairService {
         List<String> validationResult = new ArrayList<>();
         if (isGateway(instanceMetaData)) {
             if (createdFromBaseImage(stack)) {
-                validationResult.add("Repair is only supported if the image already contains Cloudera Manager and Cloudera Data Platform artifacts.");
+                validationResult.add("Action is only supported if the image already contains Cloudera Manager and Cloudera Data Platform artifacts.");
             }
             if (!gatewayDatabaseAvailable(stack.getCluster()) && !stack.isMultipleGateway()) {
-                validationResult.add("Repair is only supported if Cloudera Manager state is stored in external Database.");
+                validationResult.add("Action is only supported if Cloudera Manager state is stored in external Database.");
             }
             if (withEmbeddedClusterManagerDB(stack.getCluster())) {
                 validationResult.add("Cloudera Manager server failure with embedded Database cannot be repaired!");
