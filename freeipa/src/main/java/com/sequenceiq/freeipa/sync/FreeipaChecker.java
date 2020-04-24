@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -70,7 +68,7 @@ public class FreeipaChecker {
         } catch (FreeIpaClientException e) {
             LOGGER.info("FreeIpaClientException occurred during status fetch: " + e.getMessage(), e);
             Throwable t = FreeIpaClientExceptionUtil.getAncestorCauseBeforeFreeIpaClientExceptions(e);
-            if (t instanceof HttpHostConnectException || t instanceof ConnectTimeoutException || t instanceof FreeIpaHostNotAvailableException) {
+            if (t instanceof FreeIpaHostNotAvailableException) {
                 return new SyncResult("Freeipa is unreachable: " + t.getMessage(), DetailedStackStatus.UNREACHABLE, false);
             }
             return new SyncResult("Freeipa is unhealthy, error occurred: " + e.getMessage(), DetailedStackStatus.UNHEALTHY, false);
