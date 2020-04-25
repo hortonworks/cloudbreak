@@ -67,6 +67,14 @@ public class UsersState {
             return this;
         }
 
+        public Builder addMemberToGroupIfGroupExists(String group, String user) {
+            boolean groupExists = fmsGroups.stream().anyMatch(g -> g.getName().equals(group));
+            if (groupExists) {
+                groupMembership.put(group, user);
+            }
+            return this;
+        }
+
         public UsersState build() {
             return new UsersState(fmsGroups, fmsUsers, groupMembership);
         }

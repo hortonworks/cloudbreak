@@ -161,8 +161,7 @@ public class UmsUsersStateProvider {
                 });
 
                 workloadAdministrationGroupsForUser.getWorkloadAdministrationGroupNameList().forEach(groupName -> {
-                    usersStateBuilder.addGroup(nameToGroup(groupName));
-                    usersStateBuilder.addMemberToGroup(groupName, username);
+                    usersStateBuilder.addMemberToGroupIfGroupExists(groupName, username);
                 });
 
                 if (environmentAccessRights.hasAdminFreeIPARight()) {
