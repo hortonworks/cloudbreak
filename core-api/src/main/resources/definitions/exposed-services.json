@@ -136,6 +136,20 @@
       "port": 21000,
       "tlsPort": 31443,
       "apiOnly": false,
+      "apiIncluded": false,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
+    },
+    {
+      "name": "ATLAS_API",
+      "displayName": "Atlas",
+      "serviceName": "ATLAS_SERVER",
+      "knoxService": "ATLAS_API",
+      "knoxUrl": "/atlas/api/atlas/",
+      "ssoSupported": false,
+      "port": 21000,
+      "tlsPort": 31443,
+      "apiOnly": true,
       "apiIncluded": true,
       "visibleForDatalake": true,
       "visibleForDatahub": true
