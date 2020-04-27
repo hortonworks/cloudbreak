@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.vault.VaultException;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -29,6 +31,9 @@ public class KerberosConfigService {
     @Inject
     private SecretService secretService;
 
+    @Inject
+    private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
+
     public boolean isKerberosConfigExistsForEnvironment(String environmentCrn, String clusterName) {
         return describeKerberosConfig(environmentCrn, clusterName).isPresent();
     }
@@ -44,6 +49,11 @@ public class KerberosConfigService {
         } catch (NotFoundException | ForbiddenException notFoundEx) {
             LOGGER.debug("No Kerberos config found for {} environment. Ldap setup will be skipped!", environmentCrn);
             return Optional.empty();
+        } catch (WebApplicationException e) {
+            String errorMessage = exceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to get Kerberos config from FreeIpa service due to: '%s' ", errorMessage);
+            LOGGER.warn(message, e);
+            throw new CloudbreakServiceException(message, e);
         } catch (Exception communicationEx) {
             String message = String.format("Failed to get Kerberos config from FreeIpa service due to: '%s' ", communicationEx.getMessage());
             LOGGER.warn(message, communicationEx);

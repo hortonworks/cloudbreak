@@ -36,7 +36,7 @@ public interface KerberosMgmtV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_GENERATE_SERVICE_KEYTAB, produces = MediaType.APPLICATION_JSON,
             notes = KeytabModelNotes.GENERATE_SERVICE_KEYTAB_NOTES, nickname = "generateServiceKeytabV1")
-    ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request) throws Exception;
+    ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request);
 
     @GET
     @Path("servicekeytab")
@@ -65,7 +65,7 @@ public interface KerberosMgmtV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_USER_KEYTAB, produces = MediaType.APPLICATION_JSON,
             notes = KeytabModelNotes.GET_USER_KEYTAB_NOTES, nickname = "getUserKeytabV1")
-    String getUserKeytab(@NotEmpty @QueryParam("environmentCrn") String environmentCrn, @NotEmpty @QueryParam("userCrn") String userCrn) throws Exception;
+    String getUserKeytab(@NotEmpty @QueryParam("environmentCrn") String environmentCrn, @NotEmpty @QueryParam("userCrn") String userCrn);
 
     @DELETE
     @Path("serviceprincipal")
@@ -73,7 +73,7 @@ public interface KerberosMgmtV1Endpoint {
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_DELETE_SERVICE_PRINCIPAL, produces = MediaType.APPLICATION_JSON,
             notes = KeytabModelNotes.DELETE_SERVICE_PRINCIPAL_NOTES,
             nickname = "deleteServicePrinciapalV1")
-    void deleteServicePrincipal(@Valid ServicePrincipalRequest request) throws Exception;
+    void deleteServicePrincipal(@Valid ServicePrincipalRequest request);
 
     @DELETE
     @Path("host")
@@ -87,12 +87,12 @@ public interface KerberosMgmtV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_CLUSTER_CLEANUP, produces = MediaType.APPLICATION_JSON, notes = KeytabModelNotes.CLEANUP_NOTES,
             nickname = "cleanupClusterSecretsV1")
-    void cleanupClusterSecrets(@Valid VaultCleanupRequest request) throws Exception;
+    void cleanupClusterSecrets(@Valid VaultCleanupRequest request);
 
     @DELETE
     @Path("cleanupEnvironmentSecrets")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_ENVIRONMENT_CLEANUP, produces = MediaType.APPLICATION_JSON,
             notes = KeytabModelNotes.CLEANUP_NOTES, nickname = "cleanupEnvironmentSecretsV1")
-    void cleanupEnvironmentSecrets(@QueryParam("environmentCrn") @NotEmpty String environmentCrn) throws Exception;
+    void cleanupEnvironmentSecrets(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 }

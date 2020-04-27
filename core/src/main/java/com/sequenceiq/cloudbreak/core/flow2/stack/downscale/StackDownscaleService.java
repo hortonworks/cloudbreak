@@ -15,12 +15,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -51,6 +53,9 @@ public class StackDownscaleService {
 
     @Inject
     private DnsV1Endpoint dnsV1Endpoint;
+
+    @Inject
+    private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
     public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
         LOGGER.debug("Downscaling of stack {}", context.getStack().getId());
@@ -90,6 +95,9 @@ public class StackDownscaleService {
         try {
             LOGGER.info("Cleanup DNS records for FQDNS: [{}]", fqdns);
             dnsV1Endpoint.deleteDnsRecordsByFqdn(stack.getEnvironmentCrn(), fqdns);
+        } catch (WebApplicationException e) {
+            String errorMessage = exceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to delete dns records for FQDNS: [{}] with message: '{}'", fqdns, errorMessage, e);
         } catch (Exception e) {
             LOGGER.error("Failed to delete dns records for FQDNS: [{}]", fqdns, e);
         }
