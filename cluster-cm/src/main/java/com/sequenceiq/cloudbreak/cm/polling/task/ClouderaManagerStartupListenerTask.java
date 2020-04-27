@@ -45,7 +45,7 @@ public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerC
         } catch (ApiException e) {
             String errorMessage = e.getMessage();
             if (ArrayUtils.contains(ERROR_CODES, e.getCode()) || Arrays.stream(CONNECTION_MESSAGES).anyMatch(msg -> containsIgnoreCase(errorMessage, msg))) {
-                LOGGER.debug("Cloudera Manager is not running");
+                LOGGER.debug("Cloudera Manager is not running.");
                 return false;
             } else {
                 throw e;

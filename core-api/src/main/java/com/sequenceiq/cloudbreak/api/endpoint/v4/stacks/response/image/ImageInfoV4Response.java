@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image;
 
+import java.util.Date;
 import java.util.Objects;
 
 public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
@@ -12,6 +13,8 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
 
     private long created;
 
+    private Date createDt;
+
     private ImageComponentVersions componentVersions;
 
     public ImageInfoV4Response() {
@@ -22,6 +25,7 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
         this.imageId = imageId;
         this.imageCatalogName = imageCatalogName;
         this.created = created;
+        this.createDt = new Date(created * 1000);
     }
 
     public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created, ImageComponentVersions componentVersions) {
@@ -29,6 +33,7 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
         this.imageId = imageId;
         this.imageCatalogName = imageCatalogName;
         this.created = created;
+        this.createDt = new Date(created * 1000);
         this.componentVersions = componentVersions;
     }
 
@@ -62,6 +67,15 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
 
     public void setCreated(long created) {
         this.created = created;
+        this.createDt = new Date(created * 1000);
+    }
+
+    public Date getCreateDt() {
+        return createDt;
+    }
+
+    public void setCreateDt(Date createDt) {
+        this.createDt = createDt;
     }
 
     public ImageComponentVersions getComponentVersions() {
