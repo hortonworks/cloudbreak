@@ -39,7 +39,9 @@ public class FreeIpaClientFactory {
 
     private static final String ADMIN_USER = "admin";
 
-    private static final Map<String, String> ADDITIONAL_CLUSTER_PROXY_HEADERS = Map.of("Proxy-Ignore-Auth", "true");
+    private static final Map<String, String> ADDITIONAL_CLUSTER_PROXY_HEADERS = Map.of(
+            "Proxy-Ignore-Auth", "true",
+            "Proxy-With-Timeout", "90000");
 
     private static final RequestListener CLUSTER_PROXY_ERROR_LISTENER = new ClusterProxyErrorRpcListener();
 
