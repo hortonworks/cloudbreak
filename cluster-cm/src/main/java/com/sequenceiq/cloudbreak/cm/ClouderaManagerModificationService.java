@@ -184,6 +184,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient);
 
             startClouderaManager(stack, apiClient);
+            checkParcelApiAvailability();
             setParcelRepo(stackProductParcel);
             downloadParcel(stackProductVersion, parcelResourceApi, product);
             distributeParcel(stackProductVersion, parcelResourceApi, product);
@@ -393,6 +394,16 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             throw new CloudbreakException("Timeout during CDP Runtime upgrade.");
         }
         LOGGER.info("Runtime is successfully upgraded!");
+    }
+
+    private void checkParcelApiAvailability() throws CloudbreakException {
+        LOGGER.debug("Checking if Parcels API is available");
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingParcelsApiAvailable(stack, apiClient);
+        if (isExited(pollingResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for Parcels API to be available");
+        } else if (isTimeout(pollingResult)) {
+            throw new CloudbreakException("Timeout during waiting for CM Parcels API to be available.");
+        }
     }
 
     private void distributeParcel(String stackProductVersion, ParcelResourceApi parcelResourceApi, String product) throws ApiException, CloudbreakException {
