@@ -81,6 +81,10 @@
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
             <param>
+                <name>nifi-registry.acl</name>
+                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
+            <param>
                 <name>oozie.acl</name>
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
@@ -199,7 +203,7 @@
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
              {%- endif %}
-            {% if 'NIFI-REGISTRY' in exposed and 'NIFI_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
+            {% if 'NIFI-REGISTRY-REST' in exposed and 'NIFI_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>NIFI-REGISTRY</name>
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
@@ -394,7 +398,7 @@
     {%- endif %}
 
     {% if 'NIFI_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
-    {% if 'NIFI-REGISTRY' in exposed -%}
+    {% if 'NIFI-REGISTRY-REST' in exposed -%}
     <service>
         <role>NIFI-REGISTRY</role>
         <param name="useTwoWaySsl" value="true" />

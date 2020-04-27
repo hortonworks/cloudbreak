@@ -296,7 +296,7 @@
     },
     {
       "name": "NIFI",
-      "displayName": "Nifi",
+      "displayName": "NiFi",
       "serviceName": "NIFI_NODE",
       "knoxService": "NIFI",
       "knoxUrl": "/nifi-app/nifi/",
@@ -310,7 +310,7 @@
     },
     {
       "name": "NIFI_REGISTRY",
-      "displayName": "Nifi Registry",
+      "displayName": "NiFi Registry",
       "serviceName": "NIFI_REGISTRY_SERVER",
       "knoxService": "NIFI-REGISTRY",
       "knoxUrl": "/nifi-registry-app/nifi-registry/",
@@ -318,7 +318,7 @@
       "port": 18080,
       "tlsPort": 18433,
       "apiOnly": false,
-      "apiIncluded": true,
+      "apiIncluded": false,
       "visibleForDatalake": true,
       "visibleForDatahub": true
     },
@@ -331,6 +331,20 @@
       "ssoSupported": true,
       "port": 8080,
       "tlsPort": 8443,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
+    },
+    {
+      "name": "NIFI_REGISTRY_REST",
+      "displayName": "NiFi Registry Rest",
+      "serviceName": "NIFI_REGISTRY_SERVER",
+      "knoxService": "NIFI-REGISTRY-REST",
+      "knoxUrl": "/nifi-registry-app/nifi-registry-api/",
+      "ssoSupported": true,
+      "port": 18080,
+      "tlsPort": 18433,
       "apiOnly": true,
       "apiIncluded": true,
       "visibleForDatalake": true,
