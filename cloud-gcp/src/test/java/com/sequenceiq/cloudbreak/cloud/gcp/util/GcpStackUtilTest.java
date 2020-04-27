@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.util;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -64,6 +65,17 @@ public class GcpStackUtilTest {
         parameters.put(GcpStackUtil.SUBNET_ID, "asdf");
         Network network = new Network(new Subnet(""), parameters);
         assertFalse(GcpStackUtil.isNewSubnetInExistingNetwork(network));
+    }
+
+    @Test
+    public void testBucketAndObjectName() {
+        String image = "bucket/europe/france/paris/image.tar.gz";
+        String bucketName = GcpStackUtil.getBucket(image);
+        assertEquals("bucket", bucketName);
+        String objectName = GcpStackUtil.getTarName(image);
+        assertEquals("europe/france/paris/image.tar.gz", objectName);
+        String imageName = GcpStackUtil.getImageName(image);
+        assertEquals("europe/france/paris/image", imageName);
     }
 
 }

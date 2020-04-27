@@ -234,7 +234,8 @@ public class AzureClient {
                     .withRegion(storageLocation)
                     .withExistingResourceGroup(resourceGroup)
                     .withTags(resultTags)
-                    .withSku(accType);
+                    .withSku(accType)
+                    .withOnlyHttpsTraffic();
             if (encryted) {
                 withCreate.withBlobEncryption();
             }
@@ -488,6 +489,10 @@ public class AzureClient {
 
     public NetworkInterface getNetworkInterface(String resourceGroup, String networkInterfaceName) {
         return handleAuthException(() -> azure.networkInterfaces().getByResourceGroup(resourceGroup, networkInterfaceName));
+    }
+
+    public Observable<NetworkInterface> getNetworkInterfaceAsync(String resourceGroup, String networkInterfaceName) {
+        return handleAuthException(() -> azure.networkInterfaces().getByResourceGroupAsync(resourceGroup, networkInterfaceName));
     }
 
     public NetworkInterface getNetworkInterfaceById(String networkInterfaceId) {

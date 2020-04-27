@@ -225,7 +225,7 @@ public final class GcpStackUtil {
     public static String getBucket(String image) {
         if (!StringUtils.isEmpty(image) && createParts(image).length > 1) {
             String[] parts = createParts(image);
-            return StringUtils.join(ArrayUtils.remove(parts, parts.length - 1), "/");
+            return parts[0];
         } else {
             LOGGER.warn("No bucket found in source image path.");
             return EMPTY_BUCKET;
@@ -235,7 +235,7 @@ public final class GcpStackUtil {
     public static String getTarName(String image) {
         if (!StringUtils.isEmpty(image)) {
             String[] parts = createParts(image);
-            return parts[parts.length - 1];
+            return StringUtils.join(ArrayUtils.remove(parts, 0), "/");
         } else {
             throw new GcpResourceException("Source image path environment variable is not well formed");
         }

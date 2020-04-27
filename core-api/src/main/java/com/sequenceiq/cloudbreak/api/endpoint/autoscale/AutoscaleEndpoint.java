@@ -94,4 +94,11 @@ public interface AutoscaleEndpoint {
     @ApiOperation(value = StackOpDescription.GET_STACK_CERT, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getCertificateStackForAutoscale")
     CertificateResponse getCertificate(@PathParam("id") Long stackId);
+
+    @GET
+    @Path("/stack/{id}/cluster/hostgroup/{name}/hostmetadata/count")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ClusterOpDescription.GET_HOST_HOSTMETADATA_COUNT_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
+            nickname = "getClusterHostGroupsForAutoscale")
+    Long getHostMetadataCountForAutoscale(@PathParam("id") Long id, @PathParam("name") String hostGroupName);
 }
