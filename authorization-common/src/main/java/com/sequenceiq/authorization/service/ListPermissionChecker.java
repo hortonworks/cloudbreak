@@ -1,14 +1,12 @@
 package com.sequenceiq.authorization.service;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationFilterableResponseCollection;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 
 @Component
@@ -31,22 +28,11 @@ public class ListPermissionChecker {
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
-    @Inject
-    private List<ResourceBasedCrnProvider> resourceBasedCrnProviders;
-
-    private final Map<AuthorizationResourceType, ResourceBasedCrnProvider> resourceBasedCrnProviderMap = new HashMap<>();
-
-    @PostConstruct
-    public void populateResourceBasedCrnProviderMap() {
-        resourceBasedCrnProviders.forEach(resourceBasedCrnProvider ->
-                resourceBasedCrnProviderMap.put(resourceBasedCrnProvider.getResourceType(), resourceBasedCrnProvider));
-    }
-
-    public Object checkPermissions(FilterListBasedOnPermissions methodAnnotation, AuthorizationResourceType resourceType, String userCrn,
+    public Object checkPermissions(FilterListBasedOnPermissions methodAnnotation, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
         AuthorizationResourceAction action = methodAnnotation.action();
-        List<String> allResourceCrns = resourceBasedCrnProviderMap.get(resourceType).getResourceCrnsInAccount();
-        Set<String> filteredResourceCrns = commonPermissionCheckingUtils.getPermissionsForUserOnResources(resourceType, action, userCrn, allResourceCrns)
+        List<String> allResourceCrns = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action).getResourceCrnsInAccount();
+        Set<String> filteredResourceCrns = commonPermissionCheckingUtils.getPermissionsForUserOnResources(action, userCrn, allResourceCrns)
                 .entrySet()
                 .stream()
                 .filter(Map.Entry::getValue)

@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Lists;
@@ -32,7 +30,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationFilterableResponseCollection;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -53,24 +50,19 @@ public class ListPermissionCheckerTest {
     @Mock
     private ResourceBasedCrnProvider resourceBasedCrnProvider;
 
-    @Spy
-    private List<ResourceBasedCrnProvider> resourceBasedCrnProviders = new ArrayList<>();
-
     @InjectMocks
     private ListPermissionChecker underTest;
 
     @Before
     public void setup() {
-        resourceBasedCrnProviders.add(resourceBasedCrnProvider);
-        when(resourceBasedCrnProvider.getResourceType()).thenReturn(AuthorizationResourceType.CREDENTIAL);
         when(resourceBasedCrnProvider.getResourceCrnsInAccount()).thenReturn(
                 Lists.newArrayList(RESOURCE_CRN1, RESOURCE_CRN2, RESOURCE_CRN3));
         Map<String, Boolean> rightCheckResult = Maps.newHashMap();
         rightCheckResult.put(RESOURCE_CRN1, Boolean.TRUE);
         rightCheckResult.put(RESOURCE_CRN2, Boolean.TRUE);
         rightCheckResult.put(RESOURCE_CRN3, Boolean.FALSE);
-        when(commonPermissionCheckingUtils.getPermissionsForUserOnResources(any(), any(), any(), anyList())).thenReturn(rightCheckResult);
-        underTest.populateResourceBasedCrnProviderMap();
+        when(commonPermissionCheckingUtils.getPermissionsForUserOnResources(any(), any(), anyList())).thenReturn(rightCheckResult);
+        when(commonPermissionCheckingUtils.getResourceBasedCrnProvider(any())).thenReturn(resourceBasedCrnProvider);
     }
 
     @Test
@@ -78,7 +70,7 @@ public class ListPermissionCheckerTest {
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(
                 Lists.newArrayList((ResourceCrnAwareApiModel) () -> RESOURCE_CRN1, () -> RESOURCE_CRN2, () -> RESOURCE_CRN3));
 
-        Object result = underTest.checkPermissions(getAnnotation(), AuthorizationResourceType.CREDENTIAL, null, null, null, 0L);
+        Object result = underTest.checkPermissions(getAnnotation(), null, null, null, 0L);
 
         assertTrue(result instanceof List);
         assertEquals(2, ((List) result).size());
@@ -98,7 +90,7 @@ public class ListPermissionCheckerTest {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage("Items of your response list or set should implement ResourceCrnAwareApiModel interface");
 
-        underTest.checkPermissions(getAnnotation(), AuthorizationResourceType.CREDENTIAL, null, null, null, 0L);
+        underTest.checkPermissions(getAnnotation(), null, null, null, 0L);
     }
 
     @Test
@@ -106,7 +98,7 @@ public class ListPermissionCheckerTest {
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(
                 Sets.newHashSet((ResourceCrnAwareApiModel) () -> RESOURCE_CRN1, () -> RESOURCE_CRN2, () -> RESOURCE_CRN3));
 
-        Object result = underTest.checkPermissions(getAnnotation(), AuthorizationResourceType.CREDENTIAL, null, null, null, 0L);
+        Object result = underTest.checkPermissions(getAnnotation(), null, null, null, 0L);
 
         assertTrue(result instanceof Set);
         assertEquals(2, ((Set) result).size());
@@ -126,14 +118,14 @@ public class ListPermissionCheckerTest {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage("Items of your response list or set should implement ResourceCrnAwareApiModel interface");
 
-        underTest.checkPermissions(getAnnotation(), AuthorizationResourceType.CREDENTIAL, null, null, null, 0L);
+        underTest.checkPermissions(getAnnotation(), null, null, null, 0L);
     }
 
     @Test
     public void testAuthorizationFilterableCollectionFiltering() {
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(getAuthorizationFilterableResponse());
 
-        Object result = underTest.checkPermissions(getAnnotation(), AuthorizationResourceType.CREDENTIAL, null, null, null, 0L);
+        Object result = underTest.checkPermissions(getAnnotation(), null, null, null, 0L);
 
         assertTrue(result instanceof AuthorizationFilterableResponseCollection);
         Collection<ResourceCrnAwareApiModel> responses = ((AuthorizationFilterableResponseCollection) result).getResponses();
@@ -152,7 +144,7 @@ public class ListPermissionCheckerTest {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage("Response of list API should be List, Set or an instance of AuthorizationFilterableResponseCollection interface");
 
-        underTest.checkPermissions(getAnnotation(), AuthorizationResourceType.CREDENTIAL, null, null, null, 0L);
+        underTest.checkPermissions(getAnnotation(), null, null, null, 0L);
     }
 
     private AuthorizationFilterableResponseCollection<ResourceCrnAwareApiModel> getAuthorizationFilterableResponse() {

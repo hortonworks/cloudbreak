@@ -22,7 +22,6 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
@@ -43,7 +42,7 @@ import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(ImageCatalog.class)
 @InternalReady
-@AuthorizationResource(type = AuthorizationResourceType.IMAGE_CATALOG)
+@AuthorizationResource
 public class ImageCatalogV4Controller extends NotificationController implements ImageCatalogV4Endpoint {
 
     @Inject

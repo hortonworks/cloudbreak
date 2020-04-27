@@ -21,8 +21,7 @@ import org.mockito.ArgumentCaptor;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.resource.RightUtils;
+import com.sequenceiq.authorization.service.UmsRightProvider;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
@@ -43,6 +42,8 @@ class EnvironmentAccessCheckerTest {
             + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
     private GrpcUmsClient grpcUmsClient = mock(GrpcUmsClient.class);
+
+    private UmsRightProvider umsRightProvider = mock(UmsRightProvider.class);
 
     @Test
     void testEnvironmentCrnNull() {
@@ -66,10 +67,10 @@ class EnvironmentAccessCheckerTest {
         List<AuthorizationProto.RightCheck> capturedRightChecks = argumentCaptor.getValue();
         assertEquals(2, capturedRightChecks.size());
         AuthorizationProto.RightCheck hasAccess = capturedRightChecks.get(0);
-        assertEquals(RightUtils.getRight(AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.ACCESS_ENVIRONMENT), hasAccess.getRight());
+        assertEquals("environments/accessEnvironment", hasAccess.getRight());
         assertEquals(ENV_CRN, hasAccess.getResource());
         AuthorizationProto.RightCheck isAdmin = capturedRightChecks.get(1);
-        assertEquals(RightUtils.getRight(AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.ADMIN_FREEIPA), isAdmin.getRight());
+        assertEquals("environments/adminFreeipa", isAdmin.getRight());
     }
 
     @Test
@@ -102,6 +103,8 @@ class EnvironmentAccessCheckerTest {
     }
 
     private EnvironmentAccessChecker createEnvironmentAccessChecker(String environmentCrn) {
-        return new EnvironmentAccessChecker(grpcUmsClient, environmentCrn);
+        when(umsRightProvider.getRight(eq(AuthorizationResourceAction.ACCESS_ENVIRONMENT))).thenReturn("environments/accessEnvironment");
+        when(umsRightProvider.getRight(eq(AuthorizationResourceAction.ADMIN_FREEIPA))).thenReturn("environments/adminFreeipa");
+        return new EnvironmentAccessChecker(grpcUmsClient, umsRightProvider, environmentCrn);
     }
 }
