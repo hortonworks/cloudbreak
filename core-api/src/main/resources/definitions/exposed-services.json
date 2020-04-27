@@ -369,7 +369,7 @@
       "displayName": "Schema Registry",
       "serviceName": "SCHEMA_REGISTRY_SERVER",
       "knoxService": "SCHEMA-REGISTRY",
-      "knoxUrl": "/schema-registry/",
+      "knoxUrl": "/schema-registry/api/v1",
       "ssoSupported": true,
       "port": 7788,
       "tlsPort": 7790,
