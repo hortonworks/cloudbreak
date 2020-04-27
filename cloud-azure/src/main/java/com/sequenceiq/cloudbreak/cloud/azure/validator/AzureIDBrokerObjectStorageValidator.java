@@ -142,7 +142,7 @@ public class AzureIDBrokerObjectStorageValidator {
                 .stream()
                 .dropWhile(mappedIdentity -> roleAssignments
                         .stream()
-                        .anyMatch(roleAssignment -> roleAssignment.principalId().equals(mappedIdentity.id())))
+                        .anyMatch(roleAssignment -> roleAssignment.principalId().equals(mappedIdentity.principalId())))
                 .forEach(identityWithNoAssignment -> addError(resultBuilder,
                         String.format("Identity with id %s has no role assignment.", identityWithNoAssignment.id())));
     }
