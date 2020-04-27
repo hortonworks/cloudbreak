@@ -12,7 +12,6 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.authorization.annotation.ResourceObjectField;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -42,8 +41,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ResourceObjectField(type = AuthorizationResourceType.CREDENTIAL,
-            action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL, variableType = AuthorizationVariableType.NAME)
+    @ResourceObjectField(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL, variableType = AuthorizationVariableType.NAME)
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_NAME_REQUEST)
     private String credentialName;
 

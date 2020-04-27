@@ -17,7 +17,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultPermissionCheckerTest {
@@ -32,7 +31,7 @@ public class DefaultPermissionCheckerTest {
 
     @Test
     public void testCheckPermissions() {
-        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUser(any(), any(), anyString());
+        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUser(any(), anyString());
 
         CheckPermissionByAccount rawMethodAnnotation = new CheckPermissionByAccount() {
 
@@ -43,13 +42,13 @@ public class DefaultPermissionCheckerTest {
 
             @Override
             public AuthorizationResourceAction action() {
-                return AuthorizationResourceAction.WRITE;
+                return AuthorizationResourceAction.ENVIRONMENT_WRITE;
             }
         };
-        underTest.checkPermissions(rawMethodAnnotation, AuthorizationResourceType.CREDENTIAL, USER_CRN, null, null, 0L);
+        underTest.checkPermissions(rawMethodAnnotation, USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils)
-                .checkPermissionForUser(eq(AuthorizationResourceType.CREDENTIAL), eq(AuthorizationResourceAction.WRITE), eq(USER_CRN));
-        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUserOnResource(any(), any(), anyString(), anyString());
+                .checkPermissionForUser(eq(AuthorizationResourceAction.ENVIRONMENT_WRITE), eq(USER_CRN));
+        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUserOnResource(any(), anyString(), anyString());
     }
 }

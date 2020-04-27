@@ -9,7 +9,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,9 +28,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PermissionCheckServiceTest {
@@ -78,46 +75,22 @@ public class PermissionCheckServiceTest {
     @Test
     public void testHasPermissionIfAuthorizationDisabled() throws NoSuchMethodException {
         when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
-        when(commonPermissionCheckingUtils.getClassAnnotation(any())).thenReturn(Optional.of(new AuthorizationResource() {
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return AuthorizationResource.class;
-            }
-
-            @Override
-            public AuthorizationResourceType type() {
-                return AuthorizationResourceType.CREDENTIAL;
-            }
-        }));
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("disabledAuthorization"));
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
 
         underTest.hasPermission(proceedingJoinPoint);
 
-        verify(permissionChecker, times(0)).checkPermissions(any(), any(), anyString(), any(), any(), anyLong());
+        verify(permissionChecker, times(0)).checkPermissions(any(), anyString(), any(), any(), anyLong());
     }
 
     @Test
     public void testHasPermissionIfThereAreTooManyAnnotationOnMethod() throws NoSuchMethodException {
         when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
-        when(commonPermissionCheckingUtils.getClassAnnotation(any())).thenReturn(Optional.of(new AuthorizationResource() {
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return AuthorizationResource.class;
-            }
-
-            @Override
-            public AuthorizationResourceType type() {
-                return AuthorizationResourceType.CREDENTIAL;
-            }
-        }));
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("tooManyAnnotation"));
 
         underTest.hasPermission(proceedingJoinPoint);
 
-        verify(permissionChecker, times(0)).checkPermissions(any(), any(), anyString(), any(), any(), anyLong());
+        verify(permissionChecker, times(0)).checkPermissions(any(), anyString(), any(), any(), anyLong());
         verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
     }
 
@@ -125,52 +98,28 @@ public class PermissionCheckServiceTest {
     public void testHasPermissionIfThereIsNoAnnotationOnMethod() throws NoSuchMethodException {
         when(proceedingJoinPoint.getTarget()).thenReturn(new ExampleClass());
         when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
-        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUser(any(), any(), any());
-        when(commonPermissionCheckingUtils.getClassAnnotation(any())).thenReturn(Optional.of(new AuthorizationResource() {
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return AuthorizationResource.class;
-            }
-
-            @Override
-            public AuthorizationResourceType type() {
-                return AuthorizationResourceType.CREDENTIAL;
-            }
-        }));
+        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUser(any(), any());
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("withoutAnnotation"));
 
         underTest.hasPermission(proceedingJoinPoint);
 
-        verify(permissionChecker, times(0)).checkPermissions(any(), any(), anyString(), any(), any(), anyLong());
-        verify(commonPermissionCheckingUtils).checkPermissionForUser(any(), eq(AuthorizationResourceAction.WRITE), any());
+        verify(permissionChecker, times(0)).checkPermissions(any(), anyString(), any(), any(), anyLong());
+        verify(commonPermissionCheckingUtils).checkPermissionForUser(eq(AuthorizationResourceAction.ENVIRONMENT_WRITE), any());
         verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
     }
 
     @Test
     public void testHasPermission() throws NoSuchMethodException {
         when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
-        when(commonPermissionCheckingUtils.getClassAnnotation(any())).thenReturn(Optional.of(new AuthorizationResource() {
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return AuthorizationResource.class;
-            }
-
-            @Override
-            public AuthorizationResourceType type() {
-                return AuthorizationResourceType.CREDENTIAL;
-            }
-        }));
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("correctMethod"));
         when(permissionChecker.supportedAnnotation()).thenReturn(CheckPermissionByAccount.class);
-        doNothing().when(permissionChecker).checkPermissions(any(), any(), any(), any(), any(), anyLong());
+        doNothing().when(permissionChecker).checkPermissions(any(), any(), any(), any(), anyLong());
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
 
         underTest.populatePermissionCheckMap();
         underTest.hasPermission(proceedingJoinPoint);
 
-        verify(permissionChecker).checkPermissions(any(), eq(AuthorizationResourceType.CREDENTIAL), any(), any(), any(), anyLong());
+        verify(permissionChecker).checkPermissions(any(), any(), any(), any(), anyLong());
         verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
     }
 
@@ -182,7 +131,7 @@ public class PermissionCheckServiceTest {
         }
 
         @DisableCheckPermissions
-        @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
         public void tooManyAnnotation() {
 
         }
@@ -191,7 +140,7 @@ public class PermissionCheckServiceTest {
 
         }
 
-        @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
         public void correctMethod() {
 
         }

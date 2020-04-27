@@ -11,8 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.resource.RightUtils;
+import com.sequenceiq.authorization.service.UmsRightProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -23,11 +22,6 @@ import io.grpc.StatusRuntimeException;
 
 public class EnvironmentAccessChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentAccessChecker.class);
-
-    private static final String ACCESS_ENVIRONMENT_RIGHT = RightUtils.getRight(AuthorizationResourceType.ENVIRONMENT,
-            AuthorizationResourceAction.ACCESS_ENVIRONMENT);
-
-    private static final String ADMIN_FREEIPA_RIGHT = RightUtils.getRight(AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.ADMIN_FREEIPA);
 
     private final GrpcUmsClient grpcUmsClient;
 
@@ -43,18 +37,18 @@ public class EnvironmentAccessChecker {
      * @throws NullPointerException if the environmentCrn is null
      * @throws CrnParseException    if the environmentCrn does not match the CRN pattern or cannot be parsed
      */
-    public EnvironmentAccessChecker(GrpcUmsClient grpcUmsClient, String environmentCrn) {
+    public EnvironmentAccessChecker(GrpcUmsClient grpcUmsClient, UmsRightProvider umsRightProvider, String environmentCrn) {
         this.grpcUmsClient = requireNonNull(grpcUmsClient, "grpcUmsClient is null");
         Crn.safeFromString(environmentCrn);
         this.environmentCrn = environmentCrn;
 
         rightChecks = List.of(
                 RightCheck.newBuilder()
-                        .setRight(ACCESS_ENVIRONMENT_RIGHT)
+                        .setRight(umsRightProvider.getRight(AuthorizationResourceAction.ACCESS_ENVIRONMENT))
                         .setResource(environmentCrn)
                         .build(),
                 RightCheck.newBuilder()
-                        .setRight(ADMIN_FREEIPA_RIGHT)
+                        .setRight(umsRightProvider.getRight(AuthorizationResourceAction.ADMIN_FREEIPA))
                         .build());
     }
 

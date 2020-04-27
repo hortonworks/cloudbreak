@@ -13,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
@@ -26,7 +25,7 @@ import com.sequenceiq.notification.NotificationController;
 @Controller
 @Transactional(TxType.NEVER)
 @InternalReady
-@AuthorizationResource(type = AuthorizationResourceType.ENVIRONMENT)
+@AuthorizationResource
 public class KerberosConfigV1Controller extends NotificationController implements KerberosConfigV1Endpoint {
     @Inject
     private KerberosConfigV1Service kerberosConfigV1Service;
@@ -35,13 +34,13 @@ public class KerberosConfigV1Controller extends NotificationController implement
     private CrnService crnService;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public DescribeKerberosConfigResponse describe(String environmentId) {
         return kerberosConfigV1Service.describe(environmentId);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
@@ -53,19 +52,19 @@ public class KerberosConfigV1Controller extends NotificationController implement
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public DescribeKerberosConfigResponse create(@Valid CreateKerberosConfigRequest request) {
         return kerberosConfigV1Service.post(request);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public void delete(String environmentId) {
         kerberosConfigV1Service.delete(environmentId);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public CreateKerberosConfigRequest getRequest(String environmentId) {
         return kerberosConfigV1Service.getCreateRequest(environmentId);
     }

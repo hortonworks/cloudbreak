@@ -13,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
 import com.sequenceiq.environment.api.v1.tags.model.request.AccountTagRequests;
@@ -28,7 +27,7 @@ import com.sequenceiq.environment.tags.v1.converter.AccountTagsRequestToAccountT
 import com.sequenceiq.notification.NotificationController;
 
 @Controller
-@AuthorizationResource(type = AuthorizationResourceType.ENVIRONMENT)
+@AuthorizationResource
 @Transactional(TxType.NEVER)
 public class AccountTagController extends NotificationController implements AccountTagEndpoint {
 
@@ -55,7 +54,7 @@ public class AccountTagController extends NotificationController implements Acco
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public AccountTagResponses list() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Set<AccountTag> accountTags = accountTagService.get(accountId);
@@ -65,7 +64,7 @@ public class AccountTagController extends NotificationController implements Acco
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public AccountTagResponses put(@Valid AccountTagRequests request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         List<AccountTag> accountTags = accountTagsRequestToAccountTagConverter.convert(request.getTags());

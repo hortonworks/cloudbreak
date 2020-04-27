@@ -5,15 +5,14 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.util.CheckedFunction;
@@ -34,7 +33,7 @@ import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
 @Transactional(Transactional.TxType.NEVER)
-@AuthorizationResource(type = AuthorizationResourceType.ENVIRONMENT)
+@AuthorizationResource
 public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtV1Controller.class);
@@ -60,7 +59,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     @Inject
     private RetryableFreeIpaClientService retryableFreeIpaClientService;
 
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request) throws KeytabCreationException {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
@@ -68,7 +67,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         });
     }
 
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public ServiceKeytabResponse getServiceKeytab(@Valid ServiceKeytabRequest request) throws KeytabCreationException {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
@@ -76,7 +75,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         });
     }
 
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public HostKeytabResponse generateHostKeytab(@Valid HostKeytabRequest request) throws KeytabCreationException {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
@@ -84,7 +83,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         });
     }
 
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public HostKeytabResponse getHostKeytab(@Valid HostKeytabRequest request) throws KeytabCreationException {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
@@ -92,7 +91,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         });
     }
 
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public void deleteServicePrincipal(@Valid ServicePrincipalRequest request) throws DeleteException {
         retryableWithDeletionException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
@@ -101,7 +100,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         });
     }
 
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public void deleteHost(@Valid HostRequest request) throws DeleteException {
         retryableWithDeletionException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
@@ -110,13 +109,13 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         });
     }
 
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public void cleanupClusterSecrets(@Valid VaultCleanupRequest request) throws DeleteException {
         String accountId = crnService.getCurrentAccountId();
         kerberosMgmtV1Service.cleanupByCluster(request, accountId);
     }
 
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public void cleanupEnvironmentSecrets(String environmentCrn) throws DeleteException {
         String accountId = crnService.getCurrentAccountId();
         kerberosMgmtV1Service.cleanupByEnvironment(environmentCrn, accountId);
@@ -127,8 +126,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         String actorCrn = checkActorCrn();
         LOGGER.debug("getUserKeytab() request for environmentCrn={} for targetUserCrn={} as actorCrn={}",
                 environmentCrn, actorCrn, targetUserCrn);
-        umsAccountAuthorizationService.checkCallerIsSelfOrHasRight(actorCrn, targetUserCrn, AuthorizationResourceType.ENVIRONMENT,
-                AuthorizationResourceAction.GET_KEYTAB);
+        umsAccountAuthorizationService.checkCallerIsSelfOrHasRight(actorCrn, targetUserCrn, AuthorizationResourceAction.GET_KEYTAB);
         return userKeytabService.getKeytabBase64(targetUserCrn, environmentCrn);
     }
 

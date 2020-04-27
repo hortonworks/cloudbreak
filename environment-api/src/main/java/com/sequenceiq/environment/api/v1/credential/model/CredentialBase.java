@@ -9,7 +9,6 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.authorization.annotation.ResourceObjectField;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
@@ -32,8 +31,7 @@ public abstract class CredentialBase implements Serializable {
             message = "The name of the credential can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true, allowableValues = "length range[5, 100]")
-    @ResourceObjectField(action = AuthorizationResourceAction.EDIT_CREDENTIAL,
-            type = AuthorizationResourceType.CREDENTIAL, variableType = AuthorizationVariableType.NAME)
+    @ResourceObjectField(action = AuthorizationResourceAction.EDIT_CREDENTIAL, variableType = AuthorizationVariableType.NAME)
     private String name;
 
     @NotNull

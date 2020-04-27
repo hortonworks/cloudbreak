@@ -1,0 +1,122 @@
+{
+  "DATAHUB_WRITE": {
+    "right": "datahub/write",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_INDEPENDENT"
+  },
+  "EDIT_CREDENTIAL": {
+    "right": "environments/editCredential",
+    "resourceType": "CREDENTIAL",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "CREATE_ENVIRONMENT": {
+    "right": "environments/createEnvironment",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_INDEPENDENT"
+  },
+  "CHANGE_CREDENTIAL": {
+    "right": "environments/changeCredential",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "ENVIRONMENT_READ": {
+    "right": "environments/read",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_INDEPENDENT"
+  },
+  "DATALAKE_WRITE": {
+    "right": "datalake/write",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_INDEPENDENT"
+  },
+  "GET_KEYTAB": {
+    "right": "environments/getKeytab",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_INDEPENDENT"
+  },
+  "ENVIRONMENT_WRITE": {
+    "right": "environments/write",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_INDEPENDENT"
+  },
+  "DATALAKE_READ": {
+    "right": "datalake/read",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_INDEPENDENT"
+  },
+  "DELETE_CREDENTIAL": {
+    "right": "environments/deleteCredential",
+    "resourceType": "CREDENTIAL",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "ACCESS_ENVIRONMENT": {
+    "right": "environments/accessEnvironment",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "CREATE_CREDENTIAL": {
+    "right": "environments/createCredential",
+    "resourceType": "CREDENTIAL",
+    "actionType": "RESOURCE_INDEPENDENT"
+  },
+  "DESCRIBE_ENVIRONMENT": {
+    "right": "environments/describeEnvironment",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "DATAHUB_READ": {
+    "right": "datahub/read",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_INDEPENDENT"
+  },
+  "DESCRIBE_CREDENTIAL": {
+    "right": "environments/describeCredential",
+    "resourceType": "CREDENTIAL",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "EDIT_ENVIRONMENT": {
+    "right": "environments/editEnvironment",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "ADMIN_FREEIPA": {
+    "right": "environments/adminFreeIPA",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "DELETE_ENVIRONMENT": {
+    "right": "environments/deleteCdpEnvironment",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "STOP_ENVIRONMENT": {
+    "right": "environments/stopEnvironment",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "START_ENVIRONMENT": {
+    "right": "environments/startEnvironment",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "CREATE_IMAGE_CATALOG": {
+    "right": "environments/createImageCatalog",
+    "resourceType": "IMAGE_CATALOG",
+    "actionType": "RESOURCE_INDEPENDENT"
+  },
+  "EDIT_IMAGE_CATALOG": {
+    "right": "environments/editImageCatalog",
+    "resourceType": "IMAGE_CATALOG",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "DESCRIBE_IMAGE_CATALOG": {
+    "right": "environments/describeImageCatalog",
+    "resourceType": "IMAGE_CATALOG",
+    "actionType": "RESOURCE_DEPENDENT"
+  },
+  "DELETE_IMAGE_CATALOG": {
+    "right": "environments/deleteImageCatalog",
+    "resourceType": "IMAGE_CATALOG",
+    "actionType": "RESOURCE_DEPENDENT"
+  }
+}

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -19,7 +20,7 @@ import org.springframework.security.access.AccessDeniedException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.resource.AuthorizationResourceActionType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -39,27 +40,26 @@ public class UmsResourceAuthorizationServiceTest {
     @Mock
     private GrpcUmsClient umsClient;
 
+    @Mock
+    private UmsRightProvider umsRightProvider;
+
     @InjectMocks
     private UmsResourceAuthorizationService underTest;
 
-    @Test
-    public void testCheckReadRightOnResource() {
-        when(umsClient.checkRight(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(false);
-
-        thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("You have no right to perform datalake/write on resource " + RESOURCE_CRN);
-
-        underTest.checkRightOfUserOnResource(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.WRITE, RESOURCE_CRN);
+    @Before
+    public void init() {
+        when(umsRightProvider.getActionType(any())).thenReturn(AuthorizationResourceActionType.RESOURCE_DEPENDENT);
+        when(umsRightProvider.getRight(any())).thenReturn("environments/describeEnvironment");
     }
 
     @Test
-    public void testCheckWriteRightOnResource() {
+    public void testCheckRightOnResource() {
         when(umsClient.checkRight(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(false);
 
         thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("You have no right to perform datalake/read on resource " + RESOURCE_CRN);
+        thrown.expectMessage("You have no right to perform environments/describeEnvironment on resource " + RESOURCE_CRN);
 
-        underTest.checkRightOfUserOnResource(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.READ, RESOURCE_CRN);
+        underTest.checkRightOfUserOnResource(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, RESOURCE_CRN);
     }
 
     @Test
@@ -67,10 +67,9 @@ public class UmsResourceAuthorizationServiceTest {
         when(umsClient.hasRights(anyString(), anyString(), anyList(), anyString(), any())).thenReturn(hasRightsResultMap());
 
         thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("You have no right to perform datalake/write on resources [" + RESOURCE_CRN + "," + RESOURCE_CRN2 + "]");
+        thrown.expectMessage("You have no right to perform environments/describeEnvironment on resources [" + RESOURCE_CRN + "," + RESOURCE_CRN2 + "]");
 
-        underTest.checkRightOfUserOnResources(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.WRITE,
-                Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2));
+        underTest.checkRightOfUserOnResources(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2));
     }
 
     @Test
@@ -79,8 +78,7 @@ public class UmsResourceAuthorizationServiceTest {
         resultMap.put(RESOURCE_CRN2, Boolean.TRUE);
         when(umsClient.hasRights(anyString(), anyString(), anyList(), anyString(), any())).thenReturn(resultMap);
 
-        underTest.checkRightOfUserOnResources(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.WRITE,
-                Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2));
+        underTest.checkRightOfUserOnResources(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2));
     }
 
     private Map<String, Boolean> hasRightsResultMap() {
