@@ -12,16 +12,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -33,9 +34,9 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
 
     @Test
     public void testGetStreamsMessagingManagerServerConfigs() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, false);
         String inputJson = getBlueprintText("input/cdp-streaming.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, false, cmTemplateProcessor);
 
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
 
@@ -49,9 +50,11 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
         ));
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject(String internalFqdn, boolean ssl) {
+    private TemplatePreparationObject getTemplatePreparationObject(String internalFqdn, boolean ssl,
+            CmTemplateProcessor cmTemplateProcessor) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
+        BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
 
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setType(DatabaseType.STREAMS_MESSAGING_MANAGER.toString());
@@ -61,6 +64,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
         rdsConfig.setConnectionPassword("smm_server_db_password");
 
         return TemplatePreparationObject.Builder.builder()
+                .withBlueprintView(blueprintView)
                 .withHostgroupViews(Set.of(master, worker))
                 .withRdsConfigs(Set.of(rdsConfig))
                 .build();
