@@ -31,7 +31,7 @@ public class ClouderaManagerParcelsApiListenerTask extends AbstractClouderaManag
             LOGGER.debug("Polling for parcel's availability returned: {}", parcelsAvailable);
             return parcelsAvailable;
         } catch (ApiException e) {
-            LOGGER.debug("Cloudera Manager Parcels API is not available.");
+            LOGGER.debug("Cloudera Manager Parcels API is not available", e);
             return false;
         }
     }
