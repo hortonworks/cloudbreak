@@ -119,13 +119,14 @@ public class ClusterBuilderService {
         connector.changeOriginalCredentialsAndCreateCloudbreakUser(ldapConfigured);
     }
 
-    public void buildCluster(Long stackId) throws CloudbreakException {
+    public void buildCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
         Cluster cluster = stack.getCluster();
         clusterService.updateCreationDateOnCluster(cluster);
+        connector.waitForServer(stack);
         TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
         Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup = loadInstanceMetadataForHostGroups(hostGroups);
         recipeEngine.executePostAmbariStartRecipes(stack, hostGroupService.getRecipesByCluster(cluster.getId()));

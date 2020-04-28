@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -41,7 +42,7 @@ public class InstallClusterHandler implements EventHandler<InstallClusterRequest
         try {
             clusterBuilderService.buildCluster(stackId);
             response = new InstallClusterSuccess(stackId);
-        } catch (RuntimeException | CloudbreakException e) {
+        } catch (RuntimeException | ClusterClientInitException | CloudbreakException e) {
             LOGGER.error("Build cluster failed", e);
             response = new InstallClusterFailed(stackId, e);
         }
