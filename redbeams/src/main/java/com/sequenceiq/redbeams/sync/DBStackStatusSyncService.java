@@ -27,7 +27,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 
 @Component
 public class DBStackStatusSyncService {
@@ -90,7 +90,7 @@ public class DBStackStatusSyncService {
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
 
-            return of(connector.resources().getDatabaseServerStatus(ac, dbStack.getDatabaseServer().getName()));
+            return ofNullable(connector.resources().getDatabaseServerStatus(ac, dbStack.getDatabaseServer().getName()));
         } catch (Exception ex) {
             LOGGER.error(":::Auto sync::: External DB status lookup failed.", ex);
             return empty();
