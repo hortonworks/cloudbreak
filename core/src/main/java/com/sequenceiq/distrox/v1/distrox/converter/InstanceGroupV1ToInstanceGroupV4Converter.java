@@ -54,6 +54,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setRecipeNames(source.getRecipeNames());
         response.setAws(getIfNotNull(source.getAws(), instanceGroupParameterConverter::convert));
         response.setAzure(getIfNotNull(source.getAzure(), instanceGroupParameterConverter::convert));
+        response.setScalingMode(source.getScalingMode());
         return response;
     }
 
@@ -67,6 +68,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setRecipeNames(source.getRecipeNames());
         response.setAws(getIfNotNull(source.getAws(), instanceGroupParameterConverter::convert));
         response.setAzure(getIfNotNull(source.getAzure(), instanceGroupParameterConverter::convert));
+        response.setScalingMode(source.getScalingMode());
         return response;
     }
 

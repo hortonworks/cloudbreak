@@ -16,6 +16,7 @@
       "name": "manager",
       "type": "GATEWAY",
       "recoveryMode": "MANUAL",
+      "scalingMode": "NONE",
       "template": {
         "aws": {},
         "instanceType": "m5.2xlarge",
@@ -96,6 +97,7 @@
         "name": "master",
         "type": "CORE",
         "recoveryMode": "MANUAL",
+        "scalingMode": "NONE",
         "template": {
           "aws": {},
           "instanceType": "m5.2xlarge",

@@ -6,6 +6,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.common.api.type.ScalingMode;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AwsInstanceGroupV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AzureInstanceGroupV4Parameters;
@@ -34,6 +35,9 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
 
     @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_TYPE, allowableValues = "CORE,GATEWAY")
     private InstanceGroupType type = InstanceGroupType.CORE;
+
+    @ApiModelProperty(value = InstanceGroupModelDescription.SCALING_MODE, allowableValues = "NONE,UNSPECIFIED")
+    private ScalingMode scalingMode = ScalingMode.UNSPECIFIED;
 
     @ApiModelProperty(InstanceGroupModelDescription.AZURE_PARAMETERS)
     private AzureInstanceGroupV4Parameters azure;
@@ -79,6 +83,14 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
 
     public void setType(InstanceGroupType type) {
         this.type = type;
+    }
+
+    public ScalingMode getScalingMode() {
+        return scalingMode;
+    }
+
+    public void setScalingMode(ScalingMode scalingMode) {
+        this.scalingMode = scalingMode;
     }
 
     public AzureInstanceGroupV4Parameters createAzure() {

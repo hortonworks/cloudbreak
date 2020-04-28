@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ScalingMode;
 import com.sequenceiq.distrox.api.v1.distrox.model.CloudPlatformProvider;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -30,6 +31,9 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
 
     @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_TYPE, allowableValues = "CORE,GATEWAY")
     private InstanceGroupType type = InstanceGroupType.CORE;
+
+    @ApiModelProperty(value = InstanceGroupModelDescription.SCALING_MODE, allowableValues = "NONE,UNSPECIFIED")
+    private ScalingMode scalingMode = ScalingMode.UNSPECIFIED;
 
     @ApiModelProperty(InstanceGroupModelDescription.AZURE_PARAMETERS)
     private AzureInstanceGroupV1Parameters azure;
@@ -65,6 +69,14 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
 
     public void setType(InstanceGroupType type) {
         this.type = type;
+    }
+
+    public ScalingMode getScalingMode() {
+        return scalingMode;
+    }
+
+    public void setScalingMode(ScalingMode scalingMode) {
+        this.scalingMode = scalingMode;
     }
 
     public void setAzure(AzureInstanceGroupV1Parameters azure) {

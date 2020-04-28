@@ -22,6 +22,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.converter.ScalingModeConverter;
+import com.sequenceiq.common.api.type.ScalingMode;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -58,6 +60,9 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     @Enumerated(EnumType.STRING)
     private InstanceGroupType instanceGroupType = InstanceGroupType.CORE;
+
+    @Convert(converter = ScalingModeConverter.class)
+    private ScalingMode scalingMode = ScalingMode.UNSPECIFIED;
 
     @ManyToOne
     private Stack stack;
@@ -151,6 +156,14 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     public void setSecurityGroup(SecurityGroup securityGroup) {
         this.securityGroup = securityGroup;
+    }
+
+    public ScalingMode getScalingMode() {
+        return scalingMode;
+    }
+
+    public void setScalingMode(ScalingMode scalingMode) {
+        this.scalingMode = scalingMode;
     }
 
     public Set<InstanceMetaData> getAllInstanceMetaData() {

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 
+import com.sequenceiq.common.api.type.ScalingMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,7 +67,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
 
     @Test
     void convertToAwsWithoutSecurityGroupsHappyPathTest() {
-        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroups(InstanceGroupType.CORE);
+        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroups(InstanceGroupType.CORE, ScalingMode.UNSPECIFIED);
 
         List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, null);
         assertThat(results).hasSameSizeAs(instanceGroups);
@@ -87,16 +88,16 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     // CHECKSTYLE:OFF
     static Object[][] securityAccessDataProvider() {
         return new Object[][] {
-                // Testcase name                       InstanceGroupType          EnvironmentSet   SecurityAccessSet   CIDR         defaultSecurityGroupId  securityGroupIdKnox   securityGroupExpected  cidrExpected,  expectedSGs
-                { "No Environment set",                InstanceGroupType.CORE,    false,           false,              null,        null,                   null,                 true,                  false,         Set.of() },
-                { "No SecurityAccess set",             InstanceGroupType.CORE,    true,            false,              null,        null,                   null,                 false,                 false,         null },
-                { "SecurityAccess w/ null props",      InstanceGroupType.CORE,    true,            true,               null,        null,                   null,                 false,                 false,         null },
-                { "SecurityAccess w/ empty cidr",      InstanceGroupType.CORE,    true,            true,               "",          null,                   null,                 true,                  false,         Set.of() },
-                { "SecurityAccess w/ empty group Ids", InstanceGroupType.CORE,    true,            true,               null,        "",                     "",                   true,                  false,         Set.of() },
-                { "Core group Id",                     InstanceGroupType.CORE,    true,            true,               null,        SECURITY_GROUP1,        SECURITY_GROUP2,      true,                  false,         Set.of(SECURITY_GROUP1) },
-                { "Gateway group Id",                  InstanceGroupType.GATEWAY, true,            true,               null,        SECURITY_GROUP1,        SECURITY_GROUP2,      true,                  false,         Set.of(SECURITY_GROUP2) },
-                { "CIDR and SG uses SG",               InstanceGroupType.CORE,    true,            true,               "0.0.0.0/0", SECURITY_GROUP1,        SECURITY_GROUP2,      true,                  false,         Set.of(SECURITY_GROUP1) },
-                { "CIDR",                              InstanceGroupType.CORE,    true,            true,               "0.0.0.0/0", null,                   null,                 true,                  true,          Set.of() },
+                // Testcase name                       InstanceGroupType          ScaleType               EnvironmentSet   SecurityAccessSet   CIDR         defaultSecurityGroupId  securityGroupIdKnox   securityGroupExpected  cidrExpected,  expectedSGs
+                { "No Environment set",                InstanceGroupType.CORE,    ScalingMode.UNSPECIFIED,  false,           false,              null,        null,                   null,                 true,                  false,         Set.of() },
+                { "No SecurityAccess set",             InstanceGroupType.CORE,    ScalingMode.NONE,         true,            false,              null,        null,                   null,                 false,                 false,         null },
+                { "SecurityAccess w/ null props",      InstanceGroupType.CORE,    ScalingMode.UNSPECIFIED,  true,            true,               null,        null,                   null,                 false,                 false,         null },
+                { "SecurityAccess w/ empty cidr",      InstanceGroupType.CORE,    ScalingMode.UNSPECIFIED,  true,            true,               "",          null,                   null,                 true,                  false,         Set.of() },
+                { "SecurityAccess w/ empty group Ids", InstanceGroupType.CORE,    ScalingMode.UNSPECIFIED,  true,            true,               null,        "",                     "",                   true,                  false,         Set.of() },
+                { "Core group Id",                     InstanceGroupType.CORE,    null,                     true,            true,               null,        SECURITY_GROUP1,        SECURITY_GROUP2,      true,                  false,         Set.of(SECURITY_GROUP1) },
+                { "Gateway group Id",                  InstanceGroupType.GATEWAY, ScalingMode.UNSPECIFIED,  true,            true,               null,        SECURITY_GROUP1,        SECURITY_GROUP2,      true,                  false,         Set.of(SECURITY_GROUP2) },
+                { "CIDR and SG uses SG",               InstanceGroupType.CORE,    ScalingMode.UNSPECIFIED,  true,            true,               "0.0.0.0/0", SECURITY_GROUP1,        SECURITY_GROUP2,      true,                  false,         Set.of(SECURITY_GROUP1) },
+                { "CIDR",                              InstanceGroupType.CORE,    ScalingMode.NONE,         true,            true,               "0.0.0.0/0", null,                   null,                 true,                  true,          Set.of() },
 
         };
     }
@@ -105,20 +106,22 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("securityAccessDataProvider")
-    void createSecurityGroupFromEnvironmentTest(String testCaseName, InstanceGroupType instanceGroupType, boolean environmentSet, boolean securityAccessSet,
-            String cidr, String defaultSecurityGroupId, String securityGroupIdKnox, boolean securityGroupExpected,
-            boolean cidrExpected, Set<String> expectedSecurityGroups) {
+    void createSecurityGroupFromEnvironmentTest(String testCaseName, InstanceGroupType instanceGroupType, ScalingMode scalingMode, boolean environmentSet,
+                                                boolean securityAccessSet, String cidr, String defaultSecurityGroupId, String securityGroupIdKnox,
+                                                boolean securityGroupExpected, boolean cidrExpected, Set<String> expectedSecurityGroups) {
 
         DetailedEnvironmentResponse environment = environmentSet
                 ? prepareEnvironment(securityAccessSet, cidr, defaultSecurityGroupId, securityGroupIdKnox)
                 : null;
-        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroups(instanceGroupType);
+        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroups(instanceGroupType, scalingMode);
 
         List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, environment);
         assertThat(results).hasSameSizeAs(instanceGroups);
         InstanceGroupV4Request first = results.get(0);
 
         assertThat(first.getType()).isEqualTo(instanceGroupType);
+
+        assertThat(first.getScalingMode()).isEqualTo(scalingMode);
 
         SecurityGroupV4Request securityGroup = first.getSecurityGroup();
         assertThat(securityGroup != null).isEqualTo(securityGroupExpected);
@@ -142,7 +145,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         return environment;
     }
 
-    private Set<InstanceGroupV1Request> prepareInstanceGroups(InstanceGroupType instanceGroupType) {
+    private Set<InstanceGroupV1Request> prepareInstanceGroups(InstanceGroupType instanceGroupType, ScalingMode scalingMode) {
         InstanceGroupV1Request instanceGroup = new InstanceGroupV1Request();
         instanceGroup.setAws(AWS_INSTANCE_GROUP_V1_PARAMETERS);
         instanceGroup.setName(INSTANE_GROUP_NAME);
@@ -151,6 +154,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         instanceGroup.setRecoveryMode(RecoveryMode.AUTO);
         instanceGroup.setTemplate(new InstanceTemplateV1Request());
         instanceGroup.setType(instanceGroupType);
+        instanceGroup.setScalingMode(scalingMode);
         return Set.of(instanceGroup);
     }
 

@@ -17,6 +17,7 @@
         "name": "manager",
         "type": "GATEWAY",
         "recoveryMode": "MANUAL",
+        "scalingMode": "NONE",
         "template": {
           "azure": {
             "availabilitySet": {
@@ -104,6 +105,7 @@
         "name": "master",
         "type": "CORE",
         "recoveryMode": "MANUAL",
+        "scalingMode": "NONE",
         "template": {
           "azure": {
             "availabilitySet": {

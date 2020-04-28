@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.controller.validation.instance.InstanceGroupScalbilityValidator;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -41,6 +44,9 @@ public class UpdateNodeCountValidator {
 
     @Inject
     private CmTemplateValidator cmTemplateValidator;
+
+    @Inject
+    private InstanceGroupScalbilityValidator igScalabilityValidator;
 
     public void validataHostMetadataStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
@@ -98,8 +104,9 @@ public class UpdateNodeCountValidator {
 
     public void validateInstanceGroup(Stack stack, String instanceGroupName) {
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        if (instanceGroup == null) {
-            throw new BadRequestException(format("Stack '%s' does not have an instanceGroup named '%s'.", stack.getName(), instanceGroupName));
+        ValidationResult validate = igScalabilityValidator.validate(instanceGroup);
+        if (validate.getState() == State.ERROR) {
+            throw new BadRequestException(format(validate.getFormattedErrors(), instanceGroupName, stack.getName()));
         }
     }
 

@@ -454,6 +454,7 @@ public class ModelDescriptions {
         public static final String AZURE_PARAMETERS = "azure specific parameters for instance group";
         public static final String GCP_PARAMETERS = "gcp specific parameters for instance group";
         public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for instance group";
+        public static final String SCALING_MODE = "mode of scaling supported by the instance group, default value is UNSPECIFIED";
     }
 
     public static class InstanceGroupAdjustmentModelDescription {

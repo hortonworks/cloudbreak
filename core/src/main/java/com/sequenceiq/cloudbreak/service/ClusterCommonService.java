@@ -5,12 +5,17 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANC
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.controller.validation.instance.InstanceGroupScalbilityValidator;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -67,6 +72,9 @@ public class ClusterCommonService {
     private CmTemplateValidator cmTemplateValidator;
 
     @Inject
+    private InstanceGroupScalbilityValidator igScalabilityValidator;
+
+    @Inject
     private StackService stackService;
 
     @Inject
@@ -119,6 +127,14 @@ public class ClusterCommonService {
         if (hostGroup.isEmpty()) {
             throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'",
                     updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName()));
+        }
+        InstanceGroup instanceGroup = hostGroup.get().getInstanceGroup();
+        ValidationResult validate = igScalabilityValidator.validate(instanceGroup);
+        if (validate.getState() == State.ERROR) {
+            throw new BadRequestException(
+                    String.format(validate.getFormattedErrors(),
+                            Objects.requireNonNullElse(instanceGroup.getGroupName(), hostGroup.get().getName()),
+                            stack.getName()));
         }
         if (blueprintService.isClouderaManagerTemplate(blueprint)) {
             cmTemplateValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(),
