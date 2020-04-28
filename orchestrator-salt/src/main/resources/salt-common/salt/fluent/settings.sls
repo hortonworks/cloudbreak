@@ -62,6 +62,12 @@
     {% set dbus_metering_enabled = False %}
 {% endif %}
 
+{% if salt['pillar.get']('fluent:dbusIncludeSaltLogs') %}
+    {% set dbus_include_salt_logs = True %}
+{% else %}
+    {% set dbus_include_salt_logs = False %}
+{% endif %}
+
 {% set cluster_name = salt['pillar.get']('fluent:clusterName') %}
 {% set cluster_type = salt['pillar.get']('fluent:clusterType')%}
 {% set cluster_crn = salt['pillar.get']('fluent:clusterCrn')%}
@@ -160,6 +166,7 @@
     "meteringWorkerIndex": metering_worker_index,
     "clusterLogsCollectionWorkerIndex": cluster_logs_collection_worker_index,
     "anonymizationRules": anonymization_rules,
+    "dbusIncludeSaltLogs": dbus_include_salt_logs,
     "region": region,
     "platform": platform,
     "proxyUrl": proxy_url,
