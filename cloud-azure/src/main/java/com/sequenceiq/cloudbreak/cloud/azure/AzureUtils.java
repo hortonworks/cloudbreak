@@ -32,6 +32,8 @@ import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.microsoft.azure.management.resources.TargetResource;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
+import com.sequenceiq.cloudbreak.cloud.azure.task.AzurePollTaskFactory;
+import com.sequenceiq.cloudbreak.cloud.azure.task.networkinterface.NetworkInterfaceDetachCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePremiumValidatorService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -48,6 +50,8 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
+import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -69,6 +73,10 @@ public class AzureUtils {
 
     private static final String MICROSOFT_COMPUTE_VIRTUAL_MACHINES = "Microsoft.Compute/virtualMachines";
 
+    private static final int NETWORKINTERFACE_DETACH_CHECKING_INTERVAL = 5000;
+
+    private static final int NETWORKINTERFACE_DETACH_CHECKING_MAXATTEMPT = 5;
+
     @Value("${cb.max.azure.resource.name.length:}")
     private int maxResourceNameLength;
 
@@ -76,7 +84,13 @@ public class AzureUtils {
     private AzurePremiumValidatorService azurePremiumValidatorService;
 
     @Inject
+    private AzurePollTaskFactory azurePollTaskFactory;
+
+    @Inject
     private AzureUtils armTemplateUtils;
+
+    @Inject
+    private SyncPollingScheduler syncPollingScheduler;
 
     public CloudResource getTemplateResource(Iterable<CloudResource> resourceList) {
         for (CloudResource resource : resourceList) {
@@ -324,11 +338,24 @@ public class AzureUtils {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public void deleteNetworkInterfaces(AzureClient azureClient, String resourceGroupName, Collection<String> networkInterfacesNames) {
-        LOGGER.info("Delete network interfaces: {}", networkInterfacesNames);
+    public void waitForDetachNetworkInterfaces(AuthenticatedContext authenticatedContext, AzureClient azureClient, String resourceGroupName,
+            Collection<String> networkInterfaceNames) {
+        try {
+            PollTask<Boolean> networkInterfaceDetachCheckerTask = azurePollTaskFactory.networkInterfaceDetachCheckerTask(
+                    authenticatedContext, new NetworkInterfaceDetachCheckerContext(azureClient, resourceGroupName, networkInterfaceNames));
+            syncPollingScheduler.schedule(networkInterfaceDetachCheckerTask, NETWORKINTERFACE_DETACH_CHECKING_INTERVAL,
+                    NETWORKINTERFACE_DETACH_CHECKING_MAXATTEMPT, 1);
+        } catch (Exception e) {
+            throw new CloudConnectorException("Error during waiting for network detach: ", e);
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteNetworkInterfaces(AzureClient azureClient, String resourceGroupName, Collection<String> networkInterfaceNames) {
+        LOGGER.info("Delete network interfaces: {}", networkInterfaceNames);
         List<Completable> deleteCompletables = new ArrayList<>();
         List<String> failedToDeleteNetworkInterfaces = new ArrayList<>();
-        for (String networkInterfaceName : networkInterfacesNames) {
+        for (String networkInterfaceName : networkInterfaceNames) {
             deleteCompletables.add(azureClient.deleteNetworkInterfaceAsync(resourceGroupName, networkInterfaceName)
                     .doOnError(throwable -> {
                         LOGGER.error("Error happend on azure network interface delete: {}", networkInterfaceName, throwable);

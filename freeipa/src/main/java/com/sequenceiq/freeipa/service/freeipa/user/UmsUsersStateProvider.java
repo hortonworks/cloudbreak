@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_
 import static java.util.Objects.requireNonNull;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Machi
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
@@ -67,14 +69,26 @@ public class UmsUsersStateProvider {
             environmentCrns.forEach(environmentCrn -> {
                 UmsUsersState.Builder umsUsersStateBuilder = new UmsUsersState.Builder();
                 UsersState.Builder usersStateBuilder = new UsersState.Builder();
+                Set<String> wagNamesForOtherEnvironments = new HashSet<>();
 
                 crnToFmsGroup.values().forEach(usersStateBuilder::addGroup);
 
-                // Only add workload admin groups that belong to this environment
-                wags.stream()
-                        .filter(wag -> wag.getResource().equalsIgnoreCase(environmentCrn))
-                        .map(wag -> nameToGroup(wag.getWorkloadAdministrationGroupName()))
-                        .forEach(usersStateBuilder::addGroup);
+                // Only add workload admin groups that belong to this environment.
+                // At the same time, build a set of workload admin groups that are
+                // associated with other environments so we can filter these out in
+                // the per-user group listing in handleUser.
+                wags.forEach(wag -> {
+                    String groupName = wag.getWorkloadAdministrationGroupName();
+                    if (wag.getResource().equalsIgnoreCase(environmentCrn)) {
+                        usersStateBuilder.addGroup(nameToGroup(groupName));
+                    } else {
+                        Crn resourceCrn = getCrn(wag);
+                        if (resourceCrn != null && resourceCrn.getService() == Crn.Service.ENVIRONMENTS
+                                && resourceCrn.getResourceType() == ResourceType.ENVIRONMENT) {
+                            wagNamesForOtherEnvironments.add(groupName);
+                        }
+                    }
+                });
 
                 // add internal usersync group for each environment
                 FmsGroup internalUserSyncGroup = new FmsGroup();
@@ -89,7 +103,7 @@ public class UmsUsersStateProvider {
                     umsUsersStateBuilder.addRequestedWorkloadUsers(fmsUser);
 
                     handleUser(umsUsersStateBuilder, usersStateBuilder, crnToFmsGroup, u.getCrn(), fmsUser,
-                            environmentAccessChecker.hasAccess(u.getCrn(), requestIdOptional), requestIdOptional);
+                            environmentAccessChecker.hasAccess(u.getCrn(), requestIdOptional), requestIdOptional, wagNamesForOtherEnvironments);
 
                 });
 
@@ -99,7 +113,7 @@ public class UmsUsersStateProvider {
                     // add workload username for each user. This will be helpful in getting users from IPA.
 
                     handleUser(umsUsersStateBuilder, usersStateBuilder, crnToFmsGroup, mu.getCrn(), fmsUser,
-                            environmentAccessChecker.hasAccess(mu.getCrn(), requestIdOptional), requestIdOptional);
+                            environmentAccessChecker.hasAccess(mu.getCrn(), requestIdOptional), requestIdOptional, wagNamesForOtherEnvironments);
                 });
 
                 umsUsersStateBuilder.setUsersState(usersStateBuilder.build());
@@ -135,7 +149,8 @@ public class UmsUsersStateProvider {
 
     @SuppressWarnings("ParameterNumber")
     private void handleUser(UmsUsersState.Builder umsUsersStateBuilder, UsersState.Builder usersStateBuilder, Map<String, FmsGroup> crnToFmsGroup,
-        String memberCrn, FmsUser fmsUser, EnvironmentAccessRights environmentAccessRights, Optional<String> requestId) {
+            String memberCrn, FmsUser fmsUser, EnvironmentAccessRights environmentAccessRights,
+            Optional<String> requestId, Set<String> wagNamesForOtherEnvironments) {
         try {
             if (environmentAccessRights.hasEnvironmentAccessRight()) {
                 String username = fmsUser.getName();
@@ -161,8 +176,10 @@ public class UmsUsersStateProvider {
                 });
 
                 workloadAdministrationGroupsForUser.getWorkloadAdministrationGroupNameList().forEach(groupName -> {
-                    usersStateBuilder.addGroup(nameToGroup(groupName));
-                    usersStateBuilder.addMemberToGroup(groupName, username);
+                    if (!wagNamesForOtherEnvironments.contains(groupName)) {
+                        usersStateBuilder.addGroup(nameToGroup(groupName));
+                        usersStateBuilder.addMemberToGroup(groupName, username);
+                    }
                 });
 
                 if (environmentAccessRights.hasAdminFreeIPARight()) {
@@ -229,5 +246,15 @@ public class UmsUsersStateProvider {
     private EnvironmentAccessChecker createEnvironmentAccessChecker(String environmentCrn) {
         requireNonNull(environmentCrn, "environmentCrn is null");
         return new EnvironmentAccessChecker(grpcUmsClient, environmentCrn);
+    }
+
+    private Crn getCrn(WorkloadAdministrationGroup wag) {
+        Crn resourceCrn = null;
+        try {
+            resourceCrn = Crn.fromString(wag.getResource());
+        } catch (Exception e) {
+            LOGGER.debug("Invalid resource is assigned to workload admin group: {}", e.getMessage());
+        }
+        return resourceCrn;
     }
 }

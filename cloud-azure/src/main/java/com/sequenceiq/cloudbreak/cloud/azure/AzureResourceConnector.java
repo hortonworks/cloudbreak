@@ -369,6 +369,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         azureUtils.deleteInstances(ac, cloudInstancesSyncedWithAzure);
 
         List<String> networkInterfaceNames = getResourcesByResourceType(resourcesToRemove, NETWORK_INTERFACES_NAMES);
+        azureUtils.waitForDetachNetworkInterfaces(ac, client, resourceGroupName, networkInterfaceNames);
         azureUtils.deleteNetworkInterfaces(client, resourceGroupName, networkInterfaceNames);
 
         List<String> publicAddressNames = getResourcesByResourceType(resourcesToRemove, PUBLIC_ADDRESS_NAME);
