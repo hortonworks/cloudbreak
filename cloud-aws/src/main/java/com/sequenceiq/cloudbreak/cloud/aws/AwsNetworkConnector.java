@@ -219,7 +219,7 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
             List<SubnetRequest> subnetRequests) {
         Map<String, String> output = cfStackUtil.getOutputs(networkRequest.getStackName(), cloudFormationRetryClient);
         String vpcId = getCreatedVpc(output);
-        Set<CreatedSubnet> subnets = awsCreatedSubnetProvider.provide(output, subnetRequests);
+        Set<CreatedSubnet> subnets = awsCreatedSubnetProvider.provide(output, subnetRequests, networkRequest.isPrivateSubnetEnabled());
         return new CreatedCloudNetwork(networkRequest.getStackName(), vpcId, subnets);
     }
 

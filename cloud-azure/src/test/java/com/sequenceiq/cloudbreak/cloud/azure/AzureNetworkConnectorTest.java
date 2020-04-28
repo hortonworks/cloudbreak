@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -134,7 +135,7 @@ public class AzureNetworkConnectorTest {
 
 
         NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnets);
-        when(azureSubnetRequestProvider.provide(anyString(), anyList(), anyList())).thenReturn(subnetRequests);
+        when(azureSubnetRequestProvider.provide(anyString(), anyList(), anyList(), anyBoolean())).thenReturn(subnetRequests);
         when(azureClientService.getClient(networkCreationRequest.getCloudCredential())).thenReturn(azureClient);
         when(azureNetworkTemplateBuilder.build(networkCreationRequest, subnetRequests)).thenReturn(TEMPLATE);
         when(azureClient.createTemplateDeployment(ENV_NAME, STACK_NAME, TEMPLATE, PARAMETER)).thenReturn(templateDeployment);

@@ -65,14 +65,14 @@ class NetworkCreationRequestFactoryTest {
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
-        when(defaultSubnetCidrProvider.provide(NETWORK_CIDR)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
+        when(defaultSubnetCidrProvider.provide(NETWORK_CIDR, false)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
         when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
         when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
 
         NetworkCreationRequest actual = underTest.create(environmentDto);
 
         verify(credentialToCloudCredentialConverter).convert(environmentDto.getCredential());
-        verify(defaultSubnetCidrProvider).provide(NETWORK_CIDR);
+        verify(defaultSubnetCidrProvider).provide(NETWORK_CIDR, false);
         assertEquals(ENV_NAME, actual.getEnvName());
         assertEquals(STACK_NAME, actual.getStackName());
         assertEquals(cloudCredential, actual.getCloudCredential());
@@ -89,12 +89,12 @@ class NetworkCreationRequestFactoryTest {
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
-        when(defaultSubnetCidrProvider.provide(NETWORK_CIDR)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
+        when(defaultSubnetCidrProvider.provide(NETWORK_CIDR, false)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
 
         NetworkCreationRequest actual = underTest.create(environmentDto);
 
         verify(credentialToCloudCredentialConverter).convert(environmentDto.getCredential());
-        verify(defaultSubnetCidrProvider).provide(NETWORK_CIDR);
+        verify(defaultSubnetCidrProvider).provide(NETWORK_CIDR, false);
 
         assertEquals(ENV_NAME, actual.getEnvName());
         assertEquals(STACK_NAME, actual.getStackName());

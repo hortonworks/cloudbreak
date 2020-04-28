@@ -36,7 +36,7 @@ public class AzureSubnetCidrProvider implements SubnetCidrProvider {
     }
 
     @Override
-    public Cidrs provide(String networkCidr) {
+    public Cidrs provide(String networkCidr, boolean privateSubnetEnabled) {
         String[] ip = extendedSubnetTypeProvider.getIp(networkCidr);
         Set<NetworkSubnetRequest> publicSubnets = new HashSet<>();
         Set<NetworkSubnetRequest> privateSubnets = new HashSet<>();
@@ -49,7 +49,7 @@ public class AzureSubnetCidrProvider implements SubnetCidrProvider {
                 SubnetType.DWX, DWX_SUBNET_MASK);
         extendedSubnetTypeProvider.updateCidrAndAddToList(PRIVATE_SUBNET_IP_OFFSET, PRIVATE_SUBNET_IP_COUNT, PLUS_BITS_FOR_19_MASK, ip, privateSubnets,
                 SubnetType.PRIVATE, PRIVATE_SUBNET_MASK);
-        return cidrs(publicSubnets, privateSubnets);
+        return cidrs(publicSubnets, privateSubnetEnabled ? privateSubnets : new HashSet<>());
     }
 
     @Override

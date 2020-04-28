@@ -15,13 +15,13 @@ import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 @Component
 class AwsCreatedSubnetProvider {
 
-    Set<CreatedSubnet> provide(Map<String, String> output, List<SubnetRequest> subnetRequests) {
+    Set<CreatedSubnet> provide(Map<String, String> output, List<SubnetRequest> subnetRequests, boolean privateSubnetEnabled) {
         Set<CreatedSubnet> subnets = new HashSet<>();
         for (SubnetRequest subnetRequest : subnetRequests) {
             CreatedSubnet createdPublicSubnet = new CreatedSubnet();
             createdPublicSubnet.setSubnetId(getValue(output, "id" + subnetRequest.getIndex()));
             createdPublicSubnet.setAvailabilityZone(subnetRequest.getAvailabilityZone());
-            if (!Strings.isNullOrEmpty(subnetRequest.getPrivateSubnetCidr())) {
+            if (!Strings.isNullOrEmpty(subnetRequest.getPrivateSubnetCidr()) && privateSubnetEnabled) {
                 createdPublicSubnet.setCidr(subnetRequest.getPrivateSubnetCidr());
                 createdPublicSubnet.setPublicSubnet(false);
                 createdPublicSubnet.setMapPublicIpOnLaunch(false);
