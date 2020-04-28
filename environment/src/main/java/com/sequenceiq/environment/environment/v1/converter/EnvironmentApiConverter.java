@@ -47,6 +47,8 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
@@ -195,8 +197,12 @@ public class EnvironmentApiConverter {
     private AzureResourceGroupDto azureResourceGroupToAzureResourceGroupDto(AzureResourceGroupRequest azureResourceGroup) {
         return AzureResourceGroupDto.builder()
                 .withName(azureResourceGroup.getName())
-                .withExisting(Objects.nonNull(azureResourceGroup.getName()))
-                .withSingle(azureResourceGroup.isSingle())
+                .withResourceGroupUsagePattern((azureResourceGroup.isSingle())
+                        ? ResourceGroupUsagePattern.USE_SINGLE
+                        : ResourceGroupUsagePattern.USE_MULTIPLE)
+                .withResourceGroupCreation(StringUtils.hasText(azureResourceGroup.getName())
+                        ? ResourceGroupCreation.USE_EXISTING
+                        : ResourceGroupCreation.CREATE_NEW)
                 .build();
     }
 

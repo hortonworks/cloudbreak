@@ -47,6 +47,8 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
@@ -215,8 +217,6 @@ public class EnvironmentResponseConverterTest {
     private void assertAzureParameters(AzureParametersDto azureParametersDto, AzureEnvironmentParametersResponse azureEnvironmentParameters) {
         assertNotNull(azureEnvironmentParameters);
         assertEquals(azureParametersDto.getAzureResourceGroupDto().getName(), azureEnvironmentParameters.getResourceGroup().getName());
-        assertEquals(azureParametersDto.getAzureResourceGroupDto().isSingle(), azureEnvironmentParameters.getResourceGroup().isSingle());
-        assertEquals(azureParametersDto.getAzureResourceGroupDto().isExisting(), azureEnvironmentParameters.getResourceGroup().isExisting());
     }
 
     private EnvironmentDto createEnvironmentDto() {
@@ -265,8 +265,8 @@ public class EnvironmentResponseConverterTest {
                         .withResourceGroup(
                                 AzureResourceGroupDto.builder()
                                         .withName("my-resource-group-name")
-                                        .withExisting(true)
-                                        .withSingle(true)
+                                        .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
+                                        .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                         .build())
                         .build())
                 .build();
