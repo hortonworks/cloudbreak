@@ -33,7 +33,7 @@ public class UpgradeOptionsResponseFactory {
 
     private ImageInfoV4Response createImageInfoFromCurrentImage(Image currentImage, String cloudPlatform, String region, String imageCatalogName) {
         return new ImageInfoV4Response(getImageName(currentImage, cloudPlatform, region), currentImage.getUuid(), imageCatalogName, currentImage.getCreated(),
-                getComponentVersions(currentImage.getPackageVersions(), currentImage.getOs(), currentImage.getDate()));
+                currentImage.getDate(), getComponentVersions(currentImage.getPackageVersions(), currentImage.getOs(), currentImage.getDate()));
     }
 
     private List<ImageInfoV4Response> createImageInfoFromFilteredImages(Images filteredImages, String imageCatalogName, String cloudPlatform, String region) {
@@ -42,7 +42,7 @@ public class UpgradeOptionsResponseFactory {
     }
 
     private ImageInfoV4Response createImageInfo(Image image, String imageCatalogName, String cloudPlatform, String region) {
-        return new ImageInfoV4Response(getImageName(image, cloudPlatform, region), image.getUuid(), imageCatalogName, image.getCreated(),
+        return new ImageInfoV4Response(getImageName(image, cloudPlatform, region), image.getUuid(), imageCatalogName, image.getCreated(), image.getDate(),
                 getComponentVersions(image.getPackageVersions(), image.getOs(), image.getDate()));
     }
 

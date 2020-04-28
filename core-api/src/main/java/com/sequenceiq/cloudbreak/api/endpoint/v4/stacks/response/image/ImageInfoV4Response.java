@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image;
 
-import java.util.Date;
 import java.util.Objects;
 
 public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
@@ -13,28 +12,29 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
 
     private long created;
 
-    private Date createDt;
+    private String date;
 
     private ImageComponentVersions componentVersions;
 
     public ImageInfoV4Response() {
     }
 
-    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created) {
+    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created, String date) {
         this.imageName = imageName;
         this.imageId = imageId;
         this.imageCatalogName = imageCatalogName;
         this.created = created;
-        this.createDt = new Date(created * 1000);
+        this.date = date;
     }
 
-    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created, ImageComponentVersions componentVersions) {
+    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created, String date,
+            ImageComponentVersions componentVersions) {
         this.imageName = imageName;
         this.imageId = imageId;
         this.imageCatalogName = imageCatalogName;
         this.created = created;
-        this.createDt = new Date(created * 1000);
         this.componentVersions = componentVersions;
+        this.date = date;
     }
 
     public String getImageName() {
@@ -67,15 +67,14 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
 
     public void setCreated(long created) {
         this.created = created;
-        this.createDt = new Date(created * 1000);
     }
 
-    public Date getCreateDt() {
-        return createDt;
+    public String getDate() {
+        return date;
     }
 
-    public void setCreateDt(Date createDt) {
-        this.createDt = createDt;
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public ImageComponentVersions getComponentVersions() {
@@ -109,12 +108,13 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
                 Objects.equals(imageName, that.imageName) &&
                 Objects.equals(imageId, that.imageId) &&
                 Objects.equals(imageCatalogName, that.imageCatalogName) &&
+                Objects.equals(date, that.date) &&
                 Objects.equals(componentVersions, that.componentVersions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(imageName, imageId, imageCatalogName, created, componentVersions);
+        return Objects.hash(imageName, imageId, imageCatalogName, created, date, componentVersions);
     }
 
     @Override
