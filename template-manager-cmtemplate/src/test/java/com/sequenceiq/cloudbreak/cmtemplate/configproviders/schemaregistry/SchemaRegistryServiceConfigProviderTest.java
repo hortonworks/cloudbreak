@@ -1,22 +1,5 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry;
 
-import java.util.List;
-import java.util.Set;
-
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.views.HostgroupView;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.common.api.type.InstanceGroupType;
-
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.DATABASE_HOST;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.DATABASE_NAME;
@@ -26,6 +9,24 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistr
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.DATABASE_USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+import java.util.Set;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.api.type.InstanceGroupType;
+
 @RunWith(MockitoJUnitRunner.class)
 public class SchemaRegistryServiceConfigProviderTest {
 
@@ -33,9 +34,9 @@ public class SchemaRegistryServiceConfigProviderTest {
 
     @Test
     public void testGetSchemaRegistryServerConfigs() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject();
         String inputJson = getBlueprintText("input/cdp-streaming.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor);
 
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
 
@@ -49,9 +50,10 @@ public class SchemaRegistryServiceConfigProviderTest {
         ));
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject() {
+    private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
+        BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
 
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setType(DatabaseType.REGISTRY.toString());
@@ -61,6 +63,7 @@ public class SchemaRegistryServiceConfigProviderTest {
         rdsConfig.setConnectionPassword("schema_registry_server_password");
 
         return TemplatePreparationObject.Builder.builder()
+                .withBlueprintView(blueprintView)
                 .withHostgroupViews(Set.of(master, worker))
                 .withRdsConfigs(Set.of(rdsConfig))
                 .build();
