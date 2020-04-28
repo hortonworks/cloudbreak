@@ -6,4 +6,9 @@ public class InvalidPasswordException extends FreeIpaClientException {
     public InvalidPasswordException() {
         super("Invalid password");
     }
+
+    @Override
+    public boolean isClientUnusable() {
+        return true;
+    }
 }

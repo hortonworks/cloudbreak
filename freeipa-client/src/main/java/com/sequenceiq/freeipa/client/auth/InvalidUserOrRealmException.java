@@ -15,4 +15,9 @@ public class InvalidUserOrRealmException extends FreeIpaClientException {
     public InvalidUserOrRealmException() {
         super("Invalid user or realm");
     }
+
+    @Override
+    public boolean isClientUnusable() {
+        return true;
+    }
 }

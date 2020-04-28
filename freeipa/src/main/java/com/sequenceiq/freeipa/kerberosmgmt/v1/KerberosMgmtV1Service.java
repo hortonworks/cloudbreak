@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
-import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ErrorCodes.DUPLICATE_ENTRY;
-import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ErrorCodes.EXECUTION_ERROR;
+import static com.sequenceiq.freeipa.client.FreeIpaErrorCodes.DUPLICATE_ENTRY;
+import static com.sequenceiq.freeipa.client.FreeIpaErrorCodes.EXECUTION_ERROR;
 
 import java.util.Optional;
 import java.util.Set;
