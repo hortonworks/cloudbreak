@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -190,8 +189,6 @@ public class EnvironmentApiConverterTest {
         assertEquals(request.getFreeIpa().getAws().getSpot().getPercentage(), actual.getAwsParametersDto().getFreeIpaSpotPercentage());
         assertEquals(request.getAzure().getResourceGroup().getName(),
                 actual.getAzureParametersDto().getAzureResourceGroupDto().getName());
-        assertEquals(request.getAzure().getResourceGroup().isSingle(), actual.getAzureParametersDto().getAzureResourceGroupDto().isSingle());
-        assertEquals(Objects.nonNull(request.getAzure().getResourceGroup().getName()), actual.getAzureParametersDto().getAzureResourceGroupDto().isExisting());
     }
 
     private void assertSecurityAccess(SecurityAccessRequest request, SecurityAccessDto actual) {

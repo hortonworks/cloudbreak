@@ -44,6 +44,10 @@ public class ParametersDto {
         return azureParametersDto;
     }
 
+    public AzureParametersDto azureParametersDto() {
+        return azureParametersDto;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -79,8 +83,8 @@ public class ParametersDto {
             return this;
         }
 
-        public Builder withAzureParameters(AzureParametersDto azureParameters) {
-            this.azureParametersDto = azureParameters;
+        public Builder withAzureParameters(AzureParametersDto azureParametersDto) {
+            this.azureParametersDto = azureParametersDto;
             return this;
         }
 

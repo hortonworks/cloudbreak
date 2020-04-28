@@ -27,6 +27,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
@@ -174,8 +176,8 @@ public class EnvironmentResponseConverter {
     private AzureResourceGroupResponse azureParametersToAzureResourceGroup(AzureResourceGroupDto azureResourceGroupDto) {
         return AzureResourceGroupResponse.builder()
                 .withName(azureResourceGroupDto.getName())
-                .withExisting(azureResourceGroupDto.isExisting())
-                .withSingle(azureResourceGroupDto.isSingle())
+                .withExisting(azureResourceGroupDto.getResourceGroupCreation().equals(ResourceGroupCreation.USE_EXISTING))
+                .withSingle(azureResourceGroupDto.getResourceGroupUsagePattern().equals(ResourceGroupUsagePattern.USE_SINGLE))
                 .build();
     }
 
