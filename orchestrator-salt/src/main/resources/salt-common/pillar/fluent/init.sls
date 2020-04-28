@@ -27,5 +27,6 @@ fluent:
   dbusClusterLogsCollection: false
   dbusClusterLogsCollectionDisableStop: false
   dbusMeteringEnabled: false
+  dbusIncludeSaltLogs: false
   anonymizationRules:
 

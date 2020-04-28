@@ -27,6 +27,8 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private static final Boolean DBUS_DISABLE_STOP_CLUSTER_LOG_COLLECTION_DEFAULT = false;
 
+    private static final Boolean DBUS_INCLUDE_SALT_LOGS_DEFAULT = false;
+
     private static final Integer PARTITION_INTERVAL_DEFAULT = 5;
 
     private final boolean enabled;
@@ -205,6 +207,7 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("dbusMeteringEnabled", this.meteringEnabled);
         map.put("dbusClusterLogsCollection", this.clusterLogsCollection);
         map.put("dbusClusterLogsCollectionDisableStop", DBUS_DISABLE_STOP_CLUSTER_LOG_COLLECTION_DEFAULT);
+        map.put("dbusIncludeSaltLogs", DBUS_INCLUDE_SALT_LOGS_DEFAULT);
         map.put("user", ObjectUtils.defaultIfNull(this.user, TD_AGENT_USER_DEFAULT));
         map.put("group", ObjectUtils.defaultIfNull(this.group, TD_AGENT_GROUP_DEFAULT));
         map.put("providerPrefix", ObjectUtils.defaultIfNull(this.providerPrefix, PROVIDER_PREFIX_DEFAULT));
