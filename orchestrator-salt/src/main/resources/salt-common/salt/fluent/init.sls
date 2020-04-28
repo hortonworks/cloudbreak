@@ -154,7 +154,7 @@ copy_td_agent_conf:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - file_mode: 640
+    - mode: 640
     - context:
         providerPrefix: {{ fluent.providerPrefix }}
         workerIndex: {{ fluent.cloudStorageWorkerIndex }}
@@ -166,7 +166,7 @@ copy_td_agent_conf:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - file_mode: 640
+    - mode: 640
 
 /etc/td-agent/input_databus.conf:
   file.managed:
@@ -174,7 +174,7 @@ copy_td_agent_conf:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - file_mode: 640
+    - mode: 640
     - context:
         providerPrefix: "databus"
         workerIndex: {{ fluent.clusterLogsCollectionWorkerIndex }}
@@ -186,7 +186,7 @@ copy_td_agent_conf:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - file_mode: 640
+    - mode: 640
     - context:
         providerPrefix: "databus"
         workerIndex: {{ fluent.clusterLogsCollectionWorkerIndex }}
@@ -197,7 +197,7 @@ copy_td_agent_conf:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - file_mode: 640
+    - mode: 640
 
 {% if fluent.cloudLoggingServiceEnabled %}
 /etc/td-agent/filter.conf:
@@ -207,7 +207,7 @@ copy_td_agent_conf:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - file_mode: 640
+    - mode: 640
     - context:
         providerPrefix: {{ fluent.providerPrefix }}
         workerIndex: {{ fluent.cloudStorageWorkerIndex }}
@@ -221,7 +221,7 @@ copy_td_agent_conf:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - file_mode: 640
+    - mode: 640
 {% endif %}
 
 /etc/td-agent/databus_credential:
@@ -230,7 +230,7 @@ copy_td_agent_conf:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - file_mode: '0600'
+    - mode: '0600'
     - context:
         profileName: "dbus"
         accessKeyIdName: "databus_access_key_id"
@@ -242,7 +242,7 @@ copy_td_agent_conf:
    file.managed:
      - user: "{{ fluent.user }}"
      - group: "{{ fluent.group }}"
-     - file_mode: '0640'
+     - mode: '0640'
 {% endif %}
 
 {%- if fluent.is_systemd %}
@@ -300,7 +300,7 @@ fluent_start:
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
-    - file_mode: 750
+    - mode: 750
     - onlyif: "test -f /etc/td-agent/td-agent.conf && grep -q 'CLUSTER BUNDLE LOGS ENABLED' /etc/td-agent/td-agent.conf"
 
 fluentd_delalyed_restart:
