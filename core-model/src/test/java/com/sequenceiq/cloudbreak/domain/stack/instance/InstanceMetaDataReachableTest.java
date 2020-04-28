@@ -29,6 +29,7 @@ public class InstanceMetaDataReachableTest {
         EnumSet<InstanceStatus> notReachableStates = EnumSet.of(
                 InstanceStatus.TERMINATED,
                 InstanceStatus.DELETED_ON_PROVIDER_SIDE,
+                InstanceStatus.DELETED_BY_PROVIDER,
                 InstanceStatus.FAILED,
                 InstanceStatus.ORCHESTRATION_FAILED,
                 InstanceStatus.STOPPED);
