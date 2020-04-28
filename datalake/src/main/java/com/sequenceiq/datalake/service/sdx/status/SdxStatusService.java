@@ -79,17 +79,18 @@ public class SdxStatusService {
                 if (statusChangeIsValid(previous)) {
                     SdxStatusEntity sdxStatusEntity = createStatusEntity(status, statusReason, sdxCluster);
                     if (DELETED.equals(status)) {
-                        sdxClusterRepository.findById(sdxCluster.getId()).ifPresent(sdx -> {
-                            sdx.setDeleted(clock.getCurrentTimeMillis());
-                            sdxClusterRepository.save(sdx);
-                        });
+                        setDeletedTime(sdxCluster);
                     }
                     sdxStatusRepository.save(sdxStatusEntity);
                     updateInMemoryStateStore(sdxCluster);
                     LOGGER.info("Updated status of Datalake with name: {} from {} to {} with statusReason {}",
                             sdxCluster.getClusterName(), getPreviousStatusText(previous), status, statusReason);
                 } else if (DELETED.equals(previous.getStatus())) {
-                    throw notFoundException("SDX cluster", sdxCluster.getClusterName());
+                    if (sdxCluster.getDeleted() == null) {
+                        setDeletedTime(sdxCluster);
+                    } else {
+                        throw notFoundException("SDX cluster", sdxCluster.getClusterName());
+                    }
                 } else {
                     throw new DatalakeStatusUpdateException(getActualStatusForSdx(sdxCluster).getStatus(), status);
                 }
@@ -98,6 +99,13 @@ public class SdxStatusService {
             LOGGER.error("Exception happened while transaction was executed", e);
             throw e.getCause();
         }
+    }
+
+    private void setDeletedTime(SdxCluster sdxCluster) {
+        sdxClusterRepository.findById(sdxCluster.getId()).ifPresent(sdx -> {
+            sdx.setDeleted(clock.getCurrentTimeMillis());
+            sdxClusterRepository.save(sdx);
+        });
     }
 
     private String getPreviousStatusText(SdxStatusEntity previous) {
