@@ -316,7 +316,7 @@
           "Ref": "PRT1"
         },
         "NatGatewayId": {
-          "Ref": "NG0"
+          "Ref": "NG1"
         }
       }
     },

@@ -42,7 +42,9 @@ public class NetworkCreationRequestFactory {
     public NetworkCreationRequest create(EnvironmentDto environment) {
         NetworkDto networkDto = environment.getNetwork();
 
-        Cidrs cidrs = getSubNetCidrs(environment.getCloudPlatform(), networkDto.getNetworkCidr());
+        boolean privateSubnetEnabled = getPrivateSubnetEnabled(environment);
+
+        Cidrs cidrs = getSubNetCidrs(environment.getCloudPlatform(), networkDto.getNetworkCidr(), privateSubnetEnabled);
 
         CDPTagMergeRequest mergeRequest = CDPTagMergeRequest.Builder
                 .builder()
@@ -60,7 +62,7 @@ public class NetworkCreationRequestFactory {
                 .withVariant(environment.getCloudPlatform())
                 .withRegion(Region.region(environment.getLocation().getName()))
                 .withNetworkCidr(networkDto.getNetworkCidr())
-                .withPrivateSubnetEnabled(getPrivateSubnetEnabled(environment))
+                .withPrivateSubnetEnabled(privateSubnetEnabled)
                 .withUserName(getUserFromCrn(environment.getCreator()))
                 .withCreatorCrn(environment.getCreator())
                 .withTags(costTagging.mergeTags(mergeRequest))
@@ -82,9 +84,9 @@ public class NetworkCreationRequestFactory {
         return PrivateSubnetCreation.ENABLED == environmentDto.getNetwork().getPrivateSubnetCreation();
     }
 
-    private Cidrs getSubNetCidrs(String cloudPlatform, String networkCidr) {
+    private Cidrs getSubNetCidrs(String cloudPlatform, String networkCidr, boolean privateSubnetEnabled) {
         SubnetCidrProvider subnetCidrProvider = subnetCidrProviders.getOrDefault(cloudPlatform, defaultSubnetCidrProvider);
-        return subnetCidrProvider.provide(networkCidr);
+        return subnetCidrProvider.provide(networkCidr, privateSubnetEnabled);
     }
 
     private Optional<Boolean> getNoPublicIp(NetworkDto networkDto) {

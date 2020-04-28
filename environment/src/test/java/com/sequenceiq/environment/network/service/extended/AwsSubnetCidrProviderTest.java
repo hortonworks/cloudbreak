@@ -21,7 +21,7 @@ class AwsSubnetCidrProviderTest {
     void testProvideShouldCreateSubnets() {
         String networkCidr = "10.10.0.0/16";
 
-        Cidrs actual = underTest.provide(networkCidr);
+        Cidrs actual = underTest.provide(networkCidr, true);
 
         Assertions.assertEquals(NUMBER_OF_PRIVATE_SUBNETS, actual.getPrivateSubnets().size());
         Assertions.assertEquals(NUMBER_OF_PUBLIC_SUBNETS, actual.getPublicSubnets().size());
