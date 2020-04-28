@@ -74,6 +74,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private AwsEnvironmentParameters aws;
 
+        private AzureEnvironmentParametersResponse azure;
+
         private TagResponse tags;
 
         private String parentEnvironmentName;
@@ -173,6 +175,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withAzure(AzureEnvironmentParametersResponse azure) {
+            this.azure = azure;
+            return this;
+        }
+
         public Builder withTag(TagResponse tags) {
             this.tags = tags;
             return this;
@@ -207,6 +214,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setTelemetry(telemetry);
             simpleEnvironmentResponse.setTunnel(tunnel);
             simpleEnvironmentResponse.setAws(aws);
+            simpleEnvironmentResponse.setAzure(azure);
             simpleEnvironmentResponse.setAdminGroupName(adminGroupName);
             simpleEnvironmentResponse.setTags(tags);
             simpleEnvironmentResponse.setParentEnvironmentName(parentEnvironmentName);

@@ -10,17 +10,18 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.sequenceiq.authorization.annotation.ResourceObjectField;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
-import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParametersRequest;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -94,6 +95,10 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
+
+    @Valid
+    @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
+    private AzureEnvironmentParametersRequest azure;
 
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.TAGS)
@@ -230,6 +235,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setAws(AwsEnvironmentParameters aws) {
         this.aws = aws;
+    }
+
+    public AzureEnvironmentParametersRequest getAzure() {
+        return azure;
+    }
+
+    public void setAzure(AzureEnvironmentParametersRequest azure) {
+        this.azure = azure;
     }
 
     public Map<String, String> getTags() {
