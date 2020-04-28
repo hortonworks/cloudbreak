@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.auth.altus;
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +31,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
@@ -335,6 +335,10 @@ public class GrpcUmsClient {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
+        if (!isAuthorizationEntitlementRegistered(actorCrn, ThreadBasedUserCrnProvider.getAccountId())) {
+            LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!", ThreadBasedUserCrnProvider.getAccountId());
+            return true;
+        }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.info("Checking right {} for user {} on resource {}!", right, userCrn, resource != null ? resource : "account");
@@ -366,9 +370,11 @@ public class GrpcUmsClient {
                 rightChecks.stream().map(AuthorizationProto.RightCheck::getRight).collect(Collectors.toList()));
         if (InternalCrnBuilder.isInternalCrn(memberCrn)) {
             LOGGER.info("InternalCrn has all rights");
-            Boolean[] values = new Boolean[rightChecks.size()];
-            Arrays.fill(values, Boolean.TRUE);
-            return Arrays.asList(values);
+            return rightChecks.stream().map(rightCheck -> Boolean.TRUE).collect(Collectors.toList());
+        }
+        if (!isAuthorizationEntitlementRegistered(actorCrn, ThreadBasedUserCrnProvider.getAccountId())) {
+            LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!", ThreadBasedUserCrnProvider.getAccountId());
+            return rightChecks.stream().map(rightCheck -> Boolean.TRUE).collect(Collectors.toList());
         }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             if (!rightChecks.isEmpty()) {
@@ -400,6 +406,13 @@ public class GrpcUmsClient {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             return client.listResourceAssigneesForResource(requestId.orElse(UUID.randomUUID().toString()), resourceCrn);
         }
+    }
+
+    private boolean isAuthorizationEntitlementRegistered(String actorCrn, String accountId) {
+        return getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId()).getEntitlementsList()
+                .stream()
+                .map(e -> e.getEntitlementName().toUpperCase())
+                .anyMatch(e -> e.equalsIgnoreCase("CB_AUTHZ_POWER_USERS"));
     }
 
     /**
