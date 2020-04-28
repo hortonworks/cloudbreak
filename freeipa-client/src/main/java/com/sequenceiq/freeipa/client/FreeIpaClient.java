@@ -12,7 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
@@ -49,6 +52,8 @@ public class FreeIpaClient {
     private static final String DEFAULT_API_VERSION = "2.230";
 
     private static final int CESSATION_OF_OPERATION = 5;
+
+    private static final Pattern RESPONSE_CODE_PATTERN = Pattern.compile("^Server returned HTTP response code: (\\d+)");
 
     private JsonRpcHttpClient jsonRpcHttpClient;
 
@@ -571,12 +576,30 @@ public class FreeIpaClient {
         } catch (Exception e) {
             String message = String.format("Invoke FreeIpa failed: %s", e.getLocalizedMessage());
             LOGGER.error(message, e);
-            throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(message, e));
+            OptionalInt responseCode = extractResponseCode(e);
+            throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(message, e, responseCode));
         } catch (Throwable throwable) {
             String message = String.format("Invoke FreeIpa failed: %s", throwable.getLocalizedMessage());
             LOGGER.error(message, throwable);
             throw new FreeIpaClientException(message, throwable);
         }
+    }
+
+    private OptionalInt extractResponseCode(Exception e) {
+        OptionalInt responseCode = OptionalInt.empty();
+        try {
+            Matcher matcher = RESPONSE_CODE_PATTERN.matcher(e.getMessage());
+            if (matcher.find()) {
+                responseCode = OptionalInt.of(Integer.parseInt(matcher.group(1)));
+            } else if (RESPONSE_CODE_PATTERN.matcher(e.getCause().getMessage()).find()) {
+                matcher = RESPONSE_CODE_PATTERN.matcher(e.getCause().getMessage());
+                matcher.find();
+                responseCode = OptionalInt.of(Integer.parseInt(matcher.group(1)));
+            }
+        } catch (Exception ex) {
+            LOGGER.warn("Couldn't extract response code from message", ex);
+        }
+        return responseCode;
     }
 
     public PasswordPolicy getPasswordPolicy() throws FreeIpaClientException {

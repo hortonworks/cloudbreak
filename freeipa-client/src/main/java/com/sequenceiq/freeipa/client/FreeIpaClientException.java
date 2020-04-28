@@ -29,4 +29,8 @@ public class FreeIpaClientException extends Exception {
     public OptionalInt getStatusCode() {
         return statusCode;
     }
+
+    public boolean isClientUnusable() {
+        return FreeIpaClientExceptionUtil.isClientUnusable(this);
+    }
 }

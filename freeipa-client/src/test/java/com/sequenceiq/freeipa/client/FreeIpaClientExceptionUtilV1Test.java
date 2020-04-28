@@ -40,19 +40,19 @@ public class FreeIpaClientExceptionUtilV1Test {
         Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE,
                         new IllegalStateException(MESSAGE)),
-                Set.of(FreeIpaClientExceptionUtil.ErrorCodes.DUPLICATE_ENTRY)));
+                Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
         Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(NOT_FOUND, MESSAGE, null)),
-                Set.of(FreeIpaClientExceptionUtil.ErrorCodes.DUPLICATE_ENTRY)));
+                Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
         Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(DUPLICATE_ENTRY, MESSAGE, null)),
-                Set.of(FreeIpaClientExceptionUtil.ErrorCodes.DUPLICATE_ENTRY)));
+                Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
         Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(DUPLICATE_ENTRY, MESSAGE, null)),
-                Set.of(FreeIpaClientExceptionUtil.ErrorCodes.DUPLICATE_ENTRY, FreeIpaClientExceptionUtil.ErrorCodes.COMMAND_ERROR)));
+                Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY, FreeIpaErrorCodes.COMMAND_ERROR)));
     }
 
     @Test
@@ -60,19 +60,19 @@ public class FreeIpaClientExceptionUtilV1Test {
         Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE,
                         new IllegalStateException(MESSAGE))),
-                Set.of(FreeIpaClientExceptionUtil.ErrorCodes.DUPLICATE_ENTRY)));
+                Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
         Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(NOT_FOUND, MESSAGE, null))),
-                Set.of(FreeIpaClientExceptionUtil.ErrorCodes.DUPLICATE_ENTRY)));
+                Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
         Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(DUPLICATE_ENTRY, MESSAGE, null))),
-                Set.of(FreeIpaClientExceptionUtil.ErrorCodes.DUPLICATE_ENTRY)));
+                Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
         Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException("", new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(DUPLICATE_ENTRY, MESSAGE, null))),
-                Set.of(FreeIpaClientExceptionUtil.ErrorCodes.DUPLICATE_ENTRY, FreeIpaClientExceptionUtil.ErrorCodes.COMMAND_ERROR)));
+                Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY, FreeIpaErrorCodes.COMMAND_ERROR)));
     }
 
     @Test

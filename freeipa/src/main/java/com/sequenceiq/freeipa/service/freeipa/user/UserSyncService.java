@@ -122,19 +122,19 @@ public class UserSyncService {
 
         if (operationState == OperationState.RUNNING) {
             tryWithOperationCleanup(operationId, accountId, () ->
-                ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> {
-                    boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
-                    if (fullSync) {
-                        long currentTime = Instant.now().toEpochMilli();
-                        stacks.forEach(stack -> {
-                            UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
-                            userSyncStatus.setLastFullSyncStartTime(currentTime);
-                            userSyncStatus.setLastStartedFullSync(operation);
-                            userSyncStatusService.save(userSyncStatus);
-                        });
-                    }
-                    asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync);
-                }));
+                    ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> {
+                        boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
+                        if (fullSync) {
+                            long currentTime = Instant.now().toEpochMilli();
+                            stacks.forEach(stack -> {
+                                UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
+                                userSyncStatus.setLastFullSyncStartTime(currentTime);
+                                userSyncStatus.setLastStartedFullSync(operation);
+                                userSyncStatusService.save(userSyncStatus);
+                            });
+                        }
+                        asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync);
+                    }));
         }
 
         return operation;
@@ -307,6 +307,7 @@ public class UserSyncService {
             } catch (FreeIpaClientException e) {
                 // TODO propagate this information out to API
                 LOGGER.error("Failed to add group {}", fmsGroup.getName(), e);
+                checkIfClientStillUsable(e);
             }
         }
     }
@@ -324,6 +325,7 @@ public class UserSyncService {
             } catch (FreeIpaClientException e) {
                 // TODO propagate this information out to API
                 LOGGER.error("Failed to add {}", username, e);
+                checkIfClientStillUsable(e);
             }
         }
     }
@@ -336,31 +338,16 @@ public class UserSyncService {
                 LOGGER.debug("Success: {}", userRemove);
             } catch (FreeIpaClientException e) {
                 LOGGER.error("Failed to delete {}", username, e);
+                checkIfClientStillUsable(e);
             }
         }
-    }
-
-    private void removeGroups(FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups) throws FreeIpaClientException {
-        for (FmsGroup fmsGroup : fmsGroups) {
-            String groupname = fmsGroup.getName();
-
-            LOGGER.debug("Removing group {}", groupname);
-
-            try {
-                freeIpaClient.deleteGroup(groupname);
-                LOGGER.debug("Success: {}", groupname);
-            } catch (FreeIpaClientException e) {
-                LOGGER.error("Failed to delete {}", groupname, e);
-            }
-        }
-
     }
 
     @VisibleForTesting
     void addUsersToGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping) throws FreeIpaClientException {
         LOGGER.debug("adding users to groups: [{}]", groupMapping);
         for (String group : groupMapping.keySet()) {
-            Iterables.partition(groupMapping.get(group), maxSubjectsPerRequest).forEach(users -> {
+            for (List<String> users : Iterables.partition(groupMapping.get(group), maxSubjectsPerRequest)) {
                 LOGGER.debug("adding users [{}] to group [{}]", users, group);
                 try {
                     // TODO specialize response object
@@ -369,15 +356,16 @@ public class UserSyncService {
                 } catch (FreeIpaClientException e) {
                     // TODO propagate this information out to API
                     LOGGER.error("Failed to add [{}] to group [{}]", users, group, e);
+                    checkIfClientStillUsable(e);
                 }
-            });
+            }
         }
     }
 
     @VisibleForTesting
     void removeUsersFromGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping) throws FreeIpaClientException {
         for (String group : groupMapping.keySet()) {
-            Iterables.partition(groupMapping.get(group), maxSubjectsPerRequest).forEach(users -> {
+            for (List<String> users : Iterables.partition(groupMapping.get(group), maxSubjectsPerRequest)) {
                 LOGGER.debug("removing users {} from group {}", users, group);
                 try {
                     // TODO specialize response object
@@ -386,8 +374,16 @@ public class UserSyncService {
                 } catch (FreeIpaClientException e) {
                     // TODO propagate this information out to API
                     LOGGER.error("Failed to add [{}] to group [{}]", users, group, e);
+                    checkIfClientStillUsable(e);
                 }
-            });
+            }
+        }
+    }
+
+    private void checkIfClientStillUsable(FreeIpaClientException e) throws FreeIpaClientException {
+        if (e.isClientUnusable()) {
+            LOGGER.warn("Client is not usable for further usage");
+            throw e;
         }
     }
 
