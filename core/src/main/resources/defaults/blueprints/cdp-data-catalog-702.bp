@@ -1,0 +1,376 @@
+{
+  "description": "7.0.2 - Data Catalog",
+  "blueprint": {
+    "cdhVersion": "7.0.2",
+    "displayName": "datacatalog-workload",
+    "services": [
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hdfs",
+        "serviceType": "HDFS",
+        "roleConfigGroups": [
+          {
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE",
+            "base": true,
+            "configs": [
+              {
+                "name": "fs_trash_interval",
+                "value": "0"
+              },
+              {
+                "name": "fs_trash_checkpoint_interval",
+                "value": "0"
+              }
+            ]
+          },
+          {
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-BALANCER-BASE",
+            "roleType": "BALANCER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "serviceConfigs": [
+          {
+            "name": "yarn_admin_acl",
+            "value": "yarn,hive,hdfs"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "base": true,
+            "configs": [
+              {
+                "name": "resourcemanager_config_safety_valve",
+                "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>file</value></property>"
+              },
+              {
+                "name": "yarn_resourcemanager_scheduler_class",
+                "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+              },
+              {
+                "name": "yarn_scheduler_capacity_resource_calculator",
+                "value": "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
+              },
+              {
+                "name": "resourcemanager_capacity_scheduler_configuration",
+                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property><property><name>yarn.scheduler.capacity.per-node-heartbeat.maximum-offswitch-assignments</name><value>4</value></property></configuration>"
+              }
+            ]
+          },
+          {
+            "refName": "yarn-NODEMANAGER-WORKER",
+            "roleType": "NODEMANAGER",
+            "base": false,
+            "configs": [
+              {
+                "name": "container_executor_allowed_system_users",
+                "value": "nobody, impala, hive, llama, hbase, dpprofiler"
+              }
+            ]
+          },
+          {
+            "refName": "yarn-NODEMANAGER-COMPUTE",
+            "roleType": "NODEMANAGER",
+            "base": false,
+            "configs": [
+              {
+                "name": "container_executor_allowed_system_users",
+                "value": "nobody, impala, hive, llama, hbase, dpprofiler"
+              }
+            ]
+          },
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "spark_on_yarn",
+        "serviceType": "SPARK_ON_YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK_YARN_HISTORY_SERVER",
+            "base": true
+          },
+          {
+            "refName": "spark_on_yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "tez",
+        "serviceType": "TEZ",
+        "serviceConfigs": [
+          {
+            "name": "yarn_service",
+            "ref": "yarn"
+          },
+          {
+            "name": "tez.am.container.reuse.non-local-fallback.enabled",
+            "value": "true"
+          },
+          {
+            "name": "tez.am.container.reuse.locality.delay-allocation-millis",
+            "value": "0"
+          },
+          {
+            "name": "tez.am.launch.cmd-opts",
+            "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+          },
+          {
+            "name": "tez.task.launch.cmd-opts",
+            "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "tez-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hms",
+        "serviceType": "HIVE",
+        "displayName": "Hive Metastore",
+        "roleConfigGroups": [
+          {
+            "refName": "hms-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "hms-HIVEMETASTORE-BASE",
+            "roleType": "HIVEMETASTORE",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hive_on_tez",
+        "serviceType": "HIVE_ON_TEZ",
+        "displayName": "Hive",
+        "serviceConfigs": [
+          {
+            "name": "hms_connector",
+            "ref": "hms"
+          },
+          {
+            "name": "tez_service",
+            "ref": "tez"
+          },
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          },
+          {
+            "name": "mapreduce_yarn_service",
+            "ref": "yarn"
+          },
+          {
+            "name": "tez_container_size",
+            "value": "4096"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hive_on_tez-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "hive_on_tez-HIVESERVER2-BASE",
+            "roleType": "HIVESERVER2",
+            "base": true,
+            "configs": [
+              {
+                "name": "hive_server2_transport_mode",
+                "value": "http"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "refName": "livy",
+        "serviceType": "LIVY",
+        "roleConfigGroups": [
+          {
+            "refName": "livy-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "livy-LIVY_SERVER-BASE",
+            "roleType": "LIVY_SERVER",
+            "base": true,
+            "configs": [
+              {
+                "name": "livy_admin_users",
+                "value": "knox,dpprofiler"
+              },
+              {
+                "name": "livy-conf/livy.conf_role_safety_valve",
+                "value": "livy.file.local-dir-whitelist=/opt/cloudera/parcels/CDH/jars/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "refName": "profiler_scheduler",
+        "serviceType": "PROFILER_SCHEDULER",
+        "serviceConfigs": [
+          {
+            "name": "profiler_admin_url",
+            "value": "{{{format-join host_groups.master format='https://%s:21700' sep=','}}}"
+          },
+          {
+            "name": "hdfs_service",
+            "ref": "hdfs"
+          },
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          },
+          {
+            "name": "livy_service",
+            "ref": "livy"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "profiler_scheduler-PROFILER_SCHEDULER_AGENT-BASE",
+            "roleType": "PROFILER_SCHEDULER_AGENT",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "profiler_manager",
+        "serviceType": "PROFILER_MANAGER",
+        "serviceConfigs": [
+          {
+            "name": "hdfs_service",
+            "ref": "hdfs"
+          },
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "profiler_manager-PROFILER_ADMIN_AGENT-BASE",
+            "roleType": "PROFILER_ADMIN_AGENT",
+            "base": true
+          },
+          {
+            "refName": "profiler_manager-DATA_DISCOVERY_SERVICE_AGENT-BASE",
+            "roleType": "DATA_DISCOVERY_SERVICE_AGENT",
+            "base": true
+          },
+          {
+            "refName": "profiler_manager-PROFILER_METRICS_AGENT-BASE",
+            "roleType": "PROFILER_METRICS_AGENT",
+            "base": true
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "master",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hdfs-BALANCER-BASE",
+          "hdfs-NAMENODE-BASE",
+          "hdfs-SECONDARYNAMENODE-BASE",
+          "hms-GATEWAY-BASE",
+          "hms-HIVEMETASTORE-BASE",
+          "hive_on_tez-HIVESERVER2-BASE",
+          "hive_on_tez-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "livy-LIVY_SERVER-BASE",
+          "yarn-JOBHISTORY-BASE",
+          "yarn-RESOURCEMANAGER-BASE",
+          "zookeeper-SERVER-BASE",
+          "profiler_scheduler-PROFILER_SCHEDULER_AGENT-BASE",
+          "profiler_manager-PROFILER_ADMIN_AGENT-BASE",
+          "profiler_manager-DATA_DISCOVERY_SERVICE_AGENT-BASE",
+          "profiler_manager-PROFILER_METRICS_AGENT-BASE"
+        ]
+      },
+      {
+        "refName": "worker",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hdfs-DATANODE-BASE",
+          "hms-GATEWAY-BASE",
+          "hive_on_tez-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "livy-GATEWAY-BASE",
+          "yarn-NODEMANAGER-WORKER"
+        ]
+      },
+      {
+        "refName": "compute",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "hms-GATEWAY-BASE",
+          "hive_on_tez-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER-COMPUTE"
+        ]
+      },
+      {
+        "refName": "gateway",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "hms-GATEWAY-BASE",
+          "hive_on_tez-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "livy-GATEWAY-BASE"
+        ]
+      }
+    ]
+  }
+}

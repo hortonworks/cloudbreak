@@ -223,6 +223,7 @@ cb:
         CDP 1.2 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-702;
         CDP 1.2 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-702;
         CDP 1.2 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-702;
+        CDP 1.2 - Data Catalog: Profilers=cdp-data-catalog-702;
         7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-710;
         7.1.0 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha-710;
         7.1.0 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3-710;
@@ -235,6 +236,7 @@ cb:
         7.1.0 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-710;
         7.1.0 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-710;
         7.1.0 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-710;
+        7.1.0 - Data Catalog: Profilers=cdp-data-catalog-710;
         7.1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-711;
         7.1.1 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha-711;
         7.1.1 - Data Mart: Apache Impala, Hue=cdp-data-mart-711;
@@ -244,6 +246,7 @@ cb:
         7.1.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-711;
         7.1.1 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-711;
         7.1.1 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-711;
+        7.1.1 - Data Catalog: Profilers=cdp-data-catalog-711;
         7.2.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-720;
         7.2.0 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha-720;
         7.2.0 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3-720;
@@ -256,6 +259,7 @@ cb:
         7.2.0 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-720;
         7.2.0 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small-720;
         7.2.0 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-720;
+        7.2.0 - Data Catalog: Profilers=cdp-data-catalog-720;
 
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
