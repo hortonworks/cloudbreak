@@ -51,8 +51,6 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
     private static final String CHILD_ENVIRONMENT_KEY = "childEnvironment";
 
-    private static final String MOCK_UMS_USER = "mockuser";
-
     private static final String MOCK_UMS_PASSWORD = "Password123!";
 
     private static final String MOCK_UMS_PASSWORD_INVALID = "Invalid password";
@@ -146,8 +144,9 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                     for (InstanceGroupV4Response ig : dto.getResponse().getStackV4Response().getInstanceGroups()) {
                         for (InstanceMetaDataV4Response i : ig.getMetadata()) {
                             String ip = i.getPublicIp();
-                            testShhAuthenticationSuccessfull(ip);
-                            testShhAuthenticationFailure(ip);
+                            String username = testContext.getActingUserCrn().getResource();
+                            testShhAuthenticationSuccessfull(username, ip);
+                            testShhAuthenticationFailure(username, ip);
                         }
                     }
                     return dto;
@@ -161,17 +160,17 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
         testContext.getResources().remove(CHILD_ENVIRONMENT_KEY);
     }
 
-    private void testShhAuthenticationSuccessfull(String host) throws IOException, UserAuthException {
+    private void testShhAuthenticationSuccessfull(String username, String host) throws IOException, UserAuthException {
         SSHClient client = getSshClient(host);
-        client.authPassword(MOCK_UMS_USER, MOCK_UMS_PASSWORD);
+        client.authPassword(username, MOCK_UMS_PASSWORD);
         client.close();
     }
 
-    private void testShhAuthenticationFailure(String host) throws IOException {
+    private void testShhAuthenticationFailure(String username, String host) throws IOException {
         SSHClient client = null;
         try {
             client = getSshClient(host);
-            client.authPassword(MOCK_UMS_USER, MOCK_UMS_PASSWORD_INVALID);
+            client.authPassword(username, MOCK_UMS_PASSWORD_INVALID);
             fail("SSH authentication passed with invalid password.");
         } catch (UserAuthException ex) {
             //Expected
