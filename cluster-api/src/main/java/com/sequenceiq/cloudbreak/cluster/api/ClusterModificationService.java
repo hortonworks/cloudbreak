@@ -17,7 +17,7 @@ public interface ClusterModificationService {
 
     List<String> upscaleCluster(HostGroup hostGroup, Collection<InstanceMetaData> metas) throws CloudbreakException;
 
-    void stopCluster() throws CloudbreakException;
+    void stopCluster(boolean full) throws CloudbreakException;
 
     int startCluster(Set<InstanceMetaData> hostsInCluster) throws CloudbreakException;
 

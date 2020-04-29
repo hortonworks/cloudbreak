@@ -64,8 +64,8 @@ public interface ClusterApi {
         clusterModificationService().upgradeClusterRuntime(components);
     }
 
-    default void stopCluster() throws CloudbreakException {
-        clusterModificationService().stopCluster();
+    default void stopCluster(boolean disableKnoxAutorestart) throws CloudbreakException {
+        clusterModificationService().stopCluster(disableKnoxAutorestart);
     }
 
     default int startCluster(Set<InstanceMetaData> hostsInCluster) throws CloudbreakException {

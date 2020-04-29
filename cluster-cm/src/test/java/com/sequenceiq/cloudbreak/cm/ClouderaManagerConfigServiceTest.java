@@ -33,7 +33,6 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 
 public class ClouderaManagerConfigServiceTest {
@@ -65,7 +64,7 @@ public class ClouderaManagerConfigServiceTest {
         ApiVersionInfo version702 = new ApiVersionInfo().version(VERSION_7_0_2);
         when(clouderaManagerResourceApi.getVersion()).thenReturn(version702);
 
-        underTest.setCdpEnvironmentIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_0_2, new ApiClient(), new HttpClientConfig(""));
+        underTest.setCdpEnvironmentIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_0_2, new ApiClient());
 
         ArgumentCaptor<ApiConfigList> apiConfigListCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
         verify(clouderaManagerResourceApi).updateConfig(eq(""), apiConfigListCaptor.capture());
@@ -84,7 +83,7 @@ public class ClouderaManagerConfigServiceTest {
         ApiVersionInfo version701 = new ApiVersionInfo().version(VERSION_7_0_1);
         when(clouderaManagerResourceApi.getVersion()).thenReturn(version701);
 
-        underTest.setCdpEnvironmentIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_0_2, new ApiClient(), new HttpClientConfig(""));
+        underTest.setCdpEnvironmentIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_0_2, new ApiClient());
 
         verify(clouderaManagerResourceApi, never()).updateConfig(any(), any());
     }
@@ -102,7 +101,7 @@ public class ClouderaManagerConfigServiceTest {
                 .addItemsItem(new ApiService().name(knoxName).type("KNOX"));
         when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
 
-        underTest.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, new ApiClient(), new HttpClientConfig(""), TEST_CLUSTER_NAME);
+        underTest.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, new ApiClient(), TEST_CLUSTER_NAME);
 
         ArgumentCaptor<ApiServiceConfig> apiServiceConfigArgumentCaptor = ArgumentCaptor.forClass(ApiServiceConfig.class);
         verify(serviceResourceApi, times(1))
@@ -132,7 +131,7 @@ public class ClouderaManagerConfigServiceTest {
         ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name("hbase-a63").type("HBASE"));
         when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
 
-        underTest.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, new ApiClient(), new HttpClientConfig(""), TEST_CLUSTER_NAME);
+        underTest.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, new ApiClient(), TEST_CLUSTER_NAME);
 
         verify(serviceResourceApi, never()).updateServiceConfig(any(), any(), any(), any());
     }
@@ -141,7 +140,7 @@ public class ClouderaManagerConfigServiceTest {
     public void testDisableKnoxAutorestartIfCmVersionAtLeastWithLowerVersion() throws ApiException {
         setUpCMVersion(VERSION_7_0_1);
 
-        underTest.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, new ApiClient(), new HttpClientConfig(""), TEST_CLUSTER_NAME);
+        underTest.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, new ApiClient(), TEST_CLUSTER_NAME);
         verify(clouderaManagerApiFactory, never()).getServicesResourceApi(any());
     }
 }
