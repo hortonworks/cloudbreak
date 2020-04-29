@@ -76,7 +76,11 @@ public class EnvironmentService {
                             return AttemptResults.finishWith(environment);
                         } else {
                             if (environment.getEnvironmentStatus().isFailed()) {
-                                return AttemptResults.breakFor("Environment creation failed " + sdxCluster.getEnvName());
+                                return AttemptResults.breakFor("Environment creation failed: " + sdxCluster.getEnvName());
+                            } else if (environment.getEnvironmentStatus().isStopInProgressOrStopped()) {
+                                return AttemptResults.breakFor("Environment is in stopped status: " + sdxCluster.getEnvName());
+                            } else if (environment.getEnvironmentStatus().isStartInProgress()) {
+                                return AttemptResults.breakFor("The environment is starting. Please wait until finished: " + sdxCluster.getEnvName());
                             } else {
                                 return AttemptResults.justContinue();
                             }

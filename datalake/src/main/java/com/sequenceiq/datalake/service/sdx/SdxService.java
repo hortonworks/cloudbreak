@@ -164,6 +164,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest.getClusterShape());
         DetailedEnvironmentResponse environment = getEnvironment(sdxClusterRequest.getEnvironment());
+        validateEnv(environment);
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setInitiatorUserCrn(userCrn);
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
@@ -207,6 +208,14 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
 
         return Pair.of(sdxCluster, flowIdentifier);
+    }
+
+    private void validateEnv(DetailedEnvironmentResponse environment) {
+        if (environment.getEnvironmentStatus().isStopInProgressOrStopped()) {
+            throw new BadRequestException("The environment is stopped. Please start the environment first!");
+        } else if (environment.getEnvironmentStatus().isStartInProgress()) {
+            throw new BadRequestException("The environment is starting. Please wait until finished!");
+        }
     }
 
     private StackV4Request getStackRequest(SdxClusterRequest sdxClusterRequest, StackV4Request internalStackV4Request, CloudPlatform cloudPlatform,
