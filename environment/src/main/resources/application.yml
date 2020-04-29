@@ -109,7 +109,7 @@ cb:
   yarn:
     domain: default.com
     defaultQueue: "default"
-    defaultLifeTime: -1
+    defaultLifeTime: 604800
     networkCidr: 172.27.0.0/16
   os:
     enable.autoimport: true

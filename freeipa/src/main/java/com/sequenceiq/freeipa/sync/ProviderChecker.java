@@ -111,6 +111,10 @@ public class ProviderChecker {
                 setStatusIfNotTheSame(instanceMetaData, InstanceStatus.DELETED_ON_PROVIDER_SIDE);
                 status = InstanceStatus.DELETED_ON_PROVIDER_SIDE;
                 break;
+            case TERMINATED_BY_PROVIDER:
+                setStatusIfNotTheSame(instanceMetaData, InstanceStatus.DELETED_BY_PROVIDER);
+                status = InstanceStatus.DELETED_BY_PROVIDER;
+                break;
             default:
                 LOGGER.info(":::Auto sync::: the '{}' status is not converted", vmInstanceStatus.getStatus());
         }

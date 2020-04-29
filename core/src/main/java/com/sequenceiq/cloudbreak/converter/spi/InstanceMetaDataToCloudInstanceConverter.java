@@ -62,6 +62,8 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
                 return InstanceStatus.DELETE_REQUESTED;
             case TERMINATED:
                 return InstanceStatus.TERMINATED;
+            case DELETED_BY_PROVIDER:
+                return InstanceStatus.TERMINATED_BY_PROVIDER;
             default:
                 return InstanceStatus.UNKNOWN;
         }

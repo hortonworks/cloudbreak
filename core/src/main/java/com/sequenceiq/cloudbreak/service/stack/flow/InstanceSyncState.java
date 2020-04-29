@@ -3,7 +3,13 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 public enum InstanceSyncState {
-    DELETED, DELETED_ON_PROVIDER_SIDE, RUNNING, STOPPED, IN_PROGRESS, UNKNOWN;
+    DELETED,
+    DELETED_ON_PROVIDER_SIDE,
+    DELETED_BY_PROVIDER,
+    RUNNING,
+    STOPPED,
+    IN_PROGRESS,
+    UNKNOWN;
 
     public static InstanceSyncState getInstanceSyncState(InstanceStatus instanceStatus) {
         switch (instanceStatus) {
@@ -19,6 +25,8 @@ public enum InstanceSyncState {
                 return DELETED;
             case TERMINATED:
                 return DELETED_ON_PROVIDER_SIDE;
+            case TERMINATED_BY_PROVIDER:
+                return DELETED_BY_PROVIDER;
             default:
                 return UNKNOWN;
         }
