@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +80,15 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Inject
     private AwsUpdateService awsUpdateService;
 
+    @Inject
+    private AwsRdsStartService awsRdsStartService;
+
+    @Inject
+    private AwsRdsStopService awsRdsStopService;
+
+    @Inject
+    private AwsRdsStatusLookupService awsRdsStatusLookupService;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
@@ -108,6 +118,21 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack, boolean force) throws Exception {
         return awsRdsTerminateService.terminate(ac, stack, force);
+    }
+
+    @Override
+    public void startDatabaseServer(AuthenticatedContext ac, String dbInstanceIdentifier) throws Exception {
+        awsRdsStartService.start(ac, dbInstanceIdentifier);
+    }
+
+    @Override
+    public void stopDatabaseServer(AuthenticatedContext ac, String dbInstanceIdentifier) throws Exception {
+        awsRdsStopService.stop(ac, dbInstanceIdentifier);
+    }
+
+    @Override
+    public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) throws Exception {
+        return awsRdsStatusLookupService.getStatus(authenticatedContext, dbInstanceIdentifier);
     }
 
     @Override

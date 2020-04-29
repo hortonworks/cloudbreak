@@ -8,6 +8,7 @@ import java.net.URL;
 import java.security.Security;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
@@ -15,6 +16,7 @@ import javax.net.ssl.SSLContext;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -65,6 +67,8 @@ public class FreeIpaClientBuilder {
     private static final int READ_TIMEOUT_MILLIS = 60 * 1000 * 5;
 
     private static final int TEST_CONNECTION_READ_TIMEOUT_MILLIS = 5 * 1000;
+
+    private static final Set<Integer> UNAVIALLBE_PING_HTTP_RESPONSES = Set.of(HttpStatus.INTERNAL_SERVER_ERROR.value(), HttpStatus.SERVICE_UNAVAILABLE.value());
 
     private final PoolingHttpClientConnectionManager connectionManager;
 
@@ -119,7 +123,7 @@ public class FreeIpaClientBuilder {
         this(user, pass, clientConfig, hostname, port, DEFAULT_BASE_PATH, Map.of(), null);
     }
 
-    public FreeIpaClient build(boolean withPing) throws URISyntaxException, IOException, FreeIpaClientException {
+    public FreeIpaClient build(boolean withPing) throws URISyntaxException, IOException, FreeIpaClientException, FreeIpaHostNotAvailableException {
         if (withPing) {
             List<BasicHeader> defaultHeaders = additionalHeaders.entrySet().stream()
                     .map(entry -> new BasicHeader(entry.getKey(), entry.getValue())).collect(Collectors.toList());
@@ -138,8 +142,16 @@ public class FreeIpaClientBuilder {
                     .build()) {
                 URI target = getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/login_password").toURI();
                 LOGGER.debug("Ping at target: {}", target);
-                client.execute(new HttpHead(target));
+                HttpHead request = new HttpHead(target);
+                additionalHeaders.forEach(request::addHeader);
+                try (CloseableHttpResponse response = client.execute(request)) {
+                    if (UNAVIALLBE_PING_HTTP_RESPONSES.contains(response.getStatusLine().getStatusCode())) {
+                        throw new HttpException("Ping failed with http status code " + response.getStatusLine().getStatusCode());
+                    }
+                }
                 LOGGER.debug("Freeipa is reachable");
+            } catch (Exception e) {
+                throw new FreeIpaHostNotAvailableException("Ping failed", e);
             }
         }
         String sessionCookie = connect(user, pass, clientConfig.getApiAddress(), port);

@@ -36,7 +36,7 @@ import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteState
 import com.sequenceiq.environment.environment.flow.start.EnvStartState;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
-import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
+import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.AbstractAction;
@@ -53,18 +53,18 @@ public class EnvDeleteActions {
 
     private final NotificationService notificationService;
 
-    private final EnvironmentApiConverter environmentApiConverter;
+    private final EnvironmentResponseConverter environmentResponseConverter;
 
     private final EnvironmentStatusUpdateService environmentStatusUpdateService;
 
     private final EnvironmentMetricService metricService;
 
     public EnvDeleteActions(EnvironmentService environmentService, NotificationService notificationService,
-            EnvironmentApiConverter environmentApiConverter, EnvironmentStatusUpdateService environmentStatusUpdateService,
+            EnvironmentResponseConverter environmentResponseConverter, EnvironmentStatusUpdateService environmentStatusUpdateService,
             EnvironmentMetricService metricService) {
         this.environmentService = environmentService;
         this.notificationService = notificationService;
-        this.environmentApiConverter = environmentApiConverter;
+        this.environmentResponseConverter = environmentResponseConverter;
         this.environmentStatusUpdateService = environmentStatusUpdateService;
         this.metricService = metricService;
     }
@@ -191,7 +191,7 @@ public class EnvDeleteActions {
                             env.setProxyConfig(null);
                             Environment result = environmentService.save(env);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
-                            SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                            SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                             simpleResponse.setName(originalName);
                             metricService.incrementMetricCounter(MetricType.ENV_DELETION_FINISHED, environmentDto);
                             notificationService.send(ResourceEvent.ENVIRONMENT_DELETION_FINISHED, simpleResponse, context.getFlowTriggerUserCrn());

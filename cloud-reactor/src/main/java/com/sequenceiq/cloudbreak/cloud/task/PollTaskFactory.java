@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.InstanceConsoleOutputResul
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 
 @Component
 public class PollTaskFactory {
@@ -32,6 +33,12 @@ public class PollTaskFactory {
     public PollTask<InstanceConsoleOutputResult> newPollConsoleOutputTask(InstanceConnector instanceConnector,
             AuthenticatedContext authenticatedContext, CloudInstance instance) {
         return createPollTask(PollInstanceConsoleOutputTask.NAME, instanceConnector, authenticatedContext, instance);
+    }
+
+    public PollTask<ExternalDatabaseStatus> newPollPermanentExternalDatabaseStateTask(AuthenticatedContext authenticatedContext,
+            String dbInstanceIdentifier) {
+        CloudConnector<Object> connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatformVariant());
+        return createPollTask(PollPermanentExternalDatabaseStateTask.NAME, authenticatedContext, dbInstanceIdentifier, connector.resources());
     }
 
     @SuppressWarnings("unchecked")

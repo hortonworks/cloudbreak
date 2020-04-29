@@ -1,5 +1,5 @@
 {%- from 'freeipa/settings.sls' import freeipa with context -%}
 #!/bin/bash
 if [ ! -f /tmp/freeipa_backup_monthly_bypass ]; then
-    /usr/local/bin/freeipa_backup -t FULL -f "{{freeipa.hostname}}/full"
+    CRON_BACKUP=true /usr/local/bin/freeipa_backup -t FULL -f "{{freeipa.hostname}}/full"
 fi

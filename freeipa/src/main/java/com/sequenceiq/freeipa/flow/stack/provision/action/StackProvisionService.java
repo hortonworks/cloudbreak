@@ -47,7 +47,6 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
-import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 import reactor.bus.EventBus;
 
@@ -85,9 +84,6 @@ public class StackProvisionService {
 
     @Inject
     private EventBus eventBus;
-
-    @Inject
-    private FreeipaJobService freeipaJobService;
 
     public void setupProvision(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_SETUP, "Provisioning setup");
@@ -142,7 +138,6 @@ public class StackProvisionService {
     }
 
     public void stackCreationFinished(Stack stack) {
-        freeipaJobService.schedule(stack);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STACK_PROVISIONED, "Stack provisioned.");
     }
 

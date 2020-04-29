@@ -54,7 +54,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
@@ -95,7 +94,7 @@ class ProvisionerServiceTest {
         when(stackV4Endpoint.post(anyLong(), any(StackV4Request.class))).thenReturn(stackV4Response);
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
 
-        underTest.startStackProvisioning(clusterId, getEnvironmentResponse(), getDatabaseServerResponse());
+        underTest.startStackProvisioning(clusterId, getEnvironmentResponse());
 
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, stackV4Response.getFlowIdentifier());
         verify(sdxClusterRepository, times(1)).save(any(SdxCluster.class));
@@ -107,7 +106,7 @@ class ProvisionerServiceTest {
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.empty());
 
         Assertions.assertThrows(com.sequenceiq.cloudbreak.exception.NotFoundException.class,
-                () -> underTest.startStackProvisioning(clusterId, getEnvironmentResponse(), getDatabaseServerResponse()));
+                () -> underTest.startStackProvisioning(clusterId, getEnvironmentResponse()));
 
         verifyZeroInteractions(cloudbreakFlowService);
     }
@@ -333,10 +332,6 @@ class ProvisionerServiceTest {
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED, "Datalake stack deleted", sdxCluster);
         verify(stackV4Endpoint, times(3)).get(anyLong(), eq(sdxCluster.getClusterName()), anySet());
-    }
-
-    private DatabaseServerStatusV4Response getDatabaseServerResponse() {
-        return new DatabaseServerStatusV4Response();
     }
 
     private DetailedEnvironmentResponse getEnvironmentResponse() {

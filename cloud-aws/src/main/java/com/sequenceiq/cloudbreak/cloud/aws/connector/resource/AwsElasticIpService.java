@@ -10,18 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
-import com.amazonaws.services.ec2.model.DisassociateAddressRequest;
-import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AwsElasticIpService {
@@ -63,42 +58,10 @@ public class AwsElasticIpService {
         }
     }
 
-    public void releaseReservedIp(AmazonEC2 client, Iterable<CloudResource> resources) {
-        CloudResource elasticIpResource = getReservedIp(resources);
-        if (elasticIpResource != null && elasticIpResource.getName() != null) {
-            Address address;
-            try {
-                DescribeAddressesResult describeResult = client.describeAddresses(
-                        new DescribeAddressesRequest().withAllocationIds(elasticIpResource.getName()));
-                address = describeResult.getAddresses().get(0);
-            } catch (AmazonServiceException e) {
-                if (e.getErrorMessage().equals("The allocation ID '" + elasticIpResource.getName() + "' does not exist")) {
-                    LOGGER.warn("Elastic IP with allocation ID '{}' not found. Ignoring IP release.", elasticIpResource.getName());
-                    return;
-                } else {
-                    throw e;
-                }
-            }
-            if (address.getAssociationId() != null) {
-                client.disassociateAddress(new DisassociateAddressRequest().withAssociationId(elasticIpResource.getName()));
-            }
-            client.releaseAddress(new ReleaseAddressRequest().withAllocationId(elasticIpResource.getName()));
-        }
-    }
-
     public List<String> getFreeIps(Collection<String> eips, AmazonEC2 amazonEC2Client) {
         DescribeAddressesResult addresses = amazonEC2Client.describeAddresses(new DescribeAddressesRequest().withAllocationIds(eips));
         return addresses.getAddresses().stream().filter(address -> address.getInstanceId() == null)
                 .map(Address::getAllocationId).collect(Collectors.toList());
-    }
-
-    private CloudResource getReservedIp(Iterable<CloudResource> cloudResources) {
-        for (CloudResource cloudResource : cloudResources) {
-            if (cloudResource.getType().equals(ResourceType.AWS_RESERVED_IP)) {
-                return cloudResource;
-            }
-        }
-        return null;
     }
 
 }

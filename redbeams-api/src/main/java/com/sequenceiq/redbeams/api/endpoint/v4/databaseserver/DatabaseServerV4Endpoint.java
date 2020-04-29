@@ -149,4 +149,20 @@ public interface DatabaseServerV4Endpoint {
     CreateDatabaseV4Response createDatabase(
             @Valid @ApiParam(DatabaseServerParamDescriptions.CREATE_DATABASE_REQUEST) CreateDatabaseV4Request request
     );
+
+    @PUT
+    @Path("{crn}/start")
+    @ApiOperation(value = DatabaseServerOpDescription.START, notes = DatabaseServerNotes.START,
+            nickname = "startDatabaseServer")
+    void start(
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+    );
+
+    @PUT
+    @Path("{crn}/stop")
+    @ApiOperation(value = DatabaseServerOpDescription.STOP, notes = DatabaseServerNotes.STOP,
+            nickname = "stopDatabaseServer")
+    void stop(
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+    );
 }

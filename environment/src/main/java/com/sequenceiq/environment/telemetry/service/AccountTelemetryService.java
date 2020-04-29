@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.telemetry.service;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,10 +13,15 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.repository.AccountTelemetryRepository;
+
+import jregex.Pattern;
+import jregex.PatternSyntaxException;
+import jregex.Replacer;
 
 @Service
 public class AccountTelemetryService {
@@ -44,6 +50,7 @@ public class AccountTelemetryService {
 
     public AccountTelemetry create(AccountTelemetry telemetry, String accountId) {
         try {
+            validateAnonymizationRules(telemetry);
             LOGGER.debug("Creating account telemetry for account: {}", accountId);
             accountTelemetryRepository.archiveAll(accountId);
             String newCrn = createCRN(accountId);
@@ -102,15 +109,18 @@ public class AccountTelemetryService {
         List<AnonymizationRule> defaultRules = new ArrayList<>();
 
         AnonymizationRule creditCardWithSepRule = new AnonymizationRule();
-        creditCardWithSepRule.setValue(CREDIT_CARD_PATTERN);
+        creditCardWithSepRule.setValue(
+                Base64.getEncoder().encodeToString(CREDIT_CARD_PATTERN.getBytes()));
         creditCardWithSepRule.setReplacement(CREDIT_CARD_REPLACEMENT);
 
         AnonymizationRule ssnWithSepRule = new AnonymizationRule();
-        ssnWithSepRule.setValue(SSN_PATTERN);
+        ssnWithSepRule.setValue(
+                Base64.getEncoder().encodeToString(SSN_PATTERN.getBytes()));
         ssnWithSepRule.setReplacement(SSN_REPLACEMENT);
 
         AnonymizationRule emailRule = new AnonymizationRule();
-        emailRule.setValue(EMAIL_PATTERN);
+        emailRule.setValue(
+                Base64.getEncoder().encodeToString(EMAIL_PATTERN.getBytes()));
         emailRule.setReplacement(EMAIL_REPLACEMENT);
 
         defaultRules.add(creditCardWithSepRule);
@@ -122,6 +132,37 @@ public class AccountTelemetryService {
         defaultTelemetry.setRules(defaultRules);
         defaultTelemetry.setFeatures(defaultFeatures);
         return defaultTelemetry;
+    }
+
+    public String testRulePatterns(List<AnonymizationRule> rules, String input) {
+        String output = input;
+        for (AnonymizationRule rule : rules) {
+            String decodedRule = new String(Base64.getDecoder().decode(rule.getValue().getBytes()));
+            Pattern p = createAndCheckPattern(decodedRule);
+            Replacer replacer = p.replacer(rule.getReplacement());
+            output = replacer.replace(output);
+        }
+        return output;
+    }
+
+    void validateAnonymizationRules(AccountTelemetry telemetry) {
+        Optional.ofNullable(telemetry.getRules()).orElse(new ArrayList<>())
+                .forEach(rule -> {
+                    String decodedRule = new String(Base64.getDecoder().decode(rule.getValue().getBytes()));
+                    createAndCheckPattern(decodedRule);
+                });
+    }
+
+    private Pattern createAndCheckPattern(String decodedRule) {
+        Pattern p;
+        try {
+            p = new Pattern(decodedRule);
+        } catch (PatternSyntaxException e) {
+            String errorMessage = String.format("Anonymization regex pattern is invalid: %s", decodedRule);
+            LOGGER.debug(errorMessage, e);
+            throw new BadRequestException(errorMessage);
+        }
+        return p;
     }
 
     private String createCRN(String accountId) {

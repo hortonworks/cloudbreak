@@ -1,10 +1,15 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm;
 
-import static org.junit.Assert.assertEquals;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.DATABASE_HOST;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.DATABASE_NAME;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.DATABASE_PASSWORD;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.DATABASE_PORT;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.DATABASE_TYPE;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.DATABASE_USER;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
@@ -12,11 +17,12 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -27,110 +33,40 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
     private final StreamsMessagingManagerServiceConfigProvider underTest = new StreamsMessagingManagerServiceConfigProvider();
 
     @Test
-    public void testGetStreamsMessagingManagerServiceConfigsWhenInternalFqdn() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject("cm.fqdn.host", false);
+    public void testGetStreamsMessagingManagerServerConfigs() {
         String inputJson = getBlueprintText("input/cdp-streaming.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, false, cmTemplateProcessor);
 
-        List<ApiClusterTemplateConfig> streamsMessagingManagerServiceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
 
-        assertEquals(5, streamsMessagingManagerServiceConfigs.size());
-        assertEquals("cm.metrics.host", streamsMessagingManagerServiceConfigs.get(0).getName());
-        assertEquals("cm.fqdn.host", streamsMessagingManagerServiceConfigs.get(0).getValue());
-
-        assertEquals("cm.metrics.username", streamsMessagingManagerServiceConfigs.get(1).getName());
-        assertEquals("cbambariuser", streamsMessagingManagerServiceConfigs.get(1).getValue());
-
-        assertEquals("cm.metrics.password", streamsMessagingManagerServiceConfigs.get(2).getName());
-        assertEquals("cbambaripassword", streamsMessagingManagerServiceConfigs.get(2).getValue());
+        assertThat(serviceConfigs).hasSameElementsAs(List.of(
+                config(DATABASE_TYPE, "postgresql"),
+                config(DATABASE_NAME, "smm"),
+                config(DATABASE_HOST, "testhost"),
+                config(DATABASE_PORT, "5432"),
+                config(DATABASE_USER, "smm_server"),
+                config(DATABASE_PASSWORD, "smm_server_db_password")
+        ));
     }
 
-    @Test
-    public void testGetStreamsMessagingManagerServiceConfigsWhenNoInternalFqdn() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, false);
-        String inputJson = getBlueprintText("input/cdp-streaming.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
-        List<ApiClusterTemplateConfig> streamsMessagingManagerServiceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
-
-        assertEquals(5, streamsMessagingManagerServiceConfigs.size());
-        assertEquals("cm.metrics.host", streamsMessagingManagerServiceConfigs.get(0).getName());
-        assertEquals("122.0.0.1", streamsMessagingManagerServiceConfigs.get(0).getValue());
-    }
-
-    @Test
-    public void testGetStreamsMessagingManagerServiceConfigsNoSsl() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject("cm.fqdn.host", false);
-        String inputJson = getBlueprintText("input/cdp-streaming.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
-        List<ApiClusterTemplateConfig> streamsMessagingManagerServiceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
-
-        assertEquals(5, streamsMessagingManagerServiceConfigs.size());
-        assertEquals("cm.metrics.protocol", streamsMessagingManagerServiceConfigs.get(3).getName());
-        assertEquals("http", streamsMessagingManagerServiceConfigs.get(3).getValue());
-
-        assertEquals("cm.metrics.port", streamsMessagingManagerServiceConfigs.get(4).getName());
-        assertEquals("7180", streamsMessagingManagerServiceConfigs.get(4).getValue());
-    }
-
-    @Test
-    public void testGetStreamsMessagingManagerServiceConfigsSsl() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject("cm.fqdn.host", true);
-        String inputJson = getBlueprintText("input/cdp-streaming.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
-        List<ApiClusterTemplateConfig> streamsMessagingManagerServiceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
-
-        assertEquals(5, streamsMessagingManagerServiceConfigs.size());
-        assertEquals("cm.metrics.protocol", streamsMessagingManagerServiceConfigs.get(3).getName());
-        assertEquals("https", streamsMessagingManagerServiceConfigs.get(3).getValue());
-
-        assertEquals("cm.metrics.port", streamsMessagingManagerServiceConfigs.get(4).getName());
-        assertEquals("7183", streamsMessagingManagerServiceConfigs.get(4).getValue());
-    }
-
-    @Test
-    public void testGetStreamsMessagingManagerServerRoleConfigs() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, false);
-        String inputJson = getBlueprintText("input/cdp-streaming.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
-        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
-        List<ApiClusterTemplateConfig> streamsMessagingManager = roleConfigs.get("streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE");
-
-        assertEquals(3, streamsMessagingManager.size());
-        assertEquals("streams.messaging.manager.storage.connector.connectURI", streamsMessagingManager.get(0).getName());
-        assertEquals("jdbc:postgresql://testhost:5432/smm", streamsMessagingManager.get(0).getValue());
-
-        assertEquals("streams.messaging.manager.storage.connector.user", streamsMessagingManager.get(1).getName());
-        assertEquals("smm_server", streamsMessagingManager.get(1).getValue());
-
-        assertEquals("streams.messaging.manager.storage.connector.password", streamsMessagingManager.get(2).getName());
-        assertEquals("smm_server_db_password", streamsMessagingManager.get(2).getValue());
-    }
-
-    private TemplatePreparationObject getTemplatePreparationObject(String internalFqdn, boolean ssl) {
+    private TemplatePreparationObject getTemplatePreparationObject(String internalFqdn, boolean ssl,
+            CmTemplateProcessor cmTemplateProcessor) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
+        BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
 
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setType(DatabaseType.STREAMS_MESSAGING_MANAGER.toString());
+        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
+        rdsConfig.setConnectionURL("jdbc:postgresql://testhost:5432/smm");
         rdsConfig.setConnectionUserName("smm_server");
         rdsConfig.setConnectionPassword("smm_server_db_password");
-        rdsConfig.setConnectionURL("jdbc:postgresql://testhost:5432/smm");
-
-        GeneralClusterConfigs gcc = new GeneralClusterConfigs();
-        gcc.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(internalFqdn));
-        gcc.setClusterManagerIp("122.0.0.1");
-        gcc.setCloudbreakAmbariUser("cbambariuser");
-        gcc.setCloudbreakAmbariPassword("cbambaripassword");
-        gcc.setAutoTlsEnabled(ssl);
 
         return TemplatePreparationObject.Builder.builder()
+                .withBlueprintView(blueprintView)
                 .withHostgroupViews(Set.of(master, worker))
                 .withRdsConfigs(Set.of(rdsConfig))
-                .withGeneralClusterConfigs(gcc)
                 .build();
     }
 

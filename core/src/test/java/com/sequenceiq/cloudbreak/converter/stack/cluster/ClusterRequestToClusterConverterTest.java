@@ -14,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.reflect.Whitebox;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -57,7 +56,6 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
 
     @Before
     public void setUp() {
-        Whitebox.setInternalState(underTest, "ambariUserName", "cloudbreak");
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
     }
 

@@ -37,7 +37,6 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 
 @Service
 public class ProvisionerService {
@@ -154,13 +153,13 @@ public class ProvisionerService {
         });
     }
 
-    public void startStackProvisioning(Long id, DetailedEnvironmentResponse environment, DatabaseServerStatusV4Response database) {
+    public void startStackProvisioning(Long id, DetailedEnvironmentResponse environment) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             stackRequestManifester.configureStackForSdxCluster(sdxCluster, environment);
             LOGGER.info("Call cloudbreak with stackrequest");
             try {
                 StackV4Request stackV4Request = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class);
-                Optional.ofNullable(database).map(DatabaseServerStatusV4Response::getResourceCrn).ifPresent(crn -> {
+                Optional.ofNullable(sdxCluster.getDatabaseCrn()).ifPresent(crn -> {
                     stackV4Request.getCluster().setDatabaseServerCrn(crn);
                     sdxCluster.setStackRequestToCloudbreak(JsonUtil.writeValueAsStringSilent(stackV4Request));
                 });

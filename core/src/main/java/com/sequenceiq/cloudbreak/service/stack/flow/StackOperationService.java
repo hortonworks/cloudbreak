@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.common.json.Json;
+
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -42,11 +43,13 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -83,6 +86,9 @@ public class StackOperationService {
 
     @Inject
     private UpdateNodeCountValidator updateNodeCountValidator;
+
+    @Inject
+    private EnvironmentService environmentService;
 
     public FlowIdentifier removeInstance(Stack stack, Long workspaceId, String instanceId, boolean forced, User user) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack, workspaceId, user);
@@ -125,7 +131,8 @@ public class StackOperationService {
         }
     }
 
-    private FlowIdentifier triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster, User user) {
+    @VisibleForTesting
+    FlowIdentifier triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster, User user) {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceType.DATAHUB, AuthorizationResourceAction.WRITE, user.getUserCrn());
         if (!isStopNeeded(stack)) {
             return FlowIdentifier.notTriggered();
@@ -133,6 +140,7 @@ public class StackOperationService {
         if (isStackRunsOnSpotInstances(stack)) {
             throw new BadRequestException(format("Cannot update the status of stack '%s' to STOPPED, because it runs on spot instances", stack.getName()));
         }
+        environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.stoppable());
         if (cluster != null && !cluster.isStopped() && !stack.isStopFailed()) {
             if (!updateCluster) {
                 throw new BadRequestException(format("Cannot update the status of stack '%s' to STOPPED, because the cluster's state is %s.",
@@ -192,6 +200,7 @@ public class StackOperationService {
 
     public FlowIdentifier updateNodeCount(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceType.DATAHUB, AuthorizationResourceAction.WRITE, user.getUserCrn());
+        environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
         try {
             return transactionService.required(() -> {
                 Stack stackWithLists = stackService.getByIdWithLists(stack.getId());
@@ -226,6 +235,7 @@ public class StackOperationService {
     FlowIdentifier start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceType.DATAHUB, AuthorizationResourceAction.WRITE, user.getUserCrn());
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
+        environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.startable());
         if (stack.isAvailable() && (cluster == null || cluster.isAvailable())) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
         } else if (isStackStartable(stack) || isClusterStartable(cluster)) {

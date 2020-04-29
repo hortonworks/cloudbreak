@@ -113,10 +113,20 @@ public class DefaultCostTaggingService implements CostTagging {
                     .filter(userDefinedResourceTags::containsKey)
                     .collect(Collectors.toSet());
             if (!accountTagsDuplicatedInResourceTags.isEmpty()) {
-                String msg = String.format("The request must not contain tag(s) with key: '%s', because with the same key tag has already been defined "
-                        + "on account level!", String.join(", ", accountTagsDuplicatedInResourceTags));
-                LOGGER.info(msg);
-                throw new AccountTagValidationFailed(msg);
+
+                Set<String> duplicateTagsWithDiffValues = accountTagsDuplicatedInResourceTags
+                    .stream()
+                    .filter(s -> !accountTags.get(s).equals(userDefinedResourceTags.get(s)))
+                    .collect(Collectors.toSet());
+
+                if (!duplicateTagsWithDiffValues.isEmpty()) {
+                    String msg = String.format(
+                        "The request must not contain tag(s) with key: '%s', because with the same key tag has already been defined "
+                            + "on account level!",
+                        String.join(", ", duplicateTagsWithDiffValues));
+                    LOGGER.info(msg);
+                    throw new AccountTagValidationFailed(msg);
+                }
             }
         }
     }

@@ -296,7 +296,7 @@
     },
     {
       "name": "NIFI",
-      "displayName": "Nifi",
+      "displayName": "NiFi",
       "serviceName": "NIFI_NODE",
       "knoxService": "NIFI",
       "knoxUrl": "/nifi-app/nifi/",
@@ -310,7 +310,7 @@
     },
     {
       "name": "NIFI_REGISTRY",
-      "displayName": "Nifi Registry",
+      "displayName": "NiFi Registry",
       "serviceName": "NIFI_REGISTRY_SERVER",
       "knoxService": "NIFI-REGISTRY",
       "knoxUrl": "/nifi-registry-app/nifi-registry/",
@@ -318,7 +318,7 @@
       "port": 18080,
       "tlsPort": 18433,
       "apiOnly": false,
-      "apiIncluded": true,
+      "apiIncluded": false,
       "visibleForDatalake": true,
       "visibleForDatahub": true
     },
@@ -331,6 +331,20 @@
       "ssoSupported": true,
       "port": 8080,
       "tlsPort": 8443,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
+    },
+    {
+      "name": "NIFI_REGISTRY_REST",
+      "displayName": "NiFi Registry Rest",
+      "serviceName": "NIFI_REGISTRY_SERVER",
+      "knoxService": "NIFI-REGISTRY-REST",
+      "knoxUrl": "/nifi-registry-app/nifi-registry-api/",
+      "ssoSupported": true,
+      "port": 18080,
+      "tlsPort": 18433,
       "apiOnly": true,
       "apiIncluded": true,
       "visibleForDatalake": true,
@@ -374,6 +388,20 @@
       "port": 7788,
       "tlsPort": 7790,
       "apiOnly": false,
+      "apiIncluded": false,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
+    },
+    {
+      "name": "SCHEMA_REGISTRY_API",
+      "displayName": "Schema Registry",
+      "serviceName": "SCHEMA_REGISTRY_SERVER",
+      "knoxService": "SCHEMA-REGISTRY-API",
+      "knoxUrl": "/schema-registry/api/v1/",
+      "ssoSupported": true,
+      "port": 7788,
+      "tlsPort": 7790,
+      "apiOnly": true,
       "apiIncluded": true,
       "visibleForDatalake": true,
       "visibleForDatahub": true
@@ -433,6 +461,20 @@
       "apiIncluded": true,
       "visibleForDatalake": false,
       "visibleForDatahub": false
+    },
+    {
+      "name": "DATA_DISCOVERY_SERVICE",
+      "displayName": "Data Discovery Service",
+      "serviceName": "DATA_DISCOVERY_SERVICE_AGENT",
+      "knoxService": "DATA-DISCOVERY-SERVICE-API",
+      "knoxUrl": "/data-discovery-service/",
+      "ssoSupported": false,
+      "port": 21600,
+      "tlsPort": 21600,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true
     },
     {
       "name": "PROFILER_ADMIN",

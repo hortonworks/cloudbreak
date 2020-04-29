@@ -56,22 +56,19 @@ public class SdxCreateActions {
     @Inject
     private SdxMetricService metricService;
 
-    @Bean(name = "SDX_CREATION_WAIT_ENV_STATE")
-    public Action<?, ?> envWaitInProgress() {
+    @Bean(name = "SDX_CREATION_WAIT_RDS_STATE")
+    public Action<?, ?> rdsCreation() {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    SdxEvent payload) {
                 return SdxContext.from(flowParameters, payload);
             }
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(SdxContext context) {
-                return EnvWaitRequest.from(context);
+                RdsWaitRequest req = new RdsWaitRequest(context);
+                sendEvent(context, req.selector(), req);
             }
 
             @Override
@@ -81,9 +78,31 @@ public class SdxCreateActions {
         };
     }
 
-    @Bean(name = "SDX_CREATION_WAIT_RDS_STATE")
-    public Action<?, ?> rdsCreation() {
+    @Bean(name = "SDX_CREATION_WAIT_ENV_STATE")
+    public Action<?, ?> envWaitInProgress() {
+        return new AbstractSdxAction<>(RdsWaitSuccessEvent.class) {
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, RdsWaitSuccessEvent payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, RdsWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
+                EnvWaitRequest req = EnvWaitRequest.from(context);
+                sendEvent(context, req.selector(), req);
+            }
+
+            @Override
+            protected Object getFailurePayload(RdsWaitSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return SdxCreateFailedEvent.from(payload, ex);
+            }
+        };
+    }
+
+    @Bean(name = "SDX_CREATION_START_STATE")
+    public Action<?, ?> sdxCreation() {
         return new AbstractSdxAction<>(EnvWaitSuccessEvent.class) {
+
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     EnvWaitSuccessEvent payload) {
@@ -92,37 +111,12 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, EnvWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                RdsWaitRequest req = new RdsWaitRequest(context, payload.getDetailedEnvironmentResponse());
-                sendEvent(context, req.selector(), req);
-            }
-
-            @Override
-            protected Object getFailurePayload(EnvWaitSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return SdxCreateFailedEvent.from(payload, ex);
-            }
-        };
-    }
-
-    @Bean(name = "SDX_CREATION_START_STATE")
-    public Action<?, ?> sdxCreation() {
-        return new AbstractSdxAction<>(RdsWaitSuccessEvent.class) {
-
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    RdsWaitSuccessEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
-            @Override
-            protected void doExecute(SdxContext context, RdsWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                provisionerService.startStackProvisioning(payload.getResourceId(),
-                        payload.getDetailedEnvironmentResponse(), payload.getDatabaseServerResponse());
-
+                provisionerService.startStackProvisioning(payload.getResourceId(), payload.getDetailedEnvironmentResponse());
                 sendEvent(context, SDX_STACK_CREATION_IN_PROGRESS_EVENT.event(), payload);
             }
 
             @Override
-            protected Object getFailurePayload(RdsWaitSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(EnvWaitSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return SdxCreateFailedEvent.from(payload, ex);
             }
         };

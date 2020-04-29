@@ -26,7 +26,6 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.instance.InstanceEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Service
 public class RebootInstancesService {
@@ -41,9 +40,6 @@ public class RebootInstancesService {
 
     @Inject
     private FreeIpaHealthDetailsService healthDetailsService;
-
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
 
     private Map<String, InstanceStatus> getInstanceHealthMap(String accountId, RebootInstancesRequest request) {
         return healthDetailsService.getHealthDetails(request.getEnvironmentCrn(), accountId).getNodeHealthDetails().stream()
@@ -102,7 +98,6 @@ public class RebootInstancesService {
         Map<String, InstanceMetaData> instancesToReboot = getInstancesToReboot(allInstancesByInstanceId, accountId, request);
 
         if (instancesToReboot.keySet().size() > 0) {
-            instanceMetaDataService.updateStatus(stack, instancesToReboot.keySet().stream().collect(Collectors.toList()), InstanceStatus.REBOOTING);
             flowManager.notify(REBOOT_EVENT.event(), new InstanceEvent(REBOOT_EVENT.event(), stack.getId(),
                     instancesToReboot.keySet().stream().collect(Collectors.toList())));
         } else {

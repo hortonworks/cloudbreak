@@ -191,6 +191,34 @@ public class MutuallyExclusiveNotNullValidatorTest {
         Assert.assertFalse(violations.isEmpty());
     }
 
+    @Test
+    public void passComplexAllowNullWhenAllGroupsNull() {
+        DummyClassWithComplexValidationAllowAllGroupsNull dummyObject = new DummyClassWithComplexValidationAllowAllGroupsNull(null, null, null, null);
+        Set<ConstraintViolation<DummyClassWithComplexValidationAllowAllGroupsNull>> violations = validator.validate(dummyObject);
+        Assert.assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    public void failComplexAllowNullWhenAllGroupsFilled() {
+        DummyClassWithComplexValidationAllowAllGroupsNull dummyObject = new DummyClassWithComplexValidationAllowAllGroupsNull("a", "b", "c", "d");
+        Set<ConstraintViolation<DummyClassWithComplexValidationAllowAllGroupsNull>> violations = validator.validate(dummyObject);
+        Assert.assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    public void passComplexAllowNullWhenOneGroupIsFilled() {
+        DummyClassWithComplexValidationAllowAllGroupsNull dummyObject = new DummyClassWithComplexValidationAllowAllGroupsNull(null, null, "c", "d");
+        Set<ConstraintViolation<DummyClassWithComplexValidationAllowAllGroupsNull>> violations = validator.validate(dummyObject);
+        Assert.assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    public void failComplexAllowNullWhenOneGroupPartiallyFilled() {
+        DummyClassWithComplexValidationAllowAllGroupsNull dummyObject = new DummyClassWithComplexValidationAllowAllGroupsNull("a", null, "c", "d");
+        Set<ConstraintViolation<DummyClassWithComplexValidationAllowAllGroupsNull>> violations = validator.validate(dummyObject);
+        Assert.assertFalse(violations.isEmpty());
+    }
+
     @MutuallyExclusiveNotNull(fieldGroups = {"a", "b"})
     static class DummySimpleClass {
 
@@ -244,6 +272,30 @@ public class MutuallyExclusiveNotNullValidatorTest {
         }
 
     }
+
+    @MutuallyExclusiveNotNull(fieldGroups = {"a,b", "c,d"}, allowAllGroupsNull = true)
+    static class DummyClassWithComplexValidationAllowAllGroupsNull {
+
+        @SuppressFBWarnings("URF_UNREAD_FIELD")
+        private String a;
+
+        @SuppressFBWarnings("URF_UNREAD_FIELD")
+        private String b;
+
+        @SuppressFBWarnings("URF_UNREAD_FIELD")
+        private String c;
+
+        @SuppressFBWarnings("URF_UNREAD_FIELD")
+        private String d;
+
+        DummyClassWithComplexValidationAllowAllGroupsNull(String a, String b, String c, String d) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.d = d;
+        }
+    }
+
 }
 
 

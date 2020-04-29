@@ -1,7 +1,7 @@
 package com.sequenceiq.datalake.flow;
 
-import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.ENV_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
+import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.RDS_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
@@ -50,7 +50,7 @@ public class SdxReactorFlowManager {
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     public FlowIdentifier triggerSdxCreation(Long sdxId) {
-        String selector = ENV_WAIT_EVENT.event();
+        String selector = RDS_WAIT_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxEvent(selector, sdxId, userId));
     }

@@ -92,7 +92,7 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then(SdxUpgradeTestAssertion
-                        .validateReasonContains("Repair is only supported if Cloudera Manager state is stored in external Database."))
+                        .validateReasonContains("Action is only supported if Cloudera Manager state is stored in external Database."))
                 .then(SdxUpgradeTestAssertion.validateReasonContains("Cloudera Manager server failure with embedded Database cannot be repaired!"))
                 .validate();
     }

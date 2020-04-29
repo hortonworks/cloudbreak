@@ -18,6 +18,7 @@
   tag {{providerPrefix}}.cloud-init
   read_from_head true
 </source>
+{% if providerPrefix != "databus" or fluent.dbusIncludeSaltLogs %}
 <source>
   @type tail
   format none
@@ -42,6 +43,7 @@
   tag {{providerPrefix}}.salt_api
   read_from_head true
 </source>
+{% endif %}
 <source>
   @type tail
   format none

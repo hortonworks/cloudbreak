@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -23,9 +23,9 @@ public class UpgradeOptionsResponseFactory {
     @Inject
     private ImageService imageService;
 
-    public UpgradeOptionsV4Response createV4Response(Image currentImage, ImageFilterResult filteredImages, String cloudPlatform, String region,
+    public UpgradeV4Response createV4Response(Image currentImage, ImageFilterResult filteredImages, String cloudPlatform, String region,
             String imageCatalogName) {
-        return new UpgradeOptionsV4Response(
+        return new UpgradeV4Response(
                 createImageInfoFromCurrentImage(currentImage, cloudPlatform, region, imageCatalogName),
                 createImageInfoFromFilteredImages(filteredImages.getAvailableImages(), imageCatalogName, cloudPlatform, region),
                 filteredImages.getReason());
@@ -33,7 +33,7 @@ public class UpgradeOptionsResponseFactory {
 
     private ImageInfoV4Response createImageInfoFromCurrentImage(Image currentImage, String cloudPlatform, String region, String imageCatalogName) {
         return new ImageInfoV4Response(getImageName(currentImage, cloudPlatform, region), currentImage.getUuid(), imageCatalogName, currentImage.getCreated(),
-                getComponentVersions(currentImage.getPackageVersions(), currentImage.getOs(), currentImage.getDate()));
+                currentImage.getDate(), getComponentVersions(currentImage.getPackageVersions(), currentImage.getOs(), currentImage.getDate()));
     }
 
     private List<ImageInfoV4Response> createImageInfoFromFilteredImages(Images filteredImages, String imageCatalogName, String cloudPlatform, String region) {
@@ -42,7 +42,7 @@ public class UpgradeOptionsResponseFactory {
     }
 
     private ImageInfoV4Response createImageInfo(Image image, String imageCatalogName, String cloudPlatform, String region) {
-        return new ImageInfoV4Response(getImageName(image, cloudPlatform, region), image.getUuid(), imageCatalogName, image.getCreated(),
+        return new ImageInfoV4Response(getImageName(image, cloudPlatform, region), image.getUuid(), imageCatalogName, image.getCreated(), image.getDate(),
                 getComponentVersions(image.getPackageVersions(), image.getOs(), image.getDate()));
     }
 
@@ -61,7 +61,7 @@ public class UpgradeOptionsResponseFactory {
         try {
             imageName = imageService.determineImageName(cloudPlatform, region, image);
         } catch (CloudbreakImageNotFoundException e) {
-            throw new NotFoundException("Image name not found", e);
+            throw new NotFoundException(String.format("Image (%s) name not found", image.getUuid()), e);
         }
         return imageName;
     }

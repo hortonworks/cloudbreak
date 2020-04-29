@@ -10,9 +10,11 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -23,10 +25,20 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class SchemaRegistryJarStorageConfigProviderTest {
 
     private final SchemaRegistryJarStorageConfigProvider subject = new SchemaRegistryJarStorageConfigProvider();
+
+    @Mock
+    private BlueprintView blueprintView;
+
+    @Mock
+    private CmTemplateProcessor processor;
 
     @Test
     void testRoleConfigsWithMultipleVolumes() {
@@ -66,8 +78,9 @@ public class SchemaRegistryJarStorageConfigProviderTest {
     }
 
     @Test
-    void testCloudStorageIsChosenWhenMultipleSchemaRegistryInstances() {
-        TemplatePreparationObject tpo = getTemplatePreparationObject(1, 1);
+    void testCloudStorageIsChosenWhenCdhVersionIsAtLeast711() {
+        cdhMainVersionIs("7.1.1");
+        TemplatePreparationObject tpo = getTemplatePreparationObject(1);
         HostgroupView hostGroup = tpo.getHostGroupsWithComponent(SCHEMA_REGISTRY_SERVER).findFirst().get();
         assertEquals(List.of(
                 config(CONFIG_JAR_STORAGE_DIRECTORY_PATH, "/schema-registry"),
@@ -77,6 +90,7 @@ public class SchemaRegistryJarStorageConfigProviderTest {
 
     @Test
     void testLocalStorageIsChosenWhenSingleSchemaRegistryInstance() {
+        cdhMainVersionIs("7.1.0");
         TemplatePreparationObject tpo = getTemplatePreparationObject(1);
         HostgroupView hostGroup = tpo.getHostGroupsWithComponent(SCHEMA_REGISTRY_SERVER).findFirst().get();
         assertEquals(List.of(
@@ -88,8 +102,9 @@ public class SchemaRegistryJarStorageConfigProviderTest {
         List<HostgroupView> srHostGroups = Arrays.stream(instanceCountsForSchemaRegistryHostGroups)
                 .map(nodeCnt -> new HostgroupView(null, 0, InstanceGroupType.CORE, nodeCnt))
                 .collect(toList());
-        TemplatePreparationObject tpo = mock(TemplatePreparationObject.class);
+        TemplatePreparationObject tpo = mock(TemplatePreparationObject.class, withSettings().lenient());
         when(tpo.getHostGroupsWithComponent(SCHEMA_REGISTRY_SERVER)).thenAnswer(__ -> srHostGroups.stream());
+        when(tpo.getBlueprintView()).thenReturn(blueprintView);
         return tpo;
     }
 
@@ -102,4 +117,8 @@ public class SchemaRegistryJarStorageConfigProviderTest {
         return preparationObject;
     }
 
+    private void cdhMainVersionIs(String version) {
+        when(blueprintView.getProcessor()).thenReturn(processor);
+        when(processor.getVersion()).thenReturn(Optional.ofNullable(version));
+    }
 }

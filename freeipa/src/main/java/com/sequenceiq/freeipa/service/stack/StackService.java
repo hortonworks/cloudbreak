@@ -31,7 +31,6 @@ public class StackService {
     public List<Stack> findAllForAutoSync() {
         return stackRepository.findAllRunningAndStatusIn(List.of(
                 Status.AVAILABLE,
-                Status.STACK_AVAILABLE,
                 Status.UPDATE_FAILED,
                 Status.START_FAILED,
                 Status.STOP_FAILED,

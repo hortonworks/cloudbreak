@@ -126,7 +126,7 @@ public class TlsSecurityService {
         return gatewayConfig;
     }
 
-    public String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance, Stack stack) {
+    private String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance, Stack stack) {
         String gatewayIP = gatewayInstance.getPublicIpWrapper();
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             gatewayIP = clusterProxyConfiguration.getClusterProxyHost();
@@ -142,11 +142,6 @@ public class TlsSecurityService {
         } else {
             return stackPort;
         }
-    }
-
-    public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Stack stack, String apiAddress) {
-        InstanceMetaData primaryGateway = instanceMetaDataRepository.getPrimaryGatewayInstanceMetadata(stack.getId());
-        return buildTLSClientConfig(stack, apiAddress, primaryGateway);
     }
 
     public HttpClientConfig buildTLSClientConfig(Stack stack, String apiAddress, InstanceMetaData gateway) {

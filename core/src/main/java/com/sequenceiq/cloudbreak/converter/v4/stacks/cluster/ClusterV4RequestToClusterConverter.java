@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -46,22 +45,12 @@ import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class ClusterV4RequestToClusterConverter extends AbstractConversionServiceAwareConverter<ClusterV4Request, Cluster> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterV4RequestToClusterConverter.class);
-
-    @Value("${cb.ambari.username:cloudbreak}")
-    private String ambariUserName;
-
-    @Value("${cb.cm.mgmt.username:cmmgmt}")
-    private String cmMgmtUsername;
-
-    @Value("${cb.cm.monitoring.username:cmmonitoring}")
-    private String cmMonitoringUser;
 
     @Inject
     private CloudStorageValidationUtil cloudStorageValidationUtil;
@@ -84,15 +73,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         Cluster cluster = new Cluster();
         cluster.setName(source.getName());
         cluster.setStatus(REQUESTED);
-        cluster.setUserName(source.getUserName());
-        cluster.setPassword(source.getPassword());
         cluster.setExecutorType(source.getExecutorType());
-        cluster.setCloudbreakUser(ambariUserName);
-        cluster.setCloudbreakPassword(PasswordUtil.generatePassword());
-        cluster.setCloudbreakClusterManagerMonitoringUser(cmMonitoringUser);
-        cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
-        cluster.setDpUser(cmMgmtUsername);
-        cluster.setDpPassword(PasswordUtil.generatePassword());
         cluster.setDatabaseServerCrn(source.getDatabaseServerCrn());
         cluster.setBlueprint(getBlueprint(source.getBlueprintName(), workspace));
         convertGateway(source, cluster);

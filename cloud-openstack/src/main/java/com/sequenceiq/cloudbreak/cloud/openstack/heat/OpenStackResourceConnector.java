@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.Keypair;
@@ -123,6 +124,21 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
         PersistenceNotifier persistenceNotifier) {
         throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
+    }
+
+    @Override
+    public void startDatabaseServer(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) {
+        throw new UnsupportedOperationException("Database server start operation is not supported for " + getClass().getName());
+    }
+
+    @Override
+    public void stopDatabaseServer(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) {
+        throw new UnsupportedOperationException("Database server stop operation is not supported for " + getClass().getName());
+    }
+
+    @Override
+    public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) throws Exception {
+        throw new UnsupportedOperationException("Database server status lookup is not supported for " + getClass().getName());
     }
 
     private List<CloudResource> collectResources(AuthenticatedContext authenticatedContext, PersistenceNotifier notifier, Stack heatStack, CloudStack stack,

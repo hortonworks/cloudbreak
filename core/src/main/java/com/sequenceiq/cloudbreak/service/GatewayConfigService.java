@@ -17,9 +17,13 @@ import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Service
 public class GatewayConfigService {
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private TlsSecurityService tlsSecurityService;
@@ -30,6 +34,14 @@ public class GatewayConfigService {
             result.add(getGatewayConfig(stack, instanceMetaData, stack.getCluster().hasGateway()));
         }
         return result;
+    }
+
+    public GatewayConfig getPrimaryGatewayConfigWithoutLists(Stack stack) {
+        Optional<InstanceMetaData> gatewayInstance = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stack.getId());
+        if (gatewayInstance.isEmpty()) {
+            throw new NotFoundException("Gateway instance does not found");
+        }
+        return getGatewayConfig(stack, gatewayInstance.get(), stack.getCluster().hasGateway());
     }
 
     public GatewayConfig getPrimaryGatewayConfig(Stack stack) {

@@ -1,32 +1,50 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static org.junit.Assert.assertTrue;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ClusterCommonServiceTest {
 
     @InjectMocks
     private ClusterCommonService underTest;
 
-    @Before
+    @Mock
+    private StackService stackService;
+
+    @Mock
+    private EnvironmentService environmentService;
+
+    @BeforeEach
     public void setUp() {
     }
 
@@ -52,7 +70,7 @@ public class ClusterCommonServiceTest {
         assertTrue(result.contains("[all:vars]\nansible_ssh_user=cloudbreak\n"));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void testIniFileGenerationWithoutAgents() {
         Stack stack = new Stack();
         Cluster cluster = new Cluster();
@@ -62,7 +80,7 @@ public class ClusterCommonServiceTest {
         stack.setCluster(cluster);
 
         // WHEN
-        underTest.getHostNamesAsIniString(stack, "cloudbreak");
+        assertThrows(NotFoundException.class, () -> underTest.getHostNamesAsIniString(stack, "cloudbreak"));
     }
 
     private Set<InstanceGroup> generateInstanceMetadata() {
@@ -96,4 +114,19 @@ public class ClusterCommonServiceTest {
         return instanceGroups;
     }
 
+    @Test
+    public void testUpdateNodeCountWhenCheckCallEnvironmentCheck() {
+        Stack stack = new Stack();
+        stack.setId(9876L);
+        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+
+        when(stackService.getByCrn("crn")).thenReturn(stack);
+
+        doThrow(RuntimeException.class).when(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
+
+        UpdateClusterV4Request update = new UpdateClusterV4Request();
+        update.setHostGroupAdjustment(new HostGroupAdjustmentV4Request());
+        assertThrows(RuntimeException.class, () -> underTest.put("crn", update));
+        verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
+    }
 }

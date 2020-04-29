@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
@@ -14,7 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
-public abstract class EnvironmentBaseResponse {
+public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiModel {
     @ApiModelProperty(ModelDescriptions.ID)
     private String crn;
 
@@ -94,6 +95,11 @@ public abstract class EnvironmentBaseResponse {
 
     public void setCrn(String crn) {
         this.crn = crn;
+    }
+
+    @Override
+    public String getResourceCrn() {
+        return crn;
     }
 
     public String getName() {

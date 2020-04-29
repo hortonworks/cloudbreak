@@ -12,24 +12,29 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
 
     private long created;
 
+    private String date;
+
     private ImageComponentVersions componentVersions;
 
     public ImageInfoV4Response() {
     }
 
-    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created) {
+    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created, String date) {
         this.imageName = imageName;
         this.imageId = imageId;
         this.imageCatalogName = imageCatalogName;
         this.created = created;
+        this.date = date;
     }
 
-    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created, ImageComponentVersions componentVersions) {
+    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, long created, String date,
+            ImageComponentVersions componentVersions) {
         this.imageName = imageName;
         this.imageId = imageId;
         this.imageCatalogName = imageCatalogName;
         this.created = created;
         this.componentVersions = componentVersions;
+        this.date = date;
     }
 
     public String getImageName() {
@@ -64,6 +69,14 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
         this.created = created;
     }
 
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
     public ImageComponentVersions getComponentVersions() {
         return componentVersions;
     }
@@ -95,12 +108,13 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
                 Objects.equals(imageName, that.imageName) &&
                 Objects.equals(imageId, that.imageId) &&
                 Objects.equals(imageCatalogName, that.imageCatalogName) &&
+                Objects.equals(date, that.date) &&
                 Objects.equals(componentVersions, that.componentVersions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(imageName, imageId, imageCatalogName, created, componentVersions);
+        return Objects.hash(imageName, imageId, imageCatalogName, created, date, componentVersions);
     }
 
     @Override
@@ -110,5 +124,13 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
             ret = componentVersions.compareTo(o.componentVersions);
         }
         return ret;
+    }
+
+    @Override
+    public String toString() {
+        return "ImageInfoV4Response{" +
+                "imageName='" + imageName + '\'' +
+                ", imageId='" + imageId + '\'' +
+                '}';
     }
 }

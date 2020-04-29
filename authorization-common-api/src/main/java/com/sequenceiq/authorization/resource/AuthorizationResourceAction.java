@@ -6,14 +6,23 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 
 public enum AuthorizationResourceAction {
-    READ("read", ActionType.RESOURCE_INDEPENDENT),
-    WRITE("write", ActionType.RESOURCE_INDEPENDENT),
-    RD_READ("rdRead", ActionType.RESOURCE_DEPENDENT),
-    RD_WRITE("rdWrite", ActionType.RESOURCE_DEPENDENT),
+    CHANGE_CREDENTIAL("changeCredential", ActionType.RESOURCE_DEPENDENT),
+    EDIT_CREDENTIAL("editCredential", ActionType.RESOURCE_DEPENDENT),
+    EDIT_ENVIRONMENT("editEnvironment", ActionType.RESOURCE_DEPENDENT),
+    START_ENVIRONMENT("startEnvironment", ActionType.RESOURCE_DEPENDENT),
+    STOP_ENVIRONMENT("stopEnvironment", ActionType.RESOURCE_DEPENDENT),
+    DELETE_CREDENTIAL("deleteCredential", ActionType.RESOURCE_DEPENDENT),
+    DESCRIBE_CREDENTIAL("describeCredential", ActionType.RESOURCE_DEPENDENT),
+    DELETE_ENVIRONMENT("deleteCdpEnvironment", ActionType.RESOURCE_DEPENDENT),
+    DESCRIBE_ENVIRONMENT("describeEnvironment", ActionType.RESOURCE_DEPENDENT),
     ACCESS_ENVIRONMENT("accessEnvironment", ActionType.RESOURCE_DEPENDENT),
     ADMIN_FREEIPA("adminFreeIPA", ActionType.RESOURCE_DEPENDENT),
-    CREATE("create", ActionType.RESOURCE_INDEPENDENT),
-    GET_KEYTAB("getKeytab", ActionType.RESOURCE_INDEPENDENT);
+    CREATE_CREDENTIAL("createCredential", ActionType.RESOURCE_INDEPENDENT),
+    CREATE_ENVIRONMENT("createEnvironment", ActionType.RESOURCE_INDEPENDENT),
+    GET_KEYTAB("getKeytab", ActionType.RESOURCE_INDEPENDENT),
+    // deprecated actions, please do not use them
+    READ("read", ActionType.RESOURCE_INDEPENDENT),
+    WRITE("write", ActionType.RESOURCE_INDEPENDENT);
 
     private final String action;
 

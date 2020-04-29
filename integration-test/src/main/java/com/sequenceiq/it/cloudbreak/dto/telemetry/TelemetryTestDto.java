@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.dto.telemetry;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
@@ -66,6 +69,9 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
         FeaturesRequest featuresRequest = new FeaturesRequest();
         featuresRequest.addClusterLogsCollection(true);
         getRequest().setFeatures(featuresRequest);
+        Map<String, Object> fluentAttributes = new HashMap<>();
+        fluentAttributes.put("dbusIncludeSaltLogs", true);
+        getRequest().setFluentAttributes(fluentAttributes);
         return this;
     }
 }

@@ -40,7 +40,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
+import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -79,7 +79,7 @@ class EnvCreationActionsTest {
     private NotificationService notificationService;
 
     @Mock
-    private EnvironmentApiConverter environmentApiConverter;
+    private EnvironmentResponseConverter environmentResponseConverter;
 
     @Mock
     private StateContext context;
@@ -164,7 +164,7 @@ class EnvCreationActionsTest {
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentApiConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
+        verify(environmentResponseConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
         verify(notificationService, never()).send(any(ResourceEvent.class), any(SimpleEnvironmentResponse.class), anyString());
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
@@ -181,7 +181,7 @@ class EnvCreationActionsTest {
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentApiConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
+        verify(environmentResponseConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
         verify(notificationService, never()).send(any(ResourceEvent.class), any(SimpleEnvironmentResponse.class), anyString());
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
@@ -206,7 +206,7 @@ class EnvCreationActionsTest {
         when(environmentDto.getId()).thenReturn(ENVIRONMENT_ID);
         when(environmentService.getEnvironmentDto(savedEnvironment)).thenReturn(environmentDto);
         SimpleEnvironmentResponse response = mock(SimpleEnvironmentResponse.class);
-        when(environmentApiConverter.dtoToSimpleResponse(environmentDto)).thenReturn(response);
+        when(environmentResponseConverter.dtoToSimpleResponse(environmentDto)).thenReturn(response);
 
         action.execute(context);
 

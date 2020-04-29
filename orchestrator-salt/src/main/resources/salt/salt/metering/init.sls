@@ -13,11 +13,6 @@
 
 {% if metering.is_systemd %}
 
-remove_old_metering_package_manually:
-  cmd.run:
-    - name: "rpm -e {{ metering_service_name }}; exit 0"
-    - onlyif: "rpm -q {{ metering_service_name }}"
-
 install_metering_rpm_manually:
   cmd.run:
     - name: "rpm -i {{ metering_rpm_location }}"
@@ -57,7 +52,7 @@ stop_metering_heartbeat_application:
     - template: jinja
     - user: "root"
     - group: "root"
-    - file_mode: 640
+    - mode: 640
 
 /etc/systemd/system/metering-heartbeat-application.service:
   file.managed:
@@ -65,7 +60,7 @@ stop_metering_heartbeat_application:
     - template: jinja
     - user: "root"
     - group: "root"
-    - file_mode: 640
+    - mode: 640
 
 start_metering_heartbeat_application:
   service.running:

@@ -127,6 +127,13 @@ public class CentralCmTemplateUpdaterTest {
     }
 
     @Test
+    public void getCmTemplateWhenShouldNotSplitJNAndZK() {
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/cb5660.bp"));
+        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
+        assertMatchesBlueprintAtPath("output/cb5660.bp", generated);
+    }
+
+    @Test
     public void danglingVariableReferencesAreRemoved() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-variables.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);

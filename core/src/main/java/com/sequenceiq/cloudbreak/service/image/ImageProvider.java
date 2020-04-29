@@ -2,14 +2,14 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 
 @Component
 public class ImageProvider {
 
-    public Image getCurrentImageFromCatalog(String currentImageId, CloudbreakImageCatalogV2 imageCatalog)
+    public Image getCurrentImageFromCatalog(String currentImageId, CloudbreakImageCatalogV3 imageCatalog)
             throws CloudbreakImageNotFoundException {
         return imageCatalog.getImages().getCdhImages().stream()
                 .filter(img -> currentImageId.equals(img.getUuid()))

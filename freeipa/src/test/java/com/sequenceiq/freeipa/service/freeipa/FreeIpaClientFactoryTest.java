@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -8,15 +9,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaHostNotAvailableException;
+import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -28,6 +35,10 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaClientFactoryTest {
+
+    private static final Set<InstanceMetaData> METADATAS = new HashSet<>();
+
+    private static final String FREEIPP_FQDN = "test.host";
 
     @Mock
     private ClusterProxyService clusterProxyService;
@@ -47,6 +58,15 @@ class FreeIpaClientFactoryTest {
     @InjectMocks
     private FreeIpaClientFactory underTest;
 
+    @BeforeAll
+    static void setup() {
+        InstanceMetaData metaData = new InstanceMetaData();
+        METADATAS.add(metaData);
+        metaData.setPrivateIp("127.0.0.1");
+        metaData.setDiscoveryFQDN(FREEIPP_FQDN);
+        metaData.setInstanceStatus(InstanceStatus.CREATED);
+    }
+
     @Test
     void getFreeIpaClientForStackShouldThrowExceptionWhenStackStatusIsUnreachable() {
         Stack stack = createStack();
@@ -61,42 +81,85 @@ class FreeIpaClientFactoryTest {
     @Test
     void getFreeIpaClientForStackShouldReturnClientWhenStackStatusIsValid() throws FreeIpaClientException {
         Stack stack = createStack();
+        stack.setGatewayport(80);
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setAdminPassword(new Secret("", ""));
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         when(stackService.getByIdWithListsInTransaction(stack.getId())).thenReturn(stack);
+        when(tlsSecurityService.buildTLSClientConfig(any(), any(), any())).thenReturn(new HttpClientConfig(FREEIPP_FQDN));
         Status unreachableState = Status.AVAILABLE;
         StackStatus stackStatus = new StackStatus(stack, unreachableState, "The FreeIPA instance is reachable.", DetailedStackStatus.AVAILABLE);
         stack.setStackStatus(stackStatus);
-        when(clusterProxyService.isCreateConfigForClusterProxy(stack)).thenThrow(new RuntimeException("Expected exception"));
+        when(clusterProxyService.isCreateConfigForClusterProxy(stack)).thenReturn(false);
 
         FreeIpaClientException exception = Assertions.assertThrows(FreeIpaClientException.class, () -> underTest.getFreeIpaClientForStack(stack));
 
         verify(clusterProxyService, times(1)).isCreateConfigForClusterProxy(stack);
-        Assertions.assertEquals(RuntimeException.class, exception.getCause().getClass());
+        verify(tlsSecurityService, times(1)).buildTLSClientConfig(any(), any(), any());
+        Assertions.assertEquals(FreeIpaClientException.class, exception.getCause().getClass());
     }
 
     @Test
-    void getFreeIpaClientForStackWithPingShouldThrowExceptionWhenStackStatusIsUnreachable() {
+    void getFreeIpaClientForStackWithPingShouldReturnClientWhenStackStatusIsUnreachable() {
         Stack stack = createStack();
+        stack.setGatewayport(80);
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setAdminPassword(new Secret("", ""));
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         when(stackService.getByIdWithListsInTransaction(stack.getId())).thenReturn(stack);
-        Status unreachableState = Status.AVAILABLE;
-        StackStatus stackStatus = new StackStatus(stack, unreachableState, "The FreeIPA instance is reachable.", DetailedStackStatus.AVAILABLE);
+        when(tlsSecurityService.buildTLSClientConfig(any(), any(), any())).thenReturn(new HttpClientConfig(FREEIPP_FQDN));
+        Status unreachableState = Status.FREEIPA_UNREACHABLE_STATUSES.stream().findAny().get();
+        StackStatus stackStatus = new StackStatus(stack, unreachableState, "The FreeIPA instance is unreachable.", DetailedStackStatus.UNREACHABLE);
         stack.setStackStatus(stackStatus);
-        when(clusterProxyService.isCreateConfigForClusterProxy(stack)).thenThrow(new RuntimeException("Expected exception"));
 
-        FreeIpaClientException exception = Assertions.assertThrows(FreeIpaClientException.class, () -> underTest.getFreeIpaClientForStackWithPing(stack));
+        FreeIpaClientException exception = Assertions.assertThrows(FreeIpaClientException.class, () ->
+                underTest.getFreeIpaClientForStackWithPing(stack, FREEIPP_FQDN));
 
         verify(clusterProxyService, times(1)).isCreateConfigForClusterProxy(stack);
-        Assertions.assertEquals(RuntimeException.class, exception.getCause().getClass());
+        verify(tlsSecurityService, times(1)).buildTLSClientConfig(any(), any(), any());
+        Assertions.assertEquals(FreeIpaHostNotAvailableException.class, exception.getCause().getClass());
     }
 
     @Test
     void getFreeIpaClientForStackWithPingShouldReturnClientWhenStackStatusIsValid() {
         Stack stack = createStack();
+        stack.setGatewayport(80);
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setAdminPassword(new Secret("", ""));
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         when(stackService.getByIdWithListsInTransaction(stack.getId())).thenReturn(stack);
-        Status unreachableState = Status.FREEIPA_UNREACHABLE_STATUSES.stream().findAny().get();
-        StackStatus stackStatus = new StackStatus(stack, unreachableState, "The FreeIPA instance is unreachable.", DetailedStackStatus.UNREACHABLE);
+        when(tlsSecurityService.buildTLSClientConfig(any(), any(), any())).thenReturn(new HttpClientConfig(FREEIPP_FQDN));
+        Status unreachableState = Status.AVAILABLE;
+        StackStatus stackStatus = new StackStatus(stack, unreachableState, "The FreeIPA instance is reachable.", DetailedStackStatus.AVAILABLE);
         stack.setStackStatus(stackStatus);
 
-        Assertions.assertThrows(FreeIpaClientException.class, () -> underTest.getFreeIpaClientForStackWithPing(stack));
+        FreeIpaClientException exception = Assertions.assertThrows(FreeIpaClientException.class, () ->
+                underTest.getFreeIpaClientForStackWithPing(stack, FREEIPP_FQDN));
+
+        verify(clusterProxyService, times(1)).isCreateConfigForClusterProxy(stack);
+        verify(tlsSecurityService, times(1)).buildTLSClientConfig(any(), any(), any());
+        Assertions.assertEquals(FreeIpaHostNotAvailableException.class, exception.getCause().getClass());
+    }
+
+    @Test
+    void getFreeIpaClientForStackShouldReturnClientWhenStackStatusIsValidAndFqdnIsProvided() throws FreeIpaClientException {
+        Stack stack = createStack();
+        stack.setGatewayport(80);
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setAdminPassword(new Secret("", ""));
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        when(stackService.getByIdWithListsInTransaction(stack.getId())).thenReturn(stack);
+        when(tlsSecurityService.buildTLSClientConfig(any(), any(), any())).thenReturn(new HttpClientConfig(FREEIPP_FQDN));
+        Status unreachableState = Status.AVAILABLE;
+        StackStatus stackStatus = new StackStatus(stack, unreachableState, "The FreeIPA instance is reachable.", DetailedStackStatus.AVAILABLE);
+        stack.setStackStatus(stackStatus);
+        when(clusterProxyService.isCreateConfigForClusterProxy(stack)).thenReturn(false);
+
+        FreeIpaClientException exception = Assertions.assertThrows(FreeIpaClientException.class, () -> underTest.getFreeIpaClientForStack(stack, FREEIPP_FQDN));
+
+        verify(clusterProxyService, times(1)).isCreateConfigForClusterProxy(stack);
+        verify(tlsSecurityService, times(1)).buildTLSClientConfig(any(), any(), any());
+        Assertions.assertEquals(FreeIpaClientException.class, exception.getCause().getClass());
     }
 
     private Stack createStack() {
@@ -105,11 +168,7 @@ class FreeIpaClientFactoryTest {
         stack.setInstanceGroups(instanceGroups);
         InstanceGroup group = new InstanceGroup();
         instanceGroups.add(group);
-        Set<InstanceMetaData> metaDatas = new HashSet<>();
-        group.setInstanceMetaData(metaDatas);
-        InstanceMetaData metaData = new InstanceMetaData();
-        metaDatas.add(metaData);
-        metaData.setPrivateIp("1.1.1.1");
+        group.setInstanceMetaData(METADATAS);
         return stack;
     }
 }

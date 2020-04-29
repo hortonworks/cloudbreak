@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionFlowConfig;
+import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartFlowConfing;
+import com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopFlowConfing;
 import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationFlowConfig;
 
 @Component
@@ -18,7 +20,9 @@ public class RedbeamsFlowInformation implements ApplicationFlowInformation {
     public List<Class<? extends FlowConfiguration<?>>> getRestartableFlows() {
         return List.of(
                 RedbeamsProvisionFlowConfig.class,
-                RedbeamsTerminationFlowConfig.class
+                RedbeamsTerminationFlowConfig.class,
+                RedbeamsStartFlowConfing.class,
+                RedbeamsStopFlowConfing.class
         );
     }
 

@@ -244,9 +244,12 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         identityPagedList.add(logger);
         when(client.listIdentities()).thenReturn(identityPagedList);
 
+        final String wrongAssumerIdentityPrincipalid = "489e3729-aed1-4d54-a95b-b231b70d383f";
+        final String wrongLoggerIdentityPrincipalid = "61a70b9b-7331-4fa3-8717-2652fc70434e";
+
         new RoleASsignmentBuilder(client)
-                .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
-                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+                .withAssignment(wrongAssumerIdentityPrincipalid, SUBSCRIPTION_FULL_ID)
+                .withAssignment(wrongLoggerIdentityPrincipalid, STORAGE_RESOURCE_GROUP_NAME);
 
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
@@ -254,7 +257,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
 
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
-        assertEquals(2, validationResult.getErrors().size());
+        assertEquals(4, validationResult.getErrors().size());
         List<String> actual = validationResult.getErrors();
         assertTrue(actual.stream().anyMatch(item ->
                 item.equals(String.format("Identity with id %s has no role assignment.", USER_IDENTITY_1))));

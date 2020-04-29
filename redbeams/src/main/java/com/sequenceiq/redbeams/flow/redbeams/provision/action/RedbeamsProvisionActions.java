@@ -35,6 +35,7 @@ import com.sequenceiq.redbeams.metrics.MetricType;
 import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
+import com.sequenceiq.redbeams.sync.DBStackJobService;
 
 @Configuration
 public class RedbeamsProvisionActions {
@@ -49,6 +50,9 @@ public class RedbeamsProvisionActions {
 
     @Inject
     private RedbeamsMetricService metricService;
+
+    @Inject
+    private DBStackJobService dbStackJobService;
 
     @Bean(name = "ALLOCATE_DATABASE_SERVER_STATE")
     public Action<?, ?> allocateDatabaseServer() {
@@ -94,6 +98,8 @@ public class RedbeamsProvisionActions {
             protected void prepareExecution(UpdateDatabaseServerRegistrationSuccess payload, Map<Object, Object> variables) {
                 DBStack dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.AVAILABLE);
                 metricService.incrementMetricCounter(MetricType.DB_PROVISION_FINISHED, dbStack);
+
+                dbStackJobService.schedule(dbStack);
             }
 
             @Override

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
@@ -22,10 +23,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -35,9 +38,11 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackOperationServiceTest {
@@ -65,6 +70,12 @@ public class StackOperationServiceTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private EnvironmentService environmentService;
+
+    @Mock
+    private TransactionService transactionService;
 
     @Test
     public void testStartWhenStackAvailable() {
@@ -162,5 +173,42 @@ public class StackOperationServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setTemplate(template);
         return instanceGroup;
+    }
+
+    @Test
+    public void testStartWhenCheckCallEnvironmentCheck() {
+        Stack stack = new Stack();
+        stack.setId(9876L);
+        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
+        cluster.setStatus(Status.STOPPED);
+        underTest.start(stack, cluster, false, new User());
+        verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.startable());
+    }
+
+    @Test
+    public void testTriggerStackStopIfNeededWhenCheckCallEnvironmentCheck() {
+        Stack stack = new Stack();
+        stack.setId(9876L);
+        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
+        cluster.setStatus(Status.STOPPED);
+        underTest.triggerStackStopIfNeeded(stack, cluster, false, new User());
+        verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.stoppable());
+    }
+
+    @Test
+    public void testUpdateNodeCountWhenCheckCallEnvironmentCheck() throws TransactionService.TransactionExecutionException {
+        Stack stack = new Stack();
+        stack.setId(9876L);
+        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        InstanceGroupAdjustmentV4Request adjustment = new InstanceGroupAdjustmentV4Request();
+
+        when(transactionService.required(any(Supplier.class))).thenReturn(null);
+
+        underTest.updateNodeCount(stack, adjustment, false, new User());
+        verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
     }
 }

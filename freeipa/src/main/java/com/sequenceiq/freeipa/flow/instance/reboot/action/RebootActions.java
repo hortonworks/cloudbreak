@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
-import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -42,7 +41,6 @@ import com.sequenceiq.freeipa.flow.instance.reboot.RebootContext;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootService;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootState;
-import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -55,9 +53,6 @@ public class RebootActions {
     private RebootService rebootService;
 
     @Inject
-    private InstanceMetaDataToCloudInstanceConverter metadataConverter;
-
-    @Inject
     private CredentialService credentialService;
 
     @Inject
@@ -65,9 +60,6 @@ public class RebootActions {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
@@ -81,9 +73,9 @@ public class RebootActions {
         return new AbstractRebootAction<>(InstanceEvent.class) {
             @Override
             protected void doExecute(RebootContext context, InstanceEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Starting reboot for {}", context.getInstanceIds());
                 rebootService.startInstanceReboot(context);
                 sendEvent(context);
-                LOGGER.info("Starting reboot for {}", context.getInstanceIds());
             }
 
             @Override
@@ -103,7 +95,7 @@ public class RebootActions {
                     InstanceEvent payload) {
                 Long stackId = payload.getResourceId();
                 Stack stack = stackService.getStackById(stackId);
-                List<InstanceMetaData> instances = instanceMetaDataRepository.findAllInStack(stackId).stream()
+                List<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stackId).stream()
                         .filter(instanceMetaData -> payload.getInstanceIds().contains(instanceMetaData.getInstanceId())).collect(Collectors.toList());
                 MDCBuilder.buildMdcContext(stack);
 

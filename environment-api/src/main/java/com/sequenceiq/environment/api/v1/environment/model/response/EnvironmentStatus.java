@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import java.util.Set;
+
 import io.swagger.annotations.ApiModel;
 
 @ApiModel(value = "EnvironmentStatusV1")
@@ -56,8 +58,24 @@ public enum EnvironmentStatus {
 
     FREEIPA_DELETED_ON_PROVIDER_SIDE;
 
+    public static Set<EnvironmentStatus> startable() {
+        return Set.of(AVAILABLE, START_DATALAKE_STARTED, START_DATAHUB_STARTED, START_FREEIPA_STARTED);
+    }
+
+    public static Set<EnvironmentStatus> stoppable() {
+        return Set.of(AVAILABLE, STOP_DATALAKE_STARTED, STOP_DATAHUB_STARTED, STOP_FREEIPA_STARTED);
+    }
+
+    public static Set<EnvironmentStatus> upscalable() {
+        return Set.of(AVAILABLE);
+    }
+
     public boolean isAvailable() {
         return equals(AVAILABLE);
+    }
+
+    public boolean isNetworkCreationFinished() {
+        return equals(PUBLICKEY_CREATE_IN_PROGRESS) || equals(FREEIPA_CREATION_IN_PROGRESS) || equals(AVAILABLE);
     }
 
     public boolean isFailed() {

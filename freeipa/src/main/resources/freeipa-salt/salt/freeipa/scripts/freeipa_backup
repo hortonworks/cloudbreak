@@ -6,6 +6,13 @@ set -x
 
 CONFIG_FILE=/etc/freeipa_backup.conf
 
+if [ -z "$CRON_BACKUP" ]
+then
+    BACKUP_MODE="MANUAL"
+else
+    BACKUP_MODE="CRON"
+fi
+
 # Config Defaults
 typeset -A config # init array
 config=( # set default values in config array
@@ -13,6 +20,7 @@ config=( # set default values in config array
     [backup_platform]="LOCAL"
     [azure_instance_msi]=""
     [logfile]="/var/log/ipabackup.log"
+    [statusfile]="/var/log/ipabackup_status.log"
     [backup_path]="/var/lib/ipa/backup"
     [http_proxy]=""
 )
@@ -56,11 +64,12 @@ fi
 
 if [[ -z "$TYPE" ]] || [[ -z "$FOLDER" ]];
 then
-    echo "A type (-t) and a folder -f must be defined" >&2
+    echo "A type (-t) and a folder (-f) must be defined" >&2
     exit 1
 fi
 
 LOGFILE="${config[logfile]}"
+STATUSFILE="${config[statusfile]}"
 DATE_FOLDER="$(date -I)"
 BACKUP_PATH_POSTFIX="${FOLDER}"
 
@@ -83,10 +92,19 @@ doLog(){
     echo "`date "+%Y-%m-%dT%H:%M:%SZ"` $type_of_msg ""$msg" >> $LOGFILE
 }
 
+doStatus(){
+    type_of_msg=$(echo $*|cut -d" " -f1)
+    msg=$(echo "$*"|cut -d" " -f2-)
+    [[ $type_of_msg == INFO ]] && type_of_msg="INFO " # one space for aligning
+
+    echo "`date "+%Y-%m-%dT%H:%M:%SZ"` $type_of_msg "$BACKUP_MODE" ""$msg" > $STATUSFILE
+}
+
 error_exit()
 {
     doLog "ERROR $1"
-	exit 1
+    doStatus "ERROR $1"
+    exit 1
 }
 
 remove_local_backups() {
@@ -123,3 +141,4 @@ elif [[ "${config[backup_platform]}" = "AZURE" ]]; then
 fi
 
 doLog "INFO Backup completed."
+doStatus "INFO Backup succeeded."

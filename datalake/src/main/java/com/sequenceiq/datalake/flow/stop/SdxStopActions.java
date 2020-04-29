@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.datalake.flow.stop.event.RdsStopSuccessEvent;
+import com.sequenceiq.datalake.flow.stop.event.RdsWaitingToStopRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -149,24 +151,51 @@ public class SdxStopActions {
         };
     }
 
-    @Bean(name = "SDX_STOP_FINISHED_STATE")
-    public Action<?, ?> finishedAction() {
+    @Bean(name = "SDX_STOP_RDS_STOP_STATE")
+    public Action<?, ?> sdxRdsStop() {
         return new AbstractSdxAction<>(SdxStopSuccessEvent.class) {
+
             @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    SdxStopSuccessEvent payload) {
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxStopSuccessEvent payload) {
                 return SdxContext.from(flowParameters, payload);
             }
 
             @Override
             protected void doExecute(SdxContext context, SdxStopSuccessEvent payload, Map<Object, Object> variables) throws Exception {
+                LOGGER.info("SDX RDS stop in progress: {}", payload.getResourceId());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(SdxContext context) {
+                return new RdsWaitingToStopRequest(context.getSdxId(), context.getUserId());
+            }
+
+            @Override
+            protected Object getFailurePayload(SdxStopSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return SdxStopFailedEvent.from(payload, ex);
+            }
+        };
+    }
+
+    @Bean(name = "SDX_STOP_FINISHED_STATE")
+    public Action<?, ?> finishedAction() {
+        return new AbstractSdxAction<>(RdsStopSuccessEvent.class) {
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    RdsStopSuccessEvent payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, RdsStopSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("SDX stop finalized: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Datalake is stopped", payload.getResourceId());
                 sendEvent(context, SDX_STOP_FINALIZED_EVENT.event(), payload);
             }
 
             @Override
-            protected Object getFailurePayload(SdxStopSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(RdsStopSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return null;
             }
         };

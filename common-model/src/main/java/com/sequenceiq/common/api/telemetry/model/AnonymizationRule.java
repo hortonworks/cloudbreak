@@ -2,7 +2,7 @@ package com.sequenceiq.common.api.telemetry.model;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AnonymizationRule implements Serializable {
 
-    @NotNull
+    @NotBlank
     private String value;
 
     private String replacement = "[REDACTED]";

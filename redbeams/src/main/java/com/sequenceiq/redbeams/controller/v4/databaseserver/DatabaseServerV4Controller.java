@@ -6,7 +6,11 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.redbeams.service.stack.RedbeamsStopService;
+import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -44,6 +48,12 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Inject
     private RedbeamsTerminationService redbeamsTerminationService;
+
+    @Inject
+    private RedbeamsStartService redbeamsStartService;
+
+    @Inject
+    private RedbeamsStopService redbeamsStopService;
 
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
@@ -146,5 +156,17 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
                 request.getType(),
                 Optional.ofNullable(request.getDatabaseDescription()));
         return new CreateDatabaseV4Response(result);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public void start(@ValidCrn @NotNull String crn) {
+        redbeamsStartService.startDatabaseServer(crn);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    public void stop(@ValidCrn @NotNull String crn) {
+        redbeamsStopService.stopDatabaseServer(crn);
     }
 }

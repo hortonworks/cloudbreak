@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public class ClusterProxyErrorRpcListener implements JsonRpcClient.RequestListener {
 
-    private Optional<ClusterProxyError> deserializeAsClusteProxyError(ObjectNode objectNode) {
+    private Optional<ClusterProxyError> deserializeAsClusterProxyError(ObjectNode objectNode) {
         ObjectMapper mapper = new ObjectMapper();
         ClusterProxyError clusterProxyError;
         try {
@@ -24,7 +24,7 @@ public class ClusterProxyErrorRpcListener implements JsonRpcClient.RequestListen
     }
 
     private void throwIfClusterProxyError(ObjectNode node) {
-        Optional<ClusterProxyError> clusterProxyError = deserializeAsClusteProxyError(node);
+        Optional<ClusterProxyError> clusterProxyError = deserializeAsClusterProxyError(node);
         if (clusterProxyError.isPresent()) {
             throw new ClusterProxyException(String.format("Cluster proxy service returned error: %s", clusterProxyError.get()));
         }

@@ -241,7 +241,8 @@ public class UpgradeService {
                 latestImage.getImage().getImageSetsByProvider().get(stack.getPlatformVariant().toLowerCase()).get(stack.getRegion()),
                 latestImage.getImage().getUuid(),
                 latestImage.getImageCatalogName(),
-                latestImage.getImage().getCreated()
+                latestImage.getImage().getCreated(),
+                latestImage.getImage().getDate()
         );
         response.setUpgrade(upgradeImageInfo);
         LOGGER.info("Datalake upgrade option evaulation finished, image found with image id {}", response.getUpgrade().getImageId());
@@ -255,7 +256,8 @@ public class UpgradeService {
                 latestImage.getImage().getImageSetsByProvider().get(stack.getPlatformVariant().toLowerCase()).get(stack.getRegion()),
                 latestImage.getImage().getUuid(),
                 latestImage.getImageCatalogName(),
-                latestImage.getImage().getCreated()
+                latestImage.getImage().getCreated(),
+                latestImage.getImage().getDate()
         );
         response.setUpgrade(upgradeImageInfo);
         return response;
@@ -267,11 +269,16 @@ public class UpgradeService {
     }
 
     private UpgradeOptionV4Response createUpgradeBaseWithCurrent(Image image) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentImage = imageCatalogService.getImage(
+                image.getImageCatalogUrl(),
+                image.getImageCatalogName(),
+                image.getImageId()).getImage();
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response(
                 image.getImageName(),
                 image.getImageId(),
                 image.getImageCatalogName(),
-                imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage().getCreated());
+                currentImage.getCreated(),
+                currentImage.getDate());
         UpgradeOptionV4Response response = new UpgradeOptionV4Response();
         response.setCurrent(currentImageInfo);
         return response;

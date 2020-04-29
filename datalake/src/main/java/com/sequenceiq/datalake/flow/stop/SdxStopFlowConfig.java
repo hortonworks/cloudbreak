@@ -6,6 +6,7 @@ import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_ALL_DATAHU
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_IN_PROGRESS_STATE;
+import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_RDS_STOP_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_START_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_SYNC_STATE;
 
@@ -34,8 +35,11 @@ public class SdxStopFlowConfig extends AbstractFlowConfiguration<SdxStopState, S
             .from(SDX_STOP_ALL_DATAHUBS_STATE).to(SDX_STOP_IN_PROGRESS_STATE)
             .event(SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT).defaultFailureEvent()
 
-            .from(SDX_STOP_IN_PROGRESS_STATE).to(SDX_STOP_FINISHED_STATE)
+            .from(SDX_STOP_IN_PROGRESS_STATE).to(SDX_STOP_RDS_STOP_STATE)
             .event(SdxStopEvent.SDX_STOP_SUCCESS_EVENT).failureEvent(SdxStopEvent.SDX_STOP_FAILED_EVENT)
+
+            .from(SDX_STOP_RDS_STOP_STATE).to(SDX_STOP_FINISHED_STATE)
+            .event(SdxStopEvent.SDX_STOP_RDS_FINISHED_EVENT).defaultFailureEvent()
 
             .from(SDX_STOP_FINISHED_STATE).to(FINAL_STATE)
             .event(SdxStopEvent.SDX_STOP_FINALIZED_EVENT).defaultFailureEvent()

@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 public enum AuthorizationResourceType {
     DATALAKE("datalake"),
     ENVIRONMENT("environments"),
-    CREDENTIAL("credential"),
+    CREDENTIAL("environments"),
     DATAHUB("datahub");
 
     private final String resource;

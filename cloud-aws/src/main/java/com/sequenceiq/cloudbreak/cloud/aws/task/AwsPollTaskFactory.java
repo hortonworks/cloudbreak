@@ -13,6 +13,7 @@ import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.rds.AmazonRDS;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -67,6 +68,11 @@ public class AwsPollTaskFactory {
 
     public PollTask<Boolean> newAMICopyStatusCheckerTask(AuthenticatedContext authenticatedContext, Collection<String> imageIds, AmazonEC2Client client) {
         return createPollTask(AMICopyStatusCheckerTask.NAME, authenticatedContext, imageIds, client);
+    }
+
+    public PollTask<Boolean> newRdbStatusCheckerTask(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier,
+            String successStatus, AmazonRDS client) {
+        return createPollTask(AwsRdbStatusCheckerTask.NAME, authenticatedContext, dbInstanceIdentifier, successStatus, client);
     }
 
     @SuppressWarnings("unchecked")

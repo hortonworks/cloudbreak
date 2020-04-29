@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -70,11 +68,11 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
-import com.sequenceiq.cloudbreak.tag.CostTagging;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerScheduledExecutor;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 import freemarker.template.TemplateException;
 
@@ -270,7 +268,7 @@ public abstract class AwsComponentTest {
         }
 
         @Bean
-        public SyncPollingScheduler<?> syncPollingScheduler() throws InterruptedException, ExecutionException, TimeoutException {
+        public SyncPollingScheduler<?> syncPollingScheduler() throws Exception {
             SyncPollingScheduler<?> syncPollingScheduler = mock(SyncPollingScheduler.class);
             when(syncPollingScheduler.schedule(any())).thenAnswer(
                     getAnswer()
@@ -285,7 +283,7 @@ public abstract class AwsComponentTest {
         }
 
         @Bean
-        public AwsBackoffSyncPollingScheduler<?> awsBackoffSyncPollingScheduler() throws InterruptedException, ExecutionException, TimeoutException {
+        public AwsBackoffSyncPollingScheduler<?> awsBackoffSyncPollingScheduler() throws Exception {
             AwsBackoffSyncPollingScheduler<?> awsBackoffSyncPollingScheduler = mock(AwsBackoffSyncPollingScheduler.class);
             when(awsBackoffSyncPollingScheduler.schedule(any())).thenAnswer(
                     getAnswer()
