@@ -59,4 +59,4 @@ include 'flow-api'
 include 'template-manager-tag'
 include 'common-handlebar'
 include 'environment-common'
-
+include 'audit-connector'

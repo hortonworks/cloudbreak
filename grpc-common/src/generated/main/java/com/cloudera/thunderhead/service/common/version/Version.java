@@ -1958,9 +1958,10 @@ public final class Version {
       "st\"\225\001\n\017VersionResponse\022\014\n\004name\030\001 \001(\t\022\017\n\007" +
       "version\030\002 \001(\t\022\016\n\006commit\030\003 \001(\t\022\021\n\ttimesta" +
       "mp\030\004 \001(\t\022\023\n\013buildNumber\030\005 \001(\t\022\014\n\004host\030\006 " +
-      "\001(\t\022\014\n\004user\030\007 \001(\t\022\017\n\007pokemon\030\010 \001(\tB:\n/co" +
+      "\001(\t\022\014\n\004user\030\007 \001(\t\022\017\n\007pokemon\030\010 \001(\tBU\n/co" +
       "m.cloudera.thunderhead.service.common.ve" +
-      "rsionB\007Versionb\006proto3"
+      "rsionB\007VersionZ\031com/cloudera/cdp/protobu" +
+      "fb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

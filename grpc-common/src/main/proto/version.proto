@@ -4,6 +4,7 @@ package version;
 
 option java_package = "com.cloudera.thunderhead.service.common.version";
 option java_outer_classname = "Version";
+option go_package = "com/cloudera/cdp/protobuf";
 
 message VersionRequest {
 }

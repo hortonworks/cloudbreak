@@ -33,6 +33,9 @@
         <Package name="~org\.apache\.cb\.yarn.*"/>
     </Match>
     <Match>
+        <Package name="~com\.cloudera\.thunderhead\.service\.audit.*"/>
+    </Match>
+    <Match>
         <Package name="~com\.cloudera\.thunderhead\.service\.authorization.*"/>
     </Match>
     <Match>
