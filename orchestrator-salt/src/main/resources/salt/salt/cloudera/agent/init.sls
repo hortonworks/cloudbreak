@@ -47,3 +47,20 @@ generate_host_id:
   cmd.run:
     - name: /opt/scripts/generate-host-id.sh
     - shell: /bin/bash
+
+/opt/cloudera/cm-agent/service/inituids:
+  file.directory:
+    - user: cloudera-scm
+    - group: cloudera-scm
+    - dir_mode: 750
+    - makedirs: True
+
+set_service_uids:
+  cmd.run:
+    - name: /opt/cloudera/cm-agent/service/inituids/set-service-uids.py -l INFO  2>&1 | tee -a /var/log/set-service-uids.log && [[ 0 -eq ${PIPESTATUS[0]} ]] && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/set-service-uids-executed || exit ${PIPESTATUS[0]}
+    - cwd: /opt/cloudera/cm-agent/service/inituids
+    - failhard: True
+    - onlyif: test -f /opt/cloudera/cm-agent/service/inituids/set-service-uids.py
+    - unless: test -f /var/log/set-service-uids-executed
+    - require:
+        - file: /opt/cloudera/cm-agent/service/inituids

@@ -242,7 +242,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             if (prewarmed) {
                 refreshParcelRepos(clouderaManagerResourceApi);
             }
-            clouderaManagerConfigService.setCdpEnvironmentIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_0_2, apiClient, clientConfig);
+            clouderaManagerConfigService.setCdpEnvironmentIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_0_2, apiClient);
             installCluster(cluster, apiClusterTemplate, clouderaManagerResourceApi, prewarmed);
             clouderaManagerMgmtLaunchService.startManagementServices(stack, apiClient);
             clouderaManagerYarnSetupService.suppressWarnings(stack, apiClient);

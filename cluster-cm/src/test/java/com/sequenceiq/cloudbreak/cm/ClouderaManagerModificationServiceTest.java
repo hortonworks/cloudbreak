@@ -127,6 +127,9 @@ class ClouderaManagerModificationServiceTest {
     @Mock
     private CloudbreakEventService eventService;
 
+    @Mock
+    private ClouderaManagerConfigService configService;
+
     private Cluster cluster;
 
     private HostGroup hostGroup;

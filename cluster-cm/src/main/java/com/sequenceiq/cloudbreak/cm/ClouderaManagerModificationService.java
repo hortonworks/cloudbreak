@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTING;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
@@ -98,6 +99,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Inject
     private ClouderaManagerRoleRefreshService clouderaManagerRoleRefreshService;
 
+    @Inject
+    private ClouderaManagerConfigService configService;
+
     private final Stack stack;
 
     private final HttpClientConfig clientConfig;
@@ -186,6 +190,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             callUpgradeCdhCommand(stackProductVersion, clustersResourceApi);
             restartStaleServices(mgmtServiceResourceApi, clustersResourceApi);
 
+            configService.enableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClient, stack.getName());
         } catch (ApiException | IOException e) {
             LOGGER.info("Could not upgrade Cloudera Runtime services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
@@ -440,13 +445,14 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void stopCluster() throws CloudbreakException {
+    public void stopCluster(boolean disableKnoxAutorestart) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         try {
             LOGGER.debug("Stopping all Cloudera Runtime services");
             eventService
                     .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPING);
+            disableKnoxAutorestart(disableKnoxAutorestart);
             Collection<ApiService> apiServices = readServices(stack);
             boolean anyServiceNotStopped = apiServices.stream()
                     .anyMatch(service -> !ApiServiceState.STOPPED.equals(service.getServiceState())
@@ -465,6 +471,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         } catch (ApiException e) {
             LOGGER.info("Couldn't stop Cloudera Manager services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void disableKnoxAutorestart(boolean disableKnoxAutorestart) {
+        if (disableKnoxAutorestart) {
+            configService.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClient, stack.getName());
         }
     }
 

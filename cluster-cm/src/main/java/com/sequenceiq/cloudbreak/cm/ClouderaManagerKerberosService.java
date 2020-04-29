@@ -33,12 +33,6 @@ public class ClouderaManagerKerberosService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerKerberosService.class);
 
-    private static final String ACTIVE_DIRECTORY = "Active Directory";
-
-    private static final String FREEIPA = "Red Hat IPA";
-
-    private static final String FREEIPA_FEATURE_FLAG = "FEATURE_FLAG_redhat_ipa";
-
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
 
@@ -63,7 +57,7 @@ public class ClouderaManagerKerberosService {
         if (kerberosDetailService.isAdJoinable(kerberosConfig) || kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             ClouderaManagerModificationService modificationService = applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig);
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
-            modificationService.stopCluster();
+            modificationService.stopCluster(false);
             ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
             ApiCommand configureForKerberos = clustersResourceApi.configureForKerberos(cluster.getName(), new ApiConfigureForKerberosArguments());
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, configureForKerberos.getId());
@@ -81,10 +75,10 @@ public class ClouderaManagerKerberosService {
         String password = cluster.getCloudbreakAmbariPassword();
         try {
             ApiClient client = clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
-            clouderaManagerConfigService.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, client, clientConfig, stack.getName());
+            clouderaManagerConfigService.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, client, stack.getName());
 
             ClouderaManagerModificationService modificationService = applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig);
-            modificationService.stopCluster();
+            modificationService.stopCluster(false);
 
             ClouderaManagerClusterDecomissionService decomissionService = applicationContext.getBean(ClouderaManagerClusterDecomissionService.class,
                     stack, clientConfig);

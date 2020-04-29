@@ -118,7 +118,7 @@ public class ClouderaManagerKerberosServiceTest {
 
         underTest.configureKerberosViaApi(client, clientConfig, stack, kerberosConfig);
 
-        verify(modificationService).stopCluster();
+        verify(modificationService).stopCluster(false);
         verify(clouderaManagerPollingServiceProvider).startPollingCmKerberosJob(stack, client, BigDecimal.TEN);
         verify(clouderaManagerPollingServiceProvider).startPollingCmKerberosJob(stack, client, BigDecimal.ZERO);
         verify(clustersResourceApi).deployClientConfig(cluster.getName());
@@ -132,7 +132,7 @@ public class ClouderaManagerKerberosServiceTest {
 
         underTest.deleteCredentials(clientConfig, stack);
 
-        verify(modificationService).stopCluster();
+        verify(modificationService).stopCluster(false);
         clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, BigDecimal.ZERO);
     }
 }

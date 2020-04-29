@@ -37,7 +37,7 @@ public class ClusterStopHandler implements EventHandler<ClusterStopRequest> {
         ClusterStopResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            apiConnectors.getConnector(stack).stopCluster();
+            apiConnectors.getConnector(stack).stopCluster(false);
             result = new ClusterStopResult(request);
         } catch (Exception e) {
             result = new ClusterStopResult(e.getMessage(), e, request);
