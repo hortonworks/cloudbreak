@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -124,23 +123,19 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         if (result.getStatus() == DetailedStackStatus.PROVISIONED) {
             return DetailedStackStatus.PROVISIONED;
         }
-        if (providerSyncResults.stream().allMatch(hasStatus(InstanceStatus.STOPPED))) {
+        if (providerSyncResults.stream().allMatch(r -> r.getStatus() == InstanceStatus.STOPPED)) {
             return DetailedStackStatus.STOPPED;
         }
-        if (providerSyncResults.stream().anyMatch(hasStatus(InstanceStatus.STOPPED))) {
+        if (providerSyncResults.stream().anyMatch(r -> r.getStatus() == InstanceStatus.STOPPED)) {
             return DetailedStackStatus.PROVISIONED;
         }
-        if (providerSyncResults.stream().allMatch(hasStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.DELETED_BY_PROVIDER))) {
+        if (providerSyncResults.stream().allMatch(r -> r.getStatus() == InstanceStatus.DELETED_ON_PROVIDER_SIDE)) {
             return DetailedStackStatus.DELETED_ON_PROVIDER_SIDE;
         }
-        if (providerSyncResults.stream().anyMatch(hasStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.DELETED_BY_PROVIDER))) {
+        if (providerSyncResults.stream().anyMatch(r -> r.getStatus() == InstanceStatus.DELETED_ON_PROVIDER_SIDE)) {
             return DetailedStackStatus.PROVISIONED;
         }
         return result.getStatus();
-    }
-
-    private Predicate<ProviderSyncResult> hasStatus(InstanceStatus... statuses) {
-        return providerSyncResult -> Set.of(statuses).contains(providerSyncResult.getStatus());
     }
 
 }

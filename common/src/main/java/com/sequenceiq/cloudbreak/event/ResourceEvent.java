@@ -131,7 +131,6 @@ public enum ResourceEvent {
     STACK_SYNC_HOST_UPDATED("stack.sync.host.updated"),
     STACK_SYNC_INSTANCE_TERMINATED("stack.sync.instance.terminated"),
     STACK_SYNC_INSTANCE_DELETED_CBMETADATA("stack.sync.instance.deleted.cbmetadata"),
-    STACK_SYNC_INSTANCE_DELETED_BY_PROVIDER_CBMETADATA("stack.sync.instance.deletedbyprovider.cbmetadata"),
     STACK_DELETE_IN_PROGRESS("stack.delete.in.progress"),
     STACK_ADDING_INSTANCES("stack.adding.instances"),
     STACK_METADATA_EXTEND_WITH_COUNT("stack.metadata.extend.with.count"),
