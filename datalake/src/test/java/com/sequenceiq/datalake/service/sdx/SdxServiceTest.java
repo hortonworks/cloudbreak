@@ -33,6 +33,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -63,6 +65,7 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -163,7 +166,8 @@ class SdxServiceTest {
     @Test
     void testGetSdxClusterByAccountIdWhenNoDeployedClusterShouldThrowSdxNotFoundException() {
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> underTest.getSdxByNameInAccount(USER_CRN, "env"), "Sdx cluster not found");
+        NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.getSdxByNameInAccount(USER_CRN, "sdxcluster"));
+        assertEquals("SDX cluster 'sdxcluster' not found.", notFoundException.getMessage());
     }
 
     @Test
@@ -174,9 +178,12 @@ class SdxServiceTest {
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
         sdxClusterRequest.addTags(tags);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Collections.singletonList(new SdxCluster()));
-        Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null), "SDX cluster exists for environment name");
+        SdxCluster existing = new SdxCluster();
+        existing.setEnvName("envir");
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Collections.singletonList(existing));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        assertEquals("SDX cluster exists for environment name: envir", badRequestException.getMessage());
     }
 
     @Test
@@ -305,6 +312,41 @@ class SdxServiceTest {
         assertEquals("s3a://some/dir", createdSdxCluster.getCloudStorageBaseLocation());
     }
 
+    static Object[][] startParamProvider() {
+        return new Object[][]{
+                {EnvironmentStatus.ENV_STOPPED, "The environment is stopped. Please start the environment first!"},
+                {EnvironmentStatus.STOP_FREEIPA_STARTED, "The environment is stopped. Please start the environment first!"},
+                {EnvironmentStatus.START_FREEIPA_STARTED, "The environment is starting. Please wait until finished!"}
+        };
+    }
+
+    @ParameterizedTest
+    @MethodSource("startParamProvider")
+    void testCreateButEnvInStoppedStatus(EnvironmentStatus environmentStatus, String exceptionMessage) {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        sdxClusterRequest.setEnvironment("envir");
+        Map<String, String> tags = new HashMap<>();
+        tags.put("mytag", "tagecske");
+        sdxClusterRequest.addTags(tags);
+
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
+        detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
+        detailedEnvironmentResponse.setCrn(Crn.builder()
+                .setService(Crn.Service.ENVIRONMENTS)
+                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+                .setResource(UUID.randomUUID().toString())
+                .setAccountId(UUID.randomUUID().toString())
+                .build().toString());
+        detailedEnvironmentResponse.setEnvironmentStatus(environmentStatus);
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null), "BadRequestException should thrown");
+        assertEquals(exceptionMessage, badRequestException.getMessage());
+    }
+
     @Test
     void testListSdxClustersWhenEnvironmentNameProvidedAndTwoSdxIsInTheDatabaseShouldListAllSdxClusterWhichIsTwo() {
         List<SdxCluster> sdxClusters = List.of(new SdxCluster(), new SdxCluster());
@@ -358,9 +400,9 @@ class SdxServiceTest {
         stackViewV4Response.setName("existingDistroXCluster");
         mockCBCallForDistroXClusters(Sets.newHashSet(stackViewV4Response));
 
-        assertThrows(BadRequestException.class,
-                () -> underTest.deleteSdx(USER_CRN, "sdx-cluster-name", false),
-                "The following Data Hub cluster(s) must be terminated before SDX deletion [existingDistroXCluster]");
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.deleteSdx(USER_CRN, "sdx-cluster-name", false));
+        assertEquals("The following Data Hub cluster(s) must be terminated before SDX deletion [existingDistroXCluster]", badRequestException.getMessage());
     }
 
     @Test
@@ -392,6 +434,7 @@ class SdxServiceTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(cloudPlatform.name());
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
         detailedEnvironmentResponse.setCrn(Crn.builder()
                 .setService(Crn.Service.ENVIRONMENTS)
                 .setResourceType(Crn.ResourceType.ENVIRONMENT)
