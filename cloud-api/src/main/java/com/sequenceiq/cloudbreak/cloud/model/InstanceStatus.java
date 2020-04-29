@@ -7,6 +7,7 @@ public enum InstanceStatus {
     STOPPED(StatusGroup.PERMANENT),
     FAILED(StatusGroup.PERMANENT),
     TERMINATED(StatusGroup.PERMANENT),
+    TERMINATED_BY_PROVIDER(StatusGroup.PERMANENT),
     UNKNOWN(StatusGroup.PERMANENT),
     CREATE_REQUESTED(StatusGroup.PERMANENT),
     DELETE_REQUESTED(StatusGroup.PERMANENT),

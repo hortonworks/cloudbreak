@@ -252,6 +252,7 @@ public class ClusterRepairService {
     private boolean selectUnhealthyInstances(InstanceMetaData instanceMetaData) {
         return instanceMetaData.getInstanceStatus() == InstanceStatus.SERVICES_UNHEALTHY ||
                 instanceMetaData.getInstanceStatus() == InstanceStatus.DELETED_ON_PROVIDER_SIDE ||
+                instanceMetaData.getInstanceStatus() == InstanceStatus.DELETED_BY_PROVIDER ||
                 instanceMetaData.getInstanceStatus() == InstanceStatus.STOPPED;
     }
 

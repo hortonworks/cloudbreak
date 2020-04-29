@@ -104,7 +104,7 @@ public class AwsInstanceConnector implements InstanceConnector {
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         return setCloudVmInstanceStatuses(ac, vms, "Stopped",
                 (ec2Client, instances) -> ec2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances)),
-                "Failed to send start request to AWS: ");
+                "Failed to send stop request to AWS: ");
     }
 
     private List<CloudVmInstanceStatus> setCloudVmInstanceStatuses(AuthenticatedContext ac, List<CloudInstance> vms, String status,
@@ -216,12 +216,12 @@ public class AwsInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
         LOGGER.debug("Check instances on aws side: {}", vms);
-        List<CloudInstance> cloudIntancesWithInstanceId = vms.stream()
+        List<CloudInstance> cloudInstancesWithInstanceId = vms.stream()
                 .filter(cloudInstance -> cloudInstance.getInstanceId() != null)
                 .collect(Collectors.toList());
-        LOGGER.debug("Instances with intanceId: {}", cloudIntancesWithInstanceId);
+        LOGGER.debug("Instances with instanceId: {}", cloudInstancesWithInstanceId);
 
-        List<String> instanceIds = cloudIntancesWithInstanceId.stream().map(CloudInstance::getInstanceId)
+        List<String> instanceIds = cloudInstancesWithInstanceId.stream().map(CloudInstance::getInstanceId)
                 .collect(Collectors.toList());
 
         String region = ac.getCloudContext().getLocation().getRegion().value();
@@ -229,7 +229,7 @@ public class AwsInstanceConnector implements InstanceConnector {
             DescribeInstancesResult result = new AuthenticatedContextView(ac).getAmazonEC2Client()
                     .describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
             LOGGER.debug("Result from AWS: {}", result);
-            return fillCloudVmInstanceStatuses(ac, cloudIntancesWithInstanceId, region, result);
+            return fillCloudVmInstanceStatuses(ac, cloudInstancesWithInstanceId, region, result);
         } catch (AmazonEC2Exception e) {
             handleEC2Exception(vms, e);
         } catch (SdkClientException e) {
@@ -252,7 +252,7 @@ public class AwsInstanceConnector implements InstanceConnector {
                     LOGGER.debug("AWS instance [{}] is in {} state, region: {}, stack: {}",
                             instance.getInstanceId(), instance.getState().getName(), region, ac.getCloudContext().getId());
                     cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance,
-                            AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(instance.getState().getName())));
+                            AwsInstanceStatusMapper.getInstanceStatusByAwsStateAndReason(instance.getState(), instance.getStateReason())));
                 }
             }
         }
