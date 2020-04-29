@@ -38,7 +38,6 @@ def springBootApps() {
 }
 
 def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
-ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
 // spring dependeny management override, if you remove silent errors can happen
 ext['junit-jupiter.version'] = "$junitJupiterVersion"
 
