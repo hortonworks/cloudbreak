@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.context;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -292,6 +293,10 @@ public abstract class TestContext implements ApplicationContextAware {
             return testParameter.get(CloudbreakTest.ACCESS_KEY);
         }
         return actingUser.getAccessKey();
+    }
+
+    public Crn getActingUserCrn() {
+        return Crn.fromString(new String(Base64.getDecoder().decode(getActingUserAccessKey())));
     }
 
     protected void setActingUser(CloudbreakUser actingUser) {
