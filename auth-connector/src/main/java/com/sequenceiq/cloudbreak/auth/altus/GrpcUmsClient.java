@@ -372,8 +372,9 @@ public class GrpcUmsClient {
             LOGGER.info("InternalCrn has all rights");
             return rightChecks.stream().map(rightCheck -> Boolean.TRUE).collect(Collectors.toList());
         }
-        if (!isAuthorizationEntitlementRegistered(actorCrn, ThreadBasedUserCrnProvider.getAccountId())) {
-            LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!", ThreadBasedUserCrnProvider.getAccountId());
+        String accountId = Crn.safeFromString(memberCrn).getAccountId();
+        if (!isAuthorizationEntitlementRegistered(actorCrn, accountId)) {
+            LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!", accountId);
             return rightChecks.stream().map(rightCheck -> Boolean.TRUE).collect(Collectors.toList());
         }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
