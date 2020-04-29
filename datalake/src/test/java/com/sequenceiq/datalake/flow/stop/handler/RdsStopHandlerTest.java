@@ -11,6 +11,7 @@ import com.sequenceiq.datalake.flow.stop.event.SdxStopFailedEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.datalake.service.pause.DatabasePauseSupportService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,8 +39,6 @@ public class RdsStopHandlerTest {
 
     private static final String USER_ID = "user";
 
-    private static final String DATABASE_CRN = "db crn";
-
     @Mock
     private SdxClusterRepository sdxClusterRepository;
 
@@ -61,6 +60,9 @@ public class RdsStopHandlerTest {
     @Mock
     private EventBus eventBus;
 
+    @Mock
+    private DatabasePauseSupportService databasePauseSupportService;
+
     @InjectMocks
     private RdsStopHandler victim;
 
@@ -76,7 +78,7 @@ public class RdsStopHandlerTest {
 
     @Test
     public void shouldNotCallStopInCaseNoExternalDatabaseButSetStopedStatus() {
-        when(sdxCluster.hasExternalDatabase()).thenReturn(false);
+        when(databasePauseSupportService.isDatabasePauseSupported(sdxCluster)).thenReturn(false);
 
         victim.accept(event);
 
@@ -87,8 +89,7 @@ public class RdsStopHandlerTest {
 
     @Test
     public void shouldCallStopInCaseExistingExternalDatabaseAndSetStopedStatus() {
-        when(sdxCluster.hasExternalDatabase()).thenReturn(true);
-        when(sdxCluster.getDatabaseCrn()).thenReturn(DATABASE_CRN);
+        when(databasePauseSupportService.isDatabasePauseSupported(sdxCluster)).thenReturn(true);
 
         victim.accept(event);
 
@@ -100,8 +101,7 @@ public class RdsStopHandlerTest {
 
     @Test
     public void shouldHandleUserBreakExceptionWithSdxStopFailedEvent() {
-        when(sdxCluster.hasExternalDatabase()).thenReturn(true);
-        when(sdxCluster.getDatabaseCrn()).thenReturn(DATABASE_CRN);
+        when(databasePauseSupportService.isDatabasePauseSupported(sdxCluster)).thenReturn(true);
         doThrow(UserBreakException.class).when(databaseService).stop(sdxCluster);
 
         victim.accept(event);
@@ -111,8 +111,7 @@ public class RdsStopHandlerTest {
 
     @Test
     public void shouldHandlePollerStoppedExceptionWithSdxStopFailedEvent() {
-        when(sdxCluster.hasExternalDatabase()).thenReturn(true);
-        when(sdxCluster.getDatabaseCrn()).thenReturn(DATABASE_CRN);
+        when(databasePauseSupportService.isDatabasePauseSupported(sdxCluster)).thenReturn(true);
         doThrow(PollerStoppedException.class).when(databaseService).stop(sdxCluster);
 
         victim.accept(event);
@@ -122,8 +121,7 @@ public class RdsStopHandlerTest {
 
     @Test
     public void shouldHandlePollerExceptionWithSdxStopFailedEvent() {
-        when(sdxCluster.hasExternalDatabase()).thenReturn(true);
-        when(sdxCluster.getDatabaseCrn()).thenReturn(DATABASE_CRN);
+        when(databasePauseSupportService.isDatabasePauseSupported(sdxCluster)).thenReturn(true);
         doThrow(PollerException.class).when(databaseService).stop(sdxCluster);
 
         victim.accept(event);
@@ -133,8 +131,7 @@ public class RdsStopHandlerTest {
 
     @Test
     public void shouldHandleExceptionWithSdxStopFailedEvent() {
-        when(sdxCluster.hasExternalDatabase()).thenReturn(true);
-        when(sdxCluster.getDatabaseCrn()).thenReturn(DATABASE_CRN);
+        when(databasePauseSupportService.isDatabasePauseSupported(sdxCluster)).thenReturn(true);
         doThrow(RuntimeException.class).when(databaseService).stop(sdxCluster);
 
         victim.accept(event);
