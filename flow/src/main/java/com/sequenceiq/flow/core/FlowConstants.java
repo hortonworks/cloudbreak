@@ -15,6 +15,14 @@ public class FlowConstants {
 
     public static final String FLOW_CONTEXTPARAMS_ID = "FLOW_CONTEXTPARAMS_ID";
 
+    public static final String INIT_STATE = "INIT_STATE";
+
+    public static final String FINISHED_STATE = "FINISHED";
+
+    public static final String CANCELLED_STATE = "CANCELLED";
+
+    public static final String TERMINATED_STATE = "TERMINATED";
+
     private FlowConstants() {
     }
 }

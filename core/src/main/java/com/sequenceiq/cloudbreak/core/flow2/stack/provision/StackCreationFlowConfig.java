@@ -106,7 +106,7 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
     }
 
     @Override
-    public StackCreationEvent getFailHandledEvent() {
+    public StackCreationEvent getRetryableEvent() {
         return STACKCREATION_FAILURE_HANDLED_EVENT;
     }
 }

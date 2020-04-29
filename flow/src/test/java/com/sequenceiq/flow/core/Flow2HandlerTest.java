@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import org.junit.Before;
@@ -83,7 +84,10 @@ public class Flow2HandlerTest {
     private Map<String, FlowConfiguration<?>> flowConfigurationMap;
 
     @Mock
-    private List<String> failHandledEvents;
+    private Set<String> retryableEvents;
+
+    @Mock
+    private Set<String> failHandledEvents;
 
     @Mock
     private FlowRegister runningFlows;

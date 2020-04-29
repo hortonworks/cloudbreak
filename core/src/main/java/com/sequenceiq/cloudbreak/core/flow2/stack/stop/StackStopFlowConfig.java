@@ -72,7 +72,7 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
     }
 
     @Override
-    public StackStopEvent getFailHandledEvent() {
+    public StackStopEvent getRetryableEvent() {
         return STOP_FAIL_HANDLED_EVENT;
     }
 }

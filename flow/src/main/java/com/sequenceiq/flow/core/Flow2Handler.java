@@ -54,7 +54,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private Map<String, FlowConfiguration<?>> flowConfigurationMap;
 
     @Resource
-    private List<String> failHandledEvents;
+    private Set<String> failHandledEvents;
 
     @Inject
     private FlowChains flowChains;
