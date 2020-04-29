@@ -4,6 +4,7 @@ package paging;
 
 option java_package = "com.cloudera.thunderhead.service.common.paging";
 option java_outer_classname = "PagingProto";
+option go_package = "com/cloudera/cdp/protobuf";
 
 
 // Generally an RPC supporting paging will contain an integer page size and a

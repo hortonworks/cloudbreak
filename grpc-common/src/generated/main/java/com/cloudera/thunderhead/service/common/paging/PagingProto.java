@@ -1167,9 +1167,10 @@ public final class PagingProto {
       "umAttrsEntry\032C\n!ExclusiveStartKeyStringA" +
       "ttrsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028" +
       "\001\032@\n\036ExclusiveStartKeyNumAttrsEntry\022\013\n\003k" +
-      "ey\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001B=\n.com.cloud" +
+      "ey\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001BX\n.com.cloud" +
       "era.thunderhead.service.common.pagingB\013P" +
-      "agingProtob\006proto3"
+      "agingProtoZ\031com/cloudera/cdp/protobufb\006p" +
+      "roto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

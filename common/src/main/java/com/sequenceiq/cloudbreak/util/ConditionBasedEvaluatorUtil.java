@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.util;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class ConditionBasedEvaluatorUtil {
@@ -17,15 +18,27 @@ public class ConditionBasedEvaluatorUtil {
         }
     }
 
+    public static <T> void doIfTrue(T subject, Predicate<T> condition, Consumer<T> doIfTrue) {
+        if (condition.test(subject)) {
+            doIfTrue.accept(subject);
+        }
+    }
+
     public static <T> void doIfTrue(boolean condition, T subject,  Consumer<T> doIfTrue) {
         if (condition) {
             doIfTrue.accept(subject);
         }
     }
 
-    public static <T> void doIfFalse(boolean condition, T subject,  Consumer<T> doIfTrue) {
+    public static <T> void doIfFalse(T subject, Predicate<T> condition, Consumer<T> doIfFalse) {
+        if (!condition.test(subject)) {
+            doIfFalse.accept(subject);
+        }
+    }
+
+    public static <T> void doIfFalse(boolean condition, T subject,  Consumer<T> doIfFalse) {
         if (!condition)  {
-            doIfTrue.accept(subject);
+            doIfFalse.accept(subject);
         }
     }
 

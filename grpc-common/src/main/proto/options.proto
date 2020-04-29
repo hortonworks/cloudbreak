@@ -32,6 +32,18 @@ message FieldExtension {
     string hiddenReason = 50008;
     // This conditions under which this hidden field is made visible.
     string hiddenRetention = 50009;
+    // This field is required.
+    bool required = 50010;
+    // The minimum value for this field.
+    int32 minimum = 50011;
+    // The minimum value for this field.
+    int32 maximum = 50012;
+    // The minimum length for this field.
+    int32 minimumLength = 50013;
+    // The minimum length for this field.
+    int32 maximumLength = 50014;
+    // This field has been deprecated.
+    bool deprecated = 50015;
   }
 }
 
@@ -51,6 +63,8 @@ message MethodExtension {
     string hiddenReason = 60005;
     // This conditions under which this hidden method is made visible.
     string hiddenRetention = 60006;
+    // This method has been deprecated.
+    bool deprecated = 60007;
   }
 }
 
@@ -62,5 +76,7 @@ message MessageExtension {
     string hiddenReason = 70001;
     // This conditions under this hidden message is made visible.
     string hiddenRetention = 70002;
+    // This message has been deprecated.
+    bool deprecated = 70003;
   }
 }
