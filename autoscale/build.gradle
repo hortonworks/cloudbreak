@@ -106,9 +106,6 @@ dependencyManagement {
         dependency group: 'com.zaxxer',                    name: 'HikariCP',                       version: '3.2.0'
 
         dependency group: 'com.google.code.gson',               name: 'gson',                      version: '2.6.2'
-        dependency (group: 'org.codehaus.groovy',                name: 'groovy-all',                version: '2.5.6') {
-            exclude 'org.testng:testng'
-        }
         dependency group: 'org.apache.hadoop',                  name: 'hadoop-yarn-api',           version: hadoopVersion
         dependency group: 'org.freemarker',                     name: 'freemarker',                version: freemarkerVersion
         dependency (group: 'org.quartz-scheduler',               name: 'quartz',                    version: '2.3.2') {
@@ -140,7 +137,6 @@ dependencies {
     compile group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey'
 
     compile group: 'com.google.code.gson',          name: 'gson'
-    compile group: 'org.codehaus.groovy',           name: 'groovy-all'
     compile group: 'org.apache.hadoop',             name: 'hadoop-yarn-api'
     compile group: 'org.freemarker',                name: 'freemarker'
     compile group: 'org.postgresql',                name: 'postgresql'
