@@ -170,9 +170,9 @@ public class FlowLogDBServiceTest {
 
     @Test
     public void testGetFlowLogsWithChainId() {
-        when(flowLogRepository.findAllByChainIds(any())).thenReturn(Lists.newArrayList(createFlowLog("flow")));
+        when(flowLogRepository.findAllByFlowIdsCreatedDesc(any())).thenReturn(List.of(createFlowLog("flow")));
 
-        assertEquals(1, underTest.getFlowLogsByChainIds(Lists.newArrayList("flowchain")).size());
+        assertEquals(1, underTest.getFlowLogsByFlowIdsCreatedDesc(Set.of("flowchain")).size());
     }
 
     @Test

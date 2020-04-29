@@ -76,7 +76,7 @@ public class SdxStopFlowConfig extends AbstractFlowConfiguration<SdxStopState, S
     }
 
     @Override
-    public SdxStopEvent getFailHandledEvent() {
+    public SdxStopEvent getRetryableEvent() {
         return SdxStopEvent.SDX_STOP_FAILED_HANDLED_EVENT;
     }
 }

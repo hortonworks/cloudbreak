@@ -110,7 +110,7 @@ public class StackProvisionFlowConfig extends AbstractFlowConfiguration<StackPro
     }
 
     @Override
-    public StackProvisionEvent getFailHandledEvent() {
+    public StackProvisionEvent getRetryableEvent() {
         return STACKCREATION_FAILURE_HANDLED_EVENT;
     }
 }

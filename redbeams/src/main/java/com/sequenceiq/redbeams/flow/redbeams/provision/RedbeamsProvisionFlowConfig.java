@@ -73,7 +73,7 @@ public class RedbeamsProvisionFlowConfig extends AbstractFlowConfiguration<Redbe
     }
 
     @Override
-    public RedbeamsProvisionEvent getFailHandledEvent() {
+    public RedbeamsProvisionEvent getRetryableEvent() {
         return REDBEAMS_PROVISION_FAILURE_HANDLED_EVENT;
     }
 }

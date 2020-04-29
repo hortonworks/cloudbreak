@@ -74,7 +74,7 @@ public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteStat
     }
 
     @Override
-    public SdxDeleteEvent getFailHandledEvent() {
+    public SdxDeleteEvent getRetryableEvent() {
         return SdxDeleteEvent.SDX_DELETE_FAILED_HANDLED_EVENT;
     }
 }

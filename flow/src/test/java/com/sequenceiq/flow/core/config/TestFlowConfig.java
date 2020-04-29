@@ -51,7 +51,7 @@ public class TestFlowConfig extends AbstractFlowConfiguration<TestFlowConfig.Tes
         }
 
     @Override
-    public TestFlowEvent getFailHandledEvent() {
+    public TestFlowEvent getRetryableEvent() {
         return TestFlowEvent.TEST_FAIL_HANDLED_EVENT;
     }
 
