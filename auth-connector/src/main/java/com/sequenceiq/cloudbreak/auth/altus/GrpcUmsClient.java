@@ -335,7 +335,7 @@ public class GrpcUmsClient {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
-        if (!isAuthorizationEntitlementRegistered(actorCrn, ThreadBasedUserCrnProvider.getAccountId())) {
+        if (!isAuthorizationEntitlementRegistered(actorCrn, ThreadBasedUserCrnProvider.getAccountId()) && isReadRight(right)) {
             LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!", ThreadBasedUserCrnProvider.getAccountId());
             return true;
         }
@@ -370,11 +370,6 @@ public class GrpcUmsClient {
                 rightChecks.stream().map(AuthorizationProto.RightCheck::getRight).collect(Collectors.toList()));
         if (InternalCrnBuilder.isInternalCrn(memberCrn)) {
             LOGGER.info("InternalCrn has all rights");
-            return rightChecks.stream().map(rightCheck -> Boolean.TRUE).collect(Collectors.toList());
-        }
-        String accountId = Crn.safeFromString(memberCrn).getAccountId();
-        if (!isAuthorizationEntitlementRegistered(actorCrn, accountId)) {
-            LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!", accountId);
             return rightChecks.stream().map(rightCheck -> Boolean.TRUE).collect(Collectors.toList());
         }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
@@ -673,6 +668,17 @@ public class GrpcUmsClient {
                 .setResourceType(Crn.ResourceType.RESOURCE_ROLE)
                 .setResource(resourceRoleName)
                 .build();
+    }
+
+    protected boolean isReadRight(String action) {
+        if (action == null) {
+            return false;
+        }
+        String[] parts = action.split("/");
+        if (parts.length == 2 && parts[1] != null && parts[1].equals("read")) {
+            return true;
+        }
+        return false;
     }
 
     public Crn getRoleCrn(String roleName) {
