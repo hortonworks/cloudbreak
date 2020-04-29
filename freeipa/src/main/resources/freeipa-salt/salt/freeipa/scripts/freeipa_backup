@@ -1,17 +1,10 @@
 #!/bin/bash
-# Name: freeipa_backup.sh
+# Name: freeipa_backup
 # Description: Backup FreeIPA and Upload backup to provided Cloud Location
 ################################################################
 set -x
 
 CONFIG_FILE=/etc/freeipa_backup.conf
-
-if [ -z "$CRON_BACKUP" ]
-then
-    BACKUP_MODE="MANUAL"
-else
-    BACKUP_MODE="CRON"
-fi
 
 # Config Defaults
 typeset -A config # init array
@@ -20,7 +13,7 @@ config=( # set default values in config array
     [backup_platform]="LOCAL"
     [azure_instance_msi]=""
     [logfile]="/var/log/ipabackup.log"
-    [statusfile]="/var/log/ipabackup_status.log"
+    [statusfileprefix]="/var/log/ipabackup_status_"
     [backup_path]="/var/lib/ipa/backup"
     [http_proxy]=""
 )
@@ -69,7 +62,7 @@ then
 fi
 
 LOGFILE="${config[logfile]}"
-STATUSFILE="${config[statusfile]}"
+STATUSFILEPREFIX="${config[statusfileprefix]}"
 DATE_FOLDER="$(date -I)"
 BACKUP_PATH_POSTFIX="${FOLDER}"
 
@@ -93,11 +86,14 @@ doLog(){
 }
 
 doStatus(){
-    type_of_msg=$(echo $*|cut -d" " -f1)
-    msg=$(echo "$*"|cut -d" " -f2-)
-    [[ $type_of_msg == INFO ]] && type_of_msg="INFO " # one space for aligning
+    if [[ -n "$BACKUP_SCHEDULE" ]]
+    then
+        type_of_msg=$(echo $*|cut -d" " -f1)
+        msg=$(echo "$*"|cut -d" " -f2-)
+        [[ $type_of_msg == INFO ]] && type_of_msg="INFO " # one space for aligning
 
-    echo "`date "+%Y-%m-%dT%H:%M:%SZ"` $type_of_msg "$BACKUP_MODE" ""$msg" > $STATUSFILE
+        echo "`date "+%Y-%m-%dT%H:%M:%SZ"` $type_of_msg $msg" > $STATUSFILEPREFIX$BACKUP_SCHEDULE.log
+    fi
 }
 
 error_exit()
