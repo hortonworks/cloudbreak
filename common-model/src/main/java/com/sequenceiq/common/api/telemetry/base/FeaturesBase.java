@@ -19,6 +19,10 @@ public abstract class FeaturesBase implements Serializable {
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_CLUSTER_LOGS_COLLECTION_ENABLED)
     private FeatureSetting clusterLogsCollection;
 
+    @JsonProperty("monitoring")
+    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_CLUSTER_MONITORING_ENABLED)
+    private FeatureSetting monitoring;
+
     public FeatureSetting getWorkloadAnalytics() {
         return workloadAnalytics;
     }
@@ -35,6 +39,14 @@ public abstract class FeaturesBase implements Serializable {
         this.clusterLogsCollection = clusterLogsCollection;
     }
 
+    public FeatureSetting getMonitoring() {
+        return monitoring;
+    }
+
+    public void setMonitoring(FeatureSetting monitoring) {
+        this.monitoring = monitoring;
+    }
+
     @JsonIgnore
     public void addWorkloadAnalytics(boolean enabled) {
         workloadAnalytics = new FeatureSetting();
@@ -45,5 +57,11 @@ public abstract class FeaturesBase implements Serializable {
     public void addClusterLogsCollection(boolean enabled) {
         clusterLogsCollection = new FeatureSetting();
         clusterLogsCollection.setEnabled(enabled);
+    }
+
+    @JsonIgnore
+    public void addMonitoring(boolean enabled) {
+        monitoring = new FeatureSetting();
+        monitoring.setEnabled(enabled);
     }
 }

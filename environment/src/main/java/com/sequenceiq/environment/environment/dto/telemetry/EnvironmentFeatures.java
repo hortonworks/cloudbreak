@@ -17,6 +17,8 @@ public class EnvironmentFeatures implements Serializable {
 
     private FeatureSetting useSharedAltusCredential;
 
+    private FeatureSetting monitoring;
+
     public FeatureSetting getClusterLogsCollection() {
         return clusterLogsCollection;
     }
@@ -41,6 +43,14 @@ public class EnvironmentFeatures implements Serializable {
         this.useSharedAltusCredential = useSharedAltusCredential;
     }
 
+    public FeatureSetting getMonitoring() {
+        return monitoring;
+    }
+
+    public void setMonitoring(FeatureSetting monitoring) {
+        this.monitoring = monitoring;
+    }
+
     @JsonIgnore
     public void addWorkloadAnalytics(boolean enabled) {
         workloadAnalytics = new FeatureSetting();
@@ -51,6 +61,12 @@ public class EnvironmentFeatures implements Serializable {
     public void addClusterLogsCollection(boolean enabled) {
         clusterLogsCollection = new FeatureSetting();
         clusterLogsCollection.setEnabled(enabled);
+    }
+
+    @JsonIgnore
+    public void addMonitoring(boolean enabled) {
+        monitoring = new FeatureSetting();
+        monitoring.setEnabled(enabled);
     }
 
     @JsonIgnore

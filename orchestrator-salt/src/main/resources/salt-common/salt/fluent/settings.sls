@@ -62,6 +62,12 @@
     {% set dbus_metering_enabled = False %}
 {% endif %}
 
+{% if salt['pillar.get']('fluent:dbusMonitoringEnabled') %}
+    {% set dbus_monitoring_enabled = True %}
+{% else %}
+    {% set dbus_monitoring_enabled = False %}
+{% endif %}
+
 {% if salt['pillar.get']('fluent:dbusIncludeSaltLogs') %}
     {% set dbus_include_salt_logs = True %}
 {% else %}
@@ -89,12 +95,17 @@
 {% set cloud_storage_worker_index=0 %}
 {% set metering_worker_index=0 %}
 {% set cluster_logs_collection_worker_index=0 %}
+{% set monitoring_worker_index=0 %}
 {% if cloud_storage_logging_enabled or cloud_logging_service_enabled %}
 {%   set cloud_storage_worker_index=number_of_workers %}
 {%   set number_of_workers=number_of_workers+1 %}
 {% endif %}
 {% if dbus_metering_enabled %}
 {%   set metering_worker_index=number_of_workers %}
+{%   set number_of_workers=number_of_workers+1 %}
+{% endif %}
+{% if dbus_monitoring_enabled %}
+{%   set monitoring_worker_index=number_of_workers %}
 {%   set number_of_workers=number_of_workers+1 %}
 {% endif %}
 {% if dbus_cluster_logs_collection_enabled %}
@@ -156,6 +167,7 @@
     "dbusClusterLogsCollection": dbus_cluster_logs_collection_enabled,
     "dbusClusterLogsCollectionDisableStop": dbus_cluster_logs_collection_disable_stop,
     "dbusMeteringEnabled": dbus_metering_enabled,
+    "dbusMonitoringEnabled": dbus_monitoring_enabled,
     "clouderaPublicGemRepo": cloudera_public_gem_repo,
     "clouderaAzurePluginVersion": cloudera_azure_plugin_version,
     "clouderaAzureGen2PluginVersion": cloudera_azure_gen2_plugin_version,
@@ -164,6 +176,7 @@
     "numberOfWorkers": number_of_workers,
     "cloudStorageWorkerIndex": cloud_storage_worker_index,
     "meteringWorkerIndex": metering_worker_index,
+    "monitoringWorkerIndex": monitoring_worker_index,
     "clusterLogsCollectionWorkerIndex": cluster_logs_collection_worker_index,
     "anonymizationRules": anonymization_rules,
     "dbusIncludeSaltLogs": dbus_include_salt_logs,

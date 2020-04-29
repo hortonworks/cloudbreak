@@ -117,11 +117,11 @@ public class FluentConfigService {
         }
         builder.withCloudStorageLoggingEnabled(cloudStorageLoggingEnabled)
                 .withCloudLoggingServiceEnabled(cloudLogServiceLoggingEnabled);
-        boolean databusLogEnabled = fillMeteringAndClusterLogCollectionConfigs(telemetry, databusEnabled, meteringEnabled, builder);
+        boolean databusLogEnabled = fillDiagnosticsConfigs(telemetry, databusEnabled, meteringEnabled, builder);
         return cloudStorageLoggingEnabled || databusLogEnabled || cloudLogServiceLoggingEnabled;
     }
 
-    private boolean fillMeteringAndClusterLogCollectionConfigs(Telemetry telemetry, boolean databusEnabled,
+    private boolean fillDiagnosticsConfigs(Telemetry telemetry, boolean databusEnabled,
             boolean meteringEnabled, FluentConfigView.Builder builder) {
         boolean validDatabusLogging = false;
         if (meteringEnabled || telemetry.isClusterLogsCollectionEnabled()) {
@@ -133,6 +133,11 @@ public class FluentConfigService {
             if (databusEnabled && telemetry.isClusterLogsCollectionEnabled()) {
                 builder.withClusterLogsCollection(true);
                 LOGGER.debug("Fluent based cluster log collection is enabled.");
+                validDatabusLogging = true;
+            }
+            if (databusEnabled && telemetry.isMonitoringFeatureEnabled()) {
+                builder.withMonitoringEnabled(true);
+                LOGGER.debug("Fluent based cluster monitoring is enabled.");
                 validDatabusLogging = true;
             }
         }

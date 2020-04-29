@@ -28,10 +28,13 @@ public class TelemetryApiConverter {
 
     private final boolean clusterLogsCollection;
 
+    private final boolean monitoringEnabled;
+
     private final boolean useSharedAltusCredential;
 
     public TelemetryApiConverter(TelemetryConfiguration configuration) {
         this.clusterLogsCollection = configuration.isClusterLogsCollection();
+        this.monitoringEnabled = configuration.isMonitoringEnabled();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
     }
 
@@ -88,6 +91,7 @@ public class TelemetryApiConverter {
         if (features != null) {
             featuresRequest = new FeaturesRequest();
             featuresRequest.setClusterLogsCollection(features.getClusterLogsCollection());
+            featuresRequest.setMonitoring(features.getMonitoring());
         }
         return featuresRequest;
     }
@@ -97,6 +101,7 @@ public class TelemetryApiConverter {
         if (features != null) {
             featuresResponse = new FeaturesResponse();
             featuresResponse.setClusterLogsCollection(features.getClusterLogsCollection());
+            featuresResponse.setMonitoring(features.getMonitoring());
             featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
         }
@@ -122,16 +127,8 @@ public class TelemetryApiConverter {
             if (useSharedAltusCredential) {
                 features.addUseSharedAltusredential(true);
             }
-            if (clusterLogsCollection) {
-                if (accountFeatures.getClusterLogsCollection() != null) {
-                    features.setClusterLogsCollection(accountFeatures.getClusterLogsCollection());
-                }
-                if (featuresRequest.getClusterLogsCollection() != null) {
-                    features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
-                } else {
-                    features.addClusterLogsCollection(false);
-                }
-            }
+            setClusterLogsCollectionFromAccountAndRequest(featuresRequest, accountFeatures, features);
+            setMonitoringFromAccountAndRequest(featuresRequest, accountFeatures, features);
             if (accountFeatures.getWorkloadAnalytics() != null) {
                 features.setWorkloadAnalytics(accountFeatures.getWorkloadAnalytics());
             }
@@ -140,6 +137,32 @@ public class TelemetryApiConverter {
             }
         }
         return features;
+    }
+
+    private void setClusterLogsCollectionFromAccountAndRequest(FeaturesRequest featuresRequest, Features accountFeatures, EnvironmentFeatures features) {
+        if (clusterLogsCollection) {
+            if (accountFeatures.getClusterLogsCollection() != null) {
+                features.setClusterLogsCollection(accountFeatures.getClusterLogsCollection());
+            }
+            if (featuresRequest.getClusterLogsCollection() != null) {
+                features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
+            } else {
+                features.addClusterLogsCollection(false);
+            }
+        }
+    }
+
+    private void setMonitoringFromAccountAndRequest(FeaturesRequest featuresRequest, Features accountFeatures, EnvironmentFeatures features) {
+        if (monitoringEnabled) {
+            if (accountFeatures.getMonitoring() != null) {
+                features.setMonitoring(featuresRequest.getMonitoring());
+            }
+            if (featuresRequest.getMonitoring() != null) {
+                features.setMonitoring(featuresRequest.getMonitoring());
+            } else {
+                features.addMonitoring(false);
+            }
+        }
     }
 
     private EnvironmentWorkloadAnalytics createWorkloadAnalyticsFromRequest(WorkloadAnalyticsRequest request) {

@@ -86,6 +86,7 @@ public class AccountTelemetryService {
                 finalFeatures = new Features();
                 finalFeatures.setClusterLogsCollection(features.getClusterLogsCollection());
                 finalFeatures.setWorkloadAnalytics(features.getWorkloadAnalytics());
+                finalFeatures.setMonitoring(features.getMonitoring());
                 if (newFeatures.getClusterLogsCollection() != null) {
                     LOGGER.debug("Account telemetry feature request contains log collection feature " +
                             "for account {} (set: {})", accountId, newFeatures.getClusterLogsCollection().isEnabled());
@@ -95,6 +96,11 @@ public class AccountTelemetryService {
                     LOGGER.debug("Account telemetry feature request contains workload analytics feature " +
                             "for account {} (set: {})", accountId, newFeatures.getWorkloadAnalytics().isEnabled());
                     finalFeatures.setWorkloadAnalytics(newFeatures.getWorkloadAnalytics());
+                }
+                if (newFeatures.getMonitoring() != null) {
+                    LOGGER.debug("Account telemetry feature request contains monitoring feature " +
+                            "for account {} (set: {})", accountId, newFeatures.getMonitoring().isEnabled());
+                    finalFeatures.setMonitoring(newFeatures.getMonitoring());
                 }
             }
             telemetry.setFeatures(finalFeatures);

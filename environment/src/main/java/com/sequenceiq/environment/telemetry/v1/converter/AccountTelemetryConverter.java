@@ -37,6 +37,7 @@ public class AccountTelemetryConverter {
         if (source != null) {
             response = new FeaturesResponse();
             response.setClusterLogsCollection(source.getClusterLogsCollection());
+            response.setMonitoring(source.getMonitoring());
             response.setWorkloadAnalytics(source.getWorkloadAnalytics());
         }
         return response;
@@ -47,6 +48,7 @@ public class AccountTelemetryConverter {
         if (request != null) {
             features = new Features();
             features.setClusterLogsCollection(request.getClusterLogsCollection());
+            features.setMonitoring(request.getMonitoring());
             features.setWorkloadAnalytics(request.getWorkloadAnalytics());
         }
         return features;

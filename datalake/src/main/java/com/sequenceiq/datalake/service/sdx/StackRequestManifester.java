@@ -189,6 +189,7 @@ public class StackRequestManifester {
             if (envTelemetry.getFeatures() != null) {
                 FeaturesRequest featuresRequest = new FeaturesRequest();
                 featuresRequest.setClusterLogsCollection(envTelemetry.getFeatures().getClusterLogsCollection());
+                featuresRequest.setMonitoring(envTelemetry.getFeatures().getMonitoring());
                 telemetryRequest.setFeatures(featuresRequest);
             }
             if (envTelemetry.getFluentAttributes() != null) {
