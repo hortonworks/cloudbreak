@@ -99,7 +99,7 @@ public class DBStackStatusSyncServiceTest {
                 Arguments.of(Status.AVAILABLE, ExternalDatabaseStatus.START_IN_PROGRESS, DetailedDBStackStatus.START_IN_PROGRESS),
                 Arguments.of(Status.AVAILABLE, ExternalDatabaseStatus.STOPPED, DetailedDBStackStatus.STOPPED),
                 Arguments.of(Status.AVAILABLE, ExternalDatabaseStatus.STOP_IN_PROGRESS, DetailedDBStackStatus.STOP_IN_PROGRESS),
-                //UPDATE_IN_PROGRESS status covers all non handled statuses. In this case the DetailedDBStackStatus should be UNKNOWN
+                //UPDATE_IN_PROGRESS status covers all non handled statuses. In this case DB Stack status should not be updated.
                 Arguments.of(Status.AVAILABLE, ExternalDatabaseStatus.UPDATE_IN_PROGRESS, DetailedDBStackStatus.UNKNOWN)
         );
     }
@@ -131,7 +131,7 @@ public class DBStackStatusSyncServiceTest {
 
         victim.sync(dbStack);
 
-        if (newDetailedDBStackStatus != null) {
+        if (newDetailedDBStackStatus != null && newDetailedDBStackStatus.getStatus() != null) {
             verify(dbStackStatusUpdater).updateStatus(DB_STACK_ID, newDetailedDBStackStatus);
         } else {
             verifyZeroInteractions(dbStackStatusUpdater);

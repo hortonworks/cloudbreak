@@ -49,10 +49,16 @@ public class DBStackStatusSyncService {
     public void sync(DBStack dbStack) {
         DetailedDBStackStatus detailedDBStackStatus = getDetailedDBStackStatusFromProvider(dbStack);
         Status status = detailedDBStackStatus.getStatus();
-        if (dbStack.getStatus() != status) {
-            LOGGER.debug(":::Auto sync::: Update DB Stack Status from '{}' to '{}'", dbStack.getStatus(), status);
 
-            dbStackStatusUpdater.updateStatus(dbStack.getId(), detailedDBStackStatus);
+        if (dbStack.getStatus() != status) {
+            if (status == null) {
+                LOGGER.warn(":::Auto sync::: Can not update DBStack status because 'ExternalDatabaseStatus.{}' is mapped to 'null'",
+                        detailedDBStackStatus);
+            } else {
+                LOGGER.debug(":::Auto sync::: Update DB Stack Status from '{}' to '{}'", dbStack.getStatus(), status);
+
+                dbStackStatusUpdater.updateStatus(dbStack.getId(), detailedDBStackStatus);
+            }
         }
     }
 
