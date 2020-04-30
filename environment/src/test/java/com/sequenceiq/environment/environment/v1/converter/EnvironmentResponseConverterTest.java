@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,22 +12,25 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
-import com.sequenceiq.environment.api.v1.environment.model.response.AzureEnvironmentParametersResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentBaseResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
@@ -85,9 +90,10 @@ public class EnvironmentResponseConverterTest {
     @Mock
     private NetworkDtoToResponseConverter networkDtoToResponseConverter;
 
-    @Test
-    void testDtoToDetailedResponse() {
-        EnvironmentDto environment = createEnvironmentDto();
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE"})
+    void testDtoToDetailedResponse(CloudPlatform cloudPlatform) {
+        EnvironmentDto environment = createEnvironmentDto(cloudPlatform);
         CredentialResponse credentialResponse = mock(CredentialResponse.class);
         FreeIpaResponse freeIpaResponse = mock(FreeIpaResponse.class);
         CompactRegionResponse compactRegionResponse = mock(CompactRegionResponse.class);
@@ -126,8 +132,7 @@ public class EnvironmentResponseConverterTest {
         assertEquals(environment.getExperimentalFeatures().getIdBrokerMappingSource(), actual.getIdBrokerMappingSource());
         assertEquals(environment.getExperimentalFeatures().getCloudStorageValidation(), actual.getCloudStorageValidation());
         assertEquals(environment.getAdminGroupName(), actual.getAdminGroupName());
-        assertEquals(environment.getParameters().getAwsParametersDto().getS3GuardTableName(), actual.getAws().getS3guard().getDynamoDbTableName());
-        assertAzureParameters(environment.getParameters().getAzureParametersDto(), actual.getAzure());
+        assertParameters(environment, actual, cloudPlatform);
         assertEquals(environment.getParentEnvironmentCrn(), actual.getParentEnvironmentCrn());
         assertEquals(environment.getParentEnvironmentName(), actual.getParentEnvironmentName());
         assertEquals(environment.getParentEnvironmentCloudPlatform(), actual.getParentEnvironmentCloudPlatform());
@@ -143,9 +148,10 @@ public class EnvironmentResponseConverterTest {
         verify(networkDtoToResponseConverter).convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel());
     }
 
-    @Test
-    void testDtoToSimpleResponse() {
-        EnvironmentDto environment = createEnvironmentDto();
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE"})
+    void testDtoToSimpleResponse(CloudPlatform cloudPlatform) {
+        EnvironmentDto environment = createEnvironmentDto(cloudPlatform);
         CredentialViewResponse credentialResponse = mock(CredentialViewResponse.class);
         FreeIpaResponse freeIpaResponse = mock(FreeIpaResponse.class);
         CompactRegionResponse compactRegionResponse = mock(CompactRegionResponse.class);
@@ -181,8 +187,7 @@ public class EnvironmentResponseConverterTest {
         assertEquals(environment.getTags().getDefaultTags(), actual.getTags().getDefaults());
         assertEquals(telemetryResponse, actual.getTelemetry());
         assertEquals(compactRegionResponse, actual.getRegions());
-        assertEquals(environment.getParameters().getAwsParametersDto().getS3GuardTableName(), actual.getAws().getS3guard().getDynamoDbTableName());
-        assertAzureParameters(environment.getParameters().getAzureParametersDto(), actual.getAzure());
+        assertParameters(environment, actual, cloudPlatform);
         assertEquals(environment.getParentEnvironmentName(), actual.getParentEnvironmentName());
         assertEquals(proxyResponse, actual.getProxyConfig());
         assertEquals(environmentNetworkResponse, actual.getNetwork());
@@ -193,6 +198,14 @@ public class EnvironmentResponseConverterTest {
         verify(telemetryApiConverter).convert(environment.getTelemetry());
         verify(proxyConfigToProxyResponseConverter).convertToView(environment.getProxyConfig());
         verify(networkDtoToResponseConverter).convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel());
+    }
+
+    private void assertParameters(EnvironmentDto environment, EnvironmentBaseResponse actual, CloudPlatform cloudPlatform) {
+        if (AWS.equals(cloudPlatform)) {
+            assertEquals(environment.getParameters().getAwsParametersDto().getS3GuardTableName(), actual.getAws().getS3guard().getDynamoDbTableName());
+        } else {
+            assertAzureParameters(environment.getParameters().getAzureParametersDto(), actual.getAzure());
+        }
     }
 
     private void assertLocation(LocationDto location, LocationResponse actual) {
@@ -214,12 +227,12 @@ public class EnvironmentResponseConverterTest {
         assertEquals(securityAccess.getSecurityGroupIdForKnox(), actual.getSecurityGroupIdForKnox());
     }
 
-    private void assertAzureParameters(AzureParametersDto azureParametersDto, AzureEnvironmentParametersResponse azureEnvironmentParameters) {
+    private void assertAzureParameters(AzureParametersDto azureParametersDto, AzureEnvironmentParameters azureEnvironmentParameters) {
         assertNotNull(azureEnvironmentParameters);
         assertEquals(azureParametersDto.getAzureResourceGroupDto().getName(), azureEnvironmentParameters.getResourceGroup().getName());
     }
 
-    private EnvironmentDto createEnvironmentDto() {
+    private EnvironmentDto createEnvironmentDto(CloudPlatform cloudPlatform) {
         return EnvironmentDto.builder()
                 .withResourceCrn("resource-crn")
                 .withName("my-env")
@@ -238,7 +251,7 @@ public class EnvironmentResponseConverterTest {
                 .withTelemetry(new EnvironmentTelemetry())
                 .withExperimentalFeatures(createExperimentalFeatures())
                 .withAdminGroupName("admin group")
-                .withParameters(createParametersDto())
+                .withParameters(createParametersDto(cloudPlatform))
                 .withParentEnvironmentCrn("environment crn")
                 .withParentEnvironmentName("parent-env")
                 .withParentEnvironmentCloudPlatform("AWS")
@@ -256,7 +269,17 @@ public class EnvironmentResponseConverterTest {
                 .build();
     }
 
-    private ParametersDto createParametersDto() {
+    private ParametersDto createParametersDto(CloudPlatform cloudPlatform) {
+        if (AWS.equals(cloudPlatform)) {
+            return createAwsParameters();
+        } else if (AZURE.equals(cloudPlatform)) {
+            return createAzureParameters();
+        } else {
+            throw new RuntimeException("CloudPlatform " + cloudPlatform + " is not supported.");
+        }
+    }
+
+    private ParametersDto createAzureParameters() {
         return ParametersDto.builder()
                 .withAwsParameters(AwsParametersDto.builder()
                         .withDynamoDbTableName("my-table")
@@ -268,6 +291,14 @@ public class EnvironmentResponseConverterTest {
                                         .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                         .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                         .build())
+                        .build())
+                .build();
+    }
+
+    private ParametersDto createAwsParameters() {
+        return ParametersDto.builder()
+                .withAwsParameters(AwsParametersDto.builder()
+                        .withDynamoDbTableName("my-table")
                         .build())
                 .build();
     }

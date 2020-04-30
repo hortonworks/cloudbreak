@@ -6,28 +6,28 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "AzureResourceGroupV1Parameters")
-public class AzureResourceGroupRequest {
+public class AzureResourceGroup {
 
     @ApiModelProperty(EnvironmentModelDescription.EXISTING_RESOURCE_GROUP_NAME)
     private String name;
 
-    @ApiModelProperty(EnvironmentModelDescription.USE_SINGLE_RESOURCE_GROUP)
-    private Boolean single;
+    @ApiModelProperty(EnvironmentModelDescription.RESOURCE_GROUP_USAGE)
+    private ResourceGroupUsage resourceGroupUsage;
 
     public String getName() {
         return name;
     }
 
-    public Boolean isSingle() {
-        return single;
+    public ResourceGroupUsage getResourceGroupUsage() {
+        return resourceGroupUsage;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setSingle(Boolean single) {
-        this.single = single;
+    public void setResourceGroupUsage(ResourceGroupUsage resourceGroupUsage) {
+        this.resourceGroupUsage = resourceGroupUsage;
     }
 
     public static Builder builder() {
@@ -37,22 +37,22 @@ public class AzureResourceGroupRequest {
     public static class Builder {
         private String name;
 
-        private Boolean single;
+        private ResourceGroupUsage resourceGroupUsage;
 
         public Builder withName(String name) {
             this.name = name;
             return this;
         }
 
-        public Builder withSingle(Boolean single) {
-            this.single = single;
+        public Builder withResourceGroupUsage(ResourceGroupUsage resourceGroupUsage) {
+            this.resourceGroupUsage = resourceGroupUsage;
             return this;
         }
 
-        public AzureResourceGroupRequest build() {
-            AzureResourceGroupRequest azureResourceGroup = new AzureResourceGroupRequest();
+        public AzureResourceGroup build() {
+            AzureResourceGroup azureResourceGroup = new AzureResourceGroup();
             azureResourceGroup.setName(name);
-            azureResourceGroup.setSingle(single);
+            azureResourceGroup.setResourceGroupUsage(resourceGroupUsage);
             return azureResourceGroup;
         }
     }
