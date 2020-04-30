@@ -43,9 +43,10 @@ public class TestParameter {
         return value.orElse(defaultValue);
     }
 
-    public boolean getWithBooleanDefault(String key, String defaultValue) {
-        Optional<String> value = Optional.ofNullable(get(key));
-        return Boolean.valueOf(value.orElse(defaultValue));
+    public boolean getWithBooleanDefault(String key, boolean defaultValue) {
+        return Optional.ofNullable(get(key))
+                .map(Boolean::valueOf)
+                .orElse(defaultValue);
     }
 
     public String getRequired(String key) {

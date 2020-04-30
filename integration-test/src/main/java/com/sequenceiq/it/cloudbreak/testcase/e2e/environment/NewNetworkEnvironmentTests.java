@@ -15,6 +15,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
 public class NewNetworkEnvironmentTests extends AbstractE2ETest {
 
@@ -30,6 +31,7 @@ public class NewNetworkEnvironmentTests extends AbstractE2ETest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
             when = "create an Environment with new network which CIDR is 10.0.0.0/16 without FreeIPA",

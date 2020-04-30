@@ -99,7 +99,7 @@ public class EnvironmentTestDto
     }
 
     public EnvironmentTestDto withCreateFreeIpa(Boolean create) {
-        AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
+        AttachedFreeIpaRequest attachedFreeIpaRequest = getCloudProvider().getAttachedFreeIpaRequest();
         attachedFreeIpaRequest.setCreate(create);
         getRequest().setFreeIpa(attachedFreeIpaRequest);
         return this;

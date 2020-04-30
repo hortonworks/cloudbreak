@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -178,6 +179,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     @Override
     public EnvironmentSecurityAccessTestDto environmentSecurityAccess(EnvironmentSecurityAccessTestDto environmentSecurityAccessTestDto) {
         return environmentSecurityAccessTestDto;
+    }
+
+    @Override
+    public AttachedFreeIpaRequest getAttachedFreeIpaRequest() {
+        return new AttachedFreeIpaRequest();
     }
 
     protected abstract ClusterTestDto withCluster(ClusterTestDto cluster);

@@ -4,20 +4,26 @@ import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.junit.Assert.assertThat;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
+
+import org.testng.ITestResult;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Listeners;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.cloudbreak.util.spot.SpotRetryOnceTestListener;
+import com.sequenceiq.it.cloudbreak.util.spot.SpotRetryUtil;
+import com.sequenceiq.it.cloudbreak.util.spot.SpotUtil;
 
+@Listeners(SpotRetryOnceTestListener.class)
 public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
-    @Inject
-    private TestParameter testParameter;
-
-    protected TestParameter getTestParameter() {
-        return testParameter;
+    @Override
+    protected void setupTest(ITestResult testResult) {
+        boolean shouldUseSpotInstances = SpotUtil.shouldUseSpotInstances(testResult.getMethod().getConstructorOrMethod().getMethod());
+        boolean retried = SpotRetryUtil.isRetried(testResult.getMethod());
+        SpotUtil.useSpotInstances(shouldUseSpotInstances && !retried);
     }
 
     @Override
@@ -26,6 +32,11 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
         initializeDefaultBlueprints(testContext);
+    }
+
+    @AfterMethod
+    public void tearDownSpot() {
+        SpotUtil.useSpotInstances(Boolean.FALSE);
     }
 
     /**

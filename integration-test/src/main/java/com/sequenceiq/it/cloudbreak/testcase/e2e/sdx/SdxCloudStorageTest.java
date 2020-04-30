@@ -14,6 +14,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.AmazonS3Util;
+import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -32,6 +33,7 @@ public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
     private WaitUtil waitUtil;
 
     @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak",
             when = "a basic SDX create request with FreeIPA and DataLake Cloud Storage has been sent",

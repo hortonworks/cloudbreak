@@ -6,12 +6,15 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -194,6 +197,16 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
                 return volumeRequest;
             })
             .collect(Collectors.toSet()));
+        Optional.ofNullable(request.getTemplate().getAws())
+                .map(AwsInstanceTemplateV4Parameters::getSpot)
+                .map(AwsInstanceTemplateV4SpotParameters::getPercentage)
+                .ifPresent(spotPercentage -> {
+                    AwsInstanceTemplateParameters awsInstanceTemplateParameters = new AwsInstanceTemplateParameters();
+                    AwsInstanceTemplateSpotParameters awsInstanceTemplateSpotParameters = new AwsInstanceTemplateSpotParameters();
+                    awsInstanceTemplateSpotParameters.setPercentage(spotPercentage);
+                    awsInstanceTemplateParameters.setSpot(awsInstanceTemplateSpotParameters);
+                    template.setAws(awsInstanceTemplateParameters);
+                });
         return template;
     }
 

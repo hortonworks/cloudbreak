@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.spot;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static org.testng.Assert.fail;
 
 import java.util.Collection;
 
@@ -17,7 +16,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -30,16 +28,11 @@ public class AwsSdxSpotInstanceTest extends AbstractE2ETest {
     private static final SpotTestResultProvider RESULT_PROVIDER = new SpotTestResultProvider("SDX");
 
     @Inject
-    private CommonCloudProperties commonCloudProperties;
-
-    @Inject
     private SdxTestClient sdxTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
-        if (!CloudPlatform.AWS.name().equals(commonCloudProperties.getCloudProvider())) {
-            fail(String.format("%s cloud provider is not supported for this test case!", commonCloudProperties.getCloudProvider()));
-        }
+        checkCloudPlatform(CloudPlatform.AWS);
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createEnvironmentWithNetworkAndFreeIPA(testContext);

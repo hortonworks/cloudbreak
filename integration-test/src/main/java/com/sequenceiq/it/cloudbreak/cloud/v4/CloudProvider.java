@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Sta
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -136,5 +137,7 @@ public interface CloudProvider {
     void setImageId(String id);
 
     void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request);
+
+    AttachedFreeIpaRequest getAttachedFreeIpaRequest();
 
 }
