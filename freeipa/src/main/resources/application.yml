@@ -225,7 +225,15 @@ cb:
 clusterProxy:
   url: http://localhost:10180/cluster-proxy
   enabled: true
+  readConfigPath: /rpc/readConfig
   registerConfigPath: /rpc/forceRegisterConfig
   updateConfigPath: /rpc/updateConfig
   removeConfigPath: /rpc/removeConfig
+  intervalInSec: 5
+  healthStatusEndpoint: /ipa/session/login_password
+  timeoutInSec: 5
+  # the login page returns a 400, update this after CDPAM-609 which will provide a better health check
+  healthyStatusCode: 400
+  maxAttempts: 3
+  maxFailure: 1
 
