@@ -83,7 +83,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public DetailedEnvironmentResponse post(@Valid EnvironmentRequest request) {
         EnvironmentCreationDto environmentCreationDto = environmentApiConverter.initCreationDto(request);
         EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto);

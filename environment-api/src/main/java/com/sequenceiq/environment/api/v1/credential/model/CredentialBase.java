@@ -7,10 +7,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
@@ -32,8 +28,6 @@ public abstract class CredentialBase implements Serializable {
             message = "The name of the credential can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true, allowableValues = "length range[5, 100]")
-    @ResourceObjectField(action = AuthorizationResourceAction.RD_WRITE,
-            type = AuthorizationResourceType.CREDENTIAL, variableType = AuthorizationVariableType.NAME)
     private String name;
 
     @NotNull
