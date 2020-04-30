@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
 
 import java.util.Objects;
@@ -109,11 +111,7 @@ public class EnvironmentApiConverter {
                         .withCloudStorageValidation(request.getCloudStorageValidation())
                         .withTunnel(tunnelConverter.convert(request.getTunnel()))
                         .build())
-                .withParameters(paramsToParametersDto(
-                        request.getAws(),
-                        Optional.ofNullable(request.getFreeIpa()).map(AttachedFreeIpaRequest::getAws).orElse(null),
-                        request.getAzure()
-                ))
+                .withParameters(paramsToParametersDto(request))
                 .withParentEnvironmentName(request.getParentEnvironmentName())
                 .withProxyConfigName(request.getProxyConfigName());
 
@@ -158,13 +156,30 @@ public class EnvironmentApiConverter {
                 .toString();
     }
 
-    private ParametersDto paramsToParametersDto(
-            AwsEnvironmentParameters aws, AwsFreeIpaParameters awsFreeIpa, AzureEnvironmentParametersRequest azureEnvironmentParameters) {
-        if (Objects.isNull(aws) && Objects.isNull(awsFreeIpa) && Objects.isNull(azureEnvironmentParameters)) {
+    private ParametersDto paramsToParametersDto(EnvironmentRequest request) {
+        String cloudPlatform = request.getCloudPlatform().toUpperCase();
+        if (AWS.name().equals(cloudPlatform)) {
+            return awsParamsToParametersDto(request.getAws(), Optional.ofNullable(request.getFreeIpa()).map(AttachedFreeIpaRequest::getAws).orElse(null));
+        } else if (AZURE.name().equals(cloudPlatform)) {
+            return azureParamsToParametersDto(request.getAzure());
+        }
+        return null;
+    }
+
+    private ParametersDto awsParamsToParametersDto(AwsEnvironmentParameters aws, AwsFreeIpaParameters awsFreeIpa) {
+        if (Objects.isNull(aws) && Objects.isNull(awsFreeIpa)) {
             return null;
         }
         return ParametersDto.builder()
                 .withAwsParameters(awsParamsToAwsParameters(aws, awsFreeIpa))
+                .build();
+    }
+
+    private ParametersDto azureParamsToParametersDto(AzureEnvironmentParametersRequest azureEnvironmentParameters) {
+        if (Objects.isNull(azureEnvironmentParameters)) {
+            return null;
+        }
+        return ParametersDto.builder()
                 .withAzureParameters(azureParamsToAzureParametersDto(azureEnvironmentParameters))
                 .build();
     }
@@ -187,7 +202,7 @@ public class EnvironmentApiConverter {
                 .withResourceGroup(
                         Optional.ofNullable(azureEnvironmentParameters)
                                 .map(aep -> azureResourceGroupToAzureResourceGroupDto(aep.getResourceGroup()))
-                        .orElse(null)
+                                .orElse(null)
                 ).build();
 
     }
@@ -254,7 +269,7 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                 accountTelemetryService.getOrDefault(accountId).getFeatures())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
-        NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(paramsToParametersDto(awsParams, null, null)));
+        NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams, null)));
         return builder.build();
     }
 
