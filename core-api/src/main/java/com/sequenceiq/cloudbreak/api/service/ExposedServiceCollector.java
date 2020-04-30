@@ -59,6 +59,10 @@ public class ExposedServiceCollector {
         return exposedServices.get("HBASE_UI");
     }
 
+    public ExposedService getHBaseJarsService() {
+        return exposedServices.get("HBASEJARS");
+    }
+
     public ExposedService getHiveServerService() {
         return exposedServices.get("HIVE_SERVER");
     }

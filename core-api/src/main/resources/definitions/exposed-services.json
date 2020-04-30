@@ -570,6 +570,17 @@
       "cmProxied": true,
       "visibleForDatalake": true,
       "visibleForDatahub": true
+    },
+    {
+      "name": "HBASEJARS",
+      "displayName": "HBase Client Jars",
+      "serviceName": "MASTER",
+      "knoxService": "HBASEJARS",
+      "knoxUrl": "/hbase/jars",
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": false,
+      "visibleForDatahub": false
     }
   ]
 }
