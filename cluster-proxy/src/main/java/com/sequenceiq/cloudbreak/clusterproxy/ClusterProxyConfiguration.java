@@ -20,14 +20,17 @@ public class ClusterProxyConfiguration {
     @Value("${clusterProxy.url:}")
     private String clusterProxyUrl;
 
-    @Value("${clusterProxy.registerConfigPath:/rpc/forceRegisterConfig}")
+    @Value("${clusterProxy.registerConfigPath}")
     private String registerConfigPath;
 
-    @Value("${clusterProxy.updateConfigPath:/rpc/updateConfig}")
+    @Value("${clusterProxy.updateConfigPath}")
     private String updateConfigPath;
 
-    @Value("${clusterProxy.removeConfigPath:/rpc/removeConfig}")
+    @Value("${clusterProxy.removeConfigPath}")
     private String removeConfigPath;
+
+    @Value("${clusterProxy.readConfigPath}")
+    private String readConfigPath;
 
     private String clusterProxyHost;
 
@@ -95,6 +98,14 @@ public class ClusterProxyConfiguration {
         this.removeConfigPath = removeConfigPath;
     }
 
+    public String getReadConfigPath() {
+        return readConfigPath;
+    }
+
+    public void setReadConfigPath(String readConfigPath) {
+        this.readConfigPath = readConfigPath;
+    }
+
     public String getClusterProxyHost() {
         return clusterProxyHost;
     }
@@ -121,5 +132,9 @@ public class ClusterProxyConfiguration {
 
     public String getRemoveConfigUrl() {
         return clusterProxyUrl + removeConfigPath;
+    }
+
+    public String getReadConfigUrl() {
+        return clusterProxyUrl + readConfigPath;
     }
 }
