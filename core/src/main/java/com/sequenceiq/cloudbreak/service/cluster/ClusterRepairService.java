@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -113,9 +112,6 @@ public class ClusterRepairService {
 
     @Inject
     private CloudbreakEventService eventService;
-
-    @Inject
-    private RdsConfigService rdsConfigService;
 
     public FlowIdentifier repairAll(Long stackId) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
@@ -298,11 +294,8 @@ public class ClusterRepairService {
             if (createdFromBaseImage(stack)) {
                 validationResult.add("Action is only supported if the image already contains Cloudera Manager and Cloudera Data Platform artifacts.");
             }
-            if (!gatewayDatabaseAvailable(stack.getCluster()) && !stack.isMultipleGateway()) {
+            if (!gatewayDatabaseAvailable(stack.getCluster())) {
                 validationResult.add("Action is only supported if Cloudera Manager state is stored in external Database.");
-            }
-            if (withEmbeddedClusterManagerDB(stack.getCluster())) {
-                validationResult.add("Cloudera Manager server failure with embedded Database cannot be repaired!");
             }
         }
         return validationResult;
@@ -330,11 +323,6 @@ public class ClusterRepairService {
                 .distinct()
                 .count();
         return cmRdsCount == REQUIRED_CM_DATABASE_COUNT || cluster.getDatabaseServerCrn() != null;
-    }
-
-    private boolean withEmbeddedClusterManagerDB(Cluster cluster) {
-        RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), DatabaseType.CLOUDERA_MANAGER);
-        return (rdsConfig == null || ResourceStatus.DEFAULT == rdsConfig.getStatus()) && cluster.getDatabaseServerCrn() == null;
     }
 
     private boolean hasReattachSupportedVolumes(Stack stack, String hostGroupName) {
