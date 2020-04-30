@@ -96,7 +96,7 @@ install_fluentd_plugins:
 
 check_fluentd_plugins:
    cmd.run:
-    - name: sh /etc/td-agent/check_fluent_plugins.sh
+    - name: bash /etc/td-agent/check_fluent_plugins.sh
 
 {%- if fluent.is_systemd %}
 fluent_systemd_stop:
