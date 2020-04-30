@@ -32,9 +32,12 @@ public class ClusterServiceConfig {
     @JsonProperty
     private String accountId;
 
+    @JsonProperty
+    private ClusterServiceHealthCheck healthCheck;
+
     @JsonCreator
     public ClusterServiceConfig(String serviceName, List<String> endpoints, List<ClusterServiceCredential> credentials, ClientCertificate clientCertificate,
-                                Boolean tlsStrictCheck, Boolean useTunnel, List<Tunnel> tunnels, String accountId) {
+                                Boolean tlsStrictCheck, Boolean useTunnel, List<Tunnel> tunnels, String accountId, ClusterServiceHealthCheck healthCheck) {
         this.name = serviceName;
         this.endpoints = endpoints;
         this.credentials = credentials;
@@ -43,11 +46,17 @@ public class ClusterServiceConfig {
         this.useTunnel = useTunnel;
         this.tunnels = tunnels;
         this.accountId = accountId;
+        this.healthCheck = healthCheck;
     }
 
     public ClusterServiceConfig(String serviceName, List<String> endpoints, List<ClusterServiceCredential> credentials, ClientCertificate clientCertificate,
-                                Boolean tlsStrictCheck) {
-        this(serviceName, endpoints, credentials, clientCertificate, tlsStrictCheck, false, List.of(), null);
+            Boolean tlsStrictCheck) {
+        this(serviceName, endpoints, credentials, clientCertificate, tlsStrictCheck, null);
+    }
+
+    public ClusterServiceConfig(String serviceName, List<String> endpoints, List<ClusterServiceCredential> credentials, ClientCertificate clientCertificate,
+                                Boolean tlsStrictCheck, ClusterServiceHealthCheck healthCheck) {
+        this(serviceName, endpoints, credentials, clientCertificate, tlsStrictCheck, false, List.of(), null, healthCheck);
     }
 
     //CHECKSTYLE:OFF: CyclomaticComplexity
@@ -69,13 +78,14 @@ public class ClusterServiceConfig {
                 Objects.equals(tlsStrictCheck, that.tlsStrictCheck) &&
                 Objects.equals(useTunnel, that.useTunnel) &&
                 Objects.equals(tunnels, that.tunnels) &&
-                Objects.equals(accountId, that.accountId);
+                Objects.equals(accountId, that.accountId) &&
+                Objects.equals(healthCheck,that.healthCheck);
     }
     //CHECKSTYLE:ON
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, endpoints, credentials, clientCertificate, tlsStrictCheck, useTunnel, tunnels, accountId);
+        return Objects.hash(name, endpoints, credentials, clientCertificate, tlsStrictCheck, useTunnel, tunnels, accountId, healthCheck);
     }
 
     @Override
@@ -88,6 +98,7 @@ public class ClusterServiceConfig {
                 + ", useTunnel=" + useTunnel
                 + ", tunnels=" + tunnels
                 + ", accountId=" + accountId
+                + ", healthCheck=" + healthCheck
                 + '}';
     }
 }

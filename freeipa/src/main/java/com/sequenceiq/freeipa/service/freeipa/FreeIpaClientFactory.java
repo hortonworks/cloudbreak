@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +25,13 @@ import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientBuilder;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaHostNotAvailableException;
+import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
+import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -42,6 +45,12 @@ public class FreeIpaClientFactory {
     private static final Map<String, String> ADDITIONAL_CLUSTER_PROXY_HEADERS = Map.of(
             "Proxy-Ignore-Auth", "true",
             "Proxy-With-Timeout", "90000");
+
+    private static final Map<String, String> ADDITIONAL_CLUSTER_PROXY_HEADER_STICKY_SESSION_FIRST_RPC = Map.of("Proxy-Flow-Type", "sticky");
+
+    private static final Map<String, String> ADDITIONAL_CLUSTER_PROXY_HEADER_STICKY_SESSION = Map.of("Proxy-Flow-Type", "force");
+
+    private static final String ADDITIONAL_CLUSTER_PROXY_HEADER_STICKY_SESSION_ID = "Proxy-Sticky-Id";
 
     private static final RequestListener CLUSTER_PROXY_ERROR_LISTENER = new ClusterProxyErrorRpcListener();
 
@@ -76,7 +85,7 @@ public class FreeIpaClientFactory {
         return getFreeIpaClientForStack(stack);
     }
 
-    private String toClusterProxyBasepath(Stack stack, String clusterProxyServiceName) {
+    private String toClusterProxyBasepath(Stack stack, Optional<String> clusterProxyServiceName) {
         return String.format("%s%s", clusterProxyService.getProxyPath(stack, clusterProxyServiceName), FreeIpaClientBuilder.DEFAULT_BASE_PATH);
     }
 
@@ -87,13 +96,21 @@ public class FreeIpaClientFactory {
         if (forceCheckUnreachable || !stackStatus.isFreeIpaUnreachableStatus()) {
             try {
                 Optional<FreeIpaClient> client = Optional.empty();
-                List<InstanceMetaData> instanceMetaDatas = getPriorityOrderedFreeIpaInstances(stack).stream()
-                        .filter(instanceMetaData -> freeIpaFqdn.isEmpty() || freeIpaFqdn.get().equals(instanceMetaData.getDiscoveryFQDN()))
-                        .collect(Collectors.toList());
-                for (Iterator<InstanceMetaData> instanceIterator = instanceMetaDatas.iterator();
-                        instanceIterator.hasNext() && client.isEmpty();) {
-                    InstanceMetaData instanceMetaData = instanceIterator.next();
-                    client = getFreeIpaClient(stack, instanceMetaData, withPing, !instanceIterator.hasNext());
+                if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
+                    try {
+                        return getFreeIpaClientBuilderForClusterProxy(stack, freeIpaFqdn).build(withPing);
+                    } catch (IOException e) {
+                        throw new RetryableFreeIpaClientException("Unable to connect to FreeIPA using cluster proxy", e);
+                    }
+                } else {
+                    List<InstanceMetaData> instanceMetaDatas = getPriorityOrderedFreeIpaInstances(stack).stream()
+                            .filter(instanceMetaData -> freeIpaFqdn.isEmpty() || freeIpaFqdn.get().equals(instanceMetaData.getDiscoveryFQDN()))
+                            .collect(Collectors.toList());
+                    for (Iterator<InstanceMetaData> instanceIterator = instanceMetaDatas.iterator();
+                            instanceIterator.hasNext() && client.isEmpty();) {
+                        InstanceMetaData instanceMetaData = instanceIterator.next();
+                        client = getFreeIpaClientForDirectConnect(stack, instanceMetaData, withPing, !instanceIterator.hasNext());
+                    }
                 }
                 return client.orElseThrow(() -> createFreeIpaUnableToBuildClient(new FreeIpaHostNotAvailableException("No FreeIPA client was available")));
             } catch (Exception e) {
@@ -104,14 +121,11 @@ public class FreeIpaClientFactory {
         }
     }
 
-    private Optional<FreeIpaClient> getFreeIpaClient(Stack stack, InstanceMetaData instanceMetaData, boolean withPing, boolean lastInstance) throws Exception {
+    private Optional<FreeIpaClient> getFreeIpaClientForDirectConnect(Stack stack, InstanceMetaData instanceMetaData, boolean withPing, boolean lastInstance)
+            throws Exception {
         Optional<FreeIpaClient> client = Optional.empty();
         try {
-            if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
-                client = Optional.of(getFreeIpaClientBuilderForClusterProxy(stack, instanceMetaData).build(withPing));
-            } else {
-                client = Optional.of(getFreeIpaClientBuilderForDirectMode(stack, instanceMetaData).build(withPing));
-            }
+            client = Optional.of(getFreeIpaClientBuilderForDirectMode(stack, instanceMetaData).build(withPing));
         } catch (FreeIpaClientException e) {
             handleException(instanceMetaData, e, () -> canTryAnotherInstance(lastInstance, e));
         } catch (IOException e) {
@@ -159,18 +173,30 @@ public class FreeIpaClientFactory {
         return getFreeIpaClient(stack, true, true, Optional.of(freeIpaFqdn));
     }
 
-    private FreeIpaClientBuilder getFreeIpaClientBuilderForClusterProxy(Stack stack, InstanceMetaData instanceMetaData) throws Exception {
+    private FreeIpaClientBuilder getFreeIpaClientBuilderForClusterProxy(Stack stack, Optional<String> clusterProxyServiceName) throws Exception {
         HttpClientConfig httpClientConfig = new HttpClientConfig(clusterProxyConfiguration.getClusterProxyHost());
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        String clusterProxyPath = toClusterProxyBasepath(stack, instanceMetaData.getDiscoveryFQDN());
+        String clusterProxyPath = toClusterProxyBasepath(stack, clusterProxyServiceName);
 
+        Map<String, String> additionalHeadersStickySessionFirstRpc = new HashMap<>();
+        Map<String, String> additionalHeadersStickySession = new HashMap<>();
+        Optional<String> stickyIdHeader = Optional.empty();
+        if (clusterProxyServiceName.isEmpty()) {
+            additionalHeadersStickySessionFirstRpc.putAll(ADDITIONAL_CLUSTER_PROXY_HEADER_STICKY_SESSION_FIRST_RPC);
+            additionalHeadersStickySession.putAll(ADDITIONAL_CLUSTER_PROXY_HEADER_STICKY_SESSION);
+            stickyIdHeader = Optional.of(ADDITIONAL_CLUSTER_PROXY_HEADER_STICKY_SESSION_ID);
+        }
+        String serviceName = clusterProxyServiceName.orElseGet(() -> FreeIpaDomainUtils.getFreeIpaFqdn(freeIpa.getDomain()));
         return new FreeIpaClientBuilder(ADMIN_USER,
                 freeIpa.getAdminPassword(),
                 httpClientConfig,
-                instanceMetaData.getDiscoveryFQDN(),
+                serviceName,
                 clusterProxyConfiguration.getClusterProxyPort(),
                 clusterProxyPath,
                 ADDITIONAL_CLUSTER_PROXY_HEADERS,
+                additionalHeadersStickySessionFirstRpc,
+                additionalHeadersStickySession,
+                stickyIdHeader,
                 CLUSTER_PROXY_ERROR_LISTENER);
     }
 
