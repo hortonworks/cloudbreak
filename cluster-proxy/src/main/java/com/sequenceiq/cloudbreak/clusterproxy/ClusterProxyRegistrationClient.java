@@ -77,6 +77,22 @@ public class ClusterProxyRegistrationClient {
         }
     }
 
+    public ReadConfigResponse readConfig(String clusterIdentifier) {
+        String readConfigUrl = clusterProxyConfiguration.getReadConfigUrl();
+        try {
+            LOGGER.info("Reading cluster proxy configuration for cluster identifer: {}", clusterIdentifier);
+            ResponseEntity<ReadConfigResponse> response = restTemplate.postForEntity(readConfigUrl,
+                    requestEntity(new ReadConfigRequest(clusterIdentifier)), ReadConfigResponse.class);
+            LOGGER.info("Cluster proxy read configuration response: {}", response);
+            return response.getBody();
+        } catch (Exception e) {
+            String message = String.format("Error reading cluster proxy configuration for cluster identifer '%s' from Cluster Proxy. URL: '%s'",
+                    clusterIdentifier, readConfigUrl);
+            LOGGER.error(message, e);
+            throw new ClusterProxyException(message, e);
+        }
+    }
+
     private HttpEntity<String> requestEntity(ConfigRegistrationRequest proxyConfigRequest) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -90,6 +106,12 @@ public class ClusterProxyRegistrationClient {
     }
 
     private HttpEntity<String> requestEntity(ConfigDeleteRequest proxyConfigRequest) throws JsonProcessingException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(JsonUtil.writeValueAsString(proxyConfigRequest), headers);
+    }
+
+    private HttpEntity<String> requestEntity(ReadConfigRequest proxyConfigRequest) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(JsonUtil.writeValueAsString(proxyConfigRequest), headers);
