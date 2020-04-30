@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -14,11 +16,14 @@ import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -90,9 +95,10 @@ public class EnvironmentApiConverterTest {
         ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
     }
 
-    @Test
-    void testInitCreationDto() {
-        EnvironmentRequest request = createEnvironmentRequest();
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AWS"})
+    void testInitCreationDto(CloudPlatform cloudPlatform) {
+        EnvironmentRequest request = createEnvironmentRequest(cloudPlatform);
         FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
         EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
@@ -124,7 +130,7 @@ public class EnvironmentApiConverterTest {
         assertEquals(request.getAdminGroupName(), actual.getAdminGroupName());
         assertEquals(request.getTags(), actual.getTags());
         assertExperimentalFeatures(request, actual.getExperimentalFeatures());
-        assertParameters(request, actual.getParameters());
+        assertParameters(request, actual.getParameters(), cloudPlatform);
         assertEquals(request.getProxyConfigName(), actual.getProxyConfigName());
         assertEquals(networkDto, actual.getNetwork());
         assertSecurityAccess(request.getSecurityAccess(), actual.getSecurityAccess());
@@ -185,13 +191,24 @@ public class EnvironmentApiConverterTest {
         assertEquals(request.getTunnel(), actual.getTunnel());
     }
 
-    private void assertParameters(EnvironmentRequest request, ParametersDto actual) {
-        assertEquals(request.getAws().getS3guard().getDynamoDbTableName(), actual.getAwsParametersDto().getS3GuardTableName());
-        assertEquals(request.getFreeIpa().getAws().getSpot().getPercentage(), actual.getAwsParametersDto().getFreeIpaSpotPercentage());
+    private void assertParameters(EnvironmentRequest request, ParametersDto actual, CloudPlatform cloudPlatform) {
+        if (AWS.equals(cloudPlatform)) {
+            assertAwsParameters(request, actual);
+        } else {
+            assertAzureParameters(request, actual);
+        }
+    }
+
+    private void assertAzureParameters(EnvironmentRequest request, ParametersDto actual) {
         assertEquals(request.getAzure().getResourceGroup().getName(),
                 actual.getAzureParametersDto().getAzureResourceGroupDto().getName());
         assertEquals(request.getAzure().getResourceGroup().isSingle(), actual.getAzureParametersDto().getAzureResourceGroupDto().isSingle());
         assertEquals(Objects.nonNull(request.getAzure().getResourceGroup().getName()), actual.getAzureParametersDto().getAzureResourceGroupDto().isExisting());
+    }
+
+    private void assertAwsParameters(EnvironmentRequest request, ParametersDto actual) {
+        assertEquals(request.getAws().getS3guard().getDynamoDbTableName(), actual.getAwsParametersDto().getS3GuardTableName());
+        assertEquals(request.getFreeIpa().getAws().getSpot().getPercentage(), actual.getAwsParametersDto().getFreeIpaSpotPercentage());
     }
 
     private void assertSecurityAccess(SecurityAccessRequest request, SecurityAccessDto actual) {
@@ -200,7 +217,7 @@ public class EnvironmentApiConverterTest {
         assertEquals(request.getSecurityGroupIdForKnox(), actual.getSecurityGroupIdForKnox());
     }
 
-    private EnvironmentRequest createEnvironmentRequest() {
+    private EnvironmentRequest createEnvironmentRequest(CloudPlatform cloudPlatform) {
         EnvironmentRequest request = new EnvironmentRequest();
         request.setName("test-cluster");
         request.setDescription("Test description.");
@@ -218,11 +235,20 @@ public class EnvironmentApiConverterTest {
         request.setCloudStorageValidation(CloudStorageValidation.DISABLED);
         request.setAdminGroupName("cb-admin");
         request.setProxyConfigName("my-proxy");
-        request.setAws(createAwsRequest());
-        request.setAzure(createAzureRequest());
         request.setTags(Map.of("owner", "cloudbreak"));
         request.setParentEnvironmentName("parent-env");
+        setParameters(request, cloudPlatform);
         return request;
+    }
+
+    private void setParameters(EnvironmentRequest request, CloudPlatform cloudPlatform) {
+        if (AWS.equals(cloudPlatform)) {
+            request.setAws(createAwsRequest());
+        } else if (AZURE.equals(cloudPlatform)) {
+            request.setAzure(createAzureRequest());
+        } else {
+            throw new RuntimeException("Unexpected cloudplatform: " + cloudPlatform);
+        }
     }
 
     private EnvironmentEditRequest createEditEnvironmentRequest() {

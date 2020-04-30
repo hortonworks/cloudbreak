@@ -74,7 +74,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private AwsEnvironmentParameters aws;
 
-        private AzureEnvironmentParametersResponse azure;
+        private AzureEnvironmentParameters azure;
 
         private TagResponse tags;
 
@@ -175,7 +175,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withAzure(AzureEnvironmentParametersResponse azure) {
+        public Builder withAzure(AzureEnvironmentParameters azure) {
             this.azure = azure;
             return this;
         }

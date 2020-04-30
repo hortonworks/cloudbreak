@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
-import com.sequenceiq.environment.api.v1.environment.model.response.AzureEnvironmentParametersResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.AzureResourceGroupResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
@@ -86,7 +86,7 @@ public class EnvironmentResponseConverter {
                 .withCloudStorageValidation(environmentDto.getExperimentalFeatures().getCloudStorageValidation())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
-                .withAzure(getIfNotNull(environmentDto.getParameters(), this::azureEnvParamsToAwsEnvironmentParams))
+                .withAzure(getIfNotNull(environmentDto.getParameters(), this::azureEnvParamsToAzureEnvironmentParams))
                 .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn())
                 .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
                 .withParentEnvironmentCloudPlatform(environmentDto.getParentEnvironmentCloudPlatform());
@@ -123,7 +123,7 @@ public class EnvironmentResponseConverter {
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
-                .withAzure(getIfNotNull(environmentDto.getParameters(), this::azureEnvParamsToAwsEnvironmentParams))
+                .withAzure(getIfNotNull(environmentDto.getParameters(), this::azureEnvParamsToAzureEnvironmentParams))
                 .withParentEnvironmentName(environmentDto.getParentEnvironmentName());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
@@ -157,9 +157,9 @@ public class EnvironmentResponseConverter {
                 .orElse(null);
     }
 
-    private AzureEnvironmentParametersResponse azureEnvParamsToAwsEnvironmentParams(ParametersDto parameters) {
+    private AzureEnvironmentParameters azureEnvParamsToAzureEnvironmentParams(ParametersDto parameters) {
         return Optional.ofNullable(parameters.getAzureParametersDto())
-                .map(azure -> AzureEnvironmentParametersResponse.builder()
+                .map(azure -> AzureEnvironmentParameters.builder()
                         .withAzureResourceGroup(getIfNotNull(azure.getAzureResourceGroupDto(), this::azureParametersToAzureResourceGroup))
                         .build())
                 .orElse(null);
