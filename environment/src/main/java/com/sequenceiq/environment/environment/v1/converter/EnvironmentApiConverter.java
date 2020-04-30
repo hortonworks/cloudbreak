@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
 
 import java.util.Objects;
@@ -29,8 +31,9 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnviro
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParametersRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroupRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
@@ -108,11 +111,7 @@ public class EnvironmentApiConverter {
                         .withCloudStorageValidation(request.getCloudStorageValidation())
                         .withTunnel(tunnelConverter.convert(request.getTunnel()))
                         .build())
-                .withParameters(paramsToParametersDto(
-                        request.getAws(),
-                        Optional.ofNullable(request.getFreeIpa()).map(AttachedFreeIpaRequest::getAws).orElse(null),
-                        request.getAzure()
-                ))
+                .withParameters(paramsToParametersDto(request, cloudPlatform))
                 .withParentEnvironmentName(request.getParentEnvironmentName())
                 .withProxyConfigName(request.getProxyConfigName());
 
@@ -143,13 +142,29 @@ public class EnvironmentApiConverter {
                 .toString();
     }
 
-    private ParametersDto paramsToParametersDto(
-            AwsEnvironmentParameters aws, AwsFreeIpaParameters awsFreeIpa, AzureEnvironmentParametersRequest azureEnvironmentParameters) {
-        if (Objects.isNull(aws) && Objects.isNull(awsFreeIpa) && Objects.isNull(azureEnvironmentParameters)) {
+    private ParametersDto paramsToParametersDto(EnvironmentRequest request, String cloudPlatform) {
+        if (AWS.name().equals(cloudPlatform)) {
+            return awsParamsToParametersDto(request.getAws(), Optional.ofNullable(request.getFreeIpa()).map(AttachedFreeIpaRequest::getAws).orElse(null));
+        } else if (AZURE.name().equals(cloudPlatform)) {
+            return azureParamsToParametersDto(request.getAzure());
+        }
+        return null;
+    }
+
+    private ParametersDto awsParamsToParametersDto(AwsEnvironmentParameters aws, AwsFreeIpaParameters awsFreeIpa) {
+        if (Objects.isNull(aws) && Objects.isNull(awsFreeIpa)) {
             return null;
         }
         return ParametersDto.builder()
                 .withAwsParameters(awsParamsToAwsParameters(aws, awsFreeIpa))
+                .build();
+    }
+
+    private ParametersDto azureParamsToParametersDto(AzureEnvironmentParameters azureEnvironmentParameters) {
+        if (Objects.isNull(azureEnvironmentParameters)) {
+            return null;
+        }
+        return ParametersDto.builder()
                 .withAzureParameters(azureParamsToAzureParametersDto(azureEnvironmentParameters))
                 .build();
     }
@@ -167,26 +182,35 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
-    private AzureParametersDto azureParamsToAzureParametersDto(AzureEnvironmentParametersRequest azureEnvironmentParameters) {
+    private AzureParametersDto azureParamsToAzureParametersDto(AzureEnvironmentParameters azureEnvironmentParameters) {
         return AzureParametersDto.builder()
                 .withResourceGroup(
                         Optional.ofNullable(azureEnvironmentParameters)
                                 .map(aep -> azureResourceGroupToAzureResourceGroupDto(aep.getResourceGroup()))
-                        .orElse(null)
+                                .orElse(null)
                 ).build();
 
     }
 
-    private AzureResourceGroupDto azureResourceGroupToAzureResourceGroupDto(AzureResourceGroupRequest azureResourceGroup) {
+    private AzureResourceGroupDto azureResourceGroupToAzureResourceGroupDto(AzureResourceGroup azureResourceGroup) {
         return AzureResourceGroupDto.builder()
                 .withName(azureResourceGroup.getName())
-                .withResourceGroupUsagePattern((azureResourceGroup.isSingle())
-                        ? ResourceGroupUsagePattern.USE_SINGLE
-                        : ResourceGroupUsagePattern.USE_MULTIPLE)
+                .withResourceGroupUsagePattern(resourceGroupUsageToResourceGroupUsagePattern(azureResourceGroup.getResourceGroupUsage()))
                 .withResourceGroupCreation(StringUtils.hasText(azureResourceGroup.getName())
                         ? ResourceGroupCreation.USE_EXISTING
                         : ResourceGroupCreation.CREATE_NEW)
                 .build();
+    }
+
+    private ResourceGroupUsagePattern resourceGroupUsageToResourceGroupUsagePattern(ResourceGroupUsage resourceGroupUsage) {
+        switch (resourceGroupUsage) {
+            case SINGLE:
+                return ResourceGroupUsagePattern.USE_SINGLE;
+            case MULTIPLE:
+                return ResourceGroupUsagePattern.USE_MULTIPLE;
+            default:
+                throw new RuntimeException("Unknown usage pattern: %s" + resourceGroupUsage);
+        }
     }
 
     private LocationDto locationRequestToDto(LocationRequest location) {
@@ -243,7 +267,7 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                 accountTelemetryService.getOrDefault(accountId).getFeatures())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
-        NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(paramsToParametersDto(awsParams, null, null)));
+        NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams, null)));
         return builder.build();
     }
 

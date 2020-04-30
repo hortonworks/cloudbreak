@@ -1,22 +1,24 @@
-package com.sequenceiq.environment.api.v1.environment.model.response;
+package com.sequenceiq.environment.api.v1.environment.model.request.azure;
 
 import javax.validation.Valid;
 
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-public class AzureEnvironmentParametersResponse {
+@ApiModel(value = "AzureEnvironmentV1Parameters")
+public class AzureEnvironmentParameters {
 
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.RESOURCE_GROUP_PARAMETERS)
-    private AzureResourceGroupResponse resourceGroup;
+    private AzureResourceGroup resourceGroup;
 
-    public AzureResourceGroupResponse getResourceGroup() {
+    public AzureResourceGroup getResourceGroup() {
         return resourceGroup;
     }
 
-    public void setResourceGroup(AzureResourceGroupResponse resourceGroup) {
+    public void setResourceGroup(AzureResourceGroup resourceGroup) {
         this.resourceGroup = resourceGroup;
     }
 
@@ -26,18 +28,17 @@ public class AzureEnvironmentParametersResponse {
 
     public static final class Builder {
 
-        private AzureResourceGroupResponse azureResourceGroup;
+        private AzureResourceGroup azureResourceGroup;
 
-        public Builder withAzureResourceGroup(AzureResourceGroupResponse azureResourceGroup) {
+        public Builder withAzureResourceGroup(AzureResourceGroup azureResourceGroup) {
             this.azureResourceGroup = azureResourceGroup;
             return this;
         }
 
-        public AzureEnvironmentParametersResponse build() {
-            AzureEnvironmentParametersResponse azureEnvironmentParameters = new AzureEnvironmentParametersResponse();
+        public AzureEnvironmentParameters build() {
+            AzureEnvironmentParameters azureEnvironmentParameters = new AzureEnvironmentParameters();
             azureEnvironmentParameters.setResourceGroup(azureResourceGroup);
             return azureEnvironmentParameters;
         }
     }
-
 }
