@@ -69,25 +69,25 @@ public class SdxUpgradeService {
     @Inject
     private CloudbreakMessagesService messagesService;
 
-    public UpgradeOptionV4Response checkForUpgradeByName(String userCrn, String clusterName) {
+    public UpgradeOptionV4Response checkForOsUpgradeByName(String userCrn, String clusterName) {
         SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
         return stackV4Endpoint.checkForOsUpgrade(0L, cluster.getClusterName());
     }
 
-    public UpgradeOptionV4Response checkForUpgradeByCrn(String userCrn, String clusterCrn) {
+    public UpgradeOptionV4Response checkForOsUpgradeByCrn(String userCrn, String clusterCrn) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         return stackV4Endpoint.checkForOsUpgrade(0L, cluster.getClusterName());
     }
 
-    public SdxUpgradeResponse triggerUpgradeByName(String userCrn, String clusterName) {
-        UpgradeOptionV4Response upgradeOption = checkForUpgradeByName(userCrn, clusterName);
+    public SdxUpgradeResponse triggerOsUpgradeByName(String userCrn, String clusterName) {
+        UpgradeOptionV4Response upgradeOption = checkForOsUpgradeByName(userCrn, clusterName);
         validateOsUpgradeOption(upgradeOption);
         SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
         return triggerUpgrade(upgradeOption, cluster);
     }
 
-    public SdxUpgradeResponse triggerUpgradeByCrn(String userCrn, String clusterCrn) {
-        UpgradeOptionV4Response upgradeOption = checkForUpgradeByCrn(userCrn, clusterCrn);
+    public SdxUpgradeResponse triggerOsUpgradeByCrn(String userCrn, String clusterCrn) {
+        UpgradeOptionV4Response upgradeOption = checkForOsUpgradeByCrn(userCrn, clusterCrn);
         validateOsUpgradeOption(upgradeOption);
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         return triggerUpgrade(upgradeOption, cluster);
@@ -119,7 +119,7 @@ public class SdxUpgradeService {
         }
     }
 
-    public void upgradeCluster(Long id, String imageId) {
+    public void upgradeRuntime(Long id, String imageId) {
         SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found the cluster with id: " + id));
         sdxStatusService.setStatusForDatalakeAndNotify(
                 DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS,

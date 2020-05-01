@@ -482,7 +482,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
                 .toString();
     }
 
-    private String getAccountIdFromCrn(String userCrn) {
+    public String getAccountIdFromCrn(String userCrn) {
         try {
             Crn crn = Crn.safeFromString(userCrn);
             return crn.getAccountId();

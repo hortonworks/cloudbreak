@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -18,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -31,7 +34,7 @@ import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
 @Component
-public class SdxClusterUpgradeService {
+public class SdxRuntimeUpgradeService {
 
     private static final long WORKSPACE_ID = 0L;
 
@@ -50,47 +53,59 @@ public class SdxClusterUpgradeService {
     @Inject
     private SdxUpgradeClusterConverter sdxUpgradeClusterConverter;
 
-    public SdxUpgradeResponse checkForClusterUpgradeByName(String name, SdxUpgradeRequest upgradeSdxClusterRequest) {
+    @Inject
+    private EntitlementService entitlementService;
+
+    public SdxUpgradeResponse checkForRuntimeUpgradeByName(String userCrn, String name, SdxUpgradeRequest upgradeSdxClusterRequest) {
+        checkRuntimeUpgradeEntitlement(userCrn);
         UpgradeV4Response upgradeV4Response = stackV4Endpoint.checkForClusterUpgradeByName(0L, name,
                 sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest));
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4Response);
     }
 
-    public SdxUpgradeResponse checkForClusterUpgradeByCrn(String userCrn, String crn, SdxUpgradeRequest upgradeSdxClusterRequest) {
+    public SdxUpgradeResponse checkForRuntimeUpgradeByCrn(String userCrn, String crn, SdxUpgradeRequest upgradeSdxClusterRequest) {
+        checkRuntimeUpgradeEntitlement(userCrn);
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
         UpgradeV4Response upgradeV4Response = stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, sdxCluster.getClusterName(),
                 sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest));
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4Response);
     }
 
-    public SdxUpgradeResponse triggerClusterUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeRequest) {
+    public SdxUpgradeResponse triggerRuntimeUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeRequest) {
         SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
-        String imageId = determineImageId(cluster.getClusterName(), upgradeRequest);
+        String imageId = determineImageId(userCrn, cluster.getClusterName(), upgradeRequest);
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(imageId, cluster);
         String message = getMessage(imageId);
         return new SdxUpgradeResponse(message, flowIdentifier);
     }
 
-    public SdxUpgradeResponse triggerClusterUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest) {
+    public SdxUpgradeResponse triggerRuntimeUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
-        String imageId = determineImageId(cluster.getClusterName(), upgradeRequest);
+        String imageId = determineImageId(userCrn, cluster.getClusterName(), upgradeRequest);
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(imageId, cluster);
         String message = getMessage(imageId);
         return new SdxUpgradeResponse(message, flowIdentifier);
+    }
+
+    private void checkRuntimeUpgradeEntitlement(String userCrn) {
+        String accountId = sdxService.getAccountIdFromCrn(userCrn);
+        if (!entitlementService.runtimeUpgradeEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+            throw new BadRequestException("Runtime upgrade feature is not enabled");
+        }
     }
 
     private FlowIdentifier triggerDatalakeUpgradeFlow(String imageId, SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
-        return sdxReactorFlowManager.triggerDatalakeClusterUpgradeFlow(cluster.getId(), imageId);
+        return sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(cluster.getId(), imageId);
     }
 
     private String getMessage(String imageId) {
         return messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE.getMessage(), Collections.singletonList(imageId));
     }
 
-    private String determineImageId(String clusterName, SdxUpgradeRequest upgradeRequest) {
+    private String determineImageId(String userCrn, String clusterName, SdxUpgradeRequest upgradeRequest) {
         String imageId;
-        SdxUpgradeResponse upgradeResponse = checkForClusterUpgradeByName(clusterName, upgradeRequest);
+        SdxUpgradeResponse upgradeResponse = checkForRuntimeUpgradeByName(userCrn, clusterName, upgradeRequest);
         List<ImageInfoV4Response> upgradeCandidates = validateUpgradeCandidates(clusterName, upgradeResponse);
 
         if (Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty()) {
@@ -117,14 +132,14 @@ public class SdxClusterUpgradeService {
             throw new BadRequestException(String.format("There is no compatible image to upgrade for stack %s", clusterName));
         } else if (StringUtils.isNotEmpty(upgradeResponse.getReason())) {
             throw new BadRequestException(String.format("The following error prevents the cluster upgrade process, please fix it and try again %s.",
-            upgradeResponse.getReason()));
+                    upgradeResponse.getReason()));
         }
         return upgradeCandidates;
     }
 
     private String validateRuntime(List<ImageInfoV4Response> upgradeCandidates, String runtime) {
         String imageId;
-        Supplier<Stream<ImageInfoV4Response>> imagesWithMatchingRuntime = () ->  upgradeCandidates.stream().filter(
+        Supplier<Stream<ImageInfoV4Response>> imagesWithMatchingRuntime = () -> upgradeCandidates.stream().filter(
                 imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp()));
         boolean hasCompatbileImageWithRuntime = imagesWithMatchingRuntime.get().anyMatch(e -> true);
         if (!hasCompatbileImageWithRuntime) {

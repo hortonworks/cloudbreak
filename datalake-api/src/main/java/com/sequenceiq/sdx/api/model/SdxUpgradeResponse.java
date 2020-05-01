@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 public class SdxUpgradeResponse {
@@ -18,6 +19,12 @@ public class SdxUpgradeResponse {
     private FlowIdentifier flowIdentifier;
 
     public SdxUpgradeResponse() {
+    }
+
+    public SdxUpgradeResponse(UpgradeOptionV4Response upgradeResponse) {
+        current = upgradeResponse.getCurrent();
+        upgradeCandidates = upgradeResponse.getUpgrade() != null ? List.of(upgradeResponse.getUpgrade()) : List.of();
+        reason = upgradeResponse.getReason();
     }
 
     public SdxUpgradeResponse(ImageInfoV4Response current, List<ImageInfoV4Response> upgradeCandidates, String reason, FlowIdentifier flowIdentifier) {
