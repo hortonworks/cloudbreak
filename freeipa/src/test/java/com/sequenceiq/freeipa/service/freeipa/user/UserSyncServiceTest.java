@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -29,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -42,8 +44,10 @@ import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -220,6 +224,60 @@ class UserSyncServiceTest {
                 Set.of(), Set.of(), Set.of());
 
         verify(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), anySet(), anySet(), anyBoolean());
+    }
+
+    @Test
+    void testApplyStateDifferenceToIpa() throws FreeIpaClientException {
+        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        RPCResponse<Object> mockResponse = mock(RPCResponse.class);
+        when(freeIpaClient.groupAddMembers(anyString(), anyCollection())).thenReturn(mockResponse);
+        when(freeIpaClient.groupRemoveMembers(anyString(), anyCollection())).thenReturn(mockResponse);
+
+        FmsGroup groupToAdd1 = new FmsGroup().withName("groupToAdd1");
+        FmsGroup groupToAdd2 = new FmsGroup().withName("groupToAdd2");
+        FmsGroup groupToRemove1 = new FmsGroup().withName("groupToRemove1");
+        FmsGroup groupToRemove2 = new FmsGroup().withName("groupToRemove2");
+        FmsUser userToAdd1 = new FmsUser().withName("userToAdd1").withFirstName("clark").withLastName("kent");
+        FmsUser userToAdd2 = new FmsUser().withName("userToAdd2").withFirstName("peter").withLastName("parker");
+        String userToRemove1 = "userToRemove1";
+        String userToRemove2 = "userToRemove2";
+
+        UsersStateDifference usersStateDifference = new UsersStateDifference(
+                ImmutableSet.of(groupToAdd1, groupToAdd2),
+                ImmutableSet.of(groupToRemove1, groupToRemove2),
+                ImmutableSet.of(userToAdd1, userToAdd2),
+                ImmutableSet.of(userToRemove1, userToRemove2),
+                ImmutableMultimap.<String, String>builder()
+                        .put(groupToAdd1.getName(), userToAdd1.getName())
+                        .put(groupToAdd2.getName(), userToAdd2.getName())
+                        .build(),
+                ImmutableMultimap.<String, String>builder()
+                        .put(groupToRemove1.getName(), userToRemove1)
+                        .put(groupToRemove2.getName(), userToRemove2)
+                        .build()
+        );
+
+        underTest.applyStateDifferenceToIpa(ENV_CRN, freeIpaClient, usersStateDifference);
+
+        verify(freeIpaClient).groupAdd(groupToAdd1.getName());
+        verify(freeIpaClient).groupAdd(groupToAdd2.getName());
+
+        verify(freeIpaClient).userAdd(userToAdd1.getName(), userToAdd1.getFirstName(), userToAdd1.getLastName());
+        verify(freeIpaClient).userAdd(userToAdd2.getName(), userToAdd2.getFirstName(), userToAdd2.getLastName());
+
+        verify(freeIpaClient).groupAddMembers(groupToAdd1.getName(), usersStateDifference.getGroupMembershipToAdd().get(groupToAdd1.getName()));
+        verify(freeIpaClient).groupAddMembers(groupToAdd2.getName(), usersStateDifference.getGroupMembershipToAdd().get(groupToAdd2.getName()));
+
+        verify(freeIpaClient).groupRemoveMembers(groupToRemove1.getName(), usersStateDifference.getGroupMembershipToRemove().get(groupToRemove1.getName()));
+        verify(freeIpaClient).groupRemoveMembers(groupToRemove2.getName(), usersStateDifference.getGroupMembershipToRemove().get(groupToRemove2.getName()));
+
+        verify(freeIpaClient).deleteUser(userToRemove1);
+        verify(freeIpaClient).deleteUser(userToRemove2);
+
+        verify(freeIpaClient).deleteGroup(groupToRemove1.getName());
+        verify(freeIpaClient).deleteGroup(groupToRemove2.getName());
+
+        verifyNoMoreInteractions(freeIpaClient);
     }
 
     private Multimap<String, String> setupGroupMapping(int numGroups, int numPerGroup) {

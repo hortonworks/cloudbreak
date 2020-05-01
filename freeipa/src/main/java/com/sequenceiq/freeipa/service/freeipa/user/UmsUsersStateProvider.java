@@ -64,12 +64,16 @@ public class UmsUsersStateProvider {
             Map<String, FmsGroup> crnToFmsGroup = grpcUmsClient.listGroups(actorCrn, accountId, List.of(), requestIdOptional).stream()
                     .collect(Collectors.toMap(Group::getCrn, this::umsGroupToGroup));
 
-            List<WorkloadAdministrationGroup> wags = grpcUmsClient.listWorkloadAdministrationGroups(INTERNAL_ACTOR_CRN, accountId, requestIdOptional);
-
+            Map<WorkloadAdministrationGroup, FmsGroup> wags = grpcUmsClient.listWorkloadAdministrationGroups(INTERNAL_ACTOR_CRN, accountId, requestIdOptional)
+                    .stream()
+                    .collect(Collectors.toMap(wag -> wag, wag -> nameToGroup(wag.getWorkloadAdministrationGroupName())));
             environmentCrns.forEach(environmentCrn -> {
-                UmsUsersState.Builder umsUsersStateBuilder = new UmsUsersState.Builder();
+                UmsUsersState.Builder umsUsersStateBuilder = new UmsUsersState.Builder()
+                        .setWorkloadAdministrationGroups(wags.values());
+
                 UsersState.Builder usersStateBuilder = new UsersState.Builder();
                 Set<String> wagNamesForOtherEnvironments = new HashSet<>();
+
 
                 crnToFmsGroup.values().forEach(usersStateBuilder::addGroup);
 
@@ -77,10 +81,11 @@ public class UmsUsersStateProvider {
                 // At the same time, build a set of workload admin groups that are
                 // associated with other environments so we can filter these out in
                 // the per-user group listing in handleUser.
-                wags.forEach(wag -> {
+                wags.entrySet().forEach(wagEntry -> {
+                    WorkloadAdministrationGroup wag = wagEntry.getKey();
                     String groupName = wag.getWorkloadAdministrationGroupName();
                     if (wag.getResource().equalsIgnoreCase(environmentCrn)) {
-                        usersStateBuilder.addGroup(nameToGroup(groupName));
+                        usersStateBuilder.addGroup(wagEntry.getValue());
                     } else {
                         Crn resourceCrn = getCrn(wag);
                         if (resourceCrn != null && resourceCrn.getService() == Crn.Service.ENVIRONMENTS
@@ -90,10 +95,8 @@ public class UmsUsersStateProvider {
                     }
                 });
 
-                // add internal usersync group for each environment
-                FmsGroup internalUserSyncGroup = new FmsGroup();
-                internalUserSyncGroup.setName(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP);
-                usersStateBuilder.addGroup(internalUserSyncGroup);
+                // Add internal usersync group for each environment
+                usersStateBuilder.addGroup(nameToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP));
 
                 EnvironmentAccessChecker environmentAccessChecker = createEnvironmentAccessChecker(environmentCrn);
 
@@ -207,20 +210,20 @@ public class UmsUsersStateProvider {
     }
 
     private void addMemberToInternalTrackingGroup(UsersState.Builder usersStateBuilder, String username) {
-        usersStateBuilder.addMemberToGroup(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP, username);
+        usersStateBuilder.addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, username);
     }
 
     private FmsUser umsUserToUser(User umsUser) {
         FmsUser fmsUser = new FmsUser();
-        fmsUser.setName(umsUser.getWorkloadUsername());
-        fmsUser.setFirstName(getOrDefault(umsUser.getFirstName(), "None"));
-        fmsUser.setLastName(getOrDefault(umsUser.getLastName(), "None"));
+        fmsUser.withName(umsUser.getWorkloadUsername());
+        fmsUser.withFirstName(getOrDefault(umsUser.getFirstName(), "None"));
+        fmsUser.withLastName(getOrDefault(umsUser.getLastName(), "None"));
         return fmsUser;
     }
 
     private FmsGroup nameToGroup(String name) {
         FmsGroup fmsGroup = new FmsGroup();
-        fmsGroup.setName(name);
+        fmsGroup.withName(name);
         return fmsGroup;
     }
 
@@ -230,16 +233,16 @@ public class UmsUsersStateProvider {
 
     private FmsUser umsMachineUserToUser(MachineUser umsMachineUser) {
         FmsUser fmsUser = new FmsUser();
-        fmsUser.setName(umsMachineUser.getWorkloadUsername());
+        fmsUser.withName(umsMachineUser.getWorkloadUsername());
         // TODO what should the appropriate first and last name be for machine users?
-        fmsUser.setFirstName("Machine");
-        fmsUser.setLastName("User");
+        fmsUser.withFirstName("Machine");
+        fmsUser.withLastName("User");
         return fmsUser;
     }
 
     private FmsGroup umsGroupToGroup(Group umsGroup) {
         FmsGroup fmsGroup = new FmsGroup();
-        fmsGroup.setName(umsGroup.getGroupName());
+        fmsGroup.withName(umsGroup.getGroupName());
         return fmsGroup;
     }
 

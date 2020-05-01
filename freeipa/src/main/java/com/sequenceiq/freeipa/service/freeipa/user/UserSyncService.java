@@ -238,7 +238,7 @@ public class UserSyncService {
             LOGGER.debug("IPA UsersState, found {} users and {} groups", ipaUsersState.getUsers().size(), ipaUsersState.getGroups().size());
 
             applyStateDifferenceToIpa(stack.getEnvironmentCrn(), freeIpaClient,
-                    UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState.getUsersState(), ipaUsersState));
+                    UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, ipaUsersState));
 
             // Check for the password related attribute (cdpUserAttr) existence and go for password sync.
             processUsersWorkloadCredentials(environmentCrn, umsUsersState, freeIpaClient);
@@ -257,7 +257,8 @@ public class UserSyncService {
                 freeIpaUsersStateProvider.getFilteredFreeIPAState(freeIpaClient, umsUsersState.getRequestedWorkloadUsers());
     }
 
-    private void applyStateDifferenceToIpa(String environmentCrn, FreeIpaClient freeIpaClient, UsersStateDifference stateDifference)
+    @VisibleForTesting
+    void applyStateDifferenceToIpa(String environmentCrn, FreeIpaClient freeIpaClient, UsersStateDifference stateDifference)
             throws FreeIpaClientException {
         LOGGER.info("Applying state difference to environment {}.", environmentCrn);
 
@@ -267,6 +268,7 @@ public class UserSyncService {
 
         removeUsersFromGroups(freeIpaClient, stateDifference.getGroupMembershipToRemove());
         removeUsers(freeIpaClient, stateDifference.getUsersToRemove());
+        removeGroups(freeIpaClient, stateDifference.getGroupsToRemove());
     }
 
     private void processUsersWorkloadCredentials(
@@ -339,6 +341,21 @@ public class UserSyncService {
             } catch (FreeIpaClientException e) {
                 LOGGER.error("Failed to delete {}", username, e);
                 checkIfClientStillUsable(e);
+            }
+        }
+    }
+
+    private void removeGroups(FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups) throws FreeIpaClientException {
+        for (FmsGroup fmsGroup : fmsGroups) {
+            String groupname = fmsGroup.getName();
+
+            LOGGER.debug("Removing group {}", groupname);
+
+            try {
+                freeIpaClient.deleteGroup(groupname);
+                LOGGER.debug("Success: {}", groupname);
+            } catch (FreeIpaClientException e) {
+                LOGGER.error("Failed to delete {}", groupname, e);
             }
         }
     }
