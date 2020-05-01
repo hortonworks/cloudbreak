@@ -44,6 +44,10 @@ public class EntitlementService {
         return isEntitlementRegistered(actorCrn, accountId, "CDP_CLOUD_STORAGE_VALIDATION");
     }
 
+    public boolean runtimeUpgradeEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, "CDP_RUNTIME_UPGRADE");
+    }
+
     public List<String> getEntitlements(String actorCrn, String accountId) {
         return getAccount(actorCrn, accountId).getEntitlementsList()
                 .stream()

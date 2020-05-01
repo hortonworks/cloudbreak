@@ -67,7 +67,7 @@ public class DatalakeUpgradeActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradeStartEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Datalake upgrade has been started for {}", payload.getResourceId());
-                sdxUpgradeService.upgradeCluster(payload.getResourceId(), payload.getImageId());
+                sdxUpgradeService.upgradeRuntime(payload.getResourceId(), payload.getImageId());
                 sendEvent(context, DATALAKE_UPGRADE_IN_PROGRESS_EVENT.event(), payload);
             }
 

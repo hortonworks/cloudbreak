@@ -176,6 +176,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_CLOUD_STORAGE_VALIDATION = "CDP_CLOUD_STORAGE_VALIDATION";
 
+    private static final String RUNTIME_UPGRADE = "CDP_RUNTIME_UPGRADE";
+
     private static final String MOCK_RESOURCE = "mock_resource";
 
     @Inject
@@ -213,6 +215,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.cloudstoragevalidation.enable}")
     private boolean enableCloudStorageValidation;
+
+    @Value("${auth.mock.runtime.upgrade.enable}")
+    private boolean runtimeUpgradeEnabled;
 
     private String cbLicense;
 
@@ -457,6 +462,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableCloudStorageValidation) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION));
+        }
+        if (runtimeUpgradeEnabled) {
+            builder.addEntitlements(createEntitlement(RUNTIME_UPGRADE));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

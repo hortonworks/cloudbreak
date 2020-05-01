@@ -74,7 +74,7 @@ public class SdxReactorFlowManager {
         return notify(selector, new SdxUpgradeStartEvent(selector, sdxId, userId, upgradeOption));
     }
 
-    public FlowIdentifier triggerDatalakeClusterUpgradeFlow(Long sdxId, String imageId) {
+    public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(Long sdxId, String imageId) {
         String selector = DATALAKE_UPGRADE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new DatalakeUpgradeStartEvent(selector, sdxId, userId, imageId));
