@@ -159,6 +159,7 @@ public class FreeIpaClient {
     }
 
     public User deleteUser(String userUid) throws FreeIpaClientException {
+        FreeIpaChecks.checkUserNotProtected(userUid, () -> String.format("User '%s' is protected and cannot be deleted from FreeIPA", userUid));
         List<Object> flags = List.of(userUid);
         Map<String, Object> params = Map.of();
         return (User) invoke("user_del", flags, params, User.class).getResult();
@@ -171,6 +172,7 @@ public class FreeIpaClient {
     }
 
     public User userAdd(String user, String firstName, String lastName) throws FreeIpaClientException {
+        FreeIpaChecks.checkUserNotProtected(user, () -> String.format("User '%s' is protected and cannot be added to FreeIPA", user));
         List<Object> flags = List.of(user);
         Map<String, Object> params = Map.of(
                 "givenname", firstName,
@@ -237,12 +239,14 @@ public class FreeIpaClient {
     }
 
     public Group groupAdd(String group) throws FreeIpaClientException {
+        FreeIpaChecks.checkGroupNotProtected(group, () -> String.format("Group '%s' is protected and cannot be added to FreeIPA", group));
         List<Object> flags = List.of(group);
         Map<String, Object> params = Map.of();
         return (Group) invoke("group_add", flags, params, Group.class).getResult();
     }
 
     public void deleteGroup(String group) throws FreeIpaClientException {
+        FreeIpaChecks.checkGroupNotProtected(group, () -> String.format("Group '%s' is protected and cannot be deleted from FreeIPA", group));
         List<Object> flags = List.of(group);
         Map<String, Object> params = Map.of();
         invoke("group_del", flags, params, Object.class);
@@ -285,6 +289,7 @@ public class FreeIpaClient {
     //}
     // TODO the response to this API call not currently deserializable
     public RPCResponse<Object> groupAddMembers(String group, Collection<String> users) throws FreeIpaClientException {
+        FreeIpaChecks.checkGroupNotUnmanaged(group, () -> String.format("Group '%s' is not managed and membership cannot be changed", group));
         List<Object> flags = List.of(group);
         Map<String, Object> params = Map.of(
                 "user", users
@@ -293,6 +298,7 @@ public class FreeIpaClient {
     }
 
     public RPCResponse<Object> groupRemoveMembers(String group, Collection<String> users) throws FreeIpaClientException {
+        FreeIpaChecks.checkGroupNotUnmanaged(group, () -> String.format("Group '%s' is not managed and membership cannot be changed", group));
         List<Object> flags = List.of(group);
         Map<String, Object> params = Map.of(
                 "user", users

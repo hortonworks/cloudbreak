@@ -14,24 +14,27 @@ public class FmsUser {
         return name;
     }
 
-    public void setName(String name) {
+    public FmsUser withName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getFirstName() {
         return firstName;
     }
 
-    public void setFirstName(String firstName) {
+    public FmsUser withFirstName(String firstName) {
         this.firstName = firstName;
+        return this;
     }
 
     public String getLastName() {
         return lastName;
     }
 
-    public void setLastName(String lastName) {
+    public FmsUser withLastName(String lastName) {
         this.lastName = lastName;
+        return this;
     }
 
     @Override

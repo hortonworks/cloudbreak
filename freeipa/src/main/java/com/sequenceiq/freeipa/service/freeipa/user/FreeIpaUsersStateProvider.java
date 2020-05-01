@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import java.util.List;
+import static com.sequenceiq.freeipa.client.FreeIpaChecks.IPA_PROTECTED_USERS;
+import static com.sequenceiq.freeipa.client.FreeIpaChecks.IPA_UNMANAGED_GROUPS;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -17,15 +19,6 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 
 @Service
 public class FreeIpaUsersStateProvider {
-    // TODO add other Cloudera-managed users (e.g., Kerberos and LDAP users?)
-    @VisibleForTesting
-    static final List<String> IPA_ONLY_USERS = List.of("admin");
-
-    // TODO add other Cloudera-managed groups?
-    // TODO handle name conflicts between ipa and ums? e.g., should ums "admins" be ipa "admins"?
-    @VisibleForTesting
-    static final List<String> IPA_ONLY_GROUPS = List.of("editors", "ipausers", "trust admins");
-
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaUsersStateProvider.class);
 
     public UsersState getUsersState(FreeIpaClient freeIpaClient) throws FreeIpaClientException {
@@ -33,12 +26,12 @@ public class FreeIpaUsersStateProvider {
         UsersState.Builder builder = new UsersState.Builder();
 
         freeIpaClient.userFindAll().stream()
-                .filter(user -> !IPA_ONLY_USERS.contains(user.getUid()))
+                .filter(user -> !IPA_PROTECTED_USERS.contains(user.getUid()))
                 .forEach(user -> {
                     builder.addUser(fromIpaUser(user));
                     if (null != user.getMemberOfGroup()) {
                         user.getMemberOfGroup().stream()
-                                .filter(group -> !IPA_ONLY_GROUPS.contains(group))
+                                .filter(group -> !IPA_UNMANAGED_GROUPS.contains(group))
                                 .forEach(group -> builder.addMemberToGroup(group, user.getUid()));
                     } else {
                         LOGGER.warn("User {} is not a member of any groups.", user.getUid());
@@ -46,7 +39,7 @@ public class FreeIpaUsersStateProvider {
                 });
 
         freeIpaClient.groupFindAll().stream()
-                .filter(group -> !IPA_ONLY_GROUPS.contains(group.getCn()))
+                .filter(group -> !IPA_UNMANAGED_GROUPS.contains(group.getCn()))
                 .forEach(group -> builder.addGroup(fromIpaGroup(group)));
 
         return builder.build();
@@ -58,11 +51,11 @@ public class FreeIpaUsersStateProvider {
 
         // get all groups from IPA
         freeIpaClient.groupFindAll().stream()
-                .filter(group -> !IPA_ONLY_GROUPS.contains(group.getCn()))
+                .filter(group -> !IPA_UNMANAGED_GROUPS.contains(group.getCn()))
                 .forEach(group -> builder.addGroup(fromIpaGroup(group)));
 
         for (FmsUser user : users) {
-            if (IPA_ONLY_USERS.contains(user.getName())) {
+            if (IPA_PROTECTED_USERS.contains(user.getName())) {
                 continue;
             }
             Optional<com.sequenceiq.freeipa.client.model.User> ipaUserOptional = freeIpaClient.userFind(user.getName());
@@ -71,7 +64,7 @@ public class FreeIpaUsersStateProvider {
                 builder.addUser(fromIpaUser(ipaUser));
                 if (ipaUser.getMemberOfGroup() != null) {
                     ipaUser.getMemberOfGroup().stream()
-                            .filter(group -> !IPA_ONLY_GROUPS.contains(group))
+                            .filter(group -> !IPA_UNMANAGED_GROUPS.contains(group))
                             .forEach(groupname -> {
                                 builder.addMemberToGroup(groupname, user.getName());
                             });
@@ -84,17 +77,15 @@ public class FreeIpaUsersStateProvider {
 
     @VisibleForTesting
     FmsUser fromIpaUser(com.sequenceiq.freeipa.client.model.User ipaUser) {
-        FmsUser fmsUser = new FmsUser();
-        fmsUser.setName(ipaUser.getUid());
-        fmsUser.setFirstName(ipaUser.getGivenname());
-        fmsUser.setLastName(ipaUser.getSn());
-        return fmsUser;
+        return new FmsUser()
+                .withName(ipaUser.getUid())
+                .withFirstName(ipaUser.getGivenname())
+                .withLastName(ipaUser.getSn());
     }
 
     @VisibleForTesting
     FmsGroup fromIpaGroup(com.sequenceiq.freeipa.client.model.Group ipaGroup) {
-        FmsGroup fmsGroup = new FmsGroup();
-        fmsGroup.setName(ipaGroup.getCn());
-        return fmsGroup;
+        return new FmsGroup()
+                .withName(ipaGroup.getCn());
     }
 }

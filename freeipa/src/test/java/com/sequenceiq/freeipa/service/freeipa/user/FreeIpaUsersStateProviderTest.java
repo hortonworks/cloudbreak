@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static com.sequenceiq.freeipa.client.FreeIpaChecks.IPA_PROTECTED_USERS;
+import static com.sequenceiq.freeipa.client.FreeIpaChecks.IPA_UNMANAGED_GROUPS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -42,12 +44,12 @@ class FreeIpaUsersStateProviderTest {
     @Test
     void testGetUserState() throws Exception {
         List<String> user1GroupNames = List.of("group1", "group2");
-        List<String> user2GroupNames = List.of("group2", "group3", FreeIpaUsersStateProvider.IPA_ONLY_GROUPS.get(0));
+        List<String> user2GroupNames = List.of("group2", "group3", IPA_UNMANAGED_GROUPS.get(0));
         List<String> ipaOnlyUserGroupNames = List.of("dont_include");
         Map<String, List<String>> users = Map.of(
                 "user1", user1GroupNames,
                 "user2", user2GroupNames,
-                FreeIpaUsersStateProvider.IPA_ONLY_USERS.get(0), ipaOnlyUserGroupNames
+                IPA_PROTECTED_USERS.get(0), ipaOnlyUserGroupNames
         );
 
         Set<com.sequenceiq.freeipa.client.model.User> usersFindAll = users.entrySet().stream()
@@ -55,7 +57,7 @@ class FreeIpaUsersStateProviderTest {
                 .collect(Collectors.toSet());
 
         Set<com.sequenceiq.freeipa.client.model.Group> groupsFindAll = Stream.of(user1GroupNames.stream(),
-                user2GroupNames.stream(), FreeIpaUsersStateProvider.IPA_ONLY_GROUPS.stream())
+                user2GroupNames.stream(), IPA_UNMANAGED_GROUPS.stream())
                 .flatMap(groupName -> groupName)
                 .map(this::createIpaGroup)
                 .collect(Collectors.toSet());
@@ -66,12 +68,12 @@ class FreeIpaUsersStateProviderTest {
         UsersState ipaState = underTest.getUsersState(freeIpaClient);
 
         Set<String> expectedUsers = users.keySet().stream()
-                .filter(user -> !FreeIpaUsersStateProvider.IPA_ONLY_USERS.contains(user))
+                .filter(user -> !IPA_PROTECTED_USERS.contains(user))
                 .collect(Collectors.toSet());
 
         Set<String> expectedGroups = expectedUsers.stream()
                 .flatMap(user -> users.get(user).stream())
-                .filter(group -> !FreeIpaUsersStateProvider.IPA_ONLY_GROUPS.contains(group))
+                .filter(group -> !IPA_UNMANAGED_GROUPS.contains(group))
                 .collect(Collectors.toSet());
 
         for (FmsUser fmsUser : ipaState.getUsers()) {
@@ -92,7 +94,7 @@ class FreeIpaUsersStateProviderTest {
         String username = "userNull";
         Set<com.sequenceiq.freeipa.client.model.User> usersFindAll = Set.of(createIpaUser(username, null));
 
-        Set<com.sequenceiq.freeipa.client.model.Group> groupsFindAll = FreeIpaUsersStateProvider.IPA_ONLY_GROUPS.stream()
+        Set<com.sequenceiq.freeipa.client.model.Group> groupsFindAll = IPA_UNMANAGED_GROUPS.stream()
                 .map(this::createIpaGroup)
                 .collect(Collectors.toSet());
 

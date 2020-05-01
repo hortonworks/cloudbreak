@@ -6,8 +6,9 @@ public class FmsGroup {
 
     private String name;
 
-    public void setName(String name) {
+    public FmsGroup withName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getName() {
