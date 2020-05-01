@@ -57,14 +57,14 @@ public class SdxRuntimeUpgradeService {
     private EntitlementService entitlementService;
 
     public SdxUpgradeResponse checkForRuntimeUpgradeByName(String userCrn, String name, SdxUpgradeRequest upgradeSdxClusterRequest) {
-        checkRuntimeUpgradeEntitlement(userCrn);
+        verifyRuntimeUpgradeEntitlement(userCrn);
         UpgradeV4Response upgradeV4Response = stackV4Endpoint.checkForClusterUpgradeByName(0L, name,
                 sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest));
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4Response);
     }
 
     public SdxUpgradeResponse checkForRuntimeUpgradeByCrn(String userCrn, String crn, SdxUpgradeRequest upgradeSdxClusterRequest) {
-        checkRuntimeUpgradeEntitlement(userCrn);
+        verifyRuntimeUpgradeEntitlement(userCrn);
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
         UpgradeV4Response upgradeV4Response = stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, sdxCluster.getClusterName(),
                 sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest));
@@ -87,9 +87,13 @@ public class SdxRuntimeUpgradeService {
         return new SdxUpgradeResponse(message, flowIdentifier);
     }
 
-    private void checkRuntimeUpgradeEntitlement(String userCrn) {
+    public boolean isRuntimeUpgradeEnabled(String userCrn) {
         String accountId = sdxService.getAccountIdFromCrn(userCrn);
-        if (!entitlementService.runtimeUpgradeEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+        return entitlementService.runtimeUpgradeEnabled(INTERNAL_ACTOR_CRN, accountId);
+    }
+
+    private void verifyRuntimeUpgradeEntitlement(String userCrn) {
+        if (!isRuntimeUpgradeEnabled(userCrn)) {
             throw new BadRequestException("Runtime upgrade feature is not enabled");
         }
     }
