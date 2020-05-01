@@ -1,7 +1,11 @@
 package com.sequenceiq.datalake.controller.sdx;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
@@ -19,6 +23,8 @@ import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 @AuthorizationResource(type = AuthorizationResourceType.DATALAKE)
 public class SdxUpgradeController implements SdxUpgradeEndpoint {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeController.class);
+
     @Inject
     private SdxUpgradeService sdxUpgradeService;
 
@@ -29,6 +35,7 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public SdxUpgradeResponse upgradeClusterByName(String clusterName, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        lockComponentsIfRuntimeUpgradeIsDisabled(request, userCrn, clusterName);
         if (isDryRun(request)) {
             if (isOsUpgrade(request)) {
                 return new SdxUpgradeResponse(sdxUpgradeService.checkForOsUpgradeByName(userCrn, clusterName));
@@ -47,6 +54,7 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public SdxUpgradeResponse upgradeClusterByCrn(String clusterCrn, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        lockComponentsIfRuntimeUpgradeIsDisabled(request, userCrn, clusterCrn);
         if (isDryRun(request)) {
             if (isOsUpgrade(request)) {
                 return new SdxUpgradeResponse(sdxUpgradeService.checkForOsUpgradeByCrn(userCrn, clusterCrn));
@@ -59,6 +67,21 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
         } else {
             return sdxRuntimeUpgradeService.triggerRuntimeUpgradeByCrn(userCrn, clusterCrn, request);
         }
+    }
+
+    private void lockComponentsIfRuntimeUpgradeIsDisabled(SdxUpgradeRequest request, String userCrn, String clusterNameOrCrn) {
+        if (!isRequestSpecifyUpgradeType(request) && !sdxRuntimeUpgradeService.isRuntimeUpgradeEnabled(userCrn)) {
+            LOGGER.info("Set lock-components since no upgrade type is specified and runtime upgrade is disabled for cluster: {}", clusterNameOrCrn);
+            request.setLockComponents(true);
+        }
+    }
+
+    private boolean isRequestSpecifyUpgradeType(SdxUpgradeRequest request) {
+        return !(request.isEmpty() || isDryRunOnly(request));
+    }
+
+    private boolean isDryRunOnly(SdxUpgradeRequest request) {
+        return isDryRun(request) && isEmpty(request.getRuntime()) && isEmpty(request.getImageId()) && !isOsUpgrade(request);
     }
 
     private boolean isDryRun(SdxUpgradeRequest request) {
