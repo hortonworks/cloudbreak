@@ -51,7 +51,7 @@ dump_to_azure() {
 
   doLog "INFO Uploading to ${BACKUP_LOCATION}"
   # todo: strip trailing slash from BACKUP_LOCATION if it's there
-  AZURE_LOCATION="${BACKUP_LOCATION}/${BACKUP_DATE}/${SERVICE}_backup"
+  AZURE_LOCATION="${BACKUP_LOCATION}/${SERVICE}_backup"
   azcopy copy "$LOCAL_BACKUP" "$AZURE_LOCATION" >>$LOGFILE 2>&1 || errorExit "Unable to upload $SERVICE backup"
   doLog "INFO Completed upload to ${BACKUP_LOCATION}"
 
@@ -74,7 +74,7 @@ run_azure_backup () {
 dump_to_s3() {
   SERVICE=$1
   # todo: strip trailing slash from BACKUP_LOCATION if it's there
-  S3_LOCATION="${BACKUP_LOCATION}/${BACKUP_DATE}/${SERVICE}_backup"
+  S3_LOCATION="${BACKUP_LOCATION}/${SERVICE}_backup"
   doLog "INFO Dumping ${SERVICE} to ${S3_LOCATION}"
   # todo: Specify a good compression level with `-Z 1...9`
   pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=custom --data-only 2>>$LOGFILE | /usr/bin/aws s3 cp --sse AES256 --no-progress - "${S3_LOCATION}" 2>>$LOGFILE || errorExit "Unable to dump ${SERVICE}."
