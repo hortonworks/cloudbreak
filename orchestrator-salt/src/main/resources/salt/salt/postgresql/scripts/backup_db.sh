@@ -5,11 +5,11 @@ set -o pipefail
 
 if [ $# -ne 6 ]; then
   echo "Invalid inputs provided"
-  echo "Script accepts five inputs:"
+  echo "Script accepts six inputs:"
   echo "  1. Cloud Provider (azure | aws)"
-  echo "  2. PostgreSQL host name."
-  echo "  3. PostgreSQL port."
-  echo "  4. Object Storage Service url to place backups."
+  echo "  2. Object Storage Service url to place backups."
+  echo "  3. PostgreSQL host name."
+  echo "  4. PostgreSQL port."
   echo "  5. PostgreSQL user name."
   echo "  6. PostgreSQL password."
   exit 1
