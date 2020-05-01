@@ -7,6 +7,12 @@
       {
         "refName": "zookeeper",
         "serviceType": "ZOOKEEPER",
+        "serviceConfigs": [
+          {
+            "name": "zookeeper_datadir_autocreate",
+            "value": "true"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "zookeeper-SERVER-BASE",
