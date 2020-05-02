@@ -6,7 +6,9 @@ import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -82,6 +84,8 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
 
     private static final String READ_HOSTTEMPLATES = ClouderaManagerMock.API_V31 + "/clusters/:clusterName/hostTemplates";
 
+    private static final Duration POLLING_INTERVAL = Duration.of(3000, ChronoUnit.MILLIS);
+
     @Inject
     private BlueprintTestClient blueprintTestClient;
 
@@ -131,7 +135,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(desiredWorkerCount).withForced(Boolean.FALSE))
-                .await(StackTestDto.class, STACK_AVAILABLE)
+                .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
                 .then(MockVerification.verify(POST, ITResponse.MOCK_ROOT + "/cloud_instance_statuses").atLeast(1))
                 .then(MockVerification.verify(POST, ITResponse.MOCK_ROOT + "/cloud_metadata_statuses")
                         .bodyContains("CREATE_REQUESTED", addedNodes).exactTimes(1))

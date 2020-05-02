@@ -5,6 +5,9 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
@@ -52,6 +55,8 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeClusterTest.class);
 
     private static final String RECIPE_CONTENT = Base64.encodeBase64String("#!/bin/bash\necho ALMAA".getBytes());
+
+    private static final Duration POLLING_INTERVAL = Duration.of(3000, ChronoUnit.MILLIS);
 
     @Inject
     private LdapTestClient ldapTestClient;
@@ -219,7 +224,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
-                .await(STACK_AVAILABLE)
+                .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
                 .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(4))
                 .validate();
     }
@@ -262,7 +267,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
-                .await(STACK_AVAILABLE)
+                .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
                 .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(4))
                 .validate();
     }

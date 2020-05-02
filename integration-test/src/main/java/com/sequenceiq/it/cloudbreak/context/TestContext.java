@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.context;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -47,7 +49,6 @@ import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
@@ -56,8 +57,14 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
-import com.sequenceiq.it.cloudbreak.util.wait.WaitUtilForMultipleStatuses;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
+import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakAwait;
+import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsAwait;
+import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeAwait;
+import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeInternalAwait;
+import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaAwait;
@@ -89,9 +96,6 @@ public abstract class TestContext implements ApplicationContextAware {
     private Map<String, Object> contextParameters = new HashMap<>();
 
     private TestContext testContext;
-
-    @Inject
-    private WaitUtilForMultipleStatuses waitUtil;
 
     @Inject
     private WaitUtil waitUtilSingleStatus;
@@ -127,10 +131,31 @@ public abstract class TestContext implements ApplicationContextAware {
     private FreeIpaAwait freeIpaAwait;
 
     @Inject
+    private DatalakeAwait datalakeAwait;
+
+    @Inject
+    private DatalakeInternalAwait datalakeInternalAwait;
+
+    @Inject
+    private RedbeamsAwait redbeamsAwait;
+
+    @Inject
+    private CloudbreakAwait cloudbreakAwait;
+
+    @Inject
     private WaitService<EnvironmentWaitObject> environmentWaitService;
 
     @Inject
     private WaitService<FreeIpaWaitObject> freeIpaWaitService;
+
+    @Inject
+    private WaitService<DatalakeWaitObject> datalakeWaitService;
+
+    @Inject
+    private WaitService<RedbeamsWaitObject> redbeamsWaitService;
+
+    @Inject
+    private WaitService<CloudbreakWaitObject> cloudbreakWaitService;
 
     private DefaultModel model;
 
@@ -139,6 +164,10 @@ public abstract class TestContext implements ApplicationContextAware {
     private boolean initialized;
 
     private CloudbreakUser actingUser;
+
+    public Duration getPollingDurationInMills() {
+        return Duration.of(pollingInterval, ChronoUnit.MILLIS);
+    }
 
     public Map<String, CloudbreakTestDto> getResources() {
         return resources;
@@ -179,6 +208,18 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public WaitService<FreeIpaWaitObject> getFreeIpaWaitService() {
         return freeIpaWaitService;
+    }
+
+    public WaitService<DatalakeWaitObject> getDatalakeWaitService() {
+        return datalakeWaitService;
+    }
+
+    public WaitService<RedbeamsWaitObject> getRedbeamsWaitService() {
+        return redbeamsWaitService;
+    }
+
+    public WaitService<CloudbreakWaitObject> getCloudbreakWaitService() {
+        return cloudbreakWaitService;
     }
 
     public <T extends CloudbreakTestDto, U extends MicroserviceClient> T when(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,
@@ -548,53 +589,24 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <T extends CloudbreakTestDto> T await(Class<T> entityClass, Map<String, Status> desiredStatuses) {
-        return await(entityClass, desiredStatuses, emptyRunningParameter(), -1);
+        return await(entityClass, desiredStatuses, emptyRunningParameter(), getPollingDurationInMills());
     }
 
     public <T extends CloudbreakTestDto> T await(Class<T> entityClass, Map<String, Status> desiredStatuses, RunningParameter runningParameter) {
-        return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter, -1);
+        return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter, getPollingDurationInMills());
     }
 
     public <T extends CloudbreakTestDto> T await(Class<T> entityClass, Map<String, Status> desiredStatuses, RunningParameter runningParameter,
-            long pollingInterval) {
+            Duration pollingInterval) {
         return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter, pollingInterval);
     }
 
     public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses) {
-        return await(entity, desiredStatuses, emptyRunningParameter());
+        return await(entity, desiredStatuses, emptyRunningParameter(), getPollingDurationInMills());
     }
 
     public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses, RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, -1);
-    }
-
-    public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
-        checkShutdown();
-
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        CloudbreakTestDto awaitEntity = get(key);
-        LOGGER.info("await {} for {}", key, desiredStatuses);
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
-            }
-
-            CloudbreakClient cloudbreakClient = getCloudbreakClient(getWho(runningParameter).getAccessKey());
-            statuses.putAll(waitUtil.waitAndCheckStatuses(cloudbreakClient, awaitEntity.getName(), desiredStatuses, pollingInterval));
-            if (!desiredStatuses.containsValue(Status.DELETE_COMPLETED)) {
-                awaitEntity.refresh(getTestContext(), cloudbreakClient);
-            }
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
-            }
-            getExceptionMap().put("await " + entity + " for desired statuses" + desiredStatuses, e);
-        }
-        return entity;
+        return await(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
     }
 
     public <T extends SdxTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
@@ -624,6 +636,19 @@ public abstract class TestContext implements ApplicationContextAware {
         return entity;
     }
 
+    public <T extends CloudbreakTestDto, E extends Status> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
+            Duration pollingInterval) {
+        checkShutdown();
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
+            Log.await(LOGGER, String.format("Cloudbreak await should be skipped beacause of previous error. await [%s]", desiredStatuses));
+            return entity;
+        }
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        CloudbreakTestDto awaitEntity = get(key);
+        cloudbreakAwait.await(awaitEntity, (Map<String, Status>) desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
+        return entity;
+    }
+
     public <T extends EnvironmentTestDto, E extends EnvironmentStatus> T await(T entity, E desiredStatus, RunningParameter runningParameter) {
         checkShutdown();
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
@@ -632,7 +657,7 @@ public abstract class TestContext implements ApplicationContextAware {
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         EnvironmentTestDto awaitEntity = get(key);
-        environmentAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, pollingInterval, maxRetry);
+        environmentAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, getPollingDurationInMills(), maxRetry);
         return entity;
     }
 
@@ -645,160 +670,46 @@ public abstract class TestContext implements ApplicationContextAware {
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         FreeIPATestDto awaitEntity = get(key);
-        freeIpaAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, pollingInterval, maxRetry);
+        freeIpaAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, getPollingDurationInMills(), maxRetry);
         return entity;
     }
 
-    public RedbeamsDatabaseServerTestDto await(RedbeamsDatabaseServerTestDto entity, com.sequenceiq.redbeams.api.model.common.Status desiredStatuses,
+    public <T extends SdxTestDto, E extends SdxClusterStatusResponse> T await(T entity, E desiredStatus,
             RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, -1);
-    }
-
-    public RedbeamsDatabaseServerTestDto await(RedbeamsDatabaseServerTestDto entity, com.sequenceiq.redbeams.api.model.common.Status desiredStatuses,
-            RunningParameter runningParameter, long pollingInterval) {
         checkShutdown();
-
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        RedbeamsDatabaseServerTestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format("%s for %s", key, desiredStatuses));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
-            }
-
-            RedbeamsClient redbeamsClient = getMicroserviceClient(RedbeamsClient.class, getWho(runningParameter).getAccessKey());
-            String redbeamsCrn = entity.getResponse().getResourceCrn();
-            statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(redbeamsClient, redbeamsCrn, desiredStatuses, pollingInterval));
-            if (!desiredStatuses.equals(com.sequenceiq.redbeams.api.model.common.Status.DELETE_COMPLETED)) {
-                awaitEntity.refresh(getTestContext(), (CloudbreakClient) null);
-            }
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}",
-                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName(), e);
-                Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
-                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
-            }
-            getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
-        }
-        return entity;
-    }
-
-    public SdxTestDto await(SdxTestDto entity, SdxClusterStatusResponse desiredStatuses,
-            RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, -1);
-    }
-
-    public SdxTestDto await(SdxTestDto entity, SdxClusterStatusResponse desiredStatuses,
-            RunningParameter runningParameter, long pollingInterval) {
-        checkShutdown();
-
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
+            Log.await(LOGGER, String.format("Datalake await should be skipped beacause of previous error. await [%s]", desiredStatus));
             return entity;
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         SdxTestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format("%s for %s", key, desiredStatuses));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
-            }
-
-            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter).getAccessKey());
-            String sdxName = entity.getName();
-            statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
-            if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
-                awaitEntity.refresh(getTestContext(), (CloudbreakClient) null);
-            }
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
-                Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
-                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
-            }
-            getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
-        }
+        datalakeAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, getPollingDurationInMills(), maxRetry);
         return entity;
     }
 
-    public SdxInternalTestDto await(SdxInternalTestDto entity, SdxClusterStatusResponse desiredStatuses,
+    public <T extends SdxInternalTestDto, E extends SdxClusterStatusResponse> T await(T entity, E desiredStatus,
             RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, -1);
-    }
-
-    public SdxInternalTestDto await(SdxInternalTestDto entity, SdxClusterStatusResponse desiredStatuses,
-            RunningParameter runningParameter, long pollingInterval) {
         checkShutdown();
-
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
+            Log.await(LOGGER, String.format("Datalake Internal await should be skipped beacause of previous error. await [%s]", desiredStatus));
             return entity;
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         SdxInternalTestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format("%s for %s", key, desiredStatuses));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
-            }
-
-            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter).getAccessKey());
-            String sdxName = entity.getName();
-            statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
-            if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
-                awaitEntity.refresh(getTestContext(), (CloudbreakClient) null);
-            }
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
-                Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
-                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
-            }
-            getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
-        }
+        datalakeInternalAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, getPollingDurationInMills(), maxRetry);
         return entity;
     }
 
-    public SdxRepairTestDto await(SdxRepairTestDto entity, SdxClusterStatusResponse desiredStatuses,
+    public <T extends RedbeamsDatabaseServerTestDto, E extends com.sequenceiq.redbeams.api.model.common.Status> T await(T entity, E desiredStatus,
             RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, -1);
-    }
-
-    public SdxRepairTestDto await(SdxRepairTestDto entity, SdxClusterStatusResponse desiredStatuses,
-            RunningParameter runningParameter, long pollingInterval) {
         checkShutdown();
-
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Should be skipped beacause of previous error. await [%s]", desiredStatuses));
+            Log.await(LOGGER, String.format("Redbeams await should be skipped beacause of previous error. await [%s]", desiredStatus));
             return entity;
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        SdxRepairTestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format("%s for %s", key, desiredStatuses));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
-            }
-
-            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter).getAccessKey());
-            String sdxName = entity.getName();
-            statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
-            if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
-                awaitEntity.refresh(getTestContext(), (CloudbreakClient) null);
-            }
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
-                Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
-                        entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
-            }
-            getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
-        }
+        RedbeamsDatabaseServerTestDto awaitEntity = get(key);
+        redbeamsAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, getPollingDurationInMills(), maxRetry);
         return entity;
     }
 

@@ -172,7 +172,7 @@ public class IntegrationTestApp implements CommandLineRunner {
             xmlSuite.setParallel(XmlSuite.ParallelMode.getValidParallel(parallel));
             xmlSuite.setThreadCount(threadCount);
             xmlSuite.setTimeOut(timeOut);
-            LOG.info("Test are running in: {} type of parallel mode, thread count: {}", parallel.toUpperCase(), threadCount);
+            LOG.info("Test are running in: {} type of parallel mode, thread count: {} and with test timeout: {}", parallel.toUpperCase(), threadCount, timeOut);
             return xmlSuite;
         }
     }

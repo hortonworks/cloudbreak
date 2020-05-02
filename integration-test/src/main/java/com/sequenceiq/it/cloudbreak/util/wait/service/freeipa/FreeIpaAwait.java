@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.wait.service.freeipa;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 
-import java.util.Map;
+import java.time.Duration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public class FreeIpaAwait implements Await<FreeIPATestDto, Status> {
 
     @Override
     public FreeIPATestDto await(FreeIPATestDto entity, Status desiredStatus, TestContext testContext, RunningParameter runningParameter,
-            long pollingInterval, int maxRetry) {
+            Duration pollingInterval, int maxRetry) {
         try {
             if (entity == null) {
                 throw new RuntimeException("FreeIpa key has been provided but no result in resource map!");
@@ -36,22 +36,12 @@ public class FreeIpaAwait implements Await<FreeIPATestDto, Status> {
             FreeIPAClient client = testContext.getMicroserviceClient(FreeIPAClient.class, testContext.getWho(runningParameter)
                     .getAccessKey());
             String environmentCrn = entity.getResponse().getEnvironmentCrn();
-            switch (desiredStatus) {
-                case AVAILABLE:
-                case STOPPED:
-                    waitForFreeIpaStatus(new FreeIpaOperationChecker<>(), client, environmentCrn, testContext, desiredStatus,
-                            pollingInterval, maxRetry);
-                    break;
-                case DELETE_COMPLETED:
-                    waitForFreeIpaStatus(new FreeIpaTerminationChecker<>(), client, environmentCrn, testContext, desiredStatus,
-                            pollingInterval, maxRetry);
-                    break;
-                default:
-                    LOGGER.warn("Wait checker is not implemented yet for the desired freeIpa state '{}' ", desiredStatus);
-                    break;
-            }
-            testContext.setStatuses(Map.of("status", entity.getResponse().getStatus().name()));
-            if (!desiredStatus.equals(DELETE_COMPLETED)) {
+            if (desiredStatus.equals(DELETE_COMPLETED)) {
+                waitForFreeIpaStatus(new FreeIpaTerminationChecker<>(), client, environmentCrn, testContext, desiredStatus,
+                        pollingInterval, maxRetry);
+            } else {
+                waitForFreeIpaStatus(new FreeIpaOperationChecker<>(), client, environmentCrn, testContext, desiredStatus,
+                        pollingInterval, maxRetry);
                 entity.refresh(testContext, null);
             }
         } catch (Exception e) {
@@ -67,10 +57,9 @@ public class FreeIpaAwait implements Await<FreeIPATestDto, Status> {
     }
 
     private Result<WaitResult, Exception> waitForFreeIpaStatus(ExceptionChecker<FreeIpaWaitObject> statusChecker, FreeIPAClient client,
-            String environmentCrn, TestContext testContext, Status desiredStatus, long pollingInterval, int maxRetry) {
-        return testContext.getFreeIpaWaitService().waitWithTimeout(
+            String environmentCrn, TestContext testContext, Status desiredStatus, Duration pollingInterval, int maxRetry) {
+        return testContext.getFreeIpaWaitService().waitObject(
                 statusChecker,
-                new FreeIpaWaitObject(client, environmentCrn, desiredStatus),
-                pollingInterval, maxRetry, 1);
+                new FreeIpaWaitObject(client, environmentCrn, desiredStatus), testContext, pollingInterval, maxRetry, 1);
     }
 }

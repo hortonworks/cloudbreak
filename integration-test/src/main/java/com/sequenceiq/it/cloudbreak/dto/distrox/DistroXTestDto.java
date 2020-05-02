@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.withoutLogError;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -140,7 +141,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
-    public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses, long pollingInteval) {
+    public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses, Duration pollingInteval) {
         super.await(entityClass, statuses, pollingInteval);
         waitTillFlowInOperation();
         return this;

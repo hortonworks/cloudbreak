@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.context;
 
+import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
@@ -20,7 +21,6 @@ import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
@@ -32,6 +32,9 @@ import com.sequenceiq.it.cloudbreak.performance.PerformanceIndicator;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.spark.SparkServer;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
+import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -57,6 +60,11 @@ public class MeasuredTestContext extends MockedTestContext {
     public TestContext as(Actor actor) {
         wrappedTestContext.as(actor);
         return this;
+    }
+
+    @Override
+    public Duration getPollingDurationInMills() {
+        return wrappedTestContext.getPollingDurationInMills();
     }
 
     @Override
@@ -97,6 +105,20 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     public WaitService<FreeIpaWaitObject> getFreeIpaWaitService() {
         return wrappedTestContext.getFreeIpaWaitService();
+    }
+
+    @Override
+    public WaitService<DatalakeWaitObject> getDatalakeWaitService() {
+        return wrappedTestContext.getDatalakeWaitService();
+    }
+
+    @Override
+    public WaitService<RedbeamsWaitObject> getRedbeamsWaitService() {
+        return wrappedTestContext.getRedbeamsWaitService();
+    }
+
+    public WaitService<CloudbreakWaitObject> getCloudbreakWaitService() {
+        return wrappedTestContext.getCloudbreakWaitService();
     }
 
     @Override
@@ -226,35 +248,30 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public <T extends CloudbreakTestDto, E extends Status> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
+            Duration pollingInterval) {
+        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
+    }
+
+    @Override
     public <T extends EnvironmentTestDto, E extends EnvironmentStatus> T await(T entity, E desiredStatus, RunningParameter runningParameter) {
         return wrappedTestContext.await(entity, desiredStatus, runningParameter);
     }
 
     @Override
-    public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
+    public <T extends SdxTestDto, E extends SdxClusterStatusResponse> T await(T entity, E desiredStatus, RunningParameter runningParameter) {
+        return wrappedTestContext.await(entity, desiredStatus, runningParameter);
     }
 
     @Override
-    public SdxTestDto await(SdxTestDto entity, SdxClusterStatusResponse desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
+    public <T extends SdxInternalTestDto, E extends SdxClusterStatusResponse> T await(T entity, E desiredStatus, RunningParameter runningParameter) {
+        return wrappedTestContext.await(entity, desiredStatus, runningParameter);
     }
 
     @Override
-    public SdxInternalTestDto await(SdxInternalTestDto entity, SdxClusterStatusResponse desiredStatuses,
-            RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
-    }
-
-    @Override
-    public RedbeamsDatabaseServerTestDto await(RedbeamsDatabaseServerTestDto entity, com.sequenceiq.redbeams.api.model.common.Status desiredStatuses,
-            RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
-    }
-
-    @Override
-    public SdxRepairTestDto await(SdxRepairTestDto entity, SdxClusterStatusResponse desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatuses, runningParameter, pollingInterval);
+    public <T extends RedbeamsDatabaseServerTestDto, E extends com.sequenceiq.redbeams.api.model.common.Status> T await(T entity, E desiredStatus,
+            RunningParameter runningParameter) {
+        return wrappedTestContext.await(entity, desiredStatus, runningParameter);
     }
 
     @Override
