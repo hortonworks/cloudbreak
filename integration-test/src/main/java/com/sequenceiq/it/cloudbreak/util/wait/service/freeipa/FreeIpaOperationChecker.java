@@ -1,5 +1,9 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.freeipa;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_FAILED;
+
+import java.util.Map;
+
 import javax.ws.rs.ProcessingException;
 
 import org.slf4j.Logger;
@@ -42,13 +46,8 @@ public class FreeIpaOperationChecker<T extends FreeIpaWaitObject> extends Except
                 return true;
             }
         } catch (Exception e) {
-            StringBuilder builder = new StringBuilder("FreeIpa creation failed. Also failed to get freeIpa status:  ")
-                    .append(System.lineSeparator())
-                    .append(e.getMessage())
-                    .append(System.lineSeparator())
-                    .append(e);
-            LOGGER.error(builder.toString());
-            throw new TestFailException(builder.toString());
+            LOGGER.error("FreeIpa creation failed. Also failed to get freeIpa status: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("FreeIpa creation failed. Also failed to get freeIpa status: %s", e.getMessage()));
         }
         return false;
     }
@@ -67,13 +66,9 @@ public class FreeIpaOperationChecker<T extends FreeIpaWaitObject> extends Except
             throw new TestFailException(String.format("Wait operation timed out, freeIpa '%s' '%s' has been failed for environment '%s'. FreeIpa status: '%s' "
                     + "statusReason: '%s'", name, crn, environmentCrn, status, freeIpa.getStatusReason()));
         } catch (Exception e) {
-            StringBuilder builder = new StringBuilder("Wait operation timed out, freeIpa has been failed. Also failed to get freeIpa status: ")
-                    .append(System.lineSeparator())
-                    .append(e.getMessage())
-                    .append(System.lineSeparator())
-                    .append(e);
-            LOGGER.error(builder.toString());
-            throw new TestFailException(builder.toString());
+            LOGGER.error("Wait operation timed out, freeIpa has been failed. Also failed to get freeIpa status: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("Wait operation timed out, freeIpa has been failed. Also failed to get freeIpa status: %s",
+                    e.getMessage()));
         }
     }
 
@@ -91,29 +86,24 @@ public class FreeIpaOperationChecker<T extends FreeIpaWaitObject> extends Except
             DescribeFreeIpaResponse freeIpa = waitObject.getEndpoint().describe(environmentCrn);
             if (freeIpa == null) {
                 LOGGER.info("'{}' freeIpa was not found for environment '{}'. Exit waiting", crn, environmentCrn);
-                return false;
+                return true;
             }
             Status status = freeIpa.getStatus();
-            if (status == Status.CREATE_FAILED) {
-                return false;
+            if (status.equals(CREATE_FAILED)) {
+                return true;
             }
             return status.isFailed();
         } catch (ProcessingException clientException) {
-            StringBuilder builder = new StringBuilder("Exit waiting! Failed to describe freeIpa cluster due to API client exception: ")
-                    .append(System.lineSeparator())
-                    .append(clientException.getMessage())
-                    .append(System.lineSeparator())
-                    .append(clientException);
-            LOGGER.error(builder.toString());
+            LOGGER.error("Exit waiting! Failed to describe freeIpa cluster due to API client exception: {}", clientException.getMessage(), clientException);
         } catch (Exception e) {
-            StringBuilder builder = new StringBuilder("Exit waiting! Exception occurred during describing freeIpa for environment: ")
-                    .append(System.lineSeparator())
-                    .append(e.getMessage())
-                    .append(System.lineSeparator())
-                    .append(e);
-            LOGGER.error(builder.toString());
+            LOGGER.error("Exit waiting! Exception occurred during describing freeIpa for environment: {}", e.getMessage(), e);
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Map<String, String> getStatuses(T waitObject) {
+        return Map.of("status", waitObject.getEndpoint().describe(waitObject.getEnvironmentCrn()).getStatus().name());
     }
 }

@@ -1,8 +1,9 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.environment;
 
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ARCHIVED;
+import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.CREATE_FAILED;
 
-import java.util.Map;
+import java.time.Duration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ public class EnvironmentAwait implements Await<EnvironmentTestDto, EnvironmentSt
 
     @Override
     public EnvironmentTestDto await(EnvironmentTestDto entity, EnvironmentStatus desiredStatus, TestContext testContext, RunningParameter runningParameter,
-            long pollingInterval, int maxRetry) {
+            Duration pollingInterval, int maxRetry) {
         try {
             if (entity == null) {
                 throw new RuntimeException("Environment key has been provided but no result in resource map!");
@@ -36,22 +37,16 @@ public class EnvironmentAwait implements Await<EnvironmentTestDto, EnvironmentSt
             EnvironmentClient client = testContext.getMicroserviceClient(EnvironmentClient.class, testContext.getWho(runningParameter)
                     .getAccessKey());
             String crn = entity.getResponse().getCrn();
-            switch (desiredStatus) {
-                case AVAILABLE:
-                case ENV_STOPPED:
-                    waitForEnvironmentStatus(new EnvironmentOperationChecker<>(), client, crn, testContext, desiredStatus,
-                            pollingInterval, maxRetry);
-                    break;
-                case ARCHIVED:
-                    waitForEnvironmentStatus(new EnvironmentTerminationChecker<>(), client, crn, testContext, desiredStatus,
-                            pollingInterval, maxRetry);
-                    break;
-                default:
-                    LOGGER.warn("Wait checker is not implemented yet for the desired environment state '{}' ", desiredStatus);
-                    break;
-            }
-            testContext.setStatuses(Map.of("status", entity.getResponse().getEnvironmentStatus().name()));
-            if (!desiredStatus.equals(ARCHIVED)) {
+            if (desiredStatus.equals(ARCHIVED)) {
+                waitForEnvironmentStatus(new EnvironmentTerminationChecker<>(), client, crn, testContext, desiredStatus,
+                        pollingInterval, maxRetry);
+            } else if (desiredStatus.equals(CREATE_FAILED)) {
+                waitForEnvironmentStatus(new EnvironmentFailedChecker<>(), client, crn, testContext, desiredStatus,
+                        pollingInterval, maxRetry);
+                entity.refresh(testContext, null);
+            } else {
+                waitForEnvironmentStatus(new EnvironmentOperationChecker<>(), client, crn, testContext, desiredStatus,
+                        pollingInterval, maxRetry);
                 entity.refresh(testContext, null);
             }
         } catch (Exception e) {
@@ -67,10 +62,9 @@ public class EnvironmentAwait implements Await<EnvironmentTestDto, EnvironmentSt
     }
 
     private Result<WaitResult, Exception> waitForEnvironmentStatus(ExceptionChecker<EnvironmentWaitObject> statusChecker, EnvironmentClient client,
-            String crn, TestContext testContext, EnvironmentStatus desiredStatus, long pollingInterval, int maxRetry) {
-        return testContext.getEnvironmentWaitService().waitWithTimeout(
+            String crn, TestContext testContext, EnvironmentStatus desiredStatus, Duration pollingInterval, int maxRetry) {
+        return testContext.getEnvironmentWaitService().waitObject(
                 statusChecker,
-                new EnvironmentWaitObject(client, crn, desiredStatus),
-                pollingInterval, maxRetry, 1);
+                new EnvironmentWaitObject(client, crn, desiredStatus), testContext, pollingInterval, maxRetry, 1);
     }
 }

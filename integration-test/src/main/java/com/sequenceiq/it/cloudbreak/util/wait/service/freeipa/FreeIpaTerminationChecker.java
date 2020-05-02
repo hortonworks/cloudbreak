@@ -1,7 +1,11 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.freeipa;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_FAILED;
 
+import java.util.Map;
+
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 
 import org.slf4j.Logger;
@@ -25,20 +29,19 @@ public class FreeIpaTerminationChecker<T extends FreeIpaWaitObject> extends Exce
             DescribeFreeIpaResponse freeIpa = waitObject.getEndpoint().describe(environmentCrn);
             LOGGER.info("Waiting for the '{}' state of '{}' freeIpa at '{}' environment. Actual state is: '{}'", desiredStatus, crn, environmentCrn,
                     freeIpa.getStatus());
-            if (freeIpa.getStatus() == DELETE_FAILED) {
+            if (freeIpa.getStatus().equals(DELETE_FAILED)) {
                 throw new TestFailException("FreeIpa termination failed: " + freeIpa.getStatusReason());
             }
             if (!freeIpa.getStatus().isSuccessfullyDeleted()) {
                 return false;
             }
         } catch (Exception e) {
-            StringBuilder builder = new StringBuilder("FreeIpa termination failed: ")
-                    .append(System.lineSeparator())
-                    .append(e.getMessage())
-                    .append(System.lineSeparator())
-                    .append(e);
-            LOGGER.error(builder.toString());
-            throw new TestFailException(builder.toString());
+            if (e instanceof NotFoundException) {
+                LOGGER.warn("No freeIpa found with crn '{}'", crn, e);
+            } else {
+                LOGGER.error("FreeIpa termination failed: {}", e.getMessage(), e);
+                throw new TestFailException(String.format("FreeIpa termination failed: %s", e.getMessage()));
+            }
         }
         return true;
     }
@@ -52,13 +55,9 @@ public class FreeIpaTerminationChecker<T extends FreeIpaWaitObject> extends Exce
             throw new TestFailException(String.format("Wait operation timed out, '%s' freeIpa termination failed for '%s' environment. FreeIpa status: '%s' " +
                     "statusReason: '%s'", crn, environmentCrn, freeIpa.getStatus(), freeIpa.getStatusReason()));
         } catch (Exception e) {
-            StringBuilder builder = new StringBuilder("Wait operation timed out, freeIpa termination failed. Also failed to get freeIpa status: ")
-                    .append(System.lineSeparator())
-                    .append(e.getMessage())
-                    .append(System.lineSeparator())
-                    .append(e);
-            LOGGER.error(builder.toString());
-            throw new TestFailException(builder.toString());
+            LOGGER.error("Wait operation timed out, freeIpa termination failed. Also failed to get freeIpa status: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("Wait operation timed out, freeIpa termination failed. Also failed to get freeIpa status: %s",
+                    e.getMessage()));
         }
     }
 
@@ -73,26 +72,28 @@ public class FreeIpaTerminationChecker<T extends FreeIpaWaitObject> extends Exce
         try {
             DescribeFreeIpaResponse freeIpa = waitObject.getEndpoint().describe(environmentCrn);
             Status status = freeIpa.getStatus();
-            if (status == DELETE_FAILED) {
-                return false;
+            if (status.equals(DELETE_FAILED)) {
+                return true;
             }
             return status.isFailed();
         } catch (ProcessingException clientException) {
-            StringBuilder builder = new StringBuilder("Exit waiting! Failed to get freeIpa due to API client exception: ")
-                    .append(System.lineSeparator())
-                    .append(clientException.getMessage())
-                    .append(System.lineSeparator())
-                    .append(clientException);
-            LOGGER.error(builder.toString());
+            LOGGER.error("Exit waiting! Failed to get freeIpa due to API client exception: {}", clientException.getMessage(), clientException);
         } catch (Exception e) {
-            StringBuilder builder = new StringBuilder("Exit waiting! Failed to get freeIpa, because of: ")
-                    .append(System.lineSeparator())
-                    .append(e.getMessage())
-                    .append(System.lineSeparator())
-                    .append(e);
-            LOGGER.error(builder.toString());
+            LOGGER.error("Exit waiting! Failed to get freeIpa, because of: {}", e.getMessage(), e);
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Map<String, String> getStatuses(T waitObject) {
+        String environmentCrn = waitObject.getEnvironmentCrn();
+        try {
+            DescribeFreeIpaResponse freeIpa = waitObject.getEndpoint().describe(environmentCrn);
+            return Map.of("status", freeIpa.getStatus().name());
+        } catch (NotFoundException e) {
+            LOGGER.warn("No freeIpa found with environmentCrn '{}'! It has been deleted successfully.", environmentCrn, e);
+            return Map.of("status", DELETE_COMPLETED.name());
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service;
 
+import java.util.Map;
+
 public interface StatusChecker<T> {
 
     boolean checkStatus(T t);
@@ -11,4 +13,6 @@ public interface StatusChecker<T> {
     boolean exitWaiting(T t);
 
     void handleException(Exception e);
+
+    Map<String, String> getStatuses(T t);
 }

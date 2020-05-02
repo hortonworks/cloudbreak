@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 import static com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock.PROFILE_RETURN_HTTP_500;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -36,6 +38,8 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractIntegrationTest
     private static final BigDecimal APPLY_HOST_TEMPLATE_COMMAND_ID = new BigDecimal(200);
 
     private static final BigDecimal HOSTS_DECOMMISSION_COMMAND_ID = new BigDecimal(300);
+
+    private static final Duration POLLING_INTERVAL = Duration.of(3000, ChronoUnit.MILLIS);
 
     @Inject
     private BlueprintTestClient blueprintTestClient;
@@ -79,9 +83,9 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractIntegrationTest
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
-                .await(StackTestDto.class, STACK_AVAILABLE, 3000)
+                .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredBackscaledWorkerCount()))
-                .await(StackTestDto.class, STACK_AVAILABLE, 3000)
+                .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
                 .validate();
     }
 
