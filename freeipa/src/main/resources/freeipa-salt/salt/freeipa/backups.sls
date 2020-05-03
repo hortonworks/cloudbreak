@@ -15,6 +15,11 @@
     - mode: 640
 
 {% if salt['pillar.get']('freeipa:backup:monthly_full_enabled') %}
+freeipa_backoff_monthly_full:
+  cmd.run:
+    - name: /sbin/anacron -u cron.monthly
+    - onlyif: test ! -s /var/spool/anacron/cron.monthly
+
 /etc/cron.monthly/freeipa_backup_monthly:
   file.managed:
     - source: salt://freeipa/templates/freeipa_backup_monthly.j2
