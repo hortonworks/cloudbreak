@@ -283,6 +283,9 @@ public class ServiceEndpointCollector {
                 case "HBASE_UI":
                     addHbaseUrl(managerIp, gateway, privateIps, urls);
                     break;
+                case "HBASEJARS":
+                    addHbaseJarsUrl(managerIp, gateway, privateIps, urls);
+                    break;
                 case "RESOURCEMANAGER_WEB":
                     addResourceManagerUrl(exposedService, managerIp, gateway, topologyName, api, urls);
                     break;
@@ -355,6 +358,16 @@ public class ServiceEndpointCollector {
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
         urls.addAll(hbaseUrls);
+    }
+
+    private void addHbaseJarsUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, List<String> urls) {
+        // Grab the first HBase master. Any will do, so we'll take the first
+        privateIps.get(exposedServiceCollector.getHBaseJarsService().getServiceName())
+            .stream()
+            .map(hbaseIp -> getHBaseJarsServiceUrl(gateway, managerIp, hbaseIp))
+            .flatMap(Optional::stream)
+            .findFirst()
+            .ifPresent(hbaseUrl -> urls.add(hbaseUrl));
     }
 
     private void addResourceManagerUrl(ExposedService exposedService, String managerIp, Gateway gateway, String topologyName, boolean api,
@@ -472,6 +485,11 @@ public class ServiceEndpointCollector {
                 .map(gt -> getHBaseUIUrlWithHostParameterFromGatewayTopology(managerIp, gt, hbaseMasterPrivateIp));
     }
 
+    private Optional<String> getHBaseJarsServiceUrl(Gateway gateway, String managerIp, String hbaseMasterPrivateIp) {
+        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getHBaseJarsService())
+                .map(gt -> getHBaseJarsUrlFromGatewayTopology(managerIp, gt, hbaseMasterPrivateIp));
+    }
+
     private Optional<String> getHiveJdbcUrl(Gateway gateway, String ambariIp, SecurityConfig securityConfig) {
         return getGatewayTopologyWithHive(gateway)
                 .map(gt -> getHiveJdbcUrlFromGatewayTopology(ambariIp, gt, securityConfig));
@@ -520,15 +538,27 @@ public class ServiceEndpointCollector {
         }
     }
 
-    private String getHBaseUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp) {
+    private String getHBaseUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String hbaseMasterPrivateIp) {
         Gateway gateway = gt.getGateway();
         ExposedService hbaseUi = exposedServiceCollector.getHBaseUIService();
         if (gatewayListeningOnHttpsPort(gateway)) {
             return String.format("https://%s/%s/%s%s?host=%s&port=%s", managerIp, gateway.getPath(), gt.getTopologyName(),
-                    hbaseUi.getKnoxUrl(), nameNodePrivateIp, hbaseUi.getPort());
+                    hbaseUi.getKnoxUrl(), hbaseMasterPrivateIp, hbaseUi.getPort());
         } else {
             return String.format("https://%s:%s/%s/%s%s?host=%s&port=%s", managerIp, gateway.getGatewayPort(), gateway.getPath(), gt.getTopologyName(),
-                    hbaseUi.getKnoxUrl(), nameNodePrivateIp, hbaseUi.getPort());
+                    hbaseUi.getKnoxUrl(), hbaseMasterPrivateIp, hbaseUi.getPort());
+        }
+    }
+
+    private String getHBaseJarsUrlFromGatewayTopology(String managerIp, GatewayTopology gt, String hbaseMasterPrivateIp) {
+        Gateway gateway = gt.getGateway();
+        ExposedService hbaseJars = exposedServiceCollector.getHBaseJarsService();
+        if (gatewayListeningOnHttpsPort(gateway)) {
+            return String.format("https://%s/%s/%s%s", managerIp, gateway.getPath(), gt.getTopologyName(),
+                    hbaseJars.getKnoxUrl());
+        } else {
+            return String.format("https://%s:%s/%s/%s%s", managerIp, gateway.getGatewayPort(), gateway.getPath(), gt.getTopologyName(),
+                    hbaseJars.getKnoxUrl());
         }
     }
 
