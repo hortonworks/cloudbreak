@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
@@ -81,7 +82,12 @@ public class NetworkCreationRequestFactory {
     }
 
     private boolean getPrivateSubnetEnabled(EnvironmentDto environmentDto) {
-        return PrivateSubnetCreation.ENABLED == environmentDto.getNetwork().getPrivateSubnetCreation();
+        if (environmentDto.getCloudPlatform().equals(CloudPlatform.AZURE.name())) {
+            // There is no such thing like private network in case of Azure
+            return true;
+        } else {
+            return PrivateSubnetCreation.ENABLED == environmentDto.getNetwork().getPrivateSubnetCreation();
+        }
     }
 
     private Cidrs getSubNetCidrs(String cloudPlatform, String networkCidr, boolean privateSubnetEnabled) {
