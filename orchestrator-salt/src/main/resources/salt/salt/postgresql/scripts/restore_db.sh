@@ -19,14 +19,14 @@ fi
 CLOUD_PROVIDER="$1"
 HOST="$2"
 PORT="$3"
-CLOUD_LOCATION="$4"
+CLOUD_LOCATION=$(echo "$4"| sed "s/\/\+$//g") # Clear trailng '/' (if present) for later path joining.
 USERNAME="$5"
 export PGPASSWORD="$6" # We can provide the password to pg_dump through this variable, or in ~/.pgpass
 
 LOGFILE=/var/log/dl_postgres_restore.log
 echo "Logs at ${LOGFILE}"
 
-BACKUPS_DIR="/var/tmp/postgres_restore_staging" # Is this appropriate for keeping backups that are staged before uploading to Azure Blob Storage?
+BACKUPS_DIR="/var/tmp/postgres_restore_staging"
 
 doLog() {
   type_of_msg=$(echo $* | cut -d" " -f1)
