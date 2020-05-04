@@ -27,6 +27,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
+import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -232,6 +234,20 @@ public class CredentialService extends AbstractCredentialService implements Reso
         Credential updated = repository.save(credentialAdapter.verify(original, accountId).getCredential());
         secretService.delete(attributesSecret);
         return updated;
+    }
+
+    public String getCloudPlatformByCredential(String credentialName, String accountId) {
+        if (!Strings.isNullOrEmpty(credentialName)) {
+            try {
+                Credential credential = getByNameForAccountId(credentialName, accountId);
+                return credential.getCloudPlatform();
+            } catch (NotFoundException e) {
+                throw new BadRequestException(String.format("No credential found with name [%s] in the workspace.",
+                        credentialName), e);
+            }
+        } else {
+            throw new BadRequestException("No credential has been specified as part of environment creation.");
+        }
     }
 
     public CreateAWSCredentialRequest getCreateAWSCredentialForCli(CredentialRequest credentialRequest) {

@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
@@ -57,18 +59,24 @@ public class EnvironmentValidatorService {
 
     private final EnvironmentResourceService environmentResourceService;
 
+    private final CredentialService credentialService;
+
     private Set<String> enabledParentPlatforms;
 
     private Set<String> enabledChildPlatforms;
 
-    public EnvironmentValidatorService(EnvironmentRegionValidator environmentRegionValidator, NetworkCreationValidator networkCreationValidator,
-            PlatformParameterService platformParameterService, EnvironmentResourceService environmentResourceService,
+    public EnvironmentValidatorService(EnvironmentRegionValidator environmentRegionValidator,
+            NetworkCreationValidator networkCreationValidator,
+            PlatformParameterService platformParameterService,
+            EnvironmentResourceService environmentResourceService,
+            CredentialService credentialService,
             @Value("${environment.enabledParentPlatforms}") Set<String> enabledParentPlatforms,
             @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
         this.environmentRegionValidator = environmentRegionValidator;
         this.networkCreationValidator = networkCreationValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
+        this.credentialService = credentialService;
         this.enabledChildPlatforms = enabledChildPlatforms;
         this.enabledParentPlatforms = enabledParentPlatforms;
     }
@@ -108,7 +116,9 @@ public class EnvironmentValidatorService {
 
     public ValidationResult validateAwsEnvironmentRequest(EnvironmentRequest environmentRequest) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        resultBuilder.ifError(() -> !AWS.name().equalsIgnoreCase(environmentRequest.getCloudPlatform()),
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String cloudPlatform = credentialService.getCloudPlatformByCredential(environmentRequest.getCredentialName(), accountId);
+        resultBuilder.ifError(() -> !AWS.name().equalsIgnoreCase(cloudPlatform),
                 "Environment request is not for AWS.");
 
         resultBuilder.ifError(() -> StringUtils.isBlank(Optional.ofNullable(environmentRequest.getAws())

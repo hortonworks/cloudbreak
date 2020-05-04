@@ -314,10 +314,6 @@ public class EnvironmentTestDto
         return enviornmentChangeCredentialRequest;
     }
 
-    public void setEnviornmentChangeCredentialRequest(EnvironmentChangeCredentialRequest enviornmentChangeCredentialRequest) {
-        this.enviornmentChangeCredentialRequest = enviornmentChangeCredentialRequest;
-    }
-
     public EnvironmentTestDto withChangeCredentialName(String name) {
         enviornmentChangeCredentialRequest = new EnvironmentChangeCredentialRequest();
         enviornmentChangeCredentialRequest.setCredentialName(name);
@@ -330,7 +326,6 @@ public class EnvironmentTestDto
     }
 
     private EnvironmentTestDto withCloudplatform(String platform) {
-        getRequest().setCloudPlatform(platform);
         return this;
     }
 }
