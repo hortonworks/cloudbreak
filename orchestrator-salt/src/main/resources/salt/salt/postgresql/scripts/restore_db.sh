@@ -64,24 +64,11 @@ run_azure_restore() {
   rm -rfv "$BACKUPS_DIR" >>$LOGFILE 2>&1
 }
 
-restore_db_from_s3() {
-  SERVICE="$1"
-  BACKUP="${BACKUPS_DIR}/${SERVICE}_backup"
-  LIST_FILE="${BACKUPS_DIR}/${SERVICE}_list"
-
-  doLog "INFO Copying ${CLOUD_LOCATION}/${SERVICE}_backup"
-  aws s3 cp "${CLOUD_LOCATION}/${SERVICE}_backup" "$BACKUPS_DIR" || errorExit "Could not copy $SERVICE backup from AWS S3."
-
-  doLog "INFO Restoring $SERVICE"
-  pg_restore -l "$BACKUP" | sed -e "s/\(.*0 0 COMMENT - EXTENSION plpgsql\)/;\1/" >"$LIST_FILE" # We have to drop a problematic COMMENT added by RDS backups.
-  pg_restore --clean --if-exists --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" --use-list="$LIST_FILE" "$BACKUP" >>$LOGFILE 2>&1 || errorExit "Unable to restore ${SERVICE}"
-  doLog "INFO Succesfully restored ${SERVICE}"
-}
-
 run_aws_restore () {
   mkdir -p "$BACKUPS_DIR"
-  restore_db_from_s3 "hive"
-  restore_db_from_s3 "ranger"
+  aws s3 cp "${CLOUD_LOCATION}/" "$BACKUPS_DIR" --recursive >>$LOGFILE 2>&1 || errorExit "Could not copy backups from AWS S3."
+  restore_db_from_local "hive"
+  restore_db_from_local "ranger"
   rm -rfv "$BACKUPS_DIR" >>$LOGFILE 2>&1
 }
 
