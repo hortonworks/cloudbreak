@@ -60,7 +60,7 @@ dump_to_azure() {
   doLog "INFO ${SERVICE} dumped to "
 }
 run_azure_backup () {
-  BACKUPS_DIR="/var/tmp/" # Is this appropriate for keeping backups that are staged before uploading to Azure Blob Storage?
+  BACKUPS_DIR="/var/tmp/"
   DATE_DIR=${BACKUPS_DIR}/$(date '+%Y-%m-%dT%H:%M:%SZ')
   mkdir -p "$DATE_DIR" || error_exit "Could not create local directory for backups."
 
