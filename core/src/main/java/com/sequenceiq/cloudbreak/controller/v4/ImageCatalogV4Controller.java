@@ -9,7 +9,20 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.authorization.annotation.ResourceName;
+import com.sequenceiq.authorization.annotation.ResourceNameList;
+import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
@@ -19,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -28,7 +42,8 @@ import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 @Controller
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(ImageCatalog.class)
-@DisableCheckPermissions
+@InternalReady
+@AuthorizationResource(type = AuthorizationResourceType.IMAGE_CATALOG)
 public class ImageCatalogV4Controller extends NotificationController implements ImageCatalogV4Endpoint {
 
     @Inject
@@ -38,13 +53,15 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     private ConverterUtil converterUtil;
 
     @Override
+    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImageCatalogV4Responses list(Long workspaceId) {
         Set<ImageCatalog> allByWorkspaceId = imageCatalogService.findAllByWorkspaceId(workspaceId);
         return new ImageCatalogV4Responses(converterUtil.convertAllAsSet(allByWorkspaceId, ImageCatalogV4Response.class));
     }
 
     @Override
-    public ImageCatalogV4Response getByName(Long workspaceId, String name, Boolean withImages) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
+    public ImageCatalogV4Response getByName(Long workspaceId, @ResourceName String name, Boolean withImages) {
         ImageCatalog catalog = imageCatalogService.get(NameOrCrn.ofName(name), workspaceId);
         ImageCatalogV4Response imageCatalogResponse = converterUtil.convert(catalog, ImageCatalogV4Response.class);
         Images images = imageCatalogService.propagateImagesIfRequested(workspaceId, name, withImages);
@@ -55,7 +72,8 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
-    public ImageCatalogV4Response getByCrn(Long workspaceId, String crn, Boolean withImages) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
+    public ImageCatalogV4Response getByCrn(Long workspaceId, @ResourceCrn String crn, Boolean withImages) {
         ImageCatalog catalog = imageCatalogService.get(NameOrCrn.ofCrn(crn), workspaceId);
         ImageCatalogV4Response imageCatalogResponse = converterUtil.convert(catalog, ImageCatalogV4Response.class);
         Images images = imageCatalogService.propagateImagesIfRequested(workspaceId, catalog.getName(), withImages);
@@ -66,6 +84,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_IMAGE_CATALOG)
     public ImageCatalogV4Response create(Long workspaceId, ImageCatalogV4Request request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
@@ -76,51 +95,53 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
-    public ImageCatalogV4Response deleteByName(Long workspaceId, String name) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_IMAGE_CATALOG)
+    public ImageCatalogV4Response deleteByName(Long workspaceId, @ResourceName String name) {
         ImageCatalog deleted = imageCatalogService.delete(NameOrCrn.ofName(name), workspaceId);
         notify(ResourceEvent.IMAGE_CATALOG_DELETED);
         return converterUtil.convert(deleted, ImageCatalogV4Response.class);
     }
 
     @Override
-    public ImageCatalogV4Response deleteByCrn(Long workspaceId, String crn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_IMAGE_CATALOG)
+    public ImageCatalogV4Response deleteByCrn(Long workspaceId, @ResourceCrn String crn) {
         ImageCatalog deleted = imageCatalogService.delete(NameOrCrn.ofCrn(crn), workspaceId);
         notify(ResourceEvent.IMAGE_CATALOG_DELETED);
         return converterUtil.convert(deleted, ImageCatalogV4Response.class);
     }
 
     @Override
-    public ImageCatalogV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
+    @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.DELETE_IMAGE_CATALOG)
+    public ImageCatalogV4Responses deleteMultiple(Long workspaceId, @ResourceNameList Set<String> names) {
         Set<ImageCatalog> deleted = imageCatalogService.deleteMultiple(workspaceId, names);
         notify(ResourceEvent.IMAGE_CATALOG_DELETED);
         return new ImageCatalogV4Responses(converterUtil.convertAllAsSet(deleted, ImageCatalogV4Response.class));
     }
 
     @Override
-    public ImageCatalogV4Response update(Long workspaceId, UpdateImageCatalogV4Request request) {
+    @CheckPermissionByResourceObject
+    public ImageCatalogV4Response update(Long workspaceId, @ResourceObject UpdateImageCatalogV4Request request) {
         ImageCatalog imageCatalog = imageCatalogService.update(workspaceId, converterUtil.convert(request, ImageCatalog.class));
         return converterUtil.convert(imageCatalog, ImageCatalogV4Response.class);
     }
 
     @Override
-    public ImageCatalogV4Response setDefault(Long workspaceId, String name) {
-        return converterUtil.convert(imageCatalogService.setAsDefault(workspaceId, name), ImageCatalogV4Response.class);
-    }
-
-    @Override
-    public ImageCatalogV4Request getRequest(Long workspaceId, String name) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
+    public ImageCatalogV4Request getRequest(Long workspaceId, @ResourceName String name) {
         ImageCatalog imageCatalog = imageCatalogService.get(workspaceId, name);
         return converterUtil.convert(imageCatalog, ImageCatalogV4Request.class);
     }
 
     @Override
+    @DisableCheckPermissions
     public ImagesV4Response getImages(Long workspaceId, String stackName, String platform) throws Exception {
         Images images = imageCatalogService.getImagesFromDefault(workspaceId, stackName, platform, Collections.emptySet());
         return converterUtil.convert(images, ImagesV4Response.class);
     }
 
     @Override
-    public ImagesV4Response getImagesByName(Long workspaceId, String name, String stackName, String platform) throws Exception {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
+    public ImagesV4Response getImagesByName(Long workspaceId, @ResourceName String name, String stackName, String platform) throws Exception {
         Images images = imageCatalogService.getImagesByCatalogName(workspaceId, name, stackName, platform);
         return converterUtil.convert(images, ImagesV4Response.class);
     }

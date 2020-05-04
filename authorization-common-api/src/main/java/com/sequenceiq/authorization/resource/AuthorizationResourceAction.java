@@ -20,6 +20,10 @@ public enum AuthorizationResourceAction {
     CREATE_CREDENTIAL("createCredential", ActionType.RESOURCE_INDEPENDENT),
     CREATE_ENVIRONMENT("createEnvironment", ActionType.RESOURCE_INDEPENDENT),
     GET_KEYTAB("getKeytab", ActionType.RESOURCE_INDEPENDENT),
+    CREATE_IMAGE_CATALOG("createImageCatalog", ActionType.RESOURCE_INDEPENDENT),
+    EDIT_IMAGE_CATALOG("editImageCatalog", ActionType.RESOURCE_DEPENDENT),
+    DESCRIBE_IMAGE_CATALOG("describeImageCatalog", ActionType.RESOURCE_DEPENDENT),
+    DELETE_IMAGE_CATALOG("deleteImageCatalog", ActionType.RESOURCE_DEPENDENT),
     // deprecated actions, please do not use them
     READ("read", ActionType.RESOURCE_INDEPENDENT),
     WRITE("write", ActionType.RESOURCE_INDEPENDENT);

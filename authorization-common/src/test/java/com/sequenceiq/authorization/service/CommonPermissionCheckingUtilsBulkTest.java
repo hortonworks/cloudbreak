@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 
+import java.util.List;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.Before;
@@ -51,6 +53,9 @@ public class CommonPermissionCheckingUtilsBulkTest {
 
     @Mock
     private UmsResourceAuthorizationService umsResourceAuthorizationService;
+
+    @Mock
+    private List<DefaultResourceChecker> defaultResourceCheckers;
 
     private AuthorizationResourceAction action;
 
