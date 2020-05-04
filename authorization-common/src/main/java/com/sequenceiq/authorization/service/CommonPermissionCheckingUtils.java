@@ -1,14 +1,20 @@
 package com.sequenceiq.authorization.service;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -18,11 +24,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.resource.RightUtils;
 
 @Component
 public class CommonPermissionCheckingUtils {
@@ -35,22 +43,62 @@ public class CommonPermissionCheckingUtils {
     @Inject
     private UmsResourceAuthorizationService umsResourceAuthorizationService;
 
+    @Inject
+    private Optional<List<DefaultResourceChecker>> defaultResourceCheckers;
+
+    private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    public void init() {
+        defaultResourceCheckers.ifPresent(checkers -> checkers.forEach(checker -> defaultResourceCheckerMap.put(checker.getResourceType(), checker)));
+    }
+
     public void checkPermissionForUser(AuthorizationResourceType resource, AuthorizationResourceAction action, String userCrn) {
         umsAccountAuthorizationService.checkRightOfUser(userCrn, resource, action);
     }
 
     public void checkPermissionForUserOnResource(AuthorizationResourceType resource, AuthorizationResourceAction action, String userCrn, String resourceCrn) {
-        umsResourceAuthorizationService.checkRightOfUserOnResource(userCrn, resource, action, resourceCrn);
+        DefaultResourceChecker defaultResourceChecker = defaultResourceCheckerMap.get(resource);
+        if (defaultResourceChecker == null || !defaultResourceChecker.isDefault(resourceCrn)) {
+            umsResourceAuthorizationService.checkRightOfUserOnResource(userCrn, resource, action, resourceCrn);
+        } else {
+            throwAccessDeniedIfActionNotAllowed(resource, action, List.of(resourceCrn), defaultResourceChecker);
+        }
     }
 
     public void checkPermissionForUserOnResources(AuthorizationResourceType resource, AuthorizationResourceAction action,
             String userCrn, Collection<String> resourceCrns) {
-        umsResourceAuthorizationService.checkRightOfUserOnResources(userCrn, resource, action, resourceCrns);
+        DefaultResourceChecker defaultResourceChecker = defaultResourceCheckerMap.get(resource);
+        if (defaultResourceChecker == null) {
+            umsResourceAuthorizationService.checkRightOfUserOnResources(userCrn, resource, action, resourceCrns);
+        } else {
+            CrnsByCategory crnsByCategory = defaultResourceChecker.getDefaultResourceCrns(resourceCrns);
+            if (!crnsByCategory.getDefaultResourceCrns().isEmpty()) {
+                throwAccessDeniedIfActionNotAllowed(resource, action, resourceCrns, defaultResourceChecker);
+            }
+            if (!crnsByCategory.getNotDefaultResourceCrns().isEmpty()) {
+                umsResourceAuthorizationService.checkRightOfUserOnResources(userCrn, resource, action, crnsByCategory.getNotDefaultResourceCrns());
+            }
+        }
     }
 
     public Map<String, Boolean> getPermissionsForUserOnResources(AuthorizationResourceType resource, AuthorizationResourceAction action,
             String userCrn, List<String> resourceCrns) {
-        return umsResourceAuthorizationService.getRightOfUserOnResources(userCrn, resource, action, resourceCrns);
+        DefaultResourceChecker defaultResourceChecker = defaultResourceCheckerMap.get(resource);
+        if (defaultResourceChecker == null) {
+            return umsResourceAuthorizationService.getRightOfUserOnResources(userCrn, resource, action, resourceCrns);
+        } else {
+            CrnsByCategory crnsByCategory = defaultResourceChecker.getDefaultResourceCrns(resourceCrns);
+            Map<String, Boolean> result = new HashMap<>();
+            if (!crnsByCategory.getDefaultResourceCrns().isEmpty()) {
+                result.putAll(crnsByCategory.getDefaultResourceCrns().stream().collect(toMap(Function.identity(),
+                        s -> defaultResourceChecker.isAllowedAction(action))));
+            }
+            if (!crnsByCategory.getNotDefaultResourceCrns().isEmpty()) {
+                result.putAll(umsResourceAuthorizationService.getRightOfUserOnResources(userCrn, resource, action, crnsByCategory.getNotDefaultResourceCrns()));
+            }
+            return result;
+        }
     }
 
     public Object proceed(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
@@ -98,6 +146,16 @@ public class CommonPermissionCheckingUtils {
                     String.format("The type of the annotated parameter does not match with the expected type %s", target.getSimpleName()));
         }
         return (T) result;
+    }
+
+    private void throwAccessDeniedIfActionNotAllowed(AuthorizationResourceType resource, AuthorizationResourceAction action, Collection<String> resourceCrns,
+            DefaultResourceChecker defaultResourceChecker) {
+        if (!defaultResourceChecker.isAllowedAction(action)) {
+            String right = RightUtils.getRight(resource, action);
+            String msg = String.format("You have no right to perform %s on resources [%s]", right, Joiner.on(",").join(resourceCrns));
+            LOGGER.error(msg);
+            throw new AccessDeniedException(msg);
+        }
     }
 
 }

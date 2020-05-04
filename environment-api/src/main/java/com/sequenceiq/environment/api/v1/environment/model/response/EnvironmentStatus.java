@@ -81,4 +81,12 @@ public enum EnvironmentStatus {
     public boolean isFailed() {
         return equals(CREATE_FAILED) || equals(DELETE_FAILED) || equals(UPDATE_FAILED);
     }
+
+    public boolean isStopInProgressOrStopped() {
+        return equals(STOP_DATAHUB_STARTED) || equals(STOP_DATALAKE_STARTED) || equals(STOP_FREEIPA_STARTED) || equals(ENV_STOPPED);
+    }
+
+    public boolean isStartInProgress() {
+        return equals(START_DATAHUB_STARTED) || equals(START_DATALAKE_STARTED) || equals(START_FREEIPA_STARTED);
+    }
 }
