@@ -41,6 +41,6 @@ public class ZooKeeperVolumeConfigProvider implements CmHostGroupRoleConfigProvi
 
     @Override
     public boolean sharedRoleType(String roleType) {
-        return false;
+        return "SERVER".equals(roleType);
     }
 }
