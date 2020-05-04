@@ -96,7 +96,7 @@ public class EnvironmentApiConverterTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = CloudPlatform.class, names = {"AWS"})
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE"})
     void testInitCreationDto(CloudPlatform cloudPlatform) {
         EnvironmentRequest request = createEnvironmentRequest(cloudPlatform);
         FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
@@ -105,7 +105,7 @@ public class EnvironmentApiConverterTest {
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
 
-        when(credentialService.getByNameForAccountId(eq(CREDENTIAL_NAME), any())).thenReturn(createCredential());
+        when(credentialService.getByNameForAccountId(eq(CREDENTIAL_NAME), any())).thenReturn(createCredential(cloudPlatform));
         when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
@@ -226,7 +226,7 @@ public class EnvironmentApiConverterTest {
         request.setLocation(createLocationRequest());
         request.setNetwork(new EnvironmentNetworkRequest());
         request.setTelemetry(new TelemetryRequest());
-        request.setCloudPlatform(CLOUD_PLATFORM);
+        request.setCloudPlatform(cloudPlatform.name());
         request.setAuthentication(createAuthenticationRequest());
         request.setFreeIpa(createFreeIpaRequest());
         request.setSecurityAccess(createSecurityAccessRequest());
@@ -318,9 +318,9 @@ public class EnvironmentApiConverterTest {
         return locationRequest;
     }
 
-    private Credential createCredential() {
+    private Credential createCredential(CloudPlatform cloudPlatform) {
         Credential credential = new Credential();
-        credential.setCloudPlatform(CLOUD_PLATFORM);
+        credential.setCloudPlatform(cloudPlatform.name());
         return credential;
     }
 

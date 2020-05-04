@@ -89,12 +89,13 @@ public class EnvironmentApiConverter {
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
         LOGGER.debug("Creating EnvironmentCreationDto from EnvironmentRequest: {}", request);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String cloudPlatform = getCloudPlatform(request, accountId);
         EnvironmentCreationDto.Builder builder = EnvironmentCreationDto.builder()
                 .withAccountId(accountId)
                 .withCreator(ThreadBasedUserCrnProvider.getUserCrn())
                 .withName(request.getName())
                 .withDescription(request.getDescription())
-                .withCloudPlatform(getCloudPlatform(request, accountId))
+                .withCloudPlatform(cloudPlatform)
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
                 .withFreeIpaCreation(freeIpaConverter.convert(request.getFreeIpa()))
@@ -111,7 +112,7 @@ public class EnvironmentApiConverter {
                         .withCloudStorageValidation(request.getCloudStorageValidation())
                         .withTunnel(tunnelConverter.convert(request.getTunnel()))
                         .build())
-                .withParameters(paramsToParametersDto(request))
+                .withParameters(paramsToParametersDto(request, cloudPlatform))
                 .withParentEnvironmentName(request.getParentEnvironmentName())
                 .withProxyConfigName(request.getProxyConfigName());
 
@@ -156,8 +157,7 @@ public class EnvironmentApiConverter {
                 .toString();
     }
 
-    private ParametersDto paramsToParametersDto(EnvironmentRequest request) {
-        String cloudPlatform = request.getCloudPlatform().toUpperCase();
+    private ParametersDto paramsToParametersDto(EnvironmentRequest request, String cloudPlatform) {
         if (AWS.name().equals(cloudPlatform)) {
             return awsParamsToParametersDto(request.getAws(), Optional.ofNullable(request.getFreeIpa()).map(AttachedFreeIpaRequest::getAws).orElse(null));
         } else if (AZURE.name().equals(cloudPlatform)) {
