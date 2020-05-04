@@ -8,8 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
-@Entity
-public class Image {
+@Entity(name = "image")
+public class ImageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "image_generator")

@@ -51,6 +51,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -129,10 +130,10 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     }
 
     public List<CloudInstance> buildInstances(Stack stack) {
-        com.sequenceiq.freeipa.entity.Image image = imageService.getByStack(stack);
+        ImageEntity imageEntity = imageService.getByStack(stack);
         Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
         List<Group> groups = buildInstanceGroups(Lists.newArrayList(stack.getInstanceGroups()), stack.getStackAuthentication(), Collections.emptySet(),
-                stack.getCloudPlatform(), image.getImageName(), fileSystemView);
+                stack.getCloudPlatform(), imageEntity.getImageName(), fileSystemView);
         List<CloudInstance> cloudInstances = new ArrayList<>();
         for (Group group : groups) {
             cloudInstances.addAll(group.getInstances());

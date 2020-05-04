@@ -81,6 +81,52 @@
         "os": "centos7",
         "os_type": "redhat7",
         "uuid": "81851893-8340-411d-afb7-e1b55107fb10"
+      },
+      {
+        "date": "2019-05-09",
+        "description": "Cloudbreak official prewarmed IPA image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0fe96cb9ee5c929a2",
+            "ap-northeast-2": "ami-0e08b4bfce0111807",
+            "ap-south-1": "ami-0c164a2b69c5662b9",
+            "ap-southeast-1": "ami-0968e3a8bb0d3ae7d",
+            "ap-southeast-2": "ami-0e2930bf285470313",
+            "ca-central-1": "ami-0c6e6a0fb8a74b009",
+            "eu-central-1": "ami-08c3fdfc0f4745887",
+            "eu-north-1": "ami-0a6931aea1415eb0e",
+            "eu-west-1": "ami-09fea90f257c85517",
+            "eu-west-2": "ami-0d01a113f8319988c",
+            "eu-west-3": "ami-09cf795f08445670e",
+            "sa-east-1": "ami-0da1056facaacd8c7",
+            "us-east-1": "ami-0361f014a67a219e9",
+            "us-east-2": "ami-07763cd01bab23310",
+            "us-west-1": "ami-0f99dd237165db6f7",
+            "us-west-2": "ami-0195f15a0196fb923"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "91851893-8340-411d-afb7-e1b55107fb10"
+      }
+    ]
+  },
+  "versions": {
+    "freeipa": [
+      {
+        "images": [
+          "61851893-8340-411d-afb7-e1b55107fb10",
+          "71851893-8340-411d-afb7-e1b55107fb10"
+        ],
+        "defaults": [
+          "71851893-8340-411d-afb7-e1b55107fb10"
+        ],
+        "versions": [
+          "2.19.0-dev.1",
+          "2.19.0-dev.2",
+          "2.20.0-dev.1",
+          "2.21.0-b1"
+        ]
       }
     ]
   }

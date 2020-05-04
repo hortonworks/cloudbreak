@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
-import com.sequenceiq.freeipa.entity.Image;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
@@ -34,7 +34,7 @@ public class FreeIpaDescribeService {
 
     public DescribeFreeIpaResponse describe(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
-        Image image = imageService.getByStack(stack);
+        ImageEntity image = imageService.getByStack(stack);
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         UserSyncStatus userSyncStatus = userSyncStatusService.findByStack(stack);
         return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, userSyncStatus);

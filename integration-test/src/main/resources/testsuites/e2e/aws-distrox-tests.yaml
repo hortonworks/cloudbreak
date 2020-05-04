@@ -1,0 +1,5 @@
+name: "aws-distrox-tests"
+tests:
+  - name: "[pull request] aws distrox e2e tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.stack.BasicStackTests

@@ -29,7 +29,7 @@ import com.sequenceiq.freeipa.converter.network.NetworkToNetworkResponseConverte
 import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
 import com.sequenceiq.freeipa.converter.usersync.UserSyncStatusToUserSyncStatusResponseConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
-import com.sequenceiq.freeipa.entity.Image;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.StackStatus;
@@ -109,7 +109,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
     void convert() {
         FreeIpaServerResponse freeIpaServerResponse = new FreeIpaServerResponse();
         Stack stack = createStack();
-        Image image = new Image();
+        ImageEntity image = new ImageEntity();
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain(DOMAIN);
         UserSyncStatus userSyncStatus = new UserSyncStatus();

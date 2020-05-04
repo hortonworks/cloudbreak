@@ -33,7 +33,7 @@ import com.sequenceiq.freeipa.converter.stack.CreateFreeIpaRequestToStackConvert
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.FreeIpa;
-import com.sequenceiq.freeipa.entity.Image;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
@@ -134,12 +134,12 @@ public class FreeIpaCreationService {
         stack.setTemplate(template);
         SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(accountId);
         try {
-            Triple<Stack, Image, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
+            Triple<Stack, ImageEntity, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
                 SecurityConfig savedSecurityConfig = securityConfigService.save(securityConfig);
                 stack.setSecurityConfig(savedSecurityConfig);
                 Stack savedStack = stackService.save(stack);
                 ImageSettingsRequest imageSettingsRequest = request.getImage();
-                Image image = imageService.create(savedStack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest());
+                ImageEntity image = imageService.create(savedStack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest());
                 FreeIpa freeIpa = freeIpaService.create(savedStack, request.getFreeIpa());
                 return Triple.of(savedStack, image, freeIpa);
             });

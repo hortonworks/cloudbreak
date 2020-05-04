@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 import com.sequenceiq.freeipa.entity.FreeIpa;
-import com.sequenceiq.freeipa.entity.Image;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
@@ -69,7 +69,7 @@ public class BootstrapService {
         BootstrapParams params = new BootstrapParams();
         params.setCloud(stack.getCloudPlatform());
 
-        Image image = imageService.getByStack(stack);
+        ImageEntity image = imageService.getByStack(stack);
         params.setOs(image.getOs());
         try {
             byte[] stateConfigZip = getStateConfigZip();

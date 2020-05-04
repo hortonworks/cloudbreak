@@ -48,6 +48,8 @@ public class ImageServiceTest {
 
     private static final String NON_EXISTING_OS = "Ubuntu7";
 
+    private static final String DEFAULT_VERSION = "2.20.0-dev.1";
+
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
@@ -65,10 +67,32 @@ public class ImageServiceTest {
         image = imageCatalog.getImages().getFreeipaImages().get(0);
         ReflectionTestUtils.setField(underTest, ImageService.class, "defaultCatalogUrl", DEFAULT_CATALOG_URL, null);
         ReflectionTestUtils.setField(underTest, ImageService.class, "defaultOs", DEFAULT_OS, null);
+        ReflectionTestUtils.setField(underTest, ImageService.class, "freeIpaVersion", DEFAULT_VERSION, null);
     }
 
     @Test
-    public void testGetImageGivenNoInput() {
+    public void testGetImageGivenNoInputWithInvalidAppVersion() {
+        ReflectionTestUtils.setField(underTest, ImageService.class, "freeIpaVersion", "2.21.0-dcv.1", null);
+        ImageSettingsRequest is = setupImageSettingsRequest(null, null, "centos7");
+        Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
+        assertEquals("centos7", image.getOs());
+        assertEquals("Assuming the latest image to be selected", "2019-05-09", image.getDate());
+        assertEquals("91851893-8340-411d-afb7-e1b55107fb10", image.getUuid());
+    }
+
+    @Test
+    public void testGetImageGivenNoInputWithGbnAppVersion() {
+        ReflectionTestUtils.setField(underTest, ImageService.class, "freeIpaVersion", "2.21.0-b1", null);
+        doTestGetImageGivenNoInput();
+    }
+
+    @Test
+    public void testGetImageGivenNoInputWithVersionNotInCatalog() {
+        ReflectionTestUtils.setField(underTest, ImageService.class, "freeIpaVersion", "2.20.0-dev.2", null);
+        doTestGetImageGivenNoInput();
+    }
+
+    private void doTestGetImageGivenNoInput() {
         ImageSettingsRequest is = setupImageSettingsRequest(null, null, null);
         Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
         assertEquals(DEFAULT_OS, image.getOs());

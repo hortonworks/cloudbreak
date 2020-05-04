@@ -30,9 +30,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.freeipa.api.model.image.FreeIpaVersions;
 import com.sequenceiq.freeipa.api.model.image.Image;
 import com.sequenceiq.freeipa.api.model.image.ImageCatalog;
 import com.sequenceiq.freeipa.api.model.image.Images;
+import com.sequenceiq.freeipa.api.model.image.Versions;
 
 @Service
 public class ImageCatalogProvider {
@@ -91,7 +93,22 @@ public class ImageCatalogProvider {
         }
         List<Image> catalogImages = catalog.getImages().getFreeipaImages();
         List<Image> filterImages = filterImages(catalogImages, enabledOsPredicate());
-        return new ImageCatalog(new Images(filterImages));
+        List<FreeIpaVersions> filteredVersions = filterVersions(catalog, filterImages);
+        return new ImageCatalog(new Images(filterImages), new Versions(filteredVersions));
+    }
+
+    private List<FreeIpaVersions> filterVersions(ImageCatalog catalog, List<Image> filterImages) {
+        List<String> filteredUuids = filterImages.stream().map(Image::getUuid).collect(Collectors.toList());
+        LOGGER.debug("The following uuids will be removed from defaults and image ids fields: [{}]", filteredUuids);
+        return catalog.getVersions().getFreeIpaVersions().stream()
+                .map(versions -> filterDefaultsAndImageIds(filteredUuids, versions)).collect(Collectors.toList());
+    }
+
+    private FreeIpaVersions filterDefaultsAndImageIds(List<String> filteredUuids, FreeIpaVersions versions) {
+        List<String> defaults = versions.getDefaults().stream().filter(filteredUuids::contains).collect(Collectors.toList());
+        List<String> imageIds = versions.getImageIds().stream().filter(filteredUuids::contains).collect(Collectors.toList());
+        LOGGER.debug("Filtered versions: [versions: {}, defaults: {}, images: {}]", versions.getVersions(), defaults, imageIds);
+        return new FreeIpaVersions(versions.getVersions(), defaults, imageIds);
     }
 
     private List<Image> filterImages(List<Image> imageList, Predicate<Image> predicate) {

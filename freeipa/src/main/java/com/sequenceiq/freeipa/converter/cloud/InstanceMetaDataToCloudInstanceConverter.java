@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.freeipa.entity.Image;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
@@ -45,7 +45,7 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
         String imageId = stackAuthenticationView
                 .map(StackAuthenticationView::getStackId)
                 .map(stackId -> imageService.getByStackId(stackId))
-                .map(Image::getImageName)
+                .map(ImageEntity::getImageName)
                 .orElse(null);
         InstanceTemplate instanceTemplate = stackToCloudStackConverter.buildInstanceTemplate(template, group.getGroupName(), metaDataEnity.getPrivateId(),
                 status, imageId);
