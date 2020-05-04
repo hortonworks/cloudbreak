@@ -17,11 +17,12 @@ dependencies {
 
   implementation ("io.grpc:grpc-all:1.22.0") {
     exclude group: 'org.mockito'
+    exclude group: 'junit', module: 'junit'
     exclude group: 'com.squareup.okhttp'
   }
   compile group: 'com.squareup.okhttp',     name: 'okhttp',       version: '2.7.4'
   testImplementation group: 'org.mockito',  name: 'mockito-core', version: mockitoVersion
-  testImplementation group: 'junit',        name: 'junit',        version: '4.12'
+  testImplementation group: 'junit',        name: 'junit',        version: junitVersion
 }
 
 checkstyle {

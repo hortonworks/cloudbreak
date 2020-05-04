@@ -31,12 +31,13 @@ dependencies {
 
   compile ("io.grpc:grpc-all:1.22.0") {
     exclude group: 'org.mockito'
+    exclude group: 'junit', module: 'junit'
   }
   testCompile group: 'org.mockito',                     name: 'mockito-core', version: mockitoVersion
 }
 
 dependencies {
-  testCompile group: 'junit', name: 'junit', version: '4.12'
+  testCompile group: 'junit', name: 'junit', version: junitVersion
 }
 
 checkstyle {
