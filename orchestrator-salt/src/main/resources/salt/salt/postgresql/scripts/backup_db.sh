@@ -3,7 +3,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-if [ $# -ne 5 ] || [ $# -ne 6 ]; then
+if [ $# -ne 5 ] && [ $# -ne 6 ]; then
   echo "Invalid inputs provided"
   echo "Script accepts 5 inputs:"
   echo "  1. Cloud Provider (azure | aws)"
@@ -17,9 +17,9 @@ if [ $# -ne 5 ] || [ $# -ne 6 ]; then
 fi
 
 CLOUD_PROVIDER="$1"
-HOST="$2"
-PORT="$3"
-BACKUP_LOCATION=$(echo "$4"| sed "s/\/\+$//g") # Clear trailng '/' (if present) for later path joining.
+BACKUP_LOCATION=$(echo "$2"| sed "s/\/\+$//g") # Clear trailng '/' (if present) for later path joining.
+HOST="$3"
+PORT="$4"
 USERNAME="$5"
 export PGPASSWORD="$6" # We can provide the password to pg_dump through this variable, or in ~/.pgpass
 
@@ -83,7 +83,7 @@ run_aws_backup () {
   dump_to_s3 "ranger"
 }
 
-doLog "INFO Starting backup to ${$BACKUP_LOCATION}"
+doLog "INFO Starting backup to ${BACKUP_LOCATION}"
 
 if [[ "$CLOUD_PROVIDER" = "azure" ]]; then
   run_azure_backup
@@ -93,4 +93,5 @@ else
   errorExit "Unknown cloud provider: ${CLOUD_PROVIDER}"
 fi
 
-doLog "INFO Completed backup ${$BACKUP_LOCATION}"
+doLog "INFO Completed backup ${BACKUP_LOCATION}"
+
