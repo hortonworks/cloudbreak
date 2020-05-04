@@ -3,7 +3,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-if [$# -ne 5] || [ $# -ne 6 ]; then
+if [ $# -ne 5 ] || [ $# -ne 6 ]; then
   echo "Invalid inputs provided"
   echo "Script accepts 5 inputs:"
   echo "  1. Cloud Provider (azure | aws)"
