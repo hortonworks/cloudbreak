@@ -23,7 +23,6 @@ BACKUP_LOCATION="$4"
 USERNAME="$5"
 export PGPASSWORD="$6" # We can provide the password to pg_dump through this variable, or in ~/.pgpass
 
-BACKUP_DATE=$(date '+%Y-%m-%dT%H:%M:%SZ')
 LOGFILE=/var/log/dl_postgres_backup.log
 
 echo "Logs at ${LOGFILE}"
@@ -62,7 +61,7 @@ dump_to_azure() {
 }
 run_azure_backup () {
   BACKUPS_DIR="/var/tmp/" # Is this appropriate for keeping backups that are staged before uploading to Azure Blob Storage?
-  DATE_DIR=${BACKUPS_DIR}/${BACKUP_DATE}
+  DATE_DIR=${BACKUPS_DIR}/$(date '+%Y-%m-%dT%H:%M:%SZ')
   mkdir -p "$DATE_DIR" || error_exit "Could not create local directory for backups."
 
   azcopy login --identity || errorExit "Could not login to Azure"
@@ -86,7 +85,7 @@ run_aws_backup () {
   dump_to_s3 "ranger"
 }
 
-doLog "INFO Starting backup ${BACKUP_DATE}"
+doLog "INFO Starting backup to ${$BACKUP_LOCATION}"
 
 if [[ "$CLOUD_PROVIDER" = "azure" ]]; then
   run_azure_backup
@@ -96,4 +95,4 @@ else
   errorExit "Unknown cloud provider: ${CLOUD_PROVIDER}"
 fi
 
-doLog "INFO Completed backup ${BACKUP_DATE}"
+doLog "INFO Completed backup ${$BACKUP_LOCATION}"
