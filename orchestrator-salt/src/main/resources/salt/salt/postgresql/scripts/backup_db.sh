@@ -3,15 +3,16 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-if [ $# -ne 6 ]; then
+if [$# -ne 5] || [ $# -ne 6 ]; then
   echo "Invalid inputs provided"
-  echo "Script accepts six inputs:"
+  echo "Script accepts 5 inputs:"
   echo "  1. Cloud Provider (azure | aws)"
-  echo "  2. Object Storage Service url to place backups."
+  echo "  2. Object Storage Service url to retrieve backups."
   echo "  3. PostgreSQL host name."
   echo "  4. PostgreSQL port."
   echo "  5. PostgreSQL user name."
-  echo "  6. PostgreSQL password."
+  echo
+  echo "  Optional: PostgreSQL password."
   exit 1
 fi
 
