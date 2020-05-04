@@ -61,10 +61,6 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
     private TelemetryRequest telemetry;
 
-    @Size(max = 100)
-    @ApiModelProperty(EnvironmentModelDescription.CLOUD_PLATFORM)
-    private String cloudPlatform;
-
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)
     private EnvironmentAuthenticationRequest authentication;
@@ -171,14 +167,6 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setNetwork(EnvironmentNetworkRequest network) {
         this.network = network;
-    }
-
-    public String getCloudPlatform() {
-        return cloudPlatform;
-    }
-
-    public void setCloudPlatform(String cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
     }
 
     public EnvironmentAuthenticationRequest getAuthentication() {

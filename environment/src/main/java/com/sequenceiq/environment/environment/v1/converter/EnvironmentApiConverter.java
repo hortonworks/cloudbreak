@@ -7,17 +7,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
-import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
@@ -35,7 +32,6 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRe
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroupRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
-import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -89,12 +85,13 @@ public class EnvironmentApiConverter {
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
         LOGGER.debug("Creating EnvironmentCreationDto from EnvironmentRequest: {}", request);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String cloudPlatform = credentialService.getCloudPlatformByCredential(request.getCredentialName(), accountId);
         EnvironmentCreationDto.Builder builder = EnvironmentCreationDto.builder()
                 .withAccountId(accountId)
                 .withCreator(ThreadBasedUserCrnProvider.getUserCrn())
                 .withName(request.getName())
                 .withDescription(request.getDescription())
-                .withCloudPlatform(getCloudPlatform(request, accountId))
+                .withCloudPlatform(cloudPlatform)
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
                 .withFreeIpaCreation(freeIpaConverter.convert(request.getFreeIpa()))
@@ -134,20 +131,6 @@ public class EnvironmentApiConverter {
 
     private NetworkDto networkRequestToDto(EnvironmentNetworkRequest network) {
         return networkRequestToDtoConverter.convert(network);
-    }
-
-    private String getCloudPlatform(EnvironmentRequest request, String accountId) {
-        if (!Strings.isNullOrEmpty(request.getCredentialName())) {
-            try {
-                Credential credential = credentialService.getByNameForAccountId(request.getCredentialName(), accountId);
-                return credential.getCloudPlatform();
-            } catch (NotFoundException e) {
-                throw new BadRequestException(String.format("No credential found with name [%s] in the workspace.",
-                        request.getCredentialName()), e);
-            }
-        } else {
-            throw new BadRequestException("No credential has been specified in request for environment creation.");
-        }
     }
 
     private String createCrn(@Nonnull String accountId) {

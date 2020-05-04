@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -98,7 +99,7 @@ public class EnvironmentApiConverterTest {
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
 
-        when(credentialService.getByNameForAccountId(eq(CREDENTIAL_NAME), any())).thenReturn(createCredential());
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn("AWS");
         when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
@@ -112,7 +113,6 @@ public class EnvironmentApiConverterTest {
         assertEquals(USER_CRN, actual.getCreator());
         assertEquals(request.getName(), actual.getName());
         assertEquals(request.getDescription(), actual.getDescription());
-        assertEquals(request.getCloudPlatform(), actual.getCloudPlatform());
         assertEquals(request.getCredentialName(), actual.getCredential().getCredentialName());
         assertEquals(request, actual.getCredential());
         assertEquals(freeIpaCreationDto, actual.getFreeIpaCreation());
@@ -128,7 +128,7 @@ public class EnvironmentApiConverterTest {
         assertEquals(networkDto, actual.getNetwork());
         assertSecurityAccess(request.getSecurityAccess(), actual.getSecurityAccess());
 
-        verify(credentialService).getByNameForAccountId(eq(CREDENTIAL_NAME), any());
+        verify(credentialService).getCloudPlatformByCredential(anyString(), anyString());
         verify(freeIpaConverter).convert(request.getFreeIpa());
         verify(accountTelemetry).getFeatures();
         verify(accountTelemetryService).getOrDefault(any());
@@ -206,7 +206,6 @@ public class EnvironmentApiConverterTest {
         request.setLocation(createLocationRequest());
         request.setNetwork(new EnvironmentNetworkRequest());
         request.setTelemetry(new TelemetryRequest());
-        request.setCloudPlatform(CLOUD_PLATFORM);
         request.setAuthentication(createAuthenticationRequest());
         request.setFreeIpa(createFreeIpaRequest());
         request.setSecurityAccess(createSecurityAccessRequest());
