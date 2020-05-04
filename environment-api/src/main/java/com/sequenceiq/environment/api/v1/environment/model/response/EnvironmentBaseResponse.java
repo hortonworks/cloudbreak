@@ -77,9 +77,6 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
 
-    @ApiModelProperty(EnvironmentModelDescription.AZURE_PARAMETERS)
-    private AzureEnvironmentParameters azure;
-
     @ApiModelProperty(EnvironmentModelDescription.TAGS)
     private TagResponse tags;
 
@@ -263,14 +260,6 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
 
     public void setAws(AwsEnvironmentParameters aws) {
         this.aws = aws;
-    }
-
-    public AzureEnvironmentParameters getAzure() {
-        return azure;
-    }
-
-    public void setAzure(AzureEnvironmentParameters azure) {
-        this.azure = azure;
     }
 
     public TagResponse getTags() {

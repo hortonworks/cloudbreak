@@ -68,13 +68,6 @@ public class EnvironmentModelDescription {
     public static final String S3_GUARD = "S3Guard parameters.";
     public static final String S3_GUARD_DYNAMO_TABLE_NAME = "S3Guard Dynamo table name.";
 
-    public static final String AZURE_PARAMETERS = "Azure Specific parameters.";
-    public static final String RESOURCE_GROUP_PARAMETERS = "Azure resource group parameters.";
-    public static final String EXISTING_RESOURCE_GROUP_NAME = "Name of an existing azure resource group.";
-    public static final String RESOURCE_GROUP_NAME = "Name of the azure resource group.";
-    public static final String EXISTING_RESOURCE_GROUP = "Resource group did already exist.";
-    public static final String USE_SINGLE_RESOURCE_GROUP = "Use a single resource group for all resources where possible.";
-
     public static final String PARENT_ENVIRONMENT_CRN = "Parent environment global identifier";
     public static final String PARENT_ENVIRONMENT_NAME = "Parent environment name";
     public static final String PARENT_ENVIRONMENT_CLOUD_PLATFORM = "Parent environment cloud platform";

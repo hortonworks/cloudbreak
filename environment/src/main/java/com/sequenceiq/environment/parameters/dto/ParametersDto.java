@@ -10,14 +10,11 @@ public class ParametersDto {
 
     private final AwsParametersDto awsParametersDto;
 
-    private final AzureParametersDto azureParametersDto;
-
     private ParametersDto(Builder builder) {
         id = builder.id;
         name = builder.name;
         accountId = builder.accountId;
         awsParametersDto = builder.awsParametersDto;
-        azureParametersDto = builder.azureParametersDto;
     }
 
     public Long getId() {
@@ -40,10 +37,6 @@ public class ParametersDto {
         return awsParametersDto;
     }
 
-    public AzureParametersDto getAzureParametersDto() {
-        return azureParametersDto;
-    }
-
     public static Builder builder() {
         return new Builder();
     }
@@ -56,8 +49,6 @@ public class ParametersDto {
         private String accountId;
 
         private AwsParametersDto awsParametersDto;
-
-        private AzureParametersDto azureParametersDto;
 
         public Builder withId(Long id) {
             this.id = id;
@@ -76,11 +67,6 @@ public class ParametersDto {
 
         public Builder withAwsParameters(AwsParametersDto awsParametersDto) {
             this.awsParametersDto = awsParametersDto;
-            return this;
-        }
-
-        public Builder withAzureParameters(AzureParametersDto azureParameters) {
-            this.azureParametersDto = azureParameters;
             return this;
         }
 

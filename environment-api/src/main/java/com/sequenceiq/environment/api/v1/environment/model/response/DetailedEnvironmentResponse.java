@@ -7,8 +7,8 @@ import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
-import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 
@@ -86,8 +86,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private CloudStorageValidation cloudStorageValidation;
 
         private AwsEnvironmentParameters aws;
-
-        private AzureEnvironmentParameters azure;
 
         private TagResponse tag;
 
@@ -216,11 +214,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withAzure(AzureEnvironmentParameters azure) {
-            this.azure = azure;
-            return this;
-        }
-
         public Builder withTag(TagResponse tag) {
             this.tag = tag;
             return this;
@@ -270,7 +263,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setCloudStorageValidation(cloudStorageValidation);
             detailedEnvironmentResponse.setAdminGroupName(adminGroupName);
             detailedEnvironmentResponse.setAws(aws);
-            detailedEnvironmentResponse.setAzure(azure);
             detailedEnvironmentResponse.setTags(tag);
             detailedEnvironmentResponse.setParentEnvironmentCrn(parentEnvironmentCrn);
             detailedEnvironmentResponse.setParentEnvironmentName(parentEnvironmentName);
