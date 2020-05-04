@@ -4,6 +4,7 @@ import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -20,12 +21,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
@@ -44,6 +47,8 @@ class EnvironmentValidatorServiceTest {
 
     private static final String ACCOUNT = "account";
 
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:123:user:123";
+
     @Mock
     private EnvironmentRegionValidator environmentRegionValidator;
 
@@ -56,6 +61,9 @@ class EnvironmentValidatorServiceTest {
     @Mock
     private EnvironmentResourceService environmentResourceService;
 
+    @Mock
+    private CredentialService credentialService;
+
     @InjectMocks
     private EnvironmentValidatorService underTest;
 
@@ -66,6 +74,7 @@ class EnvironmentValidatorServiceTest {
                 networkCreationValidator,
                 platformParameterService,
                 environmentResourceService,
+                credentialService,
                 singleton(CloudPlatform.AWS.name()),
                 singleton(CloudPlatform.YARN.name())
         );
@@ -73,54 +82,64 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void testValidateAwsEnvironmentRequestNotAWS() {
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn("AZURE");
+
         EnvironmentRequest request = new EnvironmentRequest();
-        request.setCloudPlatform("AZURE");
-        ValidationResult result = underTest.validateAwsEnvironmentRequest(request);
+        request.setCredentialName("azure-credential");
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateAwsEnvironmentRequest(request));
         assertTrue(result.hasError());
         assertEquals("Environment request is not for AWS.", result.getErrors().get(0));
     }
 
     @Test
     void testValidateAwsEnvironmentRequestNoAwsParams() {
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn("AWS");
+
         EnvironmentRequest request = new EnvironmentRequest();
-        request.setCloudPlatform("AWS");
-        ValidationResult result = underTest.validateAwsEnvironmentRequest(request);
+        request.setCredentialName("aws-credential");
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateAwsEnvironmentRequest(request));
         assertTrue(result.hasError());
         assertEquals("S3Guard Dynamo DB table name is not found in environment request.", result.getErrors().get(0));
     }
 
     @Test
     void testValidateAwsEnvironmentNoS3GuardParams() {
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn("AWS");
+
         EnvironmentRequest request = new EnvironmentRequest();
-        request.setCloudPlatform("AWS");
+        request.setCredentialName("aws-credential");
         request.setAws(new AwsEnvironmentParameters());
-        ValidationResult result = underTest.validateAwsEnvironmentRequest(request);
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateAwsEnvironmentRequest(request));
         assertTrue(result.hasError());
         assertEquals("S3Guard Dynamo DB table name is not found in environment request.", result.getErrors().get(0));
     }
 
     @Test
     void testValidateAwsEnvironmentRequestNoDynamoTable() {
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn("AWS");
+
         EnvironmentRequest request = new EnvironmentRequest();
-        request.setCloudPlatform("AWS");
+        request.setCredentialName("aws-credential");
         AwsEnvironmentParameters aws = new AwsEnvironmentParameters();
         aws.setS3guard(new S3GuardRequestParameters());
         request.setAws(aws);
-        ValidationResult result = underTest.validateAwsEnvironmentRequest(request);
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateAwsEnvironmentRequest(request));
         assertTrue(result.hasError());
         assertEquals("S3Guard Dynamo DB table name is not found in environment request.", result.getErrors().get(0));
     }
 
     @Test
     void testValidateAwsEnvironmentRequestValid() {
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn("AWS");
+
         EnvironmentRequest request = new EnvironmentRequest();
-        request.setCloudPlatform("AWS");
+        request.setCredentialName("aws-credential");
         AwsEnvironmentParameters aws = new AwsEnvironmentParameters();
         S3GuardRequestParameters s3GuardRequestParameters = new S3GuardRequestParameters();
         s3GuardRequestParameters.setDynamoDbTableName("table");
         aws.setS3guard(s3GuardRequestParameters);
         request.setAws(aws);
-        ValidationResult result = underTest.validateAwsEnvironmentRequest(request);
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateAwsEnvironmentRequest(request));
         assertFalse(result.hasError());
     }
 

@@ -190,7 +190,6 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
     }
 
     public Object getCreateEnvironmentForCli(EnvironmentRequest environmentRequest, String cloudPlatform) {
-        environmentRequest.setCloudPlatform(cloudPlatform);
         return delegatingCliEnvironmentRequestConverter.convertRequest(environmentRequest);
     }
 
