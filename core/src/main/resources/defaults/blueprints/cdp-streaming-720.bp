@@ -75,7 +75,23 @@
         "refName": "master",
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
-          "core_settings-STORAGEOPERATIONS-BASE",
+          "zookeeper-SERVER-BASE",
+          "core_settings-STORAGEOPERATIONS-BASE"
+        ]
+      },
+      {
+        "refName": "registry",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "zookeeper-SERVER-BASE",
+          "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE"
+        ]
+      },
+      {
+        "refName": "smm",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "zookeeper-SERVER-BASE",
           "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
           "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
           "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE"
@@ -87,13 +103,6 @@
         "roleConfigGroupsRefNames": [
           "kafka-GATEWAY-BASE",
           "kafka-KAFKA_BROKER-BASE"
-        ]
-      },
-      {
-        "refName": "quorum",
-        "cardinality": 3,
-        "roleConfigGroupsRefNames": [
-          "zookeeper-SERVER-BASE"
         ]
       }
     ]
