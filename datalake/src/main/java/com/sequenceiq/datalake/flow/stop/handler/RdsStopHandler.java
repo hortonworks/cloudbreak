@@ -11,8 +11,8 @@ import com.sequenceiq.datalake.flow.stop.event.SdxStopFailedEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.datalake.service.pause.DatabasePauseSupportService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
-import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -35,6 +35,9 @@ public class RdsStopHandler extends ExceptionCatcherEventHandler<RdsWaitingToSto
     @Inject
     private SdxStatusService sdxStatusService;
 
+    @Inject
+    private DatabasePauseSupportService databasePauseSupportService;
+
     @Override
     public String selector() {
         return RdsWaitingToStopRequest.class.getSimpleName();
@@ -53,7 +56,7 @@ public class RdsStopHandler extends ExceptionCatcherEventHandler<RdsWaitingToSto
         Selectable response;
         try {
             sdxClusterRepository.findById(sdxId).ifPresent(sdxCluster -> {
-                if (sdxCluster.hasExternalDatabase() && Strings.isNotEmpty(sdxCluster.getDatabaseCrn())) {
+                if (databasePauseSupportService.isDatabasePauseSupported(sdxCluster)) {
                     sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_STOP_IN_PROGRESS,
                             "External database stop in progress", sdxCluster);
                     LOGGER.debug("stop polling database stop for sdx: {}", sdxId);

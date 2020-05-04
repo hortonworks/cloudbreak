@@ -36,6 +36,9 @@ public class PlatformConfig {
     @Value("${datalake.experimental.externaldb.platform:MOCK}")
     private Set<CloudPlatform> dbServiceExperimentalPlatforms;
 
+    @Value("${datalake.supported.externaldb.pause.platform:AWS}")
+    private Set<CloudPlatform> dbServicePauseSupportedPlatforms;
+
     @Inject
     private Set<DatabaseServerParameterSetter> databaseServerParameterSetters;
 
@@ -43,6 +46,10 @@ public class PlatformConfig {
 
     public boolean isExternalDatabaseSupportedFor(CloudPlatform cloudPlatform) {
         return dbServiceSupportedPlatforms.contains(cloudPlatform);
+    }
+
+    public boolean isExternalDatabasePauseSupportedFor(CloudPlatform cloudPlatform) {
+        return dbServicePauseSupportedPlatforms.contains(cloudPlatform);
     }
 
     public Set<CloudPlatform> getSupportedExternalDatabasePlatforms() {

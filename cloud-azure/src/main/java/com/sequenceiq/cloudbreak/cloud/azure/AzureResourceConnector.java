@@ -165,18 +165,17 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     @Override
     public void startDatabaseServer(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) {
-        LOGGER.warn("Database server start operation is not supported for " + getClass().getName());
+        throw new UnsupportedOperationException("Database server start operation is not supported for " + getClass().getName());
     }
 
     @Override
     public void stopDatabaseServer(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) {
-        LOGGER.warn("Database server stop operation is not supported for " + getClass().getName());
+        throw new UnsupportedOperationException("Database server stop operation is not supported for " + getClass().getName());
     }
 
     @Override
     public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) throws Exception {
-        LOGGER.warn("Database server status lookup is not supported for " + getClass().getName());
-        return null;
+        throw new UnsupportedOperationException("Database server status lookup is not supported for " + getClass().getName());
     }
 
     @Override
