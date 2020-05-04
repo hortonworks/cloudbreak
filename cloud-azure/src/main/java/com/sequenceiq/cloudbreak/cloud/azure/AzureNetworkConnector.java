@@ -73,7 +73,8 @@ public class AzureNetworkConnector implements NetworkConnector {
         List<SubnetRequest> subnetRequests = azureSubnetRequestProvider.provide(
                 networkRequest.getRegion().value(),
                 Lists.newArrayList(networkRequest.getPublicSubnets()),
-                Lists.newArrayList(networkRequest.getPrivateSubnets()));
+                Lists.newArrayList(networkRequest.getPrivateSubnets()),
+                networkRequest.isPrivateSubnetEnabled());
         String template = azureNetworkTemplateBuilder.build(networkRequest, subnetRequests);
         String envName = networkRequest.getEnvName();
         Deployment templateDeployment;

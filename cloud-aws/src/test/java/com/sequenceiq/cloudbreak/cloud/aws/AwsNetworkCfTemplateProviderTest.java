@@ -97,12 +97,14 @@ public class AwsNetworkCfTemplateProviderTest {
         subnetRequest1.setPublicSubnetCidr("2.2.2.2/24");
         subnetRequest1.setPrivateSubnetCidr("2.2.2.2/24");
         subnetRequest1.setIndex(0);
+        subnetRequest1.setSubnetGroup(0);
         subnetRequest1.setAvailabilityZone("az1");
 
         SubnetRequest subnetRequest2 = new SubnetRequest();
         subnetRequest2.setPublicSubnetCidr("2.2.2.2/24");
         subnetRequest2.setPrivateSubnetCidr("2.2.2.2/24");
         subnetRequest2.setIndex(1);
+        subnetRequest2.setSubnetGroup(1);
         subnetRequest2.setAvailabilityZone("az2");
 
         return List.of(subnetRequest1, subnetRequest2);

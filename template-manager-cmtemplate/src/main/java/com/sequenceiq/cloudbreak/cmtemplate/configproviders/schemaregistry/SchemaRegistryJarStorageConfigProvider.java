@@ -12,11 +12,10 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.CdhVersionForStreaming;
-import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
@@ -62,7 +61,7 @@ public class SchemaRegistryJarStorageConfigProvider implements CmHostGroupRoleCo
     }
 
     @Override
-    public boolean shouldSplit(ServiceComponent serviceComponent) {
-        return true;
+    public boolean sharedRoleType(String roleType) {
+        return false;
     }
 }

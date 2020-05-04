@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 /**
@@ -19,8 +18,8 @@ public interface CmHostGroupRoleConfigProvider {
 
     List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source);
 
-    default boolean shouldSplit(ServiceComponent serviceComponent) {
-        return false;
+    default boolean sharedRoleType(String roleType) {
+        return true;
     }
 
 }

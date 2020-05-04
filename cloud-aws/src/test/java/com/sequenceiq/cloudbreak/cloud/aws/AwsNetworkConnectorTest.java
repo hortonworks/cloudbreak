@@ -184,7 +184,7 @@ public class AwsNetworkConnectorTest {
         when(awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest))
                 .thenReturn(pollTask);
         when(cfStackUtil.getOutputs(NETWORK_ID, cloudFormationRetryClient)).thenReturn(output);
-        when(awsCreatedSubnetProvider.provide(output, subnetRequestList)).thenReturn(createdSubnets);
+        when(awsCreatedSubnetProvider.provide(output, subnetRequestList, true)).thenReturn(createdSubnets);
 
         CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest);
 
@@ -221,7 +221,7 @@ public class AwsNetworkConnectorTest {
         when(awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest))
                 .thenReturn(pollTask);
         when(cfStackUtil.getOutputs(NETWORK_ID, cloudFormationRetryClient)).thenReturn(output);
-        when(awsCreatedSubnetProvider.provide(output, subnetRequestList)).thenReturn(createdSubnets);
+        when(awsCreatedSubnetProvider.provide(output, subnetRequestList, true)).thenReturn(createdSubnets);
 
         CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest);
 

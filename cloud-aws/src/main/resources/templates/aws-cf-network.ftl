@@ -56,6 +56,7 @@
         "RouteTableId" : { "Ref" : "PublicRouteTable" }
       }
     },
+    <#if privateSubnetEnabled == true>
     "NG${subnet.index}EIP" : {
         "Type" : "AWS::EC2::EIP",
         "DependsOn" : "AttachGateway",
@@ -63,7 +64,7 @@
             "Domain" : { "Ref" : "VPC" }
         }
     },
-    "NG${subnet.index}" : {
+    "NG${subnet.subnetGroup}" : {
         "Type" : "AWS::EC2::NatGateway",
         "Properties" : {
             "AllocationId" : { "Fn::GetAtt" : [ "NG${subnet.index}EIP", "AllocationId" ] },
@@ -71,6 +72,8 @@
         }
     },
     </#if>
+    </#if>
+    <#if privateSubnetEnabled == true>
     <#if subnet.privateSubnetCidr?has_content>
     "PrvS${subnet.index}" : {
         "Type" : "AWS::EC2::Subnet",
@@ -112,6 +115,7 @@
             "NatGatewayId" : { "Ref" : "NG${subnet.subnetGroup}" }
         }
     },
+    </#if>
     </#if>
     </#list>
 
@@ -176,10 +180,12 @@
         "Value" :  { "Ref" : "PubS${subnet.index}" }
     },
     </#if>
+    <#if privateSubnetEnabled == true>
     <#if subnet.privateSubnetCidr?has_content>
     "id${subnet.index}" : {
         "Value" :  { "Ref" : "PrvS${subnet.index}" }
     },
+    </#if>
     </#if>
     </#list>
     "CreatedVpc": {

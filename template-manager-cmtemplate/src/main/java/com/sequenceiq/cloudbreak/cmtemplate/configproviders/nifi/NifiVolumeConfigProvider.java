@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
@@ -30,9 +29,9 @@ public class NifiVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
         if (source.getProductDetailsView().getProducts().stream()
                 .filter(product -> product.getName().equals("CFM"))
                 .anyMatch(product -> {
-            String version = product.getVersion();
-            return "1.0.0.0".equals(version) || "1.0.1.0".equals(version);
-        })) {
+                    String version = product.getVersion();
+                    return "1.0.0.0".equals(version) || "1.0.1.0".equals(version);
+                })) {
             return List.of();
         }
 
@@ -75,7 +74,7 @@ public class NifiVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
     }
 
     @Override
-    public boolean shouldSplit(ServiceComponent serviceComponent) {
-        return true;
+    public boolean sharedRoleType(String roleType) {
+        return false;
     }
 }

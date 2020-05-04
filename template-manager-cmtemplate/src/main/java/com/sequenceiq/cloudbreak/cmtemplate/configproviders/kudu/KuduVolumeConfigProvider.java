@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
@@ -26,9 +25,9 @@ public class KuduVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
 
         switch (roleType) {
-            case KuduRoles.KUDU_MASTER :
+            case KuduRoles.KUDU_MASTER:
             case KuduRoles.KUDU_TSERVER:
-                String directorySuffix = KuduRoles.KUDU_MASTER.equals(roleType)  ? "kudu/master" : "kudu/tserver";
+                String directorySuffix = KuduRoles.KUDU_MASTER.equals(roleType) ? "kudu/master" : "kudu/tserver";
                 //Only one volume needs to be configured for KUDU_FS_WAL_DIRS
                 Integer walVolumeCount = hostGroupView.getVolumeCount() > 0 ? 1 : 0;
                 Integer dataDirVolumeIndex = hostGroupView.getVolumeCount() <= 1 ? 1 : 2;
@@ -36,7 +35,7 @@ public class KuduVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
                         config(KUDU_FS_WAL_DIRS, buildVolumePathStringZeroVolumeHandled(walVolumeCount, directorySuffix)),
                         config(KUDU_FS_DATA_DIRS,
                                 buildVolumePathFromVolumeIndexZeroVolumeHandled(dataDirVolumeIndex, hostGroupView.getVolumeCount(), directorySuffix))
-                        );
+                );
             default:
                 return List.of();
         }
@@ -53,7 +52,7 @@ public class KuduVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
     }
 
     @Override
-    public boolean shouldSplit(ServiceComponent serviceComponent) {
-        return true;
+    public boolean sharedRoleType(String roleType) {
+        return false;
     }
 }
