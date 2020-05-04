@@ -88,103 +88,6 @@
         }
       }
     },
-    "NG0EIP": {
-      "Type": "AWS::EC2::EIP",
-      "DependsOn": "AttachGateway",
-      "Properties": {
-        "Domain": {
-          "Ref": "VPC"
-        }
-      }
-    },
-    "NG0": {
-      "Type": "AWS::EC2::NatGateway",
-      "Properties": {
-        "AllocationId": {
-          "Fn::GetAtt": [
-            "NG0EIP",
-            "AllocationId"
-          ]
-        },
-        "SubnetId": {
-          "Ref": "PubS0"
-        }
-      }
-    },
-    "PrvS0": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "MapPublicIpOnLaunch": "false",
-        "CidrBlock": "2.2.2.2/24",
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "AvailabilityZone": "az1",
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "kubernetes.io/role/elb",
-            "Value": "1"
-          },
-          {
-            "Key": "Name",
-            "Value": "ps0-1"
-          }
-        ]
-      }
-    },
-    "PRT0": {
-      "Type": "AWS::EC2::RouteTable",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "Name",
-            "Value": "prt0-1"
-          }
-        ]
-      }
-    },
-    "PSRTA0": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "PrvS0"
-        },
-        "RouteTableId": {
-          "Ref": "PRT0"
-        }
-      }
-    },
-    "PRt0": {
-      "Type": "AWS::EC2::Route",
-      "DependsOn": [
-        "PRT0",
-        "AttachGateway"
-      ],
-      "Properties": {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "RouteTableId": {
-          "Ref": "PRT0"
-        },
-        "NatGatewayId": {
-          "Ref": "NG0"
-        }
-      }
-    },
     "PubS1": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
@@ -220,103 +123,6 @@
         },
         "RouteTableId": {
           "Ref": "PublicRouteTable"
-        }
-      }
-    },
-    "NG1EIP": {
-      "Type": "AWS::EC2::EIP",
-      "DependsOn": "AttachGateway",
-      "Properties": {
-        "Domain": {
-          "Ref": "VPC"
-        }
-      }
-    },
-    "NG1": {
-      "Type": "AWS::EC2::NatGateway",
-      "Properties": {
-        "AllocationId": {
-          "Fn::GetAtt": [
-            "NG1EIP",
-            "AllocationId"
-          ]
-        },
-        "SubnetId": {
-          "Ref": "PubS1"
-        }
-      }
-    },
-    "PrvS1": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "MapPublicIpOnLaunch": "false",
-        "CidrBlock": "2.2.2.2/24",
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "AvailabilityZone": "az2",
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "kubernetes.io/role/elb",
-            "Value": "1"
-          },
-          {
-            "Key": "Name",
-            "Value": "ps1-1"
-          }
-        ]
-      }
-    },
-    "PRT1": {
-      "Type": "AWS::EC2::RouteTable",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "Name",
-            "Value": "prt1-1"
-          }
-        ]
-      }
-    },
-    "PSRTA1": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "PrvS1"
-        },
-        "RouteTableId": {
-          "Ref": "PRT1"
-        }
-      }
-    },
-    "PRt1": {
-      "Type": "AWS::EC2::Route",
-      "DependsOn": [
-        "PRT1",
-        "AttachGateway"
-      ],
-      "Properties": {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "RouteTableId": {
-          "Ref": "PRT1"
-        },
-        "NatGatewayId": {
-          "Ref": "NG0"
         }
       }
     },
@@ -360,12 +166,12 @@
   "Outputs": {
     "id0": {
       "Value": {
-        "Ref": "PrvS0"
+        "Ref": "PubS0"
       }
     },
     "id1": {
       "Value": {
-        "Ref": "PrvS1"
+        "Ref": "PubS1"
       }
     },
     "CreatedVpc": {

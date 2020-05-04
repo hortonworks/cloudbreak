@@ -11,7 +11,8 @@ import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 @Component
 public class AzureSubnetRequestProvider {
 
-    public List<SubnetRequest> provide(String region, List<NetworkSubnetRequest> publicSubnets,  List<NetworkSubnetRequest> privateSubnets) {
+    public List<SubnetRequest> provide(String region, List<NetworkSubnetRequest> publicSubnets,
+        List<NetworkSubnetRequest> privateSubnets, boolean privateSubnetEnabled) {
         List<SubnetRequest> subnets = new ArrayList<>();
         int index = 0;
 
@@ -23,12 +24,14 @@ public class AzureSubnetRequestProvider {
             subnets.add(subnetRequest);
         }
 
-        for (int i = 0; i < privateSubnets.size(); i++) {
-            NetworkSubnetRequest networkSubnetRequest = privateSubnets.get(i);
-            SubnetRequest subnetRequest = getSubnetRequest(region, networkSubnetRequest);
-            subnetRequest.setSubnetGroup(i % publicSubnets.size());
-            subnetRequest.setIndex(index++);
-            subnets.add(subnetRequest);
+        if (privateSubnetEnabled) {
+            for (int i = 0; i < privateSubnets.size(); i++) {
+                NetworkSubnetRequest networkSubnetRequest = privateSubnets.get(i);
+                SubnetRequest subnetRequest = getSubnetRequest(region, networkSubnetRequest);
+                subnetRequest.setSubnetGroup(i % publicSubnets.size());
+                subnetRequest.setIndex(index++);
+                subnets.add(subnetRequest);
+            }
         }
 
         return subnets;

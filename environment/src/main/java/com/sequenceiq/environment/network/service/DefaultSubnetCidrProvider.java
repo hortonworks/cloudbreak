@@ -28,7 +28,7 @@ public class DefaultSubnetCidrProvider implements SubnetCidrProvider {
     private static final int SUBNETS = 3;
 
     @Override
-    public Cidrs provide(String networkCidr) {
+    public Cidrs provide(String networkCidr, boolean privateSubnetEnabled) {
         Set<NetworkSubnetRequest> result = new HashSet<>();
 
         for (int i = 0; i < SUBNETS; i++) {

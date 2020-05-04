@@ -33,7 +33,7 @@ public class AwsCreatedSubnetProviderTest {
         output.put("id1", "public-subnet-1");
         output.put("id2", "public-subnet-1");
 
-        Set<CreatedSubnet> actual = underTest.provide(output, cidrs);
+        Set<CreatedSubnet> actual = underTest.provide(output, cidrs, true);
 
         assertEquals(cidrs.size(), actual.size());
         assertTrue(actual.stream().allMatch(createdSubnet -> output.containsValue(createdSubnet.getSubnetId())));
@@ -51,7 +51,7 @@ public class AwsCreatedSubnetProviderTest {
         output.put("id1", "public-subnet-1");
         output.put("id2", "public-subnet-1");
 
-        Set<CreatedSubnet> actual = underTest.provide(output, cidrs);
+        Set<CreatedSubnet> actual = underTest.provide(output, cidrs, true);
 
         assertEquals(cidrs.size(), actual.size());
         assertTrue(actual.stream().allMatch(createdSubnet -> output.containsValue(createdSubnet.getSubnetId())));
@@ -63,7 +63,7 @@ public class AwsCreatedSubnetProviderTest {
                 publicSubnetRequest("10.0.0.16/19", 0),
                 publicSubnetRequest("10.0.0.16/19", 1),
                 publicSubnetRequest("10.0.0.16/19", 2));
-        underTest.provide(new HashMap<>(), cidrs);
+        underTest.provide(new HashMap<>(), cidrs, true);
     }
 
     public SubnetRequest publicSubnetRequest(String cidr, int index) {

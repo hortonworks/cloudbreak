@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
@@ -47,7 +46,7 @@ public class YarnVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
     }
 
     @Override
-    public boolean shouldSplit(ServiceComponent serviceComponent) {
-        return true;
+    public boolean sharedRoleType(String roleType) {
+        return false;
     }
 }

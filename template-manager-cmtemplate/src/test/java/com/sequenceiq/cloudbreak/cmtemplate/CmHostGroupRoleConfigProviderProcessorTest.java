@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static java.util.Optional.ofNullable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsVolumeConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnVolumeConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.zookeeper.ZooKeeperVolumeConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
@@ -38,7 +40,7 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
 
     @Spy
     private final List<CmHostGroupRoleConfigProvider> configProviders = new ArrayList<>(List.of(
-            new HdfsVolumeConfigProvider(), new YarnVolumeConfigProvider()
+            new HdfsVolumeConfigProvider(), new YarnVolumeConfigProvider(), new ZooKeeperVolumeConfigProvider()
     ));
 
     private TemplatePreparationObject templatePreparator;
@@ -221,7 +223,29 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
         setup("input/cb5660.bp", Builder.builder().withHostgroupViews(Set.of(master1, master2, worker, compute, quorum)));
 
         Map<String, Map<String, List<ApiClusterTemplateConfig>>> actual = underTest.generateConfigs(templateProcessor, templatePreparator);
-        assertNull(actual.get("hdfs-JOURNALNODE-BASE"));
+        assertNotNull(actual.get("hdfs-JOURNALNODE-BASE"));
+        assertNotNull(actual.get("zookeeper-SERVER-BASE"));
+    }
+
+    @Test
+    public void testProcessWhenSharedConfigThenAddVolumeConfig() {
+        HostgroupView master1 = new HostgroupView("master1", 1, InstanceGroupType.GATEWAY, 1);
+        HostgroupView master2 = new HostgroupView("master2", 1, InstanceGroupType.GATEWAY, 1);
+        HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
+        HostgroupView compute = new HostgroupView("compute", 3, InstanceGroupType.CORE, 2);
+        HostgroupView quorum = new HostgroupView("quorum", 3, InstanceGroupType.CORE, 2);
+        setup("input/cb5660.bp", Builder.builder().withHostgroupViews(Set.of(master1, master2, worker, compute, quorum)));
+        underTest.process(templateProcessor, templatePreparator);
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = mapRoleConfigs();
+        List<ApiClusterTemplateConfig> journalNodeBase = roleConfigs.get("hdfs-JOURNALNODE-BASE");
+        assertEquals(1, journalNodeBase.size());
+        assertEquals("dfs_journalnode_edits_dir", journalNodeBase.get(0).getName());
+        assertEquals("/hadoopfs/fs1/journalnode", journalNodeBase.get(0).getValue());
+        List<ApiClusterTemplateConfig> zkServerBase = roleConfigs.get("zookeeper-SERVER-BASE");
+        assertEquals("dataDir", zkServerBase.get(0).getName());
+        assertEquals("/hadoopfs/fs1/zookeeper", zkServerBase.get(0).getValue());
+        assertEquals("dataLogDir", zkServerBase.get(1).getName());
+        assertEquals("/hadoopfs/fs1/zookeeper", zkServerBase.get(1).getValue());
     }
 
     private String getBlueprintText(String path) {
