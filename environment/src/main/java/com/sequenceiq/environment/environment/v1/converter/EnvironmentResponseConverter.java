@@ -2,12 +2,16 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.api.v1.environment.model.response.AzureEnvironmentParametersResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.AzureResourceGroupResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -23,7 +27,10 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
 
@@ -81,6 +88,7 @@ public class EnvironmentResponseConverter {
                 .withCloudStorageValidation(environmentDto.getExperimentalFeatures().getCloudStorageValidation())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
+                .withAzure(getIfNotNull(environmentDto.getParameters(), this::azureEnvParamsToAwsEnvironmentParams))
                 .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn())
                 .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
                 .withParentEnvironmentCloudPlatform(environmentDto.getParentEnvironmentCloudPlatform());
@@ -117,6 +125,7 @@ public class EnvironmentResponseConverter {
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
+                .withAzure(getIfNotNull(environmentDto.getParameters(), this::azureEnvParamsToAwsEnvironmentParams))
                 .withParentEnvironmentName(environmentDto.getParentEnvironmentName());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
@@ -143,14 +152,32 @@ public class EnvironmentResponseConverter {
     }
 
     private AwsEnvironmentParameters awsEnvParamsToAwsEnvironmentParams(ParametersDto parameters) {
-        return AwsEnvironmentParameters.builder()
-                .withS3guard(getIfNotNull(parameters.getAwsParametersDto(), this::awsParametersToS3guardParam))
-                .build();
+        return Optional.ofNullable(parameters.getAwsParametersDto())
+                .map(aws -> AwsEnvironmentParameters.builder()
+                        .withS3guard(getIfNotNull(aws, this::awsParametersToS3guardParam))
+                        .build())
+                .orElse(null);
+    }
+
+    private AzureEnvironmentParametersResponse azureEnvParamsToAwsEnvironmentParams(ParametersDto parameters) {
+        return Optional.ofNullable(parameters.getAzureParametersDto())
+                .map(azure -> AzureEnvironmentParametersResponse.builder()
+                        .withAzureResourceGroup(getIfNotNull(azure.getAzureResourceGroupDto(), this::azureParametersToAzureResourceGroup))
+                        .build())
+                .orElse(null);
     }
 
     private S3GuardRequestParameters awsParametersToS3guardParam(AwsParametersDto awsParametersDto) {
         return S3GuardRequestParameters.builder()
                 .withDynamoDbTableName(awsParametersDto.getS3GuardTableName())
+                .build();
+    }
+
+    private AzureResourceGroupResponse azureParametersToAzureResourceGroup(AzureResourceGroupDto azureResourceGroupDto) {
+        return AzureResourceGroupResponse.builder()
+                .withName(azureResourceGroupDto.getName())
+                .withExisting(azureResourceGroupDto.getResourceGroupCreation().equals(ResourceGroupCreation.USE_EXISTING))
+                .withSingle(azureResourceGroupDto.getResourceGroupUsagePattern().equals(ResourceGroupUsagePattern.USE_SINGLE))
                 .build();
     }
 

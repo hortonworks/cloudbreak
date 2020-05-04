@@ -34,6 +34,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnviro
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParametersRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroupRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
@@ -185,6 +187,8 @@ public class EnvironmentApiConverterTest {
     private void assertParameters(EnvironmentRequest request, ParametersDto actual) {
         assertEquals(request.getAws().getS3guard().getDynamoDbTableName(), actual.getAwsParametersDto().getS3GuardTableName());
         assertEquals(request.getFreeIpa().getAws().getSpot().getPercentage(), actual.getAwsParametersDto().getFreeIpaSpotPercentage());
+        assertEquals(request.getAzure().getResourceGroup().getName(),
+                actual.getAzureParametersDto().getAzureResourceGroupDto().getName());
     }
 
     private void assertSecurityAccess(SecurityAccessRequest request, SecurityAccessDto actual) {
@@ -212,6 +216,7 @@ public class EnvironmentApiConverterTest {
         request.setAdminGroupName("cb-admin");
         request.setProxyConfigName("my-proxy");
         request.setAws(createAwsRequest());
+        request.setAzure(createAzureRequest());
         request.setTags(Map.of("owner", "cloudbreak"));
         request.setParentEnvironmentName("parent-env");
         return request;
@@ -237,6 +242,17 @@ public class EnvironmentApiConverterTest {
         AwsEnvironmentParameters awsEnvironmentParameters = new AwsEnvironmentParameters();
         awsEnvironmentParameters.setS3guard(s3GuardRequestParameters);
         return awsEnvironmentParameters;
+    }
+
+    private AzureEnvironmentParametersRequest createAzureRequest() {
+        AzureEnvironmentParametersRequest azureEnvironmentParameters = new AzureEnvironmentParametersRequest();
+        azureEnvironmentParameters.setResourceGroup(
+                AzureResourceGroupRequest.builder()
+                        .withName("mySingleResourceGroupName")
+                        .withSingle(true)
+                        .build()
+        );
+        return azureEnvironmentParameters;
     }
 
     private AttachedFreeIpaRequest createFreeIpaRequest() {

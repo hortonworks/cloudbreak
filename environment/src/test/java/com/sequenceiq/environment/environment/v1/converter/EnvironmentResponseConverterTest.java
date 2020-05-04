@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -21,6 +22,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.response.AzureEnvironmentParametersResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
@@ -45,7 +47,11 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
@@ -121,6 +127,7 @@ public class EnvironmentResponseConverterTest {
         assertEquals(environment.getExperimentalFeatures().getCloudStorageValidation(), actual.getCloudStorageValidation());
         assertEquals(environment.getAdminGroupName(), actual.getAdminGroupName());
         assertEquals(environment.getParameters().getAwsParametersDto().getS3GuardTableName(), actual.getAws().getS3guard().getDynamoDbTableName());
+        assertAzureParameters(environment.getParameters().getAzureParametersDto(), actual.getAzure());
         assertEquals(environment.getParentEnvironmentCrn(), actual.getParentEnvironmentCrn());
         assertEquals(environment.getParentEnvironmentName(), actual.getParentEnvironmentName());
         assertEquals(environment.getParentEnvironmentCloudPlatform(), actual.getParentEnvironmentCloudPlatform());
@@ -175,6 +182,7 @@ public class EnvironmentResponseConverterTest {
         assertEquals(telemetryResponse, actual.getTelemetry());
         assertEquals(compactRegionResponse, actual.getRegions());
         assertEquals(environment.getParameters().getAwsParametersDto().getS3GuardTableName(), actual.getAws().getS3guard().getDynamoDbTableName());
+        assertAzureParameters(environment.getParameters().getAzureParametersDto(), actual.getAzure());
         assertEquals(environment.getParentEnvironmentName(), actual.getParentEnvironmentName());
         assertEquals(proxyResponse, actual.getProxyConfig());
         assertEquals(environmentNetworkResponse, actual.getNetwork());
@@ -204,6 +212,11 @@ public class EnvironmentResponseConverterTest {
         assertEquals(securityAccess.getCidr(), actual.getCidr());
         assertEquals(securityAccess.getDefaultSecurityGroupId(), actual.getDefaultSecurityGroupId());
         assertEquals(securityAccess.getSecurityGroupIdForKnox(), actual.getSecurityGroupIdForKnox());
+    }
+
+    private void assertAzureParameters(AzureParametersDto azureParametersDto, AzureEnvironmentParametersResponse azureEnvironmentParameters) {
+        assertNotNull(azureEnvironmentParameters);
+        assertEquals(azureParametersDto.getAzureResourceGroupDto().getName(), azureEnvironmentParameters.getResourceGroup().getName());
     }
 
     private EnvironmentDto createEnvironmentDto() {
@@ -247,6 +260,14 @@ public class EnvironmentResponseConverterTest {
         return ParametersDto.builder()
                 .withAwsParameters(AwsParametersDto.builder()
                         .withDynamoDbTableName("my-table")
+                        .build())
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(
+                                AzureResourceGroupDto.builder()
+                                        .withName("my-resource-group-name")
+                                        .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
+                                        .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
+                                        .build())
                         .build())
                 .build();
     }
