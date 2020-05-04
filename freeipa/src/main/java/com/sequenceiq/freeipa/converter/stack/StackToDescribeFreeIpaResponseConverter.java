@@ -28,7 +28,7 @@ import com.sequenceiq.freeipa.converter.network.NetworkToNetworkResponseConverte
 import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
 import com.sequenceiq.freeipa.converter.usersync.UserSyncStatusToUserSyncStatusResponseConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
-import com.sequenceiq.freeipa.entity.Image;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
@@ -58,7 +58,7 @@ public class StackToDescribeFreeIpaResponseConverter {
     @Inject
     private UserSyncStatusToUserSyncStatusResponseConverter userSyncStatusConverter;
 
-    public DescribeFreeIpaResponse convert(Stack stack, Image image, FreeIpa freeIpa, UserSyncStatus userSyncStatus) {
+    public DescribeFreeIpaResponse convert(Stack stack, ImageEntity image, FreeIpa freeIpa, UserSyncStatus userSyncStatus) {
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
         describeFreeIpaResponse.setName(stack.getName());
         describeFreeIpaResponse.setEnvironmentCrn(stack.getEnvironmentCrn());

@@ -6,16 +6,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.freeipa.entity.Image;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 
 @Transactional(Transactional.TxType.REQUIRED)
-public interface ImageRepository extends CrudRepository<Image, Long> {
+public interface ImageRepository extends CrudRepository<ImageEntity, Long> {
 
-    Image getByStack(Stack stack);
+    ImageEntity getByStack(Stack stack);
 
-    @Query("SELECT i FROM Image i " +
+    @Query("SELECT i FROM image i " +
             "LEFT JOIN i.stack s " +
             "WHERE s.id = :stackId")
-    Image getByStackId(@Param("stackId") Long stackId);
+    ImageEntity getByStackId(@Param("stackId") Long stackId);
 }

@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.service.image;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.freeipa.TestUtil;
+import com.sequenceiq.freeipa.api.model.image.FreeIpaVersions;
 import com.sequenceiq.freeipa.api.model.image.Image;
 import com.sequenceiq.freeipa.api.model.image.ImageCatalog;
 
@@ -58,8 +58,15 @@ public class ImageCatalogProviderTest {
 
         ImageCatalog catalog = underTest.getImageCatalog(IMAGE_CATALOG_JSON);
         List<com.sequenceiq.freeipa.api.model.image.Image> images = catalog.getImages().getFreeipaImages();
-        assertEquals(3, images.size());
+        assertEquals(4, images.size());
         assertEquals("61851893-8340-411d-afb7-e1b55107fb10", images.get(0).getUuid());
+
+        FreeIpaVersions freeIpaVersions = catalog.getVersions().getFreeIpaVersions().get(0);
+        assertEquals(2, freeIpaVersions.getImageIds().size());
+        assertEquals("61851893-8340-411d-afb7-e1b55107fb10", freeIpaVersions.getImageIds().get(0));
+        assertEquals(1, freeIpaVersions.getDefaults().size());
+        assertEquals(List.of("71851893-8340-411d-afb7-e1b55107fb10"), freeIpaVersions.getDefaults());
+        assertEquals(4, freeIpaVersions.getVersions().size());
     }
 
     @Test
@@ -106,8 +113,11 @@ public class ImageCatalogProviderTest {
         List<String> actualOsTypes = getImageCatalogOses(actualCatalog);
         assertEquals(IMAGE_CATALOG_OS_TYPES, actualOsTypes);
 
-        assertEquals(Arrays.asList("61851893-8340-411d-afb7-e1b55107fb10", "71851893-8340-411d-afb7-e1b55107fb10",
-                "81851893-8340-411d-afb7-e1b55107fb10"), mapToUuid(actualCatalog.getImages().getFreeipaImages()));
+        List<String> expectedIds = List.of("61851893-8340-411d-afb7-e1b55107fb10", "71851893-8340-411d-afb7-e1b55107fb10",
+                "81851893-8340-411d-afb7-e1b55107fb10", "91851893-8340-411d-afb7-e1b55107fb10");
+        assertEquals(expectedIds, mapToUuid(actualCatalog.getImages().getFreeipaImages()));
+        assertEquals(List.of("61851893-8340-411d-afb7-e1b55107fb10", "71851893-8340-411d-afb7-e1b55107fb10"),
+                actualCatalog.getVersions().getFreeIpaVersions().get(0).getImageIds());
     }
 
     @Test
@@ -121,9 +131,11 @@ public class ImageCatalogProviderTest {
         List<String> actualOsTypes = getImageCatalogOses(actualCatalog);
         assertEquals(CB_CENTOS_7_FILTER, actualOsTypes);
 
-        List<String> expectedImagesList = Collections.singletonList("81851893-8340-411d-afb7-e1b55107fb10");
+        List<String> expectedImagesList = List.of("81851893-8340-411d-afb7-e1b55107fb10", "91851893-8340-411d-afb7-e1b55107fb10");
         assertEquals(expectedImagesList, mapToUuid(actualCatalog.getImages().getFreeipaImages()));
-        assertEquals(1, actualCatalog.getImages().getFreeipaImages().size());
+        assertEquals(List.of(), actualCatalog.getVersions().getFreeIpaVersions().get(0).getImageIds());
+        assertEquals(List.of(), actualCatalog.getVersions().getFreeIpaVersions().get(0).getDefaults());
+        assertEquals(2, actualCatalog.getImages().getFreeipaImages().size());
     }
 
     @Test
