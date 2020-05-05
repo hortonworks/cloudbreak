@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
+@SuppressWarnings("checkstyle:Regexp")
 @RunWith(MockitoJUnitRunner.class)
 public class ClouderaManagerHostStatusCheckerTest {
 

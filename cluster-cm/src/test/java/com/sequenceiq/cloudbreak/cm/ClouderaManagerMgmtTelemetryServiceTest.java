@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.client.ApiResponse;
@@ -25,6 +26,7 @@ import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
@@ -46,6 +48,12 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
     @Mock
     private ApiClient apiClient;
 
+    @Mock
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
+
+    @Mock
+    private ClouderaManagerResourceApi cmResourceApi;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -64,10 +72,11 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         AltusCredential credential = new AltusCredential("accessKey", "secretKey".toCharArray());
         when(apiClient.execute(any(), any())).thenReturn(response);
         when(clouderaManagerDatabusService.getAltusCredential(stack)).thenReturn(credential);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(cmResourceApi);
+        when(cmResourceApi.updateConfig(anyString(), any())).thenReturn(apiConfigList);
         // WHEN
         underTest.setupTelemetryRole(stack, apiClient, null, new ApiRoleList(), telemetry);
         // THEN
-        verify(apiClient, times(1)).execute(any(), any());
         verify(externalAccountService, times(1)).createExternalAccount(anyString(), anyString(), anyString(), anyMap(), any(ApiClient.class));
         verify(clouderaManagerDatabusService, times(1)).getAltusCredential(stack);
     }

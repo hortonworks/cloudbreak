@@ -78,6 +78,13 @@
         </module>
         -->
 
+        <module name="Regexp">
+            <property name="format" value="new (ActivitiesResourceApi|AllHostsResourceApi|AuditsResourceApi|AuthRoleMetadatasResourceApi|AuthRolesResourceApi|AuthServiceResourceApi|AuthServiceRoleCommandsResourceApi|AuthServiceRoleConfigGroupsResourceApi|AuthServiceRolesResourceApi|BatchResourceApi|CdpResourceApi|CertManagerResourceApi|ClouderaManagerResourceApi|ClustersResourceApi|CmPeersResourceApi|CommandsResourceApi|DashboardsResourceApi|DataContextsResourceApi|EventsResourceApi|ExternalAccountsResourceApi|ExternalUserMappingsResourceApi|HostsResourceApi|HostTemplatesResourceApi|ImpalaQueriesResourceApi|MgmtRoleCommandsResourceApi|MgmtRoleConfigGroupsResourceApi|MgmtRolesResourceApi|MgmtServiceResourceApi|NameservicesResourceApi|ParcelResourceApi|ParcelsResourceApi|ProcessResourceApi|ReplicationsResourceApi|RoleCommandsResourceApi|RoleConfigGroupsResourceApi|RolesResourceApi|ServicesResourceApi|SnapshotsResourceApi|TagsResourceApi|TimeSeriesResourceApi|ToolsResourceApi|UsersResourceApi|WatchedDirResourceApi|YarnApplicationsResourceApi)" />
+            <property name="message" value="It's forbidden to instantiate CM APIs with the 'new' keyword. Use instead the ClouderaManagerApiFactory." />
+            <property name="illegalPattern" value="true" />
+            <property name="ignoreComments" value="true" />
+        </module>
+
         <!-- Metrics -->
         <module name="ParameterNumber">
             <property name="max" value="7" />

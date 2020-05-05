@@ -12,6 +12,7 @@ import com.cloudera.api.swagger.CdpResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.CommandsResourceApi;
+import com.cloudera.api.swagger.ExternalAccountsResourceApi;
 import com.cloudera.api.swagger.ExternalUserMappingsResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
@@ -87,6 +88,9 @@ public class ClouderaManagerApiFactory {
     @Inject
     private Function<ApiClient, ToolsResourceApi> toolsResourceApiFactory;
 
+    @Inject
+    private Function<ApiClient, ExternalAccountsResourceApi> externalAccountsResourceApiFactory;
+
     public ClouderaManagerResourceApi getClouderaManagerResourceApi(ApiClient apiClient) {
         return clouderaManagerResourceApiFactory.apply(apiClient);
     }
@@ -161,5 +165,9 @@ public class ClouderaManagerApiFactory {
 
     public ToolsResourceApi getToolsResourceApi(ApiClient client) {
         return toolsResourceApiFactory.apply(client);
+    }
+
+    public ExternalAccountsResourceApi getExternalAccountsResourceApi(ApiClient client) {
+        return externalAccountsResourceApiFactory.apply(client);
     }
 }

@@ -63,6 +63,9 @@ public class ClouderaManagerDecomissioner {
 
     private static final String SUMMARY_REQUEST_VIEW = "SUMMARY";
 
+    @Inject
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
+
     private final Comparator<? super ApiHost> hostHealthComparator = (host1, host2) -> {
         boolean host1Healthy = ApiHealthSummary.GOOD.equals(host1.getHealthSummary());
         boolean host2Healthy = ApiHealthSummary.GOOD.equals(host2.getHealthSummary());
@@ -81,9 +84,6 @@ public class ClouderaManagerDecomissioner {
 
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
-
-    @Inject
-    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     public void verifyNodesAreRemovable(Stack stack, Collection<InstanceMetaData> removableInstances, ApiClient client) {
         try {
@@ -163,7 +163,7 @@ public class ClouderaManagerDecomissioner {
         if (hostsToRemove.size() != hostNames.size()) {
             LOGGER.debug("Not all hosts found in the given host group. [{}, {}]", hostGroup.getName(), hostNames);
         }
-        ClustersResourceApi clustersResourceApi = new ClustersResourceApi(client);
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
         try {
             ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName(), null, null);
             List<String> runningHosts = hostRefList.getItems().stream()
@@ -182,7 +182,7 @@ public class ClouderaManagerDecomissioner {
     }
 
     public Set<String> decommissionNodes(Stack stack, Map<String, InstanceMetaData> hostsToRemove, ApiClient client) {
-        ClustersResourceApi clustersResourceApi = new ClustersResourceApi(client);
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
         try {
             ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName(), null, null);
             List<String> stillAvailableRemovableHosts = hostRefList.getItems().stream()
@@ -192,7 +192,7 @@ public class ClouderaManagerDecomissioner {
                     .collect(Collectors.toList());
 
             LOGGER.debug("Decommissioning nodes: [{}]", stillAvailableRemovableHosts);
-            ClouderaManagerResourceApi apiInstance = new ClouderaManagerResourceApi(client);
+            ClouderaManagerResourceApi apiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
             ApiHostNameList body = new ApiHostNameList().items(stillAvailableRemovableHosts);
             ApiCommand apiCommand = apiInstance.hostsDecommissionCommand(body);
             PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmHostDecommissioning(stack, client, apiCommand.getId());
@@ -263,7 +263,7 @@ public class ClouderaManagerDecomissioner {
 
     private void deleteUnusedCredentialsFromCluster(Stack stack, InstanceMetaData data, ApiClient client) {
         LOGGER.debug("Deleting unused credentials");
-        ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
+        ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
         try {
             ApiCommand command = clouderaManagerResourceApi.deleteCredentialsCommand("unused");
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, command.getId());
@@ -274,7 +274,7 @@ public class ClouderaManagerDecomissioner {
     }
 
     private void deleteHostFromClouderaManager(Stack stack, InstanceMetaData data, ApiClient client) {
-        ClustersResourceApi clustersResourceApi = new ClustersResourceApi(client);
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
         try {
             ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName(), null, null);
             Optional<ApiHostRef> hostRefOptional = hostRefList.getItems().stream()
@@ -282,7 +282,7 @@ public class ClouderaManagerDecomissioner {
                     .findFirst();
             if (hostRefOptional.isPresent()) {
                 ApiHostRef hostRef = hostRefOptional.get();
-                HostsResourceApi hostsResourceApi = new HostsResourceApi(client);
+                HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
                 clustersResourceApi.removeHost(stack.getName(), hostRef.getHostId());
                 hostsResourceApi.deleteHost(hostRef.getHostId());
                 LOGGER.debug("Host remove request sent. Host id: [{}]", hostRef.getHostId());
@@ -297,8 +297,8 @@ public class ClouderaManagerDecomissioner {
 
     private void deleteRolesFromHost(Stack stack, InstanceMetaData data, ApiClient client) {
         LOGGER.debug("Deleting roles from host: [{}]", data.getDiscoveryFQDN());
-        ServicesResourceApi servicesResourceApi = new ServicesResourceApi(client);
-        RolesResourceApi rolesResourceApi = new RolesResourceApi(client);
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
+        RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(client);
 
         String filter = "hostname==" + data.getDiscoveryFQDN();
 
@@ -315,7 +315,7 @@ public class ClouderaManagerDecomissioner {
     }
 
     public void stopAndRemoveMgmtService(Stack stack, ApiClient client) {
-        MgmtServiceResourceApi mgmtServiceResourceApi = new MgmtServiceResourceApi(client);
+        MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerApiFactory.getMgmtServiceResourceApi(client);
         try {
             clouderaManagerPollingServiceProvider.startPollingCmManagementServiceShutdown(stack,
                     client, mgmtServiceResourceApi.stopCommand().getId());

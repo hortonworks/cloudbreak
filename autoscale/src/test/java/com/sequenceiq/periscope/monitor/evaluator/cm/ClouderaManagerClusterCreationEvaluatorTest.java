@@ -204,7 +204,9 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
             when(historyService.createEntry(any(), anyString(), anyInt(), any(Cluster.class))).thenReturn(history);
         }
         when(clusterService.update(anyLong(), any(), any(), anyBoolean())).thenReturn(cluster);
+        // CHECKSTYLE:OFF
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(new ClouderaManagerResourceApi());
+        // CHECKSTYLE:ON
     }
 
     private AutoscaleStackV4Response getStackResponse() {

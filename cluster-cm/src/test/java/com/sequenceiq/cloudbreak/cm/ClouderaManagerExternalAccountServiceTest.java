@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,19 +13,25 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.cloudera.api.swagger.ExternalAccountsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
-import com.cloudera.api.swagger.client.ApiResponse;
-import com.cloudera.api.swagger.model.ApiExternalAccount;
 import com.cloudera.api.swagger.model.ApiExternalAccountList;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 
 public class ClouderaManagerExternalAccountServiceTest {
 
-    @InjectMocks
-    private ClouderaManagerExternalAccountService underTest;
-
     @Mock
     private ApiClient apiClient;
+
+    @Mock
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
+
+    @Mock
+    private ExternalAccountsResourceApi externalAccountsResourceApi;
+
+    @InjectMocks
+    private ClouderaManagerExternalAccountService underTest;
 
     @Before
     public void setUp() {
@@ -35,18 +40,12 @@ public class ClouderaManagerExternalAccountServiceTest {
 
     @Test
     public void testCreateExternalAccount() throws ApiException {
-        // GIVEN
-        ApiExternalAccount apiExternalAccount = new ApiExternalAccount();
         ApiExternalAccountList apiExternalAccountList = new ApiExternalAccountList();
-        ApiResponse readAccountsResponse = new ApiResponse<>(0, null, apiExternalAccountList);
-        ApiResponse response = new ApiResponse<>(0, null, apiExternalAccount);
-        when(apiClient.execute(any(), any()))
-                .thenReturn(readAccountsResponse)
-                .thenReturn(response);
-        when(apiClient.escapeString(anyString())).thenReturn(anyString());
-        // WHEN
+        when(clouderaManagerApiFactory.getExternalAccountsResourceApi(apiClient)).thenReturn(externalAccountsResourceApi);
+        when(externalAccountsResourceApi.readAccounts(anyString(), anyString())).thenReturn(apiExternalAccountList);
+
         underTest.createExternalAccount("cb-altus-access", null, "ALTUS_ACCESS_KEY", new HashMap<>(), apiClient);
-        // THEN
-        verify(apiClient, times(2)).execute(any(), any());
+
+        verify(externalAccountsResourceApi, times(1)).readAccounts(anyString(), anyString());
     }
 }

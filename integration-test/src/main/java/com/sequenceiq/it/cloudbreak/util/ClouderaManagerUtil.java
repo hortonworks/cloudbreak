@@ -55,8 +55,9 @@ public class ClouderaManagerUtil {
         cmClient.setUsername(cmUser);
         cmClient.setPassword(cmPassword);
         cmClient.setVerifyingSsl(false);
-
+        // CHECKSTYLE:OFF
         UsersResourceApi usersResourceApi = new UsersResourceApi(cmClient);
+        // CHECKSTYLE:ON
         try {
             ApiUser2 testUserDetails = usersResourceApi.readUser2("teszt");
             String testUserName = String.valueOf(testUserDetails.getName());

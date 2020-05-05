@@ -12,6 +12,7 @@ import com.cloudera.api.swagger.CdpResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.CommandsResourceApi;
+import com.cloudera.api.swagger.ExternalAccountsResourceApi;
 import com.cloudera.api.swagger.ExternalUserMappingsResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
@@ -31,7 +32,6 @@ import com.cloudera.api.swagger.client.ApiClient;
 public class CmClientConfig {
 
     // factory functions:
-
     @Bean
     public Function<ApiClient, ClouderaManagerResourceApi> clouderaManagerResourceApiFactory() {
         return this::clouderaManagerResourceApi;
@@ -127,8 +127,13 @@ public class CmClientConfig {
         return this::toolsResourceApi;
     }
 
-    // prototype bean declarations:
+    @Bean
+    public Function<ApiClient, ExternalAccountsResourceApi> externalAccountsResourceApiFactory() {
+        return this::externalAccountsResourceApi;
+    }
 
+    // prototype bean declarations:
+    // CHECKSTYLE:OFF
     @Bean
     @Scope(value = "prototype")
     public ClouderaManagerResourceApi clouderaManagerResourceApi(ApiClient apiClient) {
@@ -242,4 +247,11 @@ public class CmClientConfig {
     public ToolsResourceApi toolsResourceApi(ApiClient apiClient) {
         return new ToolsResourceApi(apiClient);
     }
+
+    @Bean
+    @Scope(value = "prototype")
+    public ExternalAccountsResourceApi externalAccountsResourceApi(ApiClient apiClient) {
+        return new ExternalAccountsResourceApi(apiClient);
+    }
+    // CHECKSTYLE:ON
 }
