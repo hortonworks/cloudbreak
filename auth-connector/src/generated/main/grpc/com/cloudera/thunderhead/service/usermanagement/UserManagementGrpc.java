@@ -513,6 +513,43 @@ public final class UserManagementGrpc {
      return getFindUsersByEmailMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getFindUsersMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> METHOD_FIND_USERS = getFindUsersMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> getFindUsersMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> getFindUsersMethod() {
+    return getFindUsersMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> getFindUsersMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> getFindUsersMethod;
+    if ((getFindUsersMethod = UserManagementGrpc.getFindUsersMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getFindUsersMethod = UserManagementGrpc.getFindUsersMethod) == null) {
+          UserManagementGrpc.getFindUsersMethod = getFindUsersMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "FindUsers"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("FindUsers"))
+                  .build();
+          }
+        }
+     }
+     return getFindUsersMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getCreateAccessKeyMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse> METHOD_CREATE_ACCESS_KEY = getCreateAccessKeyMethodHelper();
@@ -3414,12 +3451,22 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Find users.
+     * Find users by Email.
      * </pre>
      */
     public void findUsersByEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getFindUsersByEmailMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Find users.
+     * </pre>
+     */
+    public void findUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getFindUsersMethodHelper(), responseObserver);
     }
 
     /**
@@ -4282,6 +4329,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse>(
                   this, METHODID_FIND_USERS_BY_EMAIL)))
           .addMethod(
+            getFindUsersMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse>(
+                  this, METHODID_FIND_USERS)))
+          .addMethod(
             getCreateAccessKeyMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
@@ -4969,13 +5023,24 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Find users.
+     * Find users by Email.
      * </pre>
      */
     public void findUsersByEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getFindUsersByEmailMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Find users.
+     * </pre>
+     */
+    public void findUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getFindUsersMethodHelper(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -5973,12 +6038,22 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Find users.
+     * Find users by Email.
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse findUsersByEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest request) {
       return blockingUnaryCall(
           getChannel(), getFindUsersByEmailMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Find users.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse findUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getFindUsersMethodHelper(), getCallOptions(), request);
     }
 
     /**
@@ -6914,13 +6989,24 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Find users.
+     * Find users by Email.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse> findUsersByEmail(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getFindUsersByEmailMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Find users.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> findUsers(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getFindUsersMethodHelper(), getCallOptions()), request);
     }
 
     /**
@@ -7777,80 +7863,81 @@ public final class UserManagementGrpc {
   private static final int METHODID_GET_USER = 10;
   private static final int METHODID_LIST_USERS = 11;
   private static final int METHODID_FIND_USERS_BY_EMAIL = 12;
-  private static final int METHODID_CREATE_ACCESS_KEY = 13;
-  private static final int METHODID_UPDATE_ACCESS_KEY = 14;
-  private static final int METHODID_DELETE_ACCESS_KEY = 15;
-  private static final int METHODID_GET_ACCESS_KEY = 16;
-  private static final int METHODID_LIST_ACCESS_KEYS = 17;
-  private static final int METHODID_GET_VERSION = 18;
-  private static final int METHODID_GET_ACCOUNT = 19;
-  private static final int METHODID_LIST_ACCOUNTS = 20;
-  private static final int METHODID_GET_RIGHTS = 21;
-  private static final int METHODID_CHECK_RIGHTS = 22;
-  private static final int METHODID_CREATE_ACCOUNT = 23;
-  private static final int METHODID_CREATE_TRIAL_ACCOUNT = 24;
-  private static final int METHODID_GRANT_ENTITLEMENT = 25;
-  private static final int METHODID_REVOKE_ENTITLEMENT = 26;
-  private static final int METHODID_ASSIGN_ROLE = 27;
-  private static final int METHODID_UNASSIGN_ROLE = 28;
-  private static final int METHODID_LIST_ASSIGNED_ROLES = 29;
-  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 30;
-  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 31;
-  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 32;
-  private static final int METHODID_LIST_ROLES = 33;
-  private static final int METHODID_LIST_RESOURCE_ROLES = 34;
-  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 35;
-  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 36;
-  private static final int METHODID_INITIATE_SUPPORT_CASE = 37;
-  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 38;
-  private static final int METHODID_CREATE_MACHINE_USER = 39;
-  private static final int METHODID_LIST_MACHINE_USERS = 40;
-  private static final int METHODID_DELETE_MACHINE_USER = 41;
-  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 42;
-  private static final int METHODID_SET_ACCOUNT_MESSAGES = 43;
-  private static final int METHODID_ACCEPT_TERMS = 44;
-  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 45;
-  private static final int METHODID_DESCRIBE_TERMS = 46;
-  private static final int METHODID_LIST_TERMS = 47;
-  private static final int METHODID_LIST_ENTITLEMENTS = 48;
-  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 49;
-  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 50;
-  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 51;
-  private static final int METHODID_CREATE_GROUP = 52;
-  private static final int METHODID_DELETE_GROUP = 53;
-  private static final int METHODID_LIST_GROUPS = 54;
-  private static final int METHODID_UPDATE_GROUP = 55;
-  private static final int METHODID_ADD_MEMBER_TO_GROUP = 56;
-  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 57;
-  private static final int METHODID_LIST_GROUP_MEMBERS = 58;
-  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 59;
-  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = 60;
-  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 61;
-  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 62;
-  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 63;
-  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 64;
-  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 65;
-  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 66;
-  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 67;
-  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 68;
-  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 69;
-  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 70;
-  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 71;
-  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 72;
-  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 73;
-  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 74;
-  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 75;
-  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 76;
-  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 77;
-  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 78;
-  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 79;
-  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 80;
-  private static final int METHODID_GET_EVENT_GENERATION_IDS = 81;
-  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 82;
-  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 83;
-  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 84;
-  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 85;
-  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 86;
+  private static final int METHODID_FIND_USERS = 13;
+  private static final int METHODID_CREATE_ACCESS_KEY = 14;
+  private static final int METHODID_UPDATE_ACCESS_KEY = 15;
+  private static final int METHODID_DELETE_ACCESS_KEY = 16;
+  private static final int METHODID_GET_ACCESS_KEY = 17;
+  private static final int METHODID_LIST_ACCESS_KEYS = 18;
+  private static final int METHODID_GET_VERSION = 19;
+  private static final int METHODID_GET_ACCOUNT = 20;
+  private static final int METHODID_LIST_ACCOUNTS = 21;
+  private static final int METHODID_GET_RIGHTS = 22;
+  private static final int METHODID_CHECK_RIGHTS = 23;
+  private static final int METHODID_CREATE_ACCOUNT = 24;
+  private static final int METHODID_CREATE_TRIAL_ACCOUNT = 25;
+  private static final int METHODID_GRANT_ENTITLEMENT = 26;
+  private static final int METHODID_REVOKE_ENTITLEMENT = 27;
+  private static final int METHODID_ASSIGN_ROLE = 28;
+  private static final int METHODID_UNASSIGN_ROLE = 29;
+  private static final int METHODID_LIST_ASSIGNED_ROLES = 30;
+  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 31;
+  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 32;
+  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 33;
+  private static final int METHODID_LIST_ROLES = 34;
+  private static final int METHODID_LIST_RESOURCE_ROLES = 35;
+  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 36;
+  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 37;
+  private static final int METHODID_INITIATE_SUPPORT_CASE = 38;
+  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 39;
+  private static final int METHODID_CREATE_MACHINE_USER = 40;
+  private static final int METHODID_LIST_MACHINE_USERS = 41;
+  private static final int METHODID_DELETE_MACHINE_USER = 42;
+  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 43;
+  private static final int METHODID_SET_ACCOUNT_MESSAGES = 44;
+  private static final int METHODID_ACCEPT_TERMS = 45;
+  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 46;
+  private static final int METHODID_DESCRIBE_TERMS = 47;
+  private static final int METHODID_LIST_TERMS = 48;
+  private static final int METHODID_LIST_ENTITLEMENTS = 49;
+  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 50;
+  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 51;
+  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 52;
+  private static final int METHODID_CREATE_GROUP = 53;
+  private static final int METHODID_DELETE_GROUP = 54;
+  private static final int METHODID_LIST_GROUPS = 55;
+  private static final int METHODID_UPDATE_GROUP = 56;
+  private static final int METHODID_ADD_MEMBER_TO_GROUP = 57;
+  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 58;
+  private static final int METHODID_LIST_GROUP_MEMBERS = 59;
+  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 60;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = 61;
+  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 62;
+  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 63;
+  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 64;
+  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 65;
+  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 66;
+  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 67;
+  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 68;
+  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 69;
+  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 70;
+  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 71;
+  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 72;
+  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 73;
+  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 74;
+  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 75;
+  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 76;
+  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 77;
+  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 78;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 79;
+  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 80;
+  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 81;
+  private static final int METHODID_GET_EVENT_GENERATION_IDS = 82;
+  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 83;
+  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 84;
+  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 85;
+  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 86;
+  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 87;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -7920,6 +8007,10 @@ public final class UserManagementGrpc {
         case METHODID_FIND_USERS_BY_EMAIL:
           serviceImpl.findUsersByEmail((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse>) responseObserver);
+          break;
+        case METHODID_FIND_USERS:
+          serviceImpl.findUsers((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse>) responseObserver);
           break;
         case METHODID_CREATE_ACCESS_KEY:
           serviceImpl.createAccessKey((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest) request,
@@ -8291,6 +8382,7 @@ public final class UserManagementGrpc {
               .addMethod(getGetUserMethodHelper())
               .addMethod(getListUsersMethodHelper())
               .addMethod(getFindUsersByEmailMethodHelper())
+              .addMethod(getFindUsersMethodHelper())
               .addMethod(getCreateAccessKeyMethodHelper())
               .addMethod(getUpdateAccessKeyMethodHelper())
               .addMethod(getDeleteAccessKeyMethodHelper())

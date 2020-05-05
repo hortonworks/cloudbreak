@@ -73,9 +73,14 @@ service UserManagement {
   rpc ListUsers (ListUsersRequest)
     returns (ListUsersResponse) {}
 
-  // Find users.
+  // Find users by Email.
   rpc FindUsersByEmail (FindUsersByEmailRequest)
     returns (FindUsersByEmailResponse) {}
+
+  // Find users.
+  rpc FindUsers (FindUsersRequest)
+    returns (FindUsersResponse) {
+  }
 
   // Creates a new access key.
   rpc CreateAccessKey (CreateAccessKeyRequest)
@@ -402,6 +407,16 @@ service UserManagement {
   returns (SetWorkloadPasswordPolicyResponse) {}
 }
 
+// The state of the actor.
+message ActorState {
+  enum Value {
+    // Active indicates that the actor can authenticate in to CDP.
+    ACTIVE = 0;
+    // Deleting indicates that the actor can no longer authenticate in to CDP.
+    DELETING = 1;
+  }
+}
+
 // An User is the Altus identity corresponding to an external SFDC contact. Users
 // can interactively login, be assigned roles to, and can be designated account
 // administrators.
@@ -438,6 +453,12 @@ message User {
   // if a user is deleted the workload username it used becomes available to new
   // users in the account.
   string workloadUsername = 14;
+  // The state of the user.
+  ActorState.Value state = 15;
+  // The date when the user record can safely be removed from storage.
+  // In ms from the Java epoch of 1970-01-01T00:00:00Z.
+  // The value is only meaningful when the 'state' is DELETING.
+  uint64 safeDeleteDateMs = 16;
 }
 
 // A MachineUser is an internal Altus identity, used by applications to call
@@ -466,6 +487,12 @@ message MachineUser {
   // determine the existence of an internal machine user. We simply prevent them
   // from shooting themselves in the foot by modifying one.
   bool internal = 6;
+  // The state of the machine user.
+  ActorState.Value state = 7;
+  // The date when the user record can safely be removed from storage.
+  // In ms from the Java epoch of 1970-01-01T00:00:00Z.
+  // The value is only meaningful when the 'state' is DELETING.
+  uint64 safeDeleteDateMs = 8;
 }
 
 // A Group is a Altus resource that contains a collection of Actors. Groups
@@ -645,8 +672,8 @@ message InteractiveLogin3rdPartyRequest {
   // This may be an empty string.
   string lastName = 6;
   // Optional. The InResponseTo field, which is included in the AuthnResponse by
-  // the IdP during an SP-initiated login. For an IdP-initiated login this will
-  // be an empty string.
+  // the IdP during an SP-initiated login. For an IdP-initiated or for non-SAML
+  // logins this will be an empty string.
   string inResponseTo = 7;
   // Optional. The IP address that the request was made from.
   string sourceIpAddress = 8;
@@ -790,6 +817,8 @@ message ListUsersRequest {
   string accountId = 4;
   // The list is optional. The default is to return all users.
   repeated string userIdOrCrn = 5;
+  // Whether to include deleted users.
+  bool includeDeleted = 6;
   // See the PageToken comment in paging.proto on paging usage.
   int32 pageSize = 2;
   paging.PageToken pageToken = 3;
@@ -835,6 +864,31 @@ message FindUsersByEmailRequest {
 }
 
 message FindUsersByEmailResponse {
+  // The users.
+  repeated User user = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
+}
+
+message SearchByEmail {
+  string email = 1;
+}
+
+message SearchByWorkloadUsername {
+  string workloadUsername = 1;
+}
+
+message FindUsersRequest {
+  oneof search_by {
+    SearchByEmail searchByEmail = 1;
+    SearchByWorkloadUsername searchByWorkloadUsername = 2;
+  }
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 3;
+  paging.PageToken pageToken = 4;
+}
+
+message FindUsersResponse {
   // The users.
   repeated User user = 1;
   // See the PageToken comment in paging.proto on paging usage.
@@ -1529,6 +1583,8 @@ message ListMachineUsersRequest {
   // when listing by name or CRN. For those calls, internal machine users are
   // always returned.
   bool includeInternal = 5;
+  // Whether to include deleted machine users.
+  bool includeDeleted = 6;
   // See the PageToken comment in paging.proto on paging usage.
   int32 pageSize = 3;
   paging.PageToken pageToken = 4;
@@ -1873,6 +1929,90 @@ message SamlProviderDetails {
   string metadata = 1;
 }
 
+// LDAP connection attributes used to create a LDAP identity provider connector.
+message LdapProviderDetails {
+  // LDAP server URL.
+  // Required. We support only scheme, host and port
+  // Any other attribute supplied as part of the URI would be stripped away for security
+  // eg. ldaps://ldap.example.org:663
+  string url = 1;
+  // Admin connection DN.
+  // Optional. Default: Anonymous bind when allowed
+  // If not provided, or if supplied an empty string would result in anonymous bind when allowed.
+  // e.g. uid=myapp,ou=users,dc=example,dc=org
+  string bindDn = 2;
+  // Optional. Required if bind is not anonymous
+  // This value would be stored in Vault KV store on usermanagement/<ConnectorCrn>:bindPassword
+  // Password for bindDN.
+  string bindPassword = 3 [(options.FieldExtension.sensitive) = true];
+  // Property of the LDAP user object to use when binding to verify the password.
+  // e.g. name, email
+  string userBindProperty = 4;
+  // The base DN from which to search for users by username.
+  // e.g. ou=users,dc=example,dc=org
+  string userSearchBase = 5;
+  // LDAP search filter with which to find a user by username
+  // Use the literal {{username}} to have the given username interpolated in for the LDAP search.
+  // e.g. (uid={{username}})
+  string userSearchFilter = 6;
+  // The property of user object to use in {{dn}} interpolation of groupSearchFilter.
+  string groupDnProperty = 7;
+  // The base DN from which to search for groups.
+  // If defined, groupSearchFilter must also be defined for the search to work.
+  string groupSearchBase = 8;
+  // LDAP search filter for groups.
+  // Place literal {{dn}} in the filter to have it replaced by the property defined with groupDnProperty of the found user object.
+  // {{username}} is also available and will be replaced with the uid of the found user.
+  string groupSearchFilter = 9;
+
+  // https://nodejs.org/dist/latest-v12.x/docs/api/tls.html#tls_tls_createsecurecontext_options
+  // Optionally override the trusted CA certificates. Default is to trust the well-known CAs configured in system truststore.
+  // System truststore is completely replaced when CAs are explicitly specified using this option.
+  // The value can be a string or an Array of strings. Any string can contain multiple PEM CAs concatenated together.
+  // The peer's certificate must be chainable to a CA trusted by the server for the connection to be authenticated.
+  // When using certificates that are not chainable to a well-known CA, the certificate's CA must be explicitly specified
+  // as a trusted or the connection will fail to authenticate. If the peer uses a certificate that doesn't match or chain
+  // to one of the default CAs configured in system truststore, use this option to provide a CA certificate that the peer's
+  // certificate can match or chain to. For self-signed certificates, the certificate is its own CA, and must be provided.
+  // For PEM encoded certificates, supported types are "TRUSTED CERTIFICATE", "X509 CERTIFICATE", and "CERTIFICATE".
+  // If the user is setup with a referral, we must provide certificates which can verify connection to every server
+  repeated string tlsCaCertificates = 10;
+
+  // All LDAP servers are slightly different in their own way. Information required to create a UMS user might be stored under
+  // a different attribute. Following properties would help in mapping attributes from a given LDAP server.
+
+  // Mapping user's LDAP entry into idpUserId attribute of UMS
+  string usernameMappingAttribute = 20;
+  // Mapping user's LDAP entry into email attribute of UMS
+  string emailMappingAttribute = 21;
+  // Mapping user's LDAP entry into firstName attribute of UMS
+  string firstNameMappingAttribute = 22;
+  // Mapping user's LDAP entry into lastName attribute of UMS
+  string lastNameMappingAttribute = 23;
+  // Mapping group's LDAP entry into group attribute of UMS
+  string groupNameMappingAttribute = 24;
+}
+
+// Local connection attributes used to create a local identity provider connector.
+// This was created to support first-time user onboarding and scenarios when an account
+// ended up getting locked because of a misconfigured/unreachable identity provider
+// This should only be used to configure other (real) IdP connectors
+message LocalProviderDetails {
+  // Username of the only user who can log-in using this identity provider
+  // This field must be admin
+  string username = 1;
+  // Password of this user
+  string password = 2 [(options.FieldExtension.sensitive) = true];
+  // Email address of this user
+  // This is a required field for interactive login. However, we would not ever want to use this
+  // address or expect it to be valid.
+  string email = 3;
+  // This may be an empty string.
+  string firstName = 4;
+  // This may be an empty string.
+  string lastName = 5;
+}
+
 message CreateIdentityProviderConnectorRequest {
   // Account id for which external identity provider connector is created.
   string accountId = 1;
@@ -1881,6 +2021,10 @@ message CreateIdentityProviderConnectorRequest {
   oneof providerDetails_oneof {
     // Covers SAML provider attributes.
     SamlProviderDetails samlDetails = 3;
+    // Covers LDAP connection attributes
+    LdapProviderDetails ldapDetails = 5;
+    // Covers Local connection attributes
+    LocalProviderDetails localDetails = 6;
   }
   // Whether to sync groups on login or not. This flag is reversed as the default
   // behavior before this flag was introduced was to sync group on login and the
@@ -1898,6 +2042,98 @@ message SamlProviderInfo {
   repeated SamlCert certs = 2;
 }
 
+// Information about an LDAP identity provider connector. Certain fields may
+// be switched for ListIdentityProviderConnectors, see below for details.
+message LdapProviderInfo {
+  // LDAP server URL.
+  // Required. We support only scheme, host and port
+  // Any other attribute supplied as part of the URI would be stripped away for security
+  // eg. ldaps://ldap.example.org:663
+  string url = 1;
+  // Admin connection DN.
+  // Optional. Default: Anonymous bind when allowed
+  // If not provided, or if supplied an empty string would result in anonymous bind when allowed.
+  // e.g. uid=myapp,ou=users,dc=example,dc=org
+  string bindDn = 2;
+  // Optional. Required if bind is not anonymous
+  // This value points to the path in Vault KV store where the actual value of bindPassword is stored.
+  // It is formatted as path/to/secret/on/vault:key, where `path/to/secret/on/vault` is the path in Vault
+  // where the password is stored. This, when using Vault KV store is a key-value map. `key` is the actual
+  // key name inside this map.
+  // To enable login via LDAP, console auth service should must have required permissions to read this value.
+  string bindPasswordRef = 3;
+  // Property of the LDAP user object to use when binding to verify the password.
+  // e.g. name, email
+  string userBindProperty = 4;
+  // The base DN from which to search for users by username.
+  // e.g. ou=users,dc=example,dc=org
+  string userSearchBase = 5;
+  // LDAP search filter with which to find a user by username
+  // Use the literal {{username}} to have the given username interpolated in for the LDAP search.
+  // e.g. (uid={{username}})
+  string userSearchFilter = 6;
+  // The property of user object to use in {{dn}} interpolation of groupSearchFilter.
+  string groupDnProperty = 7;
+  // The base DN from which to search for groups.
+  // If defined, groupSearchFilter must also be defined for the search to work.
+  string groupSearchBase = 8;
+  // LDAP search filter for groups.
+  // Place literal {{dn}} in the filter to have it replaced by the property defined with groupDnProperty of the found user object.
+  // {{username}} is also available and will be replaced with the uid of the found user.
+  string groupSearchFilter = 9;
+
+  // https://nodejs.org/dist/latest-v12.x/docs/api/tls.html#tls_tls_createsecurecontext_options
+  // Optionally override the trusted CA certificates. Default is to trust the well-known CAs configured in system truststore.
+  // System truststore is completely replaced when CAs are explicitly specified using this option.
+  // The value can be a string or an Array of strings. Any string can contain multiple PEM CAs concatenated together.
+  // The peer's certificate must be chainable to a CA trusted by the server for the connection to be authenticated.
+  // When using certificates that are not chainable to a well-known CA, the certificate's CA must be explicitly specified
+  // as a trusted or the connection will fail to authenticate. If the peer uses a certificate that doesn't match or chain
+  // to one of the default CAs configured in system truststore, use this option to provide a CA certificate that the peer's
+  // certificate can match or chain to. For self-signed certificates, the certificate is its own CA, and must be provided.
+  // For PEM encoded certificates, supported types are "TRUSTED CERTIFICATE", "X509 CERTIFICATE", and "CERTIFICATE".
+  // If the user is setup with a referral, we must provide certificates which can verify connection to every server
+  repeated string tlsCaCertificates = 10;
+
+  // All LDAP servers are slightly different in their own way. Information required to create a UMS user might be stored under
+  // a different attribute. Following properties would help in mapping attributes from a given LDAP server.
+
+  // Mapping LDAP entry into idpUserId attribute of UMS
+  string usernameMappingAttribute = 20;
+  // Mapping LDAP entry into email attribute of UMS
+  string emailMappingAttribute = 21;
+  // Mapping LDAP entry into firstName attribute of UMS
+  string firstNameMappingAttribute = 22;
+  // Mapping LDAP entry into lastName attribute of UMS
+  string lastNameMappingAttribute = 23;
+  // Mapping group's LDAP entry into group attribute of UMS
+  string groupNameMappingAttribute = 24;
+}
+
+// Local connection attributes used to create a local identity provider connector.
+// This was created to support first-time user onboarding and scenarios when an account
+// ended up getting locked because of a misconfigured/unreachable identity provider
+// This should only be used to configure other (real) IdP connectors
+message LocalProviderInfo {
+  // Username of the only user who can log-in using this identity provider
+  // This field must be admin
+  string username = 1;
+  // This value points to the path in Vault KV store where the value of user's password hash is stored.
+  // It is formatted as path/to/secret/on/vault:key, where `path/to/secret/on/vault` is the path in Vault
+  // where the password is stored. This, when using Vault KV store is a key-value map. `key` is the actual
+  // key name inside this map.
+  // To enable login via Local, console auth service should must have required permissions to read this value.
+  string passwordHashRef = 2;
+  // Email address of this user
+  // This is a required field for interactive login. However, we would not ever want to use this
+  // address or expect it to be valid.
+  string email = 3;
+  // This may be an empty string.
+  string firstName = 4;
+  // This may be an empty string.
+  string lastName = 5;
+}
+
 message IdentityProviderConnector {
   // Name of the identity provider connector.
   string identityProviderConnectorName = 1;
@@ -1908,6 +2144,10 @@ message IdentityProviderConnector {
   oneof providerDetails_oneof {
     // Covers SAML provider attributes.
     SamlProviderInfo samlDetails = 4;
+    // Covers LDAP connection attributes
+    LdapProviderInfo ldapDetails = 7;
+    // Covers Local connection attributes
+    LocalProviderInfo localDetails = 8;
   }
   // Identity provider connector id.
   string identityProviderConnectorId = 5;
@@ -1994,11 +2234,108 @@ message SamlIdpDetails {
   repeated SamlCert certs = 2;
 }
 
+// The IdP connector details for a LDAP typed connector. Used only for
+// dynamo db storage
+message LdapIdpDetails {
+  // LDAP server URL.
+  // Required. We support only scheme, host and port
+  // Any other attribute supplied as part of the URI would be stripped away for security
+  // eg. ldaps://ldap.example.org:663
+  string url = 1;
+  // Admin connection DN.
+  // Optional. Default: Anonymous bind when allowed
+  // If not provided, or if supplied an empty string would result in anonymous bind when allowed.
+  // e.g. uid=myapp,ou=users,dc=example,dc=org
+  string bindDn = 2;
+  // Optional. Required if bind is not anonymous
+  // This value points to the path in Vault KV store where the actual value of bindPassword is stored.
+  // It is formatted as path/to/secret/on/vault:key, where `path/to/secret/on/vault` is the path in Vault
+  // where the password is stored. This, when using Vault KV store is a key-value map. `key` is the actual
+  // key name inside this map.
+  // To enable login via LDAP, console auth service should must have required permissions to read this value.
+  string bindPasswordRef = 3;
+  // Property of the LDAP user object to use when binding to verify the password.
+  // e.g. name, email
+  string userBindProperty = 4;
+  // The base DN from which to search for users by username.
+  // e.g. ou=users,dc=example,dc=org
+  string userSearchBase = 5;
+  // LDAP search filter with which to find a user by username
+  // Use the literal {{username}} to have the given username interpolated in for the LDAP search.
+  // e.g. (uid={{username}})
+  string userSearchFilter = 6;
+  // The property of user object to use in {{dn}} interpolation of groupSearchFilter.
+  string groupDnProperty = 7;
+  // The base DN from which to search for groups.
+  // If defined, groupSearchFilter must also be defined for the search to work.
+  string groupSearchBase = 8;
+  // LDAP search filter for groups.
+  // Place literal {{dn}} in the filter to have it replaced by the property defined with groupDnProperty of the found user object.
+  // {{username}} is also available and will be replaced with the uid of the found user.
+  string groupSearchFilter = 9;
+
+  // https://nodejs.org/dist/latest-v12.x/docs/api/tls.html#tls_tls_createsecurecontext_options
+  // Optionally override the trusted CA certificates. Default is to trust the well-known CAs configured in system truststore.
+  // System truststore is completely replaced when CAs are explicitly specified using this option.
+  // The value can be a string or an Array of strings. Any string can contain multiple PEM CAs concatenated together.
+  // The peer's certificate must be chainable to a CA trusted by the server for the connection to be authenticated.
+  // When using certificates that are not chainable to a well-known CA, the certificate's CA must be explicitly specified
+  // as a trusted or the connection will fail to authenticate. If the peer uses a certificate that doesn't match or chain
+  // to one of the default CAs configured in system truststore, use this option to provide a CA certificate that the peer's
+  // certificate can match or chain to. For self-signed certificates, the certificate is its own CA, and must be provided.
+  // For PEM encoded certificates, supported types are "TRUSTED CERTIFICATE", "X509 CERTIFICATE", and "CERTIFICATE".
+  // If the user is setup with a referral, we must provide certificates which can verify connection to every server
+  repeated string tlsCaCertificates = 10;
+
+  // All LDAP servers are slightly different in their own way. Information required to create a UMS user might be stored under
+  // a different attribute. Following properties would help in mapping attributes from a given LDAP server.
+
+  // Mapping LDAP entry into idpUserId attribute of UMS
+  string usernameMappingAttribute = 20;
+  // Mapping LDAP entry into email attribute of UMS
+  string emailMappingAttribute = 21;
+  // Mapping LDAP entry into firstName attribute of UMS
+  string firstNameMappingAttribute = 22;
+  // Mapping LDAP entry into lastName attribute of UMS
+  string lastNameMappingAttribute = 23;
+  // Mapping group's LDAP entry into group attribute of UMS
+  string groupNameMappingAttribute = 24;
+}
+
+// Local connection attributes used to create a local identity provider connector.
+// This was created to support first-time user onboarding and scenarios when an account
+// ended up getting locked because of a misconfigured/unreachable identity provider
+// This should only be used to configure other (real) IdP connectors
+// Used only for DynamoDB storage
+message LocalIdpDetails {
+  // Username of the only user who can log-in using this identity provider
+  // This field must be admin
+  string username = 1;
+  // This value points to the path in Vault KV store where the value of user's password hash is stored.
+  // It is formatted as path/to/secret/on/vault:key, where `path/to/secret/on/vault` is the path in Vault
+  // where the password is stored. This, when using Vault KV store is a key-value map. `key` is the actual
+  // key name inside this map.
+  // To enable login via Local, console auth service should must have required permissions to read this value.
+  string passwordHashRef = 2;
+  // Email address of this user
+  // This is a required field for interactive login. However, we would not ever want to use this
+  // address or expect it to be valid.
+  string email = 3;
+  // This may be an empty string.
+  string firstName = 4;
+  // This may be an empty string.
+  string lastName = 5;
+}
+
 // An object used to serialize the IdP connector details to the dynamo db table.
 message IdpDetails {
   oneof details {
     // The SAML IdP connector details.
     SamlIdpDetails saml = 1;
+    // The LDAP IdP connector details.
+    LdapIdpDetails ldap = 2;
+    // The Local IdP connector details.
+    LocalIdpDetails local = 3;
   }
 }
 
@@ -2022,6 +2359,10 @@ message UpdateIdentityProviderConnectorRequest {
   oneof providerDetails_oneof {
     // Covers SAML provider attributes.
     SamlProviderDetails samlDetails = 3;
+    // Covers LDAP connection attributes
+    LdapProviderDetails ldapDetails = 5;
+    // Covers Local connection attributes
+    LocalProviderDetails localDetails = 6;
   }
   // Whether to sync groups on login or not. This flag is reversed as the default
   // behavior before this flag was introduced was to sync group on login and the
@@ -2294,6 +2635,8 @@ message GetActorWorkloadCredentialsResponse {
   repeated ActorKerberosKey kerberosKeys = 2;
   // The workload username for the actor.
   string workloadUsername = 4;
+  // A list of Ssh public keys for the actor.
+  repeated SshPublicKey sshPublicKey = 5;
 }
 
 message GetEventGenerationIdsRequest {
