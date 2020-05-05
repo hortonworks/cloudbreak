@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
 @Component
-public class SubnetFilterStrategyMultiplePreferPrivate extends SubnetFilterStrategy {
+public class SubnetFilterStrategyMultiplePreferPrivate implements SubnetFilterStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubnetFilterStrategyMultiplePreferPrivate.class);
 

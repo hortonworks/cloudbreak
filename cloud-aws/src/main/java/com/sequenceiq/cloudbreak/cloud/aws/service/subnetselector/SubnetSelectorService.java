@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 
 @Service
-class SubnetSelectorService {
+public class SubnetSelectorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubnetSelectorService.class);
 
