@@ -32,6 +32,9 @@ public class AzureInstanceConnector implements InstanceConnector {
     private AzureUtils azureUtils;
 
     @Inject
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
+    @Inject
     private AzureVirtualMachineService azureVirtualMachineService;
 
     @Override
@@ -45,7 +48,7 @@ public class AzureInstanceConnector implements InstanceConnector {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         List<Completable> startCompletables = new ArrayList<>();
         for (CloudInstance vm : vms) {
-            String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), vm);
+            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
             AzureClient azureClient = ac.getParameter(AzureClient.class);
             startCompletables.add(azureClient.startVirtualMachineAsync(resourceGroupName, vm.getInstanceId())
                     .doOnError(throwable -> {
@@ -73,7 +76,7 @@ public class AzureInstanceConnector implements InstanceConnector {
         List<CloudVmInstanceStatus> currentStatuses = check(ac, vms);
         for (CloudVmInstanceStatus vm : currentStatuses) {
             AzureClient azureClient = ac.getParameter(AzureClient.class);
-            String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), vm.getCloudInstance());
+            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm.getCloudInstance());
             if (vm.getStatus() == InstanceStatus.STARTED) {
                 doReboot(completables, vm, statuses, () -> azureClient.rebootVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId()));
             } else if (vm.getStatus() == InstanceStatus.STOPPED) {

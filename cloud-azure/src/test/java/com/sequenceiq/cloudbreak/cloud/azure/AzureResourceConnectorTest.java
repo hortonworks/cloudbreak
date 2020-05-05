@@ -88,6 +88,9 @@ public class AzureResourceConnectorTest {
     private Retry retryService;
 
     @Mock
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
+    @Mock
     private AzureComputeResourceService azureComputeResourceService;
 
     private List<CloudResource> instances;
@@ -117,7 +120,7 @@ public class AzureResourceConnectorTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(deployment.exportTemplate()).thenReturn(deploymentExportResult);
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
-        when(azureUtils.getResourceGroupName(cloudContext, stack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getInstanceCloudResources(cloudContext, deployment, groups)).thenReturn(instances);
         when(azureStackViewProvider.getAzureStack(any(), eq(stack), eq(client), eq(ac))).thenReturn(azureStackView);
     }

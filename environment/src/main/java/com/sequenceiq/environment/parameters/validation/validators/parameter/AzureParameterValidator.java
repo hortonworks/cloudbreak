@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -52,9 +53,16 @@ public class AzureParameterValidator implements ParameterValidator {
 
         AzureResourceGroupDto azureResourceGroupDto = azureParametersDto.getAzureResourceGroupDto();
         if (Objects.isNull(azureResourceGroupDto)
-                || USE_MULTIPLE.equals(azureResourceGroupDto.getResourceGroupUsagePattern())
                 || !USE_EXISTING.equals(azureResourceGroupDto.getResourceGroupCreation())) {
             return validationResultBuilder.build();
+        }
+        if (USE_MULTIPLE.equals(azureResourceGroupDto.getResourceGroupUsagePattern())) {
+            if (StringUtils.isNotBlank(azureResourceGroupDto.getName())) {
+                return validationResultBuilder.error(String.format("Resource group name '%s' could not be specified if MULTIPLE usage is defined.",
+                        azureResourceGroupDto.getName())).build();
+            } else {
+                return validationResultBuilder.build();
+            }
         }
 
         LOGGER.debug("Using single, existing resource group {}", azureResourceGroupDto.getName());

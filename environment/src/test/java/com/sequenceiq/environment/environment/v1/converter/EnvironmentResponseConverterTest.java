@@ -26,7 +26,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
-import com.sequenceiq.environment.api.v1.environment.model.response.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;

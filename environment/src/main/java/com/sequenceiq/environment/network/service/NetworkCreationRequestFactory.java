@@ -19,6 +19,9 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCrede
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
 @Service
 public class NetworkCreationRequestFactory {
@@ -70,6 +73,7 @@ public class NetworkCreationRequestFactory {
                 .withPrivateSubnets(cidrs.getPrivateSubnets())
                 .withPublicSubnets(cidrs.getPublicSubnets());
         getNoPublicIp(networkDto).ifPresent(builder::withNoPublicIp);
+        getResourceGroupName(environment).ifPresent(builder::withResourceGroup);
         return builder.build();
     }
 
@@ -97,6 +101,14 @@ public class NetworkCreationRequestFactory {
 
     private Optional<Boolean> getNoPublicIp(NetworkDto networkDto) {
         return Optional.of(networkDto).map(NetworkDto::getAzure).map(AzureParams::isNoPublicIp);
+    }
+
+    private Optional<String> getResourceGroupName(EnvironmentDto environmentDto) {
+        return Optional.of(environmentDto)
+                .map(EnvironmentDto::getParameters)
+                .map(ParametersDto::getAzureParametersDto)
+                .map(AzureParametersDto::getAzureResourceGroupDto)
+                .map(AzureResourceGroupDto::getName);
     }
 
     private String getUserFromCrn(String crn) {

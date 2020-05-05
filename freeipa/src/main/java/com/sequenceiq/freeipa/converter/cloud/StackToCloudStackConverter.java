@@ -1,8 +1,11 @@
 package com.sequenceiq.freeipa.converter.cloud;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUDWATCH_CREATE_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -50,6 +53,10 @@ import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.CloudIdentityType;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -59,6 +66,7 @@ import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.freeipa.service.SecurityRuleService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 
 @Component
@@ -81,6 +89,9 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     @Value("${freeipa.aws.cloudwatch.enabled:true}")
     private boolean enableCloudwatch;
 
+    @Inject
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
+
     @Override
     public CloudStack convert(Stack stack) {
         return convert(stack, Collections.emptySet());
@@ -98,42 +109,34 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         Image image = imageConverter.convert(imageService.getByStack(stack));
         Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
         List<Group> instanceGroups = buildInstanceGroups(Lists.newArrayList(stack.getInstanceGroups()), stack.getStackAuthentication(),
-                deleteRequestedInstances, stack.getCloudPlatform(), image.getImageName(), fileSystemView);
+                deleteRequestedInstances, stack.getCloudPlatform(), image.getImageName(), fileSystemView, stack.getEnvironmentCrn());
         Network network = buildNetwork(stack);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
+        Map<String, String> parameters = buildCloudStackParameters(stack.getEnvironmentCrn());
 
-        return new CloudStack(instanceGroups, network, image, Map.of(CLOUDWATCH_CREATE_PARAMETER, Boolean.toString(enableCloudwatch)),
+        return new CloudStack(instanceGroups, network, image, parameters,
                 getUserDefinedTags(stack), stack.getTemplate(), instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 instanceAuthentication.getPublicKey(), null);
     }
 
-    public CloudInstance buildInstance(InstanceMetaData instanceMetaData, Template template,
-            StackAuthentication stackAuthentication, String name, Long privateId, InstanceStatus status, String imageName) {
+    private CloudInstance buildInstance(InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
+            StackAuthentication stackAuthentication, Long privateId, InstanceStatus status, String imageName, String environmentCrn) {
         String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
-        String hostName = instanceMetaData == null ? null : instanceMetaData.getShortHostname();
-        String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
-        String instanceName = instanceMetaData == null ? null : instanceMetaData.getInstanceName();
-
+        String name = instanceGroup.getGroupName();
+        Template template = instanceGroup.getTemplate();
         InstanceTemplate instanceTemplate = buildInstanceTemplate(template, name, privateId, status, imageName);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
-        Map<String, Object> params = new HashMap<>();
-        if (hostName != null) {
-            params.put(CloudInstance.DISCOVERY_NAME, hostName);
-        }
-        if (subnetId != null) {
-            params.put(CloudInstance.SUBNET_ID, subnetId);
-        }
-        if (instanceName != null) {
-            params.put(CloudInstance.INSTANCE_NAME, instanceName);
-        }
-        return new CloudInstance(id, instanceTemplate, instanceAuthentication, params);
+        Map<String, Object> parameters = buildCloudInstanceParameters(environmentCrn, instanceMetaData);
+
+        return new CloudInstance(id, instanceTemplate, instanceAuthentication, parameters);
     }
 
     public List<CloudInstance> buildInstances(Stack stack) {
         ImageEntity imageEntity = imageService.getByStack(stack);
         Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
         List<Group> groups = buildInstanceGroups(Lists.newArrayList(stack.getInstanceGroups()), stack.getStackAuthentication(), Collections.emptySet(),
-                stack.getCloudPlatform(), imageEntity.getImageName(), fileSystemView);
+                stack.getCloudPlatform(), imageEntity.getImageName(), fileSystemView, stack.getEnvironmentCrn());
+
         List<CloudInstance> cloudInstances = new ArrayList<>();
         for (Group group : groups) {
             cloudInstances.addAll(group.getInstances());
@@ -181,7 +184,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     }
 
     private List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication, Collection<String> deleteRequests,
-            String cloudPlatform, String imageName, Optional<CloudFileSystemView> fileSystemView) {
+            String cloudPlatform, String imageName, Optional<CloudFileSystemView> fileSystemView, String environmentCrn) {
         // sort by name to avoid shuffling the different instance groups
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
@@ -193,12 +196,12 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                 // existing instances
                 for (InstanceMetaData metaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
                     InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-                    instances.add(buildInstance(metaData, template, stackAuthentication, instanceGroup.getGroupName(), metaData.getPrivateId(), status,
-                            imageName));
+                    instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), status,
+                            imageName, environmentCrn));
                 }
                 if (instanceGroup.getNodeCount() == 0) {
-                    skeleton = buildInstance(null, template, stackAuthentication, instanceGroup.getGroupName(), 0L,
-                            CREATE_REQUESTED, imageName);
+                    skeleton = buildInstance(null, instanceGroup, stackAuthentication, 0L,
+                            CREATE_REQUESTED, imageName, environmentCrn);
                 }
                 Json attributes = instanceGroup.getAttributes();
                 InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
@@ -307,4 +310,54 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return status;
     }
 
+    public Map<String, Object> buildCloudInstanceParameters(String environmentCrn, InstanceMetaData instanceMetaData) {
+        String hostName = instanceMetaData == null ? null : instanceMetaData.getShortHostname();
+        String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
+        String instanceName = instanceMetaData == null ? null : instanceMetaData.getInstanceName();
+        Map<String, Object> params = new HashMap<>();
+        if (hostName != null) {
+            params.put(CloudInstance.DISCOVERY_NAME, hostName);
+        }
+        if (subnetId != null) {
+            params.put(CloudInstance.SUBNET_ID, subnetId);
+        }
+        if (instanceName != null) {
+            params.put(CloudInstance.INSTANCE_NAME, instanceName);
+        }
+        Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environmentCrn);
+        if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
+            AzureResourceGroup resourceGroup = resourceGroupOptional.get();
+            String resourceGroupName = resourceGroup.getName();
+            ResourceGroupUsage resourceGroupUsage = resourceGroup.getResourceGroupUsage();
+            params.put(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName);
+            params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
+        }
+        return params;
+    }
+
+    private Map<String, String> buildCloudStackParameters(String environmentCrn) {
+        Map<String, String> params = new HashMap<>();
+        params.put(CLOUDWATCH_CREATE_PARAMETER, Boolean.toString(enableCloudwatch));
+        Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environmentCrn);
+        if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
+            AzureResourceGroup resourceGroup = resourceGroupOptional.get();
+            String resourceGroupName = resourceGroup.getName();
+            ResourceGroupUsage resourceGroupUsage = resourceGroup.getResourceGroupUsage();
+            params.put(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName);
+            params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
+        }
+        return params;
+    }
+
+    private Optional<AzureResourceGroup> getAzureResourceGroup(String environmentCrn) {
+        DetailedEnvironmentResponse environment = measure(() -> cachedEnvironmentClientService.getByCrn(environmentCrn),
+                LOGGER, "Environment properties were queried under {} ms for environment {}", environmentCrn);
+        return getResourceGroupFromEnv(environment);
+    }
+
+    private Optional<AzureResourceGroup> getResourceGroupFromEnv(DetailedEnvironmentResponse environment) {
+        return Optional.ofNullable(environment)
+                .map(DetailedEnvironmentResponse::getAzure)
+                .map(AzureEnvironmentParameters::getResourceGroup);
+    }
 }

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
@@ -88,6 +88,9 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     private AzureVirtualMachineService azureVirtualMachineService;
 
     @Inject
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
+    @Inject
     @Qualifier("DefaultRetryService")
     private Retry retryService;
 
@@ -108,7 +111,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             AdjustmentType adjustmentType, Long threshold) {
         AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
         String stackName = azureUtils.getStackName(ac.getCloudContext());
-        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
         AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, ac);
@@ -227,7 +230,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     @Override
     public List<CloudResourceStatus> terminate(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         AzureClient client = ac.getParameter(AzureClient.class);
-        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
         for (CloudResource resource : resources) {
             try {
                 try {
@@ -244,8 +247,10 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 if (azureStorage.isPersistentStorage(azureStorage.getPersistentStorageName(stack))) {
                     CloudContext cloudCtx = ac.getCloudContext();
                     AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
+                    Boolean singleResourceGroup = azureResourceGroupMetadataProvider.useSingleResourceGroup(stack);
+
                     String imageStorageName = azureStorage.getImageStorageName(azureCredentialView, cloudCtx, stack);
-                    String imageResourceGroupName = azureStorage.getImageResourceGroupName(cloudCtx, stack);
+                    String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudCtx, stack);
                     String diskContainer = azureStorage.getDiskContainerName(cloudCtx);
                     deleteContainer(client, imageResourceGroupName, imageStorageName, diskContainer);
                 }
@@ -282,7 +287,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             List<CloudInstance> vms) {
         AzureClient client = ac.getParameter(AzureClient.class);
         AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
-        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
         Map<String, Map<String, Object>> resp = new HashMap<>(vms.size());
         for (CloudInstance instance : vms) {
             // TODO: it should be async!
@@ -359,7 +364,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         String diskContainer = azureStorage.getDiskContainerName(ac.getCloudContext());
 
         List<CloudResource> networkResources = cloudResourceHelper.getNetworkResources(resources);
-        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
 
         Map<String, VirtualMachine> vmsFromAzure = azureVirtualMachineService.getVmsFromAzureAndFillStatuses(ac, vms, new ArrayList<>());
         List<CloudInstance> cloudInstancesSyncedWithAzure = vms.stream()

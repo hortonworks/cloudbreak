@@ -23,6 +23,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentExportResult;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -52,11 +53,7 @@ public class AzureUpscaleServiceTest {
 
     private static final String RESOURCE_GROUP = "resource group";
 
-    private static final List<CloudResource> NEW_INSTANCES = List.of(mock(CloudResource.class));
-
     private static final List<CloudResource> NETWORK_RESOURCES = List.of(mock(CloudResource.class));
-
-    private static final String INSTANCE_ID = "instanceId";
 
     private static final String TEMPLATE = "template";
 
@@ -82,6 +79,9 @@ public class AzureUpscaleServiceTest {
     private AzureClient client;
 
     @Mock
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
+    @Mock
     private CloudStack stack;
 
     @Mock
@@ -94,7 +94,7 @@ public class AzureUpscaleServiceTest {
     public void before() {
         when(azureStackView.getStorageAccounts()).thenReturn(Map.of("storageAccount", AzureDiskType.STANDARD_SSD_LRS));
         when(azureUtils.getStackName(any(CloudContext.class))).thenReturn(STACK_NAME);
-        when(azureUtils.getResourceGroupName(any(CloudContext.class), eq(stack))).thenReturn(RESOURCE_GROUP);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), eq(stack))).thenReturn(RESOURCE_GROUP);
         when(stack.getParameters()).thenReturn(Collections.emptyMap());
         when(azureStorage.isEncrytionNeeded(any())).thenReturn(true);
     }
@@ -129,7 +129,7 @@ public class AzureUpscaleServiceTest {
         verify(cloudResourceHelper).getNetworkResources(resources);
         verify(azureStackView).getStorageAccounts();
         verify(azureUtils).getStackName(any(CloudContext.class));
-        verify(azureUtils).getResourceGroupName(any(CloudContext.class), eq(stack));
+        verify(azureResourceGroupMetadataProvider).getResourceGroupName(any(CloudContext.class), eq(stack));
         verify(stack).getParameters();
         verify(azureStorage).isEncrytionNeeded(any());
         verify(azureComputeResourceService).buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, List.of(), NETWORK_RESOURCES);

@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.task.AsyncTaskExecutor;
 
+import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
@@ -84,6 +85,9 @@ public class AzureVolumeResourceBuilderTest {
 
     @Mock
     private AzureResourceNameService resourceNameService;
+
+    @Mock
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
     @Before
     public void setUp() {

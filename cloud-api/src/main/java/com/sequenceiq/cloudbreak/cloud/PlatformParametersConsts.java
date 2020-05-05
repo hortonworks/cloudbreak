@@ -22,6 +22,10 @@ public class PlatformParametersConsts {
 
     public static final String CLOUDWATCH_CREATE_PARAMETER = "createCloudWatchAlarm";
 
+    public static final String RESOURCE_GROUP_NAME_PARAMETER = "resourceGroupName";
+
+    public static final String RESOURCE_GROUP_USAGE_PARAMETER = "resourceGroupUsage";
+
     private PlatformParametersConsts() {
 
     }

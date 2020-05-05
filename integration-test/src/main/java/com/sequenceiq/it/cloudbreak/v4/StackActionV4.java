@@ -22,13 +22,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class StackActionV4 {
-    private static final String VPC_ID_KEY = "vpcId";
-
-    private static final String SUBNET_ID_KEY = "subnetId";
-
-    private static final String NETWORK_ID_KEY = "networkId";
-
-    private static final String RESOURCE_GROUP_NAME_KEY = "resourceGroupName";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackActionV4.class);
 

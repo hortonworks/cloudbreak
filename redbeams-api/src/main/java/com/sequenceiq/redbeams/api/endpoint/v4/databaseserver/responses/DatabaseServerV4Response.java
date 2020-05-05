@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
-// import java.util.Set;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -126,5 +126,21 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
 
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", DatabaseServerV4Response.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("crn='" + crn + "'")
+                .add("databaseVendorDisplayName='" + databaseVendorDisplayName + "'")
+                .add("connectionDriver='" + connectionDriver + "'")
+                .add("connectionUserName=" + connectionUserName)
+                .add("connectionPassword=" + connectionPassword)
+                .add("creationDate=" + creationDate)
+                .add("resourceStatus=" + resourceStatus)
+                .add("status=" + status)
+                .add("statusReason='" + statusReason + "'")
+                .toString();
     }
 }

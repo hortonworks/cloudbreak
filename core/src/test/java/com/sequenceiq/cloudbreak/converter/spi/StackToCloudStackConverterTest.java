@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -45,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -58,10 +61,15 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 public class StackToCloudStackConverterTest {
 
@@ -80,6 +88,12 @@ public class StackToCloudStackConverterTest {
     private static final String[] EMPTY_STRING = new String[0];
 
     private static final String BLUEPRINT_TEXT = "blueprintText";
+
+    private static final String CLOUD_PLATFORM = "MOCK";
+
+    private static final String ENV_CRN = "env-crn";
+
+    private static final String RESOURCE_GROUP = "resource-group";
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -135,17 +149,24 @@ public class StackToCloudStackConverterTest {
     @Mock
     private CloudFileSystemViewProvider cloudFileSystemViewProvider;
 
+    @Mock
+    private EnvironmentClientService environmentClientService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
         when(stack.getCluster()).thenReturn(cluster);
+        when(stack.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(cluster.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
         when(cluster.getExtendedBlueprintText()).thenReturn(BLUEPRINT_TEXT);
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         when(cmTemplateProcessor.getComponentsByHostGroup()).thenReturn(Mockito.mock(Map.class));
         when(cloudFileSystemViewProvider.getCloudFileSystemView(any(), any(), any())).thenReturn(Optional.empty());
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
     }
 
     @Test
@@ -198,6 +219,7 @@ public class StackToCloudStackConverterTest {
         instanceGroups.add(instanceGroup);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
 
         CloudStack result = underTest.convert(stack);
@@ -224,6 +246,7 @@ public class StackToCloudStackConverterTest {
         notDeletedMetas.add(metaData);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(notDeletedMetas);
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
 
         CloudStack result = underTest.convert(stack);
@@ -248,6 +271,7 @@ public class StackToCloudStackConverterTest {
         when(stack.getStackAuthentication()).thenReturn(auth);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(notDeletedMetas);
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
 
         CloudStack result = underTest.convert(stack);
@@ -291,6 +315,7 @@ public class StackToCloudStackConverterTest {
         when(instanceGroup.getNodeCount()).thenReturn(0);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
 
         CloudStack result = underTest.convert(stack);
@@ -309,6 +334,7 @@ public class StackToCloudStackConverterTest {
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getAttributes()).thenReturn(null);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
 
         CloudStack result = underTest.convert(stack);
@@ -330,6 +356,7 @@ public class StackToCloudStackConverterTest {
         when(instanceGroup.getAttributes()).thenReturn(attributes);
         when(attributes.getMap()).thenReturn(expected);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
 
         CloudStack result = underTest.convert(stack);
@@ -347,6 +374,7 @@ public class StackToCloudStackConverterTest {
         String platform = "platform";
         int expected = Integer.MAX_VALUE;
         when(instanceGroup.getTemplate()).thenReturn(template);
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
         when(template.getRootVolumeSize()).thenReturn(null);
         when(template.cloudPlatform()).thenReturn(platform);
@@ -366,6 +394,7 @@ public class StackToCloudStackConverterTest {
         Template template = mock(Template.class);
         int expected = Integer.MAX_VALUE;
         when(instanceGroup.getTemplate()).thenReturn(template);
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
         when(template.getRootVolumeSize()).thenReturn(expected);
 
@@ -383,6 +412,7 @@ public class StackToCloudStackConverterTest {
         instanceGroups.add(instanceGroup);
         Template template = mock(Template.class);
         when(instanceGroup.getTemplate()).thenReturn(template);
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(instanceGroup.getSecurityGroup()).thenReturn(null);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
 
@@ -404,6 +434,7 @@ public class StackToCloudStackConverterTest {
         securityGroup.setSecurityGroupIds(Collections.singleton(TEST_STRING_ID));
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
         when(securityRuleService.findAllBySecurityGroupId(securityGroup.getId())).thenReturn(Collections.emptyList());
 
@@ -429,6 +460,7 @@ public class StackToCloudStackConverterTest {
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
         when(securityRuleService.findAllBySecurityGroupId(securityGroup.getId())).thenReturn(securityRules);
 
@@ -456,6 +488,7 @@ public class StackToCloudStackConverterTest {
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
         when(securityRuleService.findAllBySecurityGroupId(securityGroup.getId())).thenReturn(securityRules);
 
@@ -485,6 +518,7 @@ public class StackToCloudStackConverterTest {
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
+        when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
         when(securityRuleService.findAllBySecurityGroupId(securityGroup.getId())).thenReturn(securityRules);
 
@@ -726,6 +760,107 @@ public class StackToCloudStackConverterTest {
 
         assertEquals(authentication.getLoginUserName(), result.getLoginUserName());
         assertEquals(authentication.getPublicKey(), result.getPublicKey());
+    }
+
+    @Test
+    public void testBuildCloudInstanceParametersAzureSingleResourceGroup() {
+
+        InstanceMetaData metaData = new InstanceMetaData();
+        String fqdnParsedName = "test1-m-1-20180605095019";
+        metaData.setId(1L);
+        metaData.setDiscoveryFQDN(String.format("%s.project.id", fqdnParsedName));
+        metaData.setSubnetId(TEST_STRING_ID);
+        metaData.setInstanceName(TEST_NAME);
+
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform("AZURE");
+        environmentResponse.setAzure(AzureEnvironmentParameters.builder()
+                .withAzureResourceGroup(AzureResourceGroup.builder()
+                        .withName(RESOURCE_GROUP)
+                        .withResourceGroupUsage(ResourceGroupUsage.SINGLE)
+                        .build())
+                .build());
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(ENV_CRN, metaData, CloudPlatform.AZURE);
+
+        assertEquals(RESOURCE_GROUP, result.get(RESOURCE_GROUP_NAME_PARAMETER).toString());
+        assertEquals(ResourceGroupUsage.SINGLE.name(), result.get(RESOURCE_GROUP_USAGE_PARAMETER).toString());
+        assertEquals(5, result.size());
+    }
+
+    @Test
+    public void testBuildCloudInstanceParametersAzureMultipleResourceGroup() {
+
+        InstanceMetaData metaData = new InstanceMetaData();
+        String fqdnParsedName = "test1-m-1-20180605095019";
+        metaData.setId(1L);
+        metaData.setDiscoveryFQDN(String.format("%s.project.id", fqdnParsedName));
+        metaData.setSubnetId(TEST_STRING_ID);
+        metaData.setInstanceName(TEST_NAME);
+
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform("AZURE");
+        environmentResponse.setAzure(AzureEnvironmentParameters.builder()
+                .withAzureResourceGroup(AzureResourceGroup.builder()
+                        .withResourceGroupUsage(ResourceGroupUsage.MULTIPLE)
+                        .build())
+                .build());
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(ENV_CRN, metaData, CloudPlatform.AZURE);
+
+        assertFalse(result.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
+        assertFalse(result.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    public void testBuildCloudStackParametersAzureSingleResourceGroup() {
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform("AZURE");
+        environmentResponse.setAzure(AzureEnvironmentParameters.builder()
+                .withAzureResourceGroup(AzureResourceGroup.builder()
+                        .withName(RESOURCE_GROUP)
+                        .withResourceGroupUsage(ResourceGroupUsage.SINGLE)
+                        .build())
+                .build());
+        when(stack.getCloudPlatform()).thenReturn("AZURE");
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("key", "value");
+        when(stack.getParameters()).thenReturn(expected);
+
+        CloudStack result = underTest.convert(stack);
+        Map<String, String> parameters = result.getParameters();
+
+        assertEquals(RESOURCE_GROUP, parameters.get(RESOURCE_GROUP_NAME_PARAMETER));
+        assertEquals(ResourceGroupUsage.SINGLE.name(), parameters.get(RESOURCE_GROUP_USAGE_PARAMETER));
+        assertEquals(3, parameters.size());
+    }
+
+    @Test
+    public void testBuildCloudStackParametersAzureMultipleResourceGroup() {
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform("AZURE");
+        environmentResponse.setAzure(AzureEnvironmentParameters.builder()
+                .withAzureResourceGroup(AzureResourceGroup.builder()
+                        .withName(RESOURCE_GROUP)
+                        .withResourceGroupUsage(ResourceGroupUsage.MULTIPLE)
+                        .build())
+                .build());
+        when(stack.getCloudPlatform()).thenReturn("AZURE");
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("key", "value");
+        when(stack.getParameters()).thenReturn(expected);
+
+        CloudStack result = underTest.convert(stack);
+        Map<String, String> parameters = result.getParameters();
+
+        assertFalse(parameters.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
+        assertFalse(parameters.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
+        assertEquals(1, parameters.size());
     }
 
     private StackAuthentication createStackAuthentication() {

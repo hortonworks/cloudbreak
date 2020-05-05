@@ -48,6 +48,7 @@ public class CloudInstance extends DynamicModel {
     public String toString() {
         StringBuilder sb = new StringBuilder("CloudInstance{");
         sb.append("instanceId='").append(instanceId).append('\'');
+        sb.append(super.toString());
         sb.append(", template=").append(template);
         sb.append(", authentication=").append(authentication);
         sb.append('}');

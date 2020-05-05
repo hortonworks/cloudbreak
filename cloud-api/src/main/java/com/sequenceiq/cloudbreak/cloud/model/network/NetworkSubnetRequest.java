@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model.network;
 
 public class NetworkSubnetRequest {
+
     private final String cidr;
 
     private final SubnetType type;

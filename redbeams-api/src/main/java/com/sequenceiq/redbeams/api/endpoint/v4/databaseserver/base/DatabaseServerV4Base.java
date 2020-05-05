@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base;
 
 import java.io.Serializable;
+import java.util.StringJoiner;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -102,5 +103,18 @@ public abstract class DatabaseServerV4Base implements Serializable {
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", DatabaseServerV4Base.class.getSimpleName() + "[", "]")
+                .add("name='" + name + "'")
+                .add("description='" + description + "'")
+                .add("host='" + host + "'")
+                .add("port=" + port)
+                .add("databaseVendor='" + databaseVendor + "'")
+                .add("connectionDriver='" + connectionDriver + "'")
+                .add("environmentCrn='" + environmentCrn + "'")
+                .toString();
     }
 }

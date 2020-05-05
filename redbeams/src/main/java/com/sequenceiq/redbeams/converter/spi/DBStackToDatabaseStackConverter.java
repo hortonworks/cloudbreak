@@ -1,10 +1,19 @@
 package com.sequenceiq.redbeams.converter.spi;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +27,23 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.exception.BadRequestException;
+import com.sequenceiq.redbeams.service.EnvironmentService;
 
 @Component
 public class DBStackToDatabaseStackConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DBStackToDatabaseStackConverter.class);
+
+    @Inject
+    private EnvironmentService environmentService;
 
     public DatabaseStack convert(DBStack dbStack) {
         Network network = buildNetwork(dbStack);
@@ -64,8 +82,7 @@ public class DBStackToDatabaseStackConverter {
                 throw new BadRequestException("Unsupported database vendor " + dbStackDatabaseServer.getDatabaseVendor());
         }
 
-        Json attributes = dbStackDatabaseServer.getAttributes();
-        Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
+        Map<String, Object> params = buildParameters(dbStack);
         SecurityGroup securityGroup = dbStackDatabaseServer.getSecurityGroup();
 
         DatabaseServer.Builder builder = DatabaseServer.builder()
@@ -103,6 +120,41 @@ public class DBStackToDatabaseStackConverter {
             LOGGER.warn("Failed to read JSON tags, skipping", e);
         }
         return result;
+    }
+
+    private Map<String, Object> buildParameters(DBStack stack) {
+        Json attributes = stack.getDatabaseServer().getAttributes();
+        Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
+
+        if (CloudPlatform.AZURE.name().equals(stack.getCloudPlatform()) && !stack.getParameters().containsKey(RESOURCE_GROUP_NAME_PARAMETER)) {
+            DetailedEnvironmentResponse environment = measure(() -> environmentService.getByCrn(stack.getEnvironmentId()),
+                    LOGGER, "Environment properties were queried under {} ms for environment {}", stack.getEnvironmentId());
+
+            AzureResourceGroup resourceGroup = getResourceGroupFromEnv(environment);
+            String resourceGroupName = resourceGroup.getName();
+            ResourceGroupUsage resourceGroupUsage = resourceGroup.getResourceGroupUsage();
+            if (!ResourceGroupUsage.MULTIPLE.equals(resourceGroupUsage)) {
+                Map<String, Object> resourceGroupParameters = Map.of(
+                        RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName,
+                        RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
+                return Stream.of(params, resourceGroupParameters)
+                        .flatMap(map -> map.entrySet().stream())
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (existingOne, newOne) ->  existingOne));
+            } else {
+                return params;
+            }
+        } else {
+            return params;
+        }
+    }
+
+    private AzureResourceGroup getResourceGroupFromEnv(DetailedEnvironmentResponse environment) {
+        return Optional.ofNullable(environment.getAzure())
+                .map(AzureEnvironmentParameters::getResourceGroup)
+                .orElseThrow(NotFoundException::new);
     }
 
 }

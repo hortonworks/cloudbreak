@@ -1,5 +1,30 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -21,6 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -31,29 +57,15 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED;
-import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
-import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class StackToCloudStackConverter {
@@ -84,6 +96,9 @@ public class StackToCloudStackConverter {
     @Inject
     private CloudFileSystemViewProvider cloudFileSystemViewProvider;
 
+    @Inject
+    private EnvironmentClientService environmentClientService;
+
     public CloudStack convert(Stack stack) {
         return convert(stack, Collections.emptySet());
     }
@@ -112,8 +127,9 @@ public class StackToCloudStackConverter {
         if (stackTemplate != null) {
             template = stackTemplate.getTemplate();
         }
+        Map<String, String> parameters = buildCloudStackParameters(stack);
 
-        return new CloudStack(instanceGroups, network, image, stack.getParameters(), getUserDefinedTags(stack), template,
+        return new CloudStack(instanceGroups, network, image, parameters, getUserDefinedTags(stack), template,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), cloudFileSystem);
     }
 
@@ -126,27 +142,20 @@ public class StackToCloudStackConverter {
         return cloudInstances;
     }
 
-    public CloudInstance buildInstance(InstanceMetaData instanceMetaData, Template template,
-            StackAuthentication stackAuthentication, String name, Long privateId, InstanceStatus status) {
+    public CloudInstance buildInstance(InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
+            StackAuthentication stackAuthentication, Long privateId, InstanceStatus status) {
         String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
-        String hostName = instanceMetaData == null ? null : instanceMetaData.getShortHostname();
-        String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
-        String instanceName = instanceMetaData == null ? null : instanceMetaData.getInstanceName();
         String instanceImageId = instanceMetaData == null ? null : instanceMetadataToImageIdConverter.convert(instanceMetaData);
+        String name = instanceGroup.getGroupName();
+        Stack stack = instanceGroup.getStack();
+        Template template = instanceGroup.getTemplate();
 
         InstanceTemplate instanceTemplate = buildInstanceTemplate(template, name, privateId, status, instanceImageId);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
-        Map<String, Object> params = new HashMap<>();
-        if (hostName != null) {
-            params.put(CloudInstance.DISCOVERY_NAME, hostName);
-        }
-        if (subnetId != null) {
-            params.put(CloudInstance.SUBNET_ID, subnetId);
-        }
-        if (instanceName != null) {
-            params.put(CloudInstance.INSTANCE_NAME, instanceName);
-        }
-        return new CloudInstance(id, instanceTemplate, instanceAuthentication, params);
+
+        Map<String, Object> parameters = buildCloudInstanceParameters(
+                stack.getEnvironmentCrn(), instanceMetaData, CloudPlatform.valueOf(stack.getCloudPlatform()));
+        return new CloudInstance(id, instanceTemplate, instanceAuthentication, parameters);
     }
 
     InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status, String instanceImageId) {
@@ -202,16 +211,15 @@ public class StackToCloudStackConverter {
                 Map<String, Set<String>> componentsByHostGroup = cmTemplateProcessor.getComponentsByHostGroup();
                 for (InstanceGroup instanceGroup : instanceGroups) {
                     if (instanceGroup.getTemplate() != null) {
-                        Template template = instanceGroup.getTemplate();
                         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
                         Optional<CloudFileSystemView> cloudFileSystemView
                                 = cloudFileSystemViewProvider.getCloudFileSystemView(cluster.getFileSystem(), componentsByHostGroup, instanceGroup);
                         groups.add(
                                 new Group(instanceGroup.getGroupName(),
                                         instanceGroup.getInstanceGroupType(),
-                                        buildCloudInstances(stackAuthentication, deleteRequests, instanceGroup, template),
+                                        buildCloudInstances(stackAuthentication, deleteRequests, instanceGroup),
                                         buildSecurity(instanceGroup),
-                                        buildCloudInstanceSkeleton(stackAuthentication, instanceGroup, template),
+                                        buildCloudInstanceSkeleton(stackAuthentication, instanceGroup, stack),
                                         getFields(instanceGroup),
                                         instanceAuthentication,
                                         instanceAuthentication.getLoginUserName(),
@@ -236,12 +244,12 @@ public class StackToCloudStackConverter {
     }
 
     private List<CloudInstance> buildCloudInstances(StackAuthentication stackAuthentication, Collection<String> deleteRequests,
-            InstanceGroup instanceGroup, Template template) {
+            InstanceGroup instanceGroup) {
         List<CloudInstance> instances = new ArrayList<>();
         // existing instances
         for (InstanceMetaData metaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
             InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-            instances.add(buildInstance(metaData, template, stackAuthentication, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
+            instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), status));
         }
         return instances;
     }
@@ -270,10 +278,10 @@ public class StackToCloudStackConverter {
         return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds(), true);
     }
 
-    private CloudInstance buildCloudInstanceSkeleton(StackAuthentication stackAuthentication, InstanceGroup instanceGroup, Template template) {
+    private CloudInstance buildCloudInstanceSkeleton(StackAuthentication stackAuthentication, InstanceGroup instanceGroup, Stack stack) {
         CloudInstance skeleton = null;
         if (instanceGroup.getNodeCount() == 0) {
-            skeleton = buildInstance(null, template, stackAuthentication, instanceGroup.getGroupName(), 0L,
+            skeleton = buildInstance(null, instanceGroup, stackAuthentication, 0L,
                     CREATE_REQUESTED);
         }
         return skeleton;
@@ -325,6 +333,62 @@ public class StackToCloudStackConverter {
             status = InstanceStatus.CREATED;
         }
         return status;
+    }
+
+    public Map<String, Object> buildCloudInstanceParameters(String environmentCrn, InstanceMetaData instanceMetaData, CloudPlatform platform) {
+        String hostName = instanceMetaData == null ? null : instanceMetaData.getShortHostname();
+        String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
+        String instanceName = instanceMetaData == null ? null : instanceMetaData.getInstanceName();
+        Map<String, Object> params = new HashMap<>();
+        if (hostName != null) {
+            params.put(CloudInstance.DISCOVERY_NAME, hostName);
+        }
+        if (subnetId != null) {
+            params.put(CloudInstance.SUBNET_ID, subnetId);
+        }
+        if (instanceName != null) {
+            params.put(CloudInstance.INSTANCE_NAME, instanceName);
+        }
+        Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environmentCrn, platform);
+        if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
+            AzureResourceGroup resourceGroup = resourceGroupOptional.get();
+            String resourceGroupName = resourceGroup.getName();
+            ResourceGroupUsage resourceGroupUsage = resourceGroup.getResourceGroupUsage();
+            params.put(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName);
+            params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
+        }
+        return params;
+    }
+
+    private Map<String, String> buildCloudStackParameters(Stack stack) {
+        Map<String, String> params = new HashMap<>(stack.getParameters());
+        Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(stack.getEnvironmentCrn(),
+                CloudPlatform.valueOf(stack.getCloudPlatform()));
+        if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
+            AzureResourceGroup resourceGroup = resourceGroupOptional.get();
+            String resourceGroupName = resourceGroup.getName();
+            ResourceGroupUsage resourceGroupUsage = resourceGroup.getResourceGroupUsage();
+            params.put(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName);
+            params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
+        }
+        return params;
+    }
+
+    private Optional<AzureResourceGroup> getAzureResourceGroup(String environmentCrn, CloudPlatform platform) {
+        if (Objects.nonNull(environmentCrn) && CloudPlatform.AZURE.equals(platform)) {
+            DetailedEnvironmentResponse environment = measure(() -> environmentClientService.getByCrn(environmentCrn),
+                    LOGGER, "Environment properties were queried under {} ms for environment {}", environmentCrn);
+            return Optional.of(getResourceGroupFromEnv(environment));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private AzureResourceGroup getResourceGroupFromEnv(DetailedEnvironmentResponse environment) {
+        return Optional.ofNullable(environment)
+                .map(DetailedEnvironmentResponse::getAzure)
+                .map(AzureEnvironmentParameters::getResourceGroup)
+                .orElseThrow(NotFoundException::new);
     }
 
 }

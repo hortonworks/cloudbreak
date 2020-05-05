@@ -70,18 +70,18 @@ public class AzureNetworkConnector implements NetworkConnector {
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
         AzureClient azureClient = azureClientService.getClient(networkRequest.getCloudCredential());
+        String region = networkRequest.getRegion().value();
         List<SubnetRequest> subnetRequests = azureSubnetRequestProvider.provide(
-                networkRequest.getRegion().value(),
+                region,
                 Lists.newArrayList(networkRequest.getPublicSubnets()),
                 Lists.newArrayList(networkRequest.getPrivateSubnets()),
                 networkRequest.isPrivateSubnetEnabled());
         String template = azureNetworkTemplateBuilder.build(networkRequest, subnetRequests);
-        String envName = networkRequest.getEnvName();
+
         Deployment templateDeployment;
         ResourceGroup resourceGroup;
         try {
-            Map<String, String> tags = Collections.unmodifiableMap(networkRequest.getTags());
-            resourceGroup = azureClient.createResourceGroup(envName, networkRequest.getRegion().value(), tags);
+            resourceGroup = getOrCreateResourceGroup(azureClient, networkRequest);
             templateDeployment = azureClient.createTemplateDeployment(resourceGroup.name(), networkRequest.getStackName(), template, "");
         } catch (CloudException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);
@@ -101,7 +101,7 @@ public class AzureNetworkConnector implements NetworkConnector {
         Set<CreatedSubnet> subnets = createSubnets(
                 subnetRequests,
                 outputMap,
-                networkRequest.getRegion().value());
+                region);
         return new CreatedCloudNetwork(networkRequest.getStackName(), networkName, subnets,
                 createProperties(resourceGroup.name(), networkRequest.getStackName()));
     }
@@ -111,7 +111,7 @@ public class AzureNetworkConnector implements NetworkConnector {
         if (!networkDeletionRequest.isExisting()) {
             try {
                 AzureClient azureClient = azureClientService.getClient(networkDeletionRequest.getCloudCredential());
-                if (isResourceGroupExists(azureClient, networkDeletionRequest)) {
+                if (resourceGroupExists(azureClient, networkDeletionRequest)) {
                     azureClient.deleteTemplateDeployment(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getStackName());
                     azureClient.deleteResourceGroup(networkDeletionRequest.getResourceGroup());
                 }
@@ -128,7 +128,23 @@ public class AzureNetworkConnector implements NetworkConnector {
         }
     }
 
-    private boolean isResourceGroupExists(AzureClient azureClient, NetworkDeletionRequest networkDeletionRequest) {
+    private ResourceGroup getOrCreateResourceGroup(AzureClient azureClient, NetworkCreationRequest networkRequest) {
+        String region = networkRequest.getRegion().value();
+        String envName = networkRequest.getEnvName();
+        Map<String, String> tags = Collections.unmodifiableMap(networkRequest.getTags());
+        String resourceGroupName = networkRequest.getResourceGroup();
+        ResourceGroup resourceGroup;
+        if (StringUtils.isNotEmpty(resourceGroupName)) {
+            LOGGER.debug("Fetching existing resource group {}", resourceGroupName);
+            resourceGroup = azureClient.getResourceGroup(resourceGroupName);
+        } else {
+            LOGGER.debug("Creating resource group {}", resourceGroupName);
+            resourceGroup = azureClient.createResourceGroup(envName, region, tags);
+        }
+        return resourceGroup;
+    }
+
+    private boolean resourceGroupExists(AzureClient azureClient, NetworkDeletionRequest networkDeletionRequest) {
         if (StringUtils.isEmpty(networkDeletionRequest.getResourceGroup())) {
             LOGGER.debug("The deletable network does not contain a valid resource group name, it is null or empty!");
             return false;
