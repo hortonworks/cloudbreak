@@ -386,7 +386,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         imageCatalog.setName(CDP_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
         imageCatalog.setResourceCrn(Crn.builder()
-                .setResource(CLOUDBREAK_DEFAULT_CATALOG_NAME)
+                .setResource(CDP_DEFAULT_CATALOG_NAME)
                 .setPartition(Crn.Partition.CDP)
                 .setService(Crn.Service.DATAHUB)
                 .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
@@ -401,7 +401,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         imageCatalog.setName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
         imageCatalog.setResourceCrn(Crn.builder()
-                .setResource(CDP_DEFAULT_CATALOG_NAME)
+                .setResource(CLOUDBREAK_DEFAULT_CATALOG_NAME)
                 .setPartition(Crn.Partition.CDP)
                 .setService(Crn.Service.DATAHUB)
                 .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
