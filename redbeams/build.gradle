@@ -22,6 +22,7 @@ dependencies {
   compile            group: 'org.yaml',                  name: 'snakeyaml'
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   compile            group: 'net.bytebuddy',             name: 'byte-buddy', version: '1.9.12'
+
   implementation     group: 'com.google.guava',          name: 'guava'
   implementation     group: 'com.google.code.gson',      name: 'gson'
   implementation     group: 'dnsjava',                   name: 'dnsjava'
@@ -32,8 +33,6 @@ dependencies {
   implementation     group: 'io.springfox',              name: 'springfox-swagger-ui'
   implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs'
   implementation     group: 'javax.xml.bind',            name: 'jaxb-api'
-  runtime            group: 'com.sun.xml.bind',          name: 'jaxb-impl'
-  runtime            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime'
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server'
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations'
   implementation     group: 'org.postgresql',            name: 'postgresql'
@@ -43,19 +42,22 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: springBootVersion
+  implementation     group: 'io.projectreactor',         name: 'reactor-core',                         version: eventBusVersion
+  implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
+  implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion
+  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',    version: opentracingSpringJaegerStarterVersion
+  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                   version: opentracingJaxrs2Version
+  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                     version: opentracingJdbcVersion
+
+  runtime            group: 'com.sun.xml.bind',          name: 'jaxb-impl'
+  runtime            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime'
+
+  testImplementation group: "junit",                     name: "junit",                                version: junitVersion
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation group: 'org.mockito',               name: 'mockito-core'
-
-  implementation     group: 'io.projectreactor',         name: 'reactor-core',                          version: eventBusVersion
-  implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
-  implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion
-
-  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
-  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                       version: opentracingJaxrs2Version
-  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                         version: opentracingJdbcVersion
 
   constraints {
     compile            group: 'org.yaml',                  name: 'snakeyaml',                      version: '1.23'

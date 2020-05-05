@@ -35,6 +35,7 @@ dependencies {
     implementation     group: "io.opentracing.contrib",        name: "opentracing-jaxrs2",             version: opentracingJaxrs2Version
     implementation     group: "com.cloudera.cdp",              name: "cdp-sdk-java",                   version: cdpSdkVersion
 
+    testImplementation group: "junit",                         name: "junit",                          version: junitVersion
     testImplementation group: "org.assertj",                   name: "assertj-core",                   version: assertjVersion
     testImplementation group: "com.openpojo",                  name: "openpojo",                       version: openPojoVersion
     testImplementation group: "org.ow2.asm",                   name: "asm",                            version: asmVersion

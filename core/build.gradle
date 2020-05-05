@@ -134,7 +134,6 @@ dependencyManagement {
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
     dependency group: 'com.google.code.findbugs',           name: 'annotations',                 version: '3.0.1'
     dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '1.22.0'
-    dependency group: 'com.icegreen',                       name: 'greenmail',                   version: '1.4.1'
     dependency group: 'com.thoughtworks.xstream',           name: 'xstream',                     version: xStream
     dependency group: 'com.github.fommil',                  name: 'openssh',                     version: '1.0'
 
@@ -157,7 +156,6 @@ dependencyManagement {
     dependency group: 'org.mybatis',                        name: 'mybatis-migrations',          version: '3.2.0'
     dependency group: 'org.mockito',                        name: 'mockito-core',                version: mockitoVersion
     dependency group: 'org.apache.commons',                 name: 'commons-collections4',        version: commonsCollections4Version
-    dependency group: 'com.sequenceiq',                     name: 'consul-api',                  version: '1.10'
     dependency group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java',                version: cdpSdkVersion
   }
 }
@@ -198,8 +196,6 @@ dependencies {
   compile group: 'com.google.http-client',             name: 'google-http-client-jackson2'
   compile group: 'com.thoughtworks.xstream',           name: 'xstream'
   compile group: 'com.github.fommil',                  name: 'openssh'
-  compile group: 'com.icegreen',                       name: 'greenmail'
-  compile group: 'com.sequenceiq',                     name: 'consul-api'
 
   compile group: 'javax.mail',                         name: 'mail'
   compile group: 'javax.xml.bind',                     name: 'jaxb-api'

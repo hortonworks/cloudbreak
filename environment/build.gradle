@@ -86,6 +86,8 @@ dependencies {
     testImplementation(group: "org.springframework.boot",  name: "spring-boot-starter-test",                 version: springBootVersion) {
         exclude group: "junit"
     }
+
+    testImplementation group: 'junit',                     name: 'junit',                                    version: junitVersion
     testImplementation group: "com.openpojo",              name: "openpojo",                                 version: openPojoVersion
     testImplementation group: "org.ow2.asm",               name: "asm",                                      version: asmVersion
     testImplementation group: "com.h2database",            name: "h2",                                       version: h2databaseVersion
