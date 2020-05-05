@@ -27,6 +27,7 @@ public class DBStackStatus {
 
     private Long created;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
 
