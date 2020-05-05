@@ -17,6 +17,7 @@ import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedEntityGraphs;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceLifeCycle;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -81,6 +82,9 @@ public class InstanceMetaData implements ProvisionEntity {
 
     @Column(columnDefinition = "TEXT")
     private String statusReason;
+
+    @Enumerated(EnumType.STRING)
+    private InstanceLifeCycle lifeCycle;
 
     public InstanceGroup getInstanceGroup() {
         return instanceGroup;
@@ -310,6 +314,14 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
+    }
+
+    public InstanceLifeCycle getLifeCycle() {
+        return lifeCycle;
+    }
+
+    public void setLifeCycle(InstanceLifeCycle lifeCycle) {
+        this.lifeCycle = lifeCycle;
     }
 
     @Override
