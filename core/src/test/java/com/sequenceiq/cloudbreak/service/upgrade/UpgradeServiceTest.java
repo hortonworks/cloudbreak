@@ -112,7 +112,7 @@ public class UpgradeServiceTest {
     }
 
     @Test
-    public void shouldReturnNewImageId() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public void shouldReturnNewImageName() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Stack stack = getStack();
         Image image = getImage("id-1");
         setUpMocks(stack, image, true, "id-1", "id-2");
@@ -133,7 +133,7 @@ public class UpgradeServiceTest {
                 .determineImageFromCatalog(
                         eq(WORKSPACE_ID), captor.capture(), eq("aws"),
                         eq(stack.getCluster().getBlueprint()), eq(false), eq(false), eq(user), any());
-        assertThat(result.getUpgrade().getImageId()).isEqualTo("id-2");
+        assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo(null);
     }
 
@@ -208,7 +208,7 @@ public class UpgradeServiceTest {
         verify(imageService)
                 .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false),
                         eq(false), eq(user), any());
-        assertThat(result.getUpgrade().getImageId()).isEqualTo("id-2");
+        assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo("Please stop connected DataHub clusters before upgrade.");
     }
 
@@ -238,7 +238,7 @@ public class UpgradeServiceTest {
         verify(imageService)
                 .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false),
                         eq(false), eq(user), any());
-        assertThat(result.getUpgrade().getImageId()).isEqualTo("id-2");
+        assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo("Please stop connected DataHub clusters before upgrade.");
     }
 
@@ -275,7 +275,7 @@ public class UpgradeServiceTest {
         verify(imageService)
                 .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false),
                         eq(false), eq(user), any());
-        assertThat(result.getUpgrade().getImageId()).isEqualTo("id-2");
+        assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo(null);
     }
 
@@ -315,24 +315,24 @@ public class UpgradeServiceTest {
         when(distroXV1Endpoint.list(eq(null), anyString())).thenReturn(stackViewV4Responses);
     }
 
-    private Image getImage(String imageId) {
+    private Image getImage(String imageName) {
         return new Image(
-                null,
+                imageName,
                 null,
                 "os",
                 null,
                 "catalogUrl",
                 "catalogName",
-                imageId,
+                "id-1",
                 Map.of()
         );
     }
 
-    private StatedImage imageFromCatalog(boolean prewarmed, String imageId) {
+    private StatedImage imageFromCatalog(boolean prewarmed, String imageName) {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         lenient().when(image.isPrewarmed()).thenReturn(prewarmed);
-        lenient().when(image.getUuid()).thenReturn(imageId);
-        lenient().when(image.getImageSetsByProvider()).thenReturn(Map.of("aws", Map.of("eu-central-1", "ami-1234")));
+        lenient().when(image.getUuid()).thenReturn("uuid");
+        lenient().when(image.getImageSetsByProvider()).thenReturn(Map.of("aws", Map.of("eu-central-1", imageName)));
         StatedImage statedImage = StatedImage.statedImage(image, null, null);
         return statedImage;
     }
