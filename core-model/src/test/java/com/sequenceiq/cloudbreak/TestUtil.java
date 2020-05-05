@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceLifeCycle;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
@@ -312,6 +313,7 @@ public class TestUtil {
         instanceMetaData.setId(instanceGroupId + serverNumber);
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setStartDate(new Date().getTime());
+        instanceMetaData.setLifeCycle(InstanceLifeCycle.SPOT);
         boolean gatewayInstanceGroup = instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY);
         InstanceMetadataType imType = gatewayInstanceGroup ? InstanceMetadataType.GATEWAY_PRIMARY : instanceMetadataType;
         instanceMetaData.setInstanceMetadataType(imType);

@@ -22,6 +22,7 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -42,6 +43,9 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     @Inject
     private CloudFormationStackUtil cloudFormationStackUtil;
+
+    @Inject
+    private AwsLifeCycleMapper awsLifeCycleMapper;
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
@@ -93,15 +97,15 @@ public class AwsMetadataCollector implements MetadataCollector {
     private Multimap<String, Instance> getUnkownInstancesForGroup(List<String> knownInstanceIdList, Multimap<String, Instance> instancesOnAWSForGroup) {
         LOGGER.debug("Collect unknown cloud metadata statuses, knownInstanceIdList: {}, instancesOnAWSForGroup: {}", knownInstanceIdList,
                 instancesOnAWSForGroup.keySet());
-        Multimap<String, Instance> unkownInstancesForGroup = ArrayListMultimap.create();
+        Multimap<String, Instance> unknownInstancesForGroup = ArrayListMultimap.create();
         for (String group : instancesOnAWSForGroup.keySet()) {
             Collection<Instance> instances = instancesOnAWSForGroup.get(group);
             List<Instance> unkownInstances = instances.stream().filter(instance ->
                     !knownInstanceIdList.contains(instance.getInstanceId()))
                     .collect(Collectors.toList());
-            unkownInstancesForGroup.putAll(group, unkownInstances);
+            unknownInstancesForGroup.putAll(group, unkownInstances);
         }
-        return unkownInstancesForGroup;
+        return unknownInstancesForGroup;
     }
 
     private void addFromUnknownMap(CloudInstance cloudInstance, Multimap<String, Instance> unknownMap,
@@ -114,8 +118,10 @@ public class AwsMetadataCollector implements MetadataCollector {
             Instance foundInstance = found.get();
             CloudInstance newCloudInstance = new CloudInstance(foundInstance.getInstanceId(), cloudInstance.getTemplate(),
                     cloudInstance.getAuthentication(), cloudInstance.getParameters());
-            CloudInstanceMetaData cloudInstanceMetaData =
-                    new CloudInstanceMetaData(foundInstance.getPrivateIpAddress(), foundInstance.getPublicIpAddress());
+            CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
+                    foundInstance.getPrivateIpAddress(),
+                    foundInstance.getPublicIpAddress(),
+                    awsLifeCycleMapper.getLifeCycle(foundInstance));
             CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(newCloudInstance, InstanceStatus.CREATED);
             CloudVmMetaDataStatus newMetadataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
             collectedCloudVmMetaDataStatuses.add(newMetadataStatus);
@@ -125,15 +131,17 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     private void addKnownInstance(CloudInstance cloudInstance, Multimap<String, Instance> instancesOnAWSForGroup,
             List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses) {
-        LOGGER.debug("Add known intance, cloudInstance: {}, instancesOnAWSForGroup: {}", cloudInstance.getInstanceId(), instancesOnAWSForGroup.keySet());
+        LOGGER.debug("Add known instance, cloudInstance: {}, instancesOnAWSForGroup: {}", cloudInstance.getInstanceId(), instancesOnAWSForGroup.keySet());
         List<Instance> instanceList = instancesOnAWSForGroup.entries().stream().map(Entry::getValue).collect(Collectors.toList());
         instanceList.stream()
                 .filter(instance ->
                         cloudInstance.getInstanceId().equals(instance.getInstanceId()))
                 .findAny()
                 .ifPresent(instance -> {
-                    CloudInstanceMetaData cloudInstanceMetaData =
-                            new CloudInstanceMetaData(instance.getPrivateIpAddress(), instance.getPublicIpAddress());
+                    CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
+                            instance.getPrivateIpAddress(),
+                            instance.getPublicIpAddress(),
+                            awsLifeCycleMapper.getLifeCycle(instance));
                     CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstance, cloudInstance.getTemplate().getStatus());
                     CloudVmMetaDataStatus newMetadataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
                     collectedCloudVmMetaDataStatuses.add(newMetadataStatus);

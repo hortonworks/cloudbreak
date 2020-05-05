@@ -24,8 +24,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceLifeCycle;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceLifeCycle;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -175,7 +177,8 @@ public class MetadataSetupServiceTest {
         params.put(CloudInstance.INSTANCE_NAME, INSTANCE_NAME);
         CloudInstance cloudInstance = new CloudInstance(null, instanceTemplate, null, params);
         CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstance, instanceStatus);
-        CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(PRIVATE_IP, PUBLIC_IP, SSH_PORT, LOCALITY_INDICATOR);
+        CloudInstanceMetaData cloudInstanceMetaData =
+                new CloudInstanceMetaData(PRIVATE_IP, PUBLIC_IP, SSH_PORT, LOCALITY_INDICATOR, CloudInstanceLifeCycle.SPOT);
         CloudVmMetaDataStatus cloudVmMetaDataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
         return List.of(cloudVmMetaDataStatus);
     }
@@ -194,6 +197,7 @@ public class MetadataSetupServiceTest {
         assertEquals(Boolean.FALSE, instanceMetaData.getAmbariServer());
         assertEquals(Boolean.FALSE, instanceMetaData.getClusterManagerServer());
         assertEquals(InstanceMetadataType.CORE, instanceMetaData.getInstanceMetadataType());
+        assertEquals(InstanceLifeCycle.SPOT, instanceMetaData.getLifeCycle());
     }
 
 }

@@ -28,6 +28,7 @@ public class InstanceMetaDataToInstanceMetaDataV4ResponseConverter
         metaDataJson.setInstanceGroup(source.getInstanceGroup().getGroupName());
         metaDataJson.setInstanceStatus(source.getInstanceStatus());
         metaDataJson.setInstanceType(source.getInstanceMetadataType());
+        metaDataJson.setLifeCycle(source.getLifeCycle());
         return metaDataJson;
     }
 }

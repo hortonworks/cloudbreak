@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceLifeCycle;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 
@@ -53,6 +54,9 @@ public class InstanceMetaData {
 
     @ManyToOne
     private InstanceGroup instanceGroup;
+
+    @Enumerated(EnumType.STRING)
+    private InstanceLifeCycle lifeCycle;
 
     public String getPrivateIp() {
         return privateIp;
@@ -159,7 +163,7 @@ public class InstanceMetaData {
     }
 
     public boolean isDeletedOnProvider() {
-        return InstanceStatus.DELETED_ON_PROVIDER_SIDE.equals(instanceStatus);
+        return InstanceStatus.DELETED_ON_PROVIDER_SIDE.equals(instanceStatus) || InstanceStatus.DELETED_BY_PROVIDER.equals(instanceStatus);
     }
 
     public boolean isRegistered() {
@@ -237,5 +241,13 @@ public class InstanceMetaData {
 
     public void setInstanceGroup(InstanceGroup instanceGroup) {
         this.instanceGroup = instanceGroup;
+    }
+
+    public InstanceLifeCycle getLifeCycle() {
+        return lifeCycle;
+    }
+
+    public void setLifeCycle(InstanceLifeCycle lifeCycle) {
+        this.lifeCycle = lifeCycle;
     }
 }

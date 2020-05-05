@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 public class CloudInstanceMetaData {
 
-    public static final CloudInstanceMetaData EMPTY_METADATA = new CloudInstanceMetaData(null, null, null);
+    public static final CloudInstanceMetaData EMPTY_METADATA = new CloudInstanceMetaData(null, null);
 
     private static final int DEFAULT_SSH_PORT = 22;
 
@@ -14,8 +14,14 @@ public class CloudInstanceMetaData {
 
     private final String localityIndicator;
 
+    private final CloudInstanceLifeCycle lifeCycle;
+
     public CloudInstanceMetaData(String privateIp, String publicIp) {
-        this(privateIp, publicIp, null);
+        this(privateIp, publicIp, (String) null);
+    }
+
+    public CloudInstanceMetaData(String privateIp, String publicIp, CloudInstanceLifeCycle lifeCycle) {
+        this(privateIp, publicIp, DEFAULT_SSH_PORT, null, lifeCycle);
     }
 
     public CloudInstanceMetaData(String privateIp, String publicIp, String localityIndicator) {
@@ -23,10 +29,15 @@ public class CloudInstanceMetaData {
     }
 
     public CloudInstanceMetaData(String privateIp, String publicIp, int sshPort, String localityIndicator) {
+        this(privateIp, publicIp, sshPort, localityIndicator, CloudInstanceLifeCycle.getDefault());
+    }
+
+    public CloudInstanceMetaData(String privateIp, String publicIp, int sshPort, String localityIndicator, CloudInstanceLifeCycle lifeCycle) {
         this.privateIp = privateIp;
         this.publicIp = publicIp;
         this.localityIndicator = localityIndicator;
         this.sshPort = sshPort;
+        this.lifeCycle = lifeCycle;
     }
 
     public String getPrivateIp() {
@@ -45,6 +56,10 @@ public class CloudInstanceMetaData {
         return localityIndicator;
     }
 
+    public CloudInstanceLifeCycle getLifeCycle() {
+        return lifeCycle;
+    }
+
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
@@ -52,6 +67,7 @@ public class CloudInstanceMetaData {
                 + ", privateIp='" + privateIp + '\''
                 + ", publicIp='" + publicIp + '\''
                 + ", localityIndicator='" + localityIndicator + '\''
+                + ", lifeCycle='" + lifeCycle + '\''
                 + '}';
     }
     //END GENERATED CODE

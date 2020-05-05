@@ -26,12 +26,14 @@ import com.amazonaws.services.ec2.model.Reservation;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
+import com.sequenceiq.cloudbreak.cloud.aws.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceLifeCycle;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -48,11 +50,16 @@ public class AwsMetaDataCollectorTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
+    private static final CloudInstanceLifeCycle CLOUD_INSTANCE_LIFE_CYCLE = CloudInstanceLifeCycle.SPOT;
+
     @Mock
     private AwsClient awsClient;
 
     @Mock
     private CloudFormationStackUtil cloudFormationStackUtil;
+
+    @Mock
+    private AwsLifeCycleMapper awsLifeCycleMapper;
 
     @Mock
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
@@ -221,6 +228,8 @@ public class AwsMetaDataCollectorTest {
 
         when(amazonEC2Client.describeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
 
+        Mockito.when(awsLifeCycleMapper.getLifeCycle(any())).thenReturn(CLOUD_INSTANCE_LIFE_CYCLE);
+
         Instance instance1 = Mockito.mock(Instance.class);
         when(instance1.getInstanceId()).thenReturn("i-1");
         when(instance1.getPrivateIpAddress()).thenReturn("privateIp1");
@@ -246,6 +255,8 @@ public class AwsMetaDataCollectorTest {
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "i-2".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "privateIp2".equals(predicate.getMetaData().getPrivateIp())));
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "publicIp2".equals(predicate.getMetaData().getPublicIp())));
+
+        Assert.assertTrue(statuses.stream().allMatch(predicate -> CLOUD_INSTANCE_LIFE_CYCLE.equals(predicate.getMetaData().getLifeCycle())));
     }
 
     @Test
