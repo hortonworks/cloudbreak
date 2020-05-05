@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -230,10 +229,7 @@ public class YarnLoadEvaluatorTest {
     }
 
     private StackV4Response getMockStackV4Response(String hostGroup, int currentHostGroupCount) {
-        Map hostGroupInstanceType = new HashMap();
-        hostGroupInstanceType.put(hostGroup, "m5.xlarge");
-        hostGroupInstanceType.put("master1", "m5.xlarge");
-        hostGroupInstanceType.put("worker1", "m5.xlarge");
+        Set hostGroups = Set.of(hostGroup, "master1", "worker1");
 
         Set fqdnToInstanceIds = new HashSet();
         for (int i = 1; i <= currentHostGroupCount; i++) {
@@ -244,7 +240,7 @@ public class YarnLoadEvaluatorTest {
         }
 
         return MockStackResponseGenerator.getMockStackV4Response("test-crn",
-                hostGroupInstanceType, fqdnToInstanceIds);
+                hostGroups, fqdnToInstanceIds);
     }
 
     private Cluster getARunningCluster() {

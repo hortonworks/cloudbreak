@@ -171,6 +171,7 @@ dependencies {
     compile project(':workspace')
     compile project(':secret-engine')
     compile project(':client-cm')
+    compile project(':authorization-common')
 }
 
 task buildInfo(type: BuildInfoTask, dependsOn: processResources) {

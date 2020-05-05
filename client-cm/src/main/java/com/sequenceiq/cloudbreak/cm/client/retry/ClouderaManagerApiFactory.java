@@ -22,6 +22,7 @@ import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.RoleCommandsResourceApi;
+import com.cloudera.api.swagger.RoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.ToolsResourceApi;
@@ -54,6 +55,9 @@ public class ClouderaManagerApiFactory {
 
     @Inject
     private Function<ApiClient, RolesResourceApi> rolesResourceApiFactory;
+
+    @Inject
+    private Function<ApiClient, RoleConfigGroupsResourceApi> roleConfigGroupsResourceApiFactory;
 
     @Inject
     private Function<ApiClient, RoleCommandsResourceApi> roleCommandsResourceApiFactory;
@@ -121,6 +125,10 @@ public class ClouderaManagerApiFactory {
 
     public RolesResourceApi getRolesResourceApi(ApiClient apiClient) {
         return rolesResourceApiFactory.apply(apiClient);
+    }
+
+    public RoleConfigGroupsResourceApi getRoleConfigGroupsResourceApi(ApiClient apiClient) {
+        return roleConfigGroupsResourceApiFactory.apply(apiClient);
     }
 
     public RoleCommandsResourceApi getRoleCommandsResourceApi(ApiClient apiClient) {

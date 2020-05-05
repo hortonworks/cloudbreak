@@ -180,7 +180,7 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
 
         verify(clusterService).findOneByStackId(STACK_ID);
         verify(clusterService).validateClusterUniqueness(any());
-        verify(clusterService).create(any(MonitoredStack.class), eq(RUNNING), captor.capture());
+        verify(clusterService).create(any(MonitoredStack.class), eq(PENDING), captor.capture());
         ClusterPertain clusterPertain = captor.getValue();
         assertThat(clusterPertain.getTenant(), is("TENANT"));
         assertThat(clusterPertain.getWorkspaceId(), is(10L));

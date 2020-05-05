@@ -45,7 +45,7 @@ periscope:
       addr: localhost
       port: 5432
   cloudbreak.url: http://localhost:9091
-  enabledPlatforms: AZURE,AWS
+  enabledPlatforms: AWS
   enabledAutoscaleMonitors:
     time-monitor:
       enabled: true
@@ -53,8 +53,6 @@ periscope:
       enabled: true
     cluster-manager-host-health-monitor:
       enabled: true
-    metric-monitor:
-      enabled: false
     prometheus-monitor:
       enabled: false
 

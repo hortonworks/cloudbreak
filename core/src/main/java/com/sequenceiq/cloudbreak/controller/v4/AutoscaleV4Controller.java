@@ -20,7 +20,6 @@ import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
@@ -45,7 +44,7 @@ import com.sequenceiq.distrox.v1.distrox.StackOperations;
 @Controller
 @Transactional(TxType.NEVER)
 @InternalReady
-@AuthorizationResource(type = AuthorizationResourceType.DATAHUB)
+@AuthorizationResource
 public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoscaleV4Controller.class);
@@ -69,19 +68,19 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     private ClusterProxyService clusterProxyService;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putStack(String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
         stackCommonService.putInDefaultWorkspace(crn, updateRequest);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putCluster(String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
         clusterCommonService.put(crn, updateRequest);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void decommissionInstancesForClusterCrn(String clusterCrn, Long workspaceId,
             List<String> instanceIds, Boolean forced) {
         stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), workspaceId,

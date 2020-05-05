@@ -51,15 +51,16 @@ public class AutoScaleClusterCommonService {
         return clusterService.findById(clusterId);
     }
 
+    @Retryable(value = NotFoundException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public Cluster getClusterByStackCrn(String stackCrn) {
         return getClusterByCrnOrName(NameOrCrn.ofCrn(stackCrn));
     }
 
+    @Retryable(value = NotFoundException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public Cluster getClusterByStackName(String stackName) {
         return getClusterByCrnOrName(NameOrCrn.ofName(stackName));
     }
 
-    @Retryable(value = NotFoundException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     protected Cluster getClusterByCrnOrName(NameOrCrn nameOrCrn) {
         return nameOrCrn.hasName() ?
                 clusterService.findOneByStackNameAndUserId(nameOrCrn.getName(), restRequestThreadLocalService.getCloudbreakUser())

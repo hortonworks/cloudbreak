@@ -28,7 +28,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateFailedHandler.class);
 
-    private static final String DELETE_STATUSES_PREFIX = "DELETE_";
+    private static final String DELETE_STATUS = "DELETE_COMPLETED";
 
     private static final String STOPPED_STATUSES_PREFIX = "STOP";
 
@@ -66,9 +66,9 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
             suspendCluster(cluster);
             return;
         }
-        if (stackStatus.startsWith(DELETE_STATUSES_PREFIX)) {
+        if (stackStatus.equalsIgnoreCase(DELETE_STATUS)) {
             clusterService.removeById(autoscaleClusterId);
-            LOGGER.debug("Delete cluster '{}' due to failing update attempts and Cloudbreak stack status.", cluster.getStackCrn());
+            LOGGER.debug("Delete cluster '{}', Cloudbreak stack status '{}'.", cluster.getStackCrn(), stackStatus);
             return;
         }
         Integer failed = updateFailures.get(autoscaleClusterId);

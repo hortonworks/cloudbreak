@@ -2,7 +2,6 @@ package com.sequenceiq.periscope.utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -15,13 +14,13 @@ public class MockStackResponseGenerator {
     private MockStackResponseGenerator() {
     }
 
-    public static StackV4Response getMockStackV4Response(String clusterCrn, Map<String, String> hostGroupInstanceTypes,
+    public static StackV4Response getMockStackV4Response(String clusterCrn, Set<String> hostGroups,
             Set<InstanceMetaDataV4Response> instanceMetaDataV4Responses) {
         StackV4Response mockReponse = new StackV4Response();
 
         List<InstanceGroupV4Response> instanceGroupV4Responses = new ArrayList<>();
-        hostGroupInstanceTypes.keySet().stream().forEach(hostGroup -> {
-            instanceGroupV4Responses.add(instanceGroup(hostGroup, awsTemplate(hostGroupInstanceTypes.get(hostGroup)),
+        hostGroups.stream().forEach(hostGroup -> {
+            instanceGroupV4Responses.add(instanceGroup(hostGroup, awsTemplate(),
                     instanceMetaDataV4Responses));
         });
 
@@ -31,9 +30,8 @@ public class MockStackResponseGenerator {
         return mockReponse;
     }
 
-    public static InstanceTemplateV4Response awsTemplate(String vmType) {
+    public static InstanceTemplateV4Response awsTemplate() {
         InstanceTemplateV4Response awsTemplate = new InstanceTemplateV4Response();
-        awsTemplate.setInstanceType(vmType);
         awsTemplate.setCloudPlatform(CloudPlatform.AWS);
         return awsTemplate;
     }

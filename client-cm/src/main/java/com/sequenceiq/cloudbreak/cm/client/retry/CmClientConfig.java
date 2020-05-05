@@ -22,6 +22,7 @@ import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.RoleCommandsResourceApi;
+import com.cloudera.api.swagger.RoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.ToolsResourceApi;
@@ -70,6 +71,11 @@ public class CmClientConfig {
     @Bean
     public Function<ApiClient, RolesResourceApi> rolesResourceApiFactory() {
         return this::rolesResourceApi;
+    }
+
+    @Bean
+    public Function<ApiClient, RoleConfigGroupsResourceApi> roleConfigGroupsResourceApiFactory() {
+        return this::roleConfigGroupsResourceApi;
     }
 
     @Bean
@@ -180,6 +186,12 @@ public class CmClientConfig {
     @Scope(value = "prototype")
     public RolesResourceApi rolesResourceApi(ApiClient apiClient) {
         return new RolesResourceApi(apiClient);
+    }
+
+    @Bean
+    @Scope(value = "prototype")
+    public RoleConfigGroupsResourceApi roleConfigGroupsResourceApi(ApiClient apiClient) {
+        return new RoleConfigGroupsResourceApi(apiClient);
     }
 
     @Bean

@@ -175,8 +175,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "WHERE ig.instanceGroupType = 'GATEWAY' "
             + "AND im.instanceMetadataType = 'GATEWAY_PRIMARY' "
             + "AND s.terminated = null "
-            + "AND c.clusterManagerIp IS NOT NULL "
-            + "AND c.status = 'AVAILABLE' "
+            + "AND c.status in ('AVAILABLE', 'REQUESTED', 'UPDATE_IN_PROGRESS') "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<AutoscaleStack> findAliveOnesWithAmbari();
 
