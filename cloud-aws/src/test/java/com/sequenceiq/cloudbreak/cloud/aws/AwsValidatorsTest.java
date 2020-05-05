@@ -131,7 +131,7 @@ public class AwsValidatorsTest {
         tests.add(DynamicTest.dynamicTest("value is valid numeric chars", () -> testTagsWithExpectedTeBeFair(VALID, "1234567890")));
         tests.add(DynamicTest.dynamicTest("value is valid alphabetic chars",
                 () -> testTagsWithExpectedTeBeFair("sheep", "A aB bC cD dE eF fG gH hI iJ jK kL lM mN nO oP pQ qR rS sT tU uV vW wX xY yZ z")));
-        tests.add(DynamicTest.dynamicTest("value should not start with aws", () -> testTagsWithExpectedException(VALID, "aws1234567890")));
+        tests.add(DynamicTest.dynamicTest("value could start with aws", () -> testTagsWithExpectedTeBeFair(VALID, "aws1234567890")));
 
         tests.add(DynamicTest.dynamicTest("too many tags",
                 () -> Assertions.assertThrows(IllegalArgumentException.class,

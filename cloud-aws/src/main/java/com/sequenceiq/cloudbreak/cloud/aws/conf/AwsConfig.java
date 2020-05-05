@@ -35,7 +35,7 @@ public class AwsConfig {
     @Value("${cb.aws.tag.value.max.length:255}")
     private Integer maxValueLength;
 
-    @Value("${cb.aws.tag.value.validator:^(?!aws|\\s)([\\w\\d+-=._:/@\\s]+)$}")
+    @Value("${cb.aws.tag.value.validator:^([\\w\\d+-=._:/@\\s]+)$}")
     private String valueValidator;
 
     @Inject
