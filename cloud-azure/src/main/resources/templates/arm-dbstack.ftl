@@ -198,7 +198,9 @@
             },
             "copy": {
                 "name": "vnetcopy",
-                "count": "[length(variables('subnetList'))]"
+                "count": "[length(variables('subnetList'))]",
+                "mode": "serial",
+                "batchSize": 5
             }
         }
     ],
