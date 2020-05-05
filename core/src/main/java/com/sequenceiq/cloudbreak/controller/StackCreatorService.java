@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -411,15 +412,21 @@ public class StackCreatorService {
             MDCBuilder.buildMdcContextFromMap(mdcContext);
             LOGGER.info("The stack with name {} has base images enabled: {} and should use base images: {}",
                     stackName, baseImageEnabled, shouldUseBaseCMImage);
-            StatedImage statedImage = imageService.determineImageFromCatalog(
-                    workspace.getId(),
-                    stackRequest.getImage(),
-                    platformString,
-                    blueprint,
-                    shouldUseBaseCMImage,
-                    baseImageEnabled,
-                    user,
-                    image -> true);
+            StatedImage statedImage = ThreadBasedUserCrnProvider.doAs(user.getUserCrn(), () -> {
+                try {
+                    return imageService.determineImageFromCatalog(
+                            workspace.getId(),
+                            stackRequest.getImage(),
+                            platformString,
+                            blueprint,
+                            shouldUseBaseCMImage,
+                            baseImageEnabled,
+                            user,
+                            image -> true);
+                } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+                    throw new RuntimeException(e);
+                }
+            });
             MDCBuilder.cleanupMdc();
             return statedImage;
         });
@@ -441,11 +448,13 @@ public class StackCreatorService {
             try {
                 return f.get(time, unit);
             } catch (ExecutionException e) {
-                if (e.getCause() instanceof CloudbreakImageNotFoundException) {
-                    throw new BadRequestException("Image id settings are incorrect: " + e.getMessage(), e);
-                }
-                if (e.getCause() instanceof CloudbreakImageCatalogException) {
-                    throw new BadRequestException("Image or image catalog settings are incorrect: " + ExceptionUtils.getRootCauseMessage(e), e.getCause());
+                if (e.getCause() instanceof RuntimeException) {
+                    if (e.getCause().getCause() instanceof CloudbreakImageNotFoundException) {
+                        throw new BadRequestException("Image id settings are incorrect: " + e.getMessage(), e);
+                    }
+                    if (e.getCause().getCause() instanceof CloudbreakImageCatalogException) {
+                        throw new BadRequestException("Image or image catalog settings are incorrect: " + ExceptionUtils.getRootCauseMessage(e), e.getCause());
+                    }
                 }
                 throw new RuntimeException("Unknown error happened when determining image from image catalog:" + e.getMessage(), e);
             } catch (InterruptedException e) {
