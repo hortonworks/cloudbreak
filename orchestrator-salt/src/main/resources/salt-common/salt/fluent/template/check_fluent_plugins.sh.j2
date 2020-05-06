@@ -8,7 +8,10 @@ function install_plugin() {
 
   install_command="/opt/td-agent/embedded/bin/fluent-gem install ${plugin}"
   if [[ "${custom_repo}" == "true" ]]; then
+     check_connection "{{ fluent.clouderaPublicGemRepo }}" "${plugin}" "${version}"
      install_command="${install_command} -s  {{ fluent.clouderaPublicGemRepo }}"
+  else
+     check_connection "https://api.rubygems.org" "${plugin}" "${version}"
   fi
 
   if [[ ! -z "${version}" ]]; then
@@ -18,6 +21,22 @@ function install_plugin() {
   echo "Run install command: ${install_command}"
   command_result=$(${install_command})
   echo "Install ${plugin} command output: ${command_result}"
+}
+
+function check_connection() {
+  check_conn_res=$(curl -f -s -I "$1" &>/dev/null && echo OK || echo FAIL)
+  plugin=$2
+  version=$3
+  if [[ "$check_conn_res" == "FAIL" ]]; then
+    local plugin_error_message="required fluent gem: ${plugin}"
+    if [[ ! -z "${version}" ]]; then
+      plugin_error_message="required ${plugin} gem version is ${version}"
+    fi
+    echo "Connection has failed for $1. Please check your firewall or use a newer OS image (${plugin_error_message}) or reach out Cloudera (Cloudbreak) support!" >>/dev/stderr
+    exit 1
+  else
+    echo "Connection Ok: $1"
+  fi
 }
 
 function check_and_install_plugin() {
