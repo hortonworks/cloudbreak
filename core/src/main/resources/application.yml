@@ -175,6 +175,7 @@ cb:
 
   azure:
     host.name.prefix.length: 255
+    database.template.batchSize: 1
     distrox:
       enabled.instance.types: >
         Standard_D8_v3,
