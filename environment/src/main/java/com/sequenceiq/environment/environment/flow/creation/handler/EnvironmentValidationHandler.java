@@ -8,7 +8,6 @@ import javax.ws.rs.WebApplicationException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -16,7 +15,6 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEve
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -53,11 +51,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                 .ifPresentOrElse(environment -> {
                             try {
                                 ValidationResult validationResult = validatorService.validateTelemetryLoggingStorageLocation(environment);
-                                // TODO: when a new cloud provider will have parameter validation, extract it behind interface properly
-                                //  and call validation without an if!
-                                if (CloudPlatform.AWS.name().equals(environmentDto.getCloudPlatform())) {
-                                    validationResult = validationResult.merge(validateAndDetermineAwsParameters(environmentDto));
-                                }
+                                validationResult = validationResult.merge(validatorService.validateParameters(environmentDto, environmentDto.getParameters()));
                                 validationResult = validationResult.merge(validatorService.validateNetworkWithProvider(environmentDto));
                                 if (validationResult.hasError()) {
                                     goToFailedState(environmentDtoEvent, validationResult.getFormattedErrors());
@@ -83,14 +77,6 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                 environmentDto.getResourceCrn());
 
         eventBus.notify(failureEvent.selector(), new Event<>(environmentDtoEvent.getHeaders(), failureEvent));
-    }
-
-    private ValidationResult validateAndDetermineAwsParameters(EnvironmentDto environment) {
-        ParametersDto parametersDto = environment.getParameters();
-        if (parametersDto != null && parametersDto.getAwsParametersDto() != null) {
-            return validatorService.processAwsParameters(environment, parametersDto);
-        }
-        return ValidationResult.builder().build();
     }
 
     private void goToNetworkCreationState(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto) {

@@ -1,8 +1,13 @@
-package com.sequenceiq.environment.parameters.validation.validators;
+package com.sequenceiq.environment.parameters.validation.validators.parameter;
+
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.LocationAwareCredential;
@@ -14,7 +19,9 @@ import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @Component
-public class AwsParameterProcessor {
+public class AwsParameterValidator implements ParameterValidator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsParameterValidator.class);
 
     private static final int PERCENTAGE_MIN = 0;
 
@@ -24,16 +31,22 @@ public class AwsParameterProcessor {
 
     private final ParametersService parametersService;
 
-    public AwsParameterProcessor(NoSqlTableCreationModeDeterminerService noSqlTableCreationModeDeterminerService,
+    public AwsParameterValidator(NoSqlTableCreationModeDeterminerService noSqlTableCreationModeDeterminerService,
             ParametersService parametersService) {
         this.noSqlTableCreationModeDeterminerService = noSqlTableCreationModeDeterminerService;
         this.parametersService = parametersService;
     }
 
-    public ValidationResult processAwsParameters(EnvironmentDto environmentDto, ParametersDto parametersDto) {
-        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+    @Override
+    public ValidationResult validate(EnvironmentDto environmentDto, ParametersDto parametersDto, ValidationResultBuilder validationResultBuilder) {
+        LOGGER.debug("ParametersDto: {}", parametersDto);
         AwsParametersDto awsParametersDto = parametersDto.getAwsParametersDto();
+        if (Objects.isNull(awsParametersDto)) {
+            LOGGER.debug("No aws parameters defined.");
+            return validationResultBuilder.build();
+        }
         if (StringUtils.isNotBlank(awsParametersDto.getS3GuardTableName())) {
+            LOGGER.debug("S3Guard table name defined: {}", awsParametersDto.getS3GuardTableName());
             boolean tableAlreadyAttached = isTableAlreadyAttached(environmentDto, awsParametersDto);
             if (tableAlreadyAttached) {
                 validationResultBuilder.error(String.format("S3Guard table '%s' is already attached to another active environment. "
@@ -48,6 +61,11 @@ public class AwsParameterProcessor {
         return validationResultBuilder.build();
     }
 
+    @Override
+    public CloudPlatform getcloudPlatform() {
+        return CloudPlatform.AWS;
+    }
+
     private boolean isTableAlreadyAttached(EnvironmentDto environment, AwsParametersDto awsParameters) {
         return parametersService.isS3GuardTableUsed(environment.getAccountId(), environment.getCredential().getCloudPlatform(),
                 environment.getLocation().getName(), awsParameters.getS3GuardTableName());
@@ -57,6 +75,7 @@ public class AwsParameterProcessor {
         LocationAwareCredential locationAwareCredential = getLocationAwareCredential(environment);
         S3GuardTableCreation dynamoDbTableCreation = noSqlTableCreationModeDeterminerService
                 .determineCreationMode(locationAwareCredential, parametersDto.getAwsParametersDto().getS3GuardTableName());
+        LOGGER.debug("S3Guard table name: {}, creation: {}", parametersDto.getAwsParametersDto().getS3GuardTableName(), dynamoDbTableCreation);
         parametersDto.getAwsParametersDto().setDynamoDbTableCreation(dynamoDbTableCreation);
         parametersService.saveParameters(environment.getId(), parametersDto);
     }

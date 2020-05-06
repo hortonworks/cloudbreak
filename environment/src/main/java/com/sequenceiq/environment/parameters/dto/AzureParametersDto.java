@@ -16,6 +16,13 @@ public class AzureParametersDto {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return "AzureParametersDto{" +
+                "azureResourceGroupDto=" + azureResourceGroupDto +
+                '}';
+    }
+
     public static final class Builder {
 
         private AzureResourceGroupDto azureResourceGroupDto;

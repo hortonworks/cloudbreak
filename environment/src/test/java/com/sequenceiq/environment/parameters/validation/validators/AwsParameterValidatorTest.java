@@ -31,9 +31,10 @@ import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
+import com.sequenceiq.environment.parameters.validation.validators.parameter.AwsParameterValidator;
 
 @ExtendWith(MockitoExtension.class)
-class AwsParameterProcessorTest {
+class AwsParameterValidatorTest {
 
     private static final Long ENV_ID = 1L;
 
@@ -44,7 +45,7 @@ class AwsParameterProcessorTest {
     private ParametersService parametersService;
 
     @InjectMocks
-    private AwsParameterProcessor underTest;
+    private AwsParameterValidator underTest;
 
     private EnvironmentDto environmentDto;
 
@@ -68,7 +69,7 @@ class AwsParameterProcessorTest {
                 .build();
         when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(true);
 
-        ValidationResult validationResult = underTest.processAwsParameters(environmentDto, parametersDto);
+        ValidationResult validationResult = underTest.validate(environmentDto, parametersDto, ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
         assertEquals(1L, validationResult.getErrors().size());
@@ -89,7 +90,7 @@ class AwsParameterProcessorTest {
         when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(false);
         when(noSqlTableCreationModeDeterminerService.determineCreationMode(any(), any())).thenReturn(creation);
 
-        ValidationResult validationResult = underTest.processAwsParameters(environmentDto, parametersDto);
+        ValidationResult validationResult = underTest.validate(environmentDto, parametersDto, ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
         verify(noSqlTableCreationModeDeterminerService).determineCreationMode(any(), any());
@@ -107,7 +108,7 @@ class AwsParameterProcessorTest {
                 .withAwsParameters(awsParameters)
                 .build();
 
-        ValidationResult validationResult = underTest.processAwsParameters(environmentDto, parametersDto);
+        ValidationResult validationResult = underTest.validate(environmentDto, parametersDto, ValidationResult.builder());
 
         assertEquals(hasError, validationResult.hasError());
         if (hasError) {
