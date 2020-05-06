@@ -124,6 +124,13 @@
                 "description": "The location in which the database should be deployed."
             }
         },
+        "batchSize": {
+            "type": "int",
+            "defaultValue": ${batchSize},
+            "metadata": {
+                "description": "batchsize of resource creation."
+            }
+        },
         "subnets": {
             "type": "string",
             "defaultValue": "${subnets}",
@@ -198,7 +205,9 @@
             },
             "copy": {
                 "name": "vnetcopy",
-                "count": "[length(variables('subnetList'))]"
+                "count": "[length(variables('subnetList'))]",
+                "mode": "serial",
+                "batchSize": "[parameters('batchSize')]"
             }
         }
     ],

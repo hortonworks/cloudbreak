@@ -127,6 +127,7 @@ cb:
 
   azure:
     host.name.prefix.length: 255
+    database.template.batchSize: 1
 
   os:
     enable.autoimport: true

@@ -159,6 +159,7 @@ cb:
 
   azure:
     host.name.prefix.length: 255
+    database.template.batchSize: 1
 
   os:
     enable.autoimport: true
@@ -189,7 +190,7 @@ cb:
     openstack.resource.name.length: 120
     yarn.resource.name.length: 63
 
-    salt.new.service.retry: 90
+    salt.new.service.retry: 180
     salt.new.service.leave.retry: 10
     salt.new.service.retry.onerror: 20
     salt.recipe.execution.retry: 180

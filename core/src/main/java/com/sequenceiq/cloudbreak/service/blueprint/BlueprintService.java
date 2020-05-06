@@ -24,6 +24,7 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -231,10 +232,14 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                     .collect(Collectors.toSet());
         }
         LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
-        Set<Blueprint> updatedBlueprints =
-                blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprintsInDatabase, workspace, this::saveDefaultsWithReadRight);
-        LOGGER.debug("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
-        return updatedBlueprints;
+        try {
+            Set<Blueprint> updatedBlueprints =
+                    blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprintsInDatabase, workspace, this::saveDefaultsWithReadRight);
+            LOGGER.debug("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
+            return updatedBlueprints;
+        } catch (ConstraintViolationException e) {
+            return updateDefaultBlueprintCollection(workspace);
+        }
     }
 
     private Optional<Blueprint> filterBlueprintsByName(String name, Collection<Blueprint> blueprints) {
@@ -245,7 +250,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return blueprintListFilters.isDatalakeBlueprint(blueprint);
     }
 
-    private Iterable<Blueprint> saveDefaultsWithReadRight(Iterable<Blueprint> blueprints, Workspace workspace) {
+    private synchronized Iterable<Blueprint> saveDefaultsWithReadRight(Iterable<Blueprint> blueprints, Workspace workspace) {
         blueprints.forEach(bp -> bp.setWorkspace(workspace));
         return blueprintRepository.saveAll(blueprints);
     }
