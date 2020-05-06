@@ -39,6 +39,8 @@ public class AzureTemplateBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureTemplateBuilder.class);
 
+    private static final int DEFAULT_BATCH_SIZE = 5;
+
     @Value("${cb.arm.template.path:}")
     private String armTemplatePath;
 
@@ -136,6 +138,8 @@ public class AzureTemplateBuilder {
             model.put("sslEnforcement", false);
             model.put("storageAutoGrow", azureDatabaseServerView.getStorageAutoGrow());
             model.put("subnets", azureNetworkView.getSubnets());
+            // if subnet number is 1 then Azure does not create the endpoints if the batchsize is 5
+            model.put("batchSize", azureNetworkView.getSubnets().split(",").length >= DEFAULT_BATCH_SIZE ? DEFAULT_BATCH_SIZE : 1);
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(databaseStack), model);
             LOGGER.debug("Generated ARM database template: {}", AnonymizerUtil.anonymize(generatedTemplate));
             return generatedTemplate;
