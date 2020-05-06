@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.TempConstants.TEMP_USER_ID;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -43,6 +44,8 @@ import reactor.bus.EventBus;
 public class ServiceProviderCredentialAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderCredentialAdapter.class);
+
+    private static final String FAILED_CREDENTIAL_VERFICIATION_MSG = "Couldn't verify credential.";
 
     private static final String SMART_SENSE_ID = "smartSenseId";
 
@@ -83,8 +86,7 @@ public class ServiceProviderCredentialAdapter {
                 throw new CredentialVerificationException(message + res.getErrorDetails(), res.getErrorDetails());
             }
             if (CredentialStatus.FAILED.equals(res.getCloudCredentialStatus().getStatus())) {
-                throw new CredentialVerificationException(message + res.getCloudCredentialStatus().getStatusReason(),
-                        res.getCloudCredentialStatus().getException());
+                return new CredentialVerification(credential, setNewStatusText(credential, res.getCloudCredentialStatus()));
             }
             changed = setNewStatusText(credential, res.getCloudCredentialStatus());
             CloudCredential cloudCredentialResponse = res.getCloudCredentialStatus().getCloudCredential();
@@ -102,6 +104,11 @@ public class ServiceProviderCredentialAdapter {
         if (CredentialStatus.PERMISSIONS_MISSING.equals(status.getStatus())) {
             if (!StringUtils.equals(originalVerificationStatusText, status.getStatusReason())) {
                 credential.setVerificationStatusText(status.getStatusReason());
+                changed = true;
+            }
+        } else if (CredentialStatus.FAILED.equals(status.getStatus())) {
+            if (!Objects.equals(credential.getVerificationStatusText(), FAILED_CREDENTIAL_VERFICIATION_MSG)) {
+                credential.setVerificationStatusText(FAILED_CREDENTIAL_VERFICIATION_MSG);
                 changed = true;
             }
         } else {

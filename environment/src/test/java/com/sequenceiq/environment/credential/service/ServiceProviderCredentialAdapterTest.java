@@ -53,8 +53,6 @@ class ServiceProviderCredentialAdapterTest {
 
     private static final String CLOUD_PLATFORM = "AWS";
 
-    private static final String CREDENTIAL_OWNER = "theOwnerOfTheCredential";
-
     @Mock
     private EventBus eventBus;
 
