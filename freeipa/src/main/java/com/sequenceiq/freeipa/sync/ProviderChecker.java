@@ -127,8 +127,8 @@ public class ProviderChecker {
     private void setStatusIfNotTheSame(InstanceMetaData instanceMetaData, InstanceStatus newStatus) {
         if (instanceMetaData.getInstanceStatus() != newStatus) {
             if (updateStatus) {
-                instanceMetaData.setInstanceStatus(newStatus);
                 LOGGER.info(":::Auto sync::: The instance status updated from {} to {}", instanceMetaData.getInstanceStatus(), newStatus);
+                instanceMetaData.setInstanceStatus(newStatus);
             } else {
                 LOGGER.info(":::Auto sync::: The instance status would be had to update from {} to {}",
                         instanceMetaData.getInstanceStatus(), newStatus);
