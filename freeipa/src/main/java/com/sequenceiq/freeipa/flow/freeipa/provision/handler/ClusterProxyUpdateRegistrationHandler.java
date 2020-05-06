@@ -38,7 +38,7 @@ public class ClusterProxyUpdateRegistrationHandler implements EventHandler<Clust
         ClusterProxyUpdateRegistrationRequest request = event.getData();
         Selectable response;
         try {
-            clusterProxyService.updateFreeIpaRegistrationAndWait(request.getResourceId());
+            clusterProxyService.updateFreeIpaRegistration(request.getResourceId());
             response = new ClusterProxyUpdateRegistrationSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Updating Cluster Proxy registration has failed", e);

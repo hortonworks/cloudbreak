@@ -6,10 +6,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.Security;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,7 +17,6 @@ import javax.net.ssl.SSLContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -93,16 +90,8 @@ public class FreeIpaClientBuilder {
 
     private Map<String, String> additionalHeaders;
 
-    private Map<String, String> additionalHeadersStickySessionFirstRpc;
-
-    private Map<String, String> additionalHeadersStickySession;
-
-    private Optional<String> stickyIdHeader;
-
     public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, String hostname, int port, String basePath,
-            Map<String, String> additionalHeaders, Map<String, String> additionalHeadersStickySessionFirstRpc,
-            Map<String, String> additionalHeadersStickySession, Optional<String> stickyIdHeader, JsonRpcClient.RequestListener rpcRequestListener)
-            throws Exception {
+            Map<String, String> additionalHeaders, JsonRpcClient.RequestListener rpcRequestListener) throws Exception {
         this.user = user;
         this.pass = pass;
         this.clientConfig = clientConfig;
@@ -127,18 +116,14 @@ public class FreeIpaClientBuilder {
 
         this.basePath = basePath;
         this.additionalHeaders = Map.copyOf(additionalHeaders);
-        this.additionalHeadersStickySessionFirstRpc = Map.copyOf(additionalHeadersStickySessionFirstRpc);
-        this.additionalHeadersStickySession = Map.copyOf(additionalHeadersStickySession);
-        this.stickyIdHeader = stickyIdHeader;
         this.rpcRequestListener = rpcRequestListener;
     }
 
     public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, int port, String hostname) throws Exception {
-        this(user, pass, clientConfig, hostname, port, DEFAULT_BASE_PATH, Map.of(), Map.of(), Map.of(), Optional.empty(), null);
+        this(user, pass, clientConfig, hostname, port, DEFAULT_BASE_PATH, Map.of(), null);
     }
 
     public FreeIpaClient build(boolean withPing) throws URISyntaxException, IOException, FreeIpaClientException, FreeIpaHostNotAvailableException {
-        Optional<String> stickyId = Optional.empty();
         if (withPing) {
             List<BasicHeader> defaultHeaders = additionalHeaders.entrySet().stream()
                     .map(entry -> new BasicHeader(entry.getKey(), entry.getValue())).collect(Collectors.toList());
@@ -159,23 +144,22 @@ public class FreeIpaClientBuilder {
                 LOGGER.debug("Ping at target: {}", target);
                 HttpHead request = new HttpHead(target);
                 additionalHeaders.forEach(request::addHeader);
-                additionalHeadersStickySessionFirstRpc.forEach(request::addHeader);
                 try (CloseableHttpResponse response = client.execute(request)) {
                     if (UNAVIALLBE_PING_HTTP_RESPONSES.contains(response.getStatusLine().getStatusCode())) {
                         throw new HttpException("Ping failed with http status code " + response.getStatusLine().getStatusCode());
                     }
-                    stickyId = getStickIdFromHeaders(response);
                 }
                 LOGGER.debug("Freeipa is reachable");
             } catch (Exception e) {
                 throw new FreeIpaHostNotAvailableException("Ping failed", e);
             }
         }
-        CookieAndStickyId cookieAndStickyId = connect(user, pass, clientConfig.getApiAddress(), port, stickyIdHeader, stickyId);
-        String sessionCookie = cookieAndStickyId.getCookie();
-        stickyId = cookieAndStickyId.getStickyId();
+        String sessionCookie = connect(user, pass, clientConfig.getApiAddress(), port);
 
-        Map<String, String> headers = buildHeaders(sessionCookie, stickyId);
+        Map<String, String> headers = ImmutableMap.<String, String>builder()
+                .put("Cookie", "ipa_session=" + sessionCookie)
+                .putAll(additionalHeaders)
+                .build();
 
         JsonRpcHttpClient jsonRpcHttpClient = new JsonRpcHttpClient(ObjectMapperBuilder.getObjectMapper(),
                 getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/json"), headers);
@@ -190,20 +174,17 @@ public class FreeIpaClientBuilder {
         return new FreeIpaClient(jsonRpcHttpClient, clientConfig.getApiAddress(), hostname);
     }
 
-    private CookieAndStickyId connect(String user, String pass, String apiAddress, int port, Optional<String> stickyIdHeader, Optional<String> stickyId)
+    private String connect(String user, String pass, String apiAddress, int port)
             throws IOException, URISyntaxException, FreeIpaClientException {
 
-        Map<String, String> stickyHeaders = createStickyHeaders(stickyId);
         URI target = getIpaUrl(apiAddress, port, basePath, "/session/login_password").toURI();
         LOGGER.debug("Connecting for user: {} at target: {}", user, target);
 
         HttpPost post = getPost(target);
-        stickyHeaders.forEach(post::addHeader);
         post.setEntity(new UrlEncodedFormEntity(List.of(new BasicNameValuePair("user", user), new BasicNameValuePair("password", pass))));
 
         CookieStore cookieStore = new BasicCookieStore();
         try (CloseableHttpResponse response = execute(post, cookieStore)) {
-            stickyId = getStickIdFromHeaders(response);
             if (response.getStatusLine().getStatusCode() != HttpStatus.OK.value()) {
                 if (response.getStatusLine().getStatusCode() == HttpStatus.UNAUTHORIZED.value()) {
 
@@ -232,7 +213,7 @@ public class FreeIpaClientBuilder {
             }
         }
         Cookie sessionCookie = cookieStore.getCookies().stream().filter(cookie -> "ipa_session".equalsIgnoreCase(cookie.getName())).findFirst().get();
-        return new CookieAndStickyId(sessionCookie.getValue(), stickyId);
+        return sessionCookie.getValue();
     }
 
     private SSLContext setupSSLContext(String clientCert, String clientKey, String serverCert) throws Exception {
@@ -289,31 +270,5 @@ public class FreeIpaClientBuilder {
 
     private static HostnameVerifier hostnameVerifier() {
         return (s, sslSession) -> true;
-    }
-
-    private Map<String, String> createStickyHeaders(Optional<String> stickyId) {
-        Map<String, String> stickyHeaders = new HashMap<>();
-        if (stickyId.isEmpty()) {
-            stickyHeaders.putAll(additionalHeadersStickySessionFirstRpc);
-        } else {
-            stickyHeaders.putAll(additionalHeadersStickySession);
-            stickyHeaders.put(stickyIdHeader.get(), stickyId.get());
-        }
-        return stickyHeaders;
-    }
-
-    private Map<String, String> buildHeaders(String sessionCookie, Optional<String> stickyId) {
-        ImmutableMap.Builder<String, String> headersBuidler = ImmutableMap.<String, String>builder()
-                .put("Cookie", "ipa_session=" + sessionCookie)
-                .putAll(additionalHeaders)
-                .putAll(additionalHeadersStickySession);
-        if (stickyIdHeader.isPresent() && stickyId.isPresent()) {
-            headersBuidler.put(stickyIdHeader.get(), stickyId.get());
-        }
-        return headersBuidler.build();
-    }
-
-    private Optional<String> getStickIdFromHeaders(CloseableHttpResponse response) {
-        return stickyIdHeader.flatMap(s -> Optional.ofNullable(response.getLastHeader(s)).map(NameValuePair::getValue));
     }
 }

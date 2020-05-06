@@ -476,7 +476,6 @@ cb:
 clusterProxy:
   url: http://localhost:10180/cluster-proxy
   enabled: true
-  readConfigPath: /rpc/readConfig
   registerConfigPath: /rpc/forceRegisterConfig
   updateConfigPath: /rpc/updateConfig
   removeConfigPath: /rpc/removeConfig
