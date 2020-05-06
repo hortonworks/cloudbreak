@@ -30,7 +30,7 @@ public class ImageCatalogVersionFilter {
 
     private static final String UNRELEASED_VERSION_PATTERN = "^\\d+\\.\\d+\\.\\d+-[d,r][c,e][v]?";
 
-    private static final String EXTENDED_UNRELEASED_VERSION_PATTERN = "^\\d+\\.\\d+\\.\\d+-[d,r][c,e][v]?\\.\\d+";
+    private static final String EXTENDED_UNRELEASED_VERSION_PATTERN = "^\\d+\\.\\d+\\.\\d+-[d,r,b][c,e]?[v]?\\.\\d+";
 
     private static final String UNSPECIFIED_VERSION = "unspecified";
 

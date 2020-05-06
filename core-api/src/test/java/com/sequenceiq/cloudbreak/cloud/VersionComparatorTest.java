@@ -46,6 +46,7 @@ public class VersionComparatorTest {
     public void compareCloudbreakVersions() {
         VersionComparator comparator = new VersionComparator();
 
+        assertEquals("dev major desc", 1L, comparator.compare(() -> "2.0.0-rc.1", () -> "2.0.0-dev.1"));
         assertEquals("major desc", 1L, comparator.compare(() -> "2.0.0", () -> "1.0.0"));
         assertEquals("minor desc", 1L, comparator.compare(() -> "2.1.0", () -> "2.0.0"));
         assertEquals("patch desc", 1L, comparator.compare(() -> "2.1.1", () -> "2.1.0"));
@@ -68,6 +69,26 @@ public class VersionComparatorTest {
     @Test
     public void testSmallerNonEqualLength() {
         Assert.assertEquals(-1, underTest.compare(new VersionString("2.4.0.0"), new VersionString("2.5.0.0-770")));
+    }
+
+    @Test
+    public void testComparingNewREVersioning() {
+        assertEquals("dev vs new re versioning asc", -1L, underTest.compare(() -> "2.1.1-dev.1", () -> "2.1.1-b3"));
+        assertEquals("dev vs new re versioning desc", 1L, underTest.compare(() -> "2.1.2-dev.13", () -> "2.1.1-b3"));
+        assertEquals("dev vs new re versioning desc build number", -1L, underTest.compare(() -> "2.1.1-dev.13", () -> "2.1.1-b3"));
+        assertEquals("dev vs new re versioning equals", -1L, underTest.compare(() -> "2.1.1-dev.3", () -> "2.1.1-b3"));
+        assertEquals("rc vs new re versioning asc", -1L, underTest.compare(() -> "2.1.1-rc.1", () -> "2.1.1-b3"));
+        assertEquals("rc vs new re versioning desc", 1L, underTest.compare(() -> "2.1.2-rc.13", () -> "2.1.1-b3"));
+        assertEquals("rc vs new re versioning desc build number", -1L, underTest.compare(() -> "2.1.1-rc.13", () -> "2.1.1-b3"));
+        assertEquals("rc vs new re versioning equals", -1L, underTest.compare(() -> "2.1.1-rc.3", () -> "2.1.1-b3"));
+        assertEquals("released vs new re versioning asc", -1L, underTest.compare(() -> "2.1.1-rc.1", () -> "2.3.1"));
+        assertEquals("released vs new re versioning desc", 1L, underTest.compare(() -> "2.1.2-b13", () -> "2.1.1"));
+        assertEquals("re versioning asc", -1L, underTest.compare(() -> "2.1.1-b2", () -> "2.1.1-b3"));
+        assertEquals("re versioning desc", 1L, underTest.compare(() -> "2.1.1-b12", () -> "2.1.1-b3"));
+        assertEquals("unspecified vs new re versioning", -1L, underTest.compare(() -> "2.1.2-b13", () -> "unspecified"));
+
+        assertEquals("dev vs new re versioning asc", -1L, underTest.compare(() -> "2.1.1-dev.1", () -> "2.2.1-b3"));
+        assertEquals("rc vs new re versioning asc", -1L, underTest.compare(() -> "2.1.1-rc.1", () -> "2.2.1-b3"));
     }
 
 }
