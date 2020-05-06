@@ -40,6 +40,9 @@ public class InstanceMetaDataResponse {
     @ApiModelProperty(HostMetadataModelDescription.STATE)
     private String state;
 
+    @ApiModelProperty
+    private InstanceLifeCycle lifeCycle;
+
     public String getInstanceGroup() {
         return instanceGroup;
     }
@@ -110,5 +113,13 @@ public class InstanceMetaDataResponse {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public InstanceLifeCycle getLifeCycle() {
+        return lifeCycle;
+    }
+
+    public void setLifeCycle(InstanceLifeCycle lifeCycle) {
+        this.lifeCycle = lifeCycle;
     }
 }
