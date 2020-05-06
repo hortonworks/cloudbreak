@@ -52,6 +52,17 @@ public class ParametersDto {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return "ParametersDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", awsParametersDto=" + awsParametersDto +
+                ", azureParametersDto=" + azureParametersDto +
+                '}';
+    }
+
     public static final class Builder {
         private Long id;
 

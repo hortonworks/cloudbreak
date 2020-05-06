@@ -33,6 +33,15 @@ public class AzureResourceGroupDto {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return "AzureResourceGroupDto{" +
+                "name='" + name + '\'' +
+                ", resourceGroupUsagePattern=" + resourceGroupUsagePattern +
+                ", resourceGroupCreation=" + resourceGroupCreation +
+                '}';
+    }
+
     public static final class Builder {
         private String name;
 

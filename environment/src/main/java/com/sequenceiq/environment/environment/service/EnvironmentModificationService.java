@@ -302,7 +302,7 @@ public class EnvironmentModificationService {
         if (parametersDto.getAwsParametersDto() != null) {
             EnvironmentDto environmentDto = environmentDtoConverter.environmentToDto(environment);
             ValidationResult validationResult = environmentFlowValidatorService
-                    .processAwsParameters(environmentDto, parametersDto);
+                    .validateParameters(environmentDto, parametersDto);
             if (validationResult.hasError()) {
                 throw new BadRequestException(validationResult.getFormattedErrors());
             }

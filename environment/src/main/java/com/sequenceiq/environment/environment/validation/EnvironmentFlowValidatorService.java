@@ -7,8 +7,8 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageLocationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentNetworkProviderValidator;
+import com.sequenceiq.environment.environment.validation.validators.EnvironmentParameterValidator;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
-import com.sequenceiq.environment.parameters.validation.validators.AwsParameterProcessor;
 
 @Service
 public class EnvironmentFlowValidatorService {
@@ -17,14 +17,14 @@ public class EnvironmentFlowValidatorService {
 
     private final EnvironmentLogStorageLocationValidator logStorageLocationValidator;
 
-    private final AwsParameterProcessor awsParameterProcessor;
+    private final EnvironmentParameterValidator environmentParameterValidator;
 
     public EnvironmentFlowValidatorService(
             EnvironmentNetworkProviderValidator environmentNetworkProviderValidator,
-            EnvironmentLogStorageLocationValidator logStorageLocationValidator, AwsParameterProcessor awsParameterProcessor) {
+            EnvironmentLogStorageLocationValidator logStorageLocationValidator, EnvironmentParameterValidator environmentParameterValidator) {
         this.environmentNetworkProviderValidator = environmentNetworkProviderValidator;
         this.logStorageLocationValidator = logStorageLocationValidator;
-        this.awsParameterProcessor = awsParameterProcessor;
+        this.environmentParameterValidator = environmentParameterValidator;
     }
 
     public ValidationResult validateTelemetryLoggingStorageLocation(Environment environment) {
@@ -35,7 +35,8 @@ public class EnvironmentFlowValidatorService {
         return environmentNetworkProviderValidator.validate(environmentDto);
     }
 
-    public ValidationResult processAwsParameters(EnvironmentDto environmentDto, ParametersDto parametersDto) {
-        return awsParameterProcessor.processAwsParameters(environmentDto, parametersDto);
+    public ValidationResult validateParameters(EnvironmentDto environmentDto, ParametersDto parametersDto) {
+        return environmentParameterValidator.validate(environmentDto, parametersDto);
     }
+
 }
