@@ -27,6 +27,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -88,11 +89,14 @@ public class ClouderaManagerMgmtTelemetryService {
     @Inject
     private ClouderaManagerDatabusService clouderaManagerDatabusService;
 
+    @Inject
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
+
     public void setupTelemetryRole(final Stack stack, final ApiClient client, final ApiHostRef cmHostRef,
             final ApiRoleList mgmtRoles, final Telemetry telemetry) throws ApiException {
         if (isWorkflowAnalyticsEnabled(stack, telemetry)) {
             WorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();
-            ClouderaManagerResourceApi cmResourceApi = new ClouderaManagerResourceApi(client);
+            ClouderaManagerResourceApi cmResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
             ApiConfigList apiConfigList = buildTelemetryCMConfigList(workloadAnalytics);
             cmResourceApi.updateConfig("Adding telemetry settings.", apiConfigList);
 
@@ -118,7 +122,7 @@ public class ClouderaManagerMgmtTelemetryService {
             final Telemetry telemetry, final String sdxContextName,
             final String sdxStackCrn, final ProxyConfig proxyConfig) throws ApiException {
         if (isWorkflowAnalyticsEnabled(stack, telemetry)) {
-            MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = new MgmtRoleConfigGroupsResourceApi(client);
+            MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(client);
             ApiConfigList configList = buildTelemetryConfigList(stack, telemetry.getWorkloadAnalytics(),
                     sdxContextName, sdxStackCrn, proxyConfig);
             mgmtRoleConfigGroupsResourceApi.updateConfig(String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, TELEMETRYPUBLISHER),

@@ -508,7 +508,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private int startServices(Stack stack, ApiClient client) throws ApiException, CloudbreakException {
         Cluster cluster = stack.getCluster();
-        ClustersResourceApi apiInstance = new ClustersResourceApi(client);
+        ClustersResourceApi apiInstance = clouderaManagerApiFactory.getClustersResourceApi(client);
         String clusterName = cluster.getName();
         LOGGER.debug("Starting all services for cluster.");
         eventService

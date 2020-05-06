@@ -160,7 +160,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         ApiClient client = null;
         try {
             client = clouderaManagerApiClientProvider.getDefaultClient(stack.getGatewayPort(), clientConfig, ClouderaManagerApiClientProvider.API_V_31);
-            ToolsResourceApi toolsResourceApi = new ToolsResourceApi(client);
+            ToolsResourceApi toolsResourceApi = clouderaManagerApiFactory.getToolsResourceApi(client);
             toolsResourceApi.echo("TEST");
             LOGGER.debug("Cloudera Manager already running, old admin user's password has not been changed yet.");
             return client;

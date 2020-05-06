@@ -33,7 +33,7 @@ public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerC
     @Override
     protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
         try {
-            ToolsResourceApi toolsResourceApi = new ToolsResourceApi(pollerObject.getApiClient());
+            ToolsResourceApi toolsResourceApi = clouderaManagerApiPojoFactory.getToolsResourceApi(pollerObject.getApiClient());
             String testMessage = "test";
             ApiEcho testIfRunning = toolsResourceApi.echo(testMessage);
             if (testMessage.equals(testIfRunning.getMessage())) {

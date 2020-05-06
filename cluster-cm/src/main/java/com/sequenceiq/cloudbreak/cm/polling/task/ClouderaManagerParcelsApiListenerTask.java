@@ -42,7 +42,7 @@ public class ClouderaManagerParcelsApiListenerTask extends AbstractClouderaManag
     }
 
     private boolean pollParcels(ClouderaManagerPollerObject pollerObject) throws ApiException {
-        ParcelsResourceApi parcelsResourceApi = new ParcelsResourceApi(pollerObject.getApiClient());
+        ParcelsResourceApi parcelsResourceApi = clouderaManagerApiPojoFactory.getParcelsResourceApi(pollerObject.getApiClient());
         ApiParcelList apiParcelList = parcelsResourceApi.readParcels(pollerObject.getStack().getName(), "");
         return Objects.nonNull(apiParcelList) && CollectionUtils.isNotEmpty(apiParcelList.getItems());
     }

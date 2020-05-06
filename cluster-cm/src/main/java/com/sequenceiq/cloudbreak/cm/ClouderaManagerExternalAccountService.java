@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cm.util.ConfigUtils.makeApiConfigList;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ExternalAccountsResourceApi;
@@ -12,13 +14,17 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiExternalAccount;
 import com.cloudera.api.swagger.model.ApiExternalAccountList;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 
 @Service
 public class ClouderaManagerExternalAccountService {
 
+    @Inject
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
+
     public ApiExternalAccount createExternalAccount(String accountName, String displayName, String typeName,
             Map<String, String> configs, ApiClient client) throws ApiException {
-        ExternalAccountsResourceApi externalAccountsResourceApi = new ExternalAccountsResourceApi(client);
+        ExternalAccountsResourceApi externalAccountsResourceApi = clouderaManagerApiFactory.getExternalAccountsResourceApi(client);
         ApiExternalAccountList externalAccountList = externalAccountsResourceApi.readAccounts(typeName, "FULL");
         boolean accountFound = false;
         if (externalAccountList.getItems() != null && !externalAccountList.getItems().isEmpty()) {
