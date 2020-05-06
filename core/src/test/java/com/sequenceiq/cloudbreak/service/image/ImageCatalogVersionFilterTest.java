@@ -27,6 +27,10 @@ public class ImageCatalogVersionFilterTest {
 
     private String latestRcVersion = "2.4.0-rc.13";
 
+    private String rEVersionOlder = "2.6.0-b14";
+
+    private String rEVersionNewest = "2.8.0-b83";
+
     private List<CloudbreakVersion> versions;
 
     @Test
@@ -35,6 +39,29 @@ public class ImageCatalogVersionFilterTest {
         List<String> list2 = generateVersionList(releasedVersion, extendedUnreleasedVersion);
         versions = generateCloudBreakVersions(list1, list2);
         assertEquals("2.8.0-rev.82", underTest.latestCloudbreakVersion(versions));
+    }
+
+    @Test
+    public void getLatestCloudbreakVersionWhenREVersioningExistsAndNewest() {
+        List<String> list1 = generateVersionList(devVersion, unReleasedVersion);
+        List<String> list2 = generateVersionList(releasedVersion, extendedUnreleasedVersion);
+        List<String> rEVersionList = generateVersionList(rEVersionOlder, rEVersionNewest);
+        versions = generateCloudBreakVersions(list1, list2, rEVersionList);
+
+        String actual = underTest.latestCloudbreakVersion(versions);
+
+        assertEquals("2.8.0-b83", actual);
+    }
+
+    @Test
+    public void getLatestCloudbreakVersionWhenREVersioningExistsAndNotNewest() {
+        List<String> list1 = generateVersionList(devVersion, unReleasedVersion);
+        List<String> list2 = generateVersionList(rEVersionOlder, extendedUnreleasedVersion);
+        versions = generateCloudBreakVersions(list1, list2);
+
+        String actual = underTest.latestCloudbreakVersion(versions);
+
+        assertEquals("2.8.0-rev.82", actual);
     }
 
     @Test
