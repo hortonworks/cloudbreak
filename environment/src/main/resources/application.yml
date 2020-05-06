@@ -148,6 +148,7 @@ cb:
         access.scope.id: 41094075-9dad-400e-a0bd-54e686782033
   azure:
     host.name.prefix.length: 255
+    database.template.batchSize: 1
 
 spring:
   application:
