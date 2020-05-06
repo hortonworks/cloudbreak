@@ -180,7 +180,7 @@ public class UpgradeService {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairResult = clusterRepairService.repairWithDryRun(stack.getId());
         if (repairResult.isSuccess()) {
             StatedImage latestImage = getLatestImage(workspaceId, stack, image, user);
-            if (!isImageIdTheSame(image, latestImage)) {
+            if (!isLatestImage(stack, image, latestImage)) {
                 if (attachedClustersStoppedOrDeleted(stack)) {
                     upgradeResponse = upgradeable(image, latestImage, stack);
                 } else {
@@ -197,8 +197,15 @@ public class UpgradeService {
         return upgradeResponse;
     }
 
-    private boolean isImageIdTheSame(Image currentImage, StatedImage latestImage) {
-        return Objects.equals(currentImage.getImageId(), latestImage.getImage().getUuid());
+    private boolean isLatestImage(Stack stack, Image currentImage, StatedImage latestImage) {
+        String latestImageName = getImageNameForStack(stack, latestImage);
+        return Objects.equals(currentImage.getImageName(), latestImageName);
+    }
+
+    private String getImageNameForStack(Stack stack, StatedImage statedImage) {
+        return statedImage.getImage().getImageSetsByProvider()
+                .get(stack.getPlatformVariant().toLowerCase())
+                .get(stack.getRegion());
     }
 
     private boolean attachedClustersStoppedOrDeleted(Stack stack) {
@@ -238,7 +245,7 @@ public class UpgradeService {
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         UpgradeOptionV4Response response = createUpgradeBaseWithCurrent(image);
         ImageInfoV4Response upgradeImageInfo = new ImageInfoV4Response(
-                latestImage.getImage().getImageSetsByProvider().get(stack.getPlatformVariant().toLowerCase()).get(stack.getRegion()),
+                getImageNameForStack(stack, latestImage),
                 latestImage.getImage().getUuid(),
                 latestImage.getImageCatalogName(),
                 latestImage.getImage().getCreated(),
@@ -253,7 +260,7 @@ public class UpgradeService {
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         UpgradeOptionV4Response response = notUpgradable(image, reason);
         ImageInfoV4Response upgradeImageInfo = new ImageInfoV4Response(
-                latestImage.getImage().getImageSetsByProvider().get(stack.getPlatformVariant().toLowerCase()).get(stack.getRegion()),
+                getImageNameForStack(stack, latestImage),
                 latestImage.getImage().getUuid(),
                 latestImage.getImageCatalogName(),
                 latestImage.getImage().getCreated(),
