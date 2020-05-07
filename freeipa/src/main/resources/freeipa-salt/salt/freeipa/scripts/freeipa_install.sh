@@ -21,6 +21,9 @@ ipa-server-install \
           --mkhomedir \
           --ip-address $IPADDR \
           --auto-forwarders \
+{%- if not salt['pillar.get']('freeipa:dnssecValidationEnabled') %}
+          --no-dnssec-validation \
+{%- endif %}
           --unattended
 
 set +e

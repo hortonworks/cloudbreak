@@ -56,6 +56,9 @@ freeipa:
   platform.default.instanceType:
     AWS: m5.large
     AZURE: Standard_D3_v2
+  platform.dnssec.validation:
+    AWS: true
+    AZURE: false
   environment:
     url: http://localhost:8088
     contextPath: /environmentservice
@@ -88,6 +91,7 @@ freeipa:
     threadpool:
       core.size: 100
       capacity.size: 4000
+
 
 info:
   app:

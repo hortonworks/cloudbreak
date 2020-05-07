@@ -5,16 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
-import java.util.Set;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -30,6 +20,15 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.backup.cloud.S3BackupConfigGenerator;
 import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
+import java.util.Map;
+import java.util.Set;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.env.Environment;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FreeIpaConfigServiceTest {
@@ -69,6 +68,9 @@ public class FreeIpaConfigServiceTest {
     @Mock
     private FreeIpaClientFactory freeIpaClientFactory;
 
+    @Mock
+    private Environment environment;
+
     @InjectMocks
     private FreeIpaConfigService freeIpaConfigService;
 
@@ -89,6 +91,7 @@ public class FreeIpaConfigServiceTest {
         when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
         when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(SUBNET_WITH_CIDR);
         when(reverseDnsZoneCalculator.reverseDnsZoneForCidrs(any())).thenReturn(REVERSE_ZONE);
+        when(environment.getProperty("freeipa.platform.dnssec.validation.AWS", "true")).thenReturn("true");
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfig.getHostname()).thenReturn(HOSTNAME);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
