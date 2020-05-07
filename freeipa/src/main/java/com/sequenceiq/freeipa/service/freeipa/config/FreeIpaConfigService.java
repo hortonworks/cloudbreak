@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -18,8 +19,6 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
-import com.sequenceiq.freeipa.service.freeipa.backup.cloud.AdlsGen2BackupConfigGenerator;
-import com.sequenceiq.freeipa.service.freeipa.backup.cloud.S3BackupConfigGenerator;
 import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
 
@@ -28,11 +27,7 @@ public class FreeIpaConfigService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaConfigService.class);
 
-    @Inject
-    private S3BackupConfigGenerator s3BackupConfigGenerator;
-
-    @Inject
-    private AdlsGen2BackupConfigGenerator adlsGen2BackupConfigGenerator;
+    private static final String DEFAULT_DNSSEC_VALIDATION_PREFIX = "freeipa.platform.dnssec.validation.";
 
     @Inject
     private NetworkService networkService;
@@ -49,6 +44,9 @@ public class FreeIpaConfigService {
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
 
+    @Inject
+    private Environment environment;
+
     public FreeIpaConfigView createFreeIpaConfigs(Stack stack, Set<Node> hosts, ProxyConfig proxyConfig) {
         final FreeIpaConfigView.Builder builder = new FreeIpaConfigView.Builder();
 
@@ -60,12 +58,25 @@ public class FreeIpaConfigService {
                 .withRealm(freeIpa.getDomain().toUpperCase())
                 .withDomain(freeIpa.getDomain())
                 .withPassword(freeIpa.getAdminPassword())
+                .withDnssecValidationEnabled(isDnsSecValidationEnabled(stack.getCloudPlatform()))
                 .withReverseZones(reverseZones)
                 .withAdminUser(freeIpaClientFactory.getAdminUser())
                 .withFreeIpaToReplicate(gatewayConfigService.getPrimaryGatewayConfig(stack).getHostname())
                 .withHosts(hosts)
                 .withBackupConfig(determineAndSetBackup(stack, proxyConfig))
                 .build();
+    }
+
+    private boolean isDnsSecValidationEnabled(String cloudPlatform) {
+        String dnssecValidationPropertyKey =
+                DEFAULT_DNSSEC_VALIDATION_PREFIX + cloudPlatform;
+        if (!environment.containsProperty(dnssecValidationPropertyKey)) {
+            LOGGER.debug("{} property is not set. Defaulting to true",
+                    dnssecValidationPropertyKey);
+        }
+        boolean dnsSecValidationEnabled = Boolean.parseBoolean(environment.getProperty(dnssecValidationPropertyKey, "true"));
+        LOGGER.info("DNSSEC validation is {}", dnsSecValidationEnabled ? "enabled" : "disabled");
+        return dnsSecValidationEnabled;
     }
 
     private FreeIpaBackupConfigView determineAndSetBackup(Stack stack, ProxyConfig proxyConfig) {
