@@ -13,8 +13,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -102,6 +106,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Role;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SshPublicKey;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest;
@@ -181,6 +186,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String MOCK_RESOURCE = "mock_resource";
 
+    private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -201,6 +208,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("#{'${auth.config.dir:}/${auth.databus.credential.fluent.file:}'}")
     private String databusFluentCredentialFile;
+
+    @Value("#{'${auth.config.dir:}/${auth.mock.sshpublickey.file:}'}")
+    private String sshPublicKeyFilePath;
 
     @Value("${auth.databus.credential.tp.profile:default}")
     private String databusTpCredentialProfile;
@@ -237,6 +247,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private WorkloadPasswordPolicy workloadPasswordPolicy;
 
+    private Optional<SshPublicKey> sshPublicKey;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -272,6 +284,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        sshPublicKey = getSshPublicKey();
     }
 
     @VisibleForTesting
@@ -667,9 +680,21 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void getActorWorkloadCredentials(GetActorWorkloadCredentialsRequest request,
             io.grpc.stub.StreamObserver<GetActorWorkloadCredentialsResponse> responseObserver) {
-
         GetActorWorkloadCredentialsResponse.Builder builder = GetActorWorkloadCredentialsResponse.newBuilder(actorWorkloadCredentialsResponse);
         builder.setPasswordHashExpirationDate(System.currentTimeMillis() + PASSWORD_LIFETIME);
+        if (sshPublicKey.isPresent()) {
+            Crn actorCrn = Crn.safeFromString(request.getActorCrn());
+            builder.addSshPublicKey(SshPublicKey.newBuilder(sshPublicKey.get())
+                    .setCrn(Crn.builder()
+                            .setAccountId(actorCrn.getAccountId())
+                            .setPartition(actorCrn.getPartition())
+                            .setService(Crn.Service.IAM)
+                            .setResourceType(ResourceType.PUBLIC_KEY)
+                            .setResource(UUID.randomUUID().toString())
+                            .build()
+                            .toString())
+                    .build());
+        }
 
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
@@ -721,6 +746,46 @@ public class MockUserManagementService extends UserManagementImplBase {
             }
         }
         return null;
+    }
+
+    private Optional<SshPublicKey> getSshPublicKey() {
+        if (null != sshPublicKeyFilePath) {
+            if (Files.exists(Paths.get(sshPublicKeyFilePath))) {
+                try {
+                    String publicKey = Files.readString(Path.of(sshPublicKeyFilePath));
+                    if (publicKey.matches(SSH_PUBLIC_KEY_PATTERN)) {
+                        byte[] keyData = Base64.getDecoder().decode(publicKey.trim().split(" ")[1]);
+
+                        try {
+                            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                            byte[] keyDigest = digest.digest(keyData);
+                            String fingerprint = Base64.getEncoder().encodeToString(keyDigest);
+                            while (fingerprint.endsWith("=")) {
+                                fingerprint = fingerprint.substring(0, fingerprint.length() - 1);
+                            }
+                            SshPublicKey sshPublicKey = SshPublicKey.newBuilder()
+                                    .setPublicKey(publicKey)
+                                    .setPublicKeyFingerprint(fingerprint)
+                                    .build();
+                            LOG.info("Ssh public key file loaded for mocking");
+                            return Optional.of(sshPublicKey);
+                        } catch (NoSuchAlgorithmException ex) {
+                            LOG.warn("Unable to calculate public ssh key fingerprint. Proceeding without ssh public key.", ex);
+                        }
+                    } else {
+                        LOG.warn("The provided ssh public key at path '{}' is invalid. It must be an RSA or ED25519 key." +
+                                "Proceeding without ssh public key.", sshPublicKeyFilePath);
+                    }
+                } catch (IOException e) {
+                    LOG.warn("Unable to load ssh public key from '{}'. Proceeding without ssh public key", sshPublicKeyFilePath);
+                }
+            } else {
+                LOG.warn("ssh public key not available at path '{}'. Proceeding without ssh public key", sshPublicKeyFilePath);
+            }
+        } else {
+            LOG.warn("ssh public key file path not specified. Proceeding without ssh public key");
+        }
+        return Optional.empty();
     }
 
     @Override

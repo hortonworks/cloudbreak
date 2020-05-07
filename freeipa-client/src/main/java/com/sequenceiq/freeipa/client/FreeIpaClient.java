@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -207,14 +209,21 @@ public class FreeIpaClient {
         updateUserPasswordExpiration(user, Optional.empty());
     }
 
-    public User userSetPasswordHash(String user, String hashedPassword,
-            String unencryptedKrbPrincipalKey, Optional<Instant> expiration) throws FreeIpaClientException {
-        String passwordExpirationDate = formatDate(expiration);
-        Map<String, Object> params =
-                Map.of("setattr", List.of(
-                        "cdpHashedPassword=" + hashedPassword,
-                        "cdpUnencryptedKrbPrincipalKey=" + unencryptedKrbPrincipalKey,
-                        "krbPasswordExpiration=" + passwordExpirationDate));
+    public User userSetWorkloadCredentials(String user, String hashedPassword,
+            String unencryptedKrbPrincipalKey, Optional<Instant> expiration,
+            List<String> sshPublicKeys) throws FreeIpaClientException {
+        Map<String, Object> params = new HashMap<>();
+        List<String> attributes = new ArrayList<>();
+
+        if (StringUtils.isNotBlank(hashedPassword)) {
+            attributes.add("cdpHashedPassword=" + hashedPassword);
+            attributes.add("cdpUnencryptedKrbPrincipalKey=" + unencryptedKrbPrincipalKey);
+            attributes.add("krbPasswordExpiration=" + formatDate(expiration));
+            params.put("setattr", attributes);
+        }
+
+        params.put("ipasshpubkey", sshPublicKeys);
+
         return userMod(user, params);
     }
 
@@ -252,58 +261,22 @@ public class FreeIpaClient {
         invoke("group_del", flags, params, Object.class);
     }
 
-    // TODO unpack response into something meaningful
-    // NOTE: API may partially succeed/fail
-    //ipa: INFO: Response: {
-    //    "error": null,
-    //    "id": 0,
-    //    "principal": "admin@IPATEST.LOCAL",
-    //    "result": {
-    //        "completed": 1,
-    //        "failed": {
-    //            "member": {
-    //                "group": [],
-    //                "user": [
-    //                    [
-    //                        "joenobody",
-    //                        "This entry is already a member"
-    //                    ]
-    //                ]
-    //            }
-    //        },
-    //        "result": {
-    //            "cn": [
-    //                "testgrp1"
-    //            ],
-    //            "dn": "cn=testgrp1,cn=groups,cn=accounts,dc=ipatest,dc=local",
-    //            "gidnumber": [
-    //                "790600009"
-    //            ],
-    //            "member_user": [
-    //                "joenobody",
-    //                "dhan"
-    //            ]
-    //        }
-    //    },
-    //    "version": "4.6.4"
-    //}
-    // TODO the response to this API call not currently deserializable
-    public RPCResponse<Object> groupAddMembers(String group, Collection<String> users) throws FreeIpaClientException {
+    public RPCResponse<Group> groupAddMembers(String group, Collection<String> users) throws FreeIpaClientException {
         FreeIpaChecks.checkGroupNotUnmanaged(group, () -> String.format("Group '%s' is not managed and membership cannot be changed", group));
         List<Object> flags = List.of(group);
         Map<String, Object> params = Map.of(
                 "user", users
         );
-        return invoke("group_add_member", flags, params, Object.class);
+        return invoke("group_add_member", flags, params, Group.class);
     }
 
-    public RPCResponse<Object> groupRemoveMembers(String group, Collection<String> users) throws FreeIpaClientException {
+    public RPCResponse<Group> groupRemoveMembers(String group, Collection<String> users) throws FreeIpaClientException {
         FreeIpaChecks.checkGroupNotUnmanaged(group, () -> String.format("Group '%s' is not managed and membership cannot be changed", group));
         List<Object> flags = List.of(group);
         Map<String, Object> params = Map.of(
                 "user", users
         );
-        return invoke("group_remove_member", flags, params, Object.class);
+        return invoke("group_remove_member", flags, params, Group.class);
     }
 
     public Set<Group> groupFindAll() throws FreeIpaClientException {
@@ -581,12 +554,12 @@ public class FreeIpaClient {
             return response;
         } catch (Exception e) {
             String message = String.format("Invoke FreeIpa failed: %s", e.getLocalizedMessage());
-            LOGGER.error(message, e);
+            LOGGER.warn(message);
             OptionalInt responseCode = extractResponseCode(e);
             throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(message, e, responseCode));
         } catch (Throwable throwable) {
             String message = String.format("Invoke FreeIpa failed: %s", throwable.getLocalizedMessage());
-            LOGGER.error(message, throwable);
+            LOGGER.warn(message);
             throw new FreeIpaClientException(message, throwable);
         }
     }
@@ -597,7 +570,7 @@ public class FreeIpaClient {
             Matcher matcher = RESPONSE_CODE_PATTERN.matcher(e.getMessage());
             if (matcher.find()) {
                 responseCode = OptionalInt.of(Integer.parseInt(matcher.group(1)));
-            } else if (RESPONSE_CODE_PATTERN.matcher(e.getCause().getMessage()).find()) {
+            } else if (null != e.getCause() && RESPONSE_CODE_PATTERN.matcher(e.getCause().getMessage()).find()) {
                 matcher = RESPONSE_CODE_PATTERN.matcher(e.getCause().getMessage());
                 matcher.find();
                 responseCode = OptionalInt.of(Integer.parseInt(matcher.group(1)));

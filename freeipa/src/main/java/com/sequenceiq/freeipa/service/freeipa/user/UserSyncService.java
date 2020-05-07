@@ -3,31 +3,31 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static java.util.Objects.requireNonNull;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -44,6 +44,8 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.client.FreeIpaCapabilities;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
+import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
@@ -52,7 +54,7 @@ import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import com.sequenceiq.freeipa.service.freeipa.user.kerberos.KrbKeySetEncoder;
+import com.sequenceiq.freeipa.service.freeipa.WorkloadCredentialService;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
@@ -60,7 +62,6 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
-import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -97,6 +98,9 @@ public class UserSyncService {
 
     @Inject
     private UserSyncStatusService userSyncStatusService;
+
+    @Inject
+    private WorkloadCredentialService workloadCredentialService;
 
     public Operation synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
@@ -197,10 +201,10 @@ public class UserSyncService {
                             success.add(new SuccessDetails(envCrn));
                             break;
                         case FAILED:
-                            failure.add(new FailureDetails(envCrn, statusDetail.getDetails()));
+                            failure.add(createFailureDetails(envCrn, statusDetail.getDetails(), statusDetail.getWarnings()));
                             break;
                         default:
-                            failure.add(new FailureDetails(envCrn, "Unexpected status: " + statusDetail.getStatus()));
+                            failure.add(createFailureDetails(envCrn, "Unexpected status: " + statusDetail.getStatus(), statusDetail.getWarnings()));
                             break;
                     }
                 } catch (InterruptedException | ExecutionException e) {
@@ -211,6 +215,18 @@ public class UserSyncService {
             operationService.completeOperation(accountId, operationId, success, failure);
             LOGGER.info("User sync operation {} completed.", operationId);
         });
+    }
+
+    private FailureDetails createFailureDetails(String envCrn, String details, Multimap<String, String> warnings) {
+        FailureDetails failureDetails = new FailureDetails(envCrn, details);
+        Map<String, String> additionalDetails = failureDetails.getAdditionalDetails();
+
+        warnings.asMap().entrySet().forEach(entry ->
+                additionalDetails.put(
+                        entry.getKey(),
+                        entry.getValue().stream().collect(Collectors.joining(", "))));
+
+        return failureDetails;
     }
 
     private Future<SyncStatusDetail> asyncSynchronizeStack(Stack stack, UmsUsersState umsUsersState, UmsEventGenerationIds umsEventGenerationIds,
@@ -232,21 +248,31 @@ public class UserSyncService {
     private SyncStatusDetail internalSynchronizeStack(Stack stack, UmsUsersState umsUsersState, boolean fullSync) {
         MDCBuilder.buildMdcContext(stack);
         String environmentCrn = stack.getEnvironmentCrn();
+        Multimap<String, String> warnings = ArrayListMultimap.create();
         try {
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
             UsersState ipaUsersState = getIpaUserState(freeIpaClient, umsUsersState, fullSync);
             LOGGER.debug("IPA UsersState, found {} users and {} groups", ipaUsersState.getUsers().size(), ipaUsersState.getGroups().size());
 
             applyStateDifferenceToIpa(stack.getEnvironmentCrn(), freeIpaClient,
-                    UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, ipaUsersState));
+                    UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, ipaUsersState),
+                    warnings::put);
 
-            // Check for the password related attribute (cdpUserAttr) existence and go for password sync.
-            processUsersWorkloadCredentials(environmentCrn, umsUsersState, freeIpaClient);
+            if (!FreeIpaCapabilities.hasSetPasswordHashSupport(freeIpaClient.getConfig())) {
+                LOGGER.debug("IPA doesn't have password hash support, no credentials sync required for env:{}", environmentCrn);
+            } else {
+                // Sync credentials for all users and not just diff. At present there is no way to identify that there is a change in password for a user
+                workloadCredentialService.setWorkloadCredentials(freeIpaClient, umsUsersState.getUsersWorkloadCredentialMap(), warnings::put);
+            }
 
-            return SyncStatusDetail.succeed(environmentCrn, "TODO- collect detail info");
+            if (warnings.isEmpty()) {
+                return SyncStatusDetail.succeed(environmentCrn);
+            } else {
+                return SyncStatusDetail.fail(environmentCrn, "Synchronization completed with warnings.", warnings);
+            }
         } catch (Exception e) {
             LOGGER.warn("Failed to synchronize environment {}", environmentCrn, e);
-            return SyncStatusDetail.fail(environmentCrn, e.getLocalizedMessage());
+            return SyncStatusDetail.fail(environmentCrn, e.getLocalizedMessage(), warnings);
         }
     }
 
@@ -258,94 +284,76 @@ public class UserSyncService {
     }
 
     @VisibleForTesting
-    void applyStateDifferenceToIpa(String environmentCrn, FreeIpaClient freeIpaClient, UsersStateDifference stateDifference)
-            throws FreeIpaClientException {
+    void applyStateDifferenceToIpa(String environmentCrn, FreeIpaClient freeIpaClient, UsersStateDifference stateDifference,
+                    BiConsumer<String, String> warnings) throws FreeIpaClientException {
         LOGGER.info("Applying state difference to environment {}.", environmentCrn);
 
-        addGroups(freeIpaClient, stateDifference.getGroupsToAdd());
-        addUsers(freeIpaClient, stateDifference.getUsersToAdd());
-        addUsersToGroups(freeIpaClient, stateDifference.getGroupMembershipToAdd());
+        addGroups(freeIpaClient, stateDifference.getGroupsToAdd(), warnings);
+        addUsers(freeIpaClient, stateDifference.getUsersToAdd(), warnings);
+        addUsersToGroups(freeIpaClient, stateDifference.getGroupMembershipToAdd(), warnings);
 
-        removeUsersFromGroups(freeIpaClient, stateDifference.getGroupMembershipToRemove());
-        removeUsers(freeIpaClient, stateDifference.getUsersToRemove());
-        removeGroups(freeIpaClient, stateDifference.getGroupsToRemove());
+        removeUsersFromGroups(freeIpaClient, stateDifference.getGroupMembershipToRemove(), warnings);
+        removeUsers(freeIpaClient, stateDifference.getUsersToRemove(), warnings);
+        removeGroups(freeIpaClient, stateDifference.getGroupsToRemove(), warnings);
     }
 
-    private void processUsersWorkloadCredentials(
-            String environmentCrn, UmsUsersState umsUsersState, FreeIpaClient freeIpaClient) throws IOException, FreeIpaClientException {
-        if (!FreeIpaCapabilities.hasSetPasswordHashSupport(freeIpaClient.getConfig())) {
-            LOGGER.debug("IPA doesn't have password hash support, no credentials sync required for env:{}", environmentCrn);
-            return;
-        }
-
-        LOGGER.debug("IPA has password hash support, going for credentials sync");
-
-        // Should sync for all users and not just diff. At present there is no way to identify that there is a change in password for a user
-        UsersState usersState = umsUsersState.getUsersState();
-        for (FmsUser u : usersState.getUsers()) {
-            WorkloadCredential workloadCredential = umsUsersState.getUsersWorkloadCredentialMap().get(u.getName());
-            if (workloadCredential == null
-                    || StringUtils.isEmpty(workloadCredential.getHashedPassword())
-                    || CollectionUtils.isEmpty(workloadCredential.getKeys())) {
-                continue;
-            }
-
-            // Call ASN_1 Encoder for encoding hashed password and then call user mod for password
-            LOGGER.debug("Found Credentials for user {}", u.getName());
-            String ansEncodedKrbPrincipalKey = KrbKeySetEncoder.getASNEncodedKrbPrincipalKey(workloadCredential.getKeys());
-
-            freeIpaClient.userSetPasswordHash(u.getName(), workloadCredential.getHashedPassword(),
-                    ansEncodedKrbPrincipalKey, workloadCredential.getExpirationDate());
-            LOGGER.debug("Password synced for the user:{}, for the environment: {}", u.getName(), environmentCrn);
-        }
-    }
-
-    private void addGroups(FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups) throws FreeIpaClientException {
+    private void addGroups(FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups, BiConsumer<String, String> warnings) throws FreeIpaClientException {
         for (FmsGroup fmsGroup : fmsGroups) {
             LOGGER.debug("adding group {}", fmsGroup.getName());
             try {
                 com.sequenceiq.freeipa.client.model.Group groupAdd = freeIpaClient.groupAdd(fmsGroup.getName());
                 LOGGER.debug("Success: {}", groupAdd);
             } catch (FreeIpaClientException e) {
-                // TODO propagate this information out to API
-                LOGGER.error("Failed to add group {}", fmsGroup.getName(), e);
-                checkIfClientStillUsable(e);
+                if (FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
+                    LOGGER.debug("group '{}' already exists", fmsGroup.getName());
+                } else {
+                    LOGGER.warn("Failed to add group {}", fmsGroup.getName(), e);
+                    warnings.accept(fmsGroup.getName(), "Failed to add group:" + e.getMessage());
+                    checkIfClientStillUsable(e);
+                }
             }
         }
     }
 
-    private void addUsers(FreeIpaClient freeIpaClient, Set<FmsUser> fmsUsers) throws FreeIpaClientException {
+    private void addUsers(FreeIpaClient freeIpaClient, Set<FmsUser> fmsUsers, BiConsumer<String, String> warnings) throws FreeIpaClientException {
         for (FmsUser fmsUser : fmsUsers) {
             String username = fmsUser.getName();
-
             LOGGER.debug("adding user {}", username);
-
             try {
                 com.sequenceiq.freeipa.client.model.User userAdd = freeIpaClient.userAdd(
                         username, fmsUser.getFirstName(), fmsUser.getLastName());
                 LOGGER.debug("Success: {}", userAdd);
             } catch (FreeIpaClientException e) {
-                // TODO propagate this information out to API
-                LOGGER.error("Failed to add {}", username, e);
-                checkIfClientStillUsable(e);
+                if (FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
+                    LOGGER.debug("user '{}' already exists", fmsUser.getName());
+                } else {
+                    LOGGER.error("Failed to add {}", username, e);
+                    warnings.accept(fmsUser.getName(), "Failed to add user:" + e.getMessage());
+                    checkIfClientStillUsable(e);
+                }
             }
         }
     }
 
-    private void removeUsers(FreeIpaClient freeIpaClient, Set<String> fmsUsers) throws FreeIpaClientException {
+    private void removeUsers(FreeIpaClient freeIpaClient, Set<String> fmsUsers, BiConsumer<String, String> warnings) throws FreeIpaClientException {
         for (String username : fmsUsers) {
             LOGGER.debug("Removing user {}", username);
             try {
                 com.sequenceiq.freeipa.client.model.User userRemove = freeIpaClient.deleteUser(username);
                 LOGGER.debug("Success: {}", userRemove);
             } catch (FreeIpaClientException e) {
-                LOGGER.error("Failed to delete {}", username, e);
-                checkIfClientStillUsable(e);
+                if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
+                    LOGGER.debug("user '{}' already does not exists", username);
+                } else {
+                    LOGGER.error("Failed to delete {}", username, e);
+                    warnings.accept(username, "Failed to remove user:" + e.getMessage());
+                    checkIfClientStillUsable(e);
+                }
             }
         }
     }
 
-    private void removeGroups(FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups) throws FreeIpaClientException {
+    private void removeGroups(FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups, BiConsumer<String, String> warnings) throws FreeIpaClientException {
         for (FmsGroup fmsGroup : fmsGroups) {
             String groupname = fmsGroup.getName();
 
@@ -355,24 +363,11 @@ public class UserSyncService {
                 freeIpaClient.deleteGroup(groupname);
                 LOGGER.debug("Success: {}", groupname);
             } catch (FreeIpaClientException e) {
-                LOGGER.error("Failed to delete {}", groupname, e);
-            }
-        }
-    }
-
-    @VisibleForTesting
-    void addUsersToGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping) throws FreeIpaClientException {
-        LOGGER.debug("adding users to groups: [{}]", groupMapping);
-        for (String group : groupMapping.keySet()) {
-            for (List<String> users : Iterables.partition(groupMapping.get(group), maxSubjectsPerRequest)) {
-                LOGGER.debug("adding users [{}] to group [{}]", users, group);
-                try {
-                    // TODO specialize response object
-                    RPCResponse<Object> groupAddMember = freeIpaClient.groupAddMembers(group, users);
-                    LOGGER.debug("Success: {}", groupAddMember.getResult());
-                } catch (FreeIpaClientException e) {
-                    // TODO propagate this information out to API
-                    LOGGER.error("Failed to add [{}] to group [{}]", users, group, e);
+                if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
+                    LOGGER.debug("group '{}' already does not exists", groupname);
+                } else {
+                    LOGGER.error("Failed to delete {}", groupname, e);
+                    warnings.accept(groupname, "Failed to remove group: " + e.getMessage());
                     checkIfClientStillUsable(e);
                 }
             }
@@ -380,17 +375,48 @@ public class UserSyncService {
     }
 
     @VisibleForTesting
-    void removeUsersFromGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping) throws FreeIpaClientException {
+    void addUsersToGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping, BiConsumer<String, String> warnings)
+            throws FreeIpaClientException {
+        LOGGER.debug("adding users to groups: [{}]", groupMapping);
+        for (String group : groupMapping.keySet()) {
+            for (List<String> users : Iterables.partition(groupMapping.get(group), maxSubjectsPerRequest)) {
+                LOGGER.debug("adding users [{}] to group [{}]", users, group);
+                try {
+                    RPCResponse<Group> groupAddMemberResponse = freeIpaClient.groupAddMembers(group, users);
+                    if (groupAddMemberResponse.getResult().getMemberUser().containsAll(users)) {
+                        LOGGER.debug("Successfully added users {} to {}", users, groupAddMemberResponse.getResult());
+                    } else {
+                        // TODO specialize RPCResponse completed/failed objects
+                        LOGGER.error("Failed to add {} to group '{}': {}", users, group, groupAddMemberResponse.getFailed());
+                        warnings.accept(group, String.format("Failed to add users to group: %s", groupAddMemberResponse.getFailed()));
+                    }
+                } catch (FreeIpaClientException e) {
+                    LOGGER.error("Failed to add {} to group '{}'", users, group, e);
+                    warnings.accept(group, String.format("Failed to add users %s to group: %s", users, e.getMessage()));
+                    checkIfClientStillUsable(e);
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    void removeUsersFromGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping, BiConsumer<String, String> warnings)
+            throws FreeIpaClientException {
         for (String group : groupMapping.keySet()) {
             for (List<String> users : Iterables.partition(groupMapping.get(group), maxSubjectsPerRequest)) {
                 LOGGER.debug("removing users {} from group {}", users, group);
                 try {
-                    // TODO specialize response object
-                    RPCResponse<Object> groupRemoveMembers = freeIpaClient.groupRemoveMembers(group, users);
-                    LOGGER.debug("Success: {}", groupRemoveMembers.getResult());
+                    RPCResponse<Group> groupRemoveMembersResponse = freeIpaClient.groupRemoveMembers(group, users);
+                    if (Collections.disjoint(groupRemoveMembersResponse.getResult().getMemberUser(), users)) {
+                        LOGGER.debug("Successfully removed users {} from {}", users, groupRemoveMembersResponse.getResult());
+                    } else {
+                        // TODO specialize RPCResponse completed/failed objects
+                        LOGGER.error("Failed to remove {} from group '{}': {}", users, group, groupRemoveMembersResponse.getFailed());
+                        warnings.accept(group, String.format("Failed to remove users from group: %s", groupRemoveMembersResponse.getFailed()));
+                    }
                 } catch (FreeIpaClientException e) {
-                    // TODO propagate this information out to API
-                    LOGGER.error("Failed to add [{}] to group [{}]", users, group, e);
+                    LOGGER.error("Failed to remove {} from group '{}'", users, group, e);
+                    warnings.accept(group, String.format("Failed to remove users %s from group: %s", users, e.getMessage()));
                     checkIfClientStillUsable(e);
                 }
             }

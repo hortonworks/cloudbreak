@@ -316,6 +316,7 @@ public class Crn {
         IMAGE_CATALOG("imageCatalog"),
         KERBEROS("kerberos"),
         RECIPE("recipe"),
+        PUBLIC_KEY("publicKey"),
         FREEIPA("freeipa"),
         DATALAKE("datalake"),
         ACCOUNT_TAG("accountTag"),

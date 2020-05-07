@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -29,6 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -39,6 +41,7 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -163,13 +166,18 @@ class UserSyncServiceTest {
     }
 
     @Test
-    void testAddUsersToGroupsPartitionsReqeusts() throws Exception {
-        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
-        RPCResponse<Object> response = mock(RPCResponse.class);
-        when(freeIpaClient.groupAddMembers(any(), any())).thenReturn(response);
-
+    void testAddUsersToGroupsPartitionsRequests() throws Exception {
         Multimap<String, String> groupMapping = setupGroupMapping(5, underTest.maxSubjectsPerRequest * 2);
-        underTest.addUsersToGroups(freeIpaClient, groupMapping);
+
+        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        Group addResponseGroup = mock(Group.class, RETURNS_DEEP_STUBS);
+        RPCResponse<Group> mockAddResponse = mock(RPCResponse.class);
+        when(mockAddResponse.getResult()).thenReturn(addResponseGroup);
+        when(addResponseGroup.getMemberUser().containsAll(anyCollection())).thenReturn(true);
+        when(freeIpaClient.groupAddMembers(anyString(), anyCollection())).thenReturn(mockAddResponse);
+        Multimap<String, String> warnings = ArrayListMultimap.create();
+
+        underTest.addUsersToGroups(freeIpaClient, groupMapping, warnings::put);
 
         groupMapping.keySet().stream().forEach(group -> {
             try {
@@ -182,12 +190,17 @@ class UserSyncServiceTest {
 
     @Test
     void testRemoveUsersFromGroupsPartitionsRequests() throws Exception {
-        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
-        RPCResponse<Object> response = mock(RPCResponse.class);
-        when(freeIpaClient.groupRemoveMembers(any(), any())).thenReturn(response);
-
         Multimap<String, String> groupMapping = setupGroupMapping(5, underTest.maxSubjectsPerRequest * 2);
-        underTest.removeUsersFromGroups(freeIpaClient, groupMapping);
+
+        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        Group removeResponseGroup = mock(Group.class, RETURNS_DEEP_STUBS);
+        RPCResponse<Group> mockRemoveResponse = mock(RPCResponse.class);
+        when(mockRemoveResponse.getResult()).thenReturn(removeResponseGroup);
+        when(removeResponseGroup.getMemberUser()).thenReturn(List.of());
+        when(freeIpaClient.groupRemoveMembers(any(), any())).thenReturn(mockRemoveResponse);
+        Multimap<String, String> warnings = ArrayListMultimap.create();
+
+        underTest.removeUsersFromGroups(freeIpaClient, groupMapping, warnings::put);
 
         groupMapping.keySet().stream().forEach(group -> {
             try {
@@ -228,11 +241,6 @@ class UserSyncServiceTest {
 
     @Test
     void testApplyStateDifferenceToIpa() throws FreeIpaClientException {
-        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
-        RPCResponse<Object> mockResponse = mock(RPCResponse.class);
-        when(freeIpaClient.groupAddMembers(anyString(), anyCollection())).thenReturn(mockResponse);
-        when(freeIpaClient.groupRemoveMembers(anyString(), anyCollection())).thenReturn(mockResponse);
-
         FmsGroup groupToAdd1 = new FmsGroup().withName("groupToAdd1");
         FmsGroup groupToAdd2 = new FmsGroup().withName("groupToAdd2");
         FmsGroup groupToRemove1 = new FmsGroup().withName("groupToRemove1");
@@ -241,6 +249,19 @@ class UserSyncServiceTest {
         FmsUser userToAdd2 = new FmsUser().withName("userToAdd2").withFirstName("peter").withLastName("parker");
         String userToRemove1 = "userToRemove1";
         String userToRemove2 = "userToRemove2";
+        Multimap<String, String> warnings = ArrayListMultimap.create();
+
+        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        Group addResponseGroup = mock(Group.class, RETURNS_DEEP_STUBS);
+        RPCResponse<Group> mockAddResponse = mock(RPCResponse.class);
+        when(mockAddResponse.getResult()).thenReturn(addResponseGroup);
+        when(addResponseGroup.getMemberUser().containsAll(anyCollection())).thenReturn(true);
+        when(freeIpaClient.groupAddMembers(anyString(), anyCollection())).thenReturn(mockAddResponse);
+        Group removeResponseGroup = mock(Group.class, RETURNS_DEEP_STUBS);
+        RPCResponse<Group> mockRemoveResponse = mock(RPCResponse.class);
+        when(mockRemoveResponse.getResult()).thenReturn(removeResponseGroup);
+        when(removeResponseGroup.getMemberUser()).thenReturn(List.of());
+        when(freeIpaClient.groupRemoveMembers(anyString(), anyCollection())).thenReturn(mockRemoveResponse);
 
         UsersStateDifference usersStateDifference = new UsersStateDifference(
                 ImmutableSet.of(groupToAdd1, groupToAdd2),
@@ -257,7 +278,7 @@ class UserSyncServiceTest {
                         .build()
         );
 
-        underTest.applyStateDifferenceToIpa(ENV_CRN, freeIpaClient, usersStateDifference);
+        underTest.applyStateDifferenceToIpa(ENV_CRN, freeIpaClient, usersStateDifference, warnings::put);
 
         verify(freeIpaClient).groupAdd(groupToAdd1.getName());
         verify(freeIpaClient).groupAdd(groupToAdd2.getName());

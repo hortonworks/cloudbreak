@@ -16,3 +16,4 @@ auth:
     freeipa.ha.enable: true
     cloudstoragevalidation.enable: true
     runtime.upgrade.enable: true
+    sshpublickey.file: key.pub
