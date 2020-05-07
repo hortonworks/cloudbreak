@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.proxy.v1.converter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -13,12 +14,14 @@ public class ProxyRequestToProxyConfigConverter extends AbstractConversionServic
     public ProxyConfig convert(ProxyRequest source) {
         ProxyConfig proxyConfig = new ProxyConfig();
         proxyConfig.setName(source.getName());
-        proxyConfig.setPassword(source.getPassword());
         proxyConfig.setDescription(source.getDescription());
         proxyConfig.setProtocol(source.getProtocol());
         proxyConfig.setServerHost(source.getHost());
         proxyConfig.setServerPort(source.getPort());
-        proxyConfig.setUserName(source.getUserName());
+        if (StringUtils.isNoneBlank(source.getUserName(), source.getPassword())) {
+            proxyConfig.setUserName(source.getUserName());
+            proxyConfig.setPassword(source.getPassword());
+        }
         return proxyConfig;
     }
 }
