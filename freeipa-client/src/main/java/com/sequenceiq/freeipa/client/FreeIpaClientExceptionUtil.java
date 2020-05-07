@@ -87,6 +87,10 @@ public class FreeIpaClientExceptionUtil {
         return isExceptionWithErrorCode(e, Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY));
     }
 
+    public static boolean isEmptyModlistException(FreeIpaClientException e) {
+        return isExceptionWithErrorCode(e, Set.of(FreeIpaErrorCodes.EMPTY_MODLIST));
+    }
+
     public static boolean isExceptionWithErrorCode(FreeIpaClientException e, Set<FreeIpaErrorCodes> errorCodes) {
         return Stream.of(getAncestorCauseBeforeFreeIpaClientExceptions(e))
                 .filter(JsonRpcClientException.class::isInstance)

@@ -3,6 +3,7 @@ package com.sequenceiq.caas.grpc.service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -21,6 +22,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAc
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadPasswordPolicy;
 import com.sequenceiq.caas.util.JsonUtil;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 
 import io.grpc.internal.testing.StreamRecorder;
 
@@ -28,6 +30,8 @@ import io.grpc.internal.testing.StreamRecorder;
 public class MockUserManagementServiceTest {
 
     private static final String VALID_LICENSE = "License file content";
+
+    private static final String SAMPLE_SSH_PUBLIC_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGHA5cmj5+agIalPxw85jFrrZcSh3dl06ukeqKu6JVQm nobody@example.com";
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -71,21 +75,39 @@ public class MockUserManagementServiceTest {
     }
 
     @Test
-    public void testGetWorkloadCredentials() {
-        underTest.initializeActorWorkloadCredentials();
+    public void testGetWorkloadCredentials() throws IOException {
+        Path sshPublicKeyFilePath = Files.createTempFile("key", ".pub");
+        Files.writeString(sshPublicKeyFilePath, SAMPLE_SSH_PUBLIC_KEY);
+        ReflectionTestUtils.setField(underTest, "sshPublicKeyFilePath", sshPublicKeyFilePath.toString());
 
-        long currentTime = System.currentTimeMillis();
+        try {
+            underTest.initializeActorWorkloadCredentials();
 
-        GetActorWorkloadCredentialsRequest req = GetActorWorkloadCredentialsRequest.getDefaultInstance();
-        StreamRecorder<GetActorWorkloadCredentialsResponse> observer = StreamRecorder.create();
-        underTest.getActorWorkloadCredentials(req, observer);
-        Assert.assertEquals(1, observer.getValues().size());
-        GetActorWorkloadCredentialsResponse res = observer.getValues().get(0);
-        Assert.assertNotNull(res);
-        Assert.assertNotNull(res.getPasswordHash());
-        Assert.assertNotNull(res.getKerberosKeysList());
-        Assert.assertEquals(2, res.getKerberosKeysList().size());
-        Assert.assertTrue(res.getPasswordHashExpirationDate() > currentTime);
+            long currentTime = System.currentTimeMillis();
+
+            GetActorWorkloadCredentialsRequest req = GetActorWorkloadCredentialsRequest.newBuilder()
+                    .setActorCrn(Crn.builder()
+                            .setPartition(Crn.Partition.CDP)
+                            .setAccountId(UUID.randomUUID().toString())
+                            .setService(Crn.Service.IAM)
+                            .setResourceType(Crn.ResourceType.USER)
+                            .setResource(UUID.randomUUID().toString())
+                            .build().toString())
+                    .build();
+            StreamRecorder<GetActorWorkloadCredentialsResponse> observer = StreamRecorder.create();
+            underTest.getActorWorkloadCredentials(req, observer);
+            Assert.assertEquals(1, observer.getValues().size());
+            GetActorWorkloadCredentialsResponse res = observer.getValues().get(0);
+            Assert.assertNotNull(res);
+            Assert.assertNotNull(res.getPasswordHash());
+            Assert.assertNotNull(res.getKerberosKeysList());
+            Assert.assertEquals(2, res.getKerberosKeysList().size());
+            Assert.assertTrue(res.getPasswordHashExpirationDate() > currentTime);
+            Assert.assertEquals(1, res.getSshPublicKeyCount());
+            Assert.assertEquals(SAMPLE_SSH_PUBLIC_KEY, res.getSshPublicKey(0).getPublicKey());
+        } finally {
+            Files.delete(sshPublicKeyFilePath);
+        }
     }
 
     @Test
