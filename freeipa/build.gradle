@@ -50,6 +50,10 @@ dependencies {
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                   version: opentracingJaxrs2Version
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                     version: opentracingJdbcVersion
 
+  implementation     group: 'io.swagger.core.v3', name: 'swagger-annotations', version: '2.1.2'
+  implementation     group: 'org.threeten', name: 'threetenbp', version: '1.3.1'
+  implementation     group: 'io.gsonfire', name: 'gson-fire', version: '1.8.4'
+  implementation     group: 'com.squareup.okhttp', name: 'logging-interceptor', version: '2.7.5'
 
   implementation     group: 'org.apache.kerby',          name: 'kerb-util',                            version: '2.0.0'
   
@@ -101,6 +105,8 @@ dependencies {
   implementation project(':cluster-proxy')
   implementation project(':status-checker')
   implementation project(':template-manager-tag')
+
+
 
   testCompile project(path: ':secret-engine', configuration: 'tests')
   runtime project(':orchestrator-salt')

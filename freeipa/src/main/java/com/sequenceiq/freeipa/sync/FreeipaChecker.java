@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,11 @@ import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.healthagent.ApiClient;
+import com.sequenceiq.freeipa.healthagent.ApiException;
+import com.sequenceiq.freeipa.healthagent.JSON;
+import com.sequenceiq.freeipa.healthagent.api.DefaultApi;
+import com.sequenceiq.freeipa.healthagent.model.CheckResult;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -37,15 +43,44 @@ public class FreeipaChecker {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    private List<RPCResponse<Boolean>> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances) throws Exception {
+    private JSON json = new JSON();
+
+    private List<CheckResult> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances) throws Exception {
         return checkedMeasure(() -> {
-            List<RPCResponse<Boolean>> statuses = new LinkedList<>();
+            List<CheckResult> statuses = new LinkedList<>();
             for (InstanceMetaData instanceMetaData : checkableInstances) {
                 String hostname = instanceMetaData.getDiscoveryFQDN();
-                FreeIpaClient freeIpaClient = checkedMeasure(() -> freeIpaClientFactory.getFreeIpaClientForStackWithPing(stack, hostname), LOGGER,
+                ApiClient client  = checkedMeasure(() -> new ApiClient(), LOGGER,
                         ":::Auto sync::: freeipa client is created in {}ms");
-                statuses.add(checkedMeasure(() -> freeIpaClient.serverConnCheck(freeIpaClient.getHostname(), hostname), LOGGER,
-                        ":::Auto sync::: freeipa server_conncheck ran in {}ms"));
+
+                // TODO direct VS CP mode will change the port.
+                client.setBasePath("https://" + hostname + ":5080");
+                // TODO : Replace with valid CA Cert maybe
+                client.setVerifyingSsl(false);
+                DefaultApi api = new DefaultApi(client);
+                CheckResult result;
+                statuses.add(checkedMeasure(() -> {
+                        try {
+                            return api.rootGet();
+                        } catch (ApiException e) {
+                            if (e.getCode() == HttpStatus.SC_SERVICE_UNAVAILABLE) {
+                                return json.deserialize(e.getResponseBody(), CheckResult.class);
+                            } else {
+                                CheckResult exResult = new CheckResult();
+                                exResult.setHost(hostname);
+                                exResult.setStatus(CheckResult.StatusEnum.ERROR);
+                                // TODO not a good place to return the exception so just log it.
+                                LOGGER.error("Exception when getting node status {}", e.getMessage());
+                                return exResult;
+                            }
+                        }
+                    }, LOGGER,":::Auto sync::: freeipa healthagent check ran in {}ms"));
+
+                // TODO: Need to add cluster checks as well.
+//                FreeIpaClient freeIpaClient = checkedMeasure(() -> freeIpaClientFactory.getFreeIpaClientForStackWithPing(stack, hostname), LOGGER,
+//                        ":::Auto sync::: freeipa client is created in {}ms");
+//                statuses.add(checkedMeasure(() -> freeIpaClient.serverConnCheck(freeIpaClient.getHostname(), hostname), LOGGER,
+//                        ":::Auto sync::: freeipa server_conncheck ran in {}ms"));
             }
             return statuses;
         }, LOGGER, ":::Auto sync::: freeipa server status is checked in {}ms");
@@ -54,17 +89,18 @@ public class FreeipaChecker {
     public SyncResult getStatus(Stack stack, Set<InstanceMetaData> checkableInstances) {
         try {
             Set<InstanceMetaData> notTermiatedStackInstances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
-            List<RPCResponse<Boolean>> responses = checkStatus(stack, checkableInstances);
+            List<CheckResult> responses = checkStatus(stack, checkableInstances);
             DetailedStackStatus status;
             String postFix = "";
-            Boolean result = !responses.isEmpty() && responses.stream().allMatch(RPCResponse::getResult);
+            // TODO: Maybe not do it this way.
+            Boolean result = !responses.isEmpty() && responses.stream().allMatch(r -> r.getStatus() == CheckResult.StatusEnum.HEALTHY);
             if (result && responses.size() == notTermiatedStackInstances.size()) {
                 status = DetailedStackStatus.PROVISIONED;
             } else {
                 status = DetailedStackStatus.UNHEALTHY;
                 postFix = "Freeipa is unhealthy, ";
             }
-            return new SyncResult(postFix + getMessages(responses), status, result);
+            return new SyncResult(postFix + getDetails(responses), status, result);
         } catch (FreeIpaClientException e) {
             LOGGER.info("FreeIpaClientException occurred during status fetch: " + e.getMessage(), e);
             Throwable t = FreeIpaClientExceptionUtil.getAncestorCauseBeforeFreeIpaClientExceptions(e);
@@ -78,13 +114,21 @@ public class FreeipaChecker {
         }
     }
 
-    private String getMessages(List<RPCResponse<Boolean>> responses) {
-        return responses.stream()
-                .map(RPCResponse::getMessages)
+    // TODO: If status gets a bigger refactor, don't do this.
+    private String getDetails(List<CheckResult> results) {
+        return results.stream()
+                .map(CheckResult::getChecks)
                 .flatMap(List::stream)
-                .map(m -> m.getName() + ": " + m.getMessage())
+                .map(e -> e.getCheckId() + ":" +e.getDetail().values().toString())
                 .collect(Collectors.joining(", "));
     }
+//    private String getMessages(List<RPCResponse<Boolean>> responses) {
+//        return responses.stream()
+//                .map(RPCResponse::getMessages)
+//                .flatMap(List::stream)
+//                .map(m -> m.getName() + ": " + m.getMessage())
+//                .collect(Collectors.joining(", "));
+//    }
 
     private String getPrimaryHostname(Set<InstanceMetaData> checkableInstances) {
         InstanceMetaData instanceMetaData = checkableInstances.stream()

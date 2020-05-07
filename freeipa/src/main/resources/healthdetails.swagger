@@ -1,0 +1,153 @@
+swagger: "2.0"
+info:
+  title: FreeIPA Healthcheck API
+  description: API of the FreeIPA healtcheck service
+  version: 1.0.0
+schemes:
+  - https
+paths:
+  /:
+    get:
+      summary: FreeIPA Node health check
+      description: Checks the health of a FreeIPA nodes services and more
+      produces:
+        - application/json
+      responses:
+        200:
+          description: Healthy
+          schema:
+            $ref: '#/definitions/CheckResult'
+        503:
+          description: Unhealthy
+          schema:
+            $ref: '#/definitions/CheckResult'
+  /cluster:
+    get:
+      summary: FreeIPA Cluster health check
+      description: Checks the health of a FreeIPA cluster from the point of view of the node its called from.
+      produces:
+        - application/json
+      responses:
+        200:
+          description: Healthy
+          schema:
+            $ref: '#/definitions/ClusterCheckResult'
+        503:
+          description: Unhealthy
+          schema:
+            $ref: '#/definitions/ClusterCheckResult'
+definitions:
+  CheckEntry:
+    type: object
+    required:
+      - check_id
+      - status
+    properties:
+      check_id:
+        type: string
+        description: The unique ID of the check being run.
+      plugin:
+        type: string
+        description: The name of the plugin running the check.
+      status:
+        description: The status of the individual check.
+        type: string
+        enum:
+          - healthy
+          - unhealthy
+          - degraded
+          - error
+      detail:
+        description: Setable details of the check.
+        type: object
+        additionalProperties:
+          type: string
+  PluginCheckEntry:
+    type: object
+    required:
+      - host
+      - status
+      - plugin
+      - detail
+      - reponse_time
+    properties:
+      host:
+        type: string
+        description: The host the plugin ran on.
+      status:
+        description: The status of the plugin check.
+        type: string
+        enum:
+          - HEALTHY
+          - UNHEALTHY
+          - DEGRADED
+          - ERROR
+      plugin:
+        description: The name of the plugin.
+        type: string
+      reponse_time:
+        description: The response time in seconds for the plugin.
+        type:  number
+        format: float
+      detail:
+        description: Setable details of the check.  Typically containing error details.
+        type: object
+        additionalProperties:
+          type: string
+  CheckResult:
+    type: object
+    required:
+      - host
+      - status
+      - checks
+      - plugin_stat
+    properties:
+      host:
+        type: string
+        description: The host the check is running on.
+      status:
+        description: The overall status of the checks.
+        type: string
+        enum:
+          - HEALTHY
+          - UNHEALTHY
+          - DEGRADED
+          - ERROR
+      checks:
+        description: Array of Check Entries.
+        type: array
+        items:
+          $ref: '#/definitions/CheckEntry'
+      plugin_stat:
+        description: Array of Plugin Check Entries.
+        type: array
+        items:
+          $ref: '#/definitions/PluginCheckEntry'
+  ClusterCheckResult:
+    type: object
+    required:
+      - host
+      - status
+      - plugin_stat
+    properties:
+      host:
+        type: string
+        description: The host the check is running on.
+      status:
+        description: Overall status of the cluster.
+        type: string
+        enum:
+          - HEALTHY
+          - UNHEALTHY
+          - DEGRADED
+          - ERROR
+      replicas:
+        type: array
+        description: Array of Replica checks.
+        items:
+          $ref: '#/definitions/CheckResult'
+      plugin_stat:
+        description: Array of Plugin Check Entries.
+        type: array
+        items:
+          $ref: '#/definitions/PluginCheckEntry'

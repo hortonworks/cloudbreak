@@ -32,6 +32,8 @@ public class HealthDetailsFreeIpaResponse {
     @NotNull
     private List<NodeHealthDetails> nodeHealthDetails;
 
+    private List<String> issues;
+
     private Status status;
 
     public String getEnvironmentCrn() {
@@ -74,6 +76,13 @@ public class HealthDetailsFreeIpaResponse {
             this.nodeHealthDetails = new ArrayList<>();
         }
         this.nodeHealthDetails.add(nodeHealthDetails);
+    }
+
+    public void addIssue(String issue) {
+        if (issues == null) {
+            issues = new ArrayList<>();
+        }
+        issues.add(issue);
     }
 
     public Status getStatus() {
