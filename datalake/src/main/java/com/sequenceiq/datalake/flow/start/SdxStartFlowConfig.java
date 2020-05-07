@@ -76,7 +76,7 @@ public class SdxStartFlowConfig extends AbstractFlowConfiguration<SdxStartState,
     }
 
     @Override
-    public SdxStartEvent getFailHandledEvent() {
+    public SdxStartEvent getRetryableEvent() {
         return SdxStartEvent.SDX_START_FAILED_HANDLED_EVENT;
     }
 }

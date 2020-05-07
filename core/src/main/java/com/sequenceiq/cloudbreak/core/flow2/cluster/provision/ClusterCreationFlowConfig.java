@@ -127,7 +127,7 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
     }
 
     @Override
-    public ClusterCreationEvent getFailHandledEvent() {
+    public ClusterCreationEvent getRetryableEvent() {
         return CLUSTER_CREATION_FAILURE_HANDLED_EVENT;
     }
 }

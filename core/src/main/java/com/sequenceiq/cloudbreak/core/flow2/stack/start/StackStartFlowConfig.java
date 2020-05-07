@@ -71,7 +71,7 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
     }
 
     @Override
-    public StackStartEvent getFailHandledEvent() {
+    public StackStartEvent getRetryableEvent() {
         return START_FAIL_HANDLED_EVENT;
     }
 }

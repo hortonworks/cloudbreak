@@ -72,7 +72,7 @@ public class RedbeamsTerminationFlowConfig extends AbstractFlowConfiguration<Red
     }
 
     @Override
-    public RedbeamsTerminationEvent getFailHandledEvent() {
+    public RedbeamsTerminationEvent getRetryableEvent() {
         return REDBEAMS_TERMINATION_FAILURE_HANDLED_EVENT;
     }
 }

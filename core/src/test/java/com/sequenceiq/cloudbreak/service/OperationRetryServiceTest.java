@@ -71,7 +71,7 @@ public class OperationRetryServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        ReflectionTestUtils.setField(underTest, "failHandledEvents", List.of(STACKCREATION_FAILURE_HANDLED_EVENT.event()));
+        ReflectionTestUtils.setField(underTest, "retryableEvents", List.of(STACKCREATION_FAILURE_HANDLED_EVENT.event()));
 
         flowConfig = new StackCreationFlowConfig();
         ReflectionTestUtils.setField(underTest, "flowConfigs", List.of(flowConfig));

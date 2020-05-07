@@ -72,7 +72,7 @@ public class ClusterCertificateRenewFlowConfig extends AbstractFlowConfiguration
     }
 
     @Override
-    public ClusterCertificateRenewEvent getFailHandledEvent() {
+    public ClusterCertificateRenewEvent getRetryableEvent() {
         return CLUSTER_CERTIFICATE_RENEW_FAILURE_HANDLED_EVENT;
     }
 

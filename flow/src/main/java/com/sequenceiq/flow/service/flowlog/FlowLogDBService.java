@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
+import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -93,15 +94,15 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     public FlowLog close(Long stackId, String flowId) throws TransactionExecutionException {
-        return finalize(stackId, flowId, "FINISHED");
+        return finalize(stackId, flowId, FlowConstants.FINISHED_STATE);
     }
 
     public FlowLog cancel(Long stackId, String flowId) throws TransactionExecutionException {
-        return finalize(stackId, flowId, "CANCELLED");
+        return finalize(stackId, flowId, FlowConstants.CANCELLED_STATE);
     }
 
     public FlowLog terminate(Long stackId, String flowId) throws TransactionExecutionException {
-        return finalize(stackId, flowId, "TERMINATED");
+        return finalize(stackId, flowId, FlowConstants.TERMINATED_STATE);
     }
 
     private FlowLog finalize(Long stackId, String flowId, String state) throws TransactionExecutionException {
@@ -254,9 +255,14 @@ public class FlowLogDBService implements FlowLogService {
         return findAllByResourceIdOrderByCreatedDesc(resourceId);
     }
 
-    public List<FlowLog> getFlowLogsByChainIds(List<String> relatedChainIds) {
-        LOGGER.info("Getting flow logs by these chain ids: {}", Joiner.on(",").join(relatedChainIds));
-        return flowLogRepository.findAllByChainIds(relatedChainIds);
+    public Set<String> getFlowIdsByChainIds(Set<String> flowChainIds) {
+        LOGGER.info("Getting flow logs by these chain ids: {}", Joiner.on(",").join(flowChainIds));
+        return flowLogRepository.findAllFlowIdsByChainIds(flowChainIds);
+    }
+
+    public List<FlowLog> getFlowLogsByFlowIdsCreatedDesc(Set<String> flowIds) {
+        LOGGER.info("Getting flow logs by these flow ids: {}", Joiner.on(",").join(flowIds));
+        return flowLogRepository.findAllByFlowIdsCreatedDesc(flowIds);
     }
 
     public Boolean hasPendingFlowEvent(List<FlowLog> flowLogs) {

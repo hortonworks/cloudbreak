@@ -165,7 +165,7 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
     }
 
     @Override
-    public ClusterUpscaleEvent getFailHandledEvent() {
+    public ClusterUpscaleEvent getRetryableEvent() {
         return FAIL_HANDLED_EVENT;
     }
 }

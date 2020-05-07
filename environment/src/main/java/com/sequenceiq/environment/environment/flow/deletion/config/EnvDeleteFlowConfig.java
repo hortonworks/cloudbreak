@@ -97,7 +97,7 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
     }
 
     @Override
-    public EnvDeleteStateSelectors getFailHandledEvent() {
+    public EnvDeleteStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_ENV_DELETE_EVENT;
     }
 

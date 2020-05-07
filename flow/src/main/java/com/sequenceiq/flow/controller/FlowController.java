@@ -51,11 +51,11 @@ public class FlowController implements FlowEndpoint {
 
     @Override
     public FlowCheckResponse hasFlowRunningByChainId(String chainId) {
-        return flowService.hasFlowRunningByChainId(chainId);
+        return flowService.getFlowChainState(chainId);
     }
 
     @Override
     public FlowCheckResponse hasFlowRunningByFlowId(String flowId) {
-        return flowService.hasFlowRunningByFlowId(flowId);
+        return flowService.getFlowState(flowId);
     }
 }
