@@ -229,7 +229,7 @@ public class AwsNetworkConnectorTest {
         CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest);
 
         verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
-        verify(awsNetworkCfTemplateProvider).provide("testEnv", 1L, networkCidr, subnetRequestList, true);
+        verify(awsNetworkCfTemplateProvider).provide(networkCreationRequest, subnetRequestList);
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
         verify(awsTaggingService).prepareCloudformationTags(any(), any());

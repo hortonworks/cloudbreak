@@ -30,8 +30,10 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
+import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.EnvironmentAwareResource;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.network.dao.domain.converter.ServiceEndpointCreationConverter;
 
 @Entity
 @Where(clause = "archived = false")
@@ -70,6 +72,10 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PrivateSubnetCreation privateSubnetCreation;
+
+    @Column(nullable = false)
+    @Convert(converter = ServiceEndpointCreationConverter.class)
+    private ServiceEndpointCreation serviceEndpointCreation;
 
     @Column(nullable = false)
     private String accountId;
@@ -181,6 +187,14 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     public void setPrivateSubnetCreation(PrivateSubnetCreation privateSubnetCreation) {
         this.privateSubnetCreation = privateSubnetCreation;
+    }
+
+    public ServiceEndpointCreation getServiceEndpointCreation() {
+        return serviceEndpointCreation;
+    }
+
+    public void setServiceEndpointCreation(ServiceEndpointCreation serviceEndpointCreation) {
+        this.serviceEndpointCreation = serviceEndpointCreation;
     }
 
     @Override

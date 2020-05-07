@@ -13,6 +13,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMoc
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
+import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -140,6 +141,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         private PrivateSubnetCreation privateSubnetCreation;
 
+        private ServiceEndpointCreation serviceEndpointCreation;
+
         private String preferedSubnetId;
 
         private Set<String> networkCidrs;
@@ -209,6 +212,11 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             return this;
         }
 
+        public EnvironmentNetworkResponseBuilder withServiceEndpointCreation(ServiceEndpointCreation serviceEndpointCreation) {
+            this.serviceEndpointCreation = serviceEndpointCreation;
+            return this;
+        }
+
         public EnvironmentNetworkResponseBuilder withAws(EnvironmentNetworkAwsParams aws) {
             this.aws = aws;
             return this;
@@ -254,6 +262,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setMock(mock);
             environmentNetworkResponse.setPreferedSubnetId(preferedSubnetId);
             environmentNetworkResponse.setPrivateSubnetCreation(privateSubnetCreation);
+            environmentNetworkResponse.setServiceEndpointCreation(serviceEndpointCreation);
             environmentNetworkResponse.setCbSubnets(cbSubnets);
             environmentNetworkResponse.setMlxSubnets(mlxSubnets);
             environmentNetworkResponse.setDwxSubnets(dwxSubnets);
