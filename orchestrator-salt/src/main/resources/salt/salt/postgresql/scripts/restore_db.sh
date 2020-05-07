@@ -47,11 +47,13 @@ errorExit() {
 restore_db_from_local() {
   SERVICE=$1
   BACKUP="${BACKUPS_DIR}/${SERVICE}_backup"
-  LIST_FILE="${BACKUPS_DIR}/${SERVICE}_list"
 
   doLog "INFO Restoring $SERVICE"
-  pg_restore -l "$BACKUP" | sed -e "s/\(.*0 0 COMMENT - EXTENSION plpgsql\)/;\1/" >"$LIST_FILE" # We have to drop a problematic COMMENT added by RDS backups.
-  pg_restore --clean --if-exists --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" --use-list="$LIST_FILE" "$BACKUP" >>$LOGFILE 2>&1 || errorExit "Unable to restore ${SERVICE}"
+
+  # Can't run a drop statement in a multi-statment cli command. Thus two additiona lines of `psql`
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE};"
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};"
+  psql --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" < "$BACKUP" >>$LOGFILE 2>&1 || errorExit "Unable to restore ${SERVICE}"
   doLog "INFO Succesfully restored ${SERVICE}"
 }
 
@@ -81,4 +83,5 @@ else
 fi
 
 doLog "INFO Completed restore."
+
 

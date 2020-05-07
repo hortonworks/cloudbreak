@@ -47,7 +47,7 @@ dump_to_azure() {
   SERVICE="$1"
   doLog "INFO Dumping ${SERVICE}"
   LOCAL_BACKUP=${DATE_DIR}/${SERVICE}_backup
-  pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=custom --file="$LOCAL_BACKUP" >>$LOGFILE 2>&1 || errorExit "Unable to dump ${SERVICE}"
+  pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=plain >>$LOGFILE 2>&1 || errorExit "Unable to dump ${SERVICE}"
 
   doLog "INFO Uploading to ${BACKUP_LOCATION}"
   AZURE_LOCATION="${BACKUP_LOCATION}/${SERVICE}_backup"
@@ -75,7 +75,7 @@ dump_to_s3() {
   S3_LOCATION="${BACKUP_LOCATION}/${SERVICE}_backup"
   doLog "INFO Dumping ${SERVICE} to ${S3_LOCATION}"
   # todo: Specify a good compression level with `-Z 1...9`
-  pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=custom --data-only 2>>$LOGFILE | /usr/bin/aws s3 cp --sse AES256 --no-progress - "${S3_LOCATION}" 2>>$LOGFILE || errorExit "Unable to dump ${SERVICE}."
+  pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2>>$LOGFILE | /usr/bin/aws s3 cp --sse AES256 --no-progress - "${S3_LOCATION}" 2>>$LOGFILE || errorExit "Unable to dump ${SERVICE}."
   doLog "INFO ${SERVICE} dumped to ${S3_LOCATION}"
 }
 run_aws_backup () {
