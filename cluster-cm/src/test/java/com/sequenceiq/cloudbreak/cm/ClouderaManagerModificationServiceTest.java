@@ -340,9 +340,13 @@ class ClouderaManagerModificationServiceTest {
         when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY")).thenReturn(apiCommandList);
         when(clustersResourceApi.deployClientConfig(stack.getName())).thenReturn(new ApiCommand().id(apiCommandId));
         when(clustersResourceApi.refresh(stack.getName())).thenReturn(new ApiCommand().id(apiCommandId));
+        when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(apiCommandId));
+
         when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(stack, apiClientMock, apiCommandId))
                 .thenReturn(successPollingResult);
         when(clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(stack, apiClientMock, apiCommandId))
+                .thenReturn(successPollingResult);
+        when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClientMock, apiCommandId))
                 .thenReturn(successPollingResult);
 
         underTest.upgradeClusterRuntime(cluster.getComponents());

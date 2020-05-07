@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -182,10 +183,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
             ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
             MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient);
+            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
 
             startClouderaManager(stack, apiClient);
             checkParcelApiAvailability();
-            setParcelRepo(stackProductParcel);
+            setParcelRepo(stackProductParcel, clouderaManagerResourceApi);
+            refreshParcelRepos(clouderaManagerResourceApi);
             downloadParcel(stackProductVersion, parcelResourceApi, product);
             distributeParcel(stackProductVersion, parcelResourceApi, product);
             callUpgradeCdhCommand(stackProductVersion, clustersResourceApi);
@@ -550,14 +553,22 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
-    private void setParcelRepo(String stackProductParcel) throws ApiException {
+    private void setParcelRepo(String stackProductParcel, ClouderaManagerResourceApi clouderaManagerResourceApi) throws ApiException {
         LOGGER.debug("Setting parcel repo to {}", stackProductParcel);
-        ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
         ApiConfigList apiConfigList = new ApiConfigList()
                 .addItemsItem(new ApiConfig()
                         .name("remote_parcel_repo_urls")
                         .value(stackProductParcel));
         clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
-        clouderaManagerResourceApi.refreshParcelRepos();
+    }
+
+    private void refreshParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi) {
+        try {
+            ApiCommand apiCommand = clouderaManagerResourceApi.refreshParcelRepos();
+            clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClient, apiCommand.getId());
+        } catch (ApiException e) {
+            LOGGER.info("Unable to refresh parcel repo", e);
+            throw new CloudbreakServiceException(e);
+        }
     }
 }
