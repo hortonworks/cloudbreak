@@ -36,6 +36,9 @@ public abstract class EnvironmentNetworkBase {
     @ApiModelProperty(EnvironmentModelDescription.PRIVATE_SUBNET_CREATION)
     private PrivateSubnetCreation privateSubnetCreation = PrivateSubnetCreation.DISABLED;
 
+    @ApiModelProperty(EnvironmentModelDescription.SERVICE_ENDPOINT_CREATION)
+    private ServiceEndpointCreation serviceEndpointCreation = ServiceEndpointCreation.DISABLED;
+
     @ApiModelProperty(EnvironmentModelDescription.AWS_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkAwsParams aws;
 
@@ -70,6 +73,14 @@ public abstract class EnvironmentNetworkBase {
 
     public void setPrivateSubnetCreation(PrivateSubnetCreation privateSubnetCreation) {
         this.privateSubnetCreation = privateSubnetCreation;
+    }
+
+    public ServiceEndpointCreation getServiceEndpointCreation() {
+        return serviceEndpointCreation;
+    }
+
+    public void setServiceEndpointCreation(ServiceEndpointCreation serviceEndpointCreation) {
+        this.serviceEndpointCreation = serviceEndpointCreation;
     }
 
     public EnvironmentNetworkAwsParams getAws() {

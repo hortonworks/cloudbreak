@@ -61,4 +61,16 @@ public class SubnetRequest {
     public SubnetType getType() {
         return type;
     }
+
+    @Override
+    public String toString() {
+        return "SubnetRequest{" +
+                "publicSubnetCidr='" + publicSubnetCidr + '\'' +
+                ", privateSubnetCidr='" + privateSubnetCidr + '\'' +
+                ", availabilityZone='" + availabilityZone + '\'' +
+                ", subnetGroup=" + subnetGroup +
+                ", index=" + index +
+                ", type=" + type +
+                '}';
+    }
 }

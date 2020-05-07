@@ -39,6 +39,8 @@ public class NetworkCreationRequest {
 
     private final boolean privateSubnetEnabled;
 
+    private final boolean serviceEndpointsEnabled;
+
     private final Map<String, String> tags;
 
     private NetworkCreationRequest(Builder builder) {
@@ -55,6 +57,7 @@ public class NetworkCreationRequest {
         noPublicIp = builder.noPublicIp;
         stackName = builder.stackName;
         privateSubnetEnabled = builder.privateSubnetEnabled;
+        serviceEndpointsEnabled = builder.serviceEndpointsEnabled;
         userName = builder.userName;
         creatorCrn = builder.creatorCrn;
         tags = builder.tags;
@@ -112,6 +115,10 @@ public class NetworkCreationRequest {
         return privateSubnetEnabled;
     }
 
+    public boolean isServiceEndpointsEnabled() {
+        return serviceEndpointsEnabled;
+    }
+
     public String getUserName() {
         return userName;
     }
@@ -152,6 +159,8 @@ public class NetworkCreationRequest {
         private String stackName;
 
         private boolean privateSubnetEnabled;
+
+        private boolean serviceEndpointsEnabled;
 
         private String creatorCrn;
 
@@ -219,6 +228,11 @@ public class NetworkCreationRequest {
 
         public Builder withPrivateSubnetEnabled(boolean privateSubnetEnabled) {
             this.privateSubnetEnabled = privateSubnetEnabled;
+            return this;
+        }
+
+        public Builder withServiceEndpointsEnabled(boolean serviceEndpointsEnabled) {
+            this.serviceEndpointsEnabled = serviceEndpointsEnabled;
             return this;
         }
 

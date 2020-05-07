@@ -12,6 +12,7 @@ import org.apache.commons.collections4.MapUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
+import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 
 public class NetworkDto {
@@ -46,6 +47,8 @@ public class NetworkDto {
 
     private final PrivateSubnetCreation privateSubnetCreation;
 
+    private final ServiceEndpointCreation serviceEndpointCreation;
+
     private final RegistrationType registrationType;
 
     private final CloudPlatform cloudPlatform;
@@ -66,6 +69,7 @@ public class NetworkDto {
         networkCidrs = builder.networkCidrs;
         networkId = builder.networkId;
         privateSubnetCreation = builder.privateSubnetCreation;
+        serviceEndpointCreation = builder.serviceEndpointCreation;
         registrationType = builder.registrationType;
         cloudPlatform = builder.cloudPlatform;
     }
@@ -158,6 +162,10 @@ public class NetworkDto {
         return privateSubnetCreation;
     }
 
+    public ServiceEndpointCreation getServiceEndpointCreation() {
+        return serviceEndpointCreation;
+    }
+
     public RegistrationType getRegistrationType() {
         return registrationType;
     }
@@ -181,6 +189,7 @@ public class NetworkDto {
                 ", networkCidrs='" + networkCidrs + '\'' +
                 ", subnetMetas=" + subnetMetas +
                 ", privateSubnetCreation=" + privateSubnetCreation +
+                ", serviceEndpointCreation=" + serviceEndpointCreation +
                 ", registrationType=" + registrationType +
                 ", cloudPlatform=" + cloudPlatform +
                 '}';
@@ -218,6 +227,8 @@ public class NetworkDto {
 
         private PrivateSubnetCreation privateSubnetCreation;
 
+        private ServiceEndpointCreation serviceEndpointCreation;
+
         private RegistrationType registrationType;
 
         private CloudPlatform cloudPlatform;
@@ -237,6 +248,7 @@ public class NetworkDto {
             subnetMetas = networkDto.subnetMetas;
             networkCidr = networkDto.networkCidr;
             privateSubnetCreation = networkDto.privateSubnetCreation;
+            serviceEndpointCreation = networkDto.serviceEndpointCreation;
             registrationType = networkDto.registrationType;
             cloudPlatform = networkDto.cloudPlatform;
             cbSubnets = networkDto.cbSubnets;
@@ -316,6 +328,11 @@ public class NetworkDto {
 
         public Builder withPrivateSubnetCreation(PrivateSubnetCreation privateSubnetCreation) {
             this.privateSubnetCreation = privateSubnetCreation;
+            return this;
+        }
+
+        public Builder withServiceEndpointCreation(ServiceEndpointCreation serviceEndpointCreation) {
+            this.serviceEndpointCreation = serviceEndpointCreation;
             return this;
         }
 

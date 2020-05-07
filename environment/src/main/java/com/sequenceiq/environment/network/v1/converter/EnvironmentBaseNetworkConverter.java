@@ -35,6 +35,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         result.setNetworkCidrs(StringUtils.join(creationDto.getNetworkCidrs(), ","));
         result.setEnvironments(convertEnvToView(environment));
         result.setPrivateSubnetCreation(creationDto.getPrivateSubnetCreation());
+        result.setServiceEndpointCreation(creationDto.getServiceEndpointCreation());
         setRegistrationType(result, creationDto);
         result.setSubnetMetas(subnetMetas);
         return result;
@@ -50,6 +51,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
                 .withNetworkCidrs(getNetworkCidrs(source))
                 .withResourceCrn(source.getResourceCrn())
                 .withPrivateSubnetCreation(source.getPrivateSubnetCreation())
+                .withServiceEndpointCreation(source.getServiceEndpointCreation())
                 .withRegistrationType(source.getRegistrationType())
                 .withNetworkId(source.getNetworkId());
 

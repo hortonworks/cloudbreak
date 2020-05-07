@@ -14,6 +14,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzu
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
+import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
@@ -79,6 +80,7 @@ public class NetworkRequestToDtoConverterTest {
         request.setNetworkCidr("10.10.10.10/16");
         request.setSubnetIds(Set.of(SUBNET_ID));
         request.setPrivateSubnetCreation(PrivateSubnetCreation.ENABLED);
+        request.setServiceEndpointCreation(ServiceEndpointCreation.ENABLED);
         return request;
     }
 
@@ -114,6 +116,7 @@ public class NetworkRequestToDtoConverterTest {
         assertEquals(actual.getSubnetMetas().get(SUBNET_ID).getId(), SUBNET_ID);
         assertEquals(actual.getSubnetMetas().get(SUBNET_ID).getName(), SUBNET_ID);
         assertEquals(network.getPrivateSubnetCreation(), actual.getPrivateSubnetCreation());
+        assertEquals(network.getServiceEndpointCreation(), actual.getServiceEndpointCreation());
         assertEquals(network.getNetworkCidr(), actual.getNetworkCidr());
     }
 

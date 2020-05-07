@@ -36,7 +36,6 @@ import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
@@ -195,16 +194,7 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
     }
 
     private String createTemplate(NetworkCreationRequest networkRequest, List<SubnetRequest> subnetRequestList) {
-        return awsNetworkCfTemplateProvider.provide(networkRequest.getEnvName(), networkRequest.getEnvId(),
-                networkRequest.getNetworkCidr(), subnetRequestList, privateSubnetEnabled(networkRequest, subnetRequestList));
-    }
-
-    private boolean privateSubnetEnabled(NetworkCreationRequest networkRequest, List<SubnetRequest> subnetRequestList) {
-        return subnetRequestList
-                .stream()
-                .filter(subnetRequest -> !Strings.isNullOrEmpty(subnetRequest.getPrivateSubnetCidr()))
-                .findFirst()
-                .isPresent() && networkRequest.isPrivateSubnetEnabled();
+        return awsNetworkCfTemplateProvider.provide(networkRequest, subnetRequestList);
     }
 
     private CreatedCloudNetwork createNewCfNetworkStack(

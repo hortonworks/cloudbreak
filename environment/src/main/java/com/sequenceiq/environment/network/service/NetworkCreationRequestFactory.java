@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
+import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -67,6 +68,7 @@ public class NetworkCreationRequestFactory {
                 .withRegion(Region.region(environment.getLocation().getName()))
                 .withNetworkCidr(networkDto.getNetworkCidr())
                 .withPrivateSubnetEnabled(privateSubnetEnabled)
+                .withServiceEndpointsEnabled(ServiceEndpointCreation.ENABLED == networkDto.getServiceEndpointCreation())
                 .withUserName(getUserFromCrn(environment.getCreator()))
                 .withCreatorCrn(environment.getCreator())
                 .withTags(costTagging.mergeTags(mergeRequest))
