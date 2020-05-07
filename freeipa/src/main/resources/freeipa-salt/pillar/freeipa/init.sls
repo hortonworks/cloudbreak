@@ -1,6 +1,7 @@
 freeipa:
   domain: testdomain
   password: pwpwpw
+  dnssecValidationEnabled: true
   realm: testrealm
   admin_user: admin
   freeipa_to_replicate:

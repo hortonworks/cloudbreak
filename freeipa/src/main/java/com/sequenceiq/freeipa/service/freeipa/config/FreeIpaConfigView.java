@@ -35,11 +35,14 @@ public class FreeIpaConfigView {
 
     private final FreeIpaBackupConfigView backup;
 
+    private final boolean dnssecValidationEnabled;
+
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaConfigView(Builder builder) {
         this.realm = builder.realm;
         this.domain = builder.domain;
         this.password = builder.password;
+        this.dnssecValidationEnabled = builder.dnssecValidationEnabled;
         this.reverseZones = builder.reverseZones;
         this.adminUser = builder.adminUser;
         this.freeipaToReplicate = builder.freeipaToReplicate;
@@ -57,6 +60,10 @@ public class FreeIpaConfigView {
 
     public String getPassword() {
         return password;
+    }
+
+    public boolean isDnssecValidationEnabled() {
+        return dnssecValidationEnabled;
     }
 
     public String getReverseZones() {
@@ -85,6 +92,7 @@ public class FreeIpaConfigView {
         map.put("realm", ObjectUtils.defaultIfNull(this.realm, EMPTY_CONFIG_DEFAULT));
         map.put("domain", ObjectUtils.defaultIfNull(this.domain, EMPTY_CONFIG_DEFAULT));
         map.put("password", ObjectUtils.defaultIfNull(this.password, EMPTY_CONFIG_DEFAULT));
+        map.put("dnssecValidationEnabled", this.dnssecValidationEnabled);
         map.put("reverseZones", ObjectUtils.defaultIfNull(this.reverseZones, EMPTY_CONFIG_DEFAULT));
         map.put("admin_user", ObjectUtils.defaultIfNull(this.adminUser, EMPTY_CONFIG_DEFAULT));
         map.put("freeipa_to_replicate", ObjectUtils.defaultIfNull(this.freeipaToReplicate, EMPTY_CONFIG_DEFAULT));
@@ -113,6 +121,8 @@ public class FreeIpaConfigView {
 
         private Set<Object> hosts;
 
+        private boolean dnssecValidationEnabled;
+
         private FreeIpaBackupConfigView backup;
 
         public FreeIpaConfigView build() {
@@ -131,6 +141,11 @@ public class FreeIpaConfigView {
 
         public Builder withPassword(String password) {
             this.password = password;
+            return this;
+        }
+
+        public Builder withDnssecValidationEnabled(boolean dnssecEnabled) {
+            this.dnssecValidationEnabled = dnssecEnabled;
             return this;
         }
 
