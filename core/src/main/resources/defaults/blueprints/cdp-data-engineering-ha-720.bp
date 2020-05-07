@@ -135,7 +135,7 @@
         "serviceConfigs": [
           {
             "name": "hue_service_safety_valve",
-            "value": "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,metastore,pig"
+            "value": "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,pig"
           }
         ],
         "roleConfigGroups": [
