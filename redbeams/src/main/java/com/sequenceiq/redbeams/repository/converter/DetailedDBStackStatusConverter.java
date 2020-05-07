@@ -12,13 +12,13 @@ public class DetailedDBStackStatusConverter implements AttributeConverter<Detail
 
     @Override
     public String convertToDatabaseColumn(DetailedDBStackStatus attribute) {
-        return attribute.name();
+        return attribute != null ? attribute.name() : null;
     }
 
     @Override
     public DetailedDBStackStatus convertToEntityAttribute(String dbData) {
         try {
-            return DetailedDBStackStatus.valueOf(dbData);
+            return dbData != null ? DetailedDBStackStatus.valueOf(dbData) : null;
         } catch (Exception e) {
             LOGGER.info("The DetailedDBStackStatus value is not backward compatible: {}", dbData);
         }
