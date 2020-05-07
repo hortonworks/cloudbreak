@@ -72,7 +72,7 @@ public class ExternalDatabaseCreationFlowConfig extends AbstractFlowConfiguratio
     }
 
     @Override
-    public ExternalDatabaseCreationEvent getFailHandledEvent() {
+    public ExternalDatabaseCreationEvent getRetryableEvent() {
         return EXTERNAL_DATABASE_CREATION_FAILURE_HANDLED_EVENT;
     }
 }

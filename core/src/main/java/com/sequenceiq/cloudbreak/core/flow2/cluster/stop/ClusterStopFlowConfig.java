@@ -64,7 +64,7 @@ public class ClusterStopFlowConfig extends AbstractFlowConfiguration<ClusterStop
     }
 
     @Override
-    public ClusterStopEvent getFailHandledEvent() {
+    public ClusterStopEvent getRetryableEvent() {
         return FAIL_HANDLED_EVENT;
     }
 }

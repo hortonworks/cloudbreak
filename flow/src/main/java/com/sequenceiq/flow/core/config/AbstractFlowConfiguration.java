@@ -154,6 +154,10 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
     protected abstract FlowEdgeConfig<S, E> getEdgeConfig();
 
+    public E getFailHandledEvent() {
+        return getEdgeConfig().failureHandled;
+    }
+
     private AbstractAction<S, E, ?, ?> getAction(FlowState state) {
         return state.action() == null ? getAction(state.name()) : getAction(state.action());
     }

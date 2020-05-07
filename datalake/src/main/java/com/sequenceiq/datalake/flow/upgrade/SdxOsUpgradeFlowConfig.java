@@ -92,7 +92,7 @@ public class SdxOsUpgradeFlowConfig extends AbstractFlowConfiguration<SdxOsUpgra
     }
 
     @Override
-    public SdxOsUpgradeEvent getFailHandledEvent() {
+    public SdxOsUpgradeEvent getRetryableEvent() {
         return SDX_UPGRADE_FAILED_HANDLED_EVENT;
     }
 }

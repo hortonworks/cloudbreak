@@ -90,7 +90,7 @@ public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateStat
     }
 
     @Override
-    public SdxCreateEvent getFailHandledEvent() {
+    public SdxCreateEvent getRetryableEvent() {
         return SDX_CREATE_FAILED_HANDLED_EVENT;
     }
 }

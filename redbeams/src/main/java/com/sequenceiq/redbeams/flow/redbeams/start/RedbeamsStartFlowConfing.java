@@ -1,22 +1,23 @@
 package com.sequenceiq.redbeams.flow.redbeams.start;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.REDBEAMS_START_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.REDBEAMS_START_FAILED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.REDBEAMS_START_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.REDBEAMS_START_FINISHED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.START_DATABASE_SERVER_FAILED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent.START_DATABASE_SERVER_FINISHED_EVENT;
+import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartState.FINAL_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartState.INIT_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartState.REDBEAMS_START_FAILED_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartState.REDBEAMS_START_FINISHED_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartState.START_DATABASE_SERVER_STATE;
-import static com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartState.FINAL_STATE;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class RedbeamsStartFlowConfing extends AbstractFlowConfiguration<RedbeamsStartState, RedbeamsStartEvent>
@@ -67,7 +68,7 @@ public class RedbeamsStartFlowConfing extends AbstractFlowConfiguration<Redbeams
     }
 
     @Override
-    public RedbeamsStartEvent getFailHandledEvent() {
+    public RedbeamsStartEvent getRetryableEvent() {
         return RedbeamsStartEvent.REDBEAMS_START_FAILURE_HANDLED_EVENT;
     }
 }

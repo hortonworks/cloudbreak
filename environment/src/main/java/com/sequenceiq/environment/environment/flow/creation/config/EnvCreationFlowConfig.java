@@ -90,7 +90,7 @@ public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreation
     }
 
     @Override
-    public EnvCreationStateSelectors getFailHandledEvent() {
+    public EnvCreationStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_ENV_CREATION_EVENT;
     }
 

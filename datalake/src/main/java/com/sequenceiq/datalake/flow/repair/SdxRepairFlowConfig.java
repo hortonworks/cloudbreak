@@ -70,7 +70,7 @@ public class SdxRepairFlowConfig extends AbstractFlowConfiguration<SdxRepairStat
     }
 
     @Override
-    public SdxRepairEvent getFailHandledEvent() {
+    public SdxRepairEvent getRetryableEvent() {
         return SdxRepairEvent.SDX_REPAIR_FAILED_HANDLED_EVENT;
     }
 }

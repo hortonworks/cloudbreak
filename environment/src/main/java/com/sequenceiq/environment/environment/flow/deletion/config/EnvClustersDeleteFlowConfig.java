@@ -65,7 +65,7 @@ public class EnvClustersDeleteFlowConfig extends AbstractFlowConfiguration<EnvCl
     }
 
     @Override
-    public EnvClustersDeleteStateSelectors getFailHandledEvent() {
+    public EnvClustersDeleteStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_ENV_CLUSTERS_DELETE_EVENT;
     }
 

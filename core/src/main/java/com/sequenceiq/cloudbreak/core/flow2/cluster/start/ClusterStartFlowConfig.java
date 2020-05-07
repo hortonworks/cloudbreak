@@ -78,7 +78,7 @@ public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterSta
     }
 
     @Override
-    public ClusterStartEvent getFailHandledEvent() {
+    public ClusterStartEvent getRetryableEvent() {
         return FAIL_HANDLED_EVENT;
     }
 }

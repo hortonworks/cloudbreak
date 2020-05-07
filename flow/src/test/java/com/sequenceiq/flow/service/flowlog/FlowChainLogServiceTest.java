@@ -3,20 +3,13 @@ package com.sequenceiq.flow.service.flowlog;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
-import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -24,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cedarsoftware.util.io.JsonWriter;
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
@@ -34,6 +26,8 @@ public class FlowChainLogServiceTest {
 
     private static final String FLOWCHAIN_PARENT_SUFFIX = "Parent";
 
+    private static final String NO_PARENT = null;
+
     @InjectMocks
     private FlowChainLogService underTest;
 
@@ -41,80 +35,98 @@ public class FlowChainLogServiceTest {
     private FlowChainLogRepository flowLogRepository;
 
     @Test
-    public void testGetRelatedFlowChainIds() {
-        String flowChainId = "flowChainId";
-        String otherFlowChainId = "otherFlowChainId";
-        String childFlowChainId = "childFlowChainId";
-        String parentFlowChainId = "parentFlowChainId";
-        when(flowLogRepository.findByParentFlowChainIdOrderByCreatedDesc(eq(parentFlowChainId)))
-                .thenReturn(Lists.newArrayList(create(flowChainId), create(otherFlowChainId)));
-        when(flowLogRepository.findByParentFlowChainIdOrderByCreatedDesc(eq(flowChainId))).thenReturn(Lists.newArrayList(create(childFlowChainId)));
-        when(flowLogRepository.findByParentFlowChainIdOrderByCreatedDesc(eq(otherFlowChainId))).thenReturn(Lists.newArrayList());
-        when(flowLogRepository.findByParentFlowChainIdOrderByCreatedDesc(eq(childFlowChainId))).thenReturn(Lists.newArrayList());
-        when(flowLogRepository.findFirstByFlowChainIdOrderByCreatedDesc(eq(flowChainId + FLOWCHAIN_PARENT_SUFFIX)))
-                .thenReturn(Optional.of(create(parentFlowChainId)));
-        when(flowLogRepository.findFirstByFlowChainIdOrderByCreatedDesc(eq(parentFlowChainId + FLOWCHAIN_PARENT_SUFFIX))).thenReturn(Optional.empty());
+    public void testFindAllFlowChainsInTree() {
+        FlowChainLog flowChainLogA = flowChainLog("A", NO_PARENT, 1);
+        FlowChainLog flowChainLogB = flowChainLog("B", flowChainLogA.getFlowChainId(), 2);
+        FlowChainLog flowChainLogC = flowChainLog("C", flowChainLogA.getFlowChainId(), 3);
+        FlowChainLog flowChainLogD = flowChainLog("D", flowChainLogC.getFlowChainId(), 4);
+        FlowChainLog flowChainLogE = flowChainLog("E", flowChainLogC.getFlowChainId(), 5);
 
-        Set<FlowChainLog> flowChains = underTest.collectRelatedFlowChains(create(flowChainId));
-        List<String> flowChainIds = flowChains.stream().map(flowChainLog -> flowChainLog.getFlowChainId()).collect(Collectors.toList());
+        setUpParent(flowChainLogB, flowChainLogA);
+        setUpChildren(flowChainLogA, List.of(flowChainLogC, flowChainLogB));
+        setUpChildren(flowChainLogC, List.of(flowChainLogE, flowChainLogD));
 
-        assertEquals(4, flowChainIds.size());
-        assertTrue(flowChainIds.contains(flowChainId));
-        assertTrue(flowChainIds.contains(childFlowChainId));
-        assertTrue(flowChainIds.contains(parentFlowChainId));
+        List<FlowChainLog> result = underTest.collectRelatedFlowChains(flowChainLogB);
 
-        verify(flowLogRepository, times(4)).findByParentFlowChainIdOrderByCreatedDesc(any());
-        verify(flowLogRepository, times(2)).findFirstByFlowChainIdOrderByCreatedDesc(any());
+        assertEquals(List.of(flowChainLogA, flowChainLogB, flowChainLogC, flowChainLogD, flowChainLogE), result);
+    }
+
+    @Test
+    public void testFindAllLatestFlowChainsInTree() {
+        FlowChainLog flowChainLogA = flowChainLog("A", NO_PARENT, 1);
+        FlowChainLog flowChainLogB = flowChainLog("B", flowChainLogA.getFlowChainId(), 2);
+        FlowChainLog flowChainLogC = flowChainLog("C", flowChainLogA.getFlowChainId(), 3);
+        FlowChainLog flowChainLogD = flowChainLog("D", flowChainLogC.getFlowChainId(), 4);
+        FlowChainLog flowChainLogES1 = flowChainLog("E", flowChainLogC.getFlowChainId(), 5);
+        FlowChainLog flowChainLogES2 = flowChainLog("E", flowChainLogC.getFlowChainId(), 6);
+
+        setUpParent(flowChainLogB, flowChainLogA);
+        setUpChildren(flowChainLogA, List.of(flowChainLogC, flowChainLogB));
+        setUpChildren(flowChainLogC, List.of(flowChainLogES2, flowChainLogES1, flowChainLogD));
+
+        List<FlowChainLog> result = underTest.collectRelatedFlowChains(flowChainLogB);
+
+        assertEquals(List.of(flowChainLogA, flowChainLogB, flowChainLogC, flowChainLogD, flowChainLogES2), result);
     }
 
     @Test
     public void testCheckIfThereIsEventInQueues() {
-        Set<FlowChainLog> flowChains = Sets.newHashSet(
-                create("1", true, 1L),
-                create("1", true, 2L),
-                create("2", true, 1L),
-                create("2", false, 2L)
+        List<FlowChainLog> flowChains = List.of(
+                flowChainLog("1", true, 1L),
+                flowChainLog("1", true, 2L),
+                flowChainLog("2", true, 1L),
+                flowChainLog("2", false, 2L)
         );
-        assertTrue(underTest.checkIfAnyFlowChainHasEventInQueue(flowChains));
+        assertTrue(underTest.hasEventInFlowChainQueue(flowChains));
     }
 
     @Test
     public void testCheckIfThereIsNoEventInQueues() {
-        Set<FlowChainLog> flowChains = Sets.newHashSet(
-                create("1", true, 1L),
-                create("1", false, 2L),
-                create("2", true, 1L),
-                create("2", false, 2L)
+        List<FlowChainLog> flowChains = List.of(
+                flowChainLog("1", true, 1L),
+                flowChainLog("1", false, 2L),
+                flowChainLog("2", true, 1L),
+                flowChainLog("2", false, 2L)
         );
-        assertFalse(underTest.checkIfAnyFlowChainHasEventInQueue(flowChains));
+        assertFalse(underTest.hasEventInFlowChainQueue(flowChains));
     }
 
     @Test
     public void testCheckIfThereIsEventInQueuesBasedOnlatestChains() {
-        Set<FlowChainLog> flowChains = Sets.newHashSet(
-                create("1", false, 1L),
-                create("1", true, 2L),
-                create("2", false, 1L),
-                create("2", true, 2L)
+        List<FlowChainLog> flowChains = List.of(
+                flowChainLog("1", false, 1L),
+                flowChainLog("1", true, 2L),
+                flowChainLog("2", false, 1L),
+                flowChainLog("2", true, 2L)
         );
-        assertTrue(underTest.checkIfAnyFlowChainHasEventInQueue(flowChains));
+        assertTrue(underTest.hasEventInFlowChainQueue(flowChains));
     }
 
-    private FlowChainLog create(String flowChanId, boolean hasEventInQueue, Long created) {
-        FlowChainLog flowChainLog = create(flowChanId);
+    private FlowChainLog flowChainLog(String flowChainId, String parentFlowChainId, long created) {
+        FlowChainLog flowChainLog = new FlowChainLog();
+        flowChainLog.setFlowChainId(flowChainId);
+        flowChainLog.setParentFlowChainId(parentFlowChainId);
+        flowChainLog.setCreated(created);
+        return flowChainLog;
+    }
+
+    private void setUpParent(FlowChainLog child, FlowChainLog parent) {
+        when(flowLogRepository.findFirstByFlowChainIdOrderByCreatedDesc(child.getParentFlowChainId()))
+                .thenReturn(Optional.of(parent));
+    }
+
+    private void setUpChildren(FlowChainLog parent, List<FlowChainLog> children) {
+        when(flowLogRepository.findByParentFlowChainIdOrderByCreatedDesc(parent.getFlowChainId()))
+                .thenReturn(children);
+    }
+
+    private FlowChainLog flowChainLog(String flowChanId, boolean hasEventInQueue, Long created) {
+        FlowChainLog flowChainLog = flowChainLog(flowChanId, flowChanId + FLOWCHAIN_PARENT_SUFFIX, created);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         if (hasEventInQueue) {
             flowEventChain.add(new TestEvent());
         }
         flowChainLog.setChain(JsonWriter.objectToJson(flowEventChain));
-        flowChainLog.setCreated(created);
-        return flowChainLog;
-    }
-
-    private FlowChainLog create(String flowChanId) {
-        FlowChainLog flowChainLog = new FlowChainLog();
-        flowChainLog.setFlowChainId(flowChanId);
-        flowChainLog.setParentFlowChainId(flowChanId + FLOWCHAIN_PARENT_SUFFIX);
         return flowChainLog;
     }
 

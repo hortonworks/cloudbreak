@@ -52,7 +52,7 @@ public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldSt
     }
 
     @Override
-    public HelloWorldEvent getFailHandledEvent() {
+    public HelloWorldEvent getRetryableEvent() {
         return HELLOWORLD_FAILHANDLED_EVENT;
     }
 

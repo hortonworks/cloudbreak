@@ -3,6 +3,7 @@ package com.sequenceiq.flow.core.config;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Bean;
@@ -29,10 +30,18 @@ public class Flow2Config {
     }
 
     @Bean
-    public List<String> failHandledEvents(List<RetryableFlowConfiguration<?>> retryableFlowConfigurations) {
+    public Set<String> retryableEvents(List<RetryableFlowConfiguration<?>> retryableFlowConfigurations) {
         return retryableFlowConfigurations.stream()
-                .map(RetryableFlowConfiguration::getFailHandledEvent)
+                .map(RetryableFlowConfiguration::getRetryableEvent)
                 .map(FlowEvent::event)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
+    }
+
+    @Bean
+    public Set<String> failHandledEvents(List<AbstractFlowConfiguration<?, ?>> flowConfigurations) {
+        return flowConfigurations.stream()
+                .map(AbstractFlowConfiguration::getFailHandledEvent)
+                .map(FlowEvent::event)
+                .collect(Collectors.toSet());
     }
 }
