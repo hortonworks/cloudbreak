@@ -1,22 +1,23 @@
 package com.sequenceiq.redbeams.flow.redbeams.stop;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-
 import static com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopEvent.REDBEAMS_STOP_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopEvent.REDBEAMS_STOP_FAILED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopEvent.REDBEAMS_STOP_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopEvent.REDBEAMS_STOP_FINISHED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopEvent.STOP_DATABASE_SERVER_FAILED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopEvent.STOP_DATABASE_SERVER_FINISHED_EVENT;
+import static com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopState.FINAL_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopState.INIT_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopState.REDBEAMS_STOP_FAILED_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopState.REDBEAMS_STOP_FINISHED_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopState.STOP_DATABASE_SERVER_STATE;
-import static com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopState.FINAL_STATE;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class RedbeamsStopFlowConfing extends AbstractFlowConfiguration<RedbeamsStopState, RedbeamsStopEvent>
@@ -66,7 +67,7 @@ public class RedbeamsStopFlowConfing extends AbstractFlowConfiguration<RedbeamsS
     }
 
     @Override
-    public RedbeamsStopEvent getFailHandledEvent() {
+    public RedbeamsStopEvent getRetryableEvent() {
         return RedbeamsStopEvent.REDBEAMS_STOP_FAILURE_HANDLED_EVENT;
     }
 }
