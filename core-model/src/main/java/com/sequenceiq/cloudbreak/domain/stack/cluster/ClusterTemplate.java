@@ -3,9 +3,8 @@ package com.sequenceiq.cloudbreak.domain.stack.cluster;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,6 +18,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.domain.converter.ClusterTemplateV4TypeConverter;
+import com.sequenceiq.cloudbreak.domain.converter.DatalakeRequiredConverter;
+import com.sequenceiq.cloudbreak.domain.converter.FeatureStateConverter;
+import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
@@ -44,18 +47,18 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     @ManyToOne
     private Workspace workspace;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ResourceStatusConverter.class)
     private ResourceStatus status;
 
     private String cloudPlatform;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = DatalakeRequiredConverter.class)
     private DatalakeRequired datalakeRequired;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = FeatureStateConverter.class)
     private FeatureState featureState;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ClusterTemplateV4TypeConverter.class)
     private ClusterTemplateV4Type type = ClusterTemplateV4Type.OTHER;
 
     @Column(length = 1000000, columnDefinition = "TEXT")
