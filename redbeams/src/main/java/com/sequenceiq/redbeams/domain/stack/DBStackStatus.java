@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.domain.stack;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,6 +13,7 @@ import javax.persistence.Table;
 
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
+import com.sequenceiq.redbeams.repository.converter.DetailedDBStackStatusConverter;
 
 @Entity
 @Table
@@ -33,7 +35,7 @@ public class DBStackStatus {
     @Column(columnDefinition = "TEXT")
     private String statusReason;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = DetailedDBStackStatusConverter.class)
     private DetailedDBStackStatus detailedDBStackStatus;
 
     public DBStackStatus() {
