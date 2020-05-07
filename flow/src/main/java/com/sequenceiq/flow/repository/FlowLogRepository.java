@@ -39,8 +39,11 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     @Query("SELECT fl FROM FlowLog fl WHERE fl.cloudbreakNodeId IS NULL AND fl.stateStatus = 'PENDING'")
     Set<FlowLog> findAllUnassigned();
 
-    @Query("SELECT fl FROM FlowLog fl WHERE fl.flowChainId IN (:chainIds)")
-    List<FlowLog> findAllByChainIds(@Param("chainIds") List<String> chainIds);
+    @Query("SELECT fl.flowId FROM FlowLog fl WHERE fl.flowChainId IN (:chainIds)")
+    Set<String> findAllFlowIdsByChainIds(@Param("chainIds") Set<String> chainIds);
+
+    @Query("SELECT fl FROM FlowLog fl WHERE fl.flowId IN (:flowIds) ORDER BY fl.created DESC")
+    List<FlowLog> findAllByFlowIdsCreatedDesc(@Param("flowIds") Set<String> flowIds);
 
     @Modifying
     @Query("UPDATE FlowLog fl SET fl.stateStatus = :stateStatus WHERE fl.id = :id")

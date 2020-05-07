@@ -47,7 +47,7 @@ public class OperationRetryService {
     private CloudbreakEventService eventService;
 
     @Resource
-    private List<String> failHandledEvents;
+    private List<String> retryableEvents;
 
     @Resource
     private List<FlowConfiguration<?>> flowConfigs;
@@ -114,7 +114,7 @@ public class OperationRetryService {
     private List<RetryableFlow> getRetryableFlows(List<FlowLog> flowLogs) {
         if (flowLogs.size() > 2) {
             return Optional.ofNullable(flowLogs.get(INDEX_BEFORE_FINISHED_STATE))
-                    .filter(log -> failHandledEvents.contains(log.getNextEvent()))
+                    .filter(log -> retryableEvents.contains(log.getNextEvent()))
                     .map(toRetryableFlow())
                     .map(List::of)
                     .orElse(List.of());

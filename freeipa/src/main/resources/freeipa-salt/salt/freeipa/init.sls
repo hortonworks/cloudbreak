@@ -44,6 +44,7 @@ net.ipv6.conf.lo.disable_ipv6:
     - group: root
     - mode: 700
     - source: salt://freeipa/scripts/freeipa_replica_install.sh
+    - template: jinja
 
 /opt/salt/scripts/update_cnames.sh:
   file.managed:

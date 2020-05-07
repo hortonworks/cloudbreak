@@ -78,7 +78,7 @@ public class EnvStopFlowConfig extends AbstractFlowConfiguration<EnvStopState, E
     }
 
     @Override
-    public EnvStopStateSelectors getFailHandledEvent() {
+    public EnvStopStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_ENV_STOP_EVENT;
     }
 }

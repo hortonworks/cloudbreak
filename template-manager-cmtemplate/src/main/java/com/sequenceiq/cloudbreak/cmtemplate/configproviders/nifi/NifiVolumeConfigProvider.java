@@ -26,13 +26,15 @@ public class NifiVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
-        if (source.getProductDetailsView().getProducts().stream()
-                .filter(product -> product.getName().equals("CFM"))
-                .anyMatch(product -> {
-                    String version = product.getVersion();
-                    return "1.0.0.0".equals(version) || "1.0.1.0".equals(version);
-                })) {
-            return List.of();
+        if (source.getProductDetailsView() != null) {
+            if (source.getProductDetailsView().getProducts().stream()
+                    .filter(product -> product.getName().equals("CFM"))
+                    .anyMatch(product -> {
+                        String version = product.getVersion();
+                        return "1.0.0.0".equals(version) || "1.0.1.0".equals(version);
+                    })) {
+                return List.of();
+            }
         }
 
         Integer volumeCount = Objects.nonNull(hostGroupView) ? hostGroupView.getVolumeCount() : 0;

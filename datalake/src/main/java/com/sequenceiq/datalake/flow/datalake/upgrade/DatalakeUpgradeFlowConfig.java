@@ -91,7 +91,7 @@ public class DatalakeUpgradeFlowConfig extends AbstractFlowConfiguration<Datalak
     }
 
     @Override
-    public DatalakeUpgradeEvent getFailHandledEvent() {
+    public DatalakeUpgradeEvent getRetryableEvent() {
         return DATALAKE_UPGRADE_FAILED_HANDLED_EVENT;
     }
 }

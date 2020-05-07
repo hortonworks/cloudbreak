@@ -104,7 +104,7 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
     }
 
     @Override
-    public StackUpscaleEvent getFailHandledEvent() {
+    public StackUpscaleEvent getRetryableEvent() {
         return UPSCALE_FAIL_HANDLED_EVENT;
     }
 }

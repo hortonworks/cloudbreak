@@ -81,7 +81,7 @@ public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterU
     }
 
     @Override
-    public ClusterUpgradeEvent getFailHandledEvent() {
+    public ClusterUpgradeEvent getRetryableEvent() {
         return CLUSTER_UPGRADE_FAIL_HANDLED_EVENT;
     }
 }

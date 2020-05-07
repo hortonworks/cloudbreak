@@ -72,7 +72,7 @@ public class ExternalDatabaseTerminationFlowConfig extends AbstractFlowConfigura
     }
 
     @Override
-    public ExternalDatabaseTerminationEvent getFailHandledEvent() {
+    public ExternalDatabaseTerminationEvent getRetryableEvent() {
         return EXTERNAL_DATABASE_TERMINATION_FAILURE_HANDLED_EVENT;
     }
 }

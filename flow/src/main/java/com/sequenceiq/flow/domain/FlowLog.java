@@ -228,6 +228,7 @@ public class FlowLog {
                 ", flowId='" + flowId + '\'' +
                 ", currentState='" + currentState + '\'' +
                 ", stateStatus=" + stateStatus +
+                ", nextEvent=" + nextEvent +
                 '}';
     }
 

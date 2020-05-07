@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -15,7 +16,6 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.flow.core.helloworld.config.HelloWorldEvent;
 import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 
@@ -54,21 +54,21 @@ public class Flow2ConfigTest {
     }
 
     @Test
-    public void testFailHandledEventsEmptyCollection() {
-        assertTrue(underTest.failHandledEvents(Collections.emptyList()).isEmpty());
+    public void testEmptyretRyableEvents() {
+        assertTrue(underTest.retryableEvents(Collections.emptyList()).isEmpty());
     }
 
     @Test
-    public void testFailHandledEvents() {
+    public void testRetryableEvents() {
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
         TestFlowConfig testFlowConfig = new TestFlowConfig();
 
-        List<RetryableFlowConfiguration<?>> retryableFlowConfigurations = Lists.newArrayList(helloWorldFlowConfig, testFlowConfig);
-        List<String> failHandledEvents = underTest.failHandledEvents(retryableFlowConfigurations);
+        List<RetryableFlowConfiguration<?>> retryableFlowConfigurations = List.of(helloWorldFlowConfig, testFlowConfig);
+        Set<String> retryableEvents = underTest.retryableEvents(retryableFlowConfigurations);
 
-        List<String> expected = Lists.newArrayList(helloWorldFlowConfig.getFailHandledEvent().event(),
-                testFlowConfig.getFailHandledEvent().event());
-        assertEquals(expected, failHandledEvents);
+        Set<String> expected = Set.of(helloWorldFlowConfig.getRetryableEvent().event(),
+                testFlowConfig.getRetryableEvent().event());
+        assertEquals(expected, retryableEvents);
     }
 
     private int countEvents(List<FlowConfiguration<?>> flowConfigs) {

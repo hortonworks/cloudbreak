@@ -78,7 +78,7 @@ public class EnvStartFlowConfig extends AbstractFlowConfiguration<EnvStartState,
     }
 
     @Override
-    public EnvStartStateSelectors getFailHandledEvent() {
+    public EnvStartStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_ENV_START_EVENT;
     }
 }
