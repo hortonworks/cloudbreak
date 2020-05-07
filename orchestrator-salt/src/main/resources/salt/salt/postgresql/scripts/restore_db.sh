@@ -51,8 +51,10 @@ restore_db_from_local() {
   doLog "INFO Restoring $SERVICE"
 
   # Can't run a drop statement in a multi-statment cli command. Thus two additiona lines of `psql`
-  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE};"
-  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};"
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -v ON_ERROR_STOP=on << EOF
+drop database ${SERVICE};
+create database ${SERVICE};
+EOF
   psql --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" < "$BACKUP" >>$LOGFILE 2>&1 || errorExit "Unable to restore ${SERVICE}"
   doLog "INFO Succesfully restored ${SERVICE}"
 }
