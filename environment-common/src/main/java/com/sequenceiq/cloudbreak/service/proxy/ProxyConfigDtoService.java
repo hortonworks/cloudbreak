@@ -9,10 +9,10 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -74,9 +74,13 @@ public class ProxyConfigDtoService {
                 .withServerHost(proxyResponse.getHost())
                 .withServerPort(proxyResponse.getPort());
         if (proxyResponse.getUserName() != null && proxyResponse.getPassword() != null) {
-            proxyConfigBuilder.withProxyAuthentication(ProxyAuthentication.builder()
-                    .withUserName(getSecret(proxyResponse.getUserName()))
-                    .withPassword(getSecret(proxyResponse.getPassword())).build());
+            String user = getSecret(proxyResponse.getUserName());
+            String password = getSecret(proxyResponse.getPassword());
+            if (StringUtils.isNoneBlank(user, password)) {
+                proxyConfigBuilder.withProxyAuthentication(ProxyAuthentication.builder()
+                        .withUserName(user)
+                        .withPassword(password).build());
+            }
         }
         return proxyConfigBuilder.build();
     }
