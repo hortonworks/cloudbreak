@@ -160,8 +160,6 @@ cb:
         h1.2xlarge,
         h1.4xlarge,
         h1.8xlarge,
-        p3.2xlarge,
-        p3.8xlarge,
         r5d.4xlarge
     hostkey.verify: false
     role.session.name: cdp-provisioning
