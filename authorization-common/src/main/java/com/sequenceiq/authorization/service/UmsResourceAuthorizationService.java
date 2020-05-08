@@ -17,6 +17,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceActionType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -45,6 +46,10 @@ public class UmsResourceAuthorizationService {
     }
 
     public void checkRightOfUserOnResources(String userCrn, AuthorizationResourceAction action, Collection<String> resourceCrns) {
+        if (!umsClient.isAuthorizationEntitlementRegistered(userCrn, ThreadBasedUserCrnProvider.getAccountId())) {
+            checkRightOfUserOnResource(userCrn, action, null);
+            return;
+        }
         validateAction(action);
         String right = umsRightProvider.getRight(action);
         String unauthorizedMessage = String.format("You have no right to perform %s on resources [%s]", right, Joiner.on(",").join(resourceCrns));
@@ -52,8 +57,9 @@ public class UmsResourceAuthorizationService {
     }
 
     private void validateAction(AuthorizationResourceAction action) {
-        if (umsRightProvider.getActionType(action).equals(AuthorizationResourceActionType.RESOURCE_INDEPENDENT)) {
-            throw new UnsupportedOperationException("TODO");
+        if (umsClient.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getUserCrn(), ThreadBasedUserCrnProvider.getAccountId()) &&
+                umsRightProvider.getActionType(action).equals(AuthorizationResourceActionType.RESOURCE_INDEPENDENT)) {
+            throw new UnsupportedOperationException("Action should be resource depenedent.");
         }
     }
 

@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
@@ -71,13 +70,7 @@ public class PermissionCheckService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        if (annotations.isEmpty()) {
-            LOGGER.warn("Your Controller ({}) method {} does not have any authorization related annotation, " +
-                            "thus we are checking write permission on current account.",
-                    proceedingJoinPoint.getTarget().getClass().getSimpleName(), methodSignature.getMethod().getName());
-            commonPermissionCheckingUtils.checkPermissionForUser(AuthorizationResourceAction.ENVIRONMENT_WRITE, userCrn);
-            return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
-        } else if (annotations.stream().anyMatch(annotation -> annotation instanceof DisableCheckPermissions)) {
+        if (annotations.stream().anyMatch(annotation -> annotation instanceof DisableCheckPermissions)) {
             return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
         } else if (annotations.stream().anyMatch(annotation -> annotation instanceof FilterListBasedOnPermissions)) {
             FilterListBasedOnPermissions listFilterAnnotation = (FilterListBasedOnPermissions) annotations.stream()
