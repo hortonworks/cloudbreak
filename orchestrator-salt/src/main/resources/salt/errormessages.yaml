@@ -1,1 +1,2 @@
 '/usr/local/bin/freeipa_backup': 'Failed to upload freeipa backup to object storage, please check the assigned permissions to the instance'
+'/etc/td-agent/check_fluent_plugins.sh': 'Connection has failed for "https://repository.cloudera.com/cloudera/api/gems/cloudera-gems/" or "https://api.rubygems.org". If servers are not down or no network: please check your firewall or use a newer OS image with newer fluent plugin versions!'
