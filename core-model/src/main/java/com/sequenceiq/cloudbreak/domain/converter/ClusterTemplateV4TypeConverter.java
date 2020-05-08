@@ -1,27 +1,12 @@
 package com.sequenceiq.cloudbreak.domain.converter;
 
-import javax.persistence.AttributeConverter;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
+import com.sequenceiq.cloudbreak.converter.DefaultEnumConverter;
 
-public class ClusterTemplateV4TypeConverter implements AttributeConverter<ClusterTemplateV4Type, String> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateV4TypeConverter.class);
-
-    @Override
-    public String convertToDatabaseColumn(ClusterTemplateV4Type attribute) {
-        return attribute == null ? null : attribute.name();
-    }
+public class ClusterTemplateV4TypeConverter extends DefaultEnumConverter<ClusterTemplateV4Type> {
 
     @Override
-    public ClusterTemplateV4Type convertToEntityAttribute(String attribute) {
-        try {
-            return ClusterTemplateV4Type.valueOf(attribute);
-        } catch (Exception e) {
-            LOGGER.info("The ClusterTemplateType value is not backward compatible: {}", attribute);
-        }
+    public ClusterTemplateV4Type getDefault() {
         return ClusterTemplateV4Type.OTHER;
     }
 }
