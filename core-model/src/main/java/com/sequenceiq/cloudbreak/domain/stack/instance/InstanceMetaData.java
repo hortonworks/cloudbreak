@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataTyp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.InstanceStatusConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @NamedEntityGraphs({
@@ -61,7 +62,7 @@ public class InstanceMetaData implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private String serverCert;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = InstanceStatusConverter.class)
     private InstanceStatus instanceStatus;
 
     @Enumerated(EnumType.STRING)
