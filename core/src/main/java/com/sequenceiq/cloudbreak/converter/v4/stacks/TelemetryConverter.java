@@ -90,6 +90,7 @@ public class TelemetryConverter {
             telemetry.setWorkloadAnalytics(workloadAnalytics);
             setWorkloadAnalyticsFeature(telemetry, features);
             setClusterLogsCollection(request, features);
+            setMonitoring(request, features);
             setUseSharedAltusCredential(features);
             telemetry.setFluentAttributes(request.getFluentAttributes());
         }
@@ -119,6 +120,10 @@ public class TelemetryConverter {
             if (featuresResponse != null) {
                 LOGGER.debug("Setting cluster logs collection response (telemetry) based on environment response.");
                 featuresRequest.setClusterLogsCollection(featuresResponse.getClusterLogsCollection());
+            }
+            if (featuresResponse != null) {
+                LOGGER.debug("Setting cluster monitoring response (telemetry) based on environment response.");
+                featuresRequest.setMonitoring(featuresResponse.getMonitoring());
             }
             telemetryRequest.setFluentAttributes(response.getFluentAttributes());
         }
@@ -211,6 +216,7 @@ public class TelemetryConverter {
             featuresRequest = new FeaturesRequest();
             featuresRequest.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresRequest.setClusterLogsCollection(features.getClusterLogsCollection());
+            featuresRequest.setMonitoring(features.getMonitoring());
         }
         return featuresRequest;
     }
@@ -313,6 +319,7 @@ public class TelemetryConverter {
             FeaturesResponse featuresResponse = new FeaturesResponse();
             featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresResponse.setClusterLogsCollection(features.getClusterLogsCollection());
+            featuresResponse.setMonitoring(features.getMonitoring());
             featuresResponse.setMetering(features.getMetering());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
             response.setFeatures(featuresResponse);
@@ -360,6 +367,21 @@ public class TelemetryConverter {
         } else {
             LOGGER.debug("Cluster logs collection feature is disabled. Set feature as false.");
             features.addClusterLogsCollection(false);
+        }
+    }
+
+    private void setMonitoring(TelemetryRequest request, Features features) {
+        if (monitoringEnabled) {
+            if (request.getFeatures() != null && request.getFeatures().getMonitoring() != null) {
+                LOGGER.debug("Fill cluster monitoring setting from telemetry feature request");
+                features.setMonitoring(request.getFeatures().getMonitoring());
+            } else {
+                LOGGER.debug("Auto-filling cluster monitoring telemetry settings as it is set, but missing from the request.");
+                features.addMonitoring(false);
+            }
+        } else {
+            LOGGER.debug("Cluster monitoring feature is disabled. Set feature as false.");
+            features.addMonitoring(false);
         }
     }
 

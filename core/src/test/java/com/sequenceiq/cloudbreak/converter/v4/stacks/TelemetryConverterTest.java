@@ -68,6 +68,7 @@ public class TelemetryConverterTest {
         WorkloadAnalyticsRequest workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
         FeaturesRequest featuresRequest = new FeaturesRequest();
         featuresRequest.addClusterLogsCollection(false);
+        featuresRequest.addMonitoring(true);
         telemetryRequest.setLogging(logging);
         telemetryRequest.setFeatures(featuresRequest);
         telemetryRequest.setWorkloadAnalytics(workloadAnalyticsRequest);
@@ -179,6 +180,7 @@ public class TelemetryConverterTest {
         TelemetryRequest result = converter.convert(null, sdxClusterResponse);
         // THEN
         assertNull(result.getWorkloadAnalytics());
+        assertNull(result.getFeatures().getMonitoring());
         assertNotNull(result.getFeatures());
         assertFalse(result.getFeatures().getWorkloadAnalytics().isEnabled());
     }

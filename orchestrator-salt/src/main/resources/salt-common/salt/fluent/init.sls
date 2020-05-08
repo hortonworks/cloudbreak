@@ -168,6 +168,14 @@ copy_td_agent_conf:
     - group: "{{ fluent.group }}"
     - mode: 640
 
+/etc/td-agent/databus_monitoring.conf:
+   file.managed:
+    - source: salt://fluent/template/databus_monitoring.conf.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - mode: 640
+
 /etc/td-agent/input_databus.conf:
   file.managed:
     - source: salt://fluent/template/input.conf.j2

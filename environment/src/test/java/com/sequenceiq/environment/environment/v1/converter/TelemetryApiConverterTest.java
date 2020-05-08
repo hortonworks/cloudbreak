@@ -34,7 +34,7 @@ public class TelemetryApiConverterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", true, "****", "****");
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, false);
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, true);
         underTest = new TelemetryApiConverter(telemetryConfiguration);
     }
 
@@ -51,6 +51,7 @@ public class TelemetryApiConverterTest {
         FeaturesRequest fr = new FeaturesRequest();
         fr.addClusterLogsCollection(true);
         fr.addWorkloadAnalytics(true);
+        fr.addMonitoring(true);
         telemetryRequest.setFeatures(fr);
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features());
@@ -59,6 +60,7 @@ public class TelemetryApiConverterTest {
         assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
         assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
         assertTrue(result.getFeatures().getUseSharedAltusCredential().isEnabled());
+        assertTrue(result.getFeatures().getMonitoring().isEnabled());
     }
 
     @Test
@@ -150,6 +152,7 @@ public class TelemetryApiConverterTest {
         logging.setS3(s3Params);
         EnvironmentFeatures features = new EnvironmentFeatures();
         features.addClusterLogsCollection(false);
+        features.addMonitoring(true);
         EnvironmentTelemetry telemetry = new EnvironmentTelemetry();
         telemetry.setLogging(logging);
         telemetry.setFeatures(features);
@@ -158,6 +161,7 @@ public class TelemetryApiConverterTest {
         // THEN
         assertNotNull(result.getFeatures());
         assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
+        assertTrue(result.getFeatures().getMonitoring().isEnabled());
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
     }
 
