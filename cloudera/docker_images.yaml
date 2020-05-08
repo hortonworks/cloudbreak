@@ -1,0 +1,9 @@
+docker_images:
+  cloudbreak: hortonworks/cloudbreak
+  cloudbreak-autoscale: hortonworks/cloudbreak-autoscale
+  cloudbreak-datalake: hortonworks/cloudbreak-datalake
+  cloudbreak-environment: hortonworks/cloudbreak-environment
+  cloudbreak-freeipa: hortonworks/cloudbreak-freeipa
+  cloudbreak-redbeams: hortonworks/cloudbreak-redbeams
+  periscope-mock: hortonworks/periscope-mock
+  cloudbreak-mock-caas: hortonworks/cloudbreak-mock-caas
