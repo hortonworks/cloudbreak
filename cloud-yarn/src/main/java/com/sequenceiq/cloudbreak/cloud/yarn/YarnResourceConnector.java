@@ -13,13 +13,11 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -34,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
@@ -64,13 +63,11 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
 
     private static final String ARTIFACT_TYPE_DOCKER = "DOCKER";
 
-    private static final int APPNAME_HYPHEN_NUM = 2;
-
     @Inject
     private YarnClientUtil yarnClientUtil;
 
-    @Value("${cb.max.yarn.resource.name.length:}")
-    private int maxResourceNameLength;
+    @Inject
+    private ApplicationNameUtil applicationNameUtil;
 
     @Value("${cb.yarn.defaultQueue}")
     private String defaultQueue;
@@ -99,7 +96,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-        PersistenceNotifier persistenceNotifier) {
+            PersistenceNotifier persistenceNotifier) {
         throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
     }
 
@@ -124,8 +121,8 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
         artifact.setType(ARTIFACT_TYPE_DOCKER);
 
         List<YarnComponent> components = stack.getGroups().stream()
-            .map(group -> mapGroupToYarnComponent(group, stack, artifact))
-            .collect(Collectors.toList());
+                .map(group -> mapGroupToYarnComponent(group, stack, artifact))
+                .collect(Collectors.toList());
 
         createApplicationRequest.setComponents(components);
         return createApplicationRequest;
@@ -287,12 +284,8 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
         CloudContext context = ac.getCloudContext();
         String name = context.getName();
         String id = context.getId().toString();
-        String user = context.getUserId().split("@")[0].replaceAll("[^a-z0-9-_]", "");
-        int nameLength = Math.max(maxResourceNameLength - (id.length() + user.length() + APPNAME_HYPHEN_NUM), 1);
-        String appName = String.format("%s-%s-%s", Splitter.fixedLength(nameLength).splitToList(name).get(0), id, user);
-        if (appName.length() > maxResourceNameLength) {
-            appName = appName.substring(0, maxResourceNameLength);
-        }
-        return appName;
+        String user = context.getUserName().split("@")[0].replaceAll("[^a-z0-9-_]", "");
+        name += "-" + id;
+        return applicationNameUtil.decorateName(name, user);
     }
 }
