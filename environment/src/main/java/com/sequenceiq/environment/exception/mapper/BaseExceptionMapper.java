@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +66,7 @@ abstract class BaseExceptionMapper<T extends Throwable> implements ExceptionMapp
 
     protected String getErrorMessage(T throwable) {
         notNull(throwable, "throwable");
-        String message = throwable.getMessage();
+        String message = ExceptionUtils.getRootCause(throwable).getMessage();
         LOGGER.debug("Exception text has been mapped: {}", message);
         return message;
     }

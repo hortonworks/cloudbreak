@@ -107,8 +107,9 @@ public class ServiceProviderCredentialAdapter {
                 changed = true;
             }
         } else if (CredentialStatus.FAILED.equals(status.getStatus())) {
-            if (!Objects.equals(credential.getVerificationStatusText(), FAILED_CREDENTIAL_VERFICIATION_MSG)) {
-                credential.setVerificationStatusText(FAILED_CREDENTIAL_VERFICIATION_MSG);
+            String failedMessage = FAILED_CREDENTIAL_VERFICIATION_MSG + " Reason: " + status.getStatusReason();
+            if (!Objects.equals(credential.getVerificationStatusText(), failedMessage)) {
+                credential.setVerificationStatusText(failedMessage);
                 changed = true;
             }
         } else {

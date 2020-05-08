@@ -178,7 +178,11 @@ public class CredentialService extends AbstractCredentialService implements Reso
         credential.setAccountId(accountId);
         try {
             return transactionService.required(() -> {
-                Credential created = repository.save(credentialAdapter.verify(credential, accountId).getCredential());
+                Credential verifiedCredential = credentialAdapter.verify(credential, accountId).getCredential();
+                if (verifiedCredential.getVerificationStatusText() != null) {
+                    throw new BadRequestException(verifiedCredential.getVerificationStatusText());
+                }
+                Credential created = repository.save(verifiedCredential);
                 sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
                 return created;
             });
