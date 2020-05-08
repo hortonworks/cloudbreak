@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceActionType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
@@ -79,8 +80,9 @@ public class UmsAccountAuthorizationService {
     }
 
     private void validateAction(AuthorizationResourceAction action) {
-        if (umsRightProvider.getActionType(action).equals(AuthorizationResourceActionType.RESOURCE_DEPENDENT)) {
-            throw new UnsupportedOperationException("TODO");
+        if (umsClient.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getUserCrn(), ThreadBasedUserCrnProvider.getAccountId()) &&
+                umsRightProvider.getActionType(action).equals(AuthorizationResourceActionType.RESOURCE_DEPENDENT)) {
+            throw new UnsupportedOperationException("Action should be resource independent.");
         }
     }
 

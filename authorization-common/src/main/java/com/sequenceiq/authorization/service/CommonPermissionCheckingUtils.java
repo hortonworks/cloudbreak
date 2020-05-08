@@ -30,6 +30,8 @@ import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 
 @Component
 public class CommonPermissionCheckingUtils {
@@ -46,6 +48,9 @@ public class CommonPermissionCheckingUtils {
     private UmsRightProvider umsRightProvider;
 
     @Inject
+    private GrpcUmsClient grpcUmsClient;
+
+    @Inject
     private Optional<List<DefaultResourceChecker>> defaultResourceCheckers;
 
     private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap = new ConcurrentHashMap<>();
@@ -60,6 +65,10 @@ public class CommonPermissionCheckingUtils {
         defaultResourceCheckers.ifPresent(checkers -> checkers.forEach(checker -> defaultResourceCheckerMap.put(checker.getResourceType(), checker)));
         resourceBasedCrnProviders.ifPresent(crnProviders -> crnProviders.forEach(crnProvider ->
                 resourceBasedCrnProviderMap.put(crnProvider.getResourceType(), crnProvider)));
+    }
+
+    public boolean legacyAuthorizationNeeded() {
+        return !grpcUmsClient.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getUserCrn(), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     public ResourceBasedCrnProvider getResourceBasedCrnProvider(AuthorizationResourceAction action) {

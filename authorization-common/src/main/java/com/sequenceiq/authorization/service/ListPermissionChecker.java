@@ -31,6 +31,10 @@ public class ListPermissionChecker {
     public Object checkPermissions(FilterListBasedOnPermissions methodAnnotation, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
         AuthorizationResourceAction action = methodAnnotation.action();
+        if (commonPermissionCheckingUtils.legacyAuthorizationNeeded()) {
+            commonPermissionCheckingUtils.checkPermissionForUser(action, userCrn);
+            return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
+        }
         List<String> allResourceCrns = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action).getResourceCrnsInAccount();
         Set<String> filteredResourceCrns = commonPermissionCheckingUtils.getPermissionsForUserOnResources(action, userCrn, allResourceCrns)
                 .entrySet()

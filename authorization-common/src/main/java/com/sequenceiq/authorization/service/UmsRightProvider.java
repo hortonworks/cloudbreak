@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.ws.rs.InternalServerErrorException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +19,8 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceActionModel;
 import com.sequenceiq.authorization.resource.AuthorizationResourceActionType;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -25,6 +28,9 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 public class UmsRightProvider {
 
     private final Map<AuthorizationResourceAction, AuthorizationResourceActionModel> actions = new HashMap<>();
+
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
 
     @PostConstruct
     public void init() {
@@ -40,7 +46,10 @@ public class UmsRightProvider {
     }
 
     public String getRight(AuthorizationResourceAction action) {
-        return getActionModel(action).getRight();
+        if (grpcUmsClient.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getUserCrn(), ThreadBasedUserCrnProvider.getAccountId())) {
+            return getActionModel(action).getRight();
+        }
+        return getActionModel(action).getLegacyRight();
     }
 
     public Optional<AuthorizationResourceAction> getByName(String name) {

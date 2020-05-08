@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceActionType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,6 +51,7 @@ public class UmsResourceAuthorizationServiceTest {
     public void init() {
         when(umsRightProvider.getActionType(any())).thenReturn(AuthorizationResourceActionType.RESOURCE_DEPENDENT);
         when(umsRightProvider.getRight(any())).thenReturn("environments/describeEnvironment");
+        when(umsClient.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.TRUE);
     }
 
     @Test
@@ -59,7 +61,8 @@ public class UmsResourceAuthorizationServiceTest {
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage("You have no right to perform environments/describeEnvironment on resource " + RESOURCE_CRN);
 
-        underTest.checkRightOfUserOnResource(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, RESOURCE_CRN);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
+                checkRightOfUserOnResource(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, RESOURCE_CRN));
     }
 
     @Test
@@ -69,7 +72,8 @@ public class UmsResourceAuthorizationServiceTest {
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage("You have no right to perform environments/describeEnvironment on resources [" + RESOURCE_CRN + "," + RESOURCE_CRN2 + "]");
 
-        underTest.checkRightOfUserOnResources(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
+                checkRightOfUserOnResources(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2)));
     }
 
     @Test
@@ -78,7 +82,8 @@ public class UmsResourceAuthorizationServiceTest {
         resultMap.put(RESOURCE_CRN2, Boolean.TRUE);
         when(umsClient.hasRights(anyString(), anyString(), anyList(), anyString(), any())).thenReturn(resultMap);
 
-        underTest.checkRightOfUserOnResources(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
+                checkRightOfUserOnResources(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2)));
     }
 
     private Map<String, Boolean> hasRightsResultMap() {

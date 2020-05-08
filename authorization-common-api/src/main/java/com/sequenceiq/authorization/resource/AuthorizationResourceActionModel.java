@@ -6,6 +6,8 @@ public class AuthorizationResourceActionModel implements Serializable {
 
     private String right;
 
+    private String legacyRight;
+
     private AuthorizationResourceType resourceType;
 
     private AuthorizationResourceActionType actionType;
@@ -32,5 +34,13 @@ public class AuthorizationResourceActionModel implements Serializable {
 
     public void setActionType(AuthorizationResourceActionType actionType) {
         this.actionType = actionType;
+    }
+
+    public String getLegacyRight() {
+        return legacyRight;
+    }
+
+    public void setLegacyRight(String legacyRight) {
+        this.legacyRight = legacyRight;
     }
 }

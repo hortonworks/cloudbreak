@@ -3,7 +3,6 @@ package com.sequenceiq.authorization.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -95,20 +94,6 @@ public class PermissionCheckServiceTest {
     }
 
     @Test
-    public void testHasPermissionIfThereIsNoAnnotationOnMethod() throws NoSuchMethodException {
-        when(proceedingJoinPoint.getTarget()).thenReturn(new ExampleClass());
-        when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
-        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUser(any(), any());
-        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("withoutAnnotation"));
-
-        underTest.hasPermission(proceedingJoinPoint);
-
-        verify(permissionChecker, times(0)).checkPermissions(any(), anyString(), any(), any(), anyLong());
-        verify(commonPermissionCheckingUtils).checkPermissionForUser(eq(AuthorizationResourceAction.ENVIRONMENT_WRITE), any());
-        verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
-    }
-
-    @Test
     public void testHasPermission() throws NoSuchMethodException {
         when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("correctMethod"));
@@ -133,10 +118,6 @@ public class PermissionCheckServiceTest {
         @DisableCheckPermissions
         @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
         public void tooManyAnnotation() {
-
-        }
-
-        public void withoutAnnotation() {
 
         }
 
