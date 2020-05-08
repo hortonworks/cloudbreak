@@ -17,7 +17,7 @@ if [ $# -ne 5 ] && [ $# -ne 6 ]; then
 fi
 
 CLOUD_PROVIDER="$1"
-BACKUP_LOCATION=$(echo "$2"| sed "s/\/\+$//g") # Clear trailng '/' (if present) for later path joining.
+BACKUP_LOCATION=$(echo "$2"| sed 's/\/\+$//g') # Clear trailng '/' (if present) for later path joining.
 HOST="$3"
 PORT="$4"
 USERNAME="$5"
@@ -47,7 +47,7 @@ dump_to_azure() {
   SERVICE="$1"
   doLog "INFO Dumping ${SERVICE}"
   LOCAL_BACKUP=${DATE_DIR}/${SERVICE}_backup
-  pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=plain >>$LOGFILE 2>&1 || errorExit "Unable to dump ${SERVICE}"
+  pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=plain --file="$LOCAL_BACKUP" >>$LOGFILE 2>&1 || errorExit "Unable to dump ${SERVICE}"
 
   doLog "INFO Uploading to ${BACKUP_LOCATION}"
   AZURE_LOCATION="${BACKUP_LOCATION}/${SERVICE}_backup"
@@ -94,4 +94,3 @@ else
 fi
 
 doLog "INFO Completed backup ${BACKUP_LOCATION}"
-

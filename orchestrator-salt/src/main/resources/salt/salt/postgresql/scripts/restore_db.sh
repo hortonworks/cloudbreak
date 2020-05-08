@@ -17,12 +17,11 @@ if [ $# -ne 5 ] && [ $# -ne 6 ]; then
 fi
 
 CLOUD_PROVIDER="$1"
-CLOUD_LOCATION=$(echo "$2"| sed "s/\/\+$//g") # Clear trailng '/' (if present) for later path joining.
+CLOUD_LOCATION=$(echo "$2" | sed 's/\/\+$//g') # Clear trailng '/' (if present) for later path joining.
 HOST="$3"
 PORT="$4"
 USERNAME="$5"
 export PGPASSWORD="$6" # We can provide the password to pg_dump through this variable, or in ~/.pgpass
-
 LOGFILE=/var/log/dl_postgres_restore.log
 echo "Logs at ${LOGFILE}"
 
@@ -50,10 +49,8 @@ restore_db_from_local() {
 
   doLog "INFO Restoring $SERVICE"
 
-  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -v ON_ERROR_STOP=on << EOF
-drop database ${SERVICE};
-create database ${SERVICE};
-EOF
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE};"
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};"
   psql --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" < "$BACKUP" >>$LOGFILE 2>&1 || errorExit "Unable to restore ${SERVICE}"
   doLog "INFO Succesfully restored ${SERVICE}"
 }
@@ -84,5 +81,3 @@ else
 fi
 
 doLog "INFO Completed restore."
-
-
