@@ -1,27 +1,12 @@
 package com.sequenceiq.cloudbreak.domain.converter;
 
-import javax.persistence.AttributeConverter;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
+import com.sequenceiq.cloudbreak.converter.DefaultEnumConverter;
 
-public class FeatureStateConverter implements AttributeConverter<FeatureState, String> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FeatureStateConverter.class);
-
-    @Override
-    public String convertToDatabaseColumn(FeatureState attribute) {
-        return attribute == null ? null : attribute.name();
-    }
+public class FeatureStateConverter extends DefaultEnumConverter<FeatureState> {
 
     @Override
-    public FeatureState convertToEntityAttribute(String attribute) {
-        try {
-            return FeatureState.valueOf(attribute);
-        } catch (Exception e) {
-            LOGGER.info("The FeatureState value is not backward compatible: {}", attribute);
-        }
+    public FeatureState getDefault() {
         return FeatureState.RELEASED;
     }
 }
