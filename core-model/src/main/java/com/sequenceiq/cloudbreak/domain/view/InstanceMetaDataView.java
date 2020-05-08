@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.domain.view;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.InstanceStatusConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
@@ -22,7 +22,7 @@ public class InstanceMetaDataView implements ProvisionEntity {
     private InstanceGroupView instanceGroup;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = InstanceStatusConverter.class)
     private InstanceStatus instanceStatus;
 
     @Column
