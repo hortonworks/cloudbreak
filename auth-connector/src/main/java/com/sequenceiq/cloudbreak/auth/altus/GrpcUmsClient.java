@@ -335,9 +335,15 @@ public class GrpcUmsClient {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
-        if (!isAuthorizationEntitlementRegistered(actorCrn, ThreadBasedUserCrnProvider.getAccountId()) && isReadRight(right)) {
-            LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!", ThreadBasedUserCrnProvider.getAccountId());
-            return true;
+        if (!isAuthorizationEntitlementRegistered(actorCrn, ThreadBasedUserCrnProvider.getAccountId())) {
+            if (isReadRight(right)) {
+                LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!",
+                        ThreadBasedUserCrnProvider.getAccountId());
+                return true;
+            } else {
+                // if legacy authz then we will check permission on account level
+                resource = null;
+            }
         }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
@@ -404,7 +410,7 @@ public class GrpcUmsClient {
         }
     }
 
-    private boolean isAuthorizationEntitlementRegistered(String actorCrn, String accountId) {
+    public boolean isAuthorizationEntitlementRegistered(String actorCrn, String accountId) {
         return getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId()).getEntitlementsList()
                 .stream()
                 .map(e -> e.getEntitlementName().toUpperCase())

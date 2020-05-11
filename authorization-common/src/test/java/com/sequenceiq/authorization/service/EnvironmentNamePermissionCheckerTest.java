@@ -9,20 +9,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByEnvironmentName;
 import com.sequenceiq.authorization.annotation.EnvironmentName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnvironmentNamePermissionCheckerTest {
@@ -35,25 +32,25 @@ public class EnvironmentNamePermissionCheckerTest {
     @Mock
     private ResourceBasedCrnProvider resourceBasedCrnProvider;
 
-    @Spy
-    private List<ResourceBasedCrnProvider> resourceBasedCrnProviders = new ArrayList<ResourceBasedCrnProvider>();
-
     @InjectMocks
     private EnvironmentNamePermissionChecker underTest;
 
+    @Before
+    public void init() {
+        when(commonPermissionCheckingUtils.getResourceBasedCrnProvider(any())).thenReturn(resourceBasedCrnProvider);
+    }
+
     @Test
     public void testCheckPermissions() {
-        resourceBasedCrnProviders.add(resourceBasedCrnProvider);
-        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), any(), anyString(), anyString());
+        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), anyString(), anyString());
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn("resource");
         when(resourceBasedCrnProvider.getResourceCrnByEnvironmentName(any())).thenReturn(USER_CRN);
-        when(resourceBasedCrnProvider.getResourceType()).thenReturn(AuthorizationResourceType.CREDENTIAL);
 
         CheckPermissionByEnvironmentName rawMethodAnnotation = new CheckPermissionByEnvironmentName() {
 
             @Override
             public AuthorizationResourceAction action() {
-                return AuthorizationResourceAction.WRITE;
+                return AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
             }
 
             @Override
@@ -62,12 +59,11 @@ public class EnvironmentNamePermissionCheckerTest {
             }
         };
 
-        underTest.populateResourceBasedCrnProviderMap();
-        underTest.checkPermissions(rawMethodAnnotation, AuthorizationResourceType.CREDENTIAL, USER_CRN, null, null, 0L);
+        underTest.checkPermissions(rawMethodAnnotation,  USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(EnvironmentName.class), eq(String.class));
-        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), any(), anyString());
+        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), anyString());
         verify(commonPermissionCheckingUtils)
-                .checkPermissionForUserOnResource(eq(AuthorizationResourceType.CREDENTIAL), eq(AuthorizationResourceAction.WRITE), eq(USER_CRN), anyString());
+                .checkPermissionForUserOnResource(eq(AuthorizationResourceAction.DESCRIBE_CREDENTIAL), eq(USER_CRN), anyString());
     }
 }

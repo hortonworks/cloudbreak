@@ -17,7 +17,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
@@ -48,7 +47,7 @@ import com.sequenceiq.distrox.v1.distrox.converter.cli.DelegatingRequestToCliReq
 
 @Controller
 @InternalReady
-@AuthorizationResource(type = AuthorizationResourceType.DATAHUB)
+@AuthorizationResource
 public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Lazy
@@ -74,7 +73,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     private DelegatingRequestToCliRequestConverter delegatingRequestToCliRequestConverter;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public StackViewV4Responses list(String environmentName, String environmentCrn) {
         StackViewV4Responses stackViewV4Responses;
         List<StackType> stackTypes = List.of(StackType.WORKLOAD);
@@ -85,7 +84,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public StackV4Response post(@Valid DistroXV1Request request) {
         return stackOperations.post(
                 workspaceService.getForCurrentUser().getId(),
@@ -93,7 +92,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public StackV4Response getByName(String name, Set<String> entries) {
         return stackOperations.get(
                 NameOrCrn.ofName(name),
@@ -103,7 +102,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public StackV4Response getByCrn(@TenantAwareParam String crn, Set<String> entries) {
         return stackOperations.get(
                 NameOrCrn.ofCrn(crn),
@@ -113,19 +112,19 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void deleteByName(String name, Boolean forced) {
         stackOperations.delete(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId(), forced);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void deleteByCrn(String crn, Boolean forced) {
         stackOperations.delete(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId(), forced);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public void deleteMultiple(DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
         validateMultidelete(multiDeleteRequest);
         if (CollectionUtils.isNotEmpty(multiDeleteRequest.getNames())) {
@@ -159,19 +158,19 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void syncByName(String name) {
         stackOperations.sync(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void syncByCrn(String crn) {
         stackOperations.sync(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void retryByName(String name) {
         stackOperations.retry(
                 NameOrCrn.ofName(name),
@@ -179,7 +178,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public List<RetryableFlowResponse> listRetryableFlows(String name) {
         List<RetryableFlow> retryableFlows = stackOperations.getRetryableFlows(name, workspaceService.getForCurrentUser().getId());
         return retryableFlows.stream()
@@ -188,63 +187,63 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void retryByCrn(String crn) {
         stackOperations.retry(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putStopByName(String name) {
         stackOperations.putStop(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putStopByCrn(String crn) {
         stackOperations.putStop(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
 
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putStopByNames(List<String> names) {
         names.forEach(this::putStopByName);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putStopByCrns(List<String> crns) {
         crns.forEach(this::putStopByCrn);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putStartByName(String name) {
         stackOperations.putStart(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId());
 
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putStartByCrn(String crn) {
         stackOperations.putStart(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putStartByNames(List<String> names) {
         names.forEach(this::putStartByName);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putStartByCrns(List<String> crns) {
         crns.forEach(this::putStartByCrn);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putScalingByName(String name, @Valid DistroXScaleV1Request updateRequest) {
         StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
         stackScaleV4Request.setStackId(stackOperations.getStackByName(name).getId());
@@ -252,7 +251,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putScalingByCrn(String crn, @Valid DistroXScaleV1Request updateRequest) {
         StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
         stackScaleV4Request.setStackId(stackOperations.getStackByCrn(crn).getId());
@@ -260,7 +259,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void repairClusterByName(String name, @Valid DistroXRepairV1Request clusterRepairRequest) {
         stackOperations.repairCluster(
                 NameOrCrn.ofName(name),
@@ -269,7 +268,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void repairClusterByCrn(String crn, @Valid DistroXRepairV1Request clusterRepairRequest) {
         stackOperations.repairCluster(
                 NameOrCrn.ofCrn(crn),
@@ -278,7 +277,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public GeneratedBlueprintV4Response postStackForBlueprintByName(String name, @Valid DistroXV1Request stackRequest) {
         return stackOperations.postStackForBlueprint(
                 NameOrCrn.ofName(name),
@@ -287,7 +286,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public GeneratedBlueprintV4Response postStackForBlueprintByCrn(String crn, @Valid DistroXV1Request stackRequest) {
         return stackOperations.postStackForBlueprint(
                 NameOrCrn.ofCrn(crn),
@@ -296,21 +295,21 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public Object getRequestfromName(String name) {
         StackV4Request stackV4Request = getStackV4Request(NameOrCrn.ofName(name));
         return getCreateAWSClusterRequest(stackV4Request);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public Object getRequestfromCrn(String crn) {
         StackV4Request stackV4Request = getStackV4Request(NameOrCrn.ofCrn(crn));
         return getCreateAWSClusterRequest(stackV4Request);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public StackStatusV4Response getStatusByName(String name) {
         return stackOperations.getStatus(
                 NameOrCrn.ofName(name),
@@ -318,13 +317,13 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public StackStatusV4Response getStatusByCrn(String crn) {
         return stackOperations.getStatusByCrn(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void deleteInstanceByName(String name, Boolean forced, String instanceId) {
         stackOperations.deleteInstance(
                 NameOrCrn.ofName(name),
@@ -334,7 +333,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void deleteInstanceByCrn(String crn, Boolean forced, String instanceId) {
         stackOperations.deleteInstance(
                 NameOrCrn.ofCrn(crn),
@@ -344,7 +343,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void deleteInstancesByName(String name, @NotEmpty List<String> instances, boolean forced) {
         stackOperations.deleteInstances(
                 NameOrCrn.ofName(name),
@@ -354,7 +353,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void deleteInstancesByCrn(String crn, @NotEmpty List<String> instances, boolean forced) {
         stackOperations.deleteInstances(
                 NameOrCrn.ofCrn(crn),
@@ -364,7 +363,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void setClusterMaintenanceModeByName(String name, @NotNull DistroXMaintenanceModeV1Request maintenanceMode) {
         stackOperations.setClusterMaintenanceMode(
                 NameOrCrn.ofName(name),
@@ -374,7 +373,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void setClusterMaintenanceModeByCrn(String crn, @NotNull DistroXMaintenanceModeV1Request maintenanceMode) {
         stackOperations.setClusterMaintenanceMode(
                 NameOrCrn.ofCrn(crn),
@@ -383,7 +382,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void deleteWithKerberosByName(String name, boolean forced) {
         stackOperations.delete(
                 NameOrCrn.ofName(name),
@@ -393,7 +392,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void deleteWithKerberosByCrn(String crn, boolean forced) {
         stackOperations.delete(
                 NameOrCrn.ofCrn(crn),
@@ -403,7 +402,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public Object getCreateAwsClusterForCli(DistroXV1Request request) {
         return delegatingRequestToCliRequestConverter.convertDistroX(request);
     }

@@ -12,8 +12,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.resource.RightUtils;
+import com.sequenceiq.authorization.resource.AuthorizationResourceActionType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
@@ -27,53 +27,62 @@ public class UmsAccountAuthorizationService {
     @Inject
     private GrpcUmsClient umsClient;
 
-    public void checkRightOfUser(String userCrn, AuthorizationResourceType resourceType, AuthorizationResourceAction action) {
-        String right = RightUtils.getRight(resourceType, action);
-        String unauthorizedMessage = String.format("You have no right to perform %s in account %s.", right, Crn.fromString(userCrn).getAccountId());
-        checkRightOfUser(userCrn, resourceType, action, unauthorizedMessage);
+    @Inject
+    private UmsRightProvider umsRightProvider;
+
+    public void checkRightOfUser(String userCrn, AuthorizationResourceAction action) {
+        String unauthorizedMessage = String.format("You have no right to perform %s in account %s.", umsRightProvider.getRight(action),
+                Crn.fromString(userCrn).getAccountId());
+        checkRightOfUser(userCrn, action, unauthorizedMessage);
     }
 
-    public Boolean hasRightOfUser(String userCrn, String resourceType, String action) {
-        Optional<AuthorizationResourceType> resourceEnum = AuthorizationResourceType.getByName(resourceType);
-        Optional<AuthorizationResourceAction> actionEnum = AuthorizationResourceAction.getByName(action);
-        if (!resourceEnum.isPresent() || !actionEnum.isPresent()) {
-            throw new BadRequestException("Resource or action cannot be found by request!");
+    public Boolean hasRightOfUser(String userCrn, String action) {
+        Optional<AuthorizationResourceAction> actionEnum = umsRightProvider.getByName(action);
+        if (!actionEnum.isPresent()) {
+            throw new BadRequestException("Action cannot be found by request!");
         }
-        if (!hasRightOfUser(userCrn, resourceEnum.get(), actionEnum.get())) {
+        if (!hasRightOfUser(userCrn, actionEnum.get())) {
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
     }
 
-    private void checkRightOfUser(String userCrn, AuthorizationResourceType resourceType, AuthorizationResourceAction action, String unauthorizedMessage) {
-        if (!hasRightOfUser(userCrn, resourceType, action)) {
+    private void checkRightOfUser(String userCrn, AuthorizationResourceAction action, String unauthorizedMessage) {
+        if (!hasRightOfUser(userCrn, action)) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
     }
 
-    private boolean hasRightOfUser(String userCrn, AuthorizationResourceType resourceType, AuthorizationResourceAction action) {
-        return umsClient.checkRight(userCrn, userCrn, RightUtils.getRight(resourceType, action), getRequestId());
+    private boolean hasRightOfUser(String userCrn, AuthorizationResourceAction action) {
+        validateAction(action);
+        return umsClient.checkRight(userCrn, userCrn, umsRightProvider.getRight(action), getRequestId());
     }
 
     // Checks that the calling actor is either performing an action against themselves or have the right
-    public void checkCallerIsSelfOrHasRight(String actorCrnStr, String targetUserCrnStr, AuthorizationResourceType resource,
-            AuthorizationResourceAction action) {
+    public void checkCallerIsSelfOrHasRight(String actorCrnStr, String targetUserCrnStr, AuthorizationResourceAction action) {
         Crn actorCrn = Crn.safeFromString(actorCrnStr);
         Crn targetUserCrn = Crn.safeFromString(targetUserCrnStr);
         if (actorCrn.equals(targetUserCrn)) {
             return;
         }
-        String right = RightUtils.getRight(resource, action);
         if (!actorCrn.getAccountId().equals(targetUserCrn.getAccountId())) {
             String unauthorizedMessage = "Unauthorized to run this operation in a different account";
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
-        if (!umsClient.checkRight(GrpcUmsClient.INTERNAL_ACTOR_CRN, actorCrn.toString(), RightUtils.getRight(resource, action), getRequestId())) {
-            String unauthorizedMessage = String.format("You have no right to perform %s on user %s.", right, targetUserCrnStr);
+        validateAction(action);
+        if (!umsClient.checkRight(GrpcUmsClient.INTERNAL_ACTOR_CRN, actorCrn.toString(), umsRightProvider.getRight(action), getRequestId())) {
+            String unauthorizedMessage = String.format("You have no right to perform %s on user %s.", umsRightProvider.getRight(action), targetUserCrnStr);
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
+        }
+    }
+
+    private void validateAction(AuthorizationResourceAction action) {
+        if (umsClient.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getUserCrn(), ThreadBasedUserCrnProvider.getAccountId()) &&
+                umsRightProvider.getActionType(action).equals(AuthorizationResourceActionType.RESOURCE_DEPENDENT)) {
+            throw new UnsupportedOperationException("Action should be resource independent.");
         }
     }
 

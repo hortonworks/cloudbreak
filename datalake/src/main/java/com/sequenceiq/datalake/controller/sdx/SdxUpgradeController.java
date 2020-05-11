@@ -11,7 +11,6 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
 import com.sequenceiq.datalake.service.upgrade.SdxRuntimeUpgradeService;
@@ -20,7 +19,7 @@ import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
 @Controller
-@AuthorizationResource(type = AuthorizationResourceType.DATALAKE)
+@AuthorizationResource
 public class SdxUpgradeController implements SdxUpgradeEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeController.class);
@@ -32,7 +31,7 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     private SdxRuntimeUpgradeService sdxRuntimeUpgradeService;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
     public SdxUpgradeResponse upgradeClusterByName(String clusterName, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         lockComponentsIfRuntimeUpgradeIsDisabled(request, userCrn, clusterName);
@@ -51,7 +50,7 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
     public SdxUpgradeResponse upgradeClusterByCrn(String clusterCrn, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         lockComponentsIfRuntimeUpgradeIsDisabled(request, userCrn, clusterCrn);

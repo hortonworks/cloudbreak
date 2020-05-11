@@ -19,7 +19,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceCrnPermissionCheckerTest {
@@ -34,7 +33,7 @@ public class ResourceCrnPermissionCheckerTest {
 
     @Test
     public void testCheckPermissions() {
-        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), any(), anyString(), anyString());
+        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), anyString(), anyString());
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(USER_CRN);
 
         CheckPermissionByResourceCrn rawMethodAnnotation = new CheckPermissionByResourceCrn() {
@@ -49,11 +48,10 @@ public class ResourceCrnPermissionCheckerTest {
                 return CheckPermissionByResourceCrn.class;
             }
         };
-        underTest.checkPermissions(rawMethodAnnotation, AuthorizationResourceType.CREDENTIAL, USER_CRN, null, null, 0L);
+        underTest.checkPermissions(rawMethodAnnotation, USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceCrn.class), eq(String.class));
-        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), any(), anyString());
-        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResource(eq(AuthorizationResourceType.CREDENTIAL),
-                eq(AuthorizationResourceAction.EDIT_CREDENTIAL), eq(USER_CRN), anyString());
+        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), anyString());
+        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResource(eq(AuthorizationResourceAction.EDIT_CREDENTIAL), eq(USER_CRN), anyString());
     }
 }

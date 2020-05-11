@@ -2,22 +2,22 @@ package com.sequenceiq.datalake;
 
 import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.authorization.EnforceAuthorizationAnnotationsUtil;
+import com.sequenceiq.authorization.EnforceAuthorizationLogicsUtil;
 
 public class EnforceAuthorizationAnnotationsTest {
 
     @Test
     public void testIfControllerClassHasProperAnnotation() {
-        EnforceAuthorizationAnnotationsUtil.testIfControllerClassHasProperAnnotation();
+        EnforceAuthorizationLogicsUtil.testIfControllerClassHasProperAnnotation();
     }
 
     @Test
     public void testIfControllerClassHasAuthorizationAnnotation() {
-        EnforceAuthorizationAnnotationsUtil.testIfControllerClassHasAuthorizationAnnotation();
+        EnforceAuthorizationLogicsUtil.testIfControllerClassHasAuthorizationAnnotation();
     }
 
     @Test
     public void testIfControllerMethodsHaveProperAuthorizationAnnotation() {
-        EnforceAuthorizationAnnotationsUtil.testIfControllerMethodsHaveProperAuthorizationAnnotation();
+        EnforceAuthorizationLogicsUtil.testIfControllerMethodsHaveProperAuthorizationAnnotation();
     }
 }

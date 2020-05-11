@@ -21,8 +21,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
@@ -61,14 +59,10 @@ public class PermissionCheckService {
             throw getAccessDeniedAndLogMissingAnnotation(methodSignature.getMethod().getDeclaringClass());
         }
 
-        return checkPermission(proceedingJoinPoint, methodSignature, authorizationClass.get(), startTime);
+        return checkPermission(proceedingJoinPoint, methodSignature, startTime);
     }
 
-    protected Object checkPermission(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, Class<?> authorizationClass, long startTime) {
-        Optional<Annotation> classAnnotation = commonPermissionCheckingUtils.getClassAnnotation(authorizationClass);
-
-        AuthorizationResource classAuthorizationResource = (AuthorizationResource) classAnnotation.get();
-        AuthorizationResourceType resource = classAuthorizationResource.type();
+    protected Object checkPermission(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
 
         List<? extends Annotation> annotations = AuthorizationAnnotationUtils.getPossibleMethodAnnotations().stream()
@@ -76,23 +70,17 @@ public class PermissionCheckService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        if (annotations.isEmpty()) {
-            LOGGER.warn("Your Controller ({}) method {} does not have any authorization related annotation, " +
-                            "thus we are checking write permission on current account.",
-                    proceedingJoinPoint.getTarget().getClass().getSimpleName(), methodSignature.getMethod().getName());
-            commonPermissionCheckingUtils.checkPermissionForUser(resource, AuthorizationResourceAction.WRITE, userCrn);
-            return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
-        } else if (annotations.stream().anyMatch(annotation -> annotation instanceof DisableCheckPermissions)) {
+        if (annotations.stream().anyMatch(annotation -> annotation instanceof DisableCheckPermissions)) {
             return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
         } else if (annotations.stream().anyMatch(annotation -> annotation instanceof FilterListBasedOnPermissions)) {
             FilterListBasedOnPermissions listFilterAnnotation = (FilterListBasedOnPermissions) annotations.stream()
                     .filter(annotation -> annotation instanceof FilterListBasedOnPermissions).findFirst().get();
-            return listPermissionChecker.checkPermissions(listFilterAnnotation, resource, userCrn, proceedingJoinPoint, methodSignature, startTime);
+            return listPermissionChecker.checkPermissions(listFilterAnnotation, userCrn, proceedingJoinPoint, methodSignature, startTime);
         }
 
         annotations.stream().forEach(annotation -> {
             PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(annotation.annotationType());
-            permissionChecker.checkPermissions(annotation, resource, userCrn, proceedingJoinPoint, methodSignature, startTime);
+            permissionChecker.checkPermissions(annotation, userCrn, proceedingJoinPoint, methodSignature, startTime);
         });
         return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }

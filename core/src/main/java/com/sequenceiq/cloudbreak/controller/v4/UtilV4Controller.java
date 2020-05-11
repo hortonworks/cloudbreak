@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.service.UmsRightProvider;
 import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckRightV4Request;
@@ -73,6 +74,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     @Inject
     private StackOperationService stackOperationService;
 
+    @Inject
+    private UmsRightProvider umsRightProvider;
+
     @Value("${info.app.version:}")
     private String cbVersion;
 
@@ -126,8 +130,8 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     public CheckRightV4Response checkRight(CheckRightV4Request checkRightV4Request) {
         String userCrn = restRequestThreadLocalService.getCloudbreakUser().getUserCrn();
         return new CheckRightV4Response(checkRightV4Request.getRights().stream()
-                .map(rightReq -> new CheckRightV4SingleResponse(rightReq,
-                        umsAccountAuthorizationService.hasRightOfUser(userCrn, rightReq.getResource(), rightReq.getAction())))
+                .map(rightReq -> new CheckRightV4SingleResponse(rightReq, umsAccountAuthorizationService.hasRightOfUser(userCrn,
+                        umsRightProvider.getRight(rightReq.getAction()))))
                 .collect(Collectors.toList()));
     }
 

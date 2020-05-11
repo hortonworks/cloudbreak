@@ -16,7 +16,6 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
@@ -37,7 +36,7 @@ import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 
 @Controller
-@AuthorizationResource(type = AuthorizationResourceType.DATALAKE)
+@AuthorizationResource
 @Transactional(TxType.NEVER)
 public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
@@ -65,28 +64,28 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private ConverterUtil converterUtil;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_READ)
     public DatabaseServerV4Responses list(String environmentCrn) {
         Set<DatabaseServerConfig> all = databaseServerConfigService.findAll(DEFAULT_WORKSPACE, environmentCrn);
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(all, DatabaseServerV4Response.class));
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_READ)
     public DatabaseServerV4Response getByName(String environmentCrn, String name) {
         DatabaseServerConfig server = databaseServerConfigService.getByName(DEFAULT_WORKSPACE, environmentCrn, name);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_READ)
     public DatabaseServerV4Response getByCrn(String crn) {
         DatabaseServerConfig server = databaseServerConfigService.getByCrn(crn);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
     public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
         DBStack dbStack = dbStackConverter.convert(request, ThreadBasedUserCrnProvider.getUserCrn());
         DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack);
@@ -94,13 +93,13 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
     public DatabaseServerV4Response release(String crn) {
         DatabaseServerConfig server = databaseServerConfigService.release(crn);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
     public DatabaseServerV4Response register(DatabaseServerV4Request request) {
         DatabaseServerConfig server = databaseServerConfigService.create(converterUtil.convert(request, DatabaseServerConfig.class), DEFAULT_WORKSPACE, false);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_CREATED);
@@ -108,7 +107,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
     public DatabaseServerV4Response deleteByCrn(String crn, boolean force) {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         DatabaseServerConfig deleted = redbeamsTerminationService.terminateByCrn(crn, force);
@@ -117,7 +116,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
     public DatabaseServerV4Response deleteByName(String environmentCrn, String name, boolean force) {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         DatabaseServerConfig deleted = redbeamsTerminationService.terminateByName(environmentCrn, name, force);
@@ -125,7 +124,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
     public DatabaseServerV4Responses deleteMultiple(Set<String> crns, boolean force) {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         Set<DatabaseServerConfig> deleted = redbeamsTerminationService.terminateMultipleByCrn(crns, force);
@@ -134,7 +133,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_READ)
     public DatabaseServerTestV4Response test(DatabaseServerTestV4Request request) {
         throw new UnsupportedOperationException("Connection testing is disabled for security reasons until further notice");
         // String connectionResult;
@@ -148,7 +147,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
     public CreateDatabaseV4Response createDatabase(CreateDatabaseV4Request request) {
         String result = databaseServerConfigService.createDatabaseOnServer(
                 request.getExistingDatabaseServerCrn(),
@@ -159,13 +158,13 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
     public void start(@ValidCrn @NotNull String crn) {
         redbeamsStartService.startDatabaseServer(crn);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
     public void stop(@ValidCrn @NotNull String crn) {
         redbeamsStopService.stopDatabaseServer(crn);
     }

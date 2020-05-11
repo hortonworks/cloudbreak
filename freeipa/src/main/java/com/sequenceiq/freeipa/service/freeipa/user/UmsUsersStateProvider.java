@@ -22,6 +22,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListW
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
+import com.sequenceiq.authorization.service.UmsRightProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -47,6 +48,9 @@ public class UmsUsersStateProvider {
 
     @Inject
     private UmsCredentialProvider umsCredentialProvider;
+
+    @Inject
+    private UmsRightProvider umsRightProvider;
 
     public Map<String, UmsUsersState> getEnvToUmsUsersStateMap(String accountId, String actorCrn, Set<String> environmentCrns,
         Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
@@ -248,7 +252,7 @@ public class UmsUsersStateProvider {
 
     private EnvironmentAccessChecker createEnvironmentAccessChecker(String environmentCrn) {
         requireNonNull(environmentCrn, "environmentCrn is null");
-        return new EnvironmentAccessChecker(grpcUmsClient, environmentCrn);
+        return new EnvironmentAccessChecker(grpcUmsClient, umsRightProvider, environmentCrn);
     }
 
     private Crn getCrn(WorkloadAdministrationGroup wag) {

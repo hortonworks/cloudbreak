@@ -21,7 +21,6 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceCrnListPermissionCheckerTest {
@@ -36,7 +35,7 @@ public class ResourceCrnListPermissionCheckerTest {
 
     @Test
     public void testCheckPermissions() {
-        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResources(any(), any(), anyString(), any());
+        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResources(any(), anyString(), any());
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(Lists.newArrayList(USER_CRN, USER_CRN));
 
         CheckPermissionByResourceCrnList rawMethodAnnotation = new CheckPermissionByResourceCrnList() {
@@ -51,11 +50,10 @@ public class ResourceCrnListPermissionCheckerTest {
                 return CheckPermissionByResourceCrnList.class;
             }
         };
-        underTest.checkPermissions(rawMethodAnnotation, AuthorizationResourceType.CREDENTIAL, USER_CRN, null, null, 0L);
+        underTest.checkPermissions(rawMethodAnnotation, USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceCrnList.class), eq(Collection.class));
-        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), any(), anyString());
-        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResources(eq(AuthorizationResourceType.CREDENTIAL),
-                eq(AuthorizationResourceAction.EDIT_CREDENTIAL), eq(USER_CRN), any());
+        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), anyString());
+        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResources(eq(AuthorizationResourceAction.EDIT_CREDENTIAL), eq(USER_CRN), any());
     }
 }
