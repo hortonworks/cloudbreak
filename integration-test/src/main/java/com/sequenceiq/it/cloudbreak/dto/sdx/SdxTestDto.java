@@ -6,6 +6,7 @@ import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,8 @@ import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.util.TagAdderUtil;
 import com.sequenceiq.it.util.TestNameExtractorUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.sdx.api.model.SdxAwsRequest;
+import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
@@ -154,6 +157,19 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto withClusterShape(SdxClusterShape shape) {
         getRequest().setClusterShape(shape);
+        return this;
+    }
+
+    public SdxTestDto withSpotPercentage(int spotPercentage) {
+        SdxAwsRequest aws = getRequest().getAws();
+        if (Objects.isNull(aws)) {
+            aws = new SdxAwsRequest();
+            getRequest().setAws(aws);
+        }
+        SdxAwsSpotParameters spot = new SdxAwsSpotParameters();
+        spot.setPercentage(spotPercentage);
+        aws.setSpot(spot);
+
         return this;
     }
 

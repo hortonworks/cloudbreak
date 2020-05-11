@@ -1,0 +1,7 @@
+name: "aws-spot-tests"
+tests:
+  - name: "aws-spot-tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.spot.AwsDistroXSpotInstanceTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.spot.AwsFreeIpaSpotInstanceTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.spot.AwsSdxSpotInstanceTest
