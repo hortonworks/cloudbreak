@@ -3,7 +3,6 @@ package com.sequenceiq.periscope.controller;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -79,11 +78,6 @@ public class AlertController implements AlertEndpoint {
     @Override
     public void deleteMetricAlarm(Long clusterId, Long alertId) {
         alertService.deleteMetricAlert(clusterId, alertId);
-    }
-
-    @Override
-    public List<Map<String, Object>> getAlertDefinitions(Long clusterId) {
-        return alertService.getAlertDefinitions(clusterId);
     }
 
     @Override

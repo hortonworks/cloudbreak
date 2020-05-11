@@ -23,12 +23,10 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.aspects.RequestLogging;
-import com.sequenceiq.periscope.monitor.evaluator.ambari.AmbariClusterCreationEvaluator;
 import com.sequenceiq.periscope.monitor.executor.EvaluatorExecutorRegistry;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHandler;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
-import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
@@ -52,7 +50,6 @@ public class StackCollectorContext {
                             RejectedThreadService.class,
                             RequestLogging.class,
                             PeriscopeNodeConfig.class,
-                            AmbariClusterCreationEvaluator.class,
                             StackCollectorService.class,
                             ExecutorServiceWithRegistry.class,
                             EvaluatorExecutorRegistry.class,
@@ -60,7 +57,7 @@ public class StackCollectorContext {
                             Clock.class
                     })
     )
-    @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class, TlsSecurityService.class, SecurityConfigService.class,
+    @MockBean({ClusterService.class, CloudbreakClientConfiguration.class, TlsSecurityService.class, SecurityConfigService.class,
             HistoryService.class, HttpNotificationSender.class, MetricUtils.class, Clock.class, ClouderaManagerApiFactory.class, SecretService.class})
     @EnableAsync
     public static class StackCollectorSpringConfig implements AsyncConfigurer {
