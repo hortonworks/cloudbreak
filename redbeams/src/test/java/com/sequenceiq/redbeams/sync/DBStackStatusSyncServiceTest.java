@@ -18,6 +18,7 @@ import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -84,6 +85,9 @@ public class DBStackStatusSyncServiceTest {
     @Mock
     private Crn crn;
 
+    @Mock
+    private DBStackJobService dbStackJobService;
+
     private ArgumentCaptor<CloudContext> cloudContextArgumentCaptor;
 
     @InjectMocks
@@ -136,5 +140,20 @@ public class DBStackStatusSyncServiceTest {
         } else {
             verifyZeroInteractions(dbStackStatusUpdater);
         }
+        verifyZeroInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldSetStatusAndUnscheduleInCaseOfStopCompleted()
+            throws Exception {
+        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER)).thenReturn(ExternalDatabaseStatus.DELETED);
+        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.DELETE_IN_PROGRESS);
+        when(dbStack.getOwnerCrn()).thenReturn(crn);
+
+        victim.sync(dbStack);
+
+        verify(dbStackStatusUpdater).updateStatus(DB_STACK_ID, DetailedDBStackStatus.DELETE_COMPLETED);
+        verify(dbStackJobService).unschedule(dbStack);
     }
 }

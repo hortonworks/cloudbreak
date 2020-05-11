@@ -87,7 +87,12 @@ public enum Status {
                 AVAILABLE,
                 STOP_REQUESTED,
                 STOP_IN_PROGRESS,
-                STOPPED
+                STOPPED,
+                DELETE_IN_PROGRESS
         );
+    }
+
+    public static Set<Status> getUnscheduleAutoSyncStatuses() {
+        return Set.of(DELETE_COMPLETED);
     }
 }
