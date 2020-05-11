@@ -1,13 +1,6 @@
 package com.sequenceiq.periscope.service;
 
-import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,9 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.ambari.client.services.CommonService;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.BaseAlert;
@@ -58,9 +48,6 @@ public class AlertService {
 
     @Inject
     private Configuration freemarkerConfiguration;
-
-    @Inject
-    private AmbariClientProvider ambariClientProvider;
 
     @Inject
     private ConsulKeyValueService consulKeyValueService;
@@ -186,34 +173,6 @@ public class AlertService {
         return res;
     }
 
-    public List<Map<String, Object>> getAlertDefinitions(Long clusterId) {
-        Cluster cluster = clusterService.findById(clusterId);
-        List<Map<String, Object>> ret = new ArrayList<>();
-        AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
-        List<Map<String, String>> alertDefinitions = ambariRequestLogging.logging(ambariClient::getAlertDefinitions, "alertDefinition");
-        for (Map<String, String> alertDefinition : alertDefinitions) {
-            Map<String, Object> tmp = new HashMap<>();
-            for (Entry<String, String> stringStringEntry : alertDefinition.entrySet()) {
-                tmp.put(stringStringEntry.getKey(), stringStringEntry.getValue());
-            }
-            ret.add(tmp);
-        }
-        return ret;
-    }
-
-    public void addPeriscopeAlerts(Cluster cluster) {
-        MDCBuilder.buildMdcContext(cluster);
-        if (cluster.getSecurityConfig() != null) {
-            try {
-                AmbariClient client = ambariClientProvider.createAmbariClient(cluster);
-                createAlert(client, getAlertDefinition(client, CONTAINER_ALERT), CONTAINER_ALERT);
-                createAlert(client, getAlertDefinition(client, APP_ALERT), APP_ALERT);
-            } catch (Exception e) {
-                LOGGER.info("Cannot create alert definitions", e);
-            }
-        }
-    }
-
     public PrometheusAlert createPrometheusAlert(Long clusterId, PrometheusAlert alert) {
         Cluster cluster = clusterService.findById(clusterId);
         alert.setCluster(cluster);
@@ -265,19 +224,5 @@ public class AlertService {
 
     public Set<PrometheusAlert> getPrometheusAlerts(Long clusterId) {
         return prometheusAlertRepository.findAllByCluster(clusterId);
-    }
-
-    private String getAlertDefinition(CommonService client, String name) throws Exception {
-        Map<String, String> model = Collections.singletonMap("clusterName", client.getClusterName());
-        return processTemplateIntoString(freemarkerConfiguration.getTemplate(ALERT_PATH + name, "UTF-8"), model);
-    }
-
-    private void createAlert(com.sequenceiq.ambari.client.services.AlertService client, String json, String alertName) {
-        try {
-            client.createAlert(json);
-            LOGGER.debug("Alert: {} added to the cluster", alertName);
-        } catch (Exception ignored) {
-            LOGGER.info("Cannot add '{}' to the cluster", alertName);
-        }
     }
 }

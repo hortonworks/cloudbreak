@@ -8,7 +8,6 @@ import static com.sequenceiq.periscope.doc.ApiDescription.AlertOpDescription.PRO
 
 import java.text.ParseException;
 import java.util.List;
-import java.util.Map;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -63,12 +62,6 @@ public interface AlertEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.METRIC_BASED_DELETE, produces = MediaType.APPLICATION_JSON, notes = METRIC_BASED_NOTES)
     void deleteMetricAlarm(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId);
-
-    @GET
-    @Path("metric/definitions")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = AlertOpDescription.METRIC_BASED_DEFINITIONS, produces = MediaType.APPLICATION_JSON, notes = METRIC_BASED_NOTES)
-    List<Map<String, Object>> getAlertDefinitions(@PathParam("clusterId") Long clusterId);
 
     @POST
     @Path("time")
