@@ -22,7 +22,7 @@ import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
 
-public class EnforceAuthorizationAnnotationsUtil {
+public class EnforceAuthorizationLogicsUtil {
 
     private static final Reflections REFLECTIONS = new Reflections("com.sequenceiq",
             new FieldAnnotationsScanner(),
@@ -30,7 +30,7 @@ public class EnforceAuthorizationAnnotationsUtil {
             new SubTypesScanner(false),
             new MemberUsageScanner());
 
-    private EnforceAuthorizationAnnotationsUtil() {
+    private EnforceAuthorizationLogicsUtil() {
 
     }
 

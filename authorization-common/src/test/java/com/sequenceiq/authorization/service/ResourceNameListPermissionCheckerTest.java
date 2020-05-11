@@ -10,22 +10,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceNameListPermissionCheckerTest {
@@ -38,19 +35,19 @@ public class ResourceNameListPermissionCheckerTest {
     @Mock
     private ResourceBasedCrnProvider resourceBasedCrnProvider;
 
-    @Spy
-    private List<ResourceBasedCrnProvider> resourceBasedCrnProviders = new ArrayList<ResourceBasedCrnProvider>();
-
     @InjectMocks
     private ResourceNameListPermissionChecker underTest;
 
+    @Before
+    public void init() {
+        when(commonPermissionCheckingUtils.getResourceBasedCrnProvider(any())).thenReturn(resourceBasedCrnProvider);
+    }
+
     @Test
     public void testCheckPermissions() {
-        resourceBasedCrnProviders.add(resourceBasedCrnProvider);
-        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResources(any(), any(), anyString(), any());
+        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResources(any(), anyString(), any());
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(Lists.newArrayList("resource", "resource"));
         when(resourceBasedCrnProvider.getResourceCrnListByResourceNameList(anyList())).thenReturn(Lists.newArrayList(USER_CRN, USER_CRN));
-        when(resourceBasedCrnProvider.getResourceType()).thenReturn(AuthorizationResourceType.CREDENTIAL);
 
         CheckPermissionByResourceNameList rawMethodAnnotation = new CheckPermissionByResourceNameList() {
 
@@ -65,12 +62,10 @@ public class ResourceNameListPermissionCheckerTest {
             }
         };
 
-        underTest.populateResourceBasedCrnProviderMap();
-        underTest.checkPermissions(rawMethodAnnotation, AuthorizationResourceType.CREDENTIAL, USER_CRN, null, null, 0L);
+        underTest.checkPermissions(rawMethodAnnotation, USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceNameList.class), eq(Collection.class));
-        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), any(), anyString());
-        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResources(eq(AuthorizationResourceType.CREDENTIAL),
-                eq(AuthorizationResourceAction.EDIT_CREDENTIAL), eq(USER_CRN), any());
+        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), anyString());
+        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResources(eq(AuthorizationResourceAction.EDIT_CREDENTIAL), eq(USER_CRN), any());
     }
 }

@@ -155,7 +155,7 @@ public class EnvironmentServiceIntegrationTest {
         doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
         Map<String, Boolean> rightCheckMap = Maps.newHashMap();
         rightCheckMap.put(credential.getResourceCrn(), true);
-        when(umsResourceAuthorizationService.getRightOfUserOnResources(anyString(), any(), any(), anyList())).thenReturn(rightCheckMap);
+        when(umsResourceAuthorizationService.getRightOfUserOnResources(anyString(), any(), anyList())).thenReturn(rightCheckMap);
     }
 
     @AfterEach

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @Component
 public class ResourceCrnListPermissionChecker implements PermissionChecker<CheckPermissionByResourceCrnList> {
@@ -25,23 +24,17 @@ public class ResourceCrnListPermissionChecker implements PermissionChecker<Check
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
     @Override
-    public <T extends Annotation> void checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resourceType, String userCrn,
+    public <T extends Annotation> void checkPermissions(T rawMethodAnnotation, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
         CheckPermissionByResourceCrnList methodAnnotation = (CheckPermissionByResourceCrnList) rawMethodAnnotation;
         Collection<String> resourceCrns = commonPermissionCheckingUtils
                 .getParameter(proceedingJoinPoint, methodSignature, ResourceCrnList.class, Collection.class);
         AuthorizationResourceAction action = methodAnnotation.action();
-        checkActionType(resourceType, action);
-        commonPermissionCheckingUtils.checkPermissionForUserOnResources(resourceType, action, userCrn, resourceCrns);
+        commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, userCrn, resourceCrns);
     }
 
     @Override
     public Class<CheckPermissionByResourceCrnList> supportedAnnotation() {
         return CheckPermissionByResourceCrnList.class;
-    }
-
-    @Override
-    public AuthorizationResourceAction.ActionType actionType() {
-        return AuthorizationResourceAction.ActionType.RESOURCE_DEPENDENT;
     }
 }

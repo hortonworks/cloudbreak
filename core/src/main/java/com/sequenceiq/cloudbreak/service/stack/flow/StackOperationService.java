@@ -22,13 +22,11 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.common.json.Json;
-
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -105,7 +103,7 @@ public class StackOperationService {
     }
 
     public FlowIdentifier updateImage(Long stackId, Long workspaceId, String imageId, String imageCatalogName, String imageCatalogUrl, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceType.DATAHUB, AuthorizationResourceAction.WRITE, user.getUserCrn());
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceAction.DATAHUB_WRITE, user.getUserCrn());
         return flowManager.triggerStackImageUpdate(stackId, imageId, imageCatalogName, imageCatalogUrl);
     }
 
@@ -133,7 +131,7 @@ public class StackOperationService {
 
     @VisibleForTesting
     FlowIdentifier triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceType.DATAHUB, AuthorizationResourceAction.WRITE, user.getUserCrn());
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceAction.DATAHUB_WRITE, user.getUserCrn());
         if (!isStopNeeded(stack)) {
             return FlowIdentifier.notTriggered();
         }
@@ -169,13 +167,13 @@ public class StackOperationService {
     }
 
     private FlowIdentifier repairFailedNodes(Stack stack, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceType.DATAHUB, AuthorizationResourceAction.WRITE, user.getUserCrn());
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceAction.DATAHUB_WRITE, user.getUserCrn());
         LOGGER.debug("Received request to replace failed nodes: " + stack.getId());
         return flowManager.triggerManualRepairFlow(stack.getId());
     }
 
     private FlowIdentifier sync(Stack stack, boolean full, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceType.DATAHUB, AuthorizationResourceAction.WRITE, user.getUserCrn());
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceAction.DATAHUB_WRITE, user.getUserCrn());
         // TODO: is it a good condition?
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
             if (full) {
@@ -199,7 +197,7 @@ public class StackOperationService {
     }
 
     public FlowIdentifier updateNodeCount(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceType.DATAHUB, AuthorizationResourceAction.WRITE, user.getUserCrn());
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceAction.DATAHUB_WRITE, user.getUserCrn());
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
         try {
             return transactionService.required(() -> {
@@ -233,7 +231,7 @@ public class StackOperationService {
 
     @VisibleForTesting
     FlowIdentifier start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceType.DATAHUB, AuthorizationResourceAction.WRITE, user.getUserCrn());
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceAction.DATAHUB_WRITE, user.getUserCrn());
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.startable());
         if (stack.isAvailable() && (cluster == null || cluster.isAvailable())) {

@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 
 @Component
@@ -23,21 +22,15 @@ public class DefaultPermissionChecker implements PermissionChecker<CheckPermissi
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
     @Override
-    public <T extends Annotation> void checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resource, String userCrn,
-            ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
+    public <T extends Annotation> void checkPermissions(T rawMethodAnnotation, String userCrn, ProceedingJoinPoint proceedingJoinPoint,
+            MethodSignature methodSignature, long startTime) {
         CheckPermissionByAccount methodAnnotation = (CheckPermissionByAccount) rawMethodAnnotation;
         AuthorizationResourceAction action = methodAnnotation.action();
-        checkActionType(resource, action);
-        commonPermissionCheckingUtils.checkPermissionForUser(resource, action, userCrn);
+        commonPermissionCheckingUtils.checkPermissionForUser(action, userCrn);
     }
 
     @Override
     public Class<CheckPermissionByAccount> supportedAnnotation() {
         return CheckPermissionByAccount.class;
-    }
-
-    @Override
-    public AuthorizationResourceAction.ActionType actionType() {
-        return AuthorizationResourceAction.ActionType.RESOURCE_INDEPENDENT;
     }
 }

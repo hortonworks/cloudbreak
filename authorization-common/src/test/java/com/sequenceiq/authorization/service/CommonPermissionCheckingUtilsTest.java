@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
@@ -63,6 +64,11 @@ public class CommonPermissionCheckingUtilsTest {
 
     private Optional<List<DefaultResourceChecker>> defaultResourceCheckers = Optional.of(new ArrayList<>());
 
+    @Mock
+    private ResourceBasedCrnProvider resourceBasedCrnProvider;
+
+    private Optional<List<ResourceBasedCrnProvider>> resourceBasedCrnProviders = Optional.of(new ArrayList<>());
+
     @InjectMocks
     private CommonPermissionCheckingUtils underTest;
 
@@ -72,11 +78,15 @@ public class CommonPermissionCheckingUtilsTest {
     @Mock
     private MethodSignature methodSignature;
 
+    @Mock
+    private UmsRightProvider umsRightProvider;
+
     @Before
     public void setUp() throws IllegalAccessException {
         defaultResourceCheckers.map(checkers -> checkers.add(defaultResourceChecker));
         FieldUtils.writeField(underTest, "defaultResourceCheckers", defaultResourceCheckers, true);
-        when(defaultResourceChecker.getResourceType()).thenReturn(AuthorizationResourceType.IMAGE_CATALOG);
+        FieldUtils.writeField(underTest, "resourceBasedCrnProviders", resourceBasedCrnProviders, true);
+        lenient().when(defaultResourceChecker.getResourceType()).thenReturn(AuthorizationResourceType.IMAGE_CATALOG);
         lenient().when(defaultResourceChecker.isDefault(RESOURCE_CRN)).thenReturn(false);
         lenient().when(defaultResourceChecker.isDefault(DEFAULT_RESOURCE_CRN)).thenReturn(true);
         lenient().when(defaultResourceChecker.isAllowedAction(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)).thenReturn(true);
@@ -84,6 +94,8 @@ public class CommonPermissionCheckingUtilsTest {
                 .defaultResourceCrns(List.of(DEFAULT_RESOURCE_CRN))
                 .notDefaultResourceCrns(List.of(RESOURCE_CRN))
                 .build());
+        when(umsRightProvider.getResourceType(any())).thenReturn(AuthorizationResourceType.IMAGE_CATALOG);
+        when(umsRightProvider.getRight(eq(AuthorizationResourceAction.DELETE_IMAGE_CATALOG))).thenReturn("environments/deleteImageCatalog");
         underTest.init();
     }
 
@@ -145,7 +157,6 @@ public class CommonPermissionCheckingUtilsTest {
         Optional<Annotation> classAnnotation = underTest.getClassAnnotation(ExampleAuthorizationResourceClass.class);
         assertTrue(classAnnotation.isPresent());
         assertTrue(classAnnotation.get().annotationType().equals(AuthorizationResource.class));
-        assertEquals(AuthorizationResourceType.CREDENTIAL, ((AuthorizationResource) classAnnotation.get()).type());
     }
 
     @Test
@@ -230,8 +241,7 @@ public class CommonPermissionCheckingUtilsTest {
 
     @Test
     public void testCheckPermissionForUserOnDefaultResource() {
-        underTest.checkPermissionForUserOnResource(AuthorizationResourceType.IMAGE_CATALOG,
-                AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, USER_CRN, DEFAULT_RESOURCE_CRN);
+        underTest.checkPermissionForUserOnResource(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, USER_CRN, DEFAULT_RESOURCE_CRN);
 
         verify(defaultResourceChecker).isDefault(DEFAULT_RESOURCE_CRN);
         verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG);
@@ -241,23 +251,21 @@ public class CommonPermissionCheckingUtilsTest {
     @Test
     public void testCheckPermissionFailForUserOnDefaultResource() {
         AccessDeniedException exception = Assert.assertThrows(AccessDeniedException.class, () -> {
-            underTest.checkPermissionForUserOnResource(AuthorizationResourceType.IMAGE_CATALOG,
-                    AuthorizationResourceAction.EDIT_IMAGE_CATALOG, USER_CRN, DEFAULT_RESOURCE_CRN);
+            underTest.checkPermissionForUserOnResource(AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, DEFAULT_RESOURCE_CRN);
         });
 
-        assertEquals(exception.getMessage(), "You have no right to perform environments/editImageCatalog on resources [DEFAULT_RESOURCE_CRN]");
+        assertEquals(exception.getMessage(), "You have no right to perform environments/deleteImageCatalog on resources [DEFAULT_RESOURCE_CRN]");
         verify(defaultResourceChecker).isDefault(DEFAULT_RESOURCE_CRN);
-        verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.EDIT_IMAGE_CATALOG);
+        verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DELETE_IMAGE_CATALOG);
         verifyZeroInteractions(umsResourceAuthorizationService);
     }
 
     @Test
     public void testCheckPermissionForUserOnNotDefaultResource() {
-        underTest.checkPermissionForUserOnResource(AuthorizationResourceType.IMAGE_CATALOG,
-                AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, RESOURCE_CRN);
+        underTest.checkPermissionForUserOnResource(AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, RESOURCE_CRN);
 
         verify(defaultResourceChecker).isDefault(RESOURCE_CRN);
-        verify(umsResourceAuthorizationService).checkRightOfUserOnResource(USER_CRN, AuthorizationResourceType.IMAGE_CATALOG,
+        verify(umsResourceAuthorizationService).checkRightOfUserOnResource(USER_CRN,
                 AuthorizationResourceAction.DELETE_IMAGE_CATALOG, RESOURCE_CRN);
         verify(defaultResourceChecker, times(0)).isAllowedAction(any());
     }
@@ -266,12 +274,11 @@ public class CommonPermissionCheckingUtilsTest {
     public void testCheckPermissionForUserOnMixedResources() {
         List<String> resourceCrns = List.of(DEFAULT_RESOURCE_CRN, RESOURCE_CRN);
 
-        underTest.checkPermissionForUserOnResources(AuthorizationResourceType.IMAGE_CATALOG,
-                AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, USER_CRN, resourceCrns);
+        underTest.checkPermissionForUserOnResources(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, USER_CRN, resourceCrns);
 
         verify(defaultResourceChecker).getDefaultResourceCrns(resourceCrns);
         verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG);
-        verify(umsResourceAuthorizationService).checkRightOfUserOnResources(USER_CRN, AuthorizationResourceType.IMAGE_CATALOG,
+        verify(umsResourceAuthorizationService).checkRightOfUserOnResources(USER_CRN,
                 AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, List.of(RESOURCE_CRN));
     }
 
@@ -280,8 +287,7 @@ public class CommonPermissionCheckingUtilsTest {
         List<String> resourceCrns = List.of(DEFAULT_RESOURCE_CRN, RESOURCE_CRN);
 
         AccessDeniedException exception = Assert.assertThrows(AccessDeniedException.class, () -> {
-            underTest.checkPermissionForUserOnResources(AuthorizationResourceType.IMAGE_CATALOG,
-                    AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, resourceCrns);
+            underTest.checkPermissionForUserOnResources(AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, resourceCrns);
         });
 
         assertEquals(exception.getMessage(), "You have no right to perform environments/deleteImageCatalog on resources " +
@@ -294,32 +300,31 @@ public class CommonPermissionCheckingUtilsTest {
     @Test
     public void testGetPermissionForUserOnMixedResources() {
         List<String> resourceCrns = List.of(DEFAULT_RESOURCE_CRN, RESOURCE_CRN);
-        when(umsResourceAuthorizationService.getRightOfUserOnResources(anyString(), any(), any(), any())).thenReturn(Map.of(RESOURCE_CRN, true));
+        when(umsResourceAuthorizationService.getRightOfUserOnResources(anyString(), any(), any())).thenReturn(Map.of(RESOURCE_CRN, true));
 
-        Map<String, Boolean> result = underTest.getPermissionsForUserOnResources(AuthorizationResourceType.IMAGE_CATALOG,
-                AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, USER_CRN, resourceCrns);
+        Map<String, Boolean> result = underTest.getPermissionsForUserOnResources(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, USER_CRN, resourceCrns);
 
         assertEquals(Map.of(DEFAULT_RESOURCE_CRN, true, RESOURCE_CRN, true), result);
         verify(defaultResourceChecker).getDefaultResourceCrns(resourceCrns);
         verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG);
-        verify(umsResourceAuthorizationService).getRightOfUserOnResources(USER_CRN, AuthorizationResourceType.IMAGE_CATALOG,
+        verify(umsResourceAuthorizationService).getRightOfUserOnResources(USER_CRN,
                 AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, List.of(RESOURCE_CRN));
     }
 
-    @AuthorizationResource(type = AuthorizationResourceType.CREDENTIAL)
+    @AuthorizationResource
     private static class ExampleAuthorizationResourceClass {
 
-        @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
         public void exampleMethodWithParamAnnotation(@ResourceName String name, String other) {
             LOGGER.info(name + other);
         }
 
-        @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
         public void exampleMethodWithoutParamAnnotation(String name, String other) {
             LOGGER.info(name + other);
         }
 
-        @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
         public void exampleMethodWithTooManyParamAnnotation(@ResourceCrn String name, @ResourceCrn String other) {
             LOGGER.info(name + other);
         }
