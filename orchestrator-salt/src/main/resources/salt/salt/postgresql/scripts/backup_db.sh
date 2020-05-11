@@ -1,4 +1,10 @@
 #!/bin/bash
+# backup_db.sh
+# This script uses the 'pg_dump' utility to dump the contents of hive and ranger PostgreSQL databases as plain SQL.
+# After PostgreSQL contents are dumped, the SQL is uploaded to AWS or Azure using their CLI clients, 'aws s3 cp' and 'azcopy copy' respectively.
+# For the Azure upload, we must write the SQL commands to a local disk before running the `azcopy copy` command.
+# For AWS, the cli supports piping file contents to stdin, so we do that and avoid writing to a local file.
+
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -17,7 +23,7 @@ if [ $# -ne 5 ] && [ $# -ne 6 ]; then
 fi
 
 CLOUD_PROVIDER="$1"
-BACKUP_LOCATION=$(echo "$2"| sed 's/\/\+$//g') # Clear trailng '/' (if present) for later path joining.
+BACKUP_LOCATION=$(echo "$2" | sed 's/\/\+$//g') # Clear trailng '/' (if present) for later path joining.
 HOST="$3"
 PORT="$4"
 USERNAME="$5"
@@ -74,7 +80,6 @@ dump_to_s3() {
   SERVICE=$1
   S3_LOCATION="${BACKUP_LOCATION}/${SERVICE}_backup"
   doLog "INFO Dumping ${SERVICE} to ${S3_LOCATION}"
-  # todo: Specify a good compression level with `-Z 1...9`
   pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2>>$LOGFILE | /usr/bin/aws s3 cp --sse AES256 --no-progress - "${S3_LOCATION}" 2>>$LOGFILE || errorExit "Unable to dump ${SERVICE}."
   doLog "INFO ${SERVICE} dumped to ${S3_LOCATION}"
 }
@@ -94,3 +99,4 @@ else
 fi
 
 doLog "INFO Completed backup ${BACKUP_LOCATION}"
+

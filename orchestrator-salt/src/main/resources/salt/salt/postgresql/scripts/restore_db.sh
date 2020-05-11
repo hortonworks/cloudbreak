@@ -1,4 +1,9 @@
 #!/bin/bash
+# restore_db.sh
+# This script uses the 'psql' cli to drop hive and ranger databases, create them, then read in a plain SQL file to restore data.
+# We use the `azcopy copy` and `aws s3 cp` commands to copy backups from Azure or AWS respectively.
+# When using either cloud provider, the plaintext SQL files are first copied to the local filesystem, then fed into psql.
+
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -22,6 +27,7 @@ HOST="$3"
 PORT="$4"
 USERNAME="$5"
 export PGPASSWORD="$6" # We can provide the password to pg_dump through this variable, or in ~/.pgpass
+
 LOGFILE=/var/log/dl_postgres_restore.log
 echo "Logs at ${LOGFILE}"
 
@@ -81,3 +87,5 @@ else
 fi
 
 doLog "INFO Completed restore."
+
+
