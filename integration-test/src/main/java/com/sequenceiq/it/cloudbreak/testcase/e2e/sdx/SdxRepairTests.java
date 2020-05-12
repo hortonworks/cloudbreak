@@ -62,7 +62,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState());
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
@@ -73,7 +73,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesDeletedOnProviderSideState());
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesDeletedOnProviderSideState(), false);
                     return testDto;
                 })
                 .when(sdxTestClient.repair(), key(sdx))
@@ -81,7 +81,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState());
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
@@ -112,7 +112,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState());
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
@@ -122,7 +122,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, Map.of(IDBROKER.getName(), InstanceStatus.STOPPED));
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, Map.of(IDBROKER.getName(), InstanceStatus.STOPPED), false);
                     return testDto;
                 })
                 .when(sdxTestClient.repair(), key(sdx))
@@ -130,7 +130,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState());
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
@@ -171,7 +171,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState());
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
@@ -181,7 +181,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, Map.of(MASTER.getName(), InstanceStatus.STOPPED));
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, Map.of(MASTER.getName(), InstanceStatus.STOPPED), false);
                     return testDto;
                 })
                 .when(sdxTestClient.repair(), key(sdx))
@@ -189,7 +189,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState());
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
