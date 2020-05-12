@@ -64,10 +64,8 @@ class AzureEnvironmentNetworkConverterTest {
 
     private final EnvironmentViewConverter environmentViewConverter = Mockito.mock(EnvironmentViewConverter.class);
 
-    private final SubnetTypeConverter subnetTypeConverter = Mockito.mock(SubnetTypeConverter.class);
-
     private final AzureEnvironmentNetworkConverter underTest = new AzureEnvironmentNetworkConverter(environmentViewConverter,
-            subnetTypeConverter, new AzureRegistrationTypeResolver());
+            new AzureRegistrationTypeResolver());
 
     @Test
     void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {

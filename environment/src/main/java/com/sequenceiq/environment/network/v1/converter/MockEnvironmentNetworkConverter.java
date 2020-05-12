@@ -21,9 +21,18 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 @Component
 public class MockEnvironmentNetworkConverter extends EnvironmentBaseNetworkConverter {
 
-    public MockEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter,
-            SubnetTypeConverter subnetTypeConverter) {
-        super(environmentViewConverter, subnetTypeConverter);
+    public MockEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter) {
+        super(environmentViewConverter);
+    }
+
+    @Override
+    public boolean isApplicableForDwx(CloudSubnet cloudSubnet) {
+        return true;
+    }
+
+    @Override
+    public boolean isApplicableForMlx(CloudSubnet cloudSubnet) {
+        return true;
     }
 
     @Override

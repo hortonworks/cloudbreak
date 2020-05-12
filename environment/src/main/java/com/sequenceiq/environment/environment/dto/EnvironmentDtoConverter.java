@@ -106,10 +106,11 @@ public class EnvironmentDtoConverter {
                 .withAdminGroupName(environment.getAdminGroupName())
                 .withProxyConfig(environment.getProxyConfig());
 
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         doIfNotNull(environment.getParameters(), parameters -> builder.withParameters(
-                environmentParamsConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform())).convertToDto(parameters)));
+                environmentParamsConverterMap.get(cloudPlatform).convertToDto(parameters)));
         doIfNotNull(environment.getNetwork(), network -> builder.withNetwork(
-                environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform())).convertToDto(network)));
+                environmentNetworkConverterMap.get(cloudPlatform).convertToDto(network)));
         doIfNotNull(environment.getParentEnvironment(), parentEnvironment -> builder
                 .withParentEnvironmentCrn(parentEnvironment.getResourceCrn())
                 .withParentEnvironmentName(parentEnvironment.getName())

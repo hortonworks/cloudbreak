@@ -68,9 +68,6 @@ class AwsEnvironmentNetworkConverterTest {
     @Mock
     private EnvironmentViewConverter environmentViewConverter;
 
-    @Mock
-    private SubnetTypeConverter subnetTypeConverter;
-
     @InjectMocks
     private AwsEnvironmentNetworkConverter underTest;
 

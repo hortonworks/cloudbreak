@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
@@ -22,8 +23,25 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 @Component
 public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConverter {
 
-    public AwsEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter, SubnetTypeConverter subnetTypeConverter) {
-        super(environmentViewConverter, subnetTypeConverter);
+    public AwsEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter) {
+        super(environmentViewConverter);
+    }
+
+    @Override
+    public boolean isApplicableForDwx(CloudSubnet cloudSubnet) {
+        return cloudSubnet.getType() == null
+                || SubnetType.PUBLIC.equals(cloudSubnet.getType())
+                || SubnetType.PRIVATE.equals(cloudSubnet.getType())
+                || SubnetType.DWX.equals(cloudSubnet.getType());
+
+    }
+
+    @Override
+    public boolean isApplicableForMlx(CloudSubnet cloudSubnet) {
+        return cloudSubnet.getType() == null
+                || SubnetType.PUBLIC.equals(cloudSubnet.getType())
+                || SubnetType.PRIVATE.equals(cloudSubnet.getType())
+                || SubnetType.MLX.equals(cloudSubnet.getType());
     }
 
     @Override
