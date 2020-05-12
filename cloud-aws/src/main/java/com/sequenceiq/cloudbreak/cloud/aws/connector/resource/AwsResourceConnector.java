@@ -121,18 +121,18 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public void startDatabaseServer(AuthenticatedContext ac, String dbInstanceIdentifier) throws Exception {
-        awsRdsStartService.start(ac, dbInstanceIdentifier);
+    public void startDatabaseServer(AuthenticatedContext ac, DatabaseStack stack) throws Exception {
+        awsRdsStartService.start(ac, stack);
     }
 
     @Override
-    public void stopDatabaseServer(AuthenticatedContext ac, String dbInstanceIdentifier) throws Exception {
-        awsRdsStopService.stop(ac, dbInstanceIdentifier);
+    public void stopDatabaseServer(AuthenticatedContext ac, DatabaseStack stack) throws Exception {
+        awsRdsStopService.stop(ac, stack);
     }
 
     @Override
-    public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) throws Exception {
-        return awsRdsStatusLookupService.getStatus(authenticatedContext, dbInstanceIdentifier);
+    public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
+        return awsRdsStatusLookupService.getStatus(authenticatedContext, stack);
     }
 
     @Override

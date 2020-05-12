@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.flow.redbeams.start;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -11,20 +12,16 @@ public class RedbeamsStartContext extends CommonContext {
 
     private final CloudCredential cloudCredential;
 
-    private final String dbInstanceIdentifier;
-
-    private final String dbVendorDisplayName;
+    private final DatabaseStack databaseStack;
 
     public RedbeamsStartContext(FlowParameters flowParameters,
                                 CloudContext cloudContext,
                                 CloudCredential cloudCredential,
-                                String dbInstanceIdentifier,
-                                String dbVendorDisplayName) {
+                                DatabaseStack databaseStack) {
         super(flowParameters);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
-        this.dbInstanceIdentifier = dbInstanceIdentifier;
-        this.dbVendorDisplayName = dbVendorDisplayName;
+        this.databaseStack = databaseStack;
     }
 
     public CloudContext getCloudContext() {
@@ -35,11 +32,7 @@ public class RedbeamsStartContext extends CommonContext {
         return cloudCredential;
     }
 
-    public String getDbInstanceIdentifier() {
-        return dbInstanceIdentifier;
-    }
-
-    public String getDbVendorDisplayName() {
-        return dbVendorDisplayName;
+    public DatabaseStack getDatabaseStack() {
+        return databaseStack;
     }
 }
