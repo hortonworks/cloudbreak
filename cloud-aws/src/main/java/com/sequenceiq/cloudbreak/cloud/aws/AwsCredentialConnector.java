@@ -99,6 +99,11 @@ public class AwsCredentialConnector implements CredentialConnector {
                         awsCredential.isGovernmentCloudEnabled() ? "AWS_GOV_SECRET_ACCESS_KEY" : "AWS_SECRET_ACCESS_KEY");
                 LOGGER.info(errorMessage, ae);
                 return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
+            } else if (ae.getMessage().contains("is not authorized to perform: sts:AssumeRole on resource")) {
+                String errorMessage = String.format("CDP Control Pane is not authorized to perform sts:AssumeRole on '%s' role",
+                        awsCredential.getRoleArn());
+                LOGGER.info(errorMessage, ae);
+                return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
             }
         } catch (RuntimeException e) {
             String errorMessage = String.format("Could not assume role '%s': check if the role exists and if it's created with the correct external ID",
