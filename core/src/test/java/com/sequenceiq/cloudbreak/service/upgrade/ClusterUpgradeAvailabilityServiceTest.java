@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -264,7 +265,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         UpgradeV4Response response = new UpgradeV4Response();
         when(stackService.getByNameInWorkspaceWithLists(anyString(), anyLong())).thenReturn(Optional.of(createStack(createStackStatus(Status.AVAILABLE))));
 
-        UpgradeV4Response actual = underTest.checkIfClusterUpgradable(WORKSPACE_ID, STACK_NAME, response);
+        UpgradeV4Response actual = underTest.checkIfClusterRuntimeUpgradable(WORKSPACE_ID, STACK_NAME, response);
 
         assertNull(actual.getReason());
     }
@@ -278,7 +279,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
                 .when(hostOrchestrator).
                 checkIfClusterUpgradable(any());
 
-        UpgradeV4Response actual = underTest.checkIfClusterUpgradable(WORKSPACE_ID, STACK_NAME, response);
+        UpgradeV4Response actual = underTest.checkIfClusterRuntimeUpgradable(WORKSPACE_ID, STACK_NAME, response);
 
         assertNotNull(actual.getReason());
         assertEquals("Cluster is not upgradeable due to required Salt files not being present. "
@@ -403,8 +404,9 @@ public class ClusterUpgradeAvailabilityServiceTest {
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
         underTest.filterUpgradeOptions(response, request);
 
-        assertEquals(1, response.getUpgradeCandidates().size());
-        assertEquals(IMAGE_ID_LAST, response.getUpgradeCandidates().get(0).getImageId());
+        assertEquals(2, response.getUpgradeCandidates().size());
+        assertTrue(response.getUpgradeCandidates().stream().map(ImageInfoV4Response::getImageId).anyMatch(id -> id.equals(IMAGE_ID_LAST)));
+        assertTrue(response.getUpgradeCandidates().stream().map(ImageInfoV4Response::getImageId).anyMatch(id -> id.equals(IMAGE_ID)));
     }
 
     @Test

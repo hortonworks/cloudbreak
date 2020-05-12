@@ -106,7 +106,7 @@ public class ClusterUpgradeAvailabilityService {
         return upgradeOptions;
     }
 
-    public UpgradeV4Response checkIfClusterUpgradable(Long workspaceId, String stackName, UpgradeV4Response upgradeOptions) {
+    public UpgradeV4Response checkIfClusterRuntimeUpgradable(Long workspaceId, String stackName, UpgradeV4Response upgradeOptions) {
 
         Stack stack = stackService.getByNameInWorkspaceWithLists(stackName, workspaceId).orElseThrow();
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfigWithoutLists(stack);
@@ -129,7 +129,6 @@ public class ClusterUpgradeAvailabilityService {
         } else {
             String requestImageId = upgradeRequest.getImageId();
             String runtime = upgradeRequest.getRuntime();
-            boolean lockComponents = Boolean.TRUE.equals(upgradeRequest.getLockComponents());
 
             // Image id param exists
             if (StringUtils.isNotEmpty(requestImageId)) {
@@ -139,8 +138,6 @@ public class ClusterUpgradeAvailabilityService {
             } else if (StringUtils.isNotEmpty(runtime)) {
                 filteredUpgradeCandidates = validateRuntime(upgradeCandidates, runtime);
                 LOGGER.info("Image successfully filtered by runtime ({}): {}", runtime, filteredUpgradeCandidates);
-            } else if (lockComponents) {
-                filteredUpgradeCandidates = List.of(upgradeCandidates.stream().max(getComparator()).orElseThrow());
             } else {
                 filteredUpgradeCandidates = upgradeCandidates;
             }
@@ -209,13 +206,17 @@ public class ClusterUpgradeAvailabilityService {
     }
 
     private List<ImageInfoV4Response> validateImageId(List<ImageInfoV4Response> upgradeCandidates, String requestImageId) {
-        if (upgradeCandidates.stream().noneMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equalsIgnoreCase(requestImageId))) {
-            String candidates = upgradeCandidates.stream().map(ImageInfoV4Response::getImageId).collect(Collectors.joining(","));
+        if (upgradeCandidates.stream()
+                .noneMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equalsIgnoreCase(requestImageId))) {
+            String candidates = upgradeCandidates.stream()
+                    .map(ImageInfoV4Response::getImageId)
+                    .collect(Collectors.joining(","));
             throw new BadRequestException(String.format("The given image (%s) is not eligible for upgrading the cluster. "
                     + "Please choose an id from the following image(s): %s", requestImageId, candidates));
         } else {
-            return upgradeCandidates.stream().filter(imageInfoV4Response ->
-                    imageInfoV4Response.getImageId().equalsIgnoreCase(requestImageId)).collect(Collectors.toList());
+            return upgradeCandidates.stream()
+                    .filter(imageInfoV4Response -> imageInfoV4Response.getImageId().equalsIgnoreCase(requestImageId))
+                    .collect(Collectors.toList());
         }
     }
 

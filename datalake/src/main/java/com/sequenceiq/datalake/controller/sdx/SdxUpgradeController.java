@@ -15,7 +15,6 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
 import com.sequenceiq.datalake.service.upgrade.SdxRuntimeUpgradeService;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
@@ -28,9 +27,6 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeController.class);
 
     @Inject
-    private SdxUpgradeService sdxUpgradeService;
-
-    @Inject
     private SdxRuntimeUpgradeService sdxRuntimeUpgradeService;
 
     @Override
@@ -38,17 +34,10 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     public SdxUpgradeResponse upgradeClusterByName(@ResourceName String clusterName, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         lockComponentsIfRuntimeUpgradeIsDisabled(request, userCrn, clusterName);
-        if (isDryRun(request)) {
-            if (isOsUpgrade(request)) {
-                return new SdxUpgradeResponse(sdxUpgradeService.checkForOsUpgradeByName(userCrn, clusterName));
-            } else {
-                return sdxRuntimeUpgradeService.checkForRuntimeUpgradeByName(userCrn, clusterName, request);
-            }
-        }
-        if (isOsUpgrade(request)) {
-            return sdxUpgradeService.triggerOsUpgradeByName(userCrn, clusterName);
+        if (request.isDryRun(request)) {
+            return sdxRuntimeUpgradeService.checkForUpgradeByName(userCrn, clusterName, request);
         } else {
-            return sdxRuntimeUpgradeService.triggerRuntimeUpgradeByName(userCrn, clusterName, request);
+            return sdxRuntimeUpgradeService.triggerUpgradeByName(userCrn, clusterName, request);
         }
     }
 
@@ -57,40 +46,25 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     public SdxUpgradeResponse upgradeClusterByCrn(@ResourceCrn String clusterCrn, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         lockComponentsIfRuntimeUpgradeIsDisabled(request, userCrn, clusterCrn);
-        if (isDryRun(request)) {
-            if (isOsUpgrade(request)) {
-                return new SdxUpgradeResponse(sdxUpgradeService.checkForOsUpgradeByCrn(userCrn, clusterCrn));
-            } else {
-                return sdxRuntimeUpgradeService.checkForRuntimeUpgradeByCrn(userCrn, clusterCrn, request);
-            }
-        }
-        if (isOsUpgrade(request)) {
-            return sdxUpgradeService.triggerOsUpgradeByCrn(userCrn, clusterCrn);
+        if (request.isDryRun(request)) {
+            return sdxRuntimeUpgradeService.checkForUpgradeByCrn(userCrn, clusterCrn, request);
         } else {
-            return sdxRuntimeUpgradeService.triggerRuntimeUpgradeByCrn(userCrn, clusterCrn, request);
+            return sdxRuntimeUpgradeService.triggerUpgradeByCrn(userCrn, clusterCrn, request);
         }
     }
 
     private void lockComponentsIfRuntimeUpgradeIsDisabled(SdxUpgradeRequest request, String userCrn, String clusterNameOrCrn) {
-        if (!isRequestSpecifyUpgradeType(request) && !sdxRuntimeUpgradeService.isRuntimeUpgradeEnabled(userCrn)) {
+        if (!requestSpecifiesUpgradeType(request) && !sdxRuntimeUpgradeService.isRuntimeUpgradeEnabled(userCrn)) {
             LOGGER.info("Set lock-components since no upgrade type is specified and runtime upgrade is disabled for cluster: {}", clusterNameOrCrn);
             request.setLockComponents(true);
         }
     }
 
-    private boolean isRequestSpecifyUpgradeType(SdxUpgradeRequest request) {
+    private boolean requestSpecifiesUpgradeType(SdxUpgradeRequest request) {
         return !(request.isEmpty() || isDryRunOnly(request));
     }
 
     private boolean isDryRunOnly(SdxUpgradeRequest request) {
-        return isDryRun(request) && isEmpty(request.getRuntime()) && isEmpty(request.getImageId()) && !isOsUpgrade(request);
-    }
-
-    private boolean isDryRun(SdxUpgradeRequest request) {
-        return Boolean.TRUE.equals(request.isDryRun());
-    }
-
-    private boolean isOsUpgrade(SdxUpgradeRequest request) {
-        return Boolean.TRUE.equals(request.getLockComponents());
+        return request.isDryRun(request) && isEmpty(request.getRuntime()) && isEmpty(request.getImageId()) && !sdxRuntimeUpgradeService.isOsUpgrade(request);
     }
 }

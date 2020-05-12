@@ -85,7 +85,7 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then(SdxUpgradeTestAssertion
-                        .validateReasonContains("Action is only supported if Cloudera Manager state is stored in external Database."))
+                        .validateUnsuccessfulUpgrade())
                 .validate();
     }
 
@@ -136,7 +136,7 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .then(SdxUpgradeTestAssertion.validateSucessfulUpgrade())
+                .then(SdxUpgradeTestAssertion.validateSuccessfulUpgrade())
                 .validate();
     }
 

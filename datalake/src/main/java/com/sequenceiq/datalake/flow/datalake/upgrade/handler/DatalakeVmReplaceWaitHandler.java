@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade.handler;
 
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -13,17 +12,17 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeChangeImageWaitRequest;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFailedEvent;
-import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeVmReplaceEvent;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeSuccessEvent;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeVmReplaceWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Component
-public class DatalakeChangeImageWaitHandler extends ExceptionCatcherEventHandler<DatalakeChangeImageWaitRequest> {
+public class DatalakeVmReplaceWaitHandler extends ExceptionCatcherEventHandler<DatalakeVmReplaceWaitRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeChangeImageWaitHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeVmReplaceWaitHandler.class);
 
     private static final int SLEEP_TIME_IN_SEC = 20;
 
@@ -34,7 +33,7 @@ public class DatalakeChangeImageWaitHandler extends ExceptionCatcherEventHandler
 
     @Override
     public String selector() {
-        return "DatalakeChangeImageWaitRequest";
+        return "DatalakeVmReplaceWaitRequest";
     }
 
     @Override
@@ -44,35 +43,30 @@ public class DatalakeChangeImageWaitHandler extends ExceptionCatcherEventHandler
 
     @Override
     protected void doAccept(HandlerEvent event) {
-        DatalakeChangeImageWaitRequest request = event.getData();
+        DatalakeVmReplaceWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         Selectable response;
         try {
-            LOGGER.info("Start polling change image process for id: {}", sdxId);
+            LOGGER.info("Start polling cluster VM replacement process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
-            upgradeService.waitCloudbreakFlow(sdxId, pollingConfig, "Change image");
-            String imageId = upgradeService.getImageId(sdxId);
-            String expectedImageId = request.getUpgradeOption().getUpgrade().getImageId();
-            if (Objects.equals(imageId, expectedImageId)) {
-                LOGGER.info("Start polling change image process for id: {}", sdxId);
-                response = new DatalakeVmReplaceEvent(sdxId, userId);
-            } else {
-                String message = "Image not changed in cloudbreak side, expected image: " + expectedImageId + ", actual image: " + imageId;
-                LOGGER.info(message);
-                response = new DatalakeUpgradeFailedEvent(sdxId, userId, new IllegalStateException(message));
-            }
+            upgradeService.waitCloudbreakFlow(sdxId, pollingConfig, "VM replace");
+            response = new DatalakeUpgradeSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
-            LOGGER.error("Change image polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.error("VM replace polling exited before timeout. Cause: ", userBreakException);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Change image poller stopped for cluster: {}", sdxId);
+            LOGGER.error("VM replace poller stopped for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake repair timed out after " + DURATION_IN_MINUTES + " minutes"));
+                    new PollerStoppedException("VM replace timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.error("Change image polling failed for cluster: {}", sdxId);
+            LOGGER.error("VM replace polling failed for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId, exception);
+        } catch (Exception anotherException) {
+            LOGGER.error("Something wrong happened during VM replacement wait phase", anotherException);
+            response = new DatalakeUpgradeFailedEvent(sdxId, userId, anotherException);
         }
+
         sendEvent(response, event);
     }
 }

@@ -4,16 +4,14 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
+import com.sequenceiq.cloudbreak.validation.ValidUpgradeRequest;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@MutuallyExclusiveNotNull(fieldGroups = {"imageId", "runtime", "lockComponents"},
-        message = "Only one of imageId or runtime or lockComponents could be specified in the request!",
-        allowAllGroupsNull = true)
+@ValidUpgradeRequest
 public class UpgradeV4Request {
 
     @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.IMAGE_ID)

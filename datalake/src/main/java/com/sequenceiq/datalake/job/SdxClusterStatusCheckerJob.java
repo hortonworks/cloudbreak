@@ -69,7 +69,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
                     handleAmbiguousSdx(stack, sdx);
                     break;
                 case SYNC_FAILED:
-                case UPGRADE_FAILED:
+                case DATALAKE_UPGRADE_FAILED:
                 case START_FAILED:
                 case STOP_FAILED:
                 case REPAIR_FAILED:

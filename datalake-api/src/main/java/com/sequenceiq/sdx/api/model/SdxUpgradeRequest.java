@@ -2,13 +2,11 @@ package com.sequenceiq.sdx.api.model;
 
 import java.util.Objects;
 
-import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
+import com.sequenceiq.sdx.validation.ValidUpgradeRequest;
 
 import io.swagger.annotations.ApiModelProperty;
 
-@MutuallyExclusiveNotNull(fieldGroups = {"imageId", "runtime", "lockComponents"},
-        message = "Only one of 'imageId', 'runtime' or 'lockComponents' parameter could be specified in the request!",
-        allowAllGroupsNull = true)
+@ValidUpgradeRequest
 public class SdxUpgradeRequest {
 
     private String imageId;
@@ -18,6 +16,8 @@ public class SdxUpgradeRequest {
     private Boolean lockComponents;
 
     private Boolean dryRun;
+
+    private SdxUpgradeReplaceVms replaceVms = SdxUpgradeReplaceVms.DISABLED;
 
     public String getImageId() {
         return imageId;
@@ -47,8 +47,20 @@ public class SdxUpgradeRequest {
         return dryRun;
     }
 
+    public boolean isDryRun(SdxUpgradeRequest request) {
+        return Boolean.TRUE.equals(request.isDryRun());
+    }
+
     public void setDryRun(Boolean dryRun) {
         this.dryRun = dryRun;
+    }
+
+    public SdxUpgradeReplaceVms getReplaceVms() {
+        return replaceVms;
+    }
+
+    public void setReplaceVms(SdxUpgradeReplaceVms replaceVms) {
+        this.replaceVms = replaceVms;
     }
 
     @ApiModelProperty(hidden = true)
@@ -66,6 +78,7 @@ public class SdxUpgradeRequest {
                 ", runtime='" + runtime + '\'' +
                 ", lockComponents=" + lockComponents +
                 ", dryRun=" + dryRun +
+                ", replaceVms=" + replaceVms +
                 '}';
     }
 }

@@ -47,6 +47,14 @@ public class ClusterUpgradeImageFilterTest {
 
     private static final Map<String, String> IMAGE_MAP = Collections.emptyMap();
 
+    private static final long CREATED = 100000L;
+
+    private static final long CREATED_LARGER = 200000L;
+
+    private static final long CREATED_SMALLER = 1L;
+
+    private static final String DATE = "2020-05-16";
+
     @InjectMocks
     private ClusterUpgradeImageFilter underTest;
 
@@ -87,7 +95,7 @@ public class ClusterUpgradeImageFilterTest {
     }
 
     @Test
-    public void testFilterShouldReturnTheProperImageWhenTheCloudPlatformIsNotMatches() {
+    public void testFilterShouldReturnTheProperImageWhenTheCloudPlatformDoesNotMatches() {
         Image availableImages = createImageWithDifferentPlatform();
         List<Image> allImage = List.of(availableImages, properImage);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
@@ -130,6 +138,34 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no eligible images to upgrade with the same OS version.", actual.getReason());
+    }
+
+    @Test
+    public void testFilterShouldReturnReasonMessageWhenTheImageIsCreatedBeforeAndLockComponents() {
+        List<Image> allImage = List.of(createImageWithSmallerCreatedNumber());
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
+        lockComponents = true;
+
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
+
+        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
+
+        assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
+        assertEquals("There are no newer images available than " + DATE + ".", actual.getReason());
+    }
+
+    @Test
+    public void testFilterShouldReturnReasonMessageWhenTheImageIsCreatedBefore() {
+        List<Image> allImage = List.of(createImageWithSmallerCreatedNumber());
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
+
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(any(), any(), any(), any())).thenReturn(true);
+        when(upgradePermissionProvider.permitSaltUpgrade(any(), any())).thenReturn(true);
+
+        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents);
+
+        assertEquals(1, actual.getAvailableImages().getCdhImages().size());
     }
 
     @Test
@@ -287,67 +323,73 @@ public class ClusterUpgradeImageFilterTest {
     }
 
     private Image createCurrentImage() {
-        return new Image(null, null, null, OS, CURRENT_IMAGE_ID, null, null,
+        return new Image(DATE, CREATED, null, OS, CURRENT_IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
                 createPackageVersions(V_7_0_2, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, null);
     }
 
     private Image createProperImage() {
-        return new Image(null, null, null, OS, IMAGE_ID, null, null,
+        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
                 createPackageVersions(V_7_0_3, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, null);
     }
 
     private Image createImageWithDifferentPlatform() {
-        return new Image(null, null, null, OS, IMAGE_ID, null, null, Map.of("azure", IMAGE_MAP), null, OS_TYPE,
+        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null, Map.of("azure", IMAGE_MAP), null, OS_TYPE,
                 createPackageVersions(V_7_0_3, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, null);
     }
 
     private Image createImageWithDifferentOs() {
-        return new Image(null, null, null, "ubuntu", IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE,
+        return new Image(null, CREATED_LARGER, null, "ubuntu", IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE,
+                createPackageVersions(V_7_0_3, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION),
+                null, null, null);
+    }
+
+    private Image createImageWithSmallerCreatedNumber() {
+        return new Image(null, CREATED_SMALLER, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE,
                 createPackageVersions(V_7_0_3, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, null);
     }
 
     private Image createImageWithLowerCmVersion() {
-        return new Image(null, null, null, OS, IMAGE_ID, null, null,
+        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE, createPackageVersions(V_7_0_2, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, null);
     }
 
     private Image createImageWithSameStackAndCmVersion() {
-        return new Image(null, null, null, OS, IMAGE_ID, null, null,
+        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE, createPackageVersions(V_7_0_2, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, null);
     }
 
     private Image createImageWithDifferentStackVersioning() {
-        return new Image(null, null, null, OS, IMAGE_ID, null, null,
+        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
                 createPackageVersions("7.x.0", V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, null);
     }
 
     private Image createImageWithLowerCmAndCdpVersion() {
-        return new Image(null, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
+        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
                 OS_TYPE, createPackageVersions(V_7_0_2, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION), null, null, null);
     }
 
     private Image createImageWithoutCmVersion() {
-        return new Image(null, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
+        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
                 OS_TYPE, createPackageVersions("", V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION), null, null, null);
     }
 
     private Image createImageWithDifferentSaltVersion() {
-        return new Image(null, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
+        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
                 OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_3, CMF_VERSION, CSP_VERSION, "2018.7.5"), null, null, null);
     }
 
     private Image createImageWithCurrentImageId() {
-        return new Image(null, null, null, OS, CURRENT_IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP),
+        return new Image(null, CREATED_LARGER, null, OS, CURRENT_IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP),
                 null, OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION), null, null, null);
     }
 

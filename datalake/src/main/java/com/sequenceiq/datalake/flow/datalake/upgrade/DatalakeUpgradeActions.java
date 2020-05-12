@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.flow.datalake.upgrade;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_IN_PROGRESS_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_SUCCESS_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +30,8 @@ import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFailed
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeSuccessEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeWaitRequest;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeVmReplaceEvent;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeVmReplaceWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -42,6 +45,8 @@ public class DatalakeUpgradeActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeUpgradeActions.class);
 
     private static final String TARGET_IMAGE = "TARGET_IMAGE";
+
+    private static final String REPLACE_VMS_AFTER_UPGRADE = "REPAIR_AFTER_UPGRADE";
 
     @Inject
     private SdxUpgradeService sdxUpgradeService;
@@ -62,10 +67,11 @@ public class DatalakeUpgradeActions {
             protected void prepareExecution(DatalakeUpgradeStartEvent payload, Map<Object, Object> variables) {
                 super.prepareExecution(payload, variables);
                 variables.put(TARGET_IMAGE, payload.getImageId());
+                variables.put(REPLACE_VMS_AFTER_UPGRADE, payload.getReplaceVms());
             }
 
             @Override
-            protected void doExecute(SdxContext context, DatalakeUpgradeStartEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, DatalakeUpgradeStartEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake upgrade has been started for {}", payload.getResourceId());
                 sdxUpgradeService.upgradeRuntime(payload.getResourceId(), payload.getImageId());
                 sendEvent(context, DATALAKE_UPGRADE_IN_PROGRESS_EVENT.event(), payload);
@@ -102,7 +108,7 @@ public class DatalakeUpgradeActions {
     }
 
     @Bean(name = "DATALAKE_IMAGE_CHANGE_STATE")
-    public Action<?, ?> imageChanged() {
+    public Action<?, ?> imageChange() {
         return new AbstractSdxAction<>(DatalakeImageChangeEvent.class) {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
@@ -111,7 +117,7 @@ public class DatalakeUpgradeActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, DatalakeImageChangeEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, DatalakeImageChangeEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake upgrade image change is in progress for {} ", payload.getResourceId());
                 String catalogName = sdxUpgradeService.getCurrentImageCatalogName(payload.getResourceId());
                 UpgradeOptionV4Response upgrade = new UpgradeOptionV4Response().upgrade(
@@ -128,6 +134,34 @@ public class DatalakeUpgradeActions {
         };
     }
 
+    @Bean(name = "DATALAKE_REPLACE_VMS_STATE")
+    public Action<?, ?> replaceVms() {
+        return new AbstractSdxAction<>(DatalakeVmReplaceEvent.class) {
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    DatalakeVmReplaceEvent payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, DatalakeVmReplaceEvent payload, Map<Object, Object> variables) {
+                if ((boolean) variables.get(REPLACE_VMS_AFTER_UPGRADE)) {
+                    LOGGER.info("Datalake upgrade vm replacement is in progress for {} ", payload.getResourceId());
+                    sdxUpgradeService.upgradeOs(payload.getResourceId());
+                    sendEvent(context, DatalakeVmReplaceWaitRequest.from(context));
+                } else {
+                    LOGGER.info("Vm replacement is not required for {} ", payload.getResourceId());
+                    sendEvent(context, DATALAKE_UPGRADE_SUCCESS_EVENT.event(), new DatalakeUpgradeSuccessEvent(payload.getResourceId(), payload.getUserId()));
+                }
+            }
+
+            @Override
+            protected Object getFailurePayload(DatalakeVmReplaceEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return DatalakeUpgradeFailedEvent.from(payload, ex);
+            }
+        };
+    }
+
     @Bean(name = "DATALAKE_UPGRADE_FINISHED_STATE")
     public Action<?, ?> finishedAction() {
         return new AbstractSdxAction<>(DatalakeUpgradeSuccessEvent.class) {
@@ -139,7 +173,7 @@ public class DatalakeUpgradeActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, DatalakeUpgradeSuccessEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, DatalakeUpgradeSuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx upgrade was finalized with sdx id: {}", payload.getResourceId());
                 sdxUpgradeService.updateRuntimeVersionFromCloudbreak(payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
@@ -167,7 +201,7 @@ public class DatalakeUpgradeActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, DatalakeUpgradeCouldNotStartEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, DatalakeUpgradeCouldNotStartEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake upgrade could not be started for datalake with id: {}", payload.getResourceId(), exception);
                 sendEvent(context, DATALAKE_UPGRADE_FAILED_HANDLED_EVENT.event(), payload);
@@ -190,7 +224,7 @@ public class DatalakeUpgradeActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, DatalakeUpgradeFailedEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, DatalakeUpgradeFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx upgrade failed for sdxId: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.DATALAKE_UPGRADE_FAILED,
