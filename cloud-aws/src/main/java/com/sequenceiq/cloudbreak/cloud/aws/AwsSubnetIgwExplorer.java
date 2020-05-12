@@ -20,6 +20,8 @@ public class AwsSubnetIgwExplorer {
 
     private static final String OPEN_CIDR_BLOCK = "0.0.0.0/0";
 
+    private static final String IGW_PREFIX = "igw-";
+
     public boolean hasInternetGatewayOfSubnet(DescribeRouteTablesResult describeRouteTablesResult, String subnetId) {
         Optional<RouteTable> routeTable = getRouteTableForSubnet(describeRouteTablesResult, subnetId);
         return hasInternetGateway(routeTable, subnetId);
@@ -50,7 +52,8 @@ public class AwsSubnetIgwExplorer {
         if (rt.isPresent()) {
             for (Route route : rt.get().getRoutes()) {
                 LOGGER.info("Searching the route which is open. the route is {} and the subnet is :{}", route, subnetId);
-                if (StringUtils.isNotEmpty(route.getGatewayId()) && OPEN_CIDR_BLOCK.equals(route.getDestinationCidrBlock())) {
+                if (StringUtils.isNotEmpty(route.getGatewayId()) && route.getGatewayId().startsWith(IGW_PREFIX)
+                        && OPEN_CIDR_BLOCK.equals(route.getDestinationCidrBlock())) {
                     LOGGER.info("Found the route which is {} and the subnet is :{}", route, subnetId);
                     return true;
                 }
