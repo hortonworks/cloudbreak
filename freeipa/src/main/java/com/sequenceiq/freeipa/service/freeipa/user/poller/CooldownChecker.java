@@ -23,9 +23,7 @@ class CooldownChecker {
         boolean cool;
         if (userSyncStatus.getLastStartedFullSync() != null) {
             cool = Instant.ofEpochMilli(userSyncStatus.getLastStartedFullSync().getStartTime()).isBefore(cooldownThresholdTime);
-        } else if (userSyncStatus.getLastFullSyncStartTime() != null) {
-            cool = Instant.ofEpochMilli(userSyncStatus.getLastFullSyncStartTime()).isBefore(cooldownThresholdTime);
-        } else {
+        }  else {
             cool = true;
         }
         if (LOGGER.isDebugEnabled()) {

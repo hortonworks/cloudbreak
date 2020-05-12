@@ -55,41 +55,4 @@ class CooldownCheckerTest {
 
         assertFalse(underTest.isCooldownExpired(userSyncStatus, cooldownExpiration));
     }
-
-    @Test
-    void testIsCoolDeprecated() {
-        Stack stack = UserSyncPollerTestUtils.createStack();
-        UserSyncStatus userSyncStatus = UserSyncPollerTestUtils.createUserSyncStatus(stack);
-        Instant cooldownExpiration = Instant.now();
-        long lastStartTime = cooldownExpiration.toEpochMilli() - 1L;
-        userSyncStatus.setLastFullSyncStartTime(lastStartTime);
-
-        assertTrue(underTest.isCooldownExpired(userSyncStatus, cooldownExpiration));
-    }
-
-    @Test
-    void testIsNotCoolDeprecated() {
-        Stack stack = UserSyncPollerTestUtils.createStack();
-        UserSyncStatus userSyncStatus = UserSyncPollerTestUtils.createUserSyncStatus(stack);
-        Instant cooldownExpiration = Instant.now();
-        long lastStartTime = cooldownExpiration.toEpochMilli() + 1L;
-        userSyncStatus.setLastFullSyncStartTime(lastStartTime);
-
-        assertFalse(underTest.isCooldownExpired(userSyncStatus, cooldownExpiration));
-    }
-
-    @Test
-    void testIsCoolPrefersOperation() {
-        Stack stack = UserSyncPollerTestUtils.createStack();
-        UserSyncStatus userSyncStatus = UserSyncPollerTestUtils.createUserSyncStatus(stack);
-        Instant cooldownExpiration = Instant.now();
-        long coolTime = cooldownExpiration.toEpochMilli() - 1L;
-        long notCoolTime = cooldownExpiration.toEpochMilli() + 1L;
-        Operation lastRequestedOperation = new Operation();
-        lastRequestedOperation.setStartTime(coolTime);
-        userSyncStatus.setLastStartedFullSync(lastRequestedOperation);
-        userSyncStatus.setLastFullSyncStartTime(notCoolTime);
-
-        assertTrue(underTest.isCooldownExpired(userSyncStatus, cooldownExpiration));
-    }
 }
