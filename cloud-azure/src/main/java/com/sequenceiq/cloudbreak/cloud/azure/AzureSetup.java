@@ -37,6 +37,7 @@ import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -50,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
+import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
@@ -68,6 +70,9 @@ public class AzureSetup implements Setup {
 
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
+    @Inject
+    private AzureClientService azureClientService;
 
     @Override
     public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
@@ -152,6 +157,15 @@ public class AzureSetup implements Setup {
             throw new CloudConnectorException(ex);
         }
         LOGGER.debug("setup has been executed");
+    }
+
+    @Override
+    public void createEnvironmentPrerequisites(EnvironmentPrerequisitesCreateRequest environmentPrerequisitesCreateRequest) {
+        AzureClient azureClient = azureClientService.getClient(environmentPrerequisitesCreateRequest.getCloudCredential());
+        azureClient.createResourceGroup(
+                environmentPrerequisitesCreateRequest.getAzure().getResourceGroupName(),
+                environmentPrerequisitesCreateRequest.getAzure().getLocationName(),
+                environmentPrerequisitesCreateRequest.getAzure().getTags());
     }
 
     @Override

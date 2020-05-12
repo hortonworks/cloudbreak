@@ -79,6 +79,8 @@ public enum ResourceEvent {
     ENVIRONMENT_INITIALIZATION_FAILED("environment.initialization.failed"),
     ENVIRONMENT_VALIDATION_STARTED("environment.validation.started"),
     ENVIRONMENT_VALIDATION_FAILED("environment.validation.failed"),
+    ENVIRONMENT_RESOURCEGROUP_CREATE_STARTED("environment.resourcegroup.create.started"),
+    ENVIRONMENT_RESOURCEGROUP_CREATE_FAILED("environment.resourcegroup.create.failed"),
     ENVIRONMENT_NETWORK_CREATION_STARTED("environment.network.creation.started"),
     ENVIRONMENT_NETWORK_CREATION_FAILED("environment.network.creation.failed"),
     ENVIRONMENT_PUBLICKEY_CREATION_STARTED("environment.publickey.creation.started"),

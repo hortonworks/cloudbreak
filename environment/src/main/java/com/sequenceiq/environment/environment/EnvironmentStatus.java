@@ -12,6 +12,7 @@ public enum EnvironmentStatus {
     ENVIRONMENT_INITIALIZATION_IN_PROGRESS(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENVIRONMENT_INITIALIZATION_IN_PROGRESS),
     ENVIRONMENT_VALIDATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENVIRONMENT_VALIDATION_IN_PROGRESS),
+    RESOURCEGROUP_CREATE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.RESOURCEGROUP_CREATE_IN_PROGRESS),
 
     NETWORK_CREATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS),
     NETWORK_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS),
@@ -62,6 +63,7 @@ public enum EnvironmentStatus {
     public static final Set<EnvironmentStatus> AVAILABLE_STATUSES = Set.of(
             CREATION_INITIATED,
             UPDATE_INITIATED,
+            RESOURCEGROUP_CREATE_IN_PROGRESS,
             NETWORK_CREATION_IN_PROGRESS,
             PUBLICKEY_CREATE_IN_PROGRESS,
             FREEIPA_CREATION_IN_PROGRESS,
