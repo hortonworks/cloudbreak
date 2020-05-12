@@ -9,6 +9,16 @@
         "serviceType": "HDFS",
         "roleConfigGroups": [
           {
+            "refName": "hdfs-BALANCER-BASE",
+            "roleType": "BALANCER",
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE",
+            "base": true
+          },
+          {
             "refName": "hdfs-NAMENODE-BASE",
             "roleType": "NAMENODE",
             "base": true,
@@ -26,82 +36,6 @@
           {
             "refName": "hdfs-SECONDARYNAMENODE-BASE",
             "roleType": "SECONDARYNAMENODE",
-            "base": true
-          },
-          {
-            "refName": "hdfs-DATANODE-BASE",
-            "roleType": "DATANODE",
-            "base": true
-          },
-          {
-            "refName": "hdfs-BALANCER-BASE",
-            "roleType": "BALANCER",
-            "base": true
-          }
-        ]
-      },
-      {
-        "refName": "yarn",
-        "serviceType": "YARN",
-        "serviceConfigs": [
-          {
-            "name": "yarn_admin_acl",
-            "value": "yarn,hdfs"
-          }
-        ],
-        "roleConfigGroups": [
-          {
-            "refName": "yarn-RESOURCEMANAGER-BASE",
-            "roleType": "RESOURCEMANAGER",
-            "base": true,
-            "configs": [
-              {
-                "name": "resourcemanager_config_safety_valve",
-                "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>zk</value></property>"
-              },
-              {
-                "name": "yarn_resourcemanager_scheduler_class",
-                "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
-              },
-              {
-                "name": "yarn_scheduler_capacity_resource_calculator",
-                "value": "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
-              },
-              {
-                "name": "resourcemanager_capacity_scheduler_configuration",
-                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property><property><name>yarn.scheduler.capacity.per-node-heartbeat.maximum-offswitch-assignments</name><value>4</value></property></configuration>"
-              }
-            ]
-          },
-          {
-            "refName": "yarn-NODEMANAGER-WORKER",
-            "roleType": "NODEMANAGER",
-            "base": false
-          },
-          {
-            "refName": "yarn-NODEMANAGER-COMPUTE",
-            "roleType": "NODEMANAGER",
-            "base": false
-          },
-          {
-            "refName": "yarn-JOBHISTORY-BASE",
-            "roleType": "JOBHISTORY",
-            "base": true
-          }
-        ]
-      },
-      {
-        "refName": "spark3_on_yarn",
-        "serviceType": "SPARK3_ON_YARN",
-        "roleConfigGroups": [
-          {
-            "refName": "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
-            "roleType": "SPARK3_YARN_HISTORY_SERVER",
-            "base": true
-          },
-          {
-            "refName": "spark3_on_yarn-GATEWAY-BASE",
-            "roleType": "GATEWAY",
             "base": true
           }
         ]
@@ -134,19 +68,94 @@
         ],
         "roleConfigGroups": [
           {
-            "refName": "yarn-QUEUEMANAGER_WEBAPP-BASE",
-            "roleType": "QUEUEMANAGER_WEBAPP",
-            "base": true
-          },
-          {
             "refName": "yarn-QUEUEMANAGER_STORE-BASE",
             "roleType": "QUEUEMANAGER_STORE",
             "base": true
+          },
+          {
+            "refName": "yarn-QUEUEMANAGER_WEBAPP-BASE",
+            "roleType": "QUEUEMANAGER_WEBAPP",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "spark3_on_yarn",
+        "serviceType": "SPARK3_ON_YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "spark3_on_yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK3_YARN_HISTORY_SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "serviceConfigs": [
+          {
+            "name": "yarn_admin_acl",
+            "value": "yarn,hdfs"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "base": true
+          },
+          {
+            "refName": "yarn-NODEMANAGER-COMPUTE",
+            "roleType": "NODEMANAGER",
+            "base": false
+          },
+          {
+            "refName": "yarn-NODEMANAGER-WORKER",
+            "roleType": "NODEMANAGER",
+            "base": false
+          },
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "base": true,
+            "configs": [
+              {
+                "name": "resourcemanager_config_safety_valve",
+                "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>zk</value></property>"
+              },
+              {
+                "name": "yarn_resourcemanager_scheduler_class",
+                "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+              },
+              {
+                "name": "yarn_scheduler_capacity_resource_calculator",
+                "value": "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
+              },
+              {
+                "name": "resourcemanager_capacity_scheduler_configuration",
+                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property><property><name>yarn.scheduler.capacity.per-node-heartbeat.maximum-offswitch-assignments</name><value>4</value></property></configuration>"
+              }
+            ]
           }
         ]
       }
     ],
     "hostTemplates": [
+      {
+        "refName": "compute",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "hms-GATEWAY-BASE",
+          "spark3_on_yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER-COMPUTE"
+        ]
+      },
       {
         "refName": "master",
         "cardinality": 1,
@@ -159,9 +168,9 @@
           "spark3_on_yarn-GATEWAY-BASE",
           "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "yarn-JOBHISTORY-BASE",
-          "yarn-RESOURCEMANAGER-BASE",
+          "yarn-QUEUEMANAGER_STORE-BASE",
           "yarn-QUEUEMANAGER_WEBAPP-BASE",
-          "yarn-QUEUEMANAGER_STORE-BASE"
+          "yarn-RESOURCEMANAGER-BASE"
         ]
       },
       {
@@ -172,15 +181,6 @@
           "hms-GATEWAY-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
           "yarn-NODEMANAGER-WORKER"
-        ]
-      },
-      {
-        "refName": "compute",
-        "cardinality": 0,
-        "roleConfigGroupsRefNames": [
-          "hms-GATEWAY-BASE",
-          "spark3_on_yarn-GATEWAY-BASE",
-          "yarn-NODEMANAGER-COMPUTE"
         ]
       }
     ]

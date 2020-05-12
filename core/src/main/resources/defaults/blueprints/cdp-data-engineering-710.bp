@@ -5,13 +5,24 @@
     "displayName": "dataengineering",
     "services": [
       {
-        "refName": "zookeeper",
-        "serviceType": "ZOOKEEPER",
+        "refName": "das",
+        "serviceType": "DAS",
         "roleConfigGroups": [
           {
-            "refName": "zookeeper-SERVER-BASE",
-            "roleType": "SERVER",
+            "refName": "das-DAS_EVENT_PROCESSOR",
+            "roleType": "DAS_EVENT_PROCESSOR",
             "base": true
+          },
+          {
+            "refName": "das-DAS_WEBAPP",
+            "roleType": "DAS_WEBAPP",
+            "base": true,
+            "configs": [
+              {
+                "name": "data_analytics_studio_admin_users",
+                "value": "*"
+              }
+            ]
           }
         ]
       },
@@ -20,23 +31,8 @@
         "serviceType": "HDFS",
         "roleConfigGroups": [
           {
-            "refName": "hdfs-NAMENODE-BASE",
-            "roleType": "NAMENODE",
-            "base": true,
-	    "configs": [
-              {
-                "name": "fs_trash_interval",
-                "value": "0"
-              },
-	      {
-	        "name": "fs_trash_checkpoint_interval",
-	        "value": "0"
-              }
-            ]
-          },
-          {
-            "refName": "hdfs-SECONDARYNAMENODE-BASE",
-            "roleType": "SECONDARYNAMENODE",
+            "refName": "hdfs-BALANCER-BASE",
+            "roleType": "BALANCER",
             "base": true
           },
           {
@@ -45,143 +41,23 @@
             "base": true
           },
           {
-            "refName": "hdfs-BALANCER-BASE",
-            "roleType": "BALANCER",
-            "base": true
-          }
-        ]
-      },
-      {
-        "refName": "yarn",
-        "serviceType": "YARN",
-        "serviceConfigs": [
-          {
-            "name": "yarn_admin_acl",
-            "value": "yarn,hive,hdfs"
-          },
-          {
-            "name": "yarn_log_aggregation_IFile_remote_app_log_dir",
-            "value": ""
-          }
-        ],
-        "roleConfigGroups": [
-          {
-            "refName": "yarn-RESOURCEMANAGER-BASE",
-            "roleType": "RESOURCEMANAGER",
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE",
             "base": true,
             "configs": [
-            	{
-	   		        "name": "resourcemanager_config_safety_valve",
-	   		        "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>file</value></property>"
-	   	   	    },
               {
-                "name": "yarn_resourcemanager_scheduler_class",
-                "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+                "name": "fs_trash_interval",
+                "value": "0"
               },
               {
-                "name": "yarn_scheduler_capacity_resource_calculator",
-                "value": "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
-              },
-              {
-                "name": "resourcemanager_capacity_scheduler_configuration",
-                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property></configuration>"
+                "name": "fs_trash_checkpoint_interval",
+                "value": "0"
               }
             ]
           },
           {
-            "refName": "yarn-NODEMANAGER-WORKER",
-            "roleType": "NODEMANAGER",
-            "base": false
-          },
-          {
-            "refName": "yarn-NODEMANAGER-COMPUTE",
-            "roleType": "NODEMANAGER",
-            "base": false
-          },
-          {
-            "refName": "yarn-JOBHISTORY-BASE",
-            "roleType": "JOBHISTORY",
-            "base": true
-          },
-          {
-            "refName": "yarn-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true,
-            "configs": [
-              {
-                "name": "mapreduce_map_memory_mb",
-                "value": 4096
-              },
-              {
-                "name": "mapreduce_reduce_memory_mb",
-                "value": 4096
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "refName": "spark_on_yarn",
-        "serviceType": "SPARK_ON_YARN",
-        "roleConfigGroups": [
-          {
-            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
-            "roleType": "SPARK_YARN_HISTORY_SERVER",
-            "base": true
-          },
-          {
-            "refName": "spark_on_yarn-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
-          }
-        ]
-      },
-      {
-        "refName": "tez",
-        "serviceType": "TEZ",
-        "serviceConfigs": [
-          {
-            "name": "yarn_service",
-            "ref": "yarn"
-          },
-          {
-            "name": "tez.am.container.reuse.non-local-fallback.enabled",
-            "value": "true"
-          },
-          {
-            "name": "tez.am.container.reuse.locality.delay-allocation-millis",
-            "value": "0"
-          },
-	  {
-            "name": "tez.am.launch.cmd-opts",
-            "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
-	  },
-	  {
-            "name": "tez.task.launch.cmd-opts",
-	    "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
-	  }
-	],
-        "roleConfigGroups": [
-          {
-            "refName": "tez-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
-          }
-        ]
-      },
-      {
-        "refName": "hms",
-        "serviceType": "HIVE",
-        "displayName": "Hive Metastore",
-        "roleConfigGroups": [
-          {
-            "refName": "hms-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
-          },
-          {
-            "refName": "hms-HIVEMETASTORE-BASE",
-            "roleType": "HIVEMETASTORE",
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE",
             "base": true
           }
         ]
@@ -232,18 +108,35 @@
             "base": true,
             "configs": [
               {
-                 "name": "hive_server2_transport_mode",
-                 "value": "http"
+                "name": "hive_server2_transport_mode",
+                "value": "http"
               },
               {
-                 "name": "hiveserver2_mv_files_thread",
-                 "value": 20
+                "name": "hiveserver2_mv_files_thread",
+                "value": 20
               },
               {
-                 "name": "hiveserver2_load_dynamic_partitions_thread_count",
-                 "value": 20
+                "name": "hiveserver2_load_dynamic_partitions_thread_count",
+                "value": 20
               }
             ]
+          }
+        ]
+      },
+      {
+        "refName": "hms",
+        "serviceType": "HIVE",
+        "displayName": "Hive Metastore",
+        "roleConfigGroups": [
+          {
+            "refName": "hms-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "hms-HIVEMETASTORE-BASE",
+            "roleType": "HIVEMETASTORE",
+            "base": true
           }
         ]
       },
@@ -258,13 +151,13 @@
         ],
         "roleConfigGroups": [
           {
-            "refName": "hue-HUE_SERVER-BASE",
-            "roleType": "HUE_SERVER",
+            "refName": "hue-HUE_LOAD_BALANCER-BASE",
+            "roleType": "HUE_LOAD_BALANCER",
             "base": true
           },
           {
-            "refName": "hue-HUE_LOAD_BALANCER-BASE",
-            "roleType": "HUE_LOAD_BALANCER",
+            "refName": "hue-HUE_SERVER-BASE",
+            "roleType": "HUE_SERVER",
             "base": true
           }
         ]
@@ -282,6 +175,135 @@
             "refName": "livy-LIVY_SERVER-BASE",
             "roleType": "LIVY_SERVER",
             "base": true
+          }
+        ]
+      },
+      {
+        "refName": "oozie",
+        "serviceType": "OOZIE",
+        "roleConfigGroups": [
+          {
+            "refName": "oozie-OOZIE_SERVER-BASE",
+            "roleType": "OOZIE_SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "spark_on_yarn",
+        "serviceType": "SPARK_ON_YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "spark_on_yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK_YARN_HISTORY_SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "tez",
+        "serviceType": "TEZ",
+        "serviceConfigs": [
+          {
+            "name": "yarn_service",
+            "ref": "yarn"
+          },
+          {
+            "name": "tez.am.container.reuse.non-local-fallback.enabled",
+            "value": "true"
+          },
+          {
+            "name": "tez.am.container.reuse.locality.delay-allocation-millis",
+            "value": "0"
+          },
+          {
+            "name": "tez.am.launch.cmd-opts",
+            "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+          },
+          {
+            "name": "tez.task.launch.cmd-opts",
+            "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "tez-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "serviceConfigs": [
+          {
+            "name": "yarn_admin_acl",
+            "value": "yarn,hive,hdfs"
+          },
+          {
+            "name": "yarn_log_aggregation_IFile_remote_app_log_dir",
+            "value": ""
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true,
+            "configs": [
+              {
+                "name": "mapreduce_map_memory_mb",
+                "value": 4096
+              },
+              {
+                "name": "mapreduce_reduce_memory_mb",
+                "value": 4096
+              }
+            ]
+          },
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "base": true
+          },
+          {
+            "refName": "yarn-NODEMANAGER-COMPUTE",
+            "roleType": "NODEMANAGER",
+            "base": false
+          },
+          {
+            "refName": "yarn-NODEMANAGER-WORKER",
+            "roleType": "NODEMANAGER",
+            "base": false
+          },
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "base": true,
+            "configs": [
+              {
+                "name": "resourcemanager_config_safety_valve",
+                "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>file</value></property>"
+              },
+              {
+                "name": "yarn_resourcemanager_scheduler_class",
+                "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+              },
+              {
+                "name": "yarn_scheduler_capacity_resource_calculator",
+                "value": "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
+              },
+              {
+                "name": "resourcemanager_capacity_scheduler_configuration",
+                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property></configuration>"
+              }
+            ]
           }
         ]
       },
@@ -311,34 +333,12 @@
         ]
       },
       {
-        "refName": "das",
-        "serviceType": "DAS",
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
         "roleConfigGroups": [
           {
-            "refName": "das-DAS_WEBAPP",
-            "roleType": "DAS_WEBAPP",
-            "base": true,
-            "configs": [
-              {
-                "name": "data_analytics_studio_admin_users",
-                "value": "*"
-              }
-            ]
-          },
-          {
-            "refName": "das-DAS_EVENT_PROCESSOR",
-            "roleType": "DAS_EVENT_PROCESSOR",
-            "base": true
-          }
-        ]
-      },
-      {
-        "refName": "oozie",
-        "serviceType": "OOZIE",
-        "roleConfigGroups": [
-          {
-            "refName": "oozie-OOZIE_SERVER-BASE",
-            "roleType": "OOZIE_SERVER",
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
             "base": true
           }
         ]
@@ -346,30 +346,54 @@
     ],
     "hostTemplates": [
       {
+        "refName": "compute",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "hive_on_tez-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
+          "yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER-COMPUTE"
+        ]
+      },
+      {
+        "refName": "gateway",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "hive_on_tez-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
+          "livy-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
+          "yarn-GATEWAY-BASE"
+        ]
+      },
+      {
         "refName": "master",
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
+          "das-DAS_EVENT_PROCESSOR",
+          "das-DAS_WEBAPP",
           "hdfs-BALANCER-BASE",
           "hdfs-NAMENODE-BASE",
           "hdfs-SECONDARYNAMENODE-BASE",
+          "hive_on_tez-GATEWAY-BASE",
+          "hive_on_tez-HIVESERVER2-BASE",
           "hms-GATEWAY-BASE",
           "hms-HIVEMETASTORE-BASE",
-          "hive_on_tez-HIVESERVER2-BASE",
-          "hive_on_tez-GATEWAY-BASE",
           "hue-HUE_LOAD_BALANCER-BASE",
           "hue-HUE_SERVER-BASE",
-          "tez-GATEWAY-BASE",
+          "livy-LIVY_SERVER-BASE",
+          "oozie-OOZIE_SERVER-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
-          "livy-LIVY_SERVER-BASE",
-          "zeppelin-ZEPPELIN_SERVER-BASE",
-          "oozie-OOZIE_SERVER-BASE",
+          "tez-GATEWAY-BASE",
+          "yarn-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
-          "zookeeper-SERVER-BASE",
-          "das-DAS_WEBAPP",
-          "das-DAS_EVENT_PROCESSOR",
-          "yarn-GATEWAY-BASE"
+          "zeppelin-ZEPPELIN_SERVER-BASE",
+          "zookeeper-SERVER-BASE"
         ]
       },
       {
@@ -377,37 +401,13 @@
         "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
-          "hms-GATEWAY-BASE",
           "hive_on_tez-GATEWAY-BASE",
-          "tez-GATEWAY-BASE",
-          "spark_on_yarn-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
-          "yarn-NODEMANAGER-WORKER",
-          "yarn-GATEWAY-BASE"
-        ]
-      },
-      {
-        "refName": "compute",
-        "cardinality": 0,
-        "roleConfigGroupsRefNames": [
-          "hms-GATEWAY-BASE",
-          "hive_on_tez-GATEWAY-BASE",
-          "tez-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
-          "yarn-NODEMANAGER-COMPUTE",
-          "yarn-GATEWAY-BASE"
-        ]
-      },
-      {
-        "refName": "gateway",
-        "cardinality": 0,
-        "roleConfigGroupsRefNames": [
-          "hms-GATEWAY-BASE",
-          "hive_on_tez-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
-          "spark_on_yarn-GATEWAY-BASE",
-          "livy-GATEWAY-BASE",
-          "yarn-GATEWAY-BASE"
+          "yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER-WORKER"
         ]
       }
     ]
