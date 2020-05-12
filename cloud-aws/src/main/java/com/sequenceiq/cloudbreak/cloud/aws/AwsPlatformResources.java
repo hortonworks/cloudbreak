@@ -636,12 +636,17 @@ public class AwsPlatformResources implements PlatformResources {
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
 
-        for (AvailabilityZone availabilityZone : regions.getCloudRegions().get(region)) {
-            Set<VmType> types = vmTypes.get(region).stream()
-                    .filter(enabledInstanceTypeFilter)
-                    .collect(Collectors.toSet());
-            cloudVmResponses.put(availabilityZone.value(), types);
-            defaultCloudVmResponses.put(availabilityZone.value(), defaultVmTypes.get(region));
+        List<AvailabilityZone> availabilityZones = regions.getCloudRegions().get(region);
+        if (availabilityZones != null && !availabilityZones.isEmpty()) {
+            for (AvailabilityZone availabilityZone : availabilityZones) {
+                Set<VmType> types = vmTypes.get(region).stream()
+                        .filter(enabledInstanceTypeFilter)
+                        .collect(Collectors.toSet());
+                cloudVmResponses.put(availabilityZone.value(), types);
+                defaultCloudVmResponses.put(availabilityZone.value(), defaultVmTypes.get(region));
+            }
+        } else {
+            LOGGER.info("Availability zones is null or empty in {}", region.getRegionName());
         }
 
         return new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);

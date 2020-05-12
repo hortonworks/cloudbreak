@@ -163,8 +163,8 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
             final StackV4Request internalStackV4Request) {
         LOGGER.info("Creating SDX cluster with name {}", name);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
-        validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest.getClusterShape());
         DetailedEnvironmentResponse environment = getEnvironment(sdxClusterRequest.getEnvironment());
+        validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest.getClusterShape());
         validateEnv(environment);
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setInitiatorUserCrn(userCrn);
@@ -412,10 +412,19 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     private void validateInternalSdxRequest(StackV4Request stackv4Request, SdxClusterShape clusterShape) {
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         if (stackv4Request != null) {
             if (!clusterShape.equals(CUSTOM)) {
-                throw new BadRequestException("Cluster shape '" + clusterShape + "' is not accepted on SDX Internal API. Use 'CUSTOM' cluster shape");
+                validationResultBuilder.error("Cluster shape '" + clusterShape + "' is not accepted on SDX Internal API. Use 'CUSTOM' cluster shape");
             }
+            if (stackv4Request.getCluster() == null) {
+                validationResultBuilder.error("Cluster cannot be null.");
+            }
+        }
+        ValidationResult validationResult = validationResultBuilder.build();
+        if (validationResult.hasError()) {
+            LOGGER.error("Cannot create SDX via internal API: {}", validationResult.getFormattedErrors());
+            throw new BadRequestException(validationResult.getFormattedErrors());
         }
     }
 

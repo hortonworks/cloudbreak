@@ -19,8 +19,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -210,10 +210,12 @@ class ProvisionerServiceTest {
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
-        doThrow(new InternalServerErrorException())
-                .when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE));
+        WebApplicationException webApplicationException = new WebApplicationException();
+        doThrow(webApplicationException).when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE));
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("web-error");
 
-        Assertions.assertThrows(InternalServerErrorException.class, () -> underTest.startStackDeletion(clusterId, false));
+        RuntimeException actual = Assertions.assertThrows(RuntimeException.class, () -> underTest.startStackDeletion(clusterId, false));
+        Assertions.assertEquals("Cannot delete stack, some error happened on Cloudbreak side: web-error", actual.getMessage());
 
         verify(stackV4Endpoint).delete(0L, null, false);
     }
