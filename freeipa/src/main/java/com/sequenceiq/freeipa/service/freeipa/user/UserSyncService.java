@@ -128,7 +128,6 @@ public class UserSyncService {
                             long currentTime = Instant.now().toEpochMilli();
                             stacks.forEach(stack -> {
                                 UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
-                                userSyncStatus.setLastFullSyncStartTime(currentTime);
                                 userSyncStatus.setLastStartedFullSync(operation);
                                 userSyncStatusService.save(userSyncStatus);
                             });
@@ -220,7 +219,6 @@ public class UserSyncService {
             if (fullSync && statusDetail.getStatus() == SynchronizationStatus.COMPLETED) {
                 UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
                 userSyncStatus.setUmsEventGenerationIds(new Json(umsEventGenerationIds));
-                userSyncStatus.setLastFullSyncEndTime(Instant.now().toEpochMilli());
                 userSyncStatus.setLastSuccessfulFullSync(operationService.getOperationForAccountIdAndOperationId(accountId, operationId));
                 userSyncStatusService.save(userSyncStatus);
             }

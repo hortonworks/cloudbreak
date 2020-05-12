@@ -28,10 +28,6 @@ public class UserSyncStatus implements AccountIdAwareResource {
     @Column(columnDefinition = "TEXT")
     private Json umsEventGenerationIds;
 
-    private Long lastFullSyncStartTime;
-
-    private Long lastFullSyncEndTime;
-
     @OneToOne
     private Operation lastStartedFullSync;
 
@@ -67,42 +63,6 @@ public class UserSyncStatus implements AccountIdAwareResource {
 
     public void setUmsEventGenerationIds(Json umsEventGenerationIds) {
         this.umsEventGenerationIds = umsEventGenerationIds;
-    }
-
-    /**
-     * Gets the last full sync start time.
-     * @deprecated information returned is redundant with {@link #getLastRequestedFullSync()}
-     */
-    @Deprecated
-    public Long getLastFullSyncStartTime() {
-        return lastFullSyncStartTime;
-    }
-
-    /**
-     * Sets the last full sync start time.
-     * @deprecated information set is redundant with {@link #setLastRequestedFullSync(Operation)}
-     */
-    @Deprecated
-    public void setLastFullSyncStartTime(Long lastFullSyncStartTime) {
-        this.lastFullSyncStartTime = lastFullSyncStartTime;
-    }
-
-    /**
-     * Sets the last full sync end time.
-     * @deprecated information returned is redundant with {@link #getLastSuccessfulFullSync()}
-     */
-    @Deprecated
-    public Long getLastFullSyncEndTime() {
-        return lastFullSyncEndTime;
-    }
-
-    /**
-     * Sets the last full sync end time.
-     * @deprecated information set is redundant with {@link #setLastSuccessfulFullSync(Operation)}
-     */
-    @Deprecated
-    public void setLastFullSyncEndTime(Long lastFullSyncEndTime) {
-        this.lastFullSyncEndTime = lastFullSyncEndTime;
     }
 
     public Operation getLastStartedFullSync() {
