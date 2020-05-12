@@ -10,9 +10,9 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
-import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,13 +82,13 @@ public class ProvisionerService {
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS,
                         "Datalake stack deletion in progress", sdxCluster);
             } catch (NotFoundException e) {
-                LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
-            } catch (ClientErrorException e) {
+                LOGGER.info("Cannot find stack on cloudbreak side {}", sdxCluster.getClusterName());
+            } catch (WebApplicationException e) {
                 String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-                LOGGER.info("Can not delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
-                throw new RuntimeException("Cannot delete stack, client error happened on Cloudbreak side: " + errorMessage);
+                LOGGER.info("Cannot delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
+                throw new RuntimeException("Cannot delete stack, some error happened on Cloudbreak side: " + errorMessage);
             } catch (ProcessingException e) {
-                LOGGER.info("Can not delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), e);
+                LOGGER.info("Cannot delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), e);
                 throw new RuntimeException("Cannot delete stack, client error happened on Cloudbreak side: " + e.getMessage());
             }
         }, () -> {
@@ -155,9 +155,9 @@ public class ProvisionerService {
 
     public void startStackProvisioning(Long id, DetailedEnvironmentResponse environment) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
-            stackRequestManifester.configureStackForSdxCluster(sdxCluster, environment);
             LOGGER.info("Call cloudbreak with stackrequest");
             try {
+                stackRequestManifester.configureStackForSdxCluster(sdxCluster, environment);
                 StackV4Request stackV4Request = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class);
                 Optional.ofNullable(sdxCluster.getDatabaseCrn()).ifPresent(crn -> {
                     stackV4Request.getCluster().setDatabaseServerCrn(crn);
@@ -175,13 +175,13 @@ public class ProvisionerService {
                 sdxClusterRepository.save(sdxCluster);
                 cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, stackV4Response.getFlowIdentifier());
                 LOGGER.info("Sdx cluster updated");
-            } catch (ClientErrorException e) {
+            } catch (WebApplicationException e) {
                 String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-                LOGGER.info("Can not start provisioning: {}", errorMessage, e);
-                throw new RuntimeException("Can not start provisioning, client error happened on Cloudbreak side: " + errorMessage);
+                LOGGER.info("Cannot start provisioning: {}", errorMessage, e);
+                throw new RuntimeException("Cannot start provisioning, some error happened on Cloudbreak side: " + errorMessage);
             } catch (IOException e) {
-                LOGGER.info("Can not parse stackrequest to json", e);
-                throw new RuntimeException("Can not write stackrequest to json: " + e.getMessage());
+                LOGGER.info("Cannot parse stackrequest to json", e);
+                throw new RuntimeException("Cannot write stackrequest to json: " + e.getMessage());
             }
         }, () -> {
             throw notFound("SDX cluster", id).get();
