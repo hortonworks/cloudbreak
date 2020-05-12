@@ -17,17 +17,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
 public class SchemaRegistryJarStorageConfigProviderTest {
@@ -79,7 +79,7 @@ public class SchemaRegistryJarStorageConfigProviderTest {
 
     @Test
     void testCloudStorageIsChosenWhenCdhVersionIsAtLeast711() {
-        cdhMainVersionIs("7.1.1");
+        cdhMainVersionIs("7.2.0");
         TemplatePreparationObject tpo = getTemplatePreparationObject(1);
         HostgroupView hostGroup = tpo.getHostGroupsWithComponent(SCHEMA_REGISTRY_SERVER).findFirst().get();
         assertEquals(List.of(

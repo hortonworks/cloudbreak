@@ -36,7 +36,6 @@ public class SupportedRuntimesTest {
     public void testNotSupported() {
         Whitebox.setInternalState(underTest, "latestSupportedRuntime", "7.1.0");
         // Newer versions shall not be supported
-        Assert.assertFalse(underTest.isSupported("7.1.1"));
         Assert.assertFalse(underTest.isSupported("7.2.0"));
     }
 
