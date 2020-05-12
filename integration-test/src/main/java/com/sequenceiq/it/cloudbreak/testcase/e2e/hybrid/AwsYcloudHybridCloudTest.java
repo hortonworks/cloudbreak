@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -107,17 +108,17 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
         createEnvironmentWithNetworkAndFreeIPA(testContext);
 
         testContext.given(CHILD_ENVIRONMENT_CREDENTIAL_KEY, CredentialTestDto.class, CHILD_CLOUD_PLATFORM)
-            .when(credentialTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT_CREDENTIAL_KEY))
-            .given(CHILD_ENVIRONMENT_NETWORK_KEY, EnvironmentNetworkTestDto.class, CHILD_CLOUD_PLATFORM)
+                .when(credentialTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT_CREDENTIAL_KEY))
+                .given(CHILD_ENVIRONMENT_NETWORK_KEY, EnvironmentNetworkTestDto.class, CHILD_CLOUD_PLATFORM)
                 .withNetworkCIDR(null)
-            .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
+                .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
                 .withCredentialName(testContext.get(CHILD_ENVIRONMENT_CREDENTIAL_KEY).getName())
                 .withParentEnvironment()
                 .withNetwork(CHILD_ENVIRONMENT_NETWORK_KEY)
-            .when(environmentTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
-            .await(EnvironmentStatus.AVAILABLE, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
-            .when(environmentTestClient.describe(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
-            .given(BlueprintTestDto.class, CHILD_CLOUD_PLATFORM)
+                .when(environmentTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
+                .await(EnvironmentStatus.AVAILABLE, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
+                .when(environmentTestClient.describe(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
+                .given(BlueprintTestDto.class, CHILD_CLOUD_PLATFORM)
                 .when(blueprintTestClient.listV4());
     }
 
@@ -135,7 +136,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .given(MASTER_INSTANCE_TEMPLATE_ID, InstanceTemplateV4TestDto.class, CHILD_CLOUD_PLATFORM)
                 .given(IDBROKER_INSTANCE_TEMPLATE_ID, InstanceTemplateV4TestDto.class, CHILD_CLOUD_PLATFORM)
                 .given(sdxInternal, SdxInternalTestDto.class, CHILD_CLOUD_PLATFORM)
-                    .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT_KEY))
+                .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -145,8 +146,9 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                         for (InstanceMetaDataV4Response i : ig.getMetadata()) {
                             String ip = i.getPublicIp();
                             String username = testContext.getActingUserCrn().getResource();
-                            testShhAuthenticationSuccessfull(username, ip);
-                            testShhAuthenticationFailure(username, ip);
+                            String sanitizedUserName = SanitizerUtil.sanitizeWorkloadUsername(username);
+                            testShhAuthenticationSuccessfull(sanitizedUserName, ip);
+                            testShhAuthenticationFailure(sanitizedUserName, ip);
                         }
                     }
                     return dto;
