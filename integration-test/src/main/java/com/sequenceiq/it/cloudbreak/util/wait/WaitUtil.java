@@ -379,7 +379,7 @@ public class WaitUtil {
         return testDto;
     }
 
-    public void waitForSdxInstanceStatus(String sdxName, TestContext testContext, Map<String, InstanceStatus> hostGroupsAndStates) {
+    public void waitForSdxInstanceStatus(String sdxName, TestContext testContext, Map<String, InstanceStatus> hostGroupsAndStates, boolean checkClusterStatus) {
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
             long startTime = System.currentTimeMillis();
@@ -395,7 +395,7 @@ public class WaitUtil {
                     String sdxStatus = sdxResponse.getStatus().name();
                     String sdxStatusReason = sdxResponse.getStatusReason() != null ? sdxResponse.getStatusReason()
                             : "SDX Status Reason is not available";
-                    if (containsIgnoreCase(sdxStatus, "FAILED")) {
+                    if (checkClusterStatus && containsIgnoreCase(sdxStatus, "FAILED")) {
                         LOGGER.error(" SDX {} is in {} state, because of: {}", sdxName, sdxStatus, sdxStatusReason);
                         throw new TestFailException("SDX " + sdxName + " is in " + sdxStatus + " state, because of: " + sdxStatusReason);
                     } else {
