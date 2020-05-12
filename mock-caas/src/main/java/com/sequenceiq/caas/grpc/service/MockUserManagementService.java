@@ -128,6 +128,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -757,6 +758,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @VisibleForTesting
     String sanitizeWorkloadUsername(String userName) {
-        return StringUtils.substringBefore(userName, "@").toLowerCase().replaceAll("[^a-z0-9_]", "");
+        return SanitizerUtil.sanitizeWorkloadUsername(userName);
     }
 }
