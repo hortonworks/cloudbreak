@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 
@@ -46,6 +47,15 @@ public interface Setup {
      * @param persistenceNotifier  if a resource has been created during this prerequisit check then the Cloud provider can persist them to Cloudbreak's
      */
     void prerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier);
+
+    /**
+     * Implementation of this method shall contain creation of basic infrastructure that is needed before resources can be created in an environment.
+     * This is currently a special case for creating azure resource groups
+     *
+     */
+    default void createEnvironmentPrerequisites(EnvironmentPrerequisitesCreateRequest environmentPrerequisitesCreateRequest) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 
     /**
      * Hadoop supports multiple filesystems instead of HDFS. These filesystems can be validated before cluster creation.
