@@ -338,9 +338,11 @@ public class WaitUtil {
             int retryCount = 0;
             long startTime = System.currentTimeMillis();
             CloudbreakClient cloudbreakClient = testContext.getMicroserviceClient(CloudbreakClient.class, testParameter.get(CloudbreakTest.ACCESS_KEY));
-            List<InstanceGroupV4Response> instanceGroups = cloudbreakClient.getCloudbreakClient().distroXV1Endpoint().getByName(distroxName, Set.of())
-                    .getInstanceGroups();
-            while (retryCount < maxRetry && checkInstanceState(hostGroup, desiredState, instanceGroups)) {
+            boolean notInDesiredState;
+            do {
+                List<InstanceGroupV4Response> instanceGroups = cloudbreakClient.getCloudbreakClient().distroXV1Endpoint().getByName(distroxName, Set.of())
+                        .getInstanceGroups();
+                notInDesiredState = checkInstanceState(hostGroup, desiredState, instanceGroups);
                 LOGGER.info("Waiting for instance status {} in Host Group {} at {} DistroX, ellapsed {}ms", desiredState, hostGroup, distroxName,
                         System.currentTimeMillis() - startTime);
                 StackV4Response distroxResponse = cloudbreakClient.getCloudbreakClient().distroXV1Endpoint().getByName(distroxName, Set.of());
@@ -359,9 +361,11 @@ public class WaitUtil {
                     LOGGER.error(" {} Distrox is not present ", distroxName);
                     throw new TestFailException(distroxName + " Distrox is not present. ");
                 }
-            }
+            } while (notInDesiredState && retryCount < maxRetry);
 
             if (retryCount < maxRetry) {
+                List<InstanceGroupV4Response> instanceGroups = cloudbreakClient.getCloudbreakClient().distroXV1Endpoint().getByName(distroxName, Set.of())
+                        .getInstanceGroups();
                 if (checkInstanceState(hostGroup, desiredState, instanceGroups)) {
                     LOGGER.error(" {} instance group or its metadata cannot be found may it was deleted or missing ", hostGroup);
                     throw new TestFailException(hostGroup + " instance group or its metadata cannot be found may it was deleted or missing. ");
@@ -379,15 +383,17 @@ public class WaitUtil {
         return testDto;
     }
 
-    public void waitForSdxInstanceStatus(String sdxName, TestContext testContext, Map<String, InstanceStatus> hostGroupsAndStates) {
+    public void waitForSdxInstanceStatus(String sdxName, TestContext testContext, Map<String, InstanceStatus> hostGroupsAndStates, boolean checkClusterStatus) {
         hostGroupsAndStates.forEach((hostGroup, desiredState) -> {
             int retryCount = 0;
             long startTime = System.currentTimeMillis();
             SdxClient sdxClient = testContext.getMicroserviceClient(SdxClient.class, testParameter.get(CloudbreakTest.ACCESS_KEY));
-            List<InstanceGroupV4Response> instanceGroups = sdxClient.getSdxClient().sdxEndpoint().getDetail(sdxName, Set.of())
-                    .getStackV4Response()
-                    .getInstanceGroups();
-            while (retryCount < maxRetry && checkInstanceState(hostGroup, desiredState, instanceGroups)) {
+            boolean notInDesiredState;
+            do {
+                List<InstanceGroupV4Response> instanceGroups = sdxClient.getSdxClient().sdxEndpoint().getDetail(sdxName, Set.of())
+                        .getStackV4Response()
+                        .getInstanceGroups();
+                notInDesiredState = checkInstanceState(hostGroup, desiredState, instanceGroups);
                 LOGGER.info("Waiting for instance status {} in Host Group {} at {} SDX, ellapsed {}ms", desiredState, hostGroup, sdxName,
                         System.currentTimeMillis() - startTime);
                 SdxClusterResponse sdxResponse = sdxClient.getSdxClient().sdxEndpoint().get(sdxName);
@@ -395,7 +401,7 @@ public class WaitUtil {
                     String sdxStatus = sdxResponse.getStatus().name();
                     String sdxStatusReason = sdxResponse.getStatusReason() != null ? sdxResponse.getStatusReason()
                             : "SDX Status Reason is not available";
-                    if (containsIgnoreCase(sdxStatus, "FAILED")) {
+                    if (checkClusterStatus && containsIgnoreCase(sdxStatus, "FAILED")) {
                         LOGGER.error(" SDX {} is in {} state, because of: {}", sdxName, sdxStatus, sdxStatusReason);
                         throw new TestFailException("SDX " + sdxName + " is in " + sdxStatus + " state, because of: " + sdxStatusReason);
                     } else {
@@ -406,9 +412,12 @@ public class WaitUtil {
                     LOGGER.error(" {} SDX is not present ", sdxName);
                     throw new TestFailException(sdxName + " SDX is not present ");
                 }
-            }
+            } while (notInDesiredState && retryCount < maxRetry);
 
             if (retryCount < maxRetry) {
+                List<InstanceGroupV4Response> instanceGroups = sdxClient.getSdxClient().sdxEndpoint().getDetail(sdxName, Set.of())
+                        .getStackV4Response()
+                        .getInstanceGroups();
                 if (checkInstanceState(hostGroup, desiredState, instanceGroups)) {
                     LOGGER.error(" {} instance group or its metadata cannot be found may it was deleted or missing ", hostGroup);
                     throw new TestFailException(hostGroup + " instance group or its metadata cannot be found may it was deleted or missing. ");
