@@ -9,7 +9,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-if [ $# -ne 5 ] && [ $# -ne 6 ]; then
+if [ $# -ne 5 ]; then
   echo "Invalid inputs provided"
   echo "Script accepts 5 inputs:"
   echo "  1. Cloud Provider (azure | aws)"
@@ -17,8 +17,6 @@ if [ $# -ne 5 ] && [ $# -ne 6 ]; then
   echo "  3. PostgreSQL host name."
   echo "  4. PostgreSQL port."
   echo "  5. PostgreSQL user name."
-  echo
-  echo "  Optional: PostgreSQL password."
   exit 1
 fi
 
@@ -27,7 +25,6 @@ BACKUP_LOCATION=$(echo "$2" | sed 's/\/\+$//g') # Clear trailng '/' (if present)
 HOST="$3"
 PORT="$4"
 USERNAME="$5"
-export PGPASSWORD="$6" # We can provide the password to pg_dump through this variable, or in ~/.pgpass
 
 LOGFILE=/var/log/dl_postgres_backup.log
 
@@ -99,4 +96,3 @@ else
 fi
 
 doLog "INFO Completed backup ${BACKUP_LOCATION}"
-
