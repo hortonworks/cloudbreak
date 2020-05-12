@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltCommandRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
+import com.sequenceiq.cloudbreak.orchestrator.salt.utils.GrainsJsonPropertyUtil;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
@@ -782,18 +783,31 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void leaveDomain(GatewayConfig gatewayConfig, Set<Node> allNodes, String roleToRemove, String roleToAdd, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
-            Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "roles", roleToAdd), exitCriteriaModel, maxRetryLeave,
-                    exitCriteria);
-            saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "roles", roleToRemove), exitCriteriaModel, maxRetryLeave,
-                    exitCriteria);
-            Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, exitCriteria);
-            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, true);
+            if (isChangingRolesNecessary(gatewayConfig, sc, roleToRemove)) {
+                Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+                saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "roles", roleToAdd),
+                        exitCriteriaModel, maxRetryLeave, exitCriteria);
+                saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "roles", roleToRemove),
+                        exitCriteriaModel, maxRetryLeave, exitCriteria);
+                Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+                saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, exitCriteria);
+                runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, true);
+            }
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for recipes).", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
+    }
+
+    private boolean isChangingRolesNecessary(GatewayConfig gatewayConfig, SaltConnector sc, String role) {
+        return getMemberRoles(gatewayConfig, sc).contains(role);
+    }
+
+    private Set<String> getMemberRoles(GatewayConfig gatewayConfig, SaltConnector sc) {
+        Map<String, JsonNode> roles = SaltStates.getGrains(sc, new HostList(List.of(gatewayConfig.getHostname())), "roles");
+        return roles.values().stream().findFirst()
+                .map(GrainsJsonPropertyUtil::getPropertySet)
+                .orElse(Collections.emptySet());
     }
 
     @Override
