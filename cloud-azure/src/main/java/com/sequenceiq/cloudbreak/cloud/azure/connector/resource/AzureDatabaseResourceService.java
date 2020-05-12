@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.microsoft.azure.management.resources.ResourceGroup;
+import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -140,6 +142,23 @@ public class AzureDatabaseResourceService {
                 .type(ResourceType.AZURE_RESOURCE_GROUP)
                 .name(resourceGroupName)
                 .build(), ResourceStatus.DELETED));
+    }
+
+    public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext ac, DatabaseStack stack) {
+        CloudContext cloudContext = ac.getCloudContext();
+        AzureClient client = ac.getParameter(AzureClient.class);
+        String resourceGroupName = azureUtils.getResourceGroupName(cloudContext, stack);
+
+        try {
+            ResourceGroup resourceGroup = client.getResourceGroup(resourceGroupName);
+            if (resourceGroup == null) {
+                return ExternalDatabaseStatus.DELETED;
+            }
+            return ExternalDatabaseStatus.STARTED;
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw new CloudConnectorException(e);
+        }
     }
 }
 

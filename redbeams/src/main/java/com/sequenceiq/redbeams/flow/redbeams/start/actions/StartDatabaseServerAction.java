@@ -29,6 +29,6 @@ public class StartDatabaseServerAction extends AbstractRedbeamsStartAction<Redbe
     @Override
     protected Selectable createRequest(RedbeamsStartContext context) {
         return new StartDatabaseServerRequest(context.getCloudContext(), context.getCloudCredential(),
-            context.getDbInstanceIdentifier());
+            context.getDatabaseStack());
     }
 }

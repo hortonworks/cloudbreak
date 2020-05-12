@@ -61,19 +61,19 @@ public class StopDatabaseServerHandler implements EventHandler<StopDatabaseServe
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
 
-            ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatus(ac, request.getDbInstanceIdentifier());
+            ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatus(ac, request.getDbStack());
             if (status != null && status.isTransient()) {
-                LOGGER.debug("Database server '{}' is in '{}' status. Start waiting for a permanent status.", request.getDbInstanceIdentifier(), status);
+                LOGGER.debug("Database server '{}' is in '{}' status. Start waiting for a permanent status.", request.getDbStack(), status);
 
-                PollTask<ExternalDatabaseStatus> task = statusCheckFactory.newPollPermanentExternalDatabaseStateTask(ac, request.getDbInstanceIdentifier());
+                PollTask<ExternalDatabaseStatus> task = statusCheckFactory.newPollPermanentExternalDatabaseStateTask(ac, request.getDbStack());
                 status = externalDatabaseStatusPollingScheduler.schedule(task);
             }
 
             if (status != STOPPED) {
-                LOGGER.debug("Database server '{}' is in '{}' status. Calling for '{}' status.", request.getDbInstanceIdentifier(), status, STOPPED);
-                connector.resources().stopDatabaseServer(ac, request.getDbInstanceIdentifier());
+                LOGGER.debug("Database server '{}' is in '{}' status. Calling for '{}' status.", request.getDbStack(), status, STOPPED);
+                connector.resources().stopDatabaseServer(ac, request.getDbStack());
             } else {
-                LOGGER.debug("Database server '{}' is already in '{}' status.", request.getDbInstanceIdentifier(), STOPPED);
+                LOGGER.debug("Database server '{}' is already in '{}' status.", request.getDbStack(), STOPPED);
             }
 
             RedbeamsEvent success = new StopDatabaseServerSuccess(request.getResourceId());

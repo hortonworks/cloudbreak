@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.flow.redbeams.start.actions;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
@@ -22,10 +23,6 @@ public class StartDatabaseServerActionTest {
 
     private static final long RESOURCE_ID = 123L;
 
-    private static final String DB_INSTANCE_IDENTIFIER = "dbInstanceIdentifier";
-
-    private static final String DB_VENDOR_DISPLAY_NAME = "dbVendorDisplayName";
-
     @Mock
     private DBStackStatusUpdater dbStackStatusUpdater;
 
@@ -37,6 +34,9 @@ public class StartDatabaseServerActionTest {
 
     @Mock
     private FlowParameters flowParameters;
+
+    @Mock
+    private DatabaseStack dbStack;
 
     @InjectMocks
     private StartDatabaseServerAction victim;
@@ -52,12 +52,12 @@ public class StartDatabaseServerActionTest {
 
     @Test
     public void createRequestShouldReturnStartDatabaseServerRequest() {
-        RedbeamsStartContext context = new RedbeamsStartContext(flowParameters, cloudContext, cloudCredential, DB_INSTANCE_IDENTIFIER, DB_VENDOR_DISPLAY_NAME);
+        RedbeamsStartContext context = new RedbeamsStartContext(flowParameters, cloudContext, cloudCredential, dbStack);
 
         StartDatabaseServerRequest startDatabaseServerRequest = (StartDatabaseServerRequest) victim.createRequest(context);
 
         assertEquals(cloudContext, startDatabaseServerRequest.getCloudContext());
         assertEquals(cloudCredential, startDatabaseServerRequest.getCloudCredential());
-        assertEquals(DB_INSTANCE_IDENTIFIER, startDatabaseServerRequest.getDbInstanceIdentifier());
+        assertEquals(dbStack, startDatabaseServerRequest.getDbStack());
     }
 }

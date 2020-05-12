@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.flow.redbeams.stop.event;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
 /**
@@ -13,13 +14,13 @@ public class StopDatabaseServerRequest extends RedbeamsEvent {
 
     private final CloudCredential cloudCredential;
 
-    private final String dbInstanceIdentifier;
+    private final DatabaseStack dbStack;
 
-    public StopDatabaseServerRequest(CloudContext cloudContext, CloudCredential cloudCredential, String dbInstanceIdentifier) {
+    public StopDatabaseServerRequest(CloudContext cloudContext, CloudCredential cloudCredential, DatabaseStack dbStack) {
         super(cloudContext != null ? cloudContext.getId() : null);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
-        this.dbInstanceIdentifier = dbInstanceIdentifier;
+        this.dbStack = dbStack;
     }
 
     public CloudContext getCloudContext() {
@@ -30,15 +31,15 @@ public class StopDatabaseServerRequest extends RedbeamsEvent {
         return cloudCredential;
     }
 
-    public String getDbInstanceIdentifier() {
-        return dbInstanceIdentifier;
+    public DatabaseStack getDbStack() {
+        return dbStack;
     }
 
     public String toString() {
         return "StopDatabaseServerRequest{"
                 + "cloudContext=" + cloudContext
                 + ", cloudCredential=" + cloudCredential
-                + ", dbInstanceIdentifier=" + dbInstanceIdentifier
+                + ", dbStack=" + dbStack
                 + '}';
     }
 }

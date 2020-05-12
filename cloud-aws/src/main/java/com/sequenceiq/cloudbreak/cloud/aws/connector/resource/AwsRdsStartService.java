@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import org.springframework.stereotype.Service;
 
@@ -29,10 +30,12 @@ public class AwsRdsStartService {
     @Inject
     private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
-    public void start(AuthenticatedContext ac, String dbInstanceIdentifier) throws ExecutionException, TimeoutException, InterruptedException {
+    public void start(AuthenticatedContext ac, DatabaseStack dbStack) throws ExecutionException, TimeoutException, InterruptedException {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AmazonRDS rdsClient = awsClient.createRdsClient(credentialView, regionName);
+
+        String dbInstanceIdentifier = dbStack.getDatabaseServer().getServerId();
 
         StartDBInstanceRequest startDBInstanceRequest = new StartDBInstanceRequest();
         startDBInstanceRequest.setDBInstanceIdentifier(dbInstanceIdentifier);

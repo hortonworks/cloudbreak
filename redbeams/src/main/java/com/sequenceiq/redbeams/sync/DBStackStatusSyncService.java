@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.sync;
 
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -42,6 +44,9 @@ public class DBStackStatusSyncService {
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Inject
+    private DBStackToDatabaseStackConverter databaseStackConverter;
 
     @Inject
     private DBStackStatusUpdater dbStackStatusUpdater;
@@ -106,8 +111,9 @@ public class DBStackStatusSyncService {
 
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
+            DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
 
-            return ofNullable(connector.resources().getDatabaseServerStatus(ac, dbStack.getDatabaseServer().getName()));
+            return ofNullable(connector.resources().getDatabaseServerStatus(ac, databaseStack));
         } catch (Exception ex) {
             LOGGER.error(":::Auto sync::: External DB status lookup failed.", ex);
             return empty();

@@ -122,28 +122,28 @@ public interface ResourceConnector<R> {
      * Starts the database server. The caller does not need to wait/block until
      * database server gets started.
      * @param authenticatedContext the authenticated context which holds the client object
-     * @param dbInstanceIdentifier the database server instance identifier
+     * @param stack contains the full description of infrastructure
      * @throws Exception in case of any error
      */
-    void startDatabaseServer(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) throws Exception;
+    void startDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
 
     /**
      * Stops the database server. The caller does not need to wait/block until
      * database server gets stopped.
      * @param authenticatedContext the authenticated context which holds the client object
-     * @param dbInstanceIdentifier the database server instance identifier
+     * @param stack contains the full description of infrastructure
      * @throws Exception in case of any error
      */
-    void stopDatabaseServer(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) throws Exception;
+    void stopDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
 
     /**
      *
      * @param authenticatedContext the authenticated context which holds the client object
-     * @param dbInstanceIdentifier the server instance identifier
+     * @param stack contains the full description of infrastructure
      * @return The status of the given database server instance
      * @throws Exception in case of any error
      */
-    ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, String dbInstanceIdentifier) throws Exception;
+    ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
 
     /**
      * Update of infrastructure on Cloud platform. (e.g change Security groups). It does not need to wait/block until the infrastructure update is

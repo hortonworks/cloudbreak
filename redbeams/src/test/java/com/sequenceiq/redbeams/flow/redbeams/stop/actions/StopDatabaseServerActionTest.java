@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.flow.redbeams.stop.actions;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
@@ -22,10 +23,6 @@ public class StopDatabaseServerActionTest {
 
     private static final long RESOURCE_ID = 123L;
 
-    private static final String DB_INSTANCE_IDENTIFIER = "dbInstanceIdentifier";
-
-    private static final String DB_VENDOR_DISPLAY_NAME = "dbVendorDisplayName";
-
     @Mock
     private DBStackStatusUpdater dbStackStatusUpdater;
 
@@ -37,6 +34,9 @@ public class StopDatabaseServerActionTest {
 
     @Mock
     private FlowParameters flowParameters;
+
+    @Mock
+    private DatabaseStack databaseStack;
 
     @InjectMocks
     private StopDatabaseServerAction victim;
@@ -52,12 +52,11 @@ public class StopDatabaseServerActionTest {
 
     @Test
     public void createRequestShouldReturnStopDatabaseServerRequest() {
-        RedbeamsStopContext context = new RedbeamsStopContext(flowParameters, cloudContext, cloudCredential, DB_INSTANCE_IDENTIFIER, DB_VENDOR_DISPLAY_NAME);
+        RedbeamsStopContext context = new RedbeamsStopContext(flowParameters, cloudContext, cloudCredential, databaseStack);
 
         StopDatabaseServerRequest stopDatabaseServerRequest = (StopDatabaseServerRequest) victim.createRequest(context);
 
         assertEquals(cloudContext, stopDatabaseServerRequest.getCloudContext());
         assertEquals(cloudCredential, stopDatabaseServerRequest.getCloudCredential());
-        assertEquals(DB_INSTANCE_IDENTIFIER, stopDatabaseServerRequest.getDbInstanceIdentifier());
     }
 }
