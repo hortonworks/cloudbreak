@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
@@ -20,9 +21,18 @@ public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     @Value("${cb.yarn.networkCidr}")
     private String yarnNetworkCidr;
 
-    public YarnEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter,
-            SubnetTypeConverter subnetTypeConverter) {
-        super(environmentViewConverter, subnetTypeConverter);
+    public YarnEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter) {
+        super(environmentViewConverter);
+    }
+
+    @Override
+    public boolean isApplicableForDwx(CloudSubnet cloudSubnet) {
+        return true;
+    }
+
+    @Override
+    public boolean isApplicableForMlx(CloudSubnet cloudSubnet) {
+        return true;
     }
 
     @Override

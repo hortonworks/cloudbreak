@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
@@ -25,8 +26,8 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     private final AzureRegistrationTypeResolver azureRegistrationTypeResolver;
 
     public AzureEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter,
-            SubnetTypeConverter subnetTypeConverter, AzureRegistrationTypeResolver azureRegistrationTypeResolver) {
-        super(environmentViewConverter, subnetTypeConverter);
+        AzureRegistrationTypeResolver azureRegistrationTypeResolver) {
+        super(environmentViewConverter);
         this.azureRegistrationTypeResolver = azureRegistrationTypeResolver;
     }
 
@@ -85,6 +86,16 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
+    }
+
+    @Override
+    public boolean isApplicableForDwx(CloudSubnet cloudSubnet) {
+        return cloudSubnet.getType() == null || SubnetType.DWX.equals(cloudSubnet.getType());
+    }
+
+    @Override
+    public boolean isApplicableForMlx(CloudSubnet cloudSubnet) {
+        return cloudSubnet.getType() == null || SubnetType.MLX.equals(cloudSubnet.getType());
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAws
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
+import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -48,7 +49,17 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
     }
 
     public EnvironmentNetworkTestDto withNetworkCIDR(String networkCIDR) {
+        getRequest().setAws(null);
+        getRequest().setAzure(null);
+        getRequest().setYarn(null);
+        getRequest().setMock(null);
+        getRequest().setSubnetIds(null);
         getRequest().setNetworkCidr(networkCIDR);
+        return this;
+    }
+
+    public EnvironmentNetworkTestDto withPrivateSubnets() {
+        getRequest().setPrivateSubnetCreation(PrivateSubnetCreation.ENABLED);
         return this;
     }
 

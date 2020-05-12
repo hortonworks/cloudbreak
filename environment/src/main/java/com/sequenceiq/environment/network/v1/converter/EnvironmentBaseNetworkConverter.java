@@ -1,27 +1,27 @@
 package com.sequenceiq.environment.network.v1.converter;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetworkConverter {
 
     private final EnvironmentViewConverter environmentViewConverter;
 
-    private final SubnetTypeConverter subnetTypeConverter;
-
-    protected EnvironmentBaseNetworkConverter(EnvironmentViewConverter environmentViewConverter,
-            SubnetTypeConverter subnetTypeConverter) {
+    protected EnvironmentBaseNetworkConverter(EnvironmentViewConverter environmentViewConverter) {
         this.environmentViewConverter = environmentViewConverter;
-        this.subnetTypeConverter = subnetTypeConverter;
     }
 
     @Override
@@ -48,10 +48,57 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
                 .withRegistrationType(source.getRegistrationType())
                 .withNetworkId(source.getNetworkId());
 
-        subnetTypeConverter.convertSubnets(source, builder);
+        convertSubnets(source, builder);
 
         return setProviderSpecificFields(builder, source);
     }
+
+    public void convertSubnets(BaseNetwork source, NetworkDto.Builder targetBuilder) {
+        // TODO: add legacy conversion for RegistrationType.CREATE_NEW networks
+        if (source.getRegistrationType() == RegistrationType.EXISTING) {
+            useAllSubnetsForAll(source, targetBuilder);
+        } else {
+            Map<String, CloudSubnet> publicSubnet = collectBySubnetType(source, SubnetType.PUBLIC);
+            Map<String, CloudSubnet> privateSubnet = collectBySubnetType(source, SubnetType.PRIVATE);
+            targetBuilder.withCbSubnets(mergeMaps(publicSubnet, privateSubnet));
+            targetBuilder.withDwxSubnets(collectDwxSubnetType(source));
+            targetBuilder.withMlxSubnets(collectMlxSubnetType(source));
+        }
+    }
+
+    private void useAllSubnetsForAll(BaseNetwork source, NetworkDto.Builder targetBuilder) {
+        targetBuilder.withCbSubnets(source.getSubnetMetas());
+        targetBuilder.withDwxSubnets(source.getSubnetMetas());
+        targetBuilder.withMlxSubnets(source.getSubnetMetas());
+    }
+
+    private Map<String, CloudSubnet> collectBySubnetType(BaseNetwork source, SubnetType subnetType) {
+        return source.getSubnetMetas().entrySet().stream()
+                .filter(entry -> entry.getValue().getType() == null || subnetType.equals(entry.getValue().getType()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Map<String, CloudSubnet> collectDwxSubnetType(BaseNetwork source) {
+        return source.getSubnetMetas().entrySet().stream()
+                .filter(entry -> isApplicableForDwx(entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Map<String, CloudSubnet> collectMlxSubnetType(BaseNetwork source) {
+        return source.getSubnetMetas().entrySet().stream()
+                .filter(entry -> isApplicableForMlx(entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Map<String, CloudSubnet> mergeMaps(Map<String, CloudSubnet> map1, Map<String, CloudSubnet> map2) {
+        Map<String, CloudSubnet> merged = new HashMap<>(map1);
+        merged.putAll(map2);
+        return merged;
+    }
+
+    public abstract boolean isApplicableForDwx(CloudSubnet cloudSubnet);
+
+    public abstract boolean isApplicableForMlx(CloudSubnet cloudSubnet);
 
     private Set<EnvironmentView> convertEnvToView(Environment environment) {
         return Collections.singleton(environmentViewConverter.convert(environment));
