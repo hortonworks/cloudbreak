@@ -3,15 +3,10 @@ package com.sequenceiq.cloudbreak.job;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED;
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -30,33 +25,24 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.gs.collections.impl.factory.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.handler.InstanceStateQuery;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
-import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.statuschecker.service.JobService;
@@ -82,19 +68,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
-    private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
-
-    @Inject
-    private InstanceStateQuery instanceStateQuery;
-
-    @Inject
-    private EnvironmentInternalCrnClient environmentInternalCrnClient;
-
-    @Inject
-    private CredentialConverter credentialConverter;
-
-    @Inject
-    private CredentialToCloudCredentialConverter cloudCredentialConverter;
+    private StackInstanceStatusChecker stackInstanceStatusChecker;
 
     @Inject
     private StackSyncService syncService;
@@ -236,7 +210,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private void syncInstances(Stack stack, Collection<InstanceMetaData> runningInstances,
             Collection<InstanceMetaData> instanceMetaData, InstanceSyncState defaultState) {
-        List<CloudVmInstanceStatus> instanceStatuses = queryInstanceStatuses(stack, instanceMetaData);
+        List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, instanceMetaData);
         LOGGER.debug("Cluster '{}' state check on provider, instances: {}", stack.getId(), instanceStatuses);
         syncService.autoSync(stack, runningInstances, instanceStatuses, true, defaultState);
     }
@@ -276,40 +250,5 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private Long getStackId() {
         return Long.valueOf(getLocalId());
-    }
-
-    private List<CloudVmInstanceStatus> queryInstanceStatuses(Stack stack, Collection<InstanceMetaData> instanceMetaData) {
-        List<CloudVmInstanceStatus> result = Collections.emptyList();
-        if (!instanceMetaData.isEmpty()) {
-            List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instanceMetaData);
-            cloudInstances.forEach(instance -> stack.getParameters().forEach(instance::putParameter));
-            Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                    location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-            CloudCredential cloudCredential = getCloudCredential(stack.getEnvironmentCrn());
-            result = getCloudVmInstanceStatuses(cloudInstances, cloudContext, cloudCredential);
-        }
-        return result;
-    }
-
-    private List<CloudVmInstanceStatus> getCloudVmInstanceStatuses(List<CloudInstance> cloudInstances,
-            CloudContext cloudContext, CloudCredential cloudCredential) {
-        List<CloudVmInstanceStatus> instanceStatuses;
-        try {
-            instanceStatuses = instanceStateQuery.getCloudVmInstanceStatuses(cloudCredential, cloudContext, cloudInstances);
-        } catch (RuntimeException e) {
-            instanceStatuses = cloudInstances.stream()
-                    .map(instance -> new CloudVmInstanceStatus(instance, InstanceStatus.UNKNOWN))
-                    .collect(toList());
-        }
-        return instanceStatuses;
-    }
-
-    private CloudCredential getCloudCredential(String environmentCrn) {
-        return cloudCredentialConverter.convert(
-                credentialConverter.convert(
-                        environmentInternalCrnClient.withInternalCrn().credentialV1Endpoint().getByEnvironmentCrn(environmentCrn)
-                )
-        );
     }
 }

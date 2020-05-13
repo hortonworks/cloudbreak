@@ -1,0 +1,393 @@
+package com.sequenceiq.cloudbreak.job;
+
+import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.HostName;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
+import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
+import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
+import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
+import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.UpdateHostsValidator;
+import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
+import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.statuschecker.service.JobService;
+
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = StackStatusIntegrationTest.TestAppContext.class)
+class StackStatusIntegrationTest {
+
+    private static final Long STACK_ID = 123L;
+
+    private static final String INSTANCE_1 = "i1";
+
+    private static final String INSTANCE_2 = "i2";
+
+    @Inject
+    private StackStatusCheckerJob underTest;
+
+    @MockBean
+    private StackService stackService;
+
+    @MockBean
+    private ClusterApiConnectors clusterApiConnectors;
+
+    @MockBean
+    private InstanceMetaDataService instanceMetaDataService;
+
+    @MockBean
+    private ClusterService clusterService;
+
+    @MockBean
+    private StackUpdater stackUpdater;
+
+    @MockBean
+    private HostGroupService hostGroupService;
+
+    @MockBean
+    private ReactorFlowManager flowManager;
+
+    @Mock
+    private ClusterStatusService clusterStatusService;
+
+    @Mock
+    private JobExecutionContext jobExecutionContext;
+
+    @MockBean
+    private StackInstanceStatusChecker stackStatusChecker;
+
+    @Captor
+    private ArgumentCaptor<InstanceMetaData> savedInstanceMetaDataArgumentCaptor;
+
+    private Stack stack;
+
+    private Set<InstanceMetaData> runningInstances;
+
+    private Map<HostName, ClusterManagerState> hostStatuses;
+
+    @BeforeEach
+    void setUp() {
+        setUpRunningInstances();
+        setUpStack();
+        setUpClusterApi();
+    }
+
+    private void setUpRunningInstances() {
+        runningInstances = Set.of(createInstance(INSTANCE_1), createInstance(INSTANCE_2));
+    }
+
+    private InstanceMetaData createInstance(String instanceName) {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
+        instanceMetaData.setInstanceId(instanceName);
+        instanceMetaData.setDiscoveryFQDN(instanceName);
+        return instanceMetaData;
+    }
+
+    private void setUpStack() {
+        underTest.setLocalId(STACK_ID.toString());
+
+        stack = new Stack();
+        stack.setId(STACK_ID);
+        Cluster cluster = new Cluster();
+        cluster.setVariant("AWS");
+        cluster.setClusterManagerIp("192.168.0.1");
+        stack.setCluster(cluster);
+        stack.setResourceCrn("crn:stack");
+        User creator = new User();
+        creator.setUserId("user-id");
+        stack.setCreator(creator);
+        Workspace workspace = new Workspace();
+        workspace.setId(564L);
+        stack.setWorkspace(workspace);
+
+        when(stackService.get(STACK_ID)).thenReturn(stack);
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(runningInstances);
+        when(instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(STACK_ID)).thenReturn(runningInstances);
+    }
+
+    private void setUpClusterApi() {
+        ClusterApi clusterApi = Mockito.mock(ClusterApi.class);
+        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+
+        hostStatuses = new HashMap<>();
+        when(clusterStatusService.getExtendedHostStatuses()).thenReturn(hostStatuses);
+    }
+
+    @Test
+    @DisplayName(
+            "GIVEN an available stack " +
+            "WHEN all instances are healthy " +
+            "THEN stack is still available"
+    )
+    void availableStackInstancesAreHealthy() throws JobExecutionException {
+        setUpClusterStatus(ClusterStatus.STARTED);
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        setUpClusterManagerStatus(INSTANCE_1, ClusterManagerStatus.HEALTHY);
+        setUpClusterManagerStatus(INSTANCE_2, ClusterManagerStatus.HEALTHY);
+        setUpCloudVmInstanceStatuses(Map.of(
+                INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED,
+                INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED));
+
+        underTest.executeInternal(jobExecutionContext);
+
+        verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
+        verify(hostGroupService, never()).getRepairViewByClusterIdAndName(anyLong(), anyString());
+        verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean());
+        verify(instanceMetaDataService, never()).saveAll(any());
+        verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
+
+        verify(instanceMetaDataService, never()).save(any());
+        verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any());
+        verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(), any());
+    }
+
+    @Test
+    @DisplayName(
+            "GIVEN an available stack " +
+            "WHEN one instance goes down " +
+            "THEN stack is still available"
+    )
+    void availableStackOneInstanceGoesDown() throws JobExecutionException {
+        setUpClusterStatus(ClusterStatus.STARTED);
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        setUpClusterManagerStatus(INSTANCE_1, ClusterManagerStatus.HEALTHY);
+        setUpClusterManagerStatus(INSTANCE_2, ClusterManagerStatus.UNHEALTHY);
+        setUpCloudVmInstanceStatuses(Map.of(
+                INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED,
+                INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
+
+        underTest.executeInternal(jobExecutionContext);
+
+        verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
+        verify(hostGroupService, never()).getRepairViewByClusterIdAndName(anyLong(), anyString());
+        verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean());
+        verify(instanceMetaDataService, never()).saveAll(any());
+        verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
+
+        assertInstancesSavedWithStatuses(Map.of(INSTANCE_2, InstanceStatus.DELETED_BY_PROVIDER));
+
+        verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any());
+        verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(), any());
+    }
+
+    @Test
+    @DisplayName(
+            "GIVEN an available stack " +
+            "WHEN all instances go down " +
+            "THEN stack is no more available"
+    )
+    void availableStackAllInstancesGoesDown() throws JobExecutionException {
+        setUpClusterStatus(ClusterStatus.STARTED);
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        setUpClusterManagerStatus(INSTANCE_1, ClusterManagerStatus.HEALTHY);
+        setUpClusterManagerStatus(INSTANCE_2, ClusterManagerStatus.UNHEALTHY);
+        setUpCloudVmInstanceStatuses(Map.of(
+                INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER,
+                INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
+        when(instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(STACK_ID)).thenReturn(Set.of());
+
+        underTest.executeInternal(jobExecutionContext);
+
+        verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
+        verify(hostGroupService, never()).getRepairViewByClusterIdAndName(anyLong(), anyString());
+        verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean());
+        verify(instanceMetaDataService, never()).saveAll(any());
+        verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
+
+        assertInstancesSavedWithStatuses(Map.of(
+                INSTANCE_1, InstanceStatus.DELETED_BY_PROVIDER,
+                INSTANCE_2, InstanceStatus.DELETED_BY_PROVIDER));
+
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DELETED_ON_PROVIDER_SIDE), any());
+    }
+
+    @Test
+    @DisplayName(
+            "GIVEN an available stack with one instance down " +
+            "WHEN all instances go down " +
+            "THEN stack is no more available"
+    )
+    void availableStackWithOneInstanceDownAllInstancesGoesDown() throws JobExecutionException {
+        setUpClusterStatus(ClusterStatus.STARTED);
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        setUpClusterManagerStatus(INSTANCE_1, ClusterManagerStatus.HEALTHY);
+        setUpClusterManagerStatus(INSTANCE_2, ClusterManagerStatus.UNHEALTHY);
+        setUpCloudVmInstanceStatuses(Map.of(
+                INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER,
+                INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
+        when(instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(STACK_ID)).thenReturn(Set.of());
+
+        underTest.executeInternal(jobExecutionContext);
+
+        verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
+        verify(hostGroupService, never()).getRepairViewByClusterIdAndName(anyLong(), anyString());
+        verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean());
+        verify(instanceMetaDataService, never()).saveAll(any());
+        verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
+
+        assertInstancesSavedWithStatuses(Map.of(
+                INSTANCE_1, InstanceStatus.DELETED_BY_PROVIDER,
+                INSTANCE_2, InstanceStatus.DELETED_BY_PROVIDER));
+
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DELETED_ON_PROVIDER_SIDE), any());
+    }
+
+    private void assertInstancesSavedWithStatuses(Map<String, InstanceStatus> instanceStatuses) {
+        verify(instanceMetaDataService, times(instanceStatuses.size())).save(savedInstanceMetaDataArgumentCaptor.capture());
+        Assertions.assertThat(savedInstanceMetaDataArgumentCaptor.getAllValues())
+                .allSatisfy(savedInstanceMetaData -> {
+                    InstanceStatus expectedInstanceStatus = instanceStatuses.get(savedInstanceMetaData.getInstanceId());
+                    Assertions.assertThat(savedInstanceMetaData)
+                            .returns(expectedInstanceStatus, InstanceMetaData::getInstanceStatus);
+                });
+    }
+
+    private void setUpCloudVmInstanceStatuses(Map<String, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus> instanceStatuses) {
+        List<CloudVmInstanceStatus> cloudVmInstanceStatuses = instanceStatuses.entrySet().stream()
+                .map(e -> createCloudVmInstanceStatus(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+        when(stackStatusChecker.queryInstanceStatuses(eq(stack), any())).thenReturn(cloudVmInstanceStatuses);
+    }
+
+    private CloudVmInstanceStatus createCloudVmInstanceStatus(String instanceId, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus instanceStatus) {
+        return new CloudVmInstanceStatus(new CloudInstance(instanceId, null, null), instanceStatus);
+    }
+
+    private void setUpClusterStatus(ClusterStatus clusterStatus) {
+        when(clusterStatusService.getStatus(anyBoolean())).thenReturn(new ClusterStatusResult(clusterStatus, ""));
+    }
+
+    private void setUpClusterManagerStatus(String fqdn, ClusterManagerStatus clusterManagerStatus) {
+        hostStatuses.put(hostName(fqdn), new ClusterManagerState(clusterManagerStatus, ""));
+    }
+
+    @Configuration
+    @Import({
+            StackStatusCheckerJob.class,
+            StackSyncService.class,
+            ClusterOperationService.class
+    })
+    @PropertySource("classpath:application.yml")
+    static class TestAppContext {
+
+        @MockBean
+        private JobService jobService;
+
+        @MockBean
+        private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
+
+        @MockBean
+        private FlowLogService flowLogService;
+
+        @MockBean
+        private CloudbreakEventService eventService;
+
+        @MockBean
+        private ServiceProviderMetadataAdapter metadata;
+
+        @MockBean
+        private ImageService imageService;
+
+        @MockBean
+        private TransactionService transactionService;
+
+        @MockBean
+        private ResourceService resourceService;
+
+        @MockBean
+        private ResourceAttributeUtil resourceAttributeUtil;
+
+        @MockBean
+        private FileSystemConfigService fileSystemConfigService;
+
+        @MockBean
+        private UsageLoggingUtil usageLoggingUtil;
+
+        @MockBean
+        private StatusToPollGroupConverter statusToPollGroupConverter;
+
+        @MockBean
+        private UpdateHostsValidator updateHostsValidator;
+
+        @MockBean
+        private CloudbreakMessagesService cloudbreakMessagesService;
+
+        @MockBean
+        private BlueprintService blueprintService;
+
+        @MockBean
+        private BlueprintValidatorFactory blueprintValidatorFactory;
+
+    }
+}

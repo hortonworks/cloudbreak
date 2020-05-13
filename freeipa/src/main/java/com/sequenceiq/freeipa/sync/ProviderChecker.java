@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.sync;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
 import java.util.ArrayList;
@@ -16,20 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.handler.InstanceStateQuery;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
-import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
-import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
-import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.CredentialService;
-import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Component
@@ -38,25 +26,10 @@ public class ProviderChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProviderChecker.class);
 
     @Inject
-    private InstanceStateQuery instanceStateQuery;
-
-    @Inject
-    private CredentialService credentialService;
-
-    @Inject
-    private StackToCloudStackConverter cloudStackConverter;
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
-
-    @Inject
-    private InstanceMetaDataToCloudInstanceConverter metadataConverter;
-
-    @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private StackUpdater stackUpdater;
+    private StackInstanceProviderChecker stackInstanceProviderChecker;
 
     @Value("${freeipa.autosync.update.status:true}")
     private boolean updateStatus;
@@ -64,7 +37,7 @@ public class ProviderChecker {
     public List<ProviderSyncResult> updateAndGetStatuses(Stack stack, Set<InstanceMetaData> checkableInstances) {
         return checkedMeasure(() -> {
             List<ProviderSyncResult> results = new ArrayList<>();
-            List<CloudVmInstanceStatus> statuses = checkStatus(stack, checkableInstances);
+            List<CloudVmInstanceStatus> statuses = stackInstanceProviderChecker.checkStatus(stack, checkableInstances);
             statuses.forEach(s -> {
                 Optional<InstanceMetaData> instanceMetaData = checkableInstances.stream()
                         .filter(i -> s.getCloudInstance().getInstanceId().equals(i.getInstanceId()))
@@ -133,21 +106,6 @@ public class ProviderChecker {
                 LOGGER.info(":::Auto sync::: The instance status would be had to update from {} to {}",
                         instanceMetaData.getInstanceStatus(), newStatus);
             }
-        }
-    }
-
-    private List<CloudVmInstanceStatus> checkStatus(Stack stack, Set<InstanceMetaData> notTerminatedForStack) {
-        Location location = location(region(stack.getRegion()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
-                location, stack.getOwner(), stack.getOwner(), stack.getAccountId());
-        CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
-        List<CloudInstance> instances = metadataConverter.convert(notTerminatedForStack);
-        try {
-            return checkedMeasure(() -> instanceStateQuery.getCloudVmInstanceStatuses(cloudCredential, cloudContext, instances), LOGGER,
-                    ":::Auto sync::: get instance statuses in {}ms");
-        } catch (Exception e) {
-            LOGGER.info(":::Auto sync::: Could not fetch vm statuses: " + e.getMessage(), e);
-            throw e;
         }
     }
 }
