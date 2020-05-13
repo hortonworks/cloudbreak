@@ -5,6 +5,7 @@ import com.sequenceiq.flow.core.FlowState;
 public enum EnvDeleteState implements FlowState {
 
     INIT_STATE,
+    XP_DELETE_STARTED_STATE,
     FREEIPA_DELETE_STARTED_STATE,
     RDBMS_DELETE_STARTED_STATE,
     PUBLICKEY_DELETE_STARTED_STATE,
