@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,6 +23,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.MockNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
@@ -99,6 +102,20 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
     public FreeIPATestDto withTelemetry(String telemetry) {
         TelemetryTestDto telemetryTestDto = getTestContext().get(telemetry);
         getRequest().setTelemetry(telemetryTestDto.getRequest());
+        return this;
+    }
+
+    public FreeIPATestDto withSpotPercentage(int spotPercentage) {
+        getRequest().getInstanceGroups().forEach(instanceGroupRequest -> {
+            AwsInstanceTemplateParameters aws = instanceGroupRequest.getInstanceTemplate().getAws();
+            if (Objects.isNull(aws)) {
+                aws = new AwsInstanceTemplateParameters();
+                instanceGroupRequest.getInstanceTemplate().setAws(aws);
+            }
+            AwsInstanceTemplateSpotParameters spot = new AwsInstanceTemplateSpotParameters();
+            spot.setPercentage(spotPercentage);
+            aws.setSpot(spot);
+        });
         return this;
     }
 

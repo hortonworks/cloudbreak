@@ -1,11 +1,13 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.withoutLogError;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -21,6 +23,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1SpotParameters;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -122,6 +127,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return this;
     }
 
+    public DistroXTestDto awaitAndIgnoreFlows(Map<String, Status> statuses) {
+        super.await(statuses, emptyRunningParameter());
+        return this;
+    }
+
     @Override
     public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses) {
         super.await(entityClass, statuses);
@@ -196,6 +206,22 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     public DistroXTestDto withTemplate(String template) {
         getRequest().getCluster().setBlueprintName(template);
+        return this;
+    }
+
+    public DistroXTestDto withSpotPercentage(int spotPercentage) {
+        getRequest().getInstanceGroups().stream()
+                .map(InstanceGroupV1Request::getTemplate)
+                .forEach(instanceTemplateV1Request -> {
+                    AwsInstanceTemplateV1Parameters aws = instanceTemplateV1Request.getAws();
+                    if (Objects.isNull(aws)) {
+                        aws = new AwsInstanceTemplateV1Parameters();
+                        instanceTemplateV1Request.setAws(aws);
+                    }
+                    AwsInstanceTemplateV1SpotParameters spot = new AwsInstanceTemplateV1SpotParameters();
+                    spot.setPercentage(spotPercentage);
+                    aws.setSpot(spot);
+                });
         return this;
     }
 
