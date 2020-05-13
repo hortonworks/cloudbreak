@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_ADDING_INSTANC
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_BOOTSTRAP_NEW_NODES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_METADATA_EXTEND_WITH_COUNT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_FAILED;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -148,13 +149,18 @@ public class StackUpscaleService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
     }
 
-    public void handleStackUpscaleFailure(Exception exception, Long stackId) {
+    public void handleStackUpscaleFailure(Boolean upscaleForRepair, Exception exception, Long stackId) {
         LOGGER.info("Exception during the upscale of stack", exception);
         try {
             String errorReason = exception.getMessage();
             metadataSetupService.cleanupRequestedInstances(stackId);
-            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
-            flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_INFRASTRUCTURE_UPDATE_FAILED, errorReason);
+            if (!upscaleForRepair) {
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
+                flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_INFRASTRUCTURE_UPDATE_FAILED, errorReason);
+            } else {
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.REPAIR_FAILED, "Stack repair failed. " + errorReason);
+                flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_REPAIR_FAILED, errorReason);
+            }
         } catch (Exception e) {
             LOGGER.info("Exception during the handling of stack scaling failure: {}", e.getMessage());
         }
