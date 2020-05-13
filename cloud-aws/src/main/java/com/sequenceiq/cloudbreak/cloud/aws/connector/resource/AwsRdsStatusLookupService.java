@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import com.amazonaws.services.rds.AmazonRDS;
+import com.amazonaws.services.rds.model.DBInstanceNotFoundException;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
@@ -27,6 +28,8 @@ public class AwsRdsStatusLookupService {
         DescribeDBInstancesResult describeDBInstancesResult;
         try {
             describeDBInstancesResult = rdsClient.describeDBInstances(describeDBInstancesRequest);
+        } catch (DBInstanceNotFoundException ex) {
+            return ExternalDatabaseStatus.DELETED;
         } catch (RuntimeException ex) {
             throw new CloudConnectorException(ex.getMessage(), ex);
         }
@@ -44,6 +47,7 @@ public class AwsRdsStatusLookupService {
             case "available": return ExternalDatabaseStatus.STARTED;
             case "stopping": return ExternalDatabaseStatus.STOP_IN_PROGRESS;
             case "stopped": return ExternalDatabaseStatus.STOPPED;
+            case "deleting": return ExternalDatabaseStatus.DELETE_IN_PROGRESS;
             default: return ExternalDatabaseStatus.UPDATE_IN_PROGRESS;
         }
     }
