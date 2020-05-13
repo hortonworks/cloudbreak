@@ -1,27 +1,26 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.environment.TempConstants.TEMP_WORKSPACE_ID;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.environment.TempConstants.TEMP_WORKSPACE_ID;
 
 @Service
 public class EnvironmentResourceDeletionService {
@@ -36,12 +35,15 @@ public class EnvironmentResourceDeletionService {
 
     private final ClusterTemplateV4Endpoint clusterTemplateV4Endpoint;
 
+    private final ExperienceConnectorService experienceConnectorService;
+
     public EnvironmentResourceDeletionService(SdxEndpoint sdxEndpoint, DatalakeV4Endpoint datalakeV4Endpoint, DistroXV1Endpoint distroXV1Endpoint,
-            ClusterTemplateV4Endpoint clusterTemplateV4Endpoint) {
+                                              ClusterTemplateV4Endpoint clusterTemplateV4Endpoint, ExperienceConnectorService experienceConnectorService) {
         this.sdxEndpoint = sdxEndpoint;
         this.datalakeV4Endpoint = datalakeV4Endpoint;
         this.distroXV1Endpoint = distroXV1Endpoint;
         this.clusterTemplateV4Endpoint = clusterTemplateV4Endpoint;
+        this.experienceConnectorService = experienceConnectorService;
     }
 
     public void deleteClusterDefinitionsOnCloudbreak(String environmentCrn) {
@@ -91,6 +93,10 @@ public class EnvironmentResourceDeletionService {
         return clusterNames;
     }
 
+    public long getConnectedExperienceAmount(Environment environment) {
+        return experienceConnectorService.getConnectedExperienceQuantity(environment);
+    }
+
     Set<String> getAttachedDistroXClusterNames(Environment environment) {
         Set<String> clusterNames = new HashSet<>();
         LOGGER.debug("Get DistroX clusters of the environment: '{}'", environment.getName());
@@ -125,4 +131,5 @@ public class EnvironmentResourceDeletionService {
         LOGGER.error(message, e);
         throw new EnvironmentServiceException(message, e);
     }
+
 }

@@ -161,3 +161,15 @@ spring:
 
 notification:
   urls: http://localhost:3000/notifications
+
+liftie:
+  api:
+    port: 9999
+    address: localhost
+    protocol: http
+
+dwx:
+  api:
+    port: 9003
+    address: 127.0.0.1
+    protocol: http

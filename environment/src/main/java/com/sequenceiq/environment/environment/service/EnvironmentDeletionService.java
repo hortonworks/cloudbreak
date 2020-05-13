@@ -1,16 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.BadRequestException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -19,6 +8,15 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.ws.rs.BadRequestException;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class EnvironmentDeletionService {
@@ -36,8 +34,8 @@ public class EnvironmentDeletionService {
     private final EnvironmentJobService environmentJobService;
 
     public EnvironmentDeletionService(EnvironmentService environmentService, EnvironmentDtoConverter environmentDtoConverter,
-            EnvironmentReactorFlowManager reactorFlowManager, EnvironmentResourceDeletionService environmentResourceDeletionService,
-            EnvironmentJobService environmentJobService) {
+                                      EnvironmentReactorFlowManager reactorFlowManager, EnvironmentResourceDeletionService environmentResourceDeletionService,
+                                      EnvironmentJobService environmentJobService) {
         this.environmentService = environmentService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.reactorFlowManager = reactorFlowManager;
@@ -121,6 +119,13 @@ public class EnvironmentDeletionService {
             throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before Environment deletion [%s]",
                     String.join(", ", distroXClusterNames)));
         }
+
+        long amountOfConnectedExperiences = environmentResourceDeletionService.getConnectedExperienceAmount(env);
+        if (amountOfConnectedExperiences > 0) {
+            throw new BadRequestException("The given environment has " + amountOfConnectedExperiences + " connected experiences. " +
+                    "These must be terminated before Environment deletion.");
+        }
+
     }
 
     void validateDeletion(Environment environment) {
