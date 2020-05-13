@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -25,6 +26,9 @@ public class AutoscaleStackV4Response {
 
     @ApiModelProperty(StackModelDescription.USER_ID)
     private String userId;
+
+    @ApiModelProperty(StackModelDescription.USER_CRN)
+    private String userCrn;
 
     @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long stackId;
@@ -61,6 +65,12 @@ public class AutoscaleStackV4Response {
 
     @ApiModelProperty(StackModelDescription.CRN)
     private String stackCrn;
+
+    @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
+    private String cloudPlatform;
+
+    @ApiModelProperty(StackModelDescription.TYPE)
+    private StackType stackType;
 
     @ApiModelProperty(StackModelDescription.TUNNEL)
     private Tunnel tunnel;
@@ -183,5 +193,29 @@ public class AutoscaleStackV4Response {
 
     public void setTunnel(Tunnel tunnel) {
         this.tunnel = tunnel;
+    }
+
+    public StackType getStackType() {
+        return stackType;
+    }
+
+    public void setStackType(StackType stackType) {
+        this.stackType = stackType;
+    }
+
+    public String getUserCrn() {
+        return userCrn;
+    }
+
+    public void setUserCrn(String userCrn) {
+        this.userCrn = userCrn;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 }

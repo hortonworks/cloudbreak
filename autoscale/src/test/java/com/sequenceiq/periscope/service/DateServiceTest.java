@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.text.ParseException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -121,6 +122,16 @@ public class DateServiceTest {
         when(dateTimeService.getZonedDateTime(currentZonedTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
         TimeAlert timeAlert = createTimeAlert(timeZone);
         assertTrue(underTest.isTrigger(timeAlert, monitorUpdateRate));
+    }
+
+    @Test
+    public void testValidateTimeZoneWhenValid() throws Exception {
+        underTest.validateTimeZone("GMT");
+    }
+
+    @Test(expected = ParseException.class)
+    public void testValidateTimeZoneWhenInvalid() throws Exception {
+        underTest.validateTimeZone("GMTzen");
     }
 
     private TimeAlert createTimeAlert(String timeZone) {

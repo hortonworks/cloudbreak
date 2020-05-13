@@ -157,9 +157,12 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "w.id as workspaceId, "
             + "t.name as tenantName, "
             + "u.userId as userId, "
+            + "u.userCrn as userCrn, "
             + "s.resourceCrn as crn, "
             + "c.variant as clusterManagerVariant, "
-            + "s.tunnel as tunnel "
+            + "s.tunnel as tunnel, "
+            + "s.cloudPlatform as cloudPlatform, "
+            + "s.type as type "
             + "FROM Stack s "
             + "LEFT JOIN s.cluster c "
             + "LEFT JOIN s.stackStatus ss "
@@ -172,10 +175,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "WHERE ig.instanceGroupType = 'GATEWAY' "
             + "AND im.instanceMetadataType = 'GATEWAY_PRIMARY' "
             + "AND s.terminated = null "
-            + "AND c.clusterManagerIp IS NOT NULL "
-            + "AND c.status = 'AVAILABLE' "
+            + "AND c.status in ('AVAILABLE', 'REQUESTED', 'UPDATE_IN_PROGRESS') "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
-    Set<AutoscaleStack> findAliveOnesWithAmbari();
+    Set<AutoscaleStack> findAliveOnesWithClusterManager();
 
     @Query("SELECT s.id as id, s.name as name FROM Stack s WHERE s.network = :network")
     Set<StackIdView> findByNetwork(@Param("network") Network network);

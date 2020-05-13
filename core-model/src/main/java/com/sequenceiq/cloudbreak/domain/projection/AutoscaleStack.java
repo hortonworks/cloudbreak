@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain.projection;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
@@ -42,9 +43,15 @@ public interface AutoscaleStack {
 
     String getUserId();
 
+    String getUserCrn();
+
     String getClusterManagerVariant();
 
     String getCrn();
+
+    String getCloudPlatform();
+
+    StackType getType();
 
     Tunnel getTunnel();
 }

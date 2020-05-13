@@ -394,7 +394,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<AutoscaleStack> findAliveOnesWithAmbari() {
+        public Set<AutoscaleStack> findAliveOnesWithClusterManager() {
             return null;
         }
 

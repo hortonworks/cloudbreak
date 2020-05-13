@@ -1,8 +1,13 @@
 package com.sequenceiq.periscope.monitor;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.PrometheusEvaluator;
 
+@Component
+@ConditionalOnProperty(prefix = "periscope.enabledAutoscaleMonitors.prometheus-monitor", name = "enabled", havingValue = "true")
 public class PrometheusMonitor extends ClusterMonitor {
 
     @Override
