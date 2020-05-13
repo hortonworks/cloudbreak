@@ -71,7 +71,7 @@ public class BlueprintLoaderService {
         return blueprintsInDatabase;
     }
 
-    private void deleteOldDefaults(Set<Blueprint> blueprintsInDatabase) {
+    public void deleteOldDefaults(Set<Blueprint> blueprintsInDatabase) {
         List<Blueprint> deletableDefaults = blueprintsInDatabase.stream()
                 .filter(blueprint -> blueprint.getStatus().equals(DEFAULT))
                 .filter(blueprint -> !defaultBlueprintCache.defaultBlueprints().containsKey(blueprint.getName()))
@@ -85,6 +85,10 @@ public class BlueprintLoaderService {
         }
 
         blueprintService.pureSaveAll(deletableDefaults);
+    }
+
+    public boolean defaultBlueprintDoesNotExistInTheCache(Collection<Blueprint> blueprints) {
+        return !collectDeviationOfExistingAndCachedBlueprints(blueprints).isEmpty();
     }
 
     private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Collection<Blueprint> blueprints,
@@ -175,8 +179,24 @@ public class BlueprintLoaderService {
         LOGGER.debug("Collecting blueprints which are missing from the defaults.");
         Map<String, Blueprint> diff = new HashMap<>();
         for (Entry<String, Blueprint> stringBlueprintEntry : defaultBlueprintCache.defaultBlueprints().entrySet()) {
-            if (blueprintsInDatabase.stream().noneMatch(bp -> bp.getName().equals(stringBlueprintEntry.getKey()))) {
+            if (blueprintsInDatabase
+                    .stream()
+                    .noneMatch(bp -> bp.getName().equals(stringBlueprintEntry.getKey()))) {
                 diff.put(stringBlueprintEntry.getKey(), stringBlueprintEntry.getValue());
+            }
+        }
+        LOGGER.debug("Finished to collect the default blueprints which are missing: {}.", diff);
+        return diff;
+    }
+
+    private Set<Blueprint> collectDeviationOfExistingAndCachedBlueprints(Collection<Blueprint> blueprintsInDatabase) {
+        LOGGER.debug("Collecting blueprints which are missing from the cache.");
+        Set<Blueprint> diff = new HashSet<>();
+        for (Blueprint blueprint : blueprintsInDatabase) {
+            if (blueprint.getStatus().equals(DEFAULT) && defaultBlueprintCache.defaultBlueprints().entrySet()
+                    .stream()
+                    .noneMatch(bp -> bp.getKey().equals(blueprint.getName()))) {
+                diff.add(blueprint);
             }
         }
         LOGGER.debug("Finished to collect the default blueprints which are missing: {}.", diff);
