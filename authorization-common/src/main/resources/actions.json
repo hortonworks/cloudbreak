@@ -184,5 +184,65 @@
     "resourceType": "ENVIRONMENT",
     "actionType": "RESOURCE_INDEPENDENT",
     "legacyRight": "environments/read"
+  },
+  "CREATE_DATALAKE":  {
+    "right": "datalake/createDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "DESCRIBE_DATALAKE":  {
+    "right": "datalake/describeDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/read"
+  },
+  "DESCRIBE_DETAILED_DATALAKE":  {
+    "right": "datalake/describeDetailedDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/read"
+  },
+  "DELETE_DATALAKE":  {
+    "right": "datalake/deleteDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "REPAIR_DATALAKE":  {
+    "right": "datalake/repairDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "SYNC_DATALAKE":  {
+    "right": "datalake/syncDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "RETRY_DATALAKE_OPERATION":  {
+    "right": "datalake/retryDatalakeOperation",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "START_DATALAKE":  {
+    "right": "datalake/startDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "STOP_DATALAKE":  {
+    "right": "datalake/stopDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "UPGRADE_DATALAKE": {
+    "right": "datalake/upgradeDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
   }
 }

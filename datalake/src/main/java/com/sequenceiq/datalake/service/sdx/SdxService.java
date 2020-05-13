@@ -594,6 +594,11 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     @Override
+    public List<String> getResourceCrnsInAccount() {
+        return sdxClusterRepository.findAllCrnInAccount(ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
     public AuthorizationResourceType getResourceType() {
         return AuthorizationResourceType.DATALAKE;
     }

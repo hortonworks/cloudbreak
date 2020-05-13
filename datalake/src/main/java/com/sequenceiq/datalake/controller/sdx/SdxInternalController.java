@@ -33,7 +33,7 @@ public class SdxInternalController implements SdxInternalEndpoint {
     private SdxMetricService metricService;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public SdxClusterResponse create(String name, @Valid SdxInternalClusterRequest createSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Pair<SdxCluster, FlowIdentifier> result = sdxService.createSdx(userCrn, name, createSdxClusterRequest, createSdxClusterRequest.getStackV4Request());
