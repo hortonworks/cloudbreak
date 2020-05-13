@@ -1,5 +1,9 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.yarn;
 
+import static java.lang.String.format;
+
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -20,7 +24,6 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYar
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
@@ -40,12 +43,9 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
-
-import java.util.List;
-
-import static java.lang.String.format;
 
 @Component
 public class YarnCloudProvider extends AbstractCloudProvider {
@@ -165,8 +165,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
-        return network.withNetworkCIDR(yarnProperties.getNetworkCidr())
-                .withYarn(environmentNetworkParameters());
+        return network.withYarn(environmentNetworkParameters());
     }
 
     @Override
