@@ -22,6 +22,8 @@ public enum EnvironmentStatus {
     FREEIPA_CREATION_IN_PROGRESS("Free IPA creation in progress"),
     FREEIPA_DELETE_IN_PROGRESS("Free IPA deletion in progress"),
 
+    XP_DELETE_IN_PROGRESS("Experience delete in progress"),
+
     CLUSTER_DEFINITION_CLEANUP_PROGRESS("Cleaning up cluster definitions"),
 
     UMS_RESOURCE_DELETE_IN_PROGRESS("User resources deletion in progress"),
