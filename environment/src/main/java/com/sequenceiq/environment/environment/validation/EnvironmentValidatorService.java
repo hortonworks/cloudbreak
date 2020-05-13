@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.validation;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
@@ -18,6 +19,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
@@ -30,6 +33,7 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
@@ -61,6 +65,8 @@ public class EnvironmentValidatorService {
 
     private final CredentialService credentialService;
 
+    private final EntitlementService entitlementService;
+
     private Set<String> enabledParentPlatforms;
 
     private Set<String> enabledChildPlatforms;
@@ -71,7 +77,8 @@ public class EnvironmentValidatorService {
             EnvironmentResourceService environmentResourceService,
             CredentialService credentialService,
             @Value("${environment.enabledParentPlatforms}") Set<String> enabledParentPlatforms,
-            @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
+            @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms,
+            EntitlementService entitlementService) {
         this.environmentRegionValidator = environmentRegionValidator;
         this.networkCreationValidator = networkCreationValidator;
         this.platformParameterService = platformParameterService;
@@ -79,6 +86,7 @@ public class EnvironmentValidatorService {
         this.credentialService = credentialService;
         this.enabledChildPlatforms = enabledChildPlatforms;
         this.enabledParentPlatforms = enabledParentPlatforms;
+        this.entitlementService = entitlementService;
     }
 
     public ValidationResultBuilder validateRegionsAndLocation(String location, Set<String> requestedRegions,
@@ -176,6 +184,47 @@ public class EnvironmentValidatorService {
             }
         }
         return validationResultBuilder.build();
+    }
+
+    public ValidationResult validateRazEnablement(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        boolean razEntitlement = entitlementService.razEnabled(creationDto.getCreator(), Crn.safeFromString(creationDto.getCreator()).getAccountId());
+        if (creationDto.getRazConfiguration() != null && creationDto.getRazConfiguration().isRazEnabled()) {
+            if (!razEntitlement) {
+                resultBuilder.error("Provisioning Ranger Raz is not enabled for this account.");
+            }
+            if (!AZURE.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
+                resultBuilder.error("Provisioning Ranger Raz is only valid for Microsft Azure.");
+            }
+            if (StringUtils.isEmpty(creationDto.getRazConfiguration().getSecurityGroupIdForRaz())) {
+                resultBuilder.error("Ranger Raz security group cannot be empty.");
+            }
+        }
+        return resultBuilder.build();
+    }
+
+    /**
+     * Once Ranger Raz is enabled, it cannot be disabled or enabled.  Only the security group may change.
+     */
+    public ValidationResult validateRazModification(EnvironmentEditDto editDto, Environment environment) {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        boolean razEntitlement = entitlementService.razEnabled(environment.getCreator(), Crn.safeFromString(environment.getCreator()).getAccountId());
+        if (editDto.getRazConfiguration() != null) {
+            if (!razEntitlement) {
+                resultBuilder.error("Provisioning Ranger Raz is not enabled for this account.");
+            }
+            if (!environment.getRazEnabled()) {
+                resultBuilder.error("Ranger Raz is not enabled for this account.");
+            }
+            if (!AZURE.name().equalsIgnoreCase(environment.getCloudPlatform())) {
+                resultBuilder.error("Provisioning Ranger Raz is only valid for Microsft Azure.");
+            }
+            if (editDto.getRazConfiguration().getSecurityGroupIdForRaz() != null
+                    && editDto.getRazConfiguration().getSecurityGroupIdForRaz().isEmpty()) {
+                resultBuilder.error("Securty Group for Ranger Raz cannot be empty");
+            }
+        }
+        return resultBuilder.build();
     }
 
     private void fetchSecurityGroup(EnvironmentEditDto editDto, Environment environment, String securityGroupId) {

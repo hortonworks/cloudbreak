@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
@@ -144,6 +145,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private ResourceService resourceService;
 
+    @Inject
+    private RazHelper razHelper;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -265,26 +269,40 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
         if (source.getType() == StackType.DATALAKE) {
             AccountMapping accountMapping = isCloudStorageConfigured(source) ? source.getCluster().getFileSystem().getCloudStorage().getAccountMapping() : null;
             if (accountMapping != null) {
-                builder.withAccountMappingView(new AccountMappingView(accountMapping.getGroupMappings(), accountMapping.getUserMappings()));
+                builder.withAccountMappingView(new AccountMappingView(
+                        accountMapping.getGroupMappings(),
+                        accountMapping.getUserMappings(),
+                        razHelper.buildUserMapping(environment.getRazConfiguration()))
+                );
             } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK) {
                 Map<String, String> groupMappings;
                 Map<String, String> userMappings;
+                Map<String, String> razMappings = Map.of();
                 String virtualGroup = getMockVirtualGroup(virtualGroupRequest);
                 switch (source.getCloudPlatform()) {
                     case AWS:
                         groupMappings = awsMockAccountMappingService.getGroupMappings(source.getRegion(), credential, virtualGroup);
                         userMappings = awsMockAccountMappingService.getUserMappings(source.getRegion(), credential);
+                        razMappings = awsMockAccountMappingService.getRazMappings();
                         break;
                     case AZURE:
                         groupMappings = azureMockAccountMappingService.getGroupMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
                                 credential, virtualGroup);
                         userMappings = azureMockAccountMappingService.getUserMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
                                 credential);
+                        if (razHelper.shouldRazBeConfigured(environment.getRazConfiguration() != null && environment.getRazConfiguration().isRazEnabled(),
+                                environment.getCreator(),
+                                Crn.safeFromString(environment.getCreator()),
+                                CloudPlatform.valueOf(credential.cloudPlatform()))) {
+                            razMappings = azureMockAccountMappingService.getRazMappings(
+                                    AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME, credential
+                            );
+                        }
                         break;
                     default:
                         return;
                 }
-                builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings));
+                builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings, razMappings));
             }
         }
     }

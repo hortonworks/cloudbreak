@@ -101,6 +101,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(value = EnvironmentModelDescription.PARENT_ENVIRONMENT_NAME)
     private String parentEnvironmentName;
 
+    @ApiModelProperty(EnvironmentModelDescription.RAZ_ENABLED)
+    private RazConfigurationRequest razConfiguration;
+
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
     }
@@ -253,5 +256,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setProxyConfigName(String proxyConfigName) {
         this.proxyConfigName = proxyConfigName;
+    }
+
+    public RazConfigurationRequest getRazConfiguration() {
+        return razConfiguration;
+    }
+
+    public void setRazConfiguration(RazConfigurationRequest razConfiguration) {
+        this.razConfiguration = razConfiguration;
     }
 }

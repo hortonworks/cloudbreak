@@ -44,15 +44,20 @@ public class KnoxIdBrokerConfigProvider extends AbstractRoleConfigProvider {
                         ? AccountMappingView.EMPTY_MAPPING : source.getAccountMappingView();
                 String userMappings = getAccountMappingSetting(accountMappingView.getUserMappings());
                 String groupMappings = getAccountMappingSetting(accountMappingView.getGroupMappings());
+                String razMappings = getAccountMappingSetting(accountMappingView.getRazMappings());
                 switch (getCloudPlatform(source)) {
                     case AWS:
                         config = List.of(config("idbroker_aws_user_mapping", userMappings),
                                 config("idbroker_aws_group_mapping", groupMappings));
                         break;
                     case AZURE:
+                        ClouderaManagerRepo cmRepo = source.getProductDetailsView().getCm();
+                        if (CMRepositoryVersionUtil.isRazConfigurationSupported(cmRepo) && !razMappings.isEmpty()) {
+                            userMappings = userMappings + ";" + getAccountMappingSetting(accountMappingView.getRazMappings());
+                        }
+
                         config = new ArrayList<>(List.of(config("idbroker_azure_user_mapping", userMappings),
                                         config("idbroker_azure_group_mapping", groupMappings)));
-                        ClouderaManagerRepo cmRepo = source.getProductDetailsView().getCm();
                         if (CMRepositoryVersionUtil.isIdBrokerManagedIdentitySupported(cmRepo)) {
                             String idBrokerManagedIdentity = getIdBrokerManagedIdentity(source.getFileSystemConfigurationView());
                             if (Objects.nonNull(idBrokerManagedIdentity)) {

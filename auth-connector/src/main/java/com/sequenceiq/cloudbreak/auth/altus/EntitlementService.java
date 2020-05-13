@@ -44,6 +44,10 @@ public class EntitlementService {
         return isEntitlementRegistered(actorCrn, accountId, "CDP_CLOUD_STORAGE_VALIDATION");
     }
 
+    public boolean razEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, "CDP_RAZ");
+    }
+
     public boolean runtimeUpgradeEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, "CDP_RUNTIME_UPGRADE");
     }

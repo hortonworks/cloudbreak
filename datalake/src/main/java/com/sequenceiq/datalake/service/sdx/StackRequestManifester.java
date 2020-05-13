@@ -46,7 +46,9 @@ import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.request.RazConfigurationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.RazConfigurationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 
 @Service
@@ -118,6 +120,9 @@ public class StackRequestManifester {
             setupClusterRequest(stackRequest);
             prepareTelemetryForStack(stackRequest, environment, sdxCluster);
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
+            if (environment.getRazConfiguration().isRazEnabled()) {
+                setupRazConfiguration(stackRequest, environment.getRazConfiguration());
+            }
             cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment, new ValidationResult.ValidationResultBuilder());
             return stackRequest;
         } catch (IOException e) {
@@ -252,5 +257,12 @@ public class StackRequestManifester {
             LOGGER.info("{} for stack {} in environment {}.", cloudStorage == null ? "Cloud storage is disabled" : "Applying user-provided mappings",
                     stackName, environmentCrn);
         }
+    }
+
+    private void setupRazConfiguration(StackV4Request stackRequest, RazConfigurationResponse response) {
+        RazConfigurationRequest request = new RazConfigurationRequest();
+        request.setRazEnabled(response.isRazEnabled());
+        request.setSecurityGroupIdForRaz(response.getSecurityGroupIdForRaz());
+        stackRequest.setRazConfigurationRequest(request);
     }
 }

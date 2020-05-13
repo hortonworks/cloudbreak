@@ -75,6 +75,8 @@ public class EnvironmentDto implements Payload {
 
     private ProxyConfig proxyConfig;
 
+    private RazConfigurationDto razConfiguration;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -316,6 +318,14 @@ public class EnvironmentDto implements Payload {
         this.proxyConfig = proxyConfig;
     }
 
+    public RazConfigurationDto getRazConfiguration() {
+        return razConfiguration;
+    }
+
+    public void setRazConfiguration(RazConfigurationDto razConfiguration) {
+        this.razConfiguration = razConfiguration;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentDto{"
@@ -388,6 +398,8 @@ public class EnvironmentDto implements Payload {
         private String parentEnvironmentCloudPlatform;
 
         private ProxyConfig proxyConfig;
+
+        private RazConfigurationDto razConfiguration;
 
         private Builder() {
         }
@@ -537,6 +549,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withRazConfiguration(RazConfigurationDto razConfiguration) {
+            this.razConfiguration = razConfiguration;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -568,6 +585,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setParentEnvironmentName(parentEnvironmentName);
             environmentDto.setParentEnvironmentCloudPlatform(parentEnvironmentCloudPlatform);
             environmentDto.setProxyConfig(proxyConfig);
+            environmentDto.setRazConfiguration(razConfiguration);
             return environmentDto;
         }
     }

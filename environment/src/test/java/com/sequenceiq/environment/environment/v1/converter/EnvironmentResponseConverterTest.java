@@ -34,6 +34,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentB
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.RazConfigurationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
@@ -49,6 +50,7 @@ import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
+import com.sequenceiq.environment.environment.dto.RazConfigurationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -139,6 +141,7 @@ public class EnvironmentResponseConverterTest {
         assertEquals(proxyResponse, actual.getProxyConfig());
         assertEquals(environmentNetworkResponse, actual.getNetwork());
         assertSecurityAccess(environment.getSecurityAccess(), actual.getSecurityAccess());
+        assertRazConfiguration(environment.getRazConfiguration(), actual.getRazConfiguration());
 
         verify(credentialConverter).convert(environment.getCredential());
         verify(freeIpaConverter).convert(environment.getFreeIpaCreation());
@@ -191,6 +194,7 @@ public class EnvironmentResponseConverterTest {
         assertEquals(environment.getParentEnvironmentName(), actual.getParentEnvironmentName());
         assertEquals(proxyResponse, actual.getProxyConfig());
         assertEquals(environmentNetworkResponse, actual.getNetwork());
+        assertRazConfiguration(environment.getRazConfiguration(), actual.getRazConfiguration());
 
         verify(credentialViewConverter).convert(environment.getCredentialView());
         verify(freeIpaConverter).convert(environment.getFreeIpaCreation());
@@ -232,6 +236,11 @@ public class EnvironmentResponseConverterTest {
         assertEquals(azureParametersDto.getAzureResourceGroupDto().getName(), azureEnvironmentParameters.getResourceGroup().getName());
     }
 
+    private void assertRazConfiguration(RazConfigurationDto razConfiguration, RazConfigurationResponse actual) {
+        assertEquals(razConfiguration.isRazEnabled(), actual.isRazEnabled());
+        assertEquals(razConfiguration.getSecurityGroupIdForRaz(), actual.getSecurityGroupIdForRaz());
+    }
+
     private EnvironmentDto createEnvironmentDto(CloudPlatform cloudPlatform) {
         return EnvironmentDto.builder()
                 .withResourceCrn("resource-crn")
@@ -258,6 +267,14 @@ public class EnvironmentResponseConverterTest {
                 .withProxyConfig(new ProxyConfig())
                 .withNetwork(NetworkDto.builder().build())
                 .withSecurityAccess(createSecurityAccess())
+                .withRazConfiguration(createRazConfiguration())
+                .build();
+    }
+
+    private RazConfigurationDto createRazConfiguration() {
+        return RazConfigurationDto.builder()
+                .withRazEnabled(true)
+                .withSecurityGroupIdForRaz("raz-group")
                 .build();
     }
 

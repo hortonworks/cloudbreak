@@ -49,6 +49,10 @@ public class AwsMockAccountMappingService {
         return replaceAccountId(MOCK_IDBROKER_USER_MAPPINGS, accountId);
     }
 
+    public Map<String, String> getRazMappings() {
+        return Map.of();
+    }
+
     private String getAccountId(String region, Credential credential) {
         IdentityService identityService = getIdentityService(credential.cloudPlatform());
         return identityService.getAccountId(region, credentialConverter.convert(credential));

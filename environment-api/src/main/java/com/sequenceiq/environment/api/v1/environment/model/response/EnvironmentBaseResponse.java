@@ -92,6 +92,9 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
     @ApiModelProperty(EnvironmentModelDescription.PARENT_ENVIRONMENT_CLOUD_PLATFORM)
     private String parentEnvironmentCloudPlatform;
 
+    @ApiModelProperty(EnvironmentModelDescription.RAZ_ENABLED)
+    private RazConfigurationResponse razConfiguration;
+
     public String getCrn() {
         return crn;
     }
@@ -303,5 +306,13 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
 
     public void setParentEnvironmentCloudPlatform(String parentEnvironmentCloudPlatform) {
         this.parentEnvironmentCloudPlatform = parentEnvironmentCloudPlatform;
+    }
+
+    public RazConfigurationResponse getRazConfiguration() {
+        return razConfiguration;
+    }
+
+    public void setRazConfiguration(RazConfigurationResponse razConfiguration) {
+        this.razConfiguration = razConfiguration;
     }
 }

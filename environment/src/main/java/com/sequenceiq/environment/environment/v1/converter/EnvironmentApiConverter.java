@@ -20,12 +20,14 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EditRazConfigurationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.RazConfigurationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
@@ -43,6 +45,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
+import com.sequenceiq.environment.environment.dto.RazConfigurationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -113,7 +116,8 @@ public class EnvironmentApiConverter {
                         .build())
                 .withParameters(paramsToParametersDto(request, cloudPlatform))
                 .withParentEnvironmentName(request.getParentEnvironmentName())
-                .withProxyConfigName(request.getProxyConfigName());
+                .withProxyConfigName(request.getProxyConfigName())
+                .withRazConfiguration(razConfigurationRequestToDto(request.getRazConfiguration()));
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
@@ -222,6 +226,29 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
+    private RazConfigurationDto razConfigurationRequestToDto(EditRazConfigurationRequest razConfigurationRequest) {
+        if (razConfigurationRequest == null) {
+            return RazConfigurationDto.builder()
+                    .withRazEnabled(false)
+                    .build();
+        }
+        return RazConfigurationDto.builder()
+                .withSecurityGroupIdForRaz(razConfigurationRequest.getSecurityGroupIdForRaz())
+                .build();
+    }
+
+    private RazConfigurationDto razConfigurationRequestToDto(RazConfigurationRequest razConfigurationRequest) {
+        if (razConfigurationRequest == null) {
+            return RazConfigurationDto.builder()
+                    .withRazEnabled(false)
+                    .build();
+        }
+        return RazConfigurationDto.builder()
+                .withRazEnabled(razConfigurationRequest.getRazEnabled())
+                .withSecurityGroupIdForRaz(razConfigurationRequest.getSecurityGroupIdForRaz())
+                .build();
+    }
+
     private AuthenticationDto authenticationRequestToDto(EnvironmentAuthenticationRequest authentication) {
         AuthenticationDto.Builder builder = AuthenticationDto.builder();
         if (authentication != null && (StringUtils.hasText(authentication.getPublicKey()) || StringUtils.hasText(authentication.getPublicKeyId()))) {
@@ -268,6 +295,9 @@ public class EnvironmentApiConverter {
                 accountTelemetryService.getOrDefault(accountId).getFeatures())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
         NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams, null)));
+        NullUtil.doIfNotNull(request.getEditRazConfigurationRequest(),
+                razConfigurationRequest -> builder.withRazConfiguration(razConfigurationRequestToDto(razConfigurationRequest)));
+
         return builder.build();
     }
 

@@ -135,6 +135,12 @@ public class Environment implements AuthResource {
     @ManyToOne
     private ProxyConfig proxyConfig;
 
+    @Column(name = "raz_enabled")
+    private boolean razEnabled;
+
+    @Column(name = "securitygroup_id_raz")
+    private String securityGroupIdForRaz;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
         tags = new Json(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
@@ -432,5 +438,21 @@ public class Environment implements AuthResource {
 
     public void setProxyConfig(ProxyConfig proxyConfig) {
         this.proxyConfig = proxyConfig;
+    }
+
+    public boolean getRazEnabled() {
+        return razEnabled;
+    }
+
+    public void setRazEnabled(Boolean razEnabled) {
+        this.razEnabled = razEnabled;
+    }
+
+    public String getSecurityGroupIdForRaz() {
+        return securityGroupIdForRaz;
+    }
+
+    public void setSecurityGroupIdForRaz(String securityGroupIdForRaz) {
+        this.securityGroupIdForRaz = securityGroupIdForRaz;
     }
 }

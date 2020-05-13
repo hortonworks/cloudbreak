@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.RazHelper;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -221,6 +222,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private ResourceService resourceService;
 
+    @Mock
+    private RazHelper razHelper;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
@@ -251,6 +255,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getResourceCrn()).thenReturn("crn");
         when(accountTagClientService.list()).thenReturn(new HashMap<>());
         when(entitlementService.internalTenant(anyString(), anyString())).thenReturn(true);
+        when(razHelper.buildUserMapping(any())).thenReturn(Map.of());
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.PLACEMENT_SETTINGS;
+import static com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription.RAZ_CONFIGURATION;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Reque
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.RazConfigurationRequest;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -94,6 +96,9 @@ public class StackV4Request extends StackV4Base {
     @Valid
     @ApiModelProperty(StackModelDescription.EXTERNAL_DATABASE)
     private DatabaseRequest externalDatabase;
+
+    @ApiModelProperty(RAZ_CONFIGURATION)
+    private RazConfigurationRequest razConfigurationRequest;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -220,5 +225,13 @@ public class StackV4Request extends StackV4Base {
 
     public void setExternalDatabase(DatabaseRequest externalDatabase) {
         this.externalDatabase = externalDatabase;
+    }
+
+    public RazConfigurationRequest getRazConfigurationRequest() {
+        return razConfigurationRequest;
+    }
+
+    public void setRazConfigurationRequest(RazConfigurationRequest razConfigurationRequest) {
+        this.razConfigurationRequest = razConfigurationRequest;
     }
 }

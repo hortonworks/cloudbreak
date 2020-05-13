@@ -82,6 +82,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private ProxyViewResponse proxyConfig;
 
+        private RazConfigurationResponse razConfiguration;
+
         private Builder() {
         }
 
@@ -195,6 +197,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withRazConfiguration(RazConfigurationResponse razConfiguration) {
+            this.razConfiguration = razConfiguration;
+            return this;
+        }
+
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -219,6 +226,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setTags(tags);
             simpleEnvironmentResponse.setParentEnvironmentName(parentEnvironmentName);
             simpleEnvironmentResponse.setProxyConfig(proxyConfig);
+            simpleEnvironmentResponse.setRazConfiguration(razConfiguration);
             return simpleEnvironmentResponse;
         }
     }

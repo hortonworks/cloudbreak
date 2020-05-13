@@ -45,6 +45,9 @@ public class EnvironmentEditRequest {
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
 
+    @ApiModelProperty(EnvironmentModelDescription.RAZ_CONFIGURATION)
+    private EditRazConfigurationRequest editRazConfigurationRequest;
+
     public String getDescription() {
         return description;
     }
@@ -115,5 +118,13 @@ public class EnvironmentEditRequest {
 
     public void setAws(AwsEnvironmentParameters aws) {
         this.aws = aws;
+    }
+
+    public EditRazConfigurationRequest getEditRazConfigurationRequest() {
+        return editRazConfigurationRequest;
+    }
+
+    public void setEditRazConfigurationRequest(EditRazConfigurationRequest editRazConfigurationRequest) {
+        this.editRazConfigurationRequest = editRazConfigurationRequest;
     }
 }

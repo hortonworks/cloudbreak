@@ -44,6 +44,10 @@ public class KnoxIdBrokerConfigProviderTest {
             Map.entry("group5", "role5")
     );
 
+    private static final Map<String, String> RAZ_MAPPINGS = fixedIterationMapOfEntries(
+            Map.entry("rangerraz", "role6")
+    );
+
     private static final String USER_MAPPINGS_STR = "user1=role1;user2=role2;user3=role3";
 
     private static final String GROUP_MAPPINGS_STR = "group4=role4;group5=role5";
@@ -63,6 +67,8 @@ public class KnoxIdBrokerConfigProviderTest {
     private static final String IDBROKER_GCP_USER_MAPPING = "idbroker_gcp_user_mapping";
 
     private static final String IDBROKER_GCP_GROUP_MAPPING = "idbroker_gcp_group_mapping";
+
+    private static final String RAZ_MAPPINGS_STR = "rangerraz=role6";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -115,7 +121,7 @@ public class KnoxIdBrokerConfigProviderTest {
     public void getRoleConfigWhenIdBrokerAndNoFileSystemAndAws() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AWS)
-                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, Map.of()))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
@@ -133,7 +139,7 @@ public class KnoxIdBrokerConfigProviderTest {
     public void getRoleConfigWhenIdBrokerAndNoFileSystemAndAzure() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
-                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, Map.of()))
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .build();
 
@@ -152,7 +158,7 @@ public class KnoxIdBrokerConfigProviderTest {
     public void getRoleConfigWhenIdBrokerAndNoFileSystemAndGcp() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.GCP)
-                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, Map.of()))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
@@ -170,7 +176,7 @@ public class KnoxIdBrokerConfigProviderTest {
     public void getRoleConfigWhenIdBrokerAndNoFileSystemAndYarn() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.YARN)
-                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, Map.of()))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
@@ -205,7 +211,7 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AWS)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, Map.of()))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
@@ -227,7 +233,7 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, Map.of()))
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .build();
 
@@ -236,6 +242,29 @@ public class KnoxIdBrokerConfigProviderTest {
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
                 Map.entry(IDBROKER_AZURE_USER_MAPPING, USER_MAPPINGS_STR),
+                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, GROUP_MAPPINGS_STR)
+        );
+        Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
+        assertThat(configNameToVariableNameMap).isEmpty();
+    }
+
+    @Test
+    public void getRoleConfigWhenIdBrokerAndAdlsFileSystemForRaz() {
+        BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock(BaseFileSystemConfigurationsView.class);
+        when(fileSystemConfigurationsView.getType()).thenReturn("ADLS");
+
+        TemplatePreparationObject tpo = new Builder()
+                .withCloudPlatform(CloudPlatform.AZURE)
+                .withFileSystemConfigurationView(fileSystemConfigurationsView)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, RAZ_MAPPINGS))
+                .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0), null)
+                .build();
+
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
+
+        Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
+        assertThat(configNameToValueMap).containsOnly(
+                Map.entry(IDBROKER_AZURE_USER_MAPPING, USER_MAPPINGS_STR + ";" + RAZ_MAPPINGS_STR),
                 Map.entry(IDBROKER_AZURE_GROUP_MAPPING, GROUP_MAPPINGS_STR)
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
@@ -252,7 +281,7 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, Map.of()))
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .build();
 
@@ -276,7 +305,7 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, Map.of()))
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_3_0), null)
                 .build();
 
@@ -299,7 +328,7 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, Map.of()))
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .build();
 
@@ -322,7 +351,7 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, Map.of()))
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .build();
 
@@ -345,7 +374,7 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, Map.of()))
                 .withProductDetails(generateCMRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .build();
 
@@ -368,7 +397,7 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.GCP)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS, Map.of()))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);

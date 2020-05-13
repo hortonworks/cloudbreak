@@ -176,6 +176,9 @@ public class EnvironmentCreationService {
         ValidationResult freeIpaCreationValidation = validatorService.validateFreeIpaCreation(creationDto.getFreeIpaCreation());
         validationBuilder.merge(freeIpaCreationValidation);
 
+        ValidationResult razValidation = validatorService.validateRazEnablement(creationDto);
+        validationBuilder.merge(razValidation);
+
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());

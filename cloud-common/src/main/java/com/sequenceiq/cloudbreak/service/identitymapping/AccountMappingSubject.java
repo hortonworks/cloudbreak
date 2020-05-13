@@ -21,6 +21,11 @@ public class AccountMappingSubject {
     public static final Set<String> RANGER_AUDIT_USERS = Set.of("kafka", "solr", "knox", "atlas");
 
     /**
+     * Immutable set of ranger raz service users for Ranger Raz access.
+     */
+    public static final Set<String> RANGER_RAZ_USER = Set.of("rangerraz");
+
+    /**
      * Convenience immutable set comprising the union of {@link #DATA_ACCESS_USERS} and {@link #RANGER_AUDIT_USERS}.
      */
     public static final Set<String> DATA_ACCESS_AND_RANGER_AUDIT_USERS;

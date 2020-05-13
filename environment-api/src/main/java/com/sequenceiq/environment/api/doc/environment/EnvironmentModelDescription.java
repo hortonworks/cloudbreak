@@ -86,6 +86,10 @@ public class EnvironmentModelDescription {
     public static final String PROXYCONFIG_NAME = "Name of the proxyconfig of the environment.";
     public static final String PROXYCONFIG_RESPONSE = "ProxyConfig attached to the environment.";
 
+    public static final String RAZ_CONFIGURATION = "Ranger Raz configuration of the environmnet.";
+    public static final String RAZ_ENABLED = "Ranger RAZ service enabled for ADLSv2.";
+    public static final String RAZ_SECURITY_GROUP = "Ranger Raz security group for the environment.";
+
     private EnvironmentModelDescription() {
     }
 }

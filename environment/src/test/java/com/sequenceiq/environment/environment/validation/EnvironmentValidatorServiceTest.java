@@ -4,6 +4,7 @@ import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -22,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -32,10 +34,12 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
+import com.sequenceiq.environment.environment.dto.RazConfigurationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
@@ -64,6 +68,9 @@ class EnvironmentValidatorServiceTest {
     @Mock
     private CredentialService credentialService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private EnvironmentValidatorService underTest;
 
@@ -76,7 +83,8 @@ class EnvironmentValidatorServiceTest {
                 environmentResourceService,
                 credentialService,
                 singleton(CloudPlatform.AWS.name()),
-                singleton(CloudPlatform.YARN.name())
+                singleton(CloudPlatform.YARN.name()),
+                entitlementService
         );
     }
 
@@ -336,6 +344,155 @@ class EnvironmentValidatorServiceTest {
 
         ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
         assertEquals("1. 'GCP' platform is not supported for child environment.", validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void shouldFailOnRazEntitlementCheck() {
+        when(entitlementService.razEnabled(any(), any())).thenReturn(false);
+        RazConfigurationDto razConfig = RazConfigurationDto.builder()
+                .withRazEnabled(true)
+                .withSecurityGroupIdForRaz("razsecurity")
+                .build();
+
+        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
+                .withRazConfiguration(razConfig)
+                .withCreator(USER_CRN)
+                .withCloudPlatform("AZURE")
+                .build();
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRazEnablement(creationDto));
+        assertEquals("1. Provisioning Ranger Raz is not enabled for this account.", result.getFormattedErrors());
+    }
+
+    @Test
+    void shouldFailRazOnNonAzure() {
+        when(entitlementService.razEnabled(any(), any())).thenReturn(true);
+        RazConfigurationDto razConfig = RazConfigurationDto.builder()
+                .withRazEnabled(true)
+                .withSecurityGroupIdForRaz("razsecurity")
+                .build();
+
+        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
+                .withRazConfiguration(razConfig)
+                .withCreator(USER_CRN)
+                .withCloudPlatform("GCP")
+                .build();
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRazEnablement(creationDto));
+        assertEquals("1. Provisioning Ranger Raz is only valid for Microsft Azure.", result.getFormattedErrors());
+    }
+
+    @Test
+    void shouldFailRazOnNoSecurityGroup() {
+        when(entitlementService.razEnabled(any(), any())).thenReturn(true);
+        RazConfigurationDto razConfig = RazConfigurationDto.builder()
+                .withRazEnabled(true)
+                .build();
+
+        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
+                .withRazConfiguration(razConfig)
+                .withCreator(USER_CRN)
+                .withCloudPlatform("AZURE")
+                .build();
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRazEnablement(creationDto));
+        assertEquals("1. Ranger Raz security group cannot be empty.", result.getFormattedErrors());
+    }
+
+    @Test
+    void testRazNotEnabled() {
+        when(entitlementService.razEnabled(any(), any())).thenReturn(true);
+        RazConfigurationDto razConfig = RazConfigurationDto.builder()
+                .withRazEnabled(false)
+                .withSecurityGroupIdForRaz("razsecurity")
+                .build();
+
+        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
+                .withRazConfiguration(razConfig)
+                .withCreator(USER_CRN)
+                .withCloudPlatform("AZURE")
+                .build();
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRazEnablement(creationDto));
+        assertFalse(result.hasError());
+    }
+
+    @Test
+    void testRazModificationNoEntitlement() {
+        when(entitlementService.razEnabled(any(), any())).thenReturn(false);
+        Environment environment = new Environment();
+        environment.setCreator(USER_CRN);
+        environment.setRazEnabled(false);
+        environment.setCloudPlatform("AZURE");
+
+        RazConfigurationDto razConfig = RazConfigurationDto.builder()
+                .withRazEnabled(true)
+                .withSecurityGroupIdForRaz("security")
+                .build();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withRazConfiguration(razConfig)
+                .build();
+
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRazModification(editDto, environment));
+        assertEquals("1. Provisioning Ranger Raz is not enabled for this account.\n" +
+                "2. Ranger Raz is not enabled for this account.", result.getFormattedErrors());
+    }
+
+    @Test
+    void testRazModificationNotEnabled() {
+        when(entitlementService.razEnabled(any(), any())).thenReturn(true);
+        Environment environment = new Environment();
+        environment.setCreator(USER_CRN);
+        environment.setRazEnabled(false);
+        environment.setCloudPlatform("AZURE");
+
+        RazConfigurationDto razConfig = RazConfigurationDto.builder()
+                .withRazEnabled(true)
+                .withSecurityGroupIdForRaz("security")
+                .build();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withRazConfiguration(razConfig)
+                .build();
+
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRazModification(editDto, environment));
+        assertEquals("1. Ranger Raz is not enabled for this account.", result.getFormattedErrors());
+    }
+
+    @Test
+    void testRazModificationNotAzure() {
+        when(entitlementService.razEnabled(any(), any())).thenReturn(true);
+        Environment environment = new Environment();
+        environment.setCreator(USER_CRN);
+        environment.setRazEnabled(false);
+        environment.setCloudPlatform("GCS");
+
+        RazConfigurationDto razConfig = RazConfigurationDto.builder()
+                .withRazEnabled(true)
+                .withSecurityGroupIdForRaz("security")
+                .build();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withRazConfiguration(razConfig)
+                .build();
+
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRazModification(editDto, environment));
+        assertEquals("1. Provisioning Ranger Raz is only valid for Microsft Azure.\n" +
+                "2. Ranger Raz is not enabled for this account.", result.getFormattedErrors());
+    }
+
+    @Test
+    void testRazModificationChangeSecurity() {
+        when(entitlementService.razEnabled(any(), any())).thenReturn(true);
+        Environment environment = new Environment();
+        environment.setCreator(USER_CRN);
+        environment.setRazEnabled(true);
+        environment.setCloudPlatform("AZURE");
+
+        RazConfigurationDto razConfig = RazConfigurationDto.builder()
+                .withRazEnabled(true)
+                .withSecurityGroupIdForRaz("security new")
+                .build();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withRazConfiguration(razConfig)
+                .build();
+
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRazModification(editDto, environment));
+        assertFalse(result.hasError());
     }
 
     private Environment aValidEnvirontmentWithParent() {

@@ -104,7 +104,8 @@ public class EnvironmentDtoConverter {
                 .withTags(environment.getEnvironmentTags())
                 .withSecurityAccess(environmentToSecurityAccessDto(environment))
                 .withAdminGroupName(environment.getAdminGroupName())
-                .withProxyConfig(environment.getProxyConfig());
+                .withProxyConfig(environment.getProxyConfig())
+                .withRazConfiguration(environmentToRazConfigurationDto(environment));
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         doIfNotNull(environment.getParameters(), parameters -> builder.withParameters(
@@ -138,6 +139,11 @@ public class EnvironmentDtoConverter {
         environment.setCreated(System.currentTimeMillis());
         environment.setTags(getTags(creationDto));
         environment.setExperimentalFeaturesJson(creationDto.getExperimentalFeatures());
+
+        environment.setRazEnabled(creationDto.getRazConfiguration().isRazEnabled());
+        if (creationDto.getRazConfiguration().isRazEnabled()) {
+            environment.setSecurityGroupIdForRaz(creationDto.getRazConfiguration().getSecurityGroupIdForRaz());
+        }
         return environment;
     }
 
@@ -147,6 +153,13 @@ public class EnvironmentDtoConverter {
                 .withDisplayName(environment.getLocationDisplayName())
                 .withLongitude(environment.getLongitude())
                 .withLatitude(environment.getLatitude())
+                .build();
+    }
+
+    public RazConfigurationDto environmentToRazConfigurationDto(Environment environment) {
+        return RazConfigurationDto.builder()
+                .withRazEnabled(environment.getRazEnabled())
+                .withSecurityGroupIdForRaz(environment.getSecurityGroupIdForRaz())
                 .build();
     }
 

@@ -25,6 +25,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.RazConfigurationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
@@ -127,6 +128,7 @@ public class EnvironmentModificationService {
         editCloudStorageValidation(editDto, env);
         editTunnelIfChanged(editDto, env);
         editEnvironmentParameters(editDto, env);
+        editRazConfiguration(editDto, env);
         Environment saved = environmentService.save(env);
         return environmentDtoConverter.environmentToDto(saved);
     }
@@ -295,6 +297,19 @@ public class EnvironmentModificationService {
             if (parameters != null) {
                 environment.setParameters(parameters);
             }
+        }
+    }
+
+    private void editRazConfiguration(EnvironmentEditDto editDto, Environment environment) {
+        RazConfigurationDto razConfigurationDto = editDto.getRazConfiguration();
+        if (razConfigurationDto != null) {
+            EnvironmentValidatorService validatorService = environmentService.getValidatorService();
+            ValidationResult validationResult = validatorService.validateRazModification(editDto, environment);
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
+
+            environment.setSecurityGroupIdForRaz(razConfigurationDto.getSecurityGroupIdForRaz());
         }
     }
 

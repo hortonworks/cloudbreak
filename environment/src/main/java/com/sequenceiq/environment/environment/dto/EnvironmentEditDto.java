@@ -31,6 +31,8 @@ public class EnvironmentEditDto {
 
     private final ParametersDto parameters;
 
+    private final RazConfigurationDto razConfiguration;
+
     public EnvironmentEditDto(
             String description,
             String accountId,
@@ -42,7 +44,8 @@ public class EnvironmentEditDto {
             IdBrokerMappingSource idBrokerMappingSource,
             CloudStorageValidation cloudStorageValidation,
             String adminGroupName,
-            ParametersDto parameters) {
+            ParametersDto parameters,
+            RazConfigurationDto razConfiguration) {
         this.description = description;
         this.accountId = accountId;
         this.network = network;
@@ -54,6 +57,7 @@ public class EnvironmentEditDto {
         this.cloudStorageValidation = cloudStorageValidation;
         this.adminGroupName = adminGroupName;
         this.parameters = parameters;
+        this.razConfiguration = razConfiguration;
     }
 
     public String getDescription() {
@@ -100,6 +104,10 @@ public class EnvironmentEditDto {
         return parameters;
     }
 
+    public RazConfigurationDto getRazConfiguration() {
+        return razConfiguration;
+    }
+
     public static EnvironmentEditDtoBuilder builder() {
         return new EnvironmentEditDtoBuilder();
     }
@@ -126,6 +134,8 @@ public class EnvironmentEditDto {
         private String adminGroupName;
 
         private ParametersDto parameters;
+
+        private RazConfigurationDto razConfiguration;
 
         private EnvironmentEditDtoBuilder() {
         }
@@ -185,9 +195,14 @@ public class EnvironmentEditDto {
             return this;
         }
 
+        public EnvironmentEditDtoBuilder withRazConfiguration(RazConfigurationDto razConfiguration) {
+            this.razConfiguration = razConfiguration;
+            return this;
+        }
+
         public EnvironmentEditDto build() {
             return new EnvironmentEditDto(description, accountId, network, authentication, telemetry, securityAccess, tunnel, idBrokerMappingSource,
-                    cloudStorageValidation, adminGroupName, parameters);
+                    cloudStorageValidation, adminGroupName, parameters, razConfiguration);
         }
     }
 }

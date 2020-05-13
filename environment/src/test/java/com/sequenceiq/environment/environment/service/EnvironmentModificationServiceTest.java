@@ -19,6 +19,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -39,6 +40,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.RazConfigurationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
@@ -95,6 +97,11 @@ class EnvironmentModificationServiceTest {
 
     @Mock
     private ValidationResult validationResult;
+
+    @BeforeEach
+    public void setup() {
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+    }
 
     @Test
     void editByName() {
@@ -311,7 +318,6 @@ class EnvironmentModificationServiceTest {
         AwsParameters awsParameters = new AwsParameters();
         awsParameters.setS3guardTableName("existingTable");
         BaseParameters baseParameters = awsParameters;
-        when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(environmentFlowValidatorService.validateParameters(any(), any())).thenReturn(validationResult);
         when(validationResult.hasError()).thenReturn(false);
         when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
@@ -343,7 +349,6 @@ class EnvironmentModificationServiceTest {
         AwsParameters awsParameters = new AwsParameters();
         awsParameters.setS3guardTableName("existingTable");
         BaseParameters baseParameters = awsParameters;
-        when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(environmentFlowValidatorService.validateParameters(any(), any())).thenReturn(validationResult);
         when(validationResult.hasError()).thenReturn(true);
         when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
@@ -576,6 +581,66 @@ class EnvironmentModificationServiceTest {
 
         verify(environmentService).save(any());
         assertTrue(environment.getTelemetry().getFeatures().getClusterLogsCollection().isEnabled());
+    }
+
+    @Test
+    public void testChangeRazConfig() {
+
+        Environment environment = new Environment();
+        environment.setRazEnabled(true);
+        environment.setSecurityGroupIdForRaz("security");
+
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withRazConfiguration(new RazConfigurationDto(false, "security2"))
+                .build();
+        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
+        when(environmentService.save(environment)).thenReturn(environment);
+        when(validatorService.validateRazModification(editDto, environment)).thenReturn(new ValidationResult.ValidationResultBuilder().build());
+
+        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, editDto);
+        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
+
+        verify(environmentService).save(environmentArgumentCaptor.capture());
+        assertEquals("security2", environmentArgumentCaptor.getValue().getSecurityGroupIdForRaz());
+    }
+
+    @Test
+    public void testNoChangeRazConfig() {
+        Environment environment = new Environment();
+        environment.setRazEnabled(true);
+        environment.setSecurityGroupIdForRaz("security");
+
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withDescription("This does not change Raz")
+                .build();
+        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
+        when(environmentService.save(environment)).thenReturn(environment);
+        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, editDto);
+        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
+
+        verify(environmentService).save(environmentArgumentCaptor.capture());
+        assertEquals("security", environmentArgumentCaptor.getValue().getSecurityGroupIdForRaz());
+    }
+
+    @Test
+    public void testChangeRazConfigurationToNull() {
+        Environment environment = new Environment();
+        environment.setRazEnabled(true);
+        environment.setSecurityGroupIdForRaz("security");
+
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withRazConfiguration(new RazConfigurationDto(false, null))
+                .build();
+        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
+        when(environmentService.save(environment)).thenReturn(environment);
+        when(validatorService.validateRazModification(any(), any()))
+                .thenReturn(new ValidationResult.ValidationResultBuilder().error("Security Group can't be null").build());
+        assertThrows(javax.ws.rs.BadRequestException.class, () -> {
+                environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, editDto);
+        });
     }
 
     @Configuration

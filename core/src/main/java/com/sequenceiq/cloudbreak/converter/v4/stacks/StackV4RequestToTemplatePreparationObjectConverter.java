@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.plac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -31,8 +33,10 @@ import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigPro
 import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.RazHelper;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -126,6 +130,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
 
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
+
+    @Inject
+    private RazHelper razHelper;
 
     @Override
     public TemplatePreparationObject convert(StackV4Request source) {
@@ -237,19 +244,31 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
         }
     }
 
+    private Map<String, String> buildRazMappings(StackV4Request request) {
+        Map<String, String> map = new HashMap<String, String>();
+        if (request.getRazConfigurationRequest() != null && request.getRazConfigurationRequest().getRazEnabled()) {
+            map.put("rangerraz", request.getRazConfigurationRequest().getSecurityGroupIdForRaz());
+        }
+        return map;
+    }
+
     private void decorateBuilderWithAccountMapping(StackV4Request source, DetailedEnvironmentResponse environment, Credential credential, Builder builder) {
         if (source.getType() == StackType.DATALAKE) {
             AccountMappingBase accountMapping = isCloudStorageConfigured(source) ? source.getCluster().getCloudStorage().getAccountMapping() : null;
             if (accountMapping != null) {
-                builder.withAccountMappingView(new AccountMappingView(accountMapping.getGroupMappings(), accountMapping.getUserMappings()));
+                builder.withAccountMappingView(
+                        new AccountMappingView(accountMapping.getGroupMappings(), accountMapping.getUserMappings(), buildRazMappings(source))
+                );
             } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK) {
                 Map<String, String> groupMappings;
                 Map<String, String> userMappings;
+                Map<String, String> razMappings = Map.of();
                 switch (source.getCloudPlatform()) {
                     case AWS:
                         groupMappings = awsMockAccountMappingService.getGroupMappings(source.getPlacement().getRegion(), credential,
                                 environment.getAdminGroupName());
                         userMappings = awsMockAccountMappingService.getUserMappings(source.getPlacement().getRegion(), credential);
+                        razMappings = awsMockAccountMappingService.getRazMappings();
                         break;
                     case AZURE:
                         groupMappings = azureMockAccountMappingService.getGroupMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
@@ -257,11 +276,19 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                                 environment.getAdminGroupName());
                         userMappings = azureMockAccountMappingService.getUserMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
                                 credential);
+                        if (razHelper.shouldRazBeConfigured(environment.getRazConfiguration() != null && environment.getRazConfiguration().isRazEnabled(),
+                                environment.getCreator(),
+                                Crn.safeFromString(environment.getCreator()),
+                                CloudPlatform.valueOf(credential.cloudPlatform()))) {
+                            razMappings = azureMockAccountMappingService.getRazMappings(
+                                    AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME, credential
+                            );
+                        }
                         break;
                     default:
                         return;
                 }
-                builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings));
+                builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings, razMappings));
             }
         }
     }

@@ -17,6 +17,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.RazConfigurationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
@@ -26,6 +27,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
+import com.sequenceiq.environment.environment.dto.RazConfigurationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
@@ -91,7 +93,8 @@ public class EnvironmentResponseConverter {
                 .withAzure(getIfNotNull(environmentDto.getParameters(), this::azureEnvParamsToAzureEnvironmentParams))
                 .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn())
                 .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
-                .withParentEnvironmentCloudPlatform(environmentDto.getParentEnvironmentCloudPlatform());
+                .withParentEnvironmentCloudPlatform(environmentDto.getParentEnvironmentCloudPlatform())
+                .withRazConfiguration(razConfigurationDtoToResponse(environmentDto.getRazConfiguration()));
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));
@@ -126,7 +129,9 @@ public class EnvironmentResponseConverter {
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
                 .withAzure(getIfNotNull(environmentDto.getParameters(), this::azureEnvParamsToAzureEnvironmentParams))
-                .withParentEnvironmentName(environmentDto.getParentEnvironmentName());
+                .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
+                .withRazConfiguration(razConfigurationDtoToResponse(environmentDto.getRazConfiguration()));
+
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())));
@@ -204,6 +209,13 @@ public class EnvironmentResponseConverter {
                 .withDisplayName(locationDto.getDisplayName())
                 .withLatitude(locationDto.getLatitude())
                 .withLongitude(locationDto.getLongitude())
+                .build();
+    }
+
+    private RazConfigurationResponse razConfigurationDtoToResponse(RazConfigurationDto razConfiguration) {
+        return RazConfigurationResponse.RazConfigurationResponseBuilder.aRazResponse()
+                .withRazEnabled(razConfiguration.isRazEnabled())
+                .withSecurity(razConfiguration.getSecurityGroupIdForRaz())
                 .build();
     }
 }

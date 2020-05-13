@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.identitymapping;
 
+import static com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject.RANGER_RAZ_USER;
+
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -35,6 +37,16 @@ public class AzureMockAccountMappingService {
     public Map<String, String> getUserMappings(String resourceGroup, Credential credential) {
         String subscriptionId = credential.getAzure().getSubscriptionId();
         return replacePlaceholders(MOCK_IDBROKER_USER_MAPPINGS, resourceGroup, subscriptionId);
+    }
+
+    public Map<String, String> getRazMappings(String resourceGroup, Credential credential) {
+        String subscriptionId = credential.getAzure().getSubscriptionId();
+        Map<String, String> razUsers = RANGER_RAZ_USER
+                .stream()
+                .map(user -> Map.entry(user, FIXED_MANAGED_IDENTITY))
+                .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
+        return replacePlaceholders(razUsers, resourceGroup, subscriptionId);
+
     }
 
     private Map<String, String> replacePlaceholders(Map<String, String> mappings, String resourceGroup, String subscriptionId) {

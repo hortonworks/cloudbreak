@@ -57,13 +57,14 @@ public class EnvironmentCreationDto {
 
     private final String proxyConfigName;
 
+    private final RazConfigurationDto razConfiguration;
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             String creator, LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, FreeIpaCreationDto freeIpaCreation, AuthenticationDto authentication,
             Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, String adminGroupName,
             ParametersDto parameters, ExperimentalFeatures experimentalFeatures, Map<String, String> tags, String crn,
-            String parentEnvironmentName, String proxyConfigName) {
+            String parentEnvironmentName, String proxyConfigName, RazConfigurationDto razConfiguration) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -94,6 +95,7 @@ public class EnvironmentCreationDto {
         this.crn = crn;
         this.parentEnvironmentName = parentEnvironmentName;
         this.proxyConfigName = proxyConfigName;
+        this.razConfiguration = razConfiguration;
     }
 
     public static Builder builder() {
@@ -184,6 +186,10 @@ public class EnvironmentCreationDto {
         return proxyConfigName;
     }
 
+    public RazConfigurationDto getRazConfiguration() {
+        return razConfiguration;
+    }
+
     public static final class Builder {
         private String name;
 
@@ -226,6 +232,8 @@ public class EnvironmentCreationDto {
         private String parentEnvironmentName;
 
         private String proxyConfigName;
+
+        private RazConfigurationDto razConfiguration;
 
         private Builder() {
         }
@@ -335,11 +343,16 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withRazConfiguration(RazConfigurationDto razConfiguration) {
+            this.razConfiguration = razConfiguration;
+            return this;
+        }
+
         public EnvironmentCreationDto build() {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, creator,
                     location, network, credential, regions, freeIpaCreation, authentication,
                     created, telemetry, securityAccess, adminGroupName, parameters, experimentalFeatures, tags, crn,
-                    parentEnvironmentName, proxyConfigName);
+                    parentEnvironmentName, proxyConfigName, razConfiguration);
         }
     }
 }
