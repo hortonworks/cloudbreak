@@ -74,6 +74,7 @@ import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX service tests")
@@ -403,6 +404,18 @@ class SdxServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.deleteSdx(USER_CRN, "sdx-cluster-name", false));
         assertEquals("The following Data Hub cluster(s) must be terminated before SDX deletion [existingDistroXCluster]", badRequestException.getMessage());
+    }
+
+    @Test
+    void testDeleteSdxWhenSdxHasExternalDatabaseButCrnIsMissingShouldThrowNotFoundException() {
+        SdxCluster sdxCluster = getSdxClusterForDeletionTest();
+        sdxCluster.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
+        sdxCluster.setDatabaseCrn(null);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.deleteSdx(USER_CRN, "sdx-cluster-name", false));
+        assertEquals(String.format("Can not find external databese CRN for SDX: %s", sdxCluster.getClusterName()), badRequestException.getMessage());
     }
 
     @Test
