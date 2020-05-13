@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -34,5 +35,8 @@ public interface SdxClusterRepository extends CrudRepository<SdxCluster, Long> {
     List<SdxCluster> findByAccountIdAndEnvNameAndDeletedIsNull(String accountId, String envName);
 
     List<SdxCluster> findByIdIn(Set<Long> resourceIds);
+
+    @Query("SELECT s.crn FROM SdxCluster s WHERE s.accountId = :accountId")
+    List<String> findAllCrnInAccount(@Param("accountId") String accountId);
 
 }

@@ -1,9 +1,11 @@
 package com.sequenceiq.sdx.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
-public class SdxClusterResponse {
+public class SdxClusterResponse implements ResourceCrnAwareApiModel {
 
     private String crn;
 
@@ -175,5 +177,11 @@ public class SdxClusterResponse {
 
     public boolean getRangerRazEnabled() {
         return rangerRazEnabled;
+    }
+
+    @JsonIgnore
+    @Override
+    public String getResourceCrn() {
+        return crn;
     }
 }
