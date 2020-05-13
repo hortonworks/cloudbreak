@@ -114,9 +114,18 @@ public class AwsRdsStatusLookupServiceTest {
         assertEquals(ExternalDatabaseStatus.UPDATE_IN_PROGRESS, result);
     }
 
-    @Test(expected = CloudConnectorException.class)
-    public void shouldThrowCloudConnectorException() {
+    @Test
+    public void shouldReturnDeletedInCaseOfDBInstanceNotFoundException() {
         when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(DBInstanceNotFoundException.class);
+
+        ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER);
+
+        assertEquals(ExternalDatabaseStatus.DELETED, result);
+    }
+
+    @Test(expected = CloudConnectorException.class)
+    public void shouldThrowCloudConnectorExceptionInCaseOfAnyRuntimeException() {
+        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(RuntimeException.class);
 
         victim.getStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER);
     }

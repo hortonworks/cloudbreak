@@ -46,6 +46,9 @@ public class DBStackStatusSyncService {
     @Inject
     private DBStackStatusUpdater dbStackStatusUpdater;
 
+    @Inject
+    private DBStackJobService dbStackJobService;
+
     public void sync(DBStack dbStack) {
         DetailedDBStackStatus detailedDBStackStatus = getDetailedDBStackStatusFromProvider(dbStack);
         Status status = detailedDBStackStatus.getStatus();
@@ -59,6 +62,12 @@ public class DBStackStatusSyncService {
 
                 dbStackStatusUpdater.updateStatus(dbStack.getId(), detailedDBStackStatus);
             }
+        }
+
+        if (status != null && Status.getUnscheduleAutoSyncStatuses().contains(status)) {
+            LOGGER.debug(":::Auto sync::: Unschedule DB Stack Status sync as the status is '{}'", status);
+
+            dbStackJobService.unschedule(dbStack);
         }
     }
 
@@ -80,6 +89,8 @@ public class DBStackStatusSyncService {
             case STOPPED: return DetailedDBStackStatus.STOPPED;
             case STOP_IN_PROGRESS: return DetailedDBStackStatus.STOP_IN_PROGRESS;
             case START_IN_PROGRESS: return DetailedDBStackStatus.START_IN_PROGRESS;
+            case DELETE_IN_PROGRESS: return DetailedDBStackStatus.DELETE_IN_PROGRESS;
+            case DELETED: return DetailedDBStackStatus.DELETE_COMPLETED;
             default: return DetailedDBStackStatus.UNKNOWN;
         }
     }
