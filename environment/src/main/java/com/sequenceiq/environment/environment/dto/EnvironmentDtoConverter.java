@@ -151,6 +151,8 @@ public class EnvironmentDtoConverter {
         return environment;
     }
 
+
+
     private void setLocation(EnvironmentCreationDto creationDto, Environment environment, LocationDto location) {
         Set<Region> regions = creationDto.getRegions().stream().map(r -> {
             Region region = new Region();

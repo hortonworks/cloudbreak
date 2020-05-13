@@ -1,13 +1,14 @@
 package com.sequenceiq.environment.configuration;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
+import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
+import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
+import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
+import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,13 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.client.Client;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.concurrent.TracingAndMdcCopyingTaskDecorator;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
@@ -113,6 +121,11 @@ public class AppConfig {
     @Bean
     public RedbeamsApiClientParams redbeamsApiClientParams() {
         return new RedbeamsApiClientParams(restDebug, certificateValidation, ignorePreValidation, redbeamsServerUrl);
+    }
+
+    @Bean
+    public Client restClient() {
+        return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
     }
 
     @Bean

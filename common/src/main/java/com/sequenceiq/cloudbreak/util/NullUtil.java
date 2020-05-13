@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.util;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -43,4 +44,11 @@ public class NullUtil {
         }
         return null;
     }
+
+    public static <K, V> void putIfPresent(Map<K, V> map, K key, V value) {
+        if (map != null && key != null && value != null) {
+            map.put(key, value);
+        }
+    }
+
 }

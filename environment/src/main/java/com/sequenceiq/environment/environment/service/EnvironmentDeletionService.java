@@ -37,14 +37,16 @@ public class EnvironmentDeletionService {
 
     private final EnvironmentJobService environmentJobService;
 
-    public EnvironmentDeletionService(EnvironmentService environmentService, EnvironmentDtoConverter environmentDtoConverter,
-            EnvironmentReactorFlowManager reactorFlowManager, EnvironmentResourceDeletionService environmentResourceDeletionService,
-            EnvironmentJobService environmentJobService) {
-        this.environmentService = environmentService;
-        this.environmentDtoConverter = environmentDtoConverter;
-        this.reactorFlowManager = reactorFlowManager;
+    public EnvironmentDeletionService(EnvironmentService environmentService,
+                                      EnvironmentJobService environmentJobService,
+                                      EnvironmentDtoConverter environmentDtoConverter,
+                                      EnvironmentReactorFlowManager reactorFlowManager,
+                                      EnvironmentResourceDeletionService environmentResourceDeletionService) {
         this.environmentResourceDeletionService = environmentResourceDeletionService;
+        this.environmentDtoConverter = environmentDtoConverter;
         this.environmentJobService = environmentJobService;
+        this.environmentService = environmentService;
+        this.reactorFlowManager = reactorFlowManager;
     }
 
     public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn,
@@ -126,6 +128,18 @@ public class EnvironmentDeletionService {
             throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before Environment deletion [%s]",
                     String.join(", ", distroXClusterNames)));
         }
+
+
+        long amountOfConnectedExperiences = environmentResourceDeletionService.getConnectedExperienceAmount(env);
+        if (amountOfConnectedExperiences > 0) {
+            if (amountOfConnectedExperiences == 1) {
+                throw new BadRequestException("The given environment [" + env.getName() + "] has 1 connected experience. " +
+                        "This must be terminated before Environment deletion.");
+            } else {
+                throw new BadRequestException("The given environment [\" + env.getName() + \"] has " + amountOfConnectedExperiences +
+                        " connected experiences. " + "These must be terminated before Environment deletion.");
+            }
+        }
     }
 
     void validateDeletion(Environment environment, boolean cascading) {
@@ -138,4 +152,5 @@ public class EnvironmentDeletionService {
             }
         }
     }
+
 }

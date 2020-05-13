@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.client.internal;
 
-import javax.ws.rs.client.WebTarget;
-
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseConfigV4Endpoint;
@@ -15,13 +9,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.progress.ProgressV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
 import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
-
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import javax.ws.rs.client.WebTarget;
 
 @Configuration
 public class CloudbreakApiClientConfig {
@@ -52,6 +51,12 @@ public class CloudbreakApiClientConfig {
     @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
     DistroXV1Endpoint distroXV1Endpoint(WebTarget cloudbreakApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, DistroXV1Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    UserProfileV4Endpoint userProfileV4Endpoint(WebTarget cloudbreakApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, UserProfileV4Endpoint.class);
     }
 
     @Bean
