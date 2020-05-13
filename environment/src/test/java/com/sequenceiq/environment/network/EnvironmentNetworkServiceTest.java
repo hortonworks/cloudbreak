@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -174,18 +175,18 @@ class EnvironmentNetworkServiceTest {
 
         when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
-        when(networkConnector.getNetworkCidr(network, cloudCredential)).thenReturn(networkCidr);
+        when(networkConnector.getNetworkCidr(network, cloudCredential)).thenReturn(new NetworkCidr(networkCidr));
 
-        String result = underTest.getNetworkCidr(network, "AWS", credential);
+        NetworkCidr result = underTest.getNetworkCidr(network, "AWS", credential);
 
-        assertEquals(networkCidr, result);
+        assertEquals(networkCidr, result.getCidr());
     }
 
     @Test
     void testGetNetworkCidrWhenNetworkNull() {
         Credential credential = mock(Credential.class);
 
-        String result = underTest.getNetworkCidr(null, "AWS", credential);
+        NetworkCidr result = underTest.getNetworkCidr(null, "AWS", credential);
 
         assertNull(result);
     }

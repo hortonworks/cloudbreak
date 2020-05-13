@@ -22,6 +22,9 @@ public class NetworkParameterAdder {
     static final String VPC_CIDR = "vpcCidr";
 
     @VisibleForTesting
+    static final String VPC_CIDRS = "vpcCidrs";
+
+    @VisibleForTesting
     static final String SUBNET_ID = "subnetId";
 
     // These constants must match those in AzureNetworkView
@@ -48,6 +51,7 @@ public class NetworkParameterAdder {
         switch (cloudPlatform) {
             case AWS:
                 parameters.put(VPC_CIDR, environmentResponse.getNetwork().getNetworkCidr());
+                parameters.put(VPC_CIDRS, environmentResponse.getNetwork().getNetworkCidrs());
                 parameters.put(VPC_ID, environmentResponse.getNetwork().getAws().getVpcId());
                 break;
             case AZURE:

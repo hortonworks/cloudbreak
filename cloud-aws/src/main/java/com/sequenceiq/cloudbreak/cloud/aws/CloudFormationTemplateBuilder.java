@@ -102,6 +102,7 @@ public class CloudFormationTemplateBuilder {
         Map<String, Object> model = new HashMap<>();
         model.put("hasPort", context.hasPort);
         model.put("hasSecurityGroup", context.hasSecurityGroup);
+        model.put("networkCidrs", context.networkCidrs);
         try {
             String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-rds-template", context.template, freemarkerConfiguration),
                                                                                 model);
@@ -234,6 +235,8 @@ public class CloudFormationTemplateBuilder {
 
         private boolean hasSecurityGroup;
 
+        private List<String> networkCidrs = new ArrayList<>();
+
         public RDSModelContext withTemplate(String template) {
             this.template = template;
             return this;
@@ -241,6 +244,11 @@ public class CloudFormationTemplateBuilder {
 
         public RDSModelContext withHasPort(boolean hasPort) {
             this.hasPort = hasPort;
+            return this;
+        }
+
+        public RDSModelContext withNetworkCidrs(List<String> networkCidrs) {
+            this.networkCidrs = networkCidrs;
             return this;
         }
 

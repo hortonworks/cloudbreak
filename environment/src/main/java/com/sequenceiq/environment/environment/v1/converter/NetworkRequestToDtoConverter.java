@@ -1,12 +1,14 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
@@ -62,8 +64,13 @@ public class NetworkRequestToDtoConverter {
         }
         return builder
                 .withNetworkCidr(network.getNetworkCidr())
+                .withNetworkCidrs(getNetworkCidrs(network))
                 .withPrivateSubnetCreation(getPrivateSubnetCreation(network))
                 .build();
+    }
+
+    private Set<String> getNetworkCidrs(EnvironmentNetworkRequest network) {
+        return Strings.isNullOrEmpty(network.getNetworkCidr()) ? null : Set.of(network.getNetworkCidr());
     }
 
     private PrivateSubnetCreation getPrivateSubnetCreation(EnvironmentNetworkRequest network) {

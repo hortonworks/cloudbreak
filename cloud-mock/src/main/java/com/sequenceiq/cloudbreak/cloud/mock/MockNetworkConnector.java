@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 
 @Service
 public class MockNetworkConnector extends DefaultNetworkConnector {
@@ -57,8 +58,8 @@ public class MockNetworkConnector extends DefaultNetworkConnector {
     }
 
     @Override
-    public String getNetworkCidr(Network network, CloudCredential credential) {
-        return "172.16.0.0/16";
+    public NetworkCidr getNetworkCidr(Network network, CloudCredential credential) {
+        return  new NetworkCidr("172.16.0.0/16");
     }
 
     @Override

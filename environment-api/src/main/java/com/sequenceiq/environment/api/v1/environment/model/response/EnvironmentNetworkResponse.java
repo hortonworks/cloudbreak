@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,6 +43,9 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
     @ApiModelProperty(EnvironmentModelDescription.PREFERED_SUBNET_ID)
     private String preferedSubnetId;
+
+    @ApiModelProperty(EnvironmentModelDescription.NETWORKCIDRS)
+    private Set<String> networkCidrs = new HashSet<>();
 
     public String getCrn() {
         return crn;
@@ -107,6 +111,14 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         this.preferedSubnetId = preferedSubnetId;
     }
 
+    public Set<String> getNetworkCidrs() {
+        return networkCidrs;
+    }
+
+    public void setNetworkCidrs(Set<String> networkCidrs) {
+        this.networkCidrs = networkCidrs;
+    }
+
     public static final class EnvironmentNetworkResponseBuilder {
         private String crn;
 
@@ -129,6 +141,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         private PrivateSubnetCreation privateSubnetCreation;
 
         private String preferedSubnetId;
+
+        private Set<String> networkCidrs;
 
         private EnvironmentNetworkAwsParams aws;
 
@@ -215,6 +229,11 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             return this;
         }
 
+        public EnvironmentNetworkResponseBuilder withNetworkCidrs(Set<String> networkCidrs) {
+            this.networkCidrs = networkCidrs;
+            return this;
+        }
+
         public EnvironmentNetworkResponseBuilder withMock(EnvironmentNetworkMockParams mock) {
             this.mock = mock;
             return this;
@@ -226,6 +245,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setName(name);
             environmentNetworkResponse.setSubnetIds(subnetIds);
             environmentNetworkResponse.setNetworkCidr(networkCidr);
+            environmentNetworkResponse.setNetworkCidrs(networkCidrs);
             environmentNetworkResponse.setAws(aws);
             environmentNetworkResponse.setAzure(azure);
             environmentNetworkResponse.setYarn(yarn);

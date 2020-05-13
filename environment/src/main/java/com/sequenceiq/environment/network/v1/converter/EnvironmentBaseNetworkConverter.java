@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
@@ -29,6 +32,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         BaseNetwork result = createProviderSpecificNetwork(creationDto);
         result.setName(creationDto.getNetworkName() != null ? creationDto.getNetworkName() : environment.getName());
         result.setNetworkCidr(creationDto.getNetworkCidr());
+        result.setNetworkCidrs(StringUtils.join(creationDto.getNetworkCidrs(), ","));
         result.setEnvironments(convertEnvToView(environment));
         result.setPrivateSubnetCreation(creationDto.getPrivateSubnetCreation());
         setRegistrationType(result, creationDto);
@@ -43,6 +47,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
                 .withName(source.getName())
                 .withSubnetMetas(source.getSubnetMetas())
                 .withNetworkCidr(source.getNetworkCidr())
+                .withNetworkCidrs(getNetworkCidrs(source))
                 .withResourceCrn(source.getResourceCrn())
                 .withPrivateSubnetCreation(source.getPrivateSubnetCreation())
                 .withRegistrationType(source.getRegistrationType())
@@ -51,6 +56,10 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         convertSubnets(source, builder);
 
         return setProviderSpecificFields(builder, source);
+    }
+
+    private Set<String> getNetworkCidrs(BaseNetwork source) {
+        return Strings.isNullOrEmpty(source.getNetworkCidrs()) ? null : Set.of(source.getNetworkCidrs().split(","));
     }
 
     public void convertSubnets(BaseNetwork source, NetworkDto.Builder targetBuilder) {

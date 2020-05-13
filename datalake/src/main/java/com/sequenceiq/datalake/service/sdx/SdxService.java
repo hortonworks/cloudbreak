@@ -504,7 +504,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
 
     private void checkIfSdxIsDeletable(SdxCluster sdxCluster) {
         if (sdxCluster.hasExternalDatabase() && Strings.isEmpty(sdxCluster.getDatabaseCrn())) {
-            throw new BadRequestException(String.format("Can not find external databese CRN for SDX: %s", sdxCluster.getClusterName()));
+            throw new BadRequestException(String.format("Can not find external database for Data Lake: %s", sdxCluster.getClusterName()));
         }
         Collection<StackViewV4Response> attachedDistroXClusters = distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn());
         if (!attachedDistroXClusters.isEmpty()) {

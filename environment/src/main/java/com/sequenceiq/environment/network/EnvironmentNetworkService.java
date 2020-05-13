@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -63,7 +64,7 @@ public class EnvironmentNetworkService {
         return converter.setCreatedCloudNetwork(baseNetwork, createdCloudNetwork);
     }
 
-    public String getNetworkCidr(Network network, String cloudPlatform, Credential credential) {
+    public NetworkCidr getNetworkCidr(Network network, String cloudPlatform, Credential credential) {
         if (network == null) {
             LOGGER.info("Could not fetch network cidr from {}, because the network is null", cloudPlatform);
             return null;

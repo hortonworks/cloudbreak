@@ -432,7 +432,7 @@ class SdxServiceTest {
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.deleteSdx(USER_CRN, "sdx-cluster-name", false));
-        assertEquals(String.format("Can not find external databese CRN for SDX: %s", sdxCluster.getClusterName()), badRequestException.getMessage());
+        assertEquals(String.format("Can not find external database for Data Lake: %s", sdxCluster.getClusterName()), badRequestException.getMessage());
     }
 
     @Test

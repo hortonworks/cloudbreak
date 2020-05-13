@@ -39,6 +39,7 @@ public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     BaseNetwork createProviderSpecificNetwork(NetworkDto network) {
         YarnNetwork yarnNetwork = new YarnNetwork();
         yarnNetwork.setNetworkCidr(yarnNetworkCidr);
+        yarnNetwork.setNetworkCidrs(yarnNetworkCidr);
         if (network.getYarn() != null) {
             yarnNetwork.setQueue(network.getYarn().getQueue());
         }

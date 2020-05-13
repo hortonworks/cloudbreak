@@ -9,12 +9,14 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -62,8 +64,9 @@ public class NetworkService {
                 baseNetwork.setAccountId(accountId);
                 if (baseNetwork.getRegistrationType() == RegistrationType.EXISTING) {
                     Network network = environmentNetworkConverter.convertToNetwork(baseNetwork);
-                    String networkCidr = environmentNetworkService.getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential());
-                    baseNetwork.setNetworkCidr(networkCidr);
+                    NetworkCidr networkCidr = environmentNetworkService.getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential());
+                    baseNetwork.setNetworkCidr(networkCidr.getCidr());
+                    baseNetwork.setNetworkCidrs(StringUtils.join(networkCidr.getCidrs(), ","));
                 }
                 baseNetwork = save(baseNetwork);
             }

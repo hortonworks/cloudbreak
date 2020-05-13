@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
+import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 
 @Service
 public class AzureNetworkConnector implements NetworkConnector {
@@ -158,7 +159,7 @@ public class AzureNetworkConnector implements NetworkConnector {
     }
 
     @Override
-    public String getNetworkCidr(Network network, CloudCredential credential) {
+    public NetworkCidr getNetworkCidr(Network network, CloudCredential credential) {
         AzureClient azureClient = azureClientService.getClient(credential);
         String resourceGroupName = azureUtils.getCustomResourceGroupName(network);
         String networkId = azureUtils.getCustomNetworkId(network);
@@ -172,7 +173,7 @@ public class AzureNetworkConnector implements NetworkConnector {
             LOGGER.info("More than one network cidrs for resource group name: {} and network id: {}. We will use the first one: {}",
                     resourceGroupName, networkId, networkCidrs.get(0));
         }
-        return networkCidrs.get(0);
+        return new NetworkCidr(networkCidrs.get(0), networkCidrs);
     }
 
     @Override
