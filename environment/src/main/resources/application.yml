@@ -196,3 +196,24 @@ spring:
 
 notification:
   urls: http://localhost:3000/notifications
+
+experience:
+  scan:
+    protocol: https
+    liftie:
+      api:
+        port: 9999
+        address: localhost
+    path:
+      componentToReplace: "{crn}"
+    config:
+      experiences:
+        - name: MLX
+          hostAddress: ${MLX_HOST_ADDRESS}
+          internalEnvEndpoint: ${MLX_INTERNAL_ENV_ENDPOINT}
+          port: ${MLX_PORT}
+        -
+          name: DWX
+          hostAddress: ${DWX_HOST_ADDRESS}
+          internalEnvEndpoint: ${DWX_INTERNAL_ENV_ENDPOINT}
+          port: ${DWX_PORT}

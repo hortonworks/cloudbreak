@@ -1,5 +1,22 @@
 package com.sequenceiq.environment.environment.service;
 
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.util.TestConstants;
+import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
+import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
+
+import javax.ws.rs.BadRequestException;
+import java.util.Optional;
+import java.util.Set;
+
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
@@ -14,25 +31,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
-import java.util.Set;
-
-import javax.ws.rs.BadRequestException;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mockito;
-
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.util.TestConstants;
-import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
-import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
-import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
-
 public class EnvironmentDeletionServiceTest {
 
     private final EnvironmentService environmentService = Mockito.mock(EnvironmentService.class);
@@ -45,8 +43,8 @@ public class EnvironmentDeletionServiceTest {
 
     private final EnvironmentJobService environmentJobService = Mockito.mock(EnvironmentJobService.class);
 
-    private final EnvironmentDeletionService environmentDeletionService = new EnvironmentDeletionService(environmentService, environmentDtoConverter,
-            reactorFlowManager, environmentResourceDeletionService, environmentJobService);
+    private final EnvironmentDeletionService environmentDeletionService = new EnvironmentDeletionService(environmentService, environmentJobService,
+            environmentDtoConverter, reactorFlowManager, environmentResourceDeletionService);
 
     private Environment environment;
 
