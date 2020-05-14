@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -67,6 +69,9 @@ public class FreeIpaCleanupService {
     @Inject
     private EnvironmentConfigProvider environmentConfigProvider;
 
+    @Inject
+    private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
+
     public void cleanup(Stack stack, boolean hostOnly, boolean recover, Set<String> hostNames, Set<String> ips) {
         Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         boolean childEnvironment = environmentConfigProvider.isChildEnvironment(stack.getEnvironmentCrn());
@@ -109,6 +114,11 @@ public class FreeIpaCleanupService {
             OperationStatus cleanup = freeIpaV1Endpoint.cleanup(cleanupRequest);
             LOGGER.info("Cleanup operation started: {}", cleanup);
             return cleanup;
+        } catch (WebApplicationException e) {
+            String errorMessage = exceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Couldn't start cleanup due to: '%s' ", errorMessage);
+            LOGGER.error(message, e);
+            throw new FreeIpaOperationFailedException(message, e);
         } catch (Exception e) {
             LOGGER.error("Couldn't start cleanup", e);
             throw new FreeIpaOperationFailedException("Couldn't start cleanup", e);

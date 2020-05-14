@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.vault.VaultException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.LdapView.LdapViewBuilder;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
@@ -36,6 +38,9 @@ public class LdapConfigService {
     @Inject
     private SecretService secretService;
 
+    @Inject
+    private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
+
     @Retryable(value = CloudbreakServiceException.class, maxAttempts = MAX_ATTEMPT, backoff = @Backoff(delay = DELAY))
     public boolean isLdapConfigExistsForEnvironment(String environmentCrn, String clusterName) {
         return describeLdapConfig(environmentCrn, clusterName).isPresent();
@@ -53,6 +58,11 @@ public class LdapConfigService {
         } catch (NotFoundException | ForbiddenException notFoundEx) {
             LOGGER.debug("No Ldap config found for {} environment. Ldap setup will be skipped!", environmentCrn);
             return Optional.empty();
+        } catch (WebApplicationException e) {
+            String errorMessage = exceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to get Ldap config from FreeIpa service due to: '%s' ", errorMessage);
+            LOGGER.warn(message, e);
+            throw new CloudbreakServiceException(message, e);
         } catch (Exception communicationEx) {
             String message = String.format("Failed to get Ldap config from FreeIpa service due to: '%s' ", communicationEx.getMessage());
             LOGGER.warn(message, communicationEx);

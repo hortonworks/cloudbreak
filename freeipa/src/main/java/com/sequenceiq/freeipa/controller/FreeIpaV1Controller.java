@@ -12,8 +12,8 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
@@ -28,6 +28,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaRespons
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.validation.AttachChildEnvironmentRequestValidator;
@@ -159,9 +160,13 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public String getRootCertificate(String environmentCrn) throws FreeIpaClientException {
+    public String getRootCertificate(String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return freeIpaRootCertificateService.getRootCertificate(environmentCrn, accountId);
+        try {
+            return freeIpaRootCertificateService.getRootCertificate(environmentCrn, accountId);
+        } catch (FreeIpaClientException e) {
+            throw new FreeIpaClientExceptionWrapper(e);
+        }
     }
 
     @Override
@@ -173,7 +178,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public OperationStatus cleanup(@Valid CleanupRequest request) throws FreeIpaClientException {
+    public OperationStatus cleanup(@Valid CleanupRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return cleanupService.cleanup(accountId, request);
     }
@@ -184,7 +189,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void rebootInstances(@Valid RebootInstancesRequest request) throws FreeIpaClientException {
+    public void rebootInstances(@Valid RebootInstancesRequest request) {
         String accountId = crnService.getCurrentAccountId();
         rebootInstancesService.rebootInstances(accountId, request);
     }
