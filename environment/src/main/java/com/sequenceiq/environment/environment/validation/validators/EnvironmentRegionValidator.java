@@ -45,7 +45,7 @@ public class EnvironmentRegionValidator {
             Set<String> existingRegionNames = new HashSet<>(supportedRegions);
             requestedRegionNames.removeAll(existingRegionNames);
             if (!requestedRegionNames.isEmpty()) {
-                resultBuilder.error(String.format("The following regions does not exist in your cloud provider: [%s]. "
+                resultBuilder.error(String.format("The following regions do not exist in your cloud provider: [%s]. "
                                 + "Existing regions are: [%s]",
                         String.join(", ", requestedRegionNames),
                         String.join(", ", existingRegionNames)

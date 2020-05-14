@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,9 +35,9 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.RegionWrapper;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
-import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.v1.cli.DelegatingCliEnvironmentRequestConverter;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
@@ -166,21 +167,21 @@ class EnvironmentServiceTest {
 
     @Test
     public void setLocationByCoordinates() {
-        LocationDto location = new LocationDto("r1", "Somewhere else", 1.2, 1.3);
+        RegionWrapper location = new RegionWrapper("r1", "Somewhere else", 1.2, 1.3, Collections.emptySet());
         environmentServiceUnderTest.setLocation(environment, location, EnvironmentTestData.getCloudRegions());
         assertEquals("Here", environment.getLocationDisplayName());
     }
 
     @Test
     public void setLocationByLocation() {
-        LocationDto location = new LocationDto("r3", "Somewhere else", 1.2, 1.3);
+        RegionWrapper location = new RegionWrapper("r3", "Somewhere else", 1.2, 1.3, Collections.emptySet());
         environmentServiceUnderTest.setLocation(environment, location, EnvironmentTestData.getCloudRegions());
         assertEquals("Somewhere else", environment.getLocationDisplayName());
     }
 
     @Test
     public void setLocationLocationCoordinatesAreInvalid() {
-        LocationDto location = new LocationDto("r3", "Somewhere else", null, 1.3);
+        RegionWrapper location = new RegionWrapper("r3", "Somewhere else", null, 1.3, Collections.emptySet());
         assertThrows(BadRequestException.class, () -> environmentServiceUnderTest.setLocation(environment, location, EnvironmentTestData.getCloudRegions()));
     }
 

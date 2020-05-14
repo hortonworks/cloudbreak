@@ -27,6 +27,7 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverte
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
+import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
@@ -126,11 +127,12 @@ public class EnvironmentDtoConverter {
         environment.setArchived(false);
         environment.setCloudPlatform(creationDto.getCloudPlatform());
         environment.setDescription(creationDto.getDescription());
-        environment.setLatitude(creationDto.getLocation().getLatitude());
-        environment.setLongitude(creationDto.getLocation().getLongitude());
-        environment.setLocation(creationDto.getLocation().getName());
+        LocationDto location = creationDto.getLocation();
+        environment.setLatitude(location.getLatitude());
+        environment.setLongitude(location.getLongitude());
+        environment.setLocation(location.getName());
         environment.setTelemetry(creationDto.getTelemetry());
-        environment.setLocationDisplayName(creationDto.getLocation().getDisplayName());
+        environment.setLocationDisplayName(location.getDisplayName());
         environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
         environment.setCreateFreeIpa(creationDto.getFreeIpaCreation().getCreate());
         environment.setFreeIpaInstanceCountByGroup(creationDto.getFreeIpaCreation().getInstanceCountByGroup());
@@ -138,7 +140,21 @@ public class EnvironmentDtoConverter {
         environment.setCreated(System.currentTimeMillis());
         environment.setTags(getTags(creationDto));
         environment.setExperimentalFeaturesJson(creationDto.getExperimentalFeatures());
+        setLocation(creationDto, environment, location);
         return environment;
+    }
+
+    private void setLocation(EnvironmentCreationDto creationDto, Environment environment, LocationDto location) {
+        Set<Region> regions = creationDto.getRegions().stream().map(r -> {
+            Region region = new Region();
+            region.setName(r);
+            return region;
+        }).collect(Collectors.toSet());
+        environment.setRegions(regions);
+        environment.setLocation(location.getName());
+        environment.setLocationDisplayName(location.getDisplayName());
+        environment.setLongitude(location.getLongitude());
+        environment.setLatitude(location.getLatitude());
     }
 
     public LocationDto environmentToLocationDto(Environment environment) {

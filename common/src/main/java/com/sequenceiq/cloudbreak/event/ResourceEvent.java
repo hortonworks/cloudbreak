@@ -74,6 +74,8 @@ public enum ResourceEvent {
     TEST_CONNECTION_SUCCESS("resource.connection.success"),
     TEST_CONNECTION_FAILED("resource.connection.failed"),
 
+    ENVIRONMENT_INITIALIZATION_STARTED("environment.initialization.started"),
+    ENVIRONMENT_INITIALIZATION_FAILED("environment.initialization.failed"),
     ENVIRONMENT_VALIDATION_STARTED("environment.validation.started"),
     ENVIRONMENT_VALIDATION_FAILED("environment.validation.failed"),
     ENVIRONMENT_NETWORK_CREATION_STARTED("environment.network.creation.started"),

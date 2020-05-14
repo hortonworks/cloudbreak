@@ -5,11 +5,16 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 
 import javax.ws.rs.WebApplicationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.RegionWrapper;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
@@ -23,6 +28,8 @@ import reactor.bus.EventBus;
 
 @Component
 public class EnvironmentValidationHandler extends EventSenderAwareHandler<EnvironmentDto> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentValidationHandler.class);
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
@@ -49,15 +56,9 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         environmentService.findEnvironmentById(environmentDto.getId())
                 .ifPresentOrElse(environment -> {
+                            LOGGER.debug("Environment validation flow step started.");
                             try {
-                                ValidationResult validationResult = validatorService.validateTelemetryLoggingStorageLocation(environment);
-                                validationResult = validationResult.merge(validatorService.validateParameters(environmentDto, environmentDto.getParameters()));
-                                validationResult = validationResult.merge(validatorService.validateNetworkWithProvider(environmentDto));
-                                if (validationResult.hasError()) {
-                                    goToFailedState(environmentDtoEvent, validationResult.getFormattedErrors());
-                                } else {
-                                    goToNetworkCreationState(environmentDtoEvent, environmentDto);
-                                }
+                                validateEnvironment(environmentDtoEvent, environmentDto, environment);
                             } catch (WebApplicationException e) {
                                 String responseMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
                                 goToFailedState(environmentDtoEvent, e.getMessage() + ". " + responseMessage);
@@ -66,6 +67,22 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                             }
                         }, () -> goToFailedState(environmentDtoEvent, String.format("Environment was not found with id '%s'.", environmentDto.getId()))
                 );
+    }
+
+    private void validateEnvironment(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto, Environment environment) {
+        RegionWrapper regionWrapper = environment.getRegionWrapper();
+        CloudRegions cloudRegions = environmentService.getRegionsByEnvironment(environment);
+        ValidationResult.ValidationResultBuilder validationBuilder = validatorService
+                .validateRegionsAndLocation(regionWrapper.getName(), regionWrapper.getRegions(), environment, cloudRegions);
+        validationBuilder.merge(validatorService.validateTelemetryLoggingStorageLocation(environment));
+        validationBuilder.merge(validatorService.validateParameters(environmentDto, environmentDto.getParameters()));
+        validationBuilder.merge(validatorService.validateNetworkWithProvider(environmentDto));
+        ValidationResult validationResult = validationBuilder.build();
+        if (validationResult.hasError()) {
+            goToFailedState(environmentDtoEvent, validationResult.getFormattedErrors());
+        } else {
+            goToNetworkCreationState(environmentDtoEvent, environmentDto);
+        }
     }
 
     private void goToFailedState(Event<EnvironmentDto> environmentDtoEvent, String message) {

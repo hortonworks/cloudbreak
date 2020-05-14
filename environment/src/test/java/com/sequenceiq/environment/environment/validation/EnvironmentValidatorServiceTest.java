@@ -38,7 +38,6 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParamete
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
-import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 
@@ -48,9 +47,6 @@ class EnvironmentValidatorServiceTest {
     private static final String ACCOUNT = "account";
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:123:user:123";
-
-    @Mock
-    private EnvironmentRegionValidator environmentRegionValidator;
 
     @Mock
     private NetworkCreationValidator networkCreationValidator;
@@ -70,7 +66,6 @@ class EnvironmentValidatorServiceTest {
     @BeforeEach
     public void initTests() {
         underTest = new EnvironmentValidatorService(
-                environmentRegionValidator,
                 networkCreationValidator,
                 platformParameterService,
                 environmentResourceService,

@@ -45,11 +45,11 @@ public class AwsParametersDto implements S3GuardParameters {
 
     @Override
     public String toString() {
-        return "AwsParametersDto{" +
-                "dynamoDbTableName='" + dynamoDbTableName + '\'' +
-                ", dynamoDbTableCreation=" + dynamoDbTableCreation +
-                ", freeIpaSpotPercentage=" + freeIpaSpotPercentage +
-                '}';
+        return "AwsParametersDto{"
+                + "dynamoDbTableName='" + dynamoDbTableName + '\''
+                + ", dynamoDbTableCreation=" + dynamoDbTableCreation
+                + ", freeIpaSpotPercentage=" + freeIpaSpotPercentage
+                + '}';
     }
 
     public static final class Builder {

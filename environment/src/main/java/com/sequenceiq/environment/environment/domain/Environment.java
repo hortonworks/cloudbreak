@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.domain;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -141,6 +142,11 @@ public class Environment implements AuthResource {
         experimentalFeaturesJson = new Json(new ExperimentalFeatures());
     }
 
+    public RegionWrapper getRegionWrapper() {
+        Set<String> regions = getRegionSet().stream().map(Region::getName).collect(Collectors.toSet());
+        return new RegionWrapper(location, locationDisplayName, latitude, longitude, regions);
+    }
+
     @Override
     public String getAccountId() {
         return accountId;
@@ -193,6 +199,10 @@ public class Environment implements AuthResource {
 
     public void setRegions(Set<Region> regions) {
         this.regions = new Json(regions);
+    }
+
+    public void setRegions(Json regions) {
+        this.regions = regions;
     }
 
     public Set<Region> getRegionSet() {
@@ -280,10 +290,6 @@ public class Environment implements AuthResource {
     @Override
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
-    }
-
-    public void setRegions(Json regions) {
-        this.regions = regions;
     }
 
     public EnvironmentStatus getStatus() {
@@ -432,5 +438,17 @@ public class Environment implements AuthResource {
 
     public void setProxyConfig(ProxyConfig proxyConfig) {
         this.proxyConfig = proxyConfig;
+    }
+
+    @Override
+    public String toString() {
+        return "Environment{" +
+                "name='" + name + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", creator='" + creator + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", status=" + status +
+                ", statusReason='" + statusReason + '\'' +
+                '}';
     }
 }

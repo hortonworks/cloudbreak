@@ -68,4 +68,5 @@ public class AzureResourceGroupDto {
             return new AzureResourceGroupDto(this);
         }
     }
+
 }

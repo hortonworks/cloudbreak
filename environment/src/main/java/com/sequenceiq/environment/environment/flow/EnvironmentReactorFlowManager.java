@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.flow;
 
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_VALIDATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_INITIALIZATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.chain.FlowChainTriggers.ENV_DELETE_CLUSTERS_TRIGGER_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 
@@ -39,10 +39,10 @@ public class EnvironmentReactorFlowManager {
     }
 
     public void triggerCreationFlow(long envId, String envName, String userCrn, String envCrn) {
-        LOGGER.info("Trigger flow creation");
+        LOGGER.info("Environment creation flow triggered.");
         EnvCreationEvent envCreationEvent = EnvCreationEvent.builder()
                 .withAccepted(new Promise<>())
-                .withSelector(START_ENVIRONMENT_VALIDATION_EVENT.selector())
+                .withSelector(START_ENVIRONMENT_INITIALIZATION_EVENT.selector())
                 .withResourceId(envId)
                 .withResourceName(envName)
                 .withResourceCrn(envCrn)
@@ -56,7 +56,7 @@ public class EnvironmentReactorFlowManager {
     }
 
     public void triggerDeleteFlow(Environment environment, String userCrn) {
-        LOGGER.info("Trigger flow deletion: {}", environment.getName());
+        LOGGER.info("Environment deletion flow triggered for '{}'.", environment.getName());
         flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                 .withAccepted(new Promise<>())
@@ -69,7 +69,7 @@ public class EnvironmentReactorFlowManager {
     }
 
     public void triggerForcedDeleteFlow(Environment environment, String userCrn) {
-        LOGGER.info("Trigger forced deletion flow: {}", environment.getName());
+        LOGGER.info("Environment forced deletion flow triggered for '{}'.", environment.getName());
         flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                 .withAccepted(new Promise<>())
@@ -82,7 +82,7 @@ public class EnvironmentReactorFlowManager {
     }
 
     public void triggerStopFlow(long envId, String envName, String userCrn) {
-        LOGGER.info("Trigger stop flow");
+        LOGGER.info("Environment stop flow triggered.");
         EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                 .withAccepted(new Promise<>())
                 .withSelector(EnvStopStateSelectors.ENV_STOP_DATAHUB_EVENT.selector())
@@ -94,7 +94,7 @@ public class EnvironmentReactorFlowManager {
     }
 
     public void triggerStartFlow(long envId, String envName, String userCrn) {
-        LOGGER.info("Trigger start flow");
+        LOGGER.info("Environment start flow triggered.");
         EnvStartEvent envSrartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                 .withAccepted(new Promise<>())
                 .withSelector(EnvStartStateSelectors.ENV_START_FREEIPA_EVENT.selector())

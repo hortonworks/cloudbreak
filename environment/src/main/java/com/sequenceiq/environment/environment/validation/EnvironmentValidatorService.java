@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
-import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -36,7 +35,6 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParamete
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
-import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
@@ -51,8 +49,6 @@ public class EnvironmentValidatorService {
 
     private static final int ALL_SPOT_PERCENTAGE = 100;
 
-    private final EnvironmentRegionValidator environmentRegionValidator;
-
     private final NetworkCreationValidator networkCreationValidator;
 
     private final PlatformParameterService platformParameterService;
@@ -61,34 +57,22 @@ public class EnvironmentValidatorService {
 
     private final CredentialService credentialService;
 
-    private Set<String> enabledParentPlatforms;
+    private final Set<String> enabledParentPlatforms;
 
-    private Set<String> enabledChildPlatforms;
+    private final Set<String> enabledChildPlatforms;
 
-    public EnvironmentValidatorService(EnvironmentRegionValidator environmentRegionValidator,
-            NetworkCreationValidator networkCreationValidator,
+    public EnvironmentValidatorService(NetworkCreationValidator networkCreationValidator,
             PlatformParameterService platformParameterService,
             EnvironmentResourceService environmentResourceService,
             CredentialService credentialService,
             @Value("${environment.enabledParentPlatforms}") Set<String> enabledParentPlatforms,
             @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
-        this.environmentRegionValidator = environmentRegionValidator;
         this.networkCreationValidator = networkCreationValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
         this.credentialService = credentialService;
         this.enabledChildPlatforms = enabledChildPlatforms;
         this.enabledParentPlatforms = enabledParentPlatforms;
-    }
-
-    public ValidationResultBuilder validateRegionsAndLocation(String location, Set<String> requestedRegions,
-            Environment environment, CloudRegions cloudRegions) {
-        String cloudPlatform = environment.getCloudPlatform();
-        ValidationResultBuilder regionValidationResult
-                = environmentRegionValidator.validateRegions(requestedRegions, cloudRegions, cloudPlatform);
-        ValidationResultBuilder locationValidationResult
-                = environmentRegionValidator.validateLocation(location, requestedRegions, cloudRegions, cloudPlatform);
-        return regionValidationResult.merge(locationValidationResult.build());
     }
 
     public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network) {
@@ -156,22 +140,22 @@ public class EnvironmentValidatorService {
     }
 
     public ValidationResult validateAuthenticationModification(EnvironmentEditDto editDto, Environment environment) {
-        ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
 
         AuthenticationDto authenticationDto = editDto.getAuthentication();
         String publicKeyId = authenticationDto.getPublicKeyId();
         Optional<PublicKeyConnector> publicKeyConnector = environmentResourceService.getPublicKeyConnector(environment.getCloudPlatform());
-        if (publicKeyConnector.isEmpty() && StringUtils.isNotEmpty(publicKeyId)) {
+        if (publicKeyConnector.isEmpty() && isNotEmpty(publicKeyId)) {
             validationResultBuilder.error("The change of publicKeyId is not supported on " + environment.getCloudPlatform());
         } else {
             String publicKey = authenticationDto.getPublicKey();
-            if (StringUtils.isNotEmpty(publicKeyId) && StringUtils.isNotEmpty(publicKey)) {
+            if (isNotEmpty(publicKeyId) && isNotEmpty(publicKey)) {
                 validationResultBuilder.error("You should define either publicKey or publicKeyId only");
             }
             if (StringUtils.isEmpty(publicKeyId) && StringUtils.isEmpty(publicKey)) {
                 validationResultBuilder.error("You should define publicKey or publicKeyId");
             }
-            if (StringUtils.isNotEmpty(publicKeyId) && !environmentResourceService.isPublicKeyIdExists(environment, publicKeyId)) {
+            if (isNotEmpty(publicKeyId) && !environmentResourceService.isPublicKeyIdExists(environment, publicKeyId)) {
                 validationResultBuilder.error(String.format("The publicKeyId with name of '%s' does not exists on the provider", publicKeyId));
             }
         }
@@ -207,7 +191,7 @@ public class EnvironmentValidatorService {
     }
 
     public ValidationResult validateFreeIpaCreation(FreeIpaCreationDto freeIpaCreation) {
-        ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         if (freeIpaCreation.getInstanceCountByGroup() == 1 && !singleInstanceIsOnDemandOrSpot(freeIpaCreation)) {
             validationResultBuilder.error(
                     String.format("Single instance FreeIpa spot percentage must be either %d or %d.", ALL_ON_DEMAND_PERCENTAGE, ALL_SPOT_PERCENTAGE));
