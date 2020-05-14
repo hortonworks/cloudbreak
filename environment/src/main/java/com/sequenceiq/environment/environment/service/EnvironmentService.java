@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,9 +32,9 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRe
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.domain.RegionWrapper;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
-import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.v1.cli.DelegatingCliEnvironmentRequestConverter;
@@ -43,7 +43,7 @@ import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
-import io.grpc.Status;
+import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;
 
 @Service
@@ -64,7 +64,7 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
 
     private final DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter;
 
-    private GrpcUmsClient grpcUmsClient;
+    private final GrpcUmsClient grpcUmsClient;
 
     public EnvironmentService(
             EnvironmentValidatorService validatorService,
@@ -82,6 +82,7 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
     }
 
     public Environment save(Environment environment) {
+        LOGGER.debug("Saving environment '{}'.", environment);
         return environmentRepository.save(environment);
     }
 
@@ -90,27 +91,39 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
     }
 
     public EnvironmentDto getByNameAndAccountId(String environmentName, String accountId) {
+        LOGGER.debug("Getting environment by name: '{}'.", environmentName);
         Optional<Environment> environment = environmentRepository.findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId);
         MDCBuilder.buildMdcContext(environment.orElseThrow(notFound("Environment with name:", environmentName)));
         return environmentDtoConverter.environmentToDto(environment.get());
     }
 
     public EnvironmentDto getByCrnAndAccountId(String crn, String accountId) {
+        LOGGER.debug("Getting environment by crn '{}' and account id '{}'.", crn, accountId);
         Optional<Environment> environment = environmentRepository
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId);
-        MDCBuilder.buildMdcContext(environment.orElseThrow(() -> new NotFoundException(String.format("No environment found with resource CRN '%s'", crn))));
+        MDCBuilder.buildMdcContext(environment.orElseThrow(() -> new NotFoundException(String.format("No environment found with resource CRN '%s'.", crn))));
         return environmentDtoConverter.environmentToDto(environment.get());
     }
 
     public List<EnvironmentDto> listByAccountId(String accountId) {
+        LOGGER.debug("Listing environments by account id '{}'.", accountId);
         Set<Environment> environments = environmentRepository.findByAccountId(accountId);
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
     }
 
     public void setRegions(Environment environment, Set<String> requestedRegions, CloudRegions cloudRegions) {
         Set<Region> regionSet = new HashSet<>();
+        LOGGER.debug("Setting regions for environment. Regions: [{}].", String.join(", ", requestedRegions));
+        setRegionsFromCloudCoordinates(requestedRegions, cloudRegions, regionSet);
+        if (regionSet.isEmpty()) {
+            setRegionsFromCloudRegions(requestedRegions, cloudRegions, regionSet);
+        }
+        environment.setRegions(regionSet);
+    }
+
+    private void setRegionsFromCloudCoordinates(Set<String> requestedRegions, CloudRegions cloudRegions, Set<Region> regionSet) {
         for (String requestedRegion : requestedRegions) {
-            Optional<Map.Entry<com.sequenceiq.cloudbreak.cloud.model.Region, Coordinate>> coordinate =
+            Optional<Entry<com.sequenceiq.cloudbreak.cloud.model.Region, Coordinate>> coordinate =
                     cloudRegions.getCoordinates().entrySet()
                             .stream()
                             .filter(e -> e.getKey().getRegionName().equals(requestedRegion)
@@ -125,7 +138,26 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
                 regionSet.add(region);
             }
         }
-        environment.setRegions(regionSet);
+    }
+
+    private void setRegionsFromCloudRegions(Set<String> requestedRegions, CloudRegions cloudRegions, Set<Region> regionSet) {
+        for (String requestedRegion : requestedRegions) {
+            Set<String> regions = cloudRegions.getCloudRegions().keySet()
+                    .stream().map(region -> region.getRegionName()).collect(Collectors.toSet());
+            if (regions.contains(requestedRegion)) {
+                Region region = new Region();
+                region.setName(requestedRegion);
+                region.setDisplayName(requestedRegion);
+                regionSet.add(region);
+            }
+        }
+    }
+
+    public CloudRegions getRegionsByEnvironment(Environment environment) {
+        PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
+        platformResourceRequest.setCredential(environment.getCredential());
+        platformResourceRequest.setCloudPlatform(environment.getCloudPlatform());
+        return platformParameterService.getRegionsByCredential(platformResourceRequest);
     }
 
     public Optional<Environment> findEnvironmentById(Long id) {
@@ -136,28 +168,29 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
         return environmentRepository.findById(id).map(environmentDtoConverter::environmentToDto);
     }
 
-    void setLocation(Environment environment, LocationDto requestedLocation, CloudRegions cloudRegions) {
-        if (requestedLocation != null) {
-            Optional<Map.Entry<com.sequenceiq.cloudbreak.cloud.model.Region, Coordinate>> coordinate =
+    public void setLocation(Environment environment, RegionWrapper regionWrapper, CloudRegions cloudRegions) {
+        if (regionWrapper != null) {
+            LOGGER.debug("Setting location for environment. Location: '{}'.", regionWrapper);
+            Optional<Entry<com.sequenceiq.cloudbreak.cloud.model.Region, Coordinate>> coordinate =
                     cloudRegions.getCoordinates().entrySet()
                             .stream()
-                            .filter(e -> e.getKey().getRegionName().equals(requestedLocation.getName())
-                                    || e.getValue().getDisplayName().equals(requestedLocation.getName())
-                                    || e.getValue().getKey().equals(requestedLocation.getName()))
+                            .filter(e -> e.getKey().getRegionName().equals(regionWrapper.getName())
+                                    || e.getValue().getDisplayName().equals(regionWrapper.getName())
+                                    || e.getValue().getKey().equals(regionWrapper.getName()))
                             .findFirst();
             if (coordinate.isPresent()) {
                 environment.setLocation(coordinate.get().getValue().getKey());
                 environment.setLocationDisplayName(coordinate.get().getValue().getDisplayName());
                 environment.setLatitude(coordinate.get().getValue().getLatitude());
                 environment.setLongitude(coordinate.get().getValue().getLongitude());
-            } else if (requestedLocation.getLatitude() != null && requestedLocation.getLongitude() != null) {
-                environment.setLocation(requestedLocation.getName());
-                environment.setLocationDisplayName(requestedLocation.getDisplayName());
-                environment.setLatitude(requestedLocation.getLatitude());
-                environment.setLongitude(requestedLocation.getLongitude());
+            } else if (regionWrapper.getLatitude() != null && regionWrapper.getLongitude() != null) {
+                environment.setLocation(regionWrapper.getName());
+                environment.setLocationDisplayName(regionWrapper.getDisplayName());
+                environment.setLatitude(regionWrapper.getLatitude());
+                environment.setLongitude(regionWrapper.getLongitude());
             } else {
                 throw new BadRequestException(String.format("No location found with name %s in the location list. The supported locations are: [%s]",
-                        requestedLocation, cloudRegions.locationNames()));
+                        regionWrapper.getName(), cloudRegions.locationNames()));
             }
         }
     }
@@ -168,13 +201,6 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
 
     boolean isNameOccupied(String name, String accountId) {
         return environmentRepository.existsWithNameAndAccountAndArchivedIsFalse(name, accountId);
-    }
-
-    CloudRegions getRegionsByEnvironment(Environment environment) {
-        PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
-        platformResourceRequest.setCredential(environment.getCredential());
-        platformResourceRequest.setCloudPlatform(environment.getCloudPlatform());
-        return platformParameterService.getRegionsByCredential(platformResourceRequest);
     }
 
     public List<EnvironmentDto> findAllByIdInAndStatusIn(Collection<Long> resourceIds, Collection<EnvironmentStatus> environmentStatuses) {
@@ -214,6 +240,7 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
      * @param securityAccess this should contains the knox and default security groups
      */
     void editSecurityAccess(Environment environment, SecurityAccessDto securityAccess) {
+        LOGGER.debug("Editing security access for environment.");
         environment.setCidr(null);
         if (StringUtils.isNotBlank(securityAccess.getDefaultSecurityGroupId())) {
             environment.setDefaultSecurityGroupId(securityAccess.getDefaultSecurityGroupId());
@@ -224,6 +251,7 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
     }
 
     void setSecurityAccess(Environment environment, SecurityAccessDto securityAccess) {
+        LOGGER.debug("Setting security access for environment.");
         if (securityAccess != null) {
             environment.setCidr(securityAccess.getCidr());
             environment.setSecurityGroupIdForKnox(securityAccess.getSecurityGroupIdForKnox());
@@ -299,7 +327,7 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
             grpcUmsClient.assignResourceRole(userCrn, environmentCrn, grpcUmsClient.getBuiltInEnvironmentAdminResourceRoleCrn(), MDCUtils.getRequestId());
             LOGGER.debug("EnvironmentAdmin role of {} environemnt is successfully assigned to the {} user", environmentCrn, userCrn);
         } catch (StatusRuntimeException ex) {
-            if (Status.Code.ALREADY_EXISTS.equals(ex.getStatus().getCode())) {
+            if (Code.ALREADY_EXISTS.equals(ex.getStatus().getCode())) {
                 LOGGER.debug("EnvironmentAdmin role of {} environemnt is already assigned to the {} user", environmentCrn, userCrn);
             } else {
                 LOGGER.warn(String.format("EnvironmentAdmin role of %s environment cannot be assigned to the %s user", environmentCrn, userCrn), ex);

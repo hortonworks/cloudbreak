@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow.creation.config;
 
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENVIRONMENT_CREATION_VALIDATION_STATE;
+import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENVIRONMENT_INITIALIZATION_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENV_CREATION_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENV_CREATION_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.FINAL_STATE;
@@ -12,6 +13,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINALIZE_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_INITIALIZATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
@@ -33,7 +35,12 @@ public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreation
     private static final List<Transition<EnvCreationState, EnvCreationStateSelectors>> TRANSITIONS
             = new Transition.Builder<EnvCreationState, EnvCreationStateSelectors>().defaultFailureEvent(FAILED_ENV_CREATION_EVENT)
 
-            .from(INIT_STATE).to(ENVIRONMENT_CREATION_VALIDATION_STATE)
+            .from(INIT_STATE).to(ENVIRONMENT_INITIALIZATION_STATE)
+            .event(START_ENVIRONMENT_INITIALIZATION_EVENT)
+            .failureState(ENV_CREATION_FAILED_STATE)
+            .defaultFailureEvent()
+
+            .from(ENVIRONMENT_INITIALIZATION_STATE).to(ENVIRONMENT_CREATION_VALIDATION_STATE)
             .event(START_ENVIRONMENT_VALIDATION_EVENT)
             .failureState(ENV_CREATION_FAILED_STATE)
             .defaultFailureEvent()
@@ -80,7 +87,7 @@ public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreation
     @Override
     public EnvCreationStateSelectors[] getInitEvents() {
         return new EnvCreationStateSelectors[]{
-                START_ENVIRONMENT_VALIDATION_EVENT
+                START_ENVIRONMENT_INITIALIZATION_EVENT
         };
     }
 

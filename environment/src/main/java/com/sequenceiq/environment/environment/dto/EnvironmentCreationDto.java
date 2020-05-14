@@ -184,6 +184,17 @@ public class EnvironmentCreationDto {
         return proxyConfigName;
     }
 
+    @Override
+    public String toString() {
+        return "EnvironmentCreationDto{" +
+                "name='" + name + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", creator='" + creator + '\'' +
+                ", crn='" + crn + '\'' +
+                ", parentEnvironmentName='" + parentEnvironmentName + '\'' +
+                '}';
+    }
+
     public static final class Builder {
         private String name;
 

@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
-import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -80,13 +79,15 @@ public class EnvironmentCreationService {
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
+        LOGGER.info("Environment creation initiated.");
         if (environmentService.isNameOccupied(creationDto.getName(), creationDto.getAccountId())) {
             throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
                     creationDto.getName(), creationDto.getAccountId()));
         }
 
         Environment environment = initializeEnvironment(creationDto);
-        if (Objects.nonNull(creationDto.getParentEnvironmentName())) {
+        if (StringUtils.isNotEmpty(creationDto.getParentEnvironmentName())) {
+            LOGGER.debug("Setting parent environment '{}'.", creationDto.getParentEnvironmentName());
             Optional<Environment> parentEnvironment = environmentService.
                     findByNameAndAccountIdAndArchivedIsFalse(creationDto.getParentEnvironmentName(), creationDto.getAccountId());
             parentEnvironment.ifPresent(environment::setParentEnvironment);
@@ -99,9 +100,7 @@ public class EnvironmentCreationService {
             environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
         }
         environmentService.assignEnvironmentAdminAndOwnerRole(creationDto.getCreator(), environmentCrnForVirtualGroups);
-
-        CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
-        validateCreation(creationDto, environment, cloudRegions);
+        validateCreation(creationDto, environment);
         try {
             environment = environmentService.save(environment);
             environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), creationDto.getAccountId(),
@@ -127,6 +126,7 @@ public class EnvironmentCreationService {
         proxyConfig.ifPresent(pc -> environment.setProxyConfig(pc));
         environment.setCloudPlatform(credential.getCloudPlatform());
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
+        LOGGER.info("Environment is initialized for creation.");
         return environment;
     }
 
@@ -148,34 +148,19 @@ public class EnvironmentCreationService {
         return result;
     }
 
-    private CloudRegions setLocationAndRegions(EnvironmentCreationDto creationDto, Environment environment) {
-        CloudRegions cloudRegions = environmentService.getRegionsByEnvironment(environment);
-        environmentService.setLocation(environment, creationDto.getLocation(), cloudRegions);
-        if (cloudRegions.areRegionsSupported()) {
-            environmentService.setRegions(environment, creationDto.getRegions(), cloudRegions);
-        }
-        return cloudRegions;
-    }
-
     private void createAndSetParameters(Environment environment, ParametersDto parameters) {
         environment.setParameters(parametersService.saveParameters(environment, parameters));
     }
 
-    private void validateCreation(EnvironmentCreationDto creationDto, Environment environment, CloudRegions cloudRegions) {
-        ValidationResultBuilder validationBuilder = validatorService
-                .validateRegionsAndLocation(creationDto.getLocation().getName(), creationDto.getRegions(), environment, cloudRegions);
-        ValidationResultBuilder networkValidation = validatorService.validateNetworkCreation(environment, creationDto.getNetwork());
-        validationBuilder = validationBuilder.merge(networkValidation.build());
-
+    private void validateCreation(EnvironmentCreationDto creationDto, Environment environment) {
+        LOGGER.info("Validating environment creation. CreationDto: '{}', Environment: '{}'.", creationDto, environment);
+        ValidationResultBuilder validationBuilder = validatorService.validateNetworkCreation(environment, creationDto.getNetwork());
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
-
         validationBuilder.ifError(() -> isCloudPlatformInvalid(creationDto.getCreator(), creationDto.getCloudPlatform()),
                 "Provisioning in Microsoft Azure is not enabled for this account.");
-
         ValidationResult freeIpaCreationValidation = validatorService.validateFreeIpaCreation(creationDto.getFreeIpaCreation());
         validationBuilder.merge(freeIpaCreationValidation);
-
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());

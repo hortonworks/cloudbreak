@@ -14,6 +14,7 @@ import javax.ws.rs.NotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -65,14 +66,13 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a create environment request is sent with an invalid region in it",
             then = "a BadRequestException should be returned")
     public void testCreateEnvironmentInvalidRegion(TestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
-                .init(EnvironmentTestDto.class)
+                .given(EnvironmentTestDto.class)
                 .withRegions(INVALID_REGION)
-                .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
-                .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.CREATE_FAILED)
                 .validate();
     }
 
@@ -82,14 +82,13 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a create environment request is sent with no region in it",
             then = "a BadRequestException should be returned")
     public void testCreateEnvironmentNoRegion(TestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
-                .init(EnvironmentTestDto.class)
+                .given(EnvironmentTestDto.class)
                 .withRegions(null)
-                .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
-                .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.CREATE_FAILED)
                 .validate();
     }
 

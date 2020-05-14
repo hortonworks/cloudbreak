@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -18,6 +20,8 @@ import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersC
 
 @Service
 public class ParametersService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ParametersService.class);
 
     private final BaseParametersRepository baseParametersRepository;
 
@@ -47,6 +51,7 @@ public class ParametersService {
     public BaseParameters saveParameters(Environment environment, ParametersDto parametersDto) {
         BaseParameters savedParameters = null;
         if (parametersDto != null) {
+            LOGGER.debug("Saving parameters for environment. Parameters: {}", parametersDto);
             EnvironmentParametersConverter environmentParametersConverter = environmentParamsConverterMap.get(getCloudPlatform(environment));
             if (environmentParametersConverter != null) {
                 BaseParameters parameters = environmentParametersConverter.convert(environment, parametersDto);
