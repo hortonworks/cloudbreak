@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
@@ -32,11 +33,14 @@ import com.sequenceiq.periscope.converter.TimeAlertResponseConverter;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.LoadAlertConfiguration;
+import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.service.AlertService;
+import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DateService;
 import com.sequenceiq.periscope.service.NotFoundException;
+import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AlertControllerTest {
@@ -68,9 +72,17 @@ public class AlertControllerTest {
     @Mock
     private TimeAlertResponseConverter timeAlertResponseConverter;
 
+    @Mock
+    private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private ClusterProxyConfigurationService clusterProxyConfigurationService;
+
     private DateService dateService = new DateService();
 
     private Long clusterId = 10L;
+
+    private Long workspaceId = 10L;
 
     private Long alertId = 20L;
 
@@ -85,8 +97,9 @@ public class AlertControllerTest {
     public void testLoadAlertUpdateNotFound() {
         LoadAlertRequest request = getALoadAlertRequest();
 
-        when(clusterService.findStackCrnById(clusterId)).thenReturn("test");
-        when(alertService.findLoadAlertByCluster(clusterId, alertId)).thenReturn(null);
+        Optional<Cluster> aCluster = getACluster();
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
+        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
 
         underTest.updateLoadAlert(clusterId, alertId, request);
     }
@@ -96,7 +109,10 @@ public class AlertControllerTest {
         LoadAlertRequest request = getALoadAlertRequest();
         LoadAlert alert = getALoadAlert();
 
-        when(alertService.findLoadAlertByCluster(clusterId, alertId)).thenReturn(alert);
+        Optional<Cluster> aCluster = getACluster();
+        aCluster.get().setLoadAlerts(Set.of(alert));
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
+        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
         when(loadAlertRequestConverter.convert(request)).thenReturn(alert);
 
         underTest.updateLoadAlert(clusterId, alertId, request);
@@ -107,10 +123,24 @@ public class AlertControllerTest {
     public void testLoadAlertCreate() {
         LoadAlertRequest request = getALoadAlertRequest();
 
-        Cluster aCluster = getACluster();
-        when(alertService.getLoadAlertsForClusterHostGroup(clusterId, "compute")).thenReturn(Set.of());
+        Optional<Cluster> aCluster = getACluster();
         when(loadAlertRequestConverter.convert(request)).thenReturn(getALoadAlert());
-        when(clusterService.findById(clusterId)).thenReturn(aCluster);
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
+        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
+        when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("http://clusterproxy"));
+
+        underTest.createLoadAlert(clusterId, request);
+        verify(alertService).createLoadAlert(anyLong(), any(LoadAlert.class));
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testLoadAlertCreateWhenClusterProxyNotRegistered() {
+        LoadAlertRequest request = getALoadAlertRequest();
+
+        Optional<Cluster> aCluster = getACluster();
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
+        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
+        when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.empty());
 
         underTest.createLoadAlert(clusterId, request);
         verify(alertService).createLoadAlert(anyLong(), any(LoadAlert.class));
@@ -119,9 +149,11 @@ public class AlertControllerTest {
     @Test(expected = BadRequestException.class)
     public void testInvalidCloudPlatform() {
         LoadAlertRequest request = getALoadAlertRequest();
-        Cluster aCluster = getACluster();
-        aCluster.setCloudPlatform("Yarn");
-        when(clusterService.findById(clusterId)).thenReturn(aCluster);
+        Optional<Cluster> aCluster = getACluster();
+        aCluster.get().setCloudPlatform("Yarn");
+
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
+        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
 
         underTest.createLoadAlert(clusterId, request);
     }
@@ -130,9 +162,11 @@ public class AlertControllerTest {
     public void testLoadAlertCreateDuplicate() {
         LoadAlertRequest request = getALoadAlertRequest();
 
-        Cluster aCluster = getACluster();
-        when(clusterService.findById(clusterId)).thenReturn(aCluster);
-        when(alertService.getLoadAlertsForClusterHostGroup(clusterId, "compute")).thenReturn(Set.of(getALoadAlert()));
+        Optional<Cluster> aCluster = getACluster();
+        aCluster.get().setLoadAlerts(Set.of(getALoadAlert()));
+
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
+        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
 
         underTest.createLoadAlert(clusterId, request);
     }
@@ -146,8 +180,10 @@ public class AlertControllerTest {
         scalingPolicy.setHostGroup("compute");
         request.setScalingPolicy(scalingPolicy);
 
-        Cluster aCluster = getACluster();
-        when(clusterService.findById(clusterId)).thenReturn(aCluster);
+        Optional<Cluster> aCluster = getACluster();
+
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
+        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
         when(timeAlertRequestConverter.convert(request)).thenReturn(new TimeAlert());
 
         underTest.createTimeAlert(clusterId, request);
@@ -158,9 +194,9 @@ public class AlertControllerTest {
     public void testTimeAlertUpdateNotFound() {
         TimeAlertRequest request = new TimeAlertRequest();
 
-        when(clusterService.findStackCrnById(clusterId)).thenReturn("test");
-        when(alertService.findTimeAlertByCluster(clusterId, alertId)).thenReturn(null);
-
+        Optional<Cluster> aCluster = getACluster();
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
+        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
         underTest.updateTimeAlert(clusterId, alertId, request);
     }
 
@@ -173,9 +209,13 @@ public class AlertControllerTest {
         scalingPolicy.setHostGroup("compute");
         request.setScalingPolicy(scalingPolicy);
         TimeAlert alert = new TimeAlert();
+        alert.setId(alertId);
 
+        Optional<Cluster> aCluster = getACluster();
+        aCluster.get().setTimeAlerts(Set.of(alert));
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
+        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
         when(timeAlertRequestConverter.convert(request)).thenReturn(alert);
-        when(alertService.findTimeAlertByCluster(clusterId, alertId)).thenReturn(alert);
 
         underTest.updateTimeAlert(clusterId, alertId, request);
         verify(alertService).updateTimeAlert(anyLong(), anyLong(), any(TimeAlert.class));
@@ -183,10 +223,15 @@ public class AlertControllerTest {
 
     private LoadAlert getALoadAlert() {
         LoadAlert alert = new LoadAlert();
+        alert.setId(alertId);
         LoadAlertConfiguration testConfiguration = new LoadAlertConfiguration();
         testConfiguration.setMaxResourceValue(200);
         testConfiguration.setMinResourceValue(0);
         alert.setLoadAlertConfiguration(testConfiguration);
+
+        ScalingPolicy scalingPolicy = new ScalingPolicy();
+        scalingPolicy.setHostGroup("compute");
+        alert.setScalingPolicy(scalingPolicy);
         return alert;
     }
 
@@ -202,10 +247,10 @@ public class AlertControllerTest {
         return loadAlertRequest;
     }
 
-    private Cluster getACluster() {
+    private Optional<Cluster> getACluster() {
         Cluster cluster = new Cluster();
         cluster.setCloudPlatform("AWS");
         cluster.setTunnel(Tunnel.CLUSTER_PROXY);
-        return cluster;
+        return Optional.of(cluster);
     }
 }

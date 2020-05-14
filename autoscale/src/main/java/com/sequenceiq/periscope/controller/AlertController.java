@@ -14,6 +14,7 @@ import javax.ws.rs.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -28,14 +29,16 @@ import com.sequenceiq.periscope.converter.LoadAlertRequestConverter;
 import com.sequenceiq.periscope.converter.LoadAlertResponseConverter;
 import com.sequenceiq.periscope.converter.TimeAlertRequestConverter;
 import com.sequenceiq.periscope.converter.TimeAlertResponseConverter;
-import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
+import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.service.AlertService;
+import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DateService;
 import com.sequenceiq.periscope.service.NotFoundException;
+import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
 
 @Controller
 @AuthorizationResource
@@ -65,6 +68,12 @@ public class AlertController implements AlertEndpoint {
     @Inject
     private ClusterService clusterService;
 
+    @Inject
+    private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private ClusterProxyConfigurationService clusterProxyConfigurationService;
+
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public TimeAlertResponse createTimeAlert(Long clusterId, TimeAlertRequest json) {
@@ -84,13 +93,14 @@ public class AlertController implements AlertEndpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public List<TimeAlertResponse> getTimeAlerts(Long clusterId) {
-        Set<TimeAlert> timeAlerts = alertService.getTimeAlerts(clusterId);
+        Set<TimeAlert> timeAlerts = getClusterForWorkspace(clusterId).getTimeAlerts();
         return createTimeAlertsResponse(timeAlerts);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void deleteTimeAlert(Long clusterId, Long alertId) {
+        validateAlertForUpdate(getClusterForWorkspace(clusterId), alertId, AlertType.TIME);
         alertService.deleteTimeAlert(clusterId, alertId);
     }
 
@@ -120,13 +130,14 @@ public class AlertController implements AlertEndpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public List<LoadAlertResponse> getLoadAlerts(Long clusterId) {
-        return alertService.getLoadAlerts(clusterId).stream()
+        return getClusterForWorkspace(clusterId).getLoadAlerts().stream()
                 .map(this::createLoadAlertResponse).collect(Collectors.toList());
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void deleteLoadAlert(Long clusterId, Long alertId) {
+        validateAlertForUpdate(getClusterForWorkspace(clusterId), alertId, AlertType.LOAD);
         alertService.deleteLoadAlert(clusterId, alertId);
     }
 
@@ -154,12 +165,9 @@ public class AlertController implements AlertEndpoint {
         }
     }
 
-    protected void setDateService(DateService dateService) {
-        this.dateService = dateService;
-    }
-
-    private LoadAlertResponse createLoadAlertResponse(LoadAlert loadAlert) {
-        return loadAlertResponseConverter.convert(loadAlert);
+    private Cluster getClusterForWorkspace(Long clusterId) {
+        return clusterService.findOneByClusterIdAndWorkspaceId(clusterId, restRequestThreadLocalService.getRequestedWorkspaceId())
+                .orElseThrow(NotFoundException.notFound("cluster", clusterId));
     }
 
     private void validateCloudPlatform(Cluster cluster) {
@@ -170,12 +178,9 @@ public class AlertController implements AlertEndpoint {
     }
 
     private void validateTimeAlert(Long clusterId, Optional<Long> alertId, TimeAlertRequest json) {
-        Cluster cluster = clusterService.findById(clusterId);
-        alertId.ifPresentOrElse(updateAlert -> {
-                    validateAlertForUpdate(clusterId, updateAlert, AlertType.TIME);
-                }, () -> {
-                    validateCloudPlatform(cluster);
-                });
+        Cluster cluster = getClusterForWorkspace(clusterId);
+        alertId.ifPresentOrElse(updateAlert -> validateAlertForUpdate(cluster, updateAlert, AlertType.TIME),
+                () -> validateCloudPlatform(cluster));
         try {
             dateService.validateTimeZone(json.getTimeZone());
             dateService.getCronExpression(json.getCron());
@@ -185,25 +190,51 @@ public class AlertController implements AlertEndpoint {
     }
 
     private void validateLoadAlert(Long clusterId, Optional<Long> alertId, LoadAlertRequest json) {
-        Cluster cluster = clusterService.findById(clusterId);
-        alertId.ifPresentOrElse(
-                updateAlert -> {
-                    validateAlertForUpdate(clusterId, updateAlert, AlertType.LOAD);
-                }, () -> {
+        Cluster cluster = getClusterForWorkspace(clusterId);
+        alertId.ifPresentOrElse(updateAlert -> validateAlertForUpdate(cluster, updateAlert, AlertType.LOAD),
+                () -> {
                     validateCloudPlatform(cluster);
-
-                    String hostGroup = json.getScalingPolicy().getHostGroup();
-                    if (!alertService.getLoadAlertsForClusterHostGroup(clusterId, hostGroup).isEmpty()) {
-                        String stackCrn = clusterService.findStackCrnById(clusterId);
-                        throw new BadRequestException(String.format("LoadAlert is already defined for Cluster %s, HostGroup %s",
-                                stackCrn, hostGroup));
-                    }
+                    String requestHostGroup = json.getScalingPolicy().getHostGroup();
+                    cluster.getLoadAlerts().stream().map(LoadAlert::getScalingPolicy).map(ScalingPolicy::getHostGroup)
+                            .filter(hostGroup -> hostGroup.equalsIgnoreCase(requestHostGroup)).findAny()
+                            .ifPresent(hostGroup -> {
+                                throw new BadRequestException(String.format("LoadAlert is already defined for Cluster '%s', HostGroup '%s'",
+                                        cluster.getStackCrn(), requestHostGroup));
+                            });
+                    clusterProxyConfigurationService.getClusterProxyUrl()
+                            .orElseThrow(() ->  new BadRequestException(String.format("ClusterProxy Not Configured for Cluster '{}', " +
+                                    " Load Alert cannot be configured.", cluster.getStackCrn())));
                 });
     }
 
+    private void validateAlertForUpdate(Cluster cluster, Long alertId, AlertType alertType) {
+        Optional alert;
+        switch (alertType) {
+            case LOAD:
+                alert = cluster.getLoadAlerts().stream().map(LoadAlert::getId)
+                        .filter(loadAlertId -> loadAlertId.equals(alertId))
+                        .findAny();
+                break;
+            case TIME:
+                alert = cluster.getTimeAlerts().stream().map(TimeAlert::getId)
+                        .filter(timeAlertId -> timeAlertId.equals(alertId))
+                        .findAny();
+                break;
+
+            default:
+                //Prometheus and Metrics Alerts not supported.
+                throw new BadRequestException(String.format("Unsupported AlertType '%s'", alertType));
+        }
+
+        if (alert.isEmpty()) {
+            throw new NotFoundException(
+                    String.format("Could not find '%s' alert with id: '%s', for cluster: '%s'", alertType, alertId, cluster.getStackCrn()));
+        }
+    }
+
     private List<TimeAlertResponse> createTimeAlertsResponse(Set<TimeAlert> alarms) {
-        List<TimeAlert> metricAlarms = new ArrayList<>(alarms);
-        return createTimeAlertsResponse(metricAlarms);
+        List<TimeAlert> timeAlerts = new ArrayList<>(alarms);
+        return createTimeAlertsResponse(timeAlerts);
     }
 
     private TimeAlertResponse createTimeAlertResponse(TimeAlert alarm) {
@@ -214,27 +245,12 @@ public class AlertController implements AlertEndpoint {
         return timeAlertResponseConverter.convertAllToJson(alarms);
     }
 
-    private void validateAlertForUpdate(Long clusterId, Long alertId, AlertType alertType) {
-        BaseAlert alert;
-        switch (alertType) {
-            case LOAD:
-                alert = alertService.findLoadAlertByCluster(clusterId, alertId);
-                break;
-            case TIME:
-                alert = alertService.findTimeAlertByCluster(clusterId, alertId);
-                break;
-            case METRIC:
-                alert = alertService.findMetricAlertByCluster(clusterId, alertId);
-                break;
-            case PROMETHEUS:
-                alert = alertService.findPrometheusAlertByCluster(clusterId, alertId);
-                break;
-            default:
-                alert = null;
-        }
-        if (alert == null) {
-            String clusterCrn = clusterService.findStackCrnById(clusterId);
-            throw new NotFoundException(String.format("Could not find %s alert with id: '%s', for cluster: '%s'", alertType, alertId, clusterCrn));
-        }
+    private LoadAlertResponse createLoadAlertResponse(LoadAlert loadAlert) {
+        return loadAlertResponseConverter.convert(loadAlert);
+    }
+
+    @VisibleForTesting
+    protected void setDateService(DateService dateService) {
+        this.dateService = dateService;
     }
 }

@@ -127,20 +127,24 @@ public class ClusterService implements ResourceBasedCrnProvider {
         return clusterRepository.findByUserId(user.getUserId());
     }
 
-    public List<Cluster> findDistroXByUser(CloudbreakUser user) {
-        return clusterRepository.findByUserIdAndStackType(user.getUserId(), StackType.WORKLOAD);
+    public List<Cluster> findDistroXByWorkspace(Long workspaceId) {
+        return clusterRepository.findByWorkspaceIdAndStackType(workspaceId, StackType.WORKLOAD);
     }
 
     public Cluster findOneByStackId(Long stackId) {
         return clusterRepository.findByStackId(stackId);
     }
 
-    public Optional<Cluster> findOneByStackCrnAndUserId(String stackCrn, CloudbreakUser cloudbreakUser) {
-        return  clusterRepository.findByStackCrnAndUserId(stackCrn, cloudbreakUser.getUserId());
+    public Optional<Cluster> findOneByStackCrnAndWorkspaceId(String stackCrn, Long workspaceId) {
+        return  clusterRepository.findByStackCrnAndWorkspaceId(stackCrn, workspaceId);
     }
 
-    public Optional<Cluster> findOneByStackNameAndUserId(String stackName, CloudbreakUser cloudbreakUser) {
-        return  clusterRepository.findByStackNameAndUserId(stackName, cloudbreakUser.getUserId());
+    public Optional<Cluster> findOneByStackNameAndWorkspaceId(String stackName, Long workspaceId) {
+        return  clusterRepository.findByStackNameAndWorkspaceId(stackName, workspaceId);
+    }
+
+    public Optional<Cluster> findOneByClusterIdAndWorkspaceId(Long clusterId, Long workspaceId) {
+        return  clusterRepository.findByClusterIdAndWorkspaceId(clusterId, workspaceId);
     }
 
     public Cluster save(Cluster cluster) {

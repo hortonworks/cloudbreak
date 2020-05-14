@@ -14,6 +14,8 @@ public class ScalingConstants {
 
     public static final int DEFAULT_MAX_SCALE_UP_STEP_SIZE = 50;
 
+    public static final Long UNINITIALIZED_WORKSPACE_ID = -1L;
+
     private ScalingConstants() {
     }
 }

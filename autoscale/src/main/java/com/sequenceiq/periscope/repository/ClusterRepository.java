@@ -19,12 +19,16 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     Cluster findByStackId(@Param("stackId") Long stackId);
 
     @Query(" SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain " +
-            " WHERE c.stackCrn = :stackCrn and c.clusterPertain.userId = :userId")
-    Optional<Cluster> findByStackCrnAndUserId(@Param("stackCrn") String stackCrn, @Param("userId") String userId);
+            " WHERE c.stackCrn = :stackCrn and c.clusterPertain.workspaceId = :workspaceId")
+    Optional<Cluster> findByStackCrnAndWorkspaceId(@Param("stackCrn") String stackCrn, @Param("workspaceId") Long workspaceId);
 
     @Query(" SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain " +
-            " WHERE c.stackName = :stackName and c.clusterPertain.userId = :userId")
-    Optional<Cluster> findByStackNameAndUserId(@Param("stackName") String stackName, @Param("userId") String userId);
+            " WHERE c.stackName = :stackName and c.clusterPertain.workspaceId = :workspaceId")
+    Optional<Cluster> findByStackNameAndWorkspaceId(@Param("stackName") String stackName, @Param("workspaceId") Long workspaceId);
+
+    @Query(" SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain " +
+            " WHERE c.id = :clusterId and c.clusterPertain.workspaceId = :workspaceId")
+    Optional<Cluster> findByClusterIdAndWorkspaceId(@Param("clusterId") Long clusterId, @Param("workspaceId") Long workspaceId);
 
     @Query("SELECT c.stackCrn FROM Cluster c WHERE c.id = :id")
     String findStackCrnById(@Param("id") Long id);
@@ -38,8 +42,8 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain WHERE c.clusterPertain.userId = :userId")
     List<Cluster> findByUserId(@Param("userId") String userId);
 
-    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain WHERE c.clusterPertain.userId = :userId and c.stackType = :stackType")
-    List<Cluster> findByUserIdAndStackType(@Param("userId") String userId, @Param("stackType") StackType stackType);
+    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain WHERE c.clusterPertain.workspaceId = :workspaceId and c.stackType = :stackType")
+    List<Cluster> findByWorkspaceIdAndStackType(@Param("workspaceId") Long workspaceId, @Param("stackType") StackType stackType);
 
     @Query("SELECT distinct c.id FROM Cluster c JOIN c.loadAlerts loadalert WHERE c.stackType = :stackType " +
             " and c.autoscalingEnabled = :autoScalingEnabled" +
