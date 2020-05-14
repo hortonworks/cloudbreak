@@ -19,7 +19,7 @@ public class AdlsGen2BackupConfigGeneratorTest {
                 FluentClusterType.FREEIPA.value(),
                 "mycluster",
                 "12345");
-        assertEquals("https://someaccount.blob.core.windows.net/mycontainer/cluster-backups/freeipa/mycluster_12345", location);
+        assertEquals("https://someaccount.dfs.core.windows.net/mycontainer/cluster-backups/freeipa/mycluster_12345", location);
     }
 
     @Test
@@ -30,7 +30,7 @@ public class AdlsGen2BackupConfigGeneratorTest {
                 FluentClusterType.FREEIPA.value(),
                 "mycluster",
                 "12345");
-        assertEquals("https://someaccount.blob.core.windows.net/mycontainer/someplace/cluster-backups/freeipa/mycluster_12345", location);
+        assertEquals("https://someaccount.dfs.core.windows.net/mycontainer/someplace/cluster-backups/freeipa/mycluster_12345", location);
     }
 
     @Test
@@ -41,7 +41,7 @@ public class AdlsGen2BackupConfigGeneratorTest {
                 FluentClusterType.FREEIPA.value(),
                 "mycluster",
                 "12345");
-        assertEquals("https://someaccount.blob.core.windows.net/mycontainer/cluster-backups/freeipa/mycluster_12345", location);
+        assertEquals("https://someaccount.dfs.core.windows.net/mycontainer/cluster-backups/freeipa/mycluster_12345", location);
     }
 
     @Test
@@ -52,7 +52,7 @@ public class AdlsGen2BackupConfigGeneratorTest {
                 FluentClusterType.FREEIPA.value(),
                 "mycluster",
                 "12345");
-        assertEquals("https://someaccount.blob.core.windows.net/mycontainer/cluster-backups/freeipa/mycluster_12345", location);
+        assertEquals("https://someaccount.dfs.core.windows.net/mycontainer/cluster-backups/freeipa/mycluster_12345", location);
     }
 
     @Test
@@ -63,6 +63,6 @@ public class AdlsGen2BackupConfigGeneratorTest {
                 FluentClusterType.FREEIPA.value(),
                 "mycluster",
                 "12345");
-        assertEquals("https://someaccount.blob.core.windows.net/mycontainer/someplace/deeper/cluster-backups/freeipa/mycluster_12345", location);
+        assertEquals("https://someaccount.dfs.core.windows.net/mycontainer/someplace/deeper/cluster-backups/freeipa/mycluster_12345", location);
     }
 }
