@@ -10,6 +10,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,6 +52,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -56,6 +60,8 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
@@ -150,6 +156,12 @@ public class ImageCatalogServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private GrpcUmsClient grpcUmsClient;
+
+    @Mock
+    private TransactionService transactionService;
 
     @Before
     public void beforeTest() throws Exception {
@@ -632,16 +644,19 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
-    public void testPopulateCrnCorrectly() {
+    public void testPopulateCrnCorrectly() throws TransactionExecutionException {
         ImageCatalog imageCatalog = getImageCatalog();
 
         when(workspaceService.get(1L, user)).thenReturn(imageCatalog.getWorkspace());
         when(workspaceService.retrieveForUser(user)).thenReturn(Set.of(imageCatalog.getWorkspace()));
+        when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
 
         underTest.createForLoggedInUser(imageCatalog, 1L, "account_id", "creator");
 
         assertThat(imageCatalog.getCreator(), is("creator"));
-        assertTrue(imageCatalog.getResourceCrn().matches("crn:cdp:datahub:us-west-1:account_id:imageCatalog:.*"));
+        String crnPattern = "crn:cdp:datahub:us-west-1:account_id:imageCatalog:.*";
+        assertTrue(imageCatalog.getResourceCrn().matches(crnPattern));
+        verify(grpcUmsClient).assignResourceOwnerRoleIfEntitled(eq("creator"), matches(crnPattern), eq("account_id"));
     }
 
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {

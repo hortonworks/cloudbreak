@@ -294,7 +294,7 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
         return environmentRepository.findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(accountId, parentEnvironmentId);
     }
 
-    public void assignEnvironmentAdminRole(String userCrn, String environmentCrn) {
+    public void assignEnvironmentAdminAndOwnerRole(String userCrn, String environmentCrn) {
         try {
             grpcUmsClient.assignResourceRole(userCrn, environmentCrn, grpcUmsClient.getBuiltInEnvironmentAdminResourceRoleCrn(), MDCUtils.getRequestId());
             LOGGER.debug("EnvironmentAdmin role of {} environemnt is successfully assigned to the {} user", environmentCrn, userCrn);
@@ -306,6 +306,11 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
             }
         } catch (RuntimeException rex) {
             LOGGER.warn(String.format("EnvironmentAdmin role of %s environment cannot be assigned to the %s user", environmentCrn, userCrn), rex);
+        }
+        try {
+            grpcUmsClient.assignResourceOwnerRoleIfEntitled(userCrn, environmentCrn, ThreadBasedUserCrnProvider.getAccountId());
+        } catch (RuntimeException ex) {
+            LOGGER.warn(String.format("Owner role of %s environment cannot be assigned to the %s user", environmentCrn, userCrn), ex);
         }
     }
 

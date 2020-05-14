@@ -183,6 +183,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
                     throw new BadRequestException(verifiedCredential.getVerificationStatusText());
                 }
                 Credential created = repository.save(verifiedCredential);
+                grpcUmsClient.assignResourceOwnerRoleIfEntitled(creatorUserCrn, credentialCrn, accountId);
                 sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
                 return created;
             });

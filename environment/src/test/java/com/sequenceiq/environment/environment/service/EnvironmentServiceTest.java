@@ -5,9 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -25,6 +28,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -53,6 +58,9 @@ class EnvironmentServiceTest {
 
     @Mock
     private EnvironmentValidatorService environmentValidatorService;
+
+    @Mock
+    private GrpcUmsClient grpcUmsClient;
 
     private Environment environment;
 
@@ -197,6 +205,33 @@ class EnvironmentServiceTest {
         assertEquals(List.of(environmentDto), environmentServiceUnderTest
                 .findAllByStatusIn(Set.of(EnvironmentStatus.AVAILABLE, EnvironmentStatus.CREATION_INITIATED)));
 
+    }
+
+    @Test
+    public void testRoleAssignment() {
+        when(grpcUmsClient.getBuiltInEnvironmentAdminResourceRoleCrn()).thenReturn("EnvAdminResourceRoleCrn");
+
+        ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
+            environmentServiceUnderTest.assignEnvironmentAdminAndOwnerRole(TestConstants.CRN, "envCrn");
+        });
+
+        verify(grpcUmsClient).assignResourceRole(eq(TestConstants.CRN), eq("envCrn"), eq("EnvAdminResourceRoleCrn"), any());
+        verify(grpcUmsClient).assignResourceOwnerRoleIfEntitled(eq(TestConstants.CRN), eq("envCrn"), eq(TestConstants.ACCOUNT_ID));
+    }
+
+    @Test
+    public void testRoleAssignmentFail() {
+        when(grpcUmsClient.getBuiltInEnvironmentAdminResourceRoleCrn()).thenReturn("EnvAdminResourceRoleCrn");
+        doThrow(new RuntimeException("Bad"))
+                .when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
+
+        ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
+            environmentServiceUnderTest.assignEnvironmentAdminAndOwnerRole(TestConstants.CRN, "envCrn");
+        });
+
+        verify(grpcUmsClient).assignResourceRole(eq(TestConstants.CRN), eq("envCrn"), eq("EnvAdminResourceRoleCrn"), any());
+        verify(grpcUmsClient).assignResourceOwnerRoleIfEntitled(eq(TestConstants.CRN), eq("envCrn"), eq(TestConstants.ACCOUNT_ID));
+        verifyNoMoreInteractions(grpcUmsClient);
     }
 
     @Configuration

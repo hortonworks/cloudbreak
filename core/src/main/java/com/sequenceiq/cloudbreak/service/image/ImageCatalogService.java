@@ -43,12 +43,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -108,6 +112,12 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
+
+    @Inject
+    private TransactionService transactionService;
+
     @Override
     public Set<ImageCatalog> findAllByWorkspaceId(Long workspaceId) {
         Set<ImageCatalog> imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchived(workspaceId, false);
@@ -134,9 +144,18 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public ImageCatalog createForLoggedInUser(ImageCatalog imageCatalog, Long workspaceId, String accountId, String creator) {
-        imageCatalog.setResourceCrn(createCRN(accountId));
+        String resourceCrn = createCRN(accountId);
+        imageCatalog.setResourceCrn(resourceCrn);
         imageCatalog.setCreator(creator);
-        return super.createForLoggedInUser(imageCatalog, workspaceId);
+        try {
+            return transactionService.required(() -> {
+                ImageCatalog created = super.createForLoggedInUser(imageCatalog, workspaceId);
+                grpcUmsClient.assignResourceOwnerRoleIfEntitled(creator, resourceCrn, accountId);
+                return created;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     public ImageCatalog get(NameOrCrn imageCatalogNameOrCrn, Long workspaceId) {
