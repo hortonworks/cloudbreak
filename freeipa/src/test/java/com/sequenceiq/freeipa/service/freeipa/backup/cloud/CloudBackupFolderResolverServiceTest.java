@@ -44,7 +44,7 @@ public class CloudBackupFolderResolverServiceTest {
         underTest.updateStorageLocation(backup, FluentClusterType.FREEIPA.value(), "mycluster",
                 "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         // THEN
-        assertEquals("https://someaccount.blob.core.windows.net/mycontainer/cluster-backups/freeipa/mycluster_12345", backup.getStorageLocation());
+        assertEquals("https://someaccount.dfs.core.windows.net/mycontainer/cluster-backups/freeipa/mycluster_12345", backup.getStorageLocation());
     }
 
     @Test
@@ -58,7 +58,7 @@ public class CloudBackupFolderResolverServiceTest {
         underTest.updateStorageLocation(backup, FluentClusterType.FREEIPA.value(), "mycluster",
                 "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         // THEN
-        assertEquals("https://someaccount.blob.core.windows.net/mycontainer/cluster-backups/freeipa/mycluster_12345", backup.getStorageLocation());
+        assertEquals("https://someaccount.dfs.core.windows.net/mycontainer/cluster-backups/freeipa/mycluster_12345", backup.getStorageLocation());
     }
 
     @Test

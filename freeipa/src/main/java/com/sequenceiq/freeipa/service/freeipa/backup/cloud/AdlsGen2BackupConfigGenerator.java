@@ -16,9 +16,7 @@ public class AdlsGen2BackupConfigGenerator extends CloudBackupConfigGenerator<Ad
 
     private static final String[] ADLS_GEN2_SCHEME_PREFIXES = {"abfs://", "abfss://"};
 
-    private static final String AZURE_DFS_DOMAIN_SUFFIX = ".dfs.core.windows.net";
-
-    private static final String AZURE_BLOB_STORAGE_SUFFIX = "blob.core.windows.net";
+    private static final String AZURE_DFS_DOMAIN_SUFFIX = "dfs.core.windows.net";
 
     private static final String AZURE_BLOB_STORAGE_SCHEMA = "https://";
 
@@ -27,7 +25,7 @@ public class AdlsGen2BackupConfigGenerator extends CloudBackupConfigGenerator<Ad
             String clusterName, String clusterId) {
         AdlsGen2BackupConfig adlsGen2BackupConfig = generateBackupConfig(location);
         String logFolder = resolveBackupFolder(adlsGen2BackupConfig, clusterType, clusterName, clusterId);
-        String hostPart = String.format("%s.%s", adlsGen2BackupConfig.getAccount(), AZURE_BLOB_STORAGE_SUFFIX);
+        String hostPart = String.format("%s.%s", adlsGen2BackupConfig.getAccount(), AZURE_DFS_DOMAIN_SUFFIX);
         String generatedLocation = String.format("%s%s", AZURE_BLOB_STORAGE_SCHEMA,
                 Paths.get(hostPart, adlsGen2BackupConfig.getFileSystem(), logFolder));
         LOGGER.info("The following ADLS Gen2 base folder location is generated: {} (from {})",
@@ -44,7 +42,7 @@ public class AdlsGen2BackupConfigGenerator extends CloudBackupConfigGenerator<Ad
             if (locationSplit.length < 2) {
                 return new AdlsGen2BackupConfig(folderPrefix, storageWithSuffix[0], null);
             } else {
-                String[] splitByDomain = locationSplit[1].split(AZURE_DFS_DOMAIN_SUFFIX);
+                String[] splitByDomain = locationSplit[1].split("." + AZURE_DFS_DOMAIN_SUFFIX);
                 String account = splitByDomain[0];
                 if (splitByDomain.length > 1) {
                     String folderPrefixAfterDomain = splitByDomain[1];
