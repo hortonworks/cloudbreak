@@ -1,7 +1,13 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +28,14 @@ public class VersionBasedImageFilter {
     @Value("${info.app.version:}")
     private String cbVersion;
 
+    @Inject
+    private ImageCatalogVersionFilter versionFilter;
+
+    @Inject
+    private PrefixMatcherService prefixMatcherService;
+
     public ImageFilterResult getCdhImagesForCbVersion(Versions versions, List<Image> availableImages) {
-        List<String> imageIds = getImageIds(versions);
+        Set<String> imageIds = getImageIds(versions);
         LOGGER.debug("{} image id(s) found for Cloudbreak version: {}", imageIds.size(), cbVersion);
         String message = String.format("%d image id(s) found for Cloudbreak version: %s", imageIds.size(), cbVersion);
         List<Image> images = availableImages.stream()
@@ -32,11 +44,33 @@ public class VersionBasedImageFilter {
         return new ImageFilterResult(new Images(null, null, null, images, null), message);
     }
 
-    private List<String> getImageIds(Versions versions) {
-        return versions.getCloudbreakVersions().stream()
-                .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().contains(cbVersion))
-                .map(CloudbreakVersion::getImageIds)
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+    private Set<String> getImageIds(Versions versions) {
+        Set<String> imageIds = new HashSet<>();
+        List<CloudbreakVersion> cbVersionsFromImageCatalog = versions.getCloudbreakVersions();
+        String currentCbVersion = getCurrentCBVersion(cbVersionsFromImageCatalog);
+
+        List<CloudbreakVersion> exactMatchedImages = getExtractMatchedImages(cbVersionsFromImageCatalog, currentCbVersion);
+        if (!exactMatchedImages.isEmpty()) {
+            for (CloudbreakVersion exactMatchedImg : exactMatchedImages) {
+                imageIds.addAll(exactMatchedImg.getImageIds());
+            }
+        } else {
+            LOGGER.debug("No image found with exact match for version {} Trying prefix matching", currentCbVersion);
+            PrefixMatchImages prefixMatchImages = prefixMatcherService.prefixMatchForCBVersion(cbVersion, cbVersionsFromImageCatalog);
+            imageIds.addAll(prefixMatchImages.getvMImageUUIDs());
+        }
+        return imageIds;
+    }
+
+    private List<CloudbreakVersion> getExtractMatchedImages(List<CloudbreakVersion> cloudbreakVersions, String currentCbVersion) {
+        return cloudbreakVersions.stream()
+                .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().contains(currentCbVersion))
+                .collect(toList());
+    }
+
+    private String getCurrentCBVersion(List<CloudbreakVersion> cbVersions) {
+        return versionFilter.isVersionUnspecified(cbVersion)
+                ? versionFilter.latestCloudbreakVersion(cbVersions)
+                : cbVersion;
     }
 }

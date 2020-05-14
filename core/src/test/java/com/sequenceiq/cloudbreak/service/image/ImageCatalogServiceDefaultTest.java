@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -40,7 +41,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @RunWith(Parameterized.class)
 public class ImageCatalogServiceDefaultTest {
-    private static final String[] PROVIDERS = {"aws", "azure", "openstack", "gcp"};
+    private static final String[] PROVIDERS = { "aws", "azure", "openstack", "gcp" };
 
     private final String catalogFile;
 
@@ -84,6 +85,9 @@ public class ImageCatalogServiceDefaultTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private PrefixMatcherService prefixMatcherService;
+
     @InjectMocks
     private ImageCatalogService underTest;
 
@@ -103,11 +107,11 @@ public class ImageCatalogServiceDefaultTest {
                 { "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json", "aws", "2.6", "latest-hdp", "5.0.0", "" },
                 { "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json", "aws", "2.6", "latest-hdp", "5.0.0", "centos7" },
                 { "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json", "aws", "2.6", "latest-amazonlinux-hdp",
-                    "5.0.0", "amazonlinux2" },
+                        "5.0.0", "amazonlinux2" },
                 { "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json", "aws", "missing", "third-latest-base-amazonlinux",
-                    "5.0.0", "amazonlinux2" },
+                        "5.0.0", "amazonlinux2" },
                 { "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json", "aws", "missing", "forth-latest-base-amazonlinux",
-                    "6.0.0", "amazonlinux2" },
+                        "6.0.0", "amazonlinux2" },
                 { "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json", "aws", "missing", "latest-base", "5.0.0", "" },
                 { "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json", "aws", "missing", "second-latest-base", "6.0.0", "" },
                 { "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json", "aws", "2.6", "second-latest-hdp", "6.0.0", "" },
@@ -139,6 +143,7 @@ public class ImageCatalogServiceDefaultTest {
         lenient().when(user.getUserCrn()).thenReturn(TestConstants.CRN);
         when(userService.getOrCreate(any())).thenReturn(user);
         when(entitlementService.baseImageEnabled(anyString(), anyString())).thenReturn(true);
+        // when(prefixMatcherService.prefixMatchForCBVersion(any(), any()))
     }
 
     @Test
@@ -146,14 +151,16 @@ public class ImageCatalogServiceDefaultTest {
         // GIVEN
         ReflectionTestUtils.setField(underTest, "cbVersion", cbVersion);
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
+
         // WHEN
+        when(prefixMatcherService.prefixMatchForCBVersion(eq(cbVersion), any()))
+                .thenReturn(new PrefixMatchImages(Set.of(expectedImageId), Collections.emptySet(), Set.of(cbVersion)));
         Set<String> operatingSystems = null;
         if (StringUtils.isNotEmpty(os)) {
             operatingSystems = Collections.singleton(os);
         }
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(provider), cbVersion, true, operatingSystems, clusterVersion);
-        StatedImage statedImage = underTest.getImagePrewarmedDefaultPreferred(imageFilter,
-                image -> true);
+        StatedImage statedImage = underTest.getImagePrewarmedDefaultPreferred(imageFilter, image -> true);
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
     }

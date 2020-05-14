@@ -2,17 +2,25 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
 
+@RunWith(MockitoJUnitRunner.class)
 public class VersionBasedImageFilterTest {
 
     private static final String CURRENT_CB_VERSION = "2.16";
@@ -25,7 +33,14 @@ public class VersionBasedImageFilterTest {
 
     private static final String OTHER_IMAGE_ID = "6edcb9d4-4110-44d8-43f7-d4c0008402a3";
 
-    private VersionBasedImageFilter underTest = new VersionBasedImageFilter();
+    @Mock
+    private ImageCatalogVersionFilter versionFilter;
+
+    @Mock
+    private PrefixMatcherService prefixMatcherService;
+
+    @InjectMocks
+    private VersionBasedImageFilter underTest;
 
     @Test
     public void testGetCdhImagesForCbVersionShouldReturnsImagesWhenThereAreSupportedImagesForCbVersion() {
@@ -46,6 +61,8 @@ public class VersionBasedImageFilterTest {
         Versions versions = createVersions();
         Image properImage = createImage(PROPER_IMAGE_ID);
         Image otherImage = createImage(OTHER_IMAGE_ID);
+        when(prefixMatcherService.prefixMatchForCBVersion(eq("2.18"), any()))
+                .thenReturn(new PrefixMatchImages(Collections.emptySet(), Collections.emptySet(), Collections.emptySet()));
 
         List<Image> actual = underTest.getCdhImagesForCbVersion(versions, List.of(properImage, otherImage)).getAvailableImages().getCdhImages();
 
