@@ -584,6 +584,21 @@ public class GrpcUmsClient {
         }
     }
 
+    public void assignResourceOwnerRoleIfEntitled(String userCrn, String resourceCrn, String accountId) {
+        try {
+            if (isAuthorizationEntitlementRegistered(userCrn, accountId)) {
+                assignResourceRole(userCrn, resourceCrn, getBuiltInOwnerResourceRoleCrn(), MDCUtils.getRequestId());
+                LOGGER.debug("Owner role of {} is successfully assigned to the {} user", resourceCrn, userCrn);
+            }
+        } catch (StatusRuntimeException ex) {
+            if (Status.Code.ALREADY_EXISTS.equals(ex.getStatus().getCode())) {
+                LOGGER.debug("Owner role of {} is already assigned to the {} user", resourceCrn, userCrn);
+            } else {
+                throw ex;
+            }
+        }
+    }
+
     // Cache evict does not work with this key, we need to wait 60s
     // @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
     public void unassignResourceRole(String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
@@ -663,6 +678,10 @@ public class GrpcUmsClient {
 
     public String getBuiltInCredentialOwnerResourceRoleCrn() {
         return getResourceRoleCrn("CredentialOwner").toString();
+    }
+
+    public String getBuiltInOwnerResourceRoleCrn() {
+        return getResourceRoleCrn("Owner").toString();
     }
 
     public String getBuiltInEnvironmentAdminResourceRoleCrn() {

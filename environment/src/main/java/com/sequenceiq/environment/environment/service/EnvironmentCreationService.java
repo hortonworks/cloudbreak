@@ -98,7 +98,7 @@ public class EnvironmentCreationService {
             // To keep backward compatibility, if somebody passes the group name, then we shall just use it
             environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
         }
-        environmentService.assignEnvironmentAdminRole(creationDto.getCreator(), environmentCrnForVirtualGroups);
+        environmentService.assignEnvironmentAdminAndOwnerRole(creationDto.getCreator(), environmentCrnForVirtualGroups);
 
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
         validateCreation(creationDto, environment, cloudRegions);
