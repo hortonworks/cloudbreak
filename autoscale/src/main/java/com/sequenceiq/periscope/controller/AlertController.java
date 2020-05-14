@@ -11,13 +11,13 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.BadRequestException;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.periscope.api.endpoint.v1.AlertEndpoint;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
@@ -37,15 +37,13 @@ import com.sequenceiq.periscope.service.AlertService;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DateService;
+import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.NotFoundException;
 import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
 
 @Controller
 @AuthorizationResource
 public class AlertController implements AlertEndpoint {
-
-    @Value("${periscope.enabledPlatforms:}")
-    private Set<String> supportedCloudPlatforms;
 
     @Inject
     private AlertService alertService;
@@ -73,6 +71,9 @@ public class AlertController implements AlertEndpoint {
 
     @Inject
     private ClusterProxyConfigurationService clusterProxyConfigurationService;
+
+    @Inject
+    private EntitlementValidationService entitlementValidationService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
@@ -170,9 +171,12 @@ public class AlertController implements AlertEndpoint {
                 .orElseThrow(NotFoundException.notFound("cluster", clusterId));
     }
 
-    private void validateCloudPlatform(Cluster cluster) {
-        if (!supportedCloudPlatforms.contains(cluster.getCloudPlatform())) {
-            throw new BadRequestException(String.format("Autoscaling for CloudPlatform '%s' is not supported, Cluster '%s'",
+    private void validateAccountEntitlement(Cluster cluster) {
+        if (!entitlementValidationService.autoscalingEntitlementEnabled(
+                ThreadBasedUserCrnProvider.getUserCrn(),
+                ThreadBasedUserCrnProvider.getAccountId(),
+                cluster.getCloudPlatform())) {
+            throw new BadRequestException(String.format("Autoscaling Entitlement is not enabled for CloudPlatform '%s, Cluster '%s'",
                     cluster.getCloudPlatform(), cluster.getStackCrn()));
         }
     }
@@ -180,7 +184,7 @@ public class AlertController implements AlertEndpoint {
     private void validateTimeAlert(Long clusterId, Optional<Long> alertId, TimeAlertRequest json) {
         Cluster cluster = getClusterForWorkspace(clusterId);
         alertId.ifPresentOrElse(updateAlert -> validateAlertForUpdate(cluster, updateAlert, AlertType.TIME),
-                () -> validateCloudPlatform(cluster));
+                () -> validateAccountEntitlement(cluster));
         try {
             dateService.validateTimeZone(json.getTimeZone());
             dateService.getCronExpression(json.getCron());
@@ -193,7 +197,7 @@ public class AlertController implements AlertEndpoint {
         Cluster cluster = getClusterForWorkspace(clusterId);
         alertId.ifPresentOrElse(updateAlert -> validateAlertForUpdate(cluster, updateAlert, AlertType.LOAD),
                 () -> {
-                    validateCloudPlatform(cluster);
+                    validateAccountEntitlement(cluster);
                     String requestHostGroup = json.getScalingPolicy().getHostGroup();
                     cluster.getLoadAlerts().stream().map(LoadAlert::getScalingPolicy).map(ScalingPolicy::getHostGroup)
                             .filter(hostGroup -> hostGroup.equalsIgnoreCase(requestHostGroup)).findAny()

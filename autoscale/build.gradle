@@ -164,8 +164,8 @@ dependencies {
     testCompile group: 'org.powermock',             name: 'powermock-api-mockito2'
     testCompile group: 'org.ow2.asm',               name: 'asm'
     testCompile group: 'com.openpojo',              name: 'openpojo'
+    testCompile group: "com.h2database",            name: "h2",     version: h2databaseVersion
 
-    compile project(':core-api')
     compile project(':autoscale-api')
     compile project(':common')
     compile project(':workspace')

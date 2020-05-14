@@ -12,6 +12,7 @@ import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.api.endpoint.v1.AlertEndpoint;
 import com.sequenceiq.periscope.api.endpoint.v1.AutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.endpoint.v1.ConfigurationEndpoint;
+import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
 import com.sequenceiq.periscope.api.endpoint.v1.PolicyEndpoint;
 
@@ -36,6 +37,10 @@ public class AutoscaleUserCrnClient extends AbstractUserCrnServiceClient<Autosca
 
         public AlertEndpoint alertEndpoint() {
             return getEndpoint(AlertEndpoint.class);
+        }
+
+        public DistroXAutoScaleClusterV1Endpoint distroXAutoScaleClusterV1Endpoint() {
+            return getEndpoint(DistroXAutoScaleClusterV1Endpoint.class);
         }
 
         public AutoScaleClusterV1Endpoint clusterEndpoint() {
