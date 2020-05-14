@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Optional;
+
 import javax.persistence.AttributeConverter;
 
 import org.slf4j.Logger;
@@ -24,9 +26,13 @@ public abstract class DefaultEnumConverter<E extends Enum<E>> implements Attribu
         } catch (Exception e) {
             LOGGER.info("The {} value is not backward compatible: {}", getDefault().getClass().getSimpleName(), attribute);
         }
-        return getDefault();
+        Optional<E> convertedEnum = tryConvertUnknownField(attribute);
+        return convertedEnum.orElse(getDefault());
     }
 
     public abstract E getDefault();
 
+    protected Optional<E> tryConvertUnknownField(String attribute) {
+        return Optional.empty();
+    }
 }
