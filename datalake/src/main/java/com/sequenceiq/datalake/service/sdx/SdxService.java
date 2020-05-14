@@ -38,10 +38,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Req
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -108,6 +112,12 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
 
     @Inject
     private FlowCancelService flowCancelService;
+
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
+
+    @Inject
+    private TransactionService transactionService;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
@@ -201,13 +211,22 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
 
         MDCBuilder.buildMdcContext(sdxCluster);
 
-        sdxCluster = sdxClusterRepository.save(sdxCluster);
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Datalake requested", sdxCluster);
+        SdxCluster savedSdxCluster;
+        try {
+            savedSdxCluster = transactionService.required(() -> {
+                SdxCluster created = sdxClusterRepository.save(sdxCluster);
+                grpcUmsClient.assignResourceOwnerRoleIfEntitled(created.getInitiatorUserCrn(), created.getCrn(), created.getAccountId());
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Datalake requested", created);
+                return created;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
 
-        LOGGER.info("trigger SDX creation: {}", sdxCluster);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
+        LOGGER.info("trigger SDX creation: {}", savedSdxCluster);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(savedSdxCluster.getId());
 
-        return Pair.of(sdxCluster, flowIdentifier);
+        return Pair.of(savedSdxCluster, flowIdentifier);
     }
 
     private void validateEnv(DetailedEnvironmentResponse environment) {
