@@ -64,6 +64,17 @@
             "refName": "hdfs-BALANCER-BASE",
             "roleType": "BALANCER",
             "base": true
+          },
+          {
+            "refName": "hdfs-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_client_use_trash",
+                "value": false
+              }
+            ]
           }
         ]
       },
@@ -354,6 +365,7 @@
         "roleConfigGroupsRefNames": [
           "hdfs-FAILOVERCONTROLLER-BASE",
           "hdfs-NAMENODE-BASE",
+          "hdfs-GATEWAY-BASE",
           "hive-GATEWAY-BASE",
           "hive-HIVESERVER2-BASE",
           "hms-GATEWAY-BASE",
@@ -373,6 +385,7 @@
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hdfs-BALANCER-BASE",
+          "hdfs-GATEWAY-BASE",
           "hive-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "hue-HUE_LOAD_BALANCER-BASE",
@@ -398,6 +411,7 @@
         "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
+          "hdfs-GATEWAY-BASE",
           "hive-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
@@ -410,6 +424,7 @@
         "refName": "compute",
         "cardinality": 0,
         "roleConfigGroupsRefNames": [
+          "hdfs-GATEWAY-BASE",
           "hive-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
