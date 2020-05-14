@@ -47,12 +47,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
@@ -97,9 +95,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     private ClouderaManagerDatabusService databusService;
 
     @Inject
-    private ClusterComponentConfigProvider clusterComponentProvider;
-
-    @Inject
     private ClouderaManagerRoleRefreshService clouderaManagerRoleRefreshService;
 
     private final Stack stack;
@@ -139,10 +134,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 activateParcel(clustersResourceApi);
                 applyHostGroupRolesOnUpscaledHosts(body, hostGroup.getName());
             } else {
-                Long clusterId = stack.getCluster().getId();
-                if (!isPrewarmed(clusterId)) {
-                    redistributeParcelsForRecovery();
-                }
+                redistributeParcelsForRecovery();
                 activateParcel(clustersResourceApi);
                 clouderaManagerRoleRefreshService.refreshClusterRoles(apiClient, stack);
             }
@@ -231,12 +223,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             throw new CloudbreakException("Timeout while Cloudera Manager was downloading parcels.");
         }
         LOGGER.debug("Refreshed parcel repos");
-    }
-
-    private Boolean isPrewarmed(Long clusterId) {
-        return Optional.ofNullable(clusterComponentProvider.getClouderaManagerRepoDetails(clusterId))
-                .map(ClouderaManagerRepo::getPredefined)
-                .orElse(Boolean.FALSE);
     }
 
     public void restartStaleServices(MgmtServiceResourceApi mgmtServiceResourceApi, ClustersResourceApi clustersResourceApi)

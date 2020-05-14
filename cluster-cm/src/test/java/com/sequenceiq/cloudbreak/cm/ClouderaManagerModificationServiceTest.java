@@ -160,8 +160,10 @@ class ClouderaManagerModificationServiceTest {
     void upscaleClusterNoHostToUpscale() throws Exception {
         setUpDeployClientConfigPolling(PollingResult.SUCCESS);
 
-        when(clouderaManagerRepo.getPredefined()).thenReturn(Boolean.TRUE);
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
+        when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClientMock, REFRESH_PARCEL_REPOS_ID))
+                .thenReturn(PollingResult.SUCCESS);
         setUpListClusterHosts();
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -181,7 +183,6 @@ class ClouderaManagerModificationServiceTest {
                 .thenReturn(PollingResult.SUCCESS);
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClientMock, REFRESH_PARCEL_REPOS_ID))
                 .thenReturn(PollingResult.SUCCESS);
-        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(null);
         setUpListClusterHosts();
         setUpDeployClientConfigPolling(PollingResult.SUCCESS);
 
