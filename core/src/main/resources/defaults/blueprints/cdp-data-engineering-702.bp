@@ -48,6 +48,17 @@
             "refName": "hdfs-BALANCER-BASE",
             "roleType": "BALANCER",
             "base": true
+          },
+          {
+            "refName": "hdfs-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_client_use_trash",
+                "value": false
+              }
+            ]
           }
         ]
       },
@@ -317,6 +328,7 @@
           "hdfs-BALANCER-BASE",
           "hdfs-NAMENODE-BASE",
           "hdfs-SECONDARYNAMENODE-BASE",
+          "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "hms-HIVEMETASTORE-BASE",
           "hive_on_tez-HIVESERVER2-BASE",
@@ -341,6 +353,7 @@
         "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
+          "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "hive_on_tez-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
@@ -353,6 +366,7 @@
         "refName": "compute",
         "cardinality": 0,
         "roleConfigGroupsRefNames": [
+          "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "hive_on_tez-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
@@ -364,6 +378,7 @@
         "refName": "gateway",
         "cardinality": 0,
         "roleConfigGroupsRefNames": [
+          "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "hive_on_tez-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
