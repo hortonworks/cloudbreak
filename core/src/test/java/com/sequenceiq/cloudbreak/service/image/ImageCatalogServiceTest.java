@@ -163,6 +163,9 @@ public class ImageCatalogServiceTest {
     @Mock
     private TransactionService transactionService;
 
+    @Mock
+    private PrefixMatcherService prefixMatcherService;
+
     @Before
     public void beforeTest() throws Exception {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
@@ -199,6 +202,12 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
+
+        Set<String> vMImageUUIDs = Set.of("7aca1fa6-980c-44e2-a75e-3144b18a5993");
+        Set<String> defaultVMImageUUIDs = Set.of("7aca1fa6-980c-44e2-a75e-3144b18a5993");
+        Set<String> supportedVersions = Set.of("2.1.0-dev.2");
+        PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
+        when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
 
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
@@ -303,6 +312,12 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, DEV_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
+        Set<String> vMImageUUIDs = Set.of("b150efce-33ac-49c9-7206-7f148d162744");
+        Set<String> defaultVMImageUUIDs = Set.of("b150efce-33ac-49c9-7206-7f148d162744");
+        Set<String> supportedVersions = Set.of("2.1.0-dev.2");
+        PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
+        when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
+
         StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0-dev.132"));
 
         boolean match = images.getImages().getHdpImages().stream()
@@ -327,6 +342,12 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, DEV_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
+        Set<String> vMImageUUIDs = Set.of("bbc63453-086c-4bf7-4337-a04c37d51b68");
+        Set<String> defaultVMImageUUIDs = Set.of("bbc63453-086c-4bf7-4337-a04c37d51b68");
+        Set<String> supportedVersions = Set.of("2.1.0-dev.2");
+        PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
+        when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
+
         StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0-rc.13"));
 
         boolean match = images.getImages().getHdpImages().stream()
@@ -337,6 +358,12 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesWhenSimilarDevVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
+
+        Set<String> vMImageUUIDs = Set.of("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2");
+        Set<String> defaultVMImageUUIDs = Set.of("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2");
+        Set<String> supportedVersions = Set.of("2.1.0-dev.2");
+        PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
+        when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
 
         StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "1.16.4-dev.132"));
 
@@ -349,6 +376,13 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenSimilarRcVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
+        Set<String> vMImageUUIDs = Set.of("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2");
+        Set<String> defaultVMImageUUIDs = Set.of("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2");
+        Set<String> supportedVersions = Set.of("2.1.0-dev.1", "2.0.0", "2.1.0-dev.100", "2.1.0-dev.2");
+        PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
+
+        when(prefixMatcherService.prefixMatchForCBVersion(eq("1.16.4-rc.13"), any())).thenReturn(prefixMatchImages);
+
         StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "1.16.4-rc.13"));
 
         boolean match = images.getImages().getHdpImages().stream()
@@ -359,6 +393,13 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesWhenSimilarDevVersionExistsInCatalog() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
+        Set<String> vMImageUUIDs = Set.of("9958938a-1261-48e2-aff9-dbcb2cebf6cd", "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145",
+                "f6e778fc-7f17-4535-9021-515351df3691");
+        Set<String> defaultVMImageUUIDs = Set.of("f6e778fc-7f17-4535-9021-515351df3691", "7aca1fa6-980c-44e2-a75e-3144b18a5993");
+        Set<String> supportedVersions = Set.of("2.1.0-dev.1", "2.0.0", "2.1.0-dev.100", "2.1.0-dev.2");
+        PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
+
+        when(prefixMatcherService.prefixMatchForCBVersion(eq("2.1.0-dev.4000"), any())).thenReturn(prefixMatchImages);
 
         StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.1.0-dev.4000", true, null, null));
 
@@ -374,6 +415,13 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesWhenSimilarRcVersionExistsInCatalog() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
+
+        Set<String> vMImageUUIDs = Set.of("2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265",
+                "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2");
+        Set<String> defaultVMImageUUIDs = Set.of("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2");
+        Set<String> supportedVersions = Set.of("2.1.0-dev.1", "2.0.0", "2.1.0-dev.100", "2.1.0-dev.2");
+        PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
+        when(prefixMatcherService.prefixMatchForCBVersion(eq("2.0.0-rc.4"), any())).thenReturn(prefixMatchImages);
 
         StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.0.0-rc.4"));
 
