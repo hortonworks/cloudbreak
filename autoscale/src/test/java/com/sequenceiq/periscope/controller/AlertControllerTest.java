@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,14 +12,15 @@ import java.util.Set;
 import javax.ws.rs.BadRequestException;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.reflect.Whitebox;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.LoadAlertConfigurationRequest;
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
@@ -39,11 +41,16 @@ import com.sequenceiq.periscope.service.AlertService;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DateService;
+import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.NotFoundException;
 import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AlertControllerTest {
+
+    private static final String TEST_ACCOUNT_ID = "accid";
+
+    private static final String TEST_USER_CRN = String.format("crn:cdp:iam:us-west-1:%s:user:mockuser@cloudera.com", TEST_ACCOUNT_ID);
 
     @InjectMocks
     private AlertController underTest;
@@ -78,6 +85,9 @@ public class AlertControllerTest {
     @Mock
     private ClusterProxyConfigurationService clusterProxyConfigurationService;
 
+    @Mock
+    private EntitlementValidationService entitlementValidationService;
+
     private DateService dateService = new DateService();
 
     private Long clusterId = 10L;
@@ -88,9 +98,14 @@ public class AlertControllerTest {
 
     @Before
     public void setup() {
-        Whitebox.setInternalState(underTest, "supportedCloudPlatforms", Set.of("AWS", "AZURE"));
         underTest.setDateService(dateService);
         MockitoAnnotations.initMocks(this);
+        when(entitlementValidationService.autoscalingEntitlementEnabled(anyString(), anyString(), anyString())).thenReturn(true);
+    }
+
+    @BeforeClass
+    public static void setupAll() {
+        ThreadBasedUserCrnProvider.setUserCrn(TEST_USER_CRN);
     }
 
     @Test(expected = NotFoundException.class)

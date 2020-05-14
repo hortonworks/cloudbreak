@@ -34,16 +34,17 @@ periscope:
     dir: /certs/
 
   db:
-    env:
-      user: postgres
-      pass:
-      db: periscopedb
-      schema: public
-      cert.file: database.crt
-      ssl: false
-    port.5432.tcp:
-      addr: localhost
-      port: 5432
+    enabled: false
+#    env:
+#      user: postgres
+#      pass:
+#      db: periscopedb
+#      schema: public
+#      cert.file: database.crt
+#      ssl: false
+#    port.5432.tcp:
+#      addr: localhost
+#      port: 5432
   cloudbreak.url: http://localhost:9091
   entitlementCheckEnabled: false
   enabledAutoscaleMonitors:
@@ -53,14 +54,15 @@ periscope:
       enabled: true
     cluster-manager-host-health-monitor:
       enabled: true
-    suspended-cluster-monitor:
-      enabled: true
     prometheus-monitor:
       enabled: false
 
 cb:
   server:
     contextPath: "/cb"
+  schema:
+    migration:
+      auto: false
 
 rest:
   debug: false
@@ -77,25 +79,17 @@ spring:
     template-loader-path: classpath:/
     prefer-file-system-access: false
   datasource:
-      maxActive: 30
+    maxActive: 30
+  profiles: test
 
 secret:
   application: as/shared
   engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
 
 vault:
-  addr: localhost
-  port: 8200
-  ssl.enabled: false
-  kv.engine.v2.path: secret
-  config.enabled: true
-  auth:
-    type: "token"
-    kubernetes:
-      service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
-      mount.path: "dps-dev"
-      login.role: "autoscale.default"
+  config.enabled: false
 
 altus:
   ums:
     host: localhost
+

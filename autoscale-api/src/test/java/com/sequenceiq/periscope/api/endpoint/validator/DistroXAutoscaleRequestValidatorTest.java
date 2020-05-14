@@ -53,7 +53,7 @@ public class DistroXAutoscaleRequestValidatorTest {
 
     @Test
     public void testIsValidWhenValidLoadAlertsThenTrue() {
-        List<String> loadHostGroups = Arrays.asList("compute2", "hdfs1", "hdfs3");
+        List<String> loadHostGroups = Arrays.asList("compute2");
 
         boolean underTestValid = underTest
                 .isValid(getTestRequest(List.of(), loadHostGroups, Optional.empty()), validatorContext);
