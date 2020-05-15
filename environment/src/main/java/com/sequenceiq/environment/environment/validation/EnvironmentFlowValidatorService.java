@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageLocationValidator;
+import com.sequenceiq.environment.environment.validation.validators.EnvironmentAuthenticationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentNetworkProviderValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentParameterValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
@@ -29,13 +30,17 @@ public class EnvironmentFlowValidatorService {
 
     private final EnvironmentParameterValidator environmentParameterValidator;
 
+    private final EnvironmentAuthenticationValidator environmentAuthenticationValidator;
+
     public EnvironmentFlowValidatorService(
             EnvironmentRegionValidator environmentRegionValidator, EnvironmentNetworkProviderValidator environmentNetworkProviderValidator,
-            EnvironmentLogStorageLocationValidator logStorageLocationValidator, EnvironmentParameterValidator environmentParameterValidator) {
+            EnvironmentLogStorageLocationValidator logStorageLocationValidator, EnvironmentParameterValidator environmentParameterValidator,
+            EnvironmentAuthenticationValidator environmentAuthenticationValidator) {
         this.environmentRegionValidator = environmentRegionValidator;
         this.environmentNetworkProviderValidator = environmentNetworkProviderValidator;
         this.logStorageLocationValidator = logStorageLocationValidator;
         this.environmentParameterValidator = environmentParameterValidator;
+        this.environmentAuthenticationValidator = environmentAuthenticationValidator;
     }
 
     public ValidationResult.ValidationResultBuilder validateRegionsAndLocation(String location, Set<String> requestedRegions,
@@ -59,6 +64,10 @@ public class EnvironmentFlowValidatorService {
 
     public ValidationResult validateParameters(EnvironmentDto environmentDto, ParametersDto parametersDto) {
         return environmentParameterValidator.validate(environmentDto, parametersDto);
+    }
+
+    public ValidationResult validateAuthentication(EnvironmentDto environmentDto) {
+        return environmentAuthenticationValidator.validate(environmentDto);
     }
 
 }

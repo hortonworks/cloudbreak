@@ -22,6 +22,12 @@ import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class EnvironmentEditTest extends AbstractIntegrationTest {
 
+    private static final String PUBLIC_KEY = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuT"
+            + "QxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgpUWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/V"
+            + "UYQ/yi0imocARlOiFdPRlZGTN0XGE1V8LSo+m0oIzTwBKn58I4v5iB4ZUL/6adGXo7dgdBh/Fmm4uYbgrCZnL1EaK"
+            + "pMxSG76XWhuzFpHjLkRndz88ha0rB6davag6nZGdno5IepLAWg9oB4jTApHwhN2j1rWLN2y1c+pTxsF6LxBiN5rsY"
+            + "KR495VFmuOepLYz5I8Dn sequence-eu";
+
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
@@ -94,7 +100,7 @@ public class EnvironmentEditTest extends AbstractIntegrationTest {
                 .whenRequested(SpiEndpoints.RegisterPublicKey.class).post()
                 .thenReturn((s, model, uriParameters) -> "")
                 .given(EnvironmentAuthenticationTestDto.class)
-                .withPublicKey("some-ssh-key")
+                .withPublicKey(PUBLIC_KEY)
                 .withPublicKeyId(null)
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.changeAuthentication())
@@ -133,7 +139,7 @@ public class EnvironmentEditTest extends AbstractIntegrationTest {
 
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKeyId("non-exists-public-key")
-                .withPublicKey("not-empty-public-key")
+                .withPublicKey(PUBLIC_KEY)
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.changeAuthentication(), key("all-defined"))
                 .expect(BadRequestException.class, key("all-defined")

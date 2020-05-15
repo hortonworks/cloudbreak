@@ -77,6 +77,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         validationBuilder.merge(validatorService.validateTelemetryLoggingStorageLocation(environment));
         validationBuilder.merge(validatorService.validateParameters(environmentDto, environmentDto.getParameters()));
         validationBuilder.merge(validatorService.validateNetworkWithProvider(environmentDto));
+        validationBuilder.merge(validatorService.validateAuthentication(environmentDto));
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             goToFailedState(environmentDtoEvent, validationResult.getFormattedErrors());
