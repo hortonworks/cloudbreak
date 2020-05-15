@@ -93,7 +93,7 @@ public class ClusterUpscaleActions {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, ClusterScaleTriggerEvent payload, Map<Object, Object> variables) {
-                clusterUpscaleFlowService.upscalingClusterManager(context.getStackId());
+                clusterUpscaleFlowService.upscalingClusterManager(context.getStackId(), payload.getHostGroupName());
                 sendEvent(context);
             }
 
