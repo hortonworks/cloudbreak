@@ -118,7 +118,7 @@ error_exit()
 {
     doLog "ERROR $1"
     doStatus "ERROR $1"
-    exit 1
+	  exit 1
 }
 
 remove_local_backups() {
