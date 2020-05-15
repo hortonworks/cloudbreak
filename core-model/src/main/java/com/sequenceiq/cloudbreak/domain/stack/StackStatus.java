@@ -3,9 +3,8 @@ package com.sequenceiq.cloudbreak.domain.stack;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,7 +15,9 @@ import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.domain.DetailedStackStatusConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.StatusConverter;
 
 @Entity
 @Table(name = "stackstatus")
@@ -31,13 +32,13 @@ public class StackStatus implements ProvisionEntity {
 
     private Long created;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = StatusConverter.class)
     private Status status;
 
     @Column(columnDefinition = "TEXT")
     private String statusReason;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = DetailedStackStatusConverter.class)
     private DetailedStackStatus detailedStackStatus;
 
     public StackStatus() {
