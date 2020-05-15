@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.util.PublicKeyReaderUtil;
 
 @Component
 public class OpenSshPublicKeyValidator {
