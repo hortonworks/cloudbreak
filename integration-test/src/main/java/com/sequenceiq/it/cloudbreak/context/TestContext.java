@@ -48,7 +48,6 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
@@ -824,7 +823,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 || Pattern.compile(runningParameter.getExpectedMessage()).matcher(ResponseUtil.getErrorMessage(exception)).find();
     }
 
-    public void handleExceptionsDuringTest(boolean silently) {
+    public void handleExceptionsDuringTest(TestErrorLog testErrorLog) {
         validated = true;
         checkShutdown();
         Map<String, Exception> exceptionsDuringTest = getErrors();
@@ -837,10 +836,7 @@ public abstract class TestContext implements ApplicationContextAware {
             });
             collectStructuredEvents(builder);
             exceptionsDuringTest.clear();
-            if (!silently) {
-                Log.error(LOGGER, builder.toString());
-                throw new TestFailException(builder.toString());
-            }
+            testErrorLog.report(LOGGER, builder.toString());
         }
     }
 
@@ -905,7 +901,7 @@ public abstract class TestContext implements ApplicationContextAware {
                     "Test context should be validated! Maybe you forgot to call .validate() at the end of the test? See other tests as an example.");
         }
         checkShutdown();
-        handleExceptionsDuringTest(true);
+        handleExceptionsDuringTest(TestErrorLog.IGNORE);
         if (!cleanUpOnFailure && !getExceptionMap().isEmpty()) {
             LOGGER.info("Cleanup skipped beacuse cleanupOnFail is false");
             return;

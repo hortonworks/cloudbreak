@@ -24,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.context.TestErrorLog;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.answer.RequestData;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
@@ -188,7 +189,7 @@ public class HttpMock implements CloudbreakTestDto {
     }
 
     public void validate() {
-        testContext.handleExceptionsDuringTest(false);
+        testContext.handleExceptionsDuringTest(TestErrorLog.FAIL);
     }
 
     public DefaultModel getModel() {

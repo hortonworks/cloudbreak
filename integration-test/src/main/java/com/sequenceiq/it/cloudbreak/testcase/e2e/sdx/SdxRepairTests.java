@@ -91,7 +91,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
-                .validate();
+                .skipWhenFailure();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -150,7 +150,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     getCloudFunctionality(tc).cloudStorageListContainerFreeIPA(getBaseLocation(testDto));
                     return testDto;
                 })
-                .validate();
+                .skipWhenFailure();
     }
 
     @Test(dataProvider = TEST_CONTEXT)

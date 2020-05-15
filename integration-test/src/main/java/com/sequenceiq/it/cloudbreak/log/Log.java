@@ -90,6 +90,10 @@ public class Log<T extends CloudbreakTestDto> {
         log(logger, "Await", message);
     }
 
+    public static void validateError(Logger logger, String message) {
+        log(logger, "Validate", message);
+    }
+
     public static void log(String message) {
         Reporter.log(message);
     }

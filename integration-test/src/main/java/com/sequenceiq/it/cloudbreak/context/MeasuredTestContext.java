@@ -263,7 +263,7 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public void handleExceptionsDuringTest(boolean silently) {
+    public void handleExceptionsDuringTest(TestErrorLog silently) {
         wrappedTestContext.handleExceptionsDuringTest(silently);
     }
 

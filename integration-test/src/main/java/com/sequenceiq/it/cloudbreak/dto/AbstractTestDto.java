@@ -23,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.context.TestErrorLog;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
 
@@ -249,7 +250,11 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     public void validate() {
-        testContext.handleExceptionsDuringTest(false);
+        testContext.handleExceptionsDuringTest(TestErrorLog.FAIL);
+    }
+
+    public void skipWhenFailure() {
+        testContext.handleExceptionsDuringTest(TestErrorLog.SKIP);
     }
 
     public ResourcePropertyProvider getResourcePropertyProvider() {
