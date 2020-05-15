@@ -200,7 +200,6 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
-        when(azureUtils.isNoSecurityGroups(any())).then(invocation -> false);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -239,7 +238,6 @@ public class AzureTemplateBuilderTest {
 
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
-        when(azureUtils.isNoSecurityGroups(any())).then(invocation -> false);
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -266,7 +264,6 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
-        when(azureUtils.isNoSecurityGroups(any())).then(invocation -> false);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         Map<String, String> parameters = new HashMap<>();
@@ -295,7 +292,6 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> false);
-        when(azureUtils.isNoSecurityGroups(any())).then(invocation -> false);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         Map<String, String> parameters = new HashMap<>();

@@ -43,7 +43,6 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRe
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
-import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -63,8 +62,6 @@ import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 public class EnvironmentApiConverterTest {
 
     private static final String CREDENTIAL_NAME = "my-credential";
-
-    private static final String CLOUD_PLATFORM = "AWS";
 
     private static final String REGION_DISPLAY_NAME = "US WEST";
 
@@ -97,7 +94,7 @@ public class EnvironmentApiConverterTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = CloudPlatform.class, names = {"AWS"})
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE"})
     void testInitCreationDto(CloudPlatform cloudPlatform) {
         EnvironmentRequest request = createEnvironmentRequest(cloudPlatform);
         FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
@@ -106,7 +103,7 @@ public class EnvironmentApiConverterTest {
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
 
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn("AWS");
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn(cloudPlatform.name());
         when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
@@ -314,11 +311,4 @@ public class EnvironmentApiConverterTest {
         locationRequest.setLongitude(567.8);
         return locationRequest;
     }
-
-    private Credential createCredential() {
-        Credential credential = new Credential();
-        credential.setCloudPlatform(CLOUD_PLATFORM);
-        return credential;
-    }
-
 }

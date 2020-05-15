@@ -11,10 +11,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
@@ -28,22 +30,30 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
     private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
 
     @Override
-    public CloudInstance convert(InstanceMetaData metaDataEnity) {
-        InstanceGroup group = metaDataEnity.getInstanceGroup();
+    public CloudInstance convert(InstanceMetaData metaDataEntity) {
+        InstanceGroup group = metaDataEntity.getInstanceGroup();
         Template template = group.getTemplate();
-        StackAuthentication stackAuthentication = group.getStack().getStackAuthentication();
-        InstanceStatus status = getInstanceStatus(metaDataEnity);
-        String imageId = instanceMetadataToImageIdConverter.convert(metaDataEnity);
-        InstanceTemplate instanceTemplate = stackToCloudStackConverter.buildInstanceTemplate(template, group.getGroupName(), metaDataEnity.getPrivateId(),
+        Stack stack = group.getStack();
+        StackAuthentication stackAuthentication = stack.getStackAuthentication();
+        InstanceStatus status = getInstanceStatus(metaDataEntity);
+        String imageId = instanceMetadataToImageIdConverter.convert(metaDataEntity);
+        InstanceTemplate instanceTemplate = stackToCloudStackConverter.buildInstanceTemplate(template, group.getGroupName(), metaDataEntity.getPrivateId(),
                 status, imageId);
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication(
                 stackAuthentication.getPublicKey(),
                 stackAuthentication.getPublicKeyId(),
                 stackAuthentication.getLoginUserName());
         Map<String, Object> params = new HashMap<>();
-        params.put(CloudInstance.SUBNET_ID, metaDataEnity.getSubnetId());
-        params.put(CloudInstance.INSTANCE_NAME, metaDataEnity.getInstanceName());
-        return new CloudInstance(metaDataEnity.getInstanceId(), instanceTemplate, instanceAuthentication, params);
+        params.put(CloudInstance.SUBNET_ID, metaDataEntity.getSubnetId());
+        params.put(CloudInstance.INSTANCE_NAME, metaDataEntity.getInstanceName());
+
+        Map<String, Object> cloudInstanceParameters = stackToCloudStackConverter.buildCloudInstanceParameters(
+                stack.getEnvironmentCrn(),
+                metaDataEntity,
+                CloudPlatform.valueOf(stack.getCloudPlatform()));
+        params.putAll(cloudInstanceParameters);
+
+        return new CloudInstance(metaDataEntity.getInstanceId(), instanceTemplate, instanceAuthentication, params);
     }
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData) {

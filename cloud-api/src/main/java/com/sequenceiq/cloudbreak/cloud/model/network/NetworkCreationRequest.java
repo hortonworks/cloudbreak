@@ -31,6 +31,8 @@ public class NetworkCreationRequest {
 
     private final Set<NetworkSubnetRequest> privateSubnets;
 
+    private final String resourceGroup;
+
     private final boolean noPublicIp;
 
     private final String stackName;
@@ -49,6 +51,7 @@ public class NetworkCreationRequest {
         networkCidr = builder.networkCidr;
         publicSubnets = builder.publicSubnets;
         privateSubnets = builder.privateSubnets;
+        resourceGroup = builder.resourceGroup;
         noPublicIp = builder.noPublicIp;
         stackName = builder.stackName;
         privateSubnetEnabled = builder.privateSubnetEnabled;
@@ -87,6 +90,10 @@ public class NetworkCreationRequest {
 
     public Set<NetworkSubnetRequest> getPublicSubnets() {
         return publicSubnets;
+    }
+
+    public String getResourceGroup() {
+        return resourceGroup;
     }
 
     public boolean isNoPublicIp() {
@@ -137,6 +144,8 @@ public class NetworkCreationRequest {
         private Set<NetworkSubnetRequest> publicSubnets;
 
         private Set<NetworkSubnetRequest> privateSubnets;
+
+        private String resourceGroup;
 
         private boolean noPublicIp;
 
@@ -190,6 +199,11 @@ public class NetworkCreationRequest {
 
         public Builder withPrivateSubnets(Set<NetworkSubnetRequest> subnets) {
             this.privateSubnets = subnets;
+            return this;
+        }
+
+        public Builder withResourceGroup(String resourceGroup) {
+            this.resourceGroup = resourceGroup;
             return this;
         }
 

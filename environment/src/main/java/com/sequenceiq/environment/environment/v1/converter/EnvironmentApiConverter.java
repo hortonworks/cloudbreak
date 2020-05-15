@@ -163,7 +163,14 @@ public class EnvironmentApiConverter {
 
     private ParametersDto azureParamsToParametersDto(AzureEnvironmentParameters azureEnvironmentParameters) {
         if (Objects.isNull(azureEnvironmentParameters)) {
-            return null;
+            return ParametersDto.builder()
+                    .withAzureParameters(AzureParametersDto.builder()
+                            .withResourceGroup(AzureResourceGroupDto.builder()
+                                    .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
+                                    .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW)
+                                    .build())
+                            .build())
+                    .build();
         }
         return ParametersDto.builder()
                 .withAzureParameters(azureParamsToAzureParametersDto(azureEnvironmentParameters))
@@ -187,8 +194,14 @@ public class EnvironmentApiConverter {
         return AzureParametersDto.builder()
                 .withResourceGroup(
                         Optional.ofNullable(azureEnvironmentParameters)
-                                .map(aep -> azureResourceGroupToAzureResourceGroupDto(aep.getResourceGroup()))
-                                .orElse(null)
+                                .map(AzureEnvironmentParameters::getResourceGroup)
+                                .filter(resourceGroup -> Objects.nonNull(resourceGroup.getResourceGroupUsage()))
+                                .map(this::azureResourceGroupToAzureResourceGroupDto)
+                                .orElse(
+                                        AzureResourceGroupDto.builder()
+                                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
+                                                .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW)
+                                                .build())
                 ).build();
 
     }

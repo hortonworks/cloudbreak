@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureStorage.IMAGES_CONTAINER;
 import static com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView.TENANT_ID;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -33,6 +34,7 @@ import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.CopyStatus;
 import com.microsoft.azure.storage.blob.ListBlobItem;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -62,20 +64,19 @@ public class AzureSetup implements Setup {
     private static final String TEST_CONTAINER = "cb-test-container";
 
     @Inject
-    private AzureUtils azureUtils;
+    private AzureStorage armStorage;
 
     @Inject
-    private AzureStorage armStorage;
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
     @Override
     public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
         LOGGER.debug("Prepare image: {}", image);
 
-        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack);
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AzureClient client = ac.getParameter(AzureClient.class);
         try {
-            copyVhdImageIfNecessary(ac, stack, image, imageResourceGroupName, region, client);
+            copyVhdImageIfNecessary(ac, stack, image, region, client);
         } catch (Exception ex) {
             LOGGER.warn("Could not create image with the specified parameters", ex);
             throw new CloudConnectorException(image.getImageName() + " image copy failed: " + ExceptionUtils.getRootCause(ex).getMessage(), ex);
@@ -83,11 +84,13 @@ public class AzureSetup implements Setup {
         LOGGER.debug("Prepare image has been executed");
     }
 
-    private void copyVhdImageIfNecessary(AuthenticatedContext ac, CloudStack stack, Image image, String imageResourceGroupName,
+    private void copyVhdImageIfNecessary(AuthenticatedContext ac, CloudStack stack, Image image,
             String region, AzureClient client) {
+
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
         String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), stack);
-        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
+        String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(ac.getCloudContext(), stack);
         if (!client.resourceGroupExists(resourceGroupName)) {
             client.createResourceGroup(resourceGroupName, region, stack.getTags());
         }
@@ -104,7 +107,7 @@ public class AzureSetup implements Setup {
 
     @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
-        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack);
+        String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(ac.getCloudContext(), stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
@@ -136,7 +139,7 @@ public class AzureSetup implements Setup {
 
     @Override
     public void prerequisites(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier persistenceNotifier) {
-        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext(), stack);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
         CloudResource cloudResource = new Builder().type(ResourceType.ARM_TEMPLATE).name(resourceGroupName).build();
         String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
@@ -154,15 +157,21 @@ public class AzureSetup implements Setup {
     @Override
     public void validateParameters(AuthenticatedContext ac, Map<String, String> parameters) {
         AzureClient client = ac.getParameter(AzureClient.class);
-        String resourceGroupName = parameters.get(AzureResourceConnector.RESOURCE_GROUP_NAME);
+        String resourceGroupName = parameters.get(PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER);
+        ResourceGroupUsage resourceGroupUsage = getIfNotNull(
+                parameters.get(PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER),
+                ResourceGroupUsage::valueOf);
+
         if (StringUtils.isEmpty(resourceGroupName)) {
             return;
         }
-        ResourceGroup resourceGroup = client.getResourceGroup(resourceGroupName);
-        if (resourceGroup != null) {
-            throw new BadRequestException("Resourcegroup name already exists: " + resourceGroup.name());
+        if (ResourceGroupUsage.MULTIPLE.equals(resourceGroupUsage)) {
+            LOGGER.debug("Multiple RG mode is active, checking existence of resource group {}", resourceGroupName);
+            ResourceGroup resourceGroup = client.getResourceGroup(resourceGroupName);
+            if (resourceGroup != null) {
+                throw new BadRequestException("Resourcegroup name already exists: " + resourceGroup.name());
+            }
         }
-
     }
 
     @Override

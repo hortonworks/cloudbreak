@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.management.resources.Deployment;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
@@ -25,12 +26,15 @@ public class AzureTemplateDeploymentService {
     private AzureUtils azureUtils;
 
     @Inject
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
+    @Inject
     private AzureTemplateBuilder azureTemplateBuilder;
 
     public Deployment getTemplateDeployment(AzureClient client, CloudStack stack, AuthenticatedContext ac, AzureStackView azureStackView) {
         CloudContext cloudContext = ac.getCloudContext();
         String stackName = azureUtils.getStackName(cloudContext);
-        String resourceGroupName = azureUtils.getResourceGroupName(cloudContext, stack);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         String template = getTemplate(stack, azureStackView, ac, ac.getCloudContext(), stackName, client);
         String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
         return client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);

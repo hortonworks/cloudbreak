@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.springframework.stereotype.Component;
 
@@ -16,10 +17,12 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.entity.projection.StackAuthenticationView;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Component
@@ -32,31 +35,41 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
     private ImageService imageService;
 
     @Inject
+    private StackService stackService;
+
+    @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
     @Override
-    public CloudInstance convert(InstanceMetaData metaDataEnity) {
-        InstanceGroup group = metaDataEnity.getInstanceGroup();
+    public CloudInstance convert(InstanceMetaData metaDataEntity) {
+        InstanceGroup group = metaDataEntity.getInstanceGroup();
         Optional<StackAuthenticationView> stackAuthenticationView = instanceMetaDataService
-                .getStackAuthenticationViewByInstanceMetaDataId(metaDataEnity.getId());
-        Template template = metaDataEnity.getInstanceGroup().getTemplate();
+                .getStackAuthenticationViewByInstanceMetaDataId(metaDataEntity.getId());
+        Template template = metaDataEntity.getInstanceGroup().getTemplate();
         Optional<StackAuthentication> stackAuthentication = stackAuthenticationView.map(StackAuthenticationView::getStackAuthentication);
-        InstanceStatus status = getInstanceStatus(metaDataEnity);
+        InstanceStatus status = getInstanceStatus(metaDataEntity);
         String imageId = stackAuthenticationView
                 .map(StackAuthenticationView::getStackId)
                 .map(stackId -> imageService.getByStackId(stackId))
                 .map(ImageEntity::getImageName)
                 .orElse(null);
-        InstanceTemplate instanceTemplate = stackToCloudStackConverter.buildInstanceTemplate(template, group.getGroupName(), metaDataEnity.getPrivateId(),
+        InstanceTemplate instanceTemplate = stackToCloudStackConverter.buildInstanceTemplate(template, group.getGroupName(), metaDataEntity.getPrivateId(),
                 status, imageId);
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication(
                 stackAuthentication.map(StackAuthentication::getPublicKey).orElse(null),
                 stackAuthentication.map(StackAuthentication::getPublicKeyId).orElse(null),
                 stackAuthentication.map(StackAuthentication::getLoginUserName).orElse(null));
         Map<String, Object> params = new HashMap<>();
-        params.put(CloudInstance.SUBNET_ID, metaDataEnity.getSubnetId());
-        params.put(CloudInstance.INSTANCE_NAME, metaDataEnity.getInstanceName());
-        return new CloudInstance(metaDataEnity.getInstanceId(), instanceTemplate, instanceAuthentication, params);
+        params.put(CloudInstance.SUBNET_ID, metaDataEntity.getSubnetId());
+        params.put(CloudInstance.INSTANCE_NAME, metaDataEntity.getInstanceName());
+
+        Stack stack = stackAuthenticationView
+                .map(StackAuthenticationView::getStackId)
+                .map(stackService::getStackById)
+                .orElseThrow(NotFoundException::new);
+        Map<String, Object> cloudInstanceParameters = stackToCloudStackConverter.buildCloudInstanceParameters(stack.getEnvironmentCrn(), metaDataEntity);
+        params.putAll(cloudInstanceParameters);
+        return new CloudInstance(metaDataEntity.getInstanceId(), instanceTemplate, instanceAuthentication, params);
     }
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData) {

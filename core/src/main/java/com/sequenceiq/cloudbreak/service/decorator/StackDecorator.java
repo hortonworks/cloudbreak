@@ -1,5 +1,21 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.BooleanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -41,19 +57,10 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import org.apache.commons.lang3.BooleanUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 @Service
 public class StackDecorator {
@@ -118,7 +125,10 @@ public class StackDecorator {
         measure(() -> preparePlacement(subject, request, environment),
                 LOGGER, "Placement was prepared under {} ms for stack {}, stackName");
 
-        measure(() -> prepareDomainIfDefined(subject, request, user, workspace, credential),
+        measure(() -> prepareParameters(subject, environment),
+                LOGGER, "Parameters were prepared under {} ms for stack {}", stackName);
+
+        measure(() -> prepareDomainIfDefined(subject, credential),
                 LOGGER, "Domain was prepared under {} ms for stack {}", stackName);
 
         subject.setCloudPlatform(credential.cloudPlatform());
@@ -169,6 +179,26 @@ public class StackDecorator {
         return environment.getRegions().getNames().stream()
                 .findFirst()
                 .orElse(null);
+    }
+
+    private void prepareParameters(Stack subject, DetailedEnvironmentResponse environment) {
+        Optional<AzureResourceGroup> resourceGroupOptional = getResourceGroupFromEnv(subject, environment);
+        if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
+            AzureResourceGroup azureResourceGroup = resourceGroupOptional.get();
+            subject.getParameters().put(PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER,
+                    azureResourceGroup.getName());
+            subject.getParameters().put(PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER,
+                    azureResourceGroup.getResourceGroupUsage().toString());
+        }
+    }
+
+    private Optional<AzureResourceGroup> getResourceGroupFromEnv(Stack stack, DetailedEnvironmentResponse environment) {
+        if (Objects.nonNull(stack) && CloudPlatform.AZURE.name().equals(stack.getCloudPlatform())) {
+            return Optional.ofNullable(environment.getAzure())
+                    .map(AzureEnvironmentParameters::getResourceGroup);
+        } else {
+            return Optional.empty();
+        }
     }
 
     private String getAvailabilityZoneFromEnv(DetailedEnvironmentResponse environment) {
@@ -249,7 +279,7 @@ public class StackDecorator {
         }
     }
 
-    private void prepareDomainIfDefined(Stack subject, StackV4Request request, User user, Workspace workspace, Credential credential) {
+    private void prepareDomainIfDefined(Stack subject, Credential credential) {
         if (subject.getNetwork() != null) {
             Network network = subject.getNetwork();
             if (network.getId() == null) {

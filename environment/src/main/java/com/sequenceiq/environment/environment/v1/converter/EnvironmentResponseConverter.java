@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
@@ -10,9 +11,9 @@ import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
-import com.sequenceiq.environment.api.v1.environment.model.response.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -30,6 +31,7 @@ import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
@@ -161,8 +163,11 @@ public class EnvironmentResponseConverter {
 
     private AzureEnvironmentParameters azureEnvParamsToAzureEnvironmentParams(ParametersDto parameters) {
         return Optional.ofNullable(parameters.getAzureParametersDto())
-                .map(azure -> AzureEnvironmentParameters.builder()
-                        .withAzureResourceGroup(getIfNotNull(azure.getAzureResourceGroupDto(), this::azureParametersToAzureResourceGroup))
+                .map(AzureParametersDto::getAzureResourceGroupDto)
+                .filter(resourceGroupDto -> Objects.nonNull(resourceGroupDto.getResourceGroupUsagePattern()))
+                .filter(resourceGroupDto -> Objects.nonNull(resourceGroupDto.getResourceGroupCreation()))
+                .map(resourceGroupDto -> AzureEnvironmentParameters.builder()
+                        .withAzureResourceGroup(getIfNotNull(resourceGroupDto, this::azureParametersToAzureResourceGroup))
                         .build())
                 .orElse(null);
     }

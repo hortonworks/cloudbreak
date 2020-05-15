@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
 import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedse
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
@@ -39,7 +42,6 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -51,16 +53,16 @@ import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
-import com.sequenceiq.cloudbreak.service.network.NetworkService;
-import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
-import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -79,21 +81,6 @@ public class StackDecoratorTest {
 
     @Mock
     private CredentialClientService credentialClientService;
-
-    @Mock
-    private NetworkService networkService;
-
-    @Mock
-    private TemplateService templateService;
-
-    @Mock
-    private SecurityGroupService securityGroupService;
-
-    @Mock
-    private TemplateDecorator templateDecorator;
-
-    @Mock
-    private TemplateValidator templateValidator;
 
     @Mock
     private ConverterUtil converterUtil;
@@ -176,6 +163,8 @@ public class StackDecoratorTest {
         subject.setInstanceGroups(instanceGroups);
         Cluster cluster = getCluster(instanceGroups);
         subject.setCluster(cluster);
+        subject.setCloudPlatform("AZURE");
+        subject.setParameters(new HashMap<>());
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
         when(platformParametersMap.get(any(Platform.class))).thenReturn(pps);
         when(pps.specialParameters()).thenReturn(specialParameters);
@@ -197,6 +186,10 @@ public class StackDecoratorTest {
         Map<String, CloudSubnet> subnetmetas = Maps.newHashMap("subnet", new CloudSubnet("id", "name", "availabilityzone", "cidr"));
         enr.setSubnetMetas(subnetmetas);
         environmentResponse.setNetwork(enr);
+        environmentResponse.setAzure(AzureEnvironmentParameters
+                .builder().withAzureResourceGroup(AzureResourceGroup
+                        .builder().withResourceGroupUsage(ResourceGroupUsage.SINGLE).withName("resource-group").build()).build());
+        when(request.getCloudPlatform()).thenReturn(CloudPlatform.AZURE);
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         Credential credential = Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build();
@@ -234,6 +227,8 @@ public class StackDecoratorTest {
         when(clusterRequest.getDatabases()).thenReturn(Set.of("db1", "db2"));
 
         underTest.decorate(subject, request, user, workspace);
+        assertEquals("resource-group", subject.getParameters().get(PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER));
+        assertEquals("SINGLE", subject.getParameters().get(PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER));
     }
 
     @Test

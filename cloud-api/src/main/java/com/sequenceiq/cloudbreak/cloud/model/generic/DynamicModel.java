@@ -50,4 +50,11 @@ public class DynamicModel {
     public boolean hasParameter(String key) {
         return parameters.containsKey(key);
     }
+
+    @Override
+    public String toString() {
+        return "DynamicModel{" +
+                "parameters=" + parameters +
+                '}';
+    }
 }

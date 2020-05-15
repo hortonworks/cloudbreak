@@ -41,7 +41,7 @@ public class AzureVirtualMachineService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureVirtualMachineService.class);
 
     @Inject
-    private AzureUtils azureUtils;
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Map<String, VirtualMachine> getVirtualMachinesByName(AzureClient azureClient, String resourceGroup, Collection<String> privateInstanceIds) {
@@ -98,7 +98,7 @@ public class AzureVirtualMachineService {
         AzureClient azureClient = ac.getParameter(AzureClient.class);
         ArrayListMultimap<String, String> resourceGroupInstanceMultimap = cloudInstances.stream()
                 .collect(Multimaps.toMultimap(
-                        cloudInstance -> azureUtils.getResourceGroupName(ac.getCloudContext(), cloudInstance),
+                        cloudInstance -> azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), cloudInstance),
                         CloudInstance::getInstanceId,
                         ArrayListMultimap::create));
 

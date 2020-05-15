@@ -43,13 +43,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -87,7 +85,7 @@ public class AzureUtils {
     private AzurePollTaskFactory azurePollTaskFactory;
 
     @Inject
-    private AzureUtils armTemplateUtils;
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
     @Inject
     private SyncPollingScheduler syncPollingScheduler;
@@ -157,23 +155,6 @@ public class AzureUtils {
         return armResourceStatus;
     }
 
-    private String getDefaultResourceGroupName(CloudContext cloudContext) {
-        return getStackName(cloudContext);
-    }
-
-    public String getResourceGroupName(CloudContext cloudContext, CloudStack cloudStack) {
-        return cloudStack.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getDefaultResourceGroupName(cloudContext));
-    }
-
-    public String getResourceGroupName(CloudContext cloudContext, DatabaseStack databaseStack) {
-        return databaseStack.getDatabaseServer().getParameters()
-                .getOrDefault(RESOURCE_GROUP_NAME, getDefaultResourceGroupName(cloudContext)).toString();
-    }
-
-    public String getResourceGroupName(CloudContext cloudContext, DynamicModel dynamicModel) {
-        return dynamicModel.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getDefaultResourceGroupName(cloudContext)).toString();
-    }
-
     public boolean isExistingNetwork(Network network) {
         return isNotEmpty(getCustomNetworkId(network)) && isNotEmpty(getCustomResourceGroupName(network)) && isListNotEmpty(getCustomSubnetIds(network));
     }
@@ -184,10 +165,6 @@ public class AzureUtils {
 
     public boolean isPrivateIp(Network network) {
         return network.getParameters().containsKey(NO_PUBLIC_IP) ? network.getParameter(NO_PUBLIC_IP, Boolean.class) : false;
-    }
-
-    public boolean isNoSecurityGroups(Network network) {
-        return false;
     }
 
     public static List<CloudInstance> getInstanceList(CloudStack stack) {
@@ -303,7 +280,7 @@ public class AzureUtils {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         List<Completable> deallocateCompletables = new ArrayList<>();
         for (CloudInstance vm : vms) {
-            String resourceGroupName = armTemplateUtils.getResourceGroupName(ac.getCloudContext(), vm);
+            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
             AzureClient azureClient = ac.getParameter(AzureClient.class);
             deallocateCompletables.add(azureClient.deallocateVirtualMachineAsync(resourceGroupName, vm.getInstanceId())
                     .doOnError(throwable -> {
@@ -323,7 +300,7 @@ public class AzureUtils {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         List<Completable> deleteCompletables = new ArrayList<>();
         for (CloudInstance vm : vms) {
-            String resourceGroupName = armTemplateUtils.getResourceGroupName(ac.getCloudContext(), vm);
+            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
             AzureClient azureClient = ac.getParameter(AzureClient.class);
             deleteCompletables.add(azureClient.deleteVirtualMachine(resourceGroupName, vm.getInstanceId())
                     .doOnError(throwable -> {

@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -43,23 +44,28 @@ public class AzureDatabaseResourceService {
     @Inject
     private AzureUtils azureUtils;
 
+    @Inject
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
     public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
 
         String stackName = azureUtils.getStackName(cloudContext);
-        String resourceGroupName = azureUtils.getResourceGroupName(cloudContext, stack);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+        Boolean useSingleResourceGroup = azureResourceGroupMetadataProvider.useSingleResourceGroup(stack);
         String template = azureTemplateBuilder.build(cloudContext, stack);
-        String region = ac.getCloudContext().getLocation().getRegion().value();
 
-        try {
-            if (!client.resourceGroupExists(resourceGroupName)) {
+        if (!client.resourceGroupExists(resourceGroupName)) {
+            if (useSingleResourceGroup) {
+                LOGGER.warn("Resource group with {} does not exist", resourceGroupName);
+                throw new CloudConnectorException(String.format("Resource group with %s does not exist!", resourceGroupName));
+            } else {
+                LOGGER.debug("Resource group with {} does not exist, creating it now..", resourceGroupName);
+                String region = ac.getCloudContext().getLocation().getRegion().value();
                 client.createResourceGroup(resourceGroupName, region, stack.getTags());
             }
-        } catch (Exception ex) {
-            throw new CloudConnectorException(ex);
         }
-
         try {
             client.createTemplateDeployment(resourceGroupName, stackName, template, "");
         } catch (CloudException e) {
@@ -105,7 +111,7 @@ public class AzureDatabaseResourceService {
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack, boolean force) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
-        String resourceGroupName = azureUtils.getResourceGroupName(cloudContext, stack);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
 
         try {
             client.deleteResourceGroup(resourceGroupName);

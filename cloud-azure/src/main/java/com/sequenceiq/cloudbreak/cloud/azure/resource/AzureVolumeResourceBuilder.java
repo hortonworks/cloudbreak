@@ -26,6 +26,7 @@ import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.compute.Disk;
 import com.microsoft.azure.management.resources.fluentcore.arm.AvailabilityZoneId;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
@@ -60,6 +61,9 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
 
     @Inject
     private AzureUtils azureUtils;
+
+    @Inject
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
     @Override
     public List<CloudResource> create(AzureContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -114,7 +118,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         LOGGER.debug("Fetching availability zone for vm {}", vm.getName());
         AzureClient client = getAzureClient(auth);
         String vmName = vm.getName();
-        String resourceGroupName = azureUtils.getResourceGroupName(auth.getCloudContext(), vm);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(auth.getCloudContext(), vm);
 
         // Azure Java client returns a Set, but VM can only have at most 1 AZ
         return client.getAvailabilityZone(resourceGroupName, vmName).stream()
@@ -137,7 +141,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
         CloudContext cloudContext = auth.getCloudContext();
-        String resourceGroupName = azureUtils.getResourceGroupName(cloudContext, cloudStack);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
         String region = cloudContext.getLocation().getRegion().getRegionName();
         for (CloudResource resource : requestedResources) {
             volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));

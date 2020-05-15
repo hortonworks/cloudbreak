@@ -15,6 +15,7 @@ import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -54,11 +55,14 @@ public class AzureUpscaleService {
     @Inject
     private AzureTemplateDeploymentService azureTemplateDeploymentService;
 
+    @Inject
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, AzureStackView azureStackView,
             AzureClient client) {
         CloudContext cloudContext = ac.getCloudContext();
         String stackName = azureUtils.getStackName(cloudContext);
-        String resourceGroupName = azureUtils.getResourceGroupName(cloudContext, stack);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
 
         try {
             List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);

@@ -32,6 +32,9 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
 @ExtendWith(MockitoExtension.class)
 class NetworkCreationRequestFactoryTest {
@@ -48,6 +51,10 @@ class NetworkCreationRequestFactoryTest {
 
     private static final String CLOUD_PLATFORM = "AWS";
 
+    private static final String LEGACY_RG = "LEGACY-RG";
+
+    private static final String SINGLE_RG = "SINGLE-RG";
+
     private static final Set<NetworkSubnetRequest> SUBNET_CIDRS = Collections.singleton(new NetworkSubnetRequest("10.10.1.1/24", PUBLIC));
 
     private final DefaultSubnetCidrProvider defaultSubnetCidrProvider = Mockito.mock(DefaultSubnetCidrProvider.class);
@@ -61,7 +68,7 @@ class NetworkCreationRequestFactoryTest {
 
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsAreNotPresent() {
-        EnvironmentDto environmentDto = createEnvironmentDtoWithoutAureParams().build();
+        EnvironmentDto environmentDto = createEnvironmentDtoWithoutAzureParams().build();
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
@@ -85,7 +92,7 @@ class NetworkCreationRequestFactoryTest {
 
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsArePresent() {
-        EnvironmentDto environmentDto = createEnvironmentDtoWithAureParams().build();
+        EnvironmentDto environmentDto = createEnvironmentDtoWithAzureParams().build();
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
@@ -106,7 +113,20 @@ class NetworkCreationRequestFactoryTest {
         assertTrue(actual.isNoPublicIp());
     }
 
-    private EnvironmentDto.Builder createEnvironmentDtoWithoutAureParams() {
+    @Test
+    void testCreateShouldCreateANetworkCreationRequestWhenResourceGroupNameIsPresent() {
+        EnvironmentDto environmentDto = createAzureParametersDto().build();
+        CloudCredential cloudCredential = new CloudCredential("1", "asd");
+
+        when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
+        when(defaultSubnetCidrProvider.provide(NETWORK_CIDR, false)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
+
+        NetworkCreationRequest actual = underTest.create(environmentDto);
+
+        assertEquals(SINGLE_RG, actual.getResourceGroup());
+    }
+
+    private EnvironmentDto.Builder createEnvironmentDtoWithoutAzureParams() {
         return EnvironmentDto.builder()
                 .withName(ENV_NAME)
                 .withTags(new EnvironmentTags(new HashMap<>(), new HashMap<>()))
@@ -117,16 +137,29 @@ class NetworkCreationRequestFactoryTest {
                 .withNetwork(NetworkDto.builder().withId(NETWORK_ID).withNetworkCidr(NETWORK_CIDR).build());
     }
 
-    private EnvironmentDto.Builder createEnvironmentDtoWithAureParams() {
-        EnvironmentDto.Builder builder = createEnvironmentDtoWithoutAureParams();
+    private EnvironmentDto.Builder createEnvironmentDtoWithAzureParams() {
+        EnvironmentDto.Builder builder = createEnvironmentDtoWithoutAzureParams();
         builder.withNetwork(NetworkDto.builder()
                 .withId(NETWORK_ID)
                 .withNetworkCidr(NETWORK_CIDR)
                 .withAzure(AzureParams.builder()
                         .withNoPublicIp(true)
+                        .withResourceGroupName(LEGACY_RG)
                         .build())
                 .build());
         return builder;
+    }
+
+    private EnvironmentDto.Builder createAzureParametersDto() {
+        return createEnvironmentDtoWithAzureParams()
+                .withParameters(ParametersDto.builder()
+                        .withAzureParameters(
+                                AzureParametersDto.builder()
+                                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                                .withName(SINGLE_RG)
+                                                .build())
+                                        .build())
+                        .build());
     }
 
     public SubnetRequest publicSubnetRequest(String cidr, int index) {

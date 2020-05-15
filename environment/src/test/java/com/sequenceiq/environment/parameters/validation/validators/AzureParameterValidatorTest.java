@@ -126,6 +126,48 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
+    public void testWhenMultipleResourceGroupAndEmptyNameThenNoError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
+                                .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
+                                .build())
+                        .build())
+                .build();
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
+        AzureClient azureClient = mock(AzureClient.class);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+        when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(true);
+
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    public void testWhenMultipleResourceGroupAndNonEmptyNameThenError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
+                                .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
+                                .withName("myResourceGroup").build())
+                        .build())
+                .build();
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
+        AzureClient azureClient = mock(AzureClient.class);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+        when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
+
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertTrue(validationResult.hasError());
+        assertEquals("1. Resource group name 'myResourceGroup' could not be specified if MULTIPLE usage is defined.",
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
     public void testWhenUseExistingResourceGroupAndNotExistsThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()

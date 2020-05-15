@@ -1,24 +1,28 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
+import java.util.Collections;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Optional;
 
 @Service
 public class RedbeamsDbServerConfigurer {
@@ -46,7 +50,12 @@ public class RedbeamsDbServerConfigurer {
      */
     public RDSConfig createNewRdsConfig(Stack stack, Cluster cluster, String dbName, String dbUser, DatabaseType type) {
         DatabaseServerV4Response resp = getDatabaseServer(cluster.getDatabaseServerCrn());
-        LOGGER.info("Using redbeams for remote database configuration");
+        LOGGER.info("Using redbeams for remote database configuration: {}", resp.toString());
+        if (Objects.nonNull(resp.getStatus()) && !resp.getStatus().isAvailable()) {
+            String message = String.format("Redbeams database server is not available (%s) with message: %s", resp.getStatus(), resp.getStatusReason());
+            LOGGER.warn(message);
+            throw new CloudbreakServiceException(message);
+        }
 
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setConnectionURL(dbCommon.getJdbcConnectionUrl(resp.getDatabaseVendor(), resp.getHost(), resp.getPort(), Optional.of(dbName)));
