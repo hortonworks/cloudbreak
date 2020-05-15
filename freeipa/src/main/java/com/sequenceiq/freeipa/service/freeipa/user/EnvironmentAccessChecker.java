@@ -41,14 +41,15 @@ public class EnvironmentAccessChecker {
         this.grpcUmsClient = requireNonNull(grpcUmsClient, "grpcUmsClient is null");
         Crn.safeFromString(environmentCrn);
         this.environmentCrn = environmentCrn;
+        String accountId = Crn.safeFromString(environmentCrn).getAccountId();
 
         rightChecks = List.of(
                 RightCheck.newBuilder()
-                        .setRight(umsRightProvider.getRight(AuthorizationResourceAction.ACCESS_ENVIRONMENT))
+                        .setRight(umsRightProvider.getRight(AuthorizationResourceAction.ACCESS_ENVIRONMENT, INTERNAL_ACTOR_CRN, accountId))
                         .setResource(environmentCrn)
                         .build(),
                 RightCheck.newBuilder()
-                        .setRight(umsRightProvider.getRight(AuthorizationResourceAction.ADMIN_FREEIPA))
+                        .setRight(umsRightProvider.getRight(AuthorizationResourceAction.ADMIN_FREEIPA, INTERNAL_ACTOR_CRN, accountId))
                         .build());
     }
 
