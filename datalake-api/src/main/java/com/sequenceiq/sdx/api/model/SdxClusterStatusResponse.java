@@ -27,6 +27,7 @@ public enum SdxClusterStatusResponse {
     DELETE_REQUESTED,
     DELETED,
     DELETE_FAILED,
+    DELETED_ON_PROVIDER_SIDE,
     START_IN_PROGRESS,
     START_FAILED,
     STOP_IN_PROGRESS,

@@ -8,6 +8,7 @@ public enum ResourceEvent {
     SDX_CLUSTER_DELETION_STARTED("resource.sdx.deletionstarted"),
     SDX_CLUSTER_DELETION_FINISHED("resource.sdx.deletionfinished"),
     SDX_CLUSTER_DELETION_FAILED("resource.sdx.deletionfailed"),
+    SDX_CLUSTER_DELETED_ON_PROVIDER_SIDE("resource.sdx.deletedonproviderside"),
     SDX_CLUSTER_CREATION_FAILED("resource.sdx.failed"),
     SDX_RDS_DELETION_STARTED("resource.sdx.rdsdeletionstarted"),
     SDX_RDS_DELETION_FAILED("resource.sdx.rdsdeletionfailed"),

@@ -18,6 +18,7 @@ public enum Status {
     PRE_DELETE_IN_PROGRESS(StatusKind.PROGRESS),
     DELETE_IN_PROGRESS(StatusKind.PROGRESS),
     DELETE_FAILED(StatusKind.FINAL),
+    DELETED_ON_PROVIDER_SIDE(StatusKind.FINAL),
     DELETE_COMPLETED(StatusKind.FINAL),
     STOPPED(StatusKind.FINAL),
     STOP_REQUESTED(StatusKind.PROGRESS),
@@ -47,7 +48,7 @@ public enum Status {
 
     public boolean isRemovableStatus() {
         return Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
-                DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED).contains(valueOf(name()));
+                DELETE_COMPLETED, DELETED_ON_PROVIDER_SIDE, STOPPED, START_FAILED, STOP_FAILED).contains(valueOf(name()));
     }
 
     public boolean isAvailable() {
@@ -98,7 +99,7 @@ public enum Status {
     }
 
     public static Set<Status> getAllowedDataHubStatesForSdxUpgrade() {
-        return Sets.immutableEnumSet(Status.STOPPED, Status.DELETE_COMPLETED,
-                Status.CREATE_FAILED, Status.DELETE_FAILED);
+        return Sets.immutableEnumSet(STOPPED, DELETE_COMPLETED,
+                CREATE_FAILED, DELETE_FAILED, DELETED_ON_PROVIDER_SIDE);
     }
 }

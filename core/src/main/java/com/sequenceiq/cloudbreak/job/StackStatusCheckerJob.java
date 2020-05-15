@@ -139,6 +139,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.DELETE_IN_PROGRESS,
                 Status.DELETE_FAILED,
                 Status.DELETE_COMPLETED,
+                Status.DELETED_ON_PROVIDER_SIDE,
                 Status.EXTERNAL_DATABASE_CREATION_FAILED,
                 Status.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
                 Status.EXTERNAL_DATABASE_DELETION_FINISHED,

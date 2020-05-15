@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.WAIT_FOR_SYNC;
@@ -232,8 +233,8 @@ public class StackSyncService {
             updateClusterStatusIfEnabled(stack.getId(), STOPPED, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
         } else if (isAllDeletedOnProvider(instanceStateCounts, instances.size()) && stack.getStatus() != DELETE_FAILED) {
-            updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.DELETE_FAILED, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
-            eventService.fireCloudbreakEvent(stack.getId(), DELETE_FAILED.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
+            updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
+            eventService.fireCloudbreakEvent(stack.getId(), DELETED_ON_PROVIDER_SIDE.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
         }
     }
 

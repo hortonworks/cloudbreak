@@ -48,6 +48,7 @@ public enum DetailedStackStatus {
     DEREGISTERING_CCM_KEY(Status.DELETE_IN_PROGRESS),
     DELETE_COMPLETED(Status.DELETE_COMPLETED),
     DELETE_FAILED(Status.DELETE_FAILED),
+    DELETED_ON_PROVIDER_SIDE(Status.DELETED_ON_PROVIDER_SIDE),
     // Rollback statuses
     ROLLING_BACK(Status.UPDATE_IN_PROGRESS),
     // The stack is available

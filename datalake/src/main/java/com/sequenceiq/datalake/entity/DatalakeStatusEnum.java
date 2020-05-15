@@ -30,6 +30,7 @@ public enum DatalakeStatusEnum {
     DELETE_REQUESTED(ResourceEvent.SDX_CLUSTER_DELETION_STARTED),
     DELETED(ResourceEvent.SDX_CLUSTER_DELETION_FINISHED),
     DELETE_FAILED(ResourceEvent.SDX_CLUSTER_DELETION_FAILED),
+    DELETED_ON_PROVIDER_SIDE(ResourceEvent.SDX_CLUSTER_DELETED_ON_PROVIDER_SIDE),
     START_IN_PROGRESS(ResourceEvent.SDX_START_STARTED),
     START_FAILED(ResourceEvent.SDX_START_FAILED),
     STOP_IN_PROGRESS(ResourceEvent.SDX_STOP_STARTED),
@@ -48,6 +49,7 @@ public enum DatalakeStatusEnum {
         return EXTERNAL_DATABASE_DELETION_IN_PROGRESS.equals(this)
                 || STACK_DELETED.equals(this)
                 || STACK_DELETION_IN_PROGRESS.equals(this)
+                || DELETED_ON_PROVIDER_SIDE.equals(this)
                 || DELETE_REQUESTED.equals(this)
                 || DELETED.equals(this);
     }
