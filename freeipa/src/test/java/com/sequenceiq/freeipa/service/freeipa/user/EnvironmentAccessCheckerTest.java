@@ -103,8 +103,10 @@ class EnvironmentAccessCheckerTest {
     }
 
     private EnvironmentAccessChecker createEnvironmentAccessChecker(String environmentCrn) {
-        when(umsRightProvider.getRight(eq(AuthorizationResourceAction.ACCESS_ENVIRONMENT))).thenReturn("environments/accessEnvironment");
-        when(umsRightProvider.getRight(eq(AuthorizationResourceAction.ADMIN_FREEIPA))).thenReturn("environments/adminFreeipa");
+        when(umsRightProvider.getRight(eq(AuthorizationResourceAction.ACCESS_ENVIRONMENT), anyString(), anyString()))
+                .thenReturn("environments/accessEnvironment");
+        when(umsRightProvider.getRight(eq(AuthorizationResourceAction.ADMIN_FREEIPA), anyString(), anyString()))
+                .thenReturn("environments/adminFreeipa");
         return new EnvironmentAccessChecker(grpcUmsClient, umsRightProvider, environmentCrn);
     }
 }
