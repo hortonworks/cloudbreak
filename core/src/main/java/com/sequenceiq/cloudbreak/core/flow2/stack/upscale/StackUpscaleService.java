@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_ADDING_INSTANCES;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_BOOTSTRAP_NEW_NODES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_METADATA_EXTEND_WITH_COUNT;
 import static java.lang.String.format;
@@ -76,13 +75,13 @@ public class StackUpscaleService {
     @Inject
     private TransactionService transactionService;
 
-    public void startAddInstances(Stack stack, Integer scalingAdjustment) {
-        String statusReason = format("Adding %s new instance(s) to the infrastructure.", scalingAdjustment);
+    public void startAddInstances(Stack stack, Integer scalingAdjustment, String hostGroupName) {
+        String statusReason = format("Adding %s new instance(s) to instance group %s", scalingAdjustment, hostGroupName);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ADDING_NEW_INSTANCES, statusReason);
     }
 
-    public void addInstanceFireEventAndLog(Stack stack, Integer scalingAdjustment) {
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_ADDING_INSTANCES, String.valueOf(scalingAdjustment));
+    public void addInstanceFireEventAndLog(Stack stack, Integer scalingAdjustment, String hostGroupName) {
+        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_ADDING_INSTANCES, String.valueOf(scalingAdjustment), hostGroupName);
     }
 
     public void finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
@@ -137,7 +136,6 @@ public class StackUpscaleService {
 
     public void bootstrappingNewNodes(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.BOOTSTRAPPING_NEW_NODES);
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_BOOTSTRAP_NEW_NODES);
     }
 
     public void extendingHostMetadata(Stack stack) {

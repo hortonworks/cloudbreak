@@ -107,9 +107,9 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackScalingFlowContext context, StackScaleTriggerEvent payload, Map<Object, Object> variables) {
                 int instanceCountToCreate = getInstanceCountToCreate(context.getStack(), payload.getInstanceGroup(), payload.getAdjustment());
-                stackUpscaleService.addInstanceFireEventAndLog(context.getStack(), payload.getAdjustment());
+                stackUpscaleService.addInstanceFireEventAndLog(context.getStack(), payload.getAdjustment(), payload.getInstanceGroup());
                 if (instanceCountToCreate > 0) {
-                    stackUpscaleService.startAddInstances(context.getStack(), payload.getAdjustment());
+                    stackUpscaleService.startAddInstances(context.getStack(), payload.getAdjustment(), payload.getInstanceGroup());
                     sendEvent(context);
                 } else {
                     List<CloudResourceStatus> list = resourceService.getAllAsCloudResourceStatus(payload.getResourceId());
