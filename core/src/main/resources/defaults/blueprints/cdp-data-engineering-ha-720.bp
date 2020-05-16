@@ -79,10 +79,26 @@
         ]
       },
       {
-        "refName": "hive",
+        "refName": "hive_on_tez",
         "serviceType": "HIVE_ON_TEZ",
         "displayName": "Hive",
         "serviceConfigs": [
+          {
+            "name": "hms_connector",
+            "ref": "hms"
+          },
+          {
+            "name": "tez_service",
+            "ref": "tez"
+          },
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          },
+          {
+            "name": "mapreduce_yarn_service",
+            "ref": "yarn"
+          },
           {
             "name": "tez_container_size",
             "value": "4096"
@@ -98,12 +114,12 @@
         ],
         "roleConfigGroups": [
           {
-            "refName": "hive-GATEWAY-BASE",
+            "refName": "hive_on_tez-GATEWAY-BASE",
             "roleType": "GATEWAY",
             "base": true
           },
           {
-            "refName": "hive-HIVESERVER2-BASE",
+            "refName": "hive_on_tez-HIVESERVER2-BASE",
             "roleType": "HIVESERVER2",
             "base": true,
             "configs": [
@@ -378,7 +394,7 @@
         "refName": "compute",
         "cardinality": 0,
         "roleConfigGroupsRefNames": [
-          "hive-GATEWAY-BASE",
+          "hive_on_tez-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
@@ -391,7 +407,7 @@
         "refName": "gateway",
         "cardinality": 0,
         "roleConfigGroupsRefNames": [
-          "hive-GATEWAY-BASE",
+          "hive_on_tez-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
@@ -407,7 +423,7 @@
           "das-DAS_WEBAPP",
           "hdfs-BALANCER-BASE",
           "hdfs-JOURNALNODE-BASE",
-          "hive-GATEWAY-BASE",
+          "hive_on_tez-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "hue-HUE_LOAD_BALANCER-BASE",
           "knox-KNOX_GATEWAY-BASE",
@@ -432,8 +448,8 @@
           "hdfs-FAILOVERCONTROLLER-BASE",
           "hdfs-JOURNALNODE-BASE",
           "hdfs-NAMENODE-BASE",
-          "hive-GATEWAY-BASE",
-          "hive-HIVESERVER2-BASE",
+          "hive_on_tez-GATEWAY-BASE",
+          "hive_on_tez-HIVESERVER2-BASE",
           "hms-GATEWAY-BASE",
           "hms-HIVEMETASTORE-BASE",
           "hue-HUE_SERVER-BASE",
@@ -451,7 +467,7 @@
         "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
-          "hive-GATEWAY-BASE",
+          "hive_on_tez-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
