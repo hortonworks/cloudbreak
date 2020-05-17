@@ -146,8 +146,8 @@ integrationtest:
 
   # aws parameters
   aws:
-    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.1.0
+    defaultBlueprintName: "7.2.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.2.0
     region: eu-central-1
     location: eu-central-1
     availabilityZone: eu-central-1a
@@ -178,8 +178,8 @@ integrationtest:
 
   # azure parameters
   azure:
-    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.1.0
+    defaultBlueprintName: "7.2.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.2.0
     availabilityZone:
     region: West US
     location: West US
@@ -214,8 +214,8 @@ integrationtest:
 
   # gcp parameters
   gcp:
-    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.1.0
+    defaultBlueprintName: "7.2.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.2.0
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2
@@ -235,8 +235,8 @@ integrationtest:
 
   # openstack parameters
   openstack:
-    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
-    blueprintCdhVersion: 7.1.0
+    defaultBlueprintName: "7.2.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.2.0
     availabilityZone: nova
     region: RegionOne
     location: Texas
@@ -255,7 +255,7 @@ integrationtest:
 
   # yarn parameters
   yarn:
-    defaultBlueprintName: "7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
+    defaultBlueprintName: "7.2.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
     availabilityZone:
     region: default
     location: Frankfurt
@@ -273,7 +273,7 @@ integrationtest:
 
   # mock parameters
   mock:
-    defaultBlueprintName: "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "7.2.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     region: Europe
     location: London
     availabilityZone: London
@@ -297,7 +297,7 @@ integrationtest:
       redhat7:
         imageId: ee68297d-59b3-4cb0-419a-f9e00763bdb4
         blueprints:
-          - "7.1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+          - "7.2.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     cloudstorage:
       s3:
         instanceProfile:
@@ -332,7 +332,10 @@ integrationtest:
 
   # sdx properties
   sdx:
-      server: http://localhost
+    internal:
+      blueprintName: "7.2.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
+      runtimeVersion: "7.2.0"
+    server: http://localhost
 
   # redbeams properties
   redbeams:
