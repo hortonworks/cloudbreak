@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.client.model;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,7 +13,6 @@ import com.sequenceiq.freeipa.client.deserializer.ListFlatteningDeserializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DnsRecord {
-
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private String idnsname;
 
@@ -21,6 +21,8 @@ public class DnsRecord {
     private List<String> sshfprecord;
 
     private List<String> ptrrecord;
+
+    private List<String> srvrecord;
 
     public String getIdnsname() {
         return idnsname;
@@ -50,8 +52,16 @@ public class DnsRecord {
         return ptrrecord;
     }
 
+    public List<String> getSrvrecord() {
+        return srvrecord;
+    }
+
     public void setPtrrecord(List<String> ptrrecord) {
         this.ptrrecord = ptrrecord;
+    }
+
+    public void setSrvrecord(List<String> srvrecord) {
+        this.srvrecord = srvrecord;
     }
 
     public boolean isHostRelatedRecord(String fqdn, String domain) {
@@ -63,6 +73,24 @@ public class DnsRecord {
             return ptrrecord.contains(StringUtils.appendIfMissing(fqdn, "."));
         }
         return false;
+    }
+
+    public boolean isHostRelatedSrvRecord(String fqdn) {
+        if (isSrvRecord()) {
+            String searchString = " " + StringUtils.appendIfMissing(fqdn, ".");
+            return srvrecord.stream()
+                    .anyMatch(record -> record.endsWith(searchString));
+        }
+        return false;
+    }
+
+    public List<String> getHostRelatedSrvRecords(String fqdn) {
+        if (isSrvRecord()) {
+            return srvrecord.stream()
+                    .filter(str -> str.contains(StringUtils.appendIfMissing(fqdn, ".")))
+                    .collect(Collectors.toList());
+        }
+        return List.of();
     }
 
     public boolean isIpRelatedRecord(String ip, String zone) {
@@ -92,6 +120,10 @@ public class DnsRecord {
         return ptrrecord != null && !ptrrecord.isEmpty();
     }
 
+    public boolean isSrvRecord() {
+        return srvrecord != null && !srvrecord.isEmpty();
+    }
+
     @Override
     public String toString() {
         return "DnsRecord{"
@@ -99,6 +131,7 @@ public class DnsRecord {
                 + ", arecord=" + arecord
                 + ", sshfprecord=" + sshfprecord
                 + ", ptrrecord=" + ptrrecord
+                + ", srvrecord=" + srvrecord
                 + '}';
     }
 }

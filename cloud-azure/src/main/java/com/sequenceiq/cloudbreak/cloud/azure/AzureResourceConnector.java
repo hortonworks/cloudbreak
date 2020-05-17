@@ -236,35 +236,32 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     public List<CloudResourceStatus> terminate(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
-        for (CloudResource resource : resources) {
+        try {
             try {
-                try {
-                    retryService.testWith2SecDelayMax5Times(() -> {
-                        if (!client.resourceGroupExists(resourceGroupName)) {
-                            throw new ActionFailedException("Resource group not exists");
-                        }
-                        return true;
-                    });
-                    client.deleteResourceGroup(resourceGroupName);
-                } catch (ActionFailedException ignored) {
-                    LOGGER.debug("Resource group not found with name: {}", resourceGroupName);
-                }
-                if (azureStorage.isPersistentStorage(azureStorage.getPersistentStorageName(stack))) {
-                    CloudContext cloudCtx = ac.getCloudContext();
-                    AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
-                    Boolean singleResourceGroup = azureResourceGroupMetadataProvider.useSingleResourceGroup(stack);
+                retryService.testWith2SecDelayMax5Times(() -> {
+                    if (!client.resourceGroupExists(resourceGroupName)) {
+                        throw new ActionFailedException("Resource group not exists");
+                    }
+                    return true;
+                });
+                client.deleteResourceGroup(resourceGroupName);
+            } catch (ActionFailedException ignored) {
+                LOGGER.debug("Resource group not found with name: {}", resourceGroupName);
+            }
+            if (azureStorage.isPersistentStorage(azureStorage.getPersistentStorageName(stack))) {
+                CloudContext cloudCtx = ac.getCloudContext();
+                AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
 
-                    String imageStorageName = azureStorage.getImageStorageName(azureCredentialView, cloudCtx, stack);
-                    String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudCtx, stack);
-                    String diskContainer = azureStorage.getDiskContainerName(cloudCtx);
-                    deleteContainer(client, imageResourceGroupName, imageStorageName, diskContainer);
-                }
-            } catch (CloudException e) {
-                if (e.response().code() != AzureConstants.NOT_FOUND) {
-                    throw new CloudConnectorException(String.format("Could not delete resource group: %s", resource.getName()), e);
-                } else {
-                    return check(ac, Collections.emptyList());
-                }
+                String imageStorageName = azureStorage.getImageStorageName(azureCredentialView, cloudCtx, stack);
+                String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudCtx, stack);
+                String diskContainer = azureStorage.getDiskContainerName(cloudCtx);
+                deleteContainer(client, imageResourceGroupName, imageStorageName, diskContainer);
+            }
+        } catch (CloudException e) {
+            if (e.response().code() != AzureConstants.NOT_FOUND) {
+                throw new CloudConnectorException(String.format("Could not delete resource group: %s", resourceGroupName), e);
+            } else {
+                return check(ac, Collections.emptyList());
             }
         }
         return check(ac, resources);
@@ -306,11 +303,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             AzureCredentialView azureCredentialView, String resourceGroupName, CloudInstance instance) {
         String instanceId = instance.getInstanceId();
         Long privateId = instance.getTemplate().getPrivateId();
-        AzureDiskType azureDiskType = AzureDiskType.getByValue(instance.getTemplate().getVolumes().get(0).getType());
-        String attachedDiskStorageName = azureStorage.getAttachedDiskStorageName(azureStorage.getArmAttachedStorageOption(stack.getParameters()),
-                azureCredentialView, privateId, ac.getCloudContext(), azureDiskType);
         Map<String, Object> resourcesToRemove = new HashMap<>();
-        resourcesToRemove.put(ATTACHED_DISK_STORAGE_NAME, attachedDiskStorageName);
+        addAttachedDiskStorageForRemoval(resourcesToRemove, ac, stack, azureCredentialView, instance, privateId);
         try {
             if (instanceId != null) {
                 VirtualMachine virtualMachine = client.getVirtualMachine(resourceGroupName, instanceId);
@@ -344,6 +338,16 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             throw new CloudConnectorException("can't collect instance resources", e);
         }
         return resourcesToRemove;
+    }
+
+    private void addAttachedDiskStorageForRemoval(Map<String, Object> resourcesToRemove, AuthenticatedContext ac, CloudStack stack,
+            AzureCredentialView azureCredentialView, CloudInstance instance, Long privateId) {
+        if (!instance.getTemplate().getVolumes().isEmpty()) {
+            AzureDiskType azureDiskType = AzureDiskType.getByValue(instance.getTemplate().getVolumes().get(0).getType());
+            String attachedDiskStorageName = azureStorage.getAttachedDiskStorageName(azureStorage.getArmAttachedStorageOption(stack.getParameters()),
+                    azureCredentialView, privateId, ac.getCloudContext(), azureDiskType);
+            resourcesToRemove.put(ATTACHED_DISK_STORAGE_NAME, attachedDiskStorageName);
+        }
     }
 
     private void collectRemovableDisks(Map<String, Object> resourcesToRemove, VirtualMachine virtualMachine) {

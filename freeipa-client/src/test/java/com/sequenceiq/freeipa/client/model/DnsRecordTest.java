@@ -68,4 +68,44 @@ public class DnsRecordTest {
     public void testIpRelatedPtrRecordFalseIfNotPtrNotARecord() {
         assertFalse(underTest.isIpRelatedRecord("10.1.1.2", "2.10.in-addr.arpa."));
     }
+
+    @Test
+    public void testIsSrvRecordTrue() {
+        underTest.setSrvrecord(List.of("0 5 5060 example.com."));
+        assertTrue(underTest.isSrvRecord());
+    }
+
+    @Test
+    public void testIsSrvRecordFalse() {
+        underTest.setArecord(List.of("192.168.1.2"));
+        assertFalse(underTest.isSrvRecord());
+    }
+
+    @Test
+    public void testIsHostRelatedRecordFalseIfSrvRecrod() {
+        underTest.setSrvrecord(List.of("0 5 5060 example.com."));
+        assertFalse(underTest.isHostRelatedRecord("example.com.", "example.com"));
+    }
+
+    @Test
+    public void testIsHostRelatedSrvRecordFalseIfNotSrvRecrod() {
+        underTest.setPtrrecord(List.of("server"));
+        assertFalse(underTest.isHostRelatedSrvRecord("server.example.com."));
+        assertFalse(underTest.isHostRelatedSrvRecord("server"));
+    }
+
+    @Test
+    public void testIsHostRelatedSrvRecordFalseIfNoMatch() {
+        underTest.setSrvrecord(List.of("0 5 5060 example.com.", "0 5 5060 example1.com.", "0 5 5060 www.example2.com."));
+        assertFalse(underTest.isHostRelatedSrvRecord("www.example.com."));
+        assertFalse(underTest.isHostRelatedSrvRecord("www.example1.com."));
+        assertFalse(underTest.isHostRelatedSrvRecord("example2.com."));
+    }
+
+    @Test
+    public void testIsHostRelatedSrvRecordTrueIfMatch() {
+        underTest.setSrvrecord(List.of("0 5 5060 example.com.", "0 5 5060 example1.com."));
+        assertTrue(underTest.isHostRelatedSrvRecord("example.com."));
+        assertTrue(underTest.isHostRelatedSrvRecord("example1.com."));
+    }
 }

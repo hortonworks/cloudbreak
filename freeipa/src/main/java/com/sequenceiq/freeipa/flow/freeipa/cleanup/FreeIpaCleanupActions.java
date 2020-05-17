@@ -53,7 +53,7 @@ public class FreeIpaCleanupActions {
                             new RevokeCertsResponse(payload, Collections.emptySet(), Collections.emptyMap());
                     sendEvent(context, response);
                 } else {
-                    RevokeCertsRequest request = new RevokeCertsRequest(payload, context.getStack(), context.getFreeIpa());
+                    RevokeCertsRequest request = new RevokeCertsRequest(payload, context.getStack());
                     sendEvent(context, request);
                 }
             }
@@ -71,7 +71,7 @@ public class FreeIpaCleanupActions {
                             new RemoveHostsResponse(payload, Collections.emptySet(), Collections.emptyMap());
                     sendEvent(context, response);
                 } else {
-                    RemoveHostsRequest request = new RemoveHostsRequest(payload, context.getStack(), context.getFreeIpa());
+                    RemoveHostsRequest request = new RemoveHostsRequest(payload, context.getStack());
                     sendEvent(context, request);
                 }
             }
@@ -108,7 +108,7 @@ public class FreeIpaCleanupActions {
                             new RemoveVaultEntriesResponse(payload, Collections.emptySet(), Collections.emptyMap());
                     sendEvent(context, response);
                 } else {
-                    RemoveVaultEntriesRequest request = new RemoveVaultEntriesRequest(payload, context.getStack(), context.getFreeIpa());
+                    RemoveVaultEntriesRequest request = new RemoveVaultEntriesRequest(payload, context.getStack());
                     sendEvent(context, request);
                 }
             }
@@ -126,7 +126,7 @@ public class FreeIpaCleanupActions {
                             new RemoveUsersResponse(payload, Collections.emptySet(), Collections.emptyMap());
                     sendEvent(context, response);
                 } else {
-                    RemoveUsersRequest request = new RemoveUsersRequest(payload, context.getStack(), context.getFreeIpa());
+                    RemoveUsersRequest request = new RemoveUsersRequest(payload, context.getStack());
                     sendEvent(context, request);
                 }
             }
@@ -144,7 +144,7 @@ public class FreeIpaCleanupActions {
                             new RemoveRolesResponse(payload, Collections.emptySet(), Collections.emptyMap());
                     sendEvent(context, response);
                 } else {
-                    RemoveRolesRequest request = new RemoveRolesRequest(payload, context.getStack(), context.getFreeIpa());
+                    RemoveRolesRequest request = new RemoveRolesRequest(payload, context.getStack());
                     sendEvent(context, request);
                 }
             }

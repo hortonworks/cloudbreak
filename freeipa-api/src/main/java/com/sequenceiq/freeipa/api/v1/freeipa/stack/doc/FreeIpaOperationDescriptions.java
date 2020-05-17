@@ -15,6 +15,7 @@ public final class FreeIpaOperationDescriptions {
     public static final String DEREGISTER_WITH_CLUSTER_PROXY = "Deregisters FreeIPA stack with given environment CRN with cluster proxy";
     public static final String HEALTH = "Provides a detailed health of the FreeIPA stack";
     public static final String REBOOT = "Reboot one or more instances";
+    public static final String REPAIR = "Repair one or more instances";
 
     private FreeIpaOperationDescriptions() {
     }

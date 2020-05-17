@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.stack.termination.action;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -62,7 +63,7 @@ public class TerminationService {
                 stack.setName(terminatedName);
                 stack.setTerminated(currentTimeMillis);
                 terminateInstanceGroups(stack);
-                terminateMetaDataInstances(stack);
+                terminateMetaDataInstances(stack, null);
                 cleanupVault(stack);
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
                 stackService.save(stack);
@@ -74,6 +75,20 @@ public class TerminationService {
         }
     }
 
+    public void finalizeTermination(Long stackId, List<String> instanceIds) {
+        try {
+            transactionService.required(() -> {
+                Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+                terminateMetaDataInstances(stack, instanceIds);
+                return null;
+            });
+        } catch (TransactionExecutionException ex) {
+            LOGGER.info("Failed to terminate cluster infrastructure.");
+            throw new TerminationFailedException(ex);
+
+        }
+    }
+
     private void terminateInstanceGroups(Stack stack) {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             instanceGroup.setSecurityGroup(null);
@@ -82,13 +97,15 @@ public class TerminationService {
         }
     }
 
-    private void terminateMetaDataInstances(Stack stack) {
+    private void terminateMetaDataInstances(Stack stack, List<String> instanceIds) {
         List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
-        for (InstanceMetaData metaData : stack.getNotDeletedInstanceMetaDataSet()) {
-            metaData.setTerminationDate(clock.getCurrentTimeMillis());
-            metaData.setInstanceStatus(InstanceStatus.TERMINATED);
-            instanceMetaDatas.add(metaData);
-        }
+        stack.getNotDeletedInstanceMetaDataList().stream()
+                .filter(metaData -> Objects.isNull(instanceIds) || instanceIds.contains(metaData.getInstanceId()))
+                .forEach(metaData -> {
+                    metaData.setTerminationDate(clock.getCurrentTimeMillis());
+                    metaData.setInstanceStatus(InstanceStatus.TERMINATED);
+                    instanceMetaDatas.add(metaData);
+                });
         instanceMetaDataService.saveAll(instanceMetaDatas);
     }
 

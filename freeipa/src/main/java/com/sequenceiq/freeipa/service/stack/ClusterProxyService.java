@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.stack;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -116,18 +117,19 @@ public class ClusterProxyService {
     private ServiceEndpointHealthListenerTask serviceEndpointHealthListenerTask;
 
     public Optional<ConfigRegistrationResponse> registerFreeIpa(String accountId, String environmentCrn) {
-        return registerFreeIpa(stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId), false, false);
+        return registerFreeIpa(stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId), null, false, false);
     }
 
-    public Optional<ConfigRegistrationResponse> updateFreeIpaRegistrationAndWait(Long stackId) {
-        return registerFreeIpa(stackService.getStackById(stackId), false, true);
+    public Optional<ConfigRegistrationResponse> updateFreeIpaRegistrationAndWait(Long stackId, List<String> instanceIdsToRegister) {
+        return registerFreeIpa(stackService.getStackById(stackId), instanceIdsToRegister, false, true);
     }
 
     public Optional<ConfigRegistrationResponse> registerBootstrapFreeIpa(Long stackId) {
-        return registerFreeIpa(stackService.getStackById(stackId), true, false);
+        return registerFreeIpa(stackService.getStackById(stackId), null, true, false);
     }
 
-    private Optional<ConfigRegistrationResponse> registerFreeIpa(Stack stack, boolean bootstrap, boolean waitForGoodHealth) {
+    private Optional<ConfigRegistrationResponse> registerFreeIpa(Stack stack, List<String> instanceIdsToRegister, boolean bootstrap,
+            boolean waitForGoodHealth) {
 
         if (!clusterProxyEnablementService.isClusterProxyApplicable(stack.getCloudPlatform())) {
             LOGGER.debug("Cluster Proxy integration disabled. Skipping registering FreeIpa [{}]", stack);
@@ -148,8 +150,11 @@ public class ClusterProxyService {
         if (bootstrap) {
             tunnelGatewayConfigs = List.of(primaryGatewayConfig);
         } else if (ClusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack)) {
-            serviceConfigs.addAll(createDnsMappedServiceConfigs(stack, gatewayConfigs, clientCertificate, usePrivateIpToTls));
-            tunnelGatewayConfigs = gatewayConfigs;
+            List<GatewayConfig> targetGatewayConfigs = gatewayConfigs.stream()
+                    .filter(gatewayConfig -> Objects.isNull(instanceIdsToRegister) || instanceIdsToRegister.contains(gatewayConfig.getInstanceId()))
+                    .collect(Collectors.toList());
+            serviceConfigs.addAll(createDnsMappedServiceConfigs(stack, targetGatewayConfigs, clientCertificate, usePrivateIpToTls));
+            tunnelGatewayConfigs = targetGatewayConfigs;
         } else {
             tunnelGatewayConfigs = List.of(primaryGatewayConfig);
         }

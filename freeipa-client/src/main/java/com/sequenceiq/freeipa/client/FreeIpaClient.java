@@ -154,6 +154,11 @@ public class FreeIpaClient {
         return (Host) invoke("host_del", List.of(fqdn), params, Host.class).getResult();
     }
 
+    public Host deleteServer(String fqdn) throws FreeIpaClientException {
+        Map<String, Object> params = Map.of();
+        return (Host) invoke("server_del", List.of(fqdn), params, Host.class).getResult();
+    }
+
     public Host addHost(String fqdn) throws FreeIpaClientException {
         RPCResponse<Host> response = null;
         Map<String, Object> params = Map.of("force", true);
@@ -496,6 +501,12 @@ public class FreeIpaClient {
     public RPCResponse<Object> deleteDnsRecord(String recordName, String dnsZoneName) throws FreeIpaClientException {
         List<Object> flags = List.of(dnsZoneName, createDnsName(recordName));
         Map<String, Object> params = Map.of("del_all", true);
+        return invoke("dnsrecord_del", flags, params, Object.class);
+    }
+
+    public RPCResponse<Object> deleteDnsSrvRecord(String recordName, String dnsZoneName, List<String> srvRecords) throws FreeIpaClientException {
+        List<Object> flags = List.of(dnsZoneName, createDnsName(recordName));
+        Map<String, Object> params = Map.of("srvrecord", srvRecords);
         return invoke("dnsrecord_del", flags, params, Object.class);
     }
 

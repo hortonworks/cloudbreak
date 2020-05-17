@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,13 @@ public class BootstrapService {
     private ImageService imageService;
 
     public void bootstrap(Long stackId) {
-        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findAllInStack(stackId);
+        bootstrap(stackId, null);
+    }
+
+    public void bootstrap(Long stackId, List<String> instanceIds) {
+        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findAllInStack(stackId).stream()
+                .filter(instanceMetaData -> Objects.isNull(instanceIds) || instanceIds.contains(instanceMetaData.getInstanceId()))
+                .collect(Collectors.toSet());
         Stack stack = stackRepository.findById(stackId).get();
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, instanceMetaDatas);
