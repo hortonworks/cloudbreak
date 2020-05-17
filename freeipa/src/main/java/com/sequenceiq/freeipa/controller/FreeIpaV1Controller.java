@@ -30,6 +30,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachCh
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
@@ -48,7 +49,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStartService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStopService;
-import com.sequenceiq.freeipa.service.stack.RebootInstancesService;
+import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -82,7 +83,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     private CleanupService cleanupService;
 
     @Inject
-    private RebootInstancesService rebootInstancesService;
+    private RepairInstancesService repairInstancesService;
 
     @Inject
     private CrnService crnService;
@@ -189,13 +190,16 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceObject
-    @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public void rebootInstances(@ResourceObject @Valid RebootInstancesRequest request) {
         String accountId = crnService.getCurrentAccountId();
-        rebootInstancesService.rebootInstances(accountId, request);
+        repairInstancesService.rebootInstances(accountId, request);
+    }
+
+    @Override
+    @CheckPermissionByResourceObject
+    public OperationStatus repairInstances(@ResourceObject @Valid RepairInstancesRequest request) {
+        String accountId = crnService.getCurrentAccountId();
+        return repairInstancesService.repairInstances(accountId, request);
     }
 
     @Override

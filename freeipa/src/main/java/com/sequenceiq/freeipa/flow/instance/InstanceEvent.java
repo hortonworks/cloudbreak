@@ -20,8 +20,12 @@ public class InstanceEvent implements Selectable, Acceptable {
 
     private final List<String> instanceIds;
 
-    public InstanceEvent(Long id) {
-        this(null, id, null);
+    public InstanceEvent(Long resourceId) {
+        this(null, resourceId, null);
+    }
+
+    public InstanceEvent(Long resourceId, List<String> instanceIds) {
+        this(null, resourceId, instanceIds);
     }
 
     public InstanceEvent(String selector, Long resourceId, List<String> instanceIds) {

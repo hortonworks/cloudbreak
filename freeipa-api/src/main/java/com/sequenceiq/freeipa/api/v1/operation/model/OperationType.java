@@ -5,7 +5,9 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 public enum OperationType {
     USER_SYNC,
     SET_PASSWORD,
-    CLEANUP;
+    CLEANUP,
+    REPAIR,
+    DOWNSCALE;
 
     public static OperationType fromSyncOperationType(SyncOperationType syncOperationType) {
         switch (syncOperationType) {

@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.StringUtils.substringBefore;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -148,6 +149,10 @@ public class CleanupService {
             for (String host : hosts) {
                 allDnsRecordInZone.stream().filter(record -> record.isHostRelatedRecord(host, domain))
                         .forEach(record -> deleteRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, host, record));
+
+                allDnsRecordInZone.stream()
+                        .filter(record -> record.isHostRelatedSrvRecord(host))
+                        .forEach(record -> deleteSrvRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, host, record));
             }
         }
     }
@@ -167,9 +172,35 @@ public class CleanupService {
         }
     }
 
+    private void deleteSrvRecord(FreeIpaClient client, Set<String> dnsCleanupSuccess, Map<String, String> dnsCleanupFailed, String zone, String host,
+            DnsRecord record) {
+        try {
+            List<String> srvRecords = record.getHostRelatedSrvRecords(host);
+            client.deleteDnsSrvRecord(record.getIdnsname(), zone, srvRecords);
+            if (!dnsCleanupFailed.containsKey(host)) {
+                dnsCleanupSuccess.add(host);
+            }
+        } catch (FreeIpaClientException e) {
+            if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
+                dnsCleanupSuccess.add(host);
+            } else {
+                LOGGER.info("DNS record delete in zone [{}] with name [{}] failed for host: {}", zone, record.getIdnsname(), host, e);
+                dnsCleanupSuccess.remove(host);
+                dnsCleanupFailed.put(host, e.getMessage());
+            }
+        }
+    }
+
     public Pair<Set<String>, Map<String, String>> removeHosts(Long stackId, Set<String> hosts) throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(stackId);
         Pair<Set<String>, Map<String, String>> hostDeleteResult = hostDeletionService.removeHosts(client, hosts);
+        removeHostRelatedServices(client, hosts);
+        return hostDeleteResult;
+    }
+
+    public Pair<Set<String>, Map<String, String>> removeServers(Long stackId, Set<String> hosts) throws FreeIpaClientException {
+        FreeIpaClient client = getFreeIpaClient(stackId);
+        Pair<Set<String>, Map<String, String>> hostDeleteResult = hostDeletionService.removeServers(client, hosts);
         removeHostRelatedServices(client, hosts);
         return hostDeleteResult;
     }

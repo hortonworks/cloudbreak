@@ -15,7 +15,8 @@ public enum InstanceStatus {
     FAILED,
     STOPPED,
     REBOOTING,
-    UNREACHABLE;
+    UNREACHABLE,
+    DELETE_REQUESTED;
 
     public static final Collection<InstanceStatus> AVAILABLE_STATUSES = List.of(CREATED);
 

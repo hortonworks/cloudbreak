@@ -30,6 +30,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.validation.AttachChildEnvironmentRequestValidator;
@@ -40,7 +41,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaRootCertificateService;
-import com.sequenceiq.freeipa.service.stack.RebootInstancesService;
+import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,9 +67,6 @@ class FreeIpaV1ControllerTest {
     private FreeIpaDescribeService describeService;
 
     @Mock
-    private RebootInstancesService rebootInstancesService;
-
-    @Mock
     private FreeIpaListService freeIpaListService;
 
     @Mock
@@ -82,6 +80,9 @@ class FreeIpaV1ControllerTest {
 
     @Mock
     private AttachChildEnvironmentRequestValidator attachChildEnvironmentRequestValidator;
+
+    @Mock
+    private RepairInstancesService repairInstancesService;
 
     @BeforeEach
     void setUp() {
@@ -198,6 +199,15 @@ class FreeIpaV1ControllerTest {
         RebootInstancesRequest rebootInstancesRequest = new RebootInstancesRequest();
 
         underTest.rebootInstances(rebootInstancesRequest);
-        verify(rebootInstancesService, times(1)).rebootInstances(crnService.getCurrentAccountId(), rebootInstancesRequest);
+        verify(repairInstancesService, times(1)).rebootInstances(crnService.getCurrentAccountId(), rebootInstancesRequest);
+    }
+
+    @Test
+    void repair() throws FreeIpaClientException {
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        RepairInstancesRequest request = new RepairInstancesRequest();
+
+        underTest.repairInstances(request);
+        verify(repairInstancesService, times(1)).repairInstances(crnService.getCurrentAccountId(), request);
     }
 }
