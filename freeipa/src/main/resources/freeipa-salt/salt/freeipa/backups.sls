@@ -5,7 +5,6 @@
     - group: root
     - mode: 750
 
-{% if salt['pillar.get']('freeipa:backup:enabled') %}
 /etc/freeipa_backup.conf:
   file.managed:
     - source: salt://freeipa/templates/freeipa_backup.conf.j2
@@ -13,6 +12,17 @@
     - user: root
     - group: root
     - mode: 640
+
+{% if salt['pillar.get']('freeipa:backup:enabled') %}
+{% if salt['pillar.get']('freeipa:backup:initial_full_enabled') %}
+freeipa_initial_full_backup:
+  cmd.run:
+    - name: /usr/local/bin/freeipa_backup -t FULL -f "{{salt['grains.get']('fqdn')}}/full" && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/freeipa_initial_backup-executed
+    - unless: test -f /var/log/freeipa_initial_backup-executed
+    - require:
+        - file: /usr/local/bin/freeipa_backup
+        - file: /etc/freeipa_backup.conf
+{% endif %}
 
 {% if salt['pillar.get']('freeipa:backup:monthly_full_enabled') %}
 freeipa_backoff_monthly_full:
@@ -37,15 +47,5 @@ freeipa_backoff_monthly_full:
     - user: root
     - group: root
     - mode: 750
-{% endif %}
-
-{% if salt['pillar.get']('freeipa:backup:initial_full_enabled') %}
-freeipa_initial_full_backup:
-  cmd.run:
-    - name: /usr/local/bin/freeipa_backup -t FULL -f "{{salt['grains.get']('fqdn')}}/full" && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/freeipa_initial_backup-executed
-    - unless: test -f /var/log/freeipa_initial_backup-executed
-    - require:
-        - file: /usr/local/bin/freeipa_backup
-        - file: /etc/freeipa_backup.conf
 {% endif %}
 {% endif %}
