@@ -157,7 +157,7 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
         platformResourceRequest.setCredential(environment.getCredential());
         platformResourceRequest.setCloudPlatform(environment.getCloudPlatform());
-        return platformParameterService.getRegionsByCredential(platformResourceRequest);
+        return platformParameterService.getRegionsByCredential(platformResourceRequest, false);
     }
 
     public Optional<Environment> findEnvironmentById(Long id) {

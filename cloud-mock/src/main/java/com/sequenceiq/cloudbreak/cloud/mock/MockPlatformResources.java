@@ -193,7 +193,7 @@ public class MockPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
         return new CloudRegions(regions, regionDisplayNames, regionCoordinates, defaultRegion, true);
     }
 

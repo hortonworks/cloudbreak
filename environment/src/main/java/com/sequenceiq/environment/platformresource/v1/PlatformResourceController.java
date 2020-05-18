@@ -94,7 +94,8 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
             String credentialCrn,
             String region,
             String platformVariant,
-            String availabilityZone) {
+            String availabilityZone,
+            boolean availabilityZonesNeeded) {
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -104,7 +105,7 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
                 platformVariant,
                 availabilityZone);
         LOGGER.info("Get /platform_resources/regions, request: {}", request);
-        CloudRegions regions = platformParameterService.getRegionsByCredential(request);
+        CloudRegions regions = platformParameterService.getRegionsByCredential(request, availabilityZonesNeeded);
         RegionResponse response = convertersionService.convert(regions, RegionResponse.class);
         LOGGER.info("Resp /platform_resources/regions, request: {}, regions: {}, response: {}", request, regions, response);
         return response;

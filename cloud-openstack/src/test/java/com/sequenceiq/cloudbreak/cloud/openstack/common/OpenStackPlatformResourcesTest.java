@@ -33,6 +33,9 @@ public class OpenStackPlatformResourcesTest {
     private final OpenStackPlatformResources underTest = new OpenStackPlatformResources();
 
     @Mock
+    private OpenStackAvailabilityZoneProvider openStackAvailabilityZoneProvider;
+
+    @Mock
     private OpenStackClient openStackClient;
 
     @Mock
@@ -49,8 +52,9 @@ public class OpenStackPlatformResourcesTest {
         when(flavor.getRam()).thenReturn(8192);
         when(openStackClient.createOSClient(cloudCredential)).thenReturn(osClient);
         when(openStackClient.getRegion(cloudCredential)).thenReturn(regionsFromOpenStack);
-        when(openStackClient.getZones(osClient, regionName)).thenReturn(availabilityZones);
         when(openStackClient.getFlavors(osClient)).thenReturn((List) Collections.singletonList(flavor));
+        when(openStackAvailabilityZoneProvider.getAvailabilityZones(openStackClient, osClient, regionName, cloudCredential))
+                .thenReturn(availabilityZones);
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, null, null);
 
@@ -71,8 +75,9 @@ public class OpenStackPlatformResourcesTest {
 
         when(openStackClient.createOSClient(cloudCredential)).thenReturn(osClient);
         when(openStackClient.getRegion(cloudCredential)).thenReturn(regionsFromOpenStack);
-        when(openStackClient.getZones(osClient, regionName)).thenReturn(availabilityZones);
         when(openStackClient.getFlavors(osClient)).thenReturn(emptyList());
+        when(openStackAvailabilityZoneProvider.getAvailabilityZones(openStackClient, osClient, regionName, cloudCredential))
+                .thenReturn(availabilityZones);
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, null, null);
 

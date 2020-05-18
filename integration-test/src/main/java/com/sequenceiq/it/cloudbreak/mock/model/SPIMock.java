@@ -39,6 +39,10 @@ public class SPIMock extends AbstractModelMock {
 
     public static final String REBOOT_INSTANCES = "/reboot_instances";
 
+    public static final String REGISTER_PUBIC_KEY = "/register_public_key";
+
+    public static final String UNREGISTER_PUBIC_KEY = "/unregister_public_key";
+
     private DynamicRouteStack dynamicRouteStack;
 
     public SPIMock(Service sparkService, DefaultModel defaultModel) {

@@ -195,7 +195,7 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Collection<com.microsoft.azure.management.resources.fluentcore.arm.Region> azureRegions = client.getRegion(region);
         return azureRegionProvider.regions(region, azureRegions);

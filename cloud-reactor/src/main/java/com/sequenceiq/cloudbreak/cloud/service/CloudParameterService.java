@@ -315,10 +315,11 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public CloudRegions getRegionsV2(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
+    public CloudRegions getRegionsV2(ExtendedCloudCredential cloudCredential, String region, String variant,
+            Map<String, String> filters, boolean availabilityZonesNeeded) {
         LOGGER.debug("Get platform regions");
         GetPlatformRegionsRequestV2 getPlatformRegionsRequest =
-                new GetPlatformRegionsRequestV2(cloudCredential, cloudCredential, variant, region, filters);
+                new GetPlatformRegionsRequestV2(cloudCredential, cloudCredential, variant, region, filters, availabilityZonesNeeded);
         eventBus.notify(getPlatformRegionsRequest.selector(), Event.wrap(getPlatformRegionsRequest));
         try {
             GetPlatformRegionsResultV2 res = getPlatformRegionsRequest.await();

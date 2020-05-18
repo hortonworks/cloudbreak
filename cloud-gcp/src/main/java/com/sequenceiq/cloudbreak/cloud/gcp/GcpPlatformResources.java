@@ -181,7 +181,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) throws Exception {
         Compute compute = GcpStackUtil.buildCompute(cloudCredential);
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
 
@@ -250,7 +250,7 @@ public class GcpPlatformResources implements PlatformResources {
             Set<VmType> types = new HashSet<>();
             VmType defaultVmType = null;
 
-            CloudRegions regions = regions(cloudCredential, region, filters);
+            CloudRegions regions = regions(cloudCredential, region, filters, true);
 
             for (AvailabilityZone availabilityZone : regions.getCloudRegions().get(region)) {
                 MachineTypeList machineTypeList = compute.machineTypes().list(projectId, availabilityZone.value()).execute();

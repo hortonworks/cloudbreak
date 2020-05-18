@@ -63,8 +63,8 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
-import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @Service
 public class OpenStackPlatformResources implements PlatformResources {
@@ -87,6 +87,9 @@ public class OpenStackPlatformResources implements PlatformResources {
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    @Inject
+    private OpenStackAvailabilityZoneProvider openStackAvailabilityZoneProvider;
 
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
 
@@ -203,15 +206,18 @@ public class OpenStackPlatformResources implements PlatformResources {
     }
 
     @Override
-    @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    @Cacheable(cacheNames = "cloudResourceRegionCache", key = "{ #cloudCredential?.id, #availabilityZonesNeeded }")
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
         Set<String> regionsFromOpenStack = openStackClient.getRegion(cloudCredential);
         OSClient<?> osClient = openStackClient.createOSClient(cloudCredential);
 
         Map<Region, List<AvailabilityZone>> cloudRegions = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         for (String regionFromOpenStack : regionsFromOpenStack) {
-            List<AvailabilityZone> availabilityZones = openStackClient.getZones(osClient, regionFromOpenStack);
+            List<AvailabilityZone> availabilityZones = new ArrayList<>();
+            if (availabilityZonesNeeded) {
+                availabilityZones = openStackAvailabilityZoneProvider.getAvailabilityZones(openStackClient, osClient, regionFromOpenStack, cloudCredential);
+            }
             cloudRegions.put(region(regionFromOpenStack), availabilityZones);
             displayNames.put(region(regionFromOpenStack), regionFromOpenStack);
         }
@@ -230,7 +236,7 @@ public class OpenStackPlatformResources implements PlatformResources {
         OSClient<?> osClient = openStackClient.createOSClient(cloudCredential);
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
-        CloudRegions regions = regions(cloudCredential, region, filters);
+        CloudRegions regions = regions(cloudCredential, region, filters, true);
 
         regions.getCloudRegions().forEach((cloudRegion, availabilityZones) -> {
             Set<VmType> types = collectVmTypes(osClient);
@@ -291,7 +297,7 @@ public class OpenStackPlatformResources implements PlatformResources {
     public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         OSClient<?> osClient = openStackClient.createOSClient(cloudCredential);
         Map<String, Set<CloudGateWay>> resultCloudGateWayMap = new HashMap<>();
-        CloudRegions regions = regions(cloudCredential, region, filters);
+        CloudRegions regions = regions(cloudCredential, region, filters, true);
         for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
             Set<CloudGateWay> cloudGateWays = new HashSet<>();
             List<? extends Router> routerList = osClient.networking().router().list();
@@ -318,7 +324,7 @@ public class OpenStackPlatformResources implements PlatformResources {
     public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         OSClient<?> osClient = openStackClient.createOSClient(cloudCredential);
         Map<String, Set<CloudIpPool>> cloudIpPools = new HashMap<>();
-        CloudRegions regions = regions(cloudCredential, region, filters);
+        CloudRegions regions = regions(cloudCredential, region, filters, true);
         for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
             Set<CloudIpPool> cloudGateWays = new HashSet<>();
             List<? extends Network> networks = getNetworks(osClient);
