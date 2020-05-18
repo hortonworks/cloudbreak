@@ -9,13 +9,9 @@ public class GcpProperties {
 
     private String availabilityZone;
 
-    private String defaultBlueprintName;
-
     private String region;
 
     private String location;
-
-    private String blueprintCdhVersion;
 
     private final Credential credential = new Credential();
 
@@ -27,14 +23,6 @@ public class GcpProperties {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
-    }
-
-    public String getDefaultBlueprintName() {
-        return defaultBlueprintName;
-    }
-
-    public void setDefaultBlueprintName(String defaultBlueprintName) {
-        this.defaultBlueprintName = defaultBlueprintName;
     }
 
     public String getRegion() {
@@ -59,14 +47,6 @@ public class GcpProperties {
 
     public Instance getInstance() {
         return instance;
-    }
-
-    public String getBlueprintCdhVersion() {
-        return blueprintCdhVersion;
-    }
-
-    public void setBlueprintCdhVersion(String blueprintCdhVersion) {
-        this.blueprintCdhVersion = blueprintCdhVersion;
     }
 
     public static class Credential {

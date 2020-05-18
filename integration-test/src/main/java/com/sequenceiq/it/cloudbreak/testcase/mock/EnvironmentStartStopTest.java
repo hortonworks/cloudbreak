@@ -61,7 +61,10 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIPATestDto.class).withCatalog(mockedTestContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .given(FreeIPATestDto.class)
+                .withCatalog(mockedTestContext
+                .getImageCatalogMockServerSetup()
+                        .getFreeIpaImageCatalogUrl())
                 .when(freeIPATestClient.create())
                 .await(AVAILABLE)
                 .given(SdxInternalTestDto.class)

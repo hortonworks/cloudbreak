@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 
+import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
@@ -92,6 +93,7 @@ public class MockSdxTests extends AbstractIntegrationTest {
         String cluster = "cmcluster";
         String networkKey = "someOtherNetwork";
         String envKey = "sdxEnvKey";
+        JSONObject jsonObject = ResourceUtil.readResourceAsJson(applicationContext, TEMPLATE_JSON);
 
         testContext
                 .given(networkKey, EnvironmentNetworkTestDto.class)
@@ -108,7 +110,7 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .given(stack, StackTestDto.class).withCluster(cluster)
                 .withGatewayPort(testContext.getSparkServer().getPort())
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withTemplate(ResourceUtil.readResourceAsJson(applicationContext, TEMPLATE_JSON))
+                .withTemplate(jsonObject)
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))

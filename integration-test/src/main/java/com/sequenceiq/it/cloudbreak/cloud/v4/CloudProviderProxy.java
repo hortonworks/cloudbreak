@@ -54,6 +54,9 @@ public class CloudProviderProxy implements CloudProvider {
     private CommonCloudProperties commonCloudProperties;
 
     @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
+
+    @Inject
     private List<CloudProvider> cloudProviders;
 
     private final Map<CloudPlatform, CloudProvider> cloudProviderMap = new HashMap<>();
@@ -268,7 +271,7 @@ public class CloudProviderProxy implements CloudProvider {
 
     @Override
     public String getBlueprintName() {
-        return delegate.getBlueprintName();
+        return String.format(delegate.getBlueprintName(), commonClusterManagerProperties.getRuntimeVersion());
     }
 
     @Override

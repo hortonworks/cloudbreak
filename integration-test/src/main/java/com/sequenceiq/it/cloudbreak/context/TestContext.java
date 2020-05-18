@@ -41,6 +41,7 @@ import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -117,6 +118,9 @@ public abstract class TestContext implements ApplicationContextAware {
     private CommonCloudProperties commonCloudProperties;
 
     @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
+
+    @Inject
     private EnvironmentAwait environmentAwait;
 
     @Inject
@@ -159,6 +163,14 @@ public abstract class TestContext implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    public CommonCloudProperties commonCloudProperties() {
+        return commonCloudProperties;
+    }
+
+    public CommonClusterManagerProperties commonClusterManagerProperties() {
+        return commonClusterManagerProperties;
     }
 
     public WaitService<EnvironmentWaitObject> getEnvironmentWaitService() {

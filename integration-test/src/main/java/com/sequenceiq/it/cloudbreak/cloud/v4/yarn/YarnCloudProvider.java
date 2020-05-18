@@ -237,12 +237,12 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBlueprintName() {
-        return yarnProperties.getDefaultBlueprintName();
+        return commonClusterManagerProperties().getInternalSdxBlueprintName();
     }
 
     @Override
     public String getBlueprintCdhVersion() {
-        return yarnProperties.getBlueprintCdhVersion();
+        return commonClusterManagerProperties().getRuntimeVersion();
     }
 
     public String getQueue() {

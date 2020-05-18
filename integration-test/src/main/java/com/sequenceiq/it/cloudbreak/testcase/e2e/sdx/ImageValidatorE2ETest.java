@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -18,21 +17,6 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImageValidatorE2ETest.class);
-
-    @Value("${integrationtest.imageValidation.sdxTemplateName}")
-    protected String sdxTemplateName;
-
-    @Value("${integrationtest.imageValidation.distroxTemplateName}")
-    protected String distroxTemplateName;
-
-    @Value("${integrationtest.imageValidation.runtimeVersion}")
-    protected String runtimeVersion;
-
-    @Value("${integrationtest.imageValidation.sourceCatalogName}")
-    protected String sourceImageCatalogName;
-
-    @Value("${integrationtest.imageValidation.sourceCatalogUrl}")
-    private String sourceImageCatalogUrl;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -46,7 +30,9 @@ public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
     @BeforeMethod
     public void createSourceCatalogIfNotExists(Object[] data) {
         TestContext testContext = (TestContext) data[0];
-        createImageValidationSourceCatalog(testContext, sourceImageCatalogUrl, sourceImageCatalogName);
+        createImageValidationSourceCatalog(testContext,
+                commonCloudProperties().getImageValidation().getSourceCatalogUrl(),
+                commonCloudProperties().getImageValidation().getSourceCatalogName());
     }
 
     @AfterMethod

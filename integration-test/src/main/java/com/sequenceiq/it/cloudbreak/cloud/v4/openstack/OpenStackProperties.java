@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "integrationtest.openstack")
 public class OpenStackProperties {
 
-    private String defaultBlueprintName;
-
     private String availabilityZone;
 
     private String region;
@@ -25,22 +23,12 @@ public class OpenStackProperties {
 
     private final Prewarmed prewarmed = new Prewarmed();
 
-    private String blueprintCdhVersion;
-
     public String getAvailabilityZone() {
         return availabilityZone;
     }
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
-    }
-
-    public String getDefaultBlueprintName() {
-        return defaultBlueprintName;
-    }
-
-    public void setDefaultBlueprintName(String defaultBlueprintName) {
-        this.defaultBlueprintName = defaultBlueprintName;
     }
 
     public String getRegion() {
@@ -85,14 +73,6 @@ public class OpenStackProperties {
 
     public Prewarmed getPrewarmed() {
         return prewarmed;
-    }
-
-    public String getBlueprintCdhVersion() {
-        return blueprintCdhVersion;
-    }
-
-    public void setBlueprintCdhVersion(String blueprintCdhVersion) {
-        this.blueprintCdhVersion = blueprintCdhVersion;
     }
 
     public static class Instance {
