@@ -61,7 +61,8 @@ public interface PlatformResourceEndpoint {
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone);
+            @QueryParam("availabilityZone") String availabilityZone,
+            @DefaultValue("true") @QueryParam("availabilityZonesNeeded") boolean availabilityZonesNeeded);
 
     @GET
     @Path("disk_types")

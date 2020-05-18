@@ -16,13 +16,16 @@ public class GetPlatformRegionsRequestV2 extends CloudPlatformRequest<GetPlatfor
 
     private final Map<String, String> filters;
 
+    private final boolean availabilityZonesNeeded;
+
     public GetPlatformRegionsRequestV2(CloudCredential cloudCredential, ExtendedCloudCredential extendedCloudCredential, String variant, String region,
-            Map<String, String> filters) {
+            Map<String, String> filters, boolean availabilityZonesNeeded) {
         super(null, cloudCredential);
         this.extendedCloudCredential = extendedCloudCredential;
         this.variant = variant;
         this.region = region;
         this.filters = filters;
+        this.availabilityZonesNeeded = availabilityZonesNeeded;
     }
 
     public String getVariant() {
@@ -39,6 +42,10 @@ public class GetPlatformRegionsRequestV2 extends CloudPlatformRequest<GetPlatfor
 
     public Map<String, String> getFilters() {
         return filters;
+    }
+
+    public boolean isAvailabilityZonesNeeded() {
+        return availabilityZonesNeeded;
     }
 
     //BEGIN GENERATED CODE

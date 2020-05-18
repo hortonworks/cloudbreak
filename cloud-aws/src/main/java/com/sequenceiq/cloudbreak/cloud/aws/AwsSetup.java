@@ -127,7 +127,7 @@ public class AwsSetup implements Setup {
     }
 
     private void validateRegionAndZone(CloudCredential cloudCredential, Location location) {
-        CloudRegions regions = awsPlatformResources.regions(cloudCredential, location.getRegion(), Collections.emptyMap());
+        CloudRegions regions = awsPlatformResources.regions(cloudCredential, location.getRegion(), Collections.emptyMap(), true);
         List<AvailabilityZone> availabilityZones = regions.getCloudRegions().get(location.getRegion());
         if (location.getAvailabilityZone() != null
                 && !availabilityZones.contains(location.getAvailabilityZone())) {

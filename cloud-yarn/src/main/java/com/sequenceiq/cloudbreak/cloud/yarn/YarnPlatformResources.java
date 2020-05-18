@@ -89,8 +89,8 @@ public class YarnPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return new CloudRegions(Collections.emptyMap(), Collections.emptyMap(), regionCoordinates, "", false);
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
+        return new CloudRegions(Collections.emptyMap(), Collections.emptyMap(), regionCoordinates, "", availabilityZonesNeeded);
     }
 
     @Override

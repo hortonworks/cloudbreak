@@ -3,6 +3,7 @@ package com.sequenceiq.environment.platformresource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -131,8 +132,8 @@ class PlatformParameterServiceTest {
 
     @Test
     void getRegionsByCredential() {
-        platformParameterServiceUnderTest.getRegionsByCredential(request);
-        verify(cloudParameterService).getRegionsV2(any(), eq(REGION), eq(PLATFORM_VARIANT), any());
+        platformParameterServiceUnderTest.getRegionsByCredential(request, true);
+        verify(cloudParameterService).getRegionsV2(any(), eq(REGION), eq(PLATFORM_VARIANT), any(), anyBoolean());
     }
 
     @Test

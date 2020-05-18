@@ -151,6 +151,9 @@ public class AwsPlatformResources implements PlatformResources {
     @Inject
     private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
 
+    @Inject
+    private AwsAvailabilityZoneProvider awsAvailabilityZoneProvider;
+
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
 
@@ -441,7 +444,7 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudSshKey>> result = new HashMap<>();
-        for (Region actualRegion : regions(cloudCredential, region, new HashMap<>()).getCloudRegions().keySet()) {
+        for (Region actualRegion : regions(cloudCredential, region, new HashMap<>(), true).getCloudRegions().keySet()) {
             // If region is provided then should filter for those region
             if (regionMatch(actualRegion, region)) {
                 Set<CloudSshKey> cloudSshKeys = new HashSet<>();
@@ -514,8 +517,8 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    @Cacheable(cacheNames = "cloudResourceRegionCache", key = "{ #cloudCredential?.id, #availabilityZonesNeeded }")
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
         AmazonEC2Client ec2Client = awsClient.createAccess(cloudCredential);
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
@@ -526,33 +529,11 @@ public class AwsPlatformResources implements PlatformResources {
 
         for (com.amazonaws.services.ec2.model.Region awsRegion : describeRegionsResult.getRegions()) {
             if (region == null || Strings.isNullOrEmpty(region.value()) || awsRegion.getRegionName().equals(region.value())) {
-                DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = new DescribeAvailabilityZonesRequest();
-
-                ec2Client.setRegion(RegionUtils.getRegion(awsRegion.getRegionName()));
-                Filter filter = new Filter();
-                filter.setName("region-name");
-                Collection<String> list = new ArrayList<>();
-                list.add(awsRegion.getRegionName());
-                filter.setValues(list);
-
-                describeAvailabilityZonesRequest.withFilters(filter);
-
                 try {
-                    LOGGER.debug("Describing AZs in region {}", awsRegion.getRegionName());
-                    DescribeAvailabilityZonesResult describeAvailabilityZonesResult = ec2Client.describeAvailabilityZones(describeAvailabilityZonesRequest);
-
-                    List<AvailabilityZone> tmpAz = new ArrayList<>();
-                    for (com.amazonaws.services.ec2.model.AvailabilityZone availabilityZone : describeAvailabilityZonesResult.getAvailabilityZones()) {
-                        if (!deniedAZs.contains(availabilityZone.getZoneName())) {
-                            tmpAz.add(availabilityZone(availabilityZone.getZoneName()));
-                        }
-                    }
-                    regionListMap.put(region(awsRegion.getRegionName()), tmpAz);
-
+                    fetchAZsIfNeeded(availabilityZonesNeeded, ec2Client, regionListMap, awsRegion, cloudCredential);
                 } catch (AmazonEC2Exception e) {
                     LOGGER.info("Failed to retrieve AZ from Region: {}!", awsRegion.getRegionName(), e);
                 }
-
                 addDisplayName(displayNames, awsRegion);
                 addCoordinate(coordinates, awsRegion);
             }
@@ -561,6 +542,35 @@ public class AwsPlatformResources implements PlatformResources {
             defaultRegion = region.value();
         }
         return new CloudRegions(regionListMap, displayNames, coordinates, defaultRegion, true);
+    }
+
+    private void fetchAZsIfNeeded(boolean availabilityZonesNeeded, AmazonEC2Client ec2Client, Map<Region, List<AvailabilityZone>> regionListMap,
+            com.amazonaws.services.ec2.model.Region awsRegion, CloudCredential cloudCredential) {
+        DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = getDescribeAvailabilityZonesRequest(ec2Client, awsRegion);
+        List<AvailabilityZone> collectedAZs = new ArrayList<>();
+        if (availabilityZonesNeeded) {
+            LOGGER.debug("Describing AZs in region {}", awsRegion.getRegionName());
+            List<com.amazonaws.services.ec2.model.AvailabilityZone> availabilityZones
+                    = awsAvailabilityZoneProvider.describeAvailabilityZones(cloudCredential, describeAvailabilityZonesRequest, ec2Client, awsRegion);
+            for (com.amazonaws.services.ec2.model.AvailabilityZone availabilityZone : availabilityZones) {
+                if (!deniedAZs.contains(availabilityZone.getZoneName())) {
+                    collectedAZs.add(availabilityZone(availabilityZone.getZoneName()));
+                }
+            }
+        }
+        regionListMap.put(region(awsRegion.getRegionName()), collectedAZs);
+    }
+
+    private DescribeAvailabilityZonesRequest getDescribeAvailabilityZonesRequest(AmazonEC2Client ec2Client, com.amazonaws.services.ec2.model.Region awsRegion) {
+        DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = new DescribeAvailabilityZonesRequest();
+        ec2Client.setRegion(RegionUtils.getRegion(awsRegion.getRegionName()));
+        Filter filter = new Filter();
+        filter.setName("region-name");
+        Collection<String> list = new ArrayList<>();
+        list.add(awsRegion.getRegionName());
+        filter.setValues(list);
+        describeAvailabilityZonesRequest.withFilters(filter);
+        return describeAvailabilityZonesRequest;
     }
 
     public void addDisplayName(Map<Region, String> displayNames, com.amazonaws.services.ec2.model.Region awsRegion) {
@@ -584,17 +594,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     private DescribeAvailabilityZonesResult describeAvailabilityZonesResult(AmazonEC2Client ec2Client, com.amazonaws.services.ec2.model.Region awsRegion) {
         try {
-            DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = new DescribeAvailabilityZonesRequest();
-
-            ec2Client.setRegion(RegionUtils.getRegion(awsRegion.getRegionName()));
-            Filter filter = new Filter();
-            filter.setName("region-name");
-            Collection<String> list = new ArrayList<>();
-            list.add(awsRegion.getRegionName());
-            filter.setValues(list);
-
-            describeAvailabilityZonesRequest.withFilters(filter);
-
+            DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = getDescribeAvailabilityZonesRequest(ec2Client, awsRegion);
             return ec2Client.describeAvailabilityZones(describeAvailabilityZonesRequest);
         } catch (AmazonEC2Exception e) {
             LOGGER.info("Failed to retrieve AZ from Region: {}!", awsRegion.getRegionName(), e);
@@ -631,7 +631,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters,
             Predicate<VmType> enabledInstanceTypeFilter) {
-        CloudRegions regions = regions(cloudCredential, region, filters);
+        CloudRegions regions = regions(cloudCredential, region, filters, true);
 
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
@@ -657,7 +657,7 @@ public class AwsPlatformResources implements PlatformResources {
         AmazonEC2Client ec2Client = awsClient.createAccess(cloudCredential);
 
         Map<String, Set<CloudGateWay>> resultCloudGateWayMap = new HashMap<>();
-        CloudRegions regions = regions(cloudCredential, region, filters);
+        CloudRegions regions = regions(cloudCredential, region, filters, true);
 
         for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
             if (region == null || Strings.isNullOrEmpty(region.value()) || regionListEntry.getKey().value().equals(region.value())) {

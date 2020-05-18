@@ -49,9 +49,11 @@ public interface PlatformResources {
      * Return the regions
      * @param region specific region (if null then the method will query every region)
      * @param filters the filter statement
+     * @param availabilityZonesNeeded Specify whether fetching availability zones is necessary for the caller.
+     *                                Skipping this fetching can speed up processing the request and results in fewer API calls (in case of AWS).
      * @return the {@link CloudRegions} contains every region per region
      */
-    CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
+    CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) throws Exception;
 
     /**
      * Return the virtual machines in the defined region

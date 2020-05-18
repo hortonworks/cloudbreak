@@ -131,9 +131,9 @@ public class PlatformParameterService {
                 request.getFilters());
     }
 
-    public CloudRegions getRegionsByCredential(PlatformResourceRequest request) {
+    public CloudRegions getRegionsByCredential(PlatformResourceRequest request, boolean availabilityZonesNeeded) {
         return cloudParameterService.getRegionsV2(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
-                request.getPlatformVariant(), request.getFilters());
+                request.getPlatformVariant(), request.getFilters(), availabilityZonesNeeded);
     }
 
     public PlatformDisks getDiskTypes() {

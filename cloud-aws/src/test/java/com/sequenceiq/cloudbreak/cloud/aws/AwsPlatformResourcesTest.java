@@ -33,7 +33,6 @@ import com.amazonaws.services.dynamodbv2.model.ListTablesRequest;
 import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AvailabilityZone;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.amazonaws.services.ec2.model.DescribeRegionsResult;
@@ -61,10 +60,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
-import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsPlatformResourcesTest {
+
+    private static final String AZ_NAME = "eu-central-1a";
+
+    private static final String REGION_NAME = "eu-central-1";
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -73,13 +75,10 @@ public class AwsPlatformResourcesTest {
     private AwsPlatformResources underTest;
 
     @Mock
+    private AwsAvailabilityZoneProvider awsAvailabilityZoneProvider;
+
+    @Mock
     private AwsClient awsClient;
-
-    @Mock
-    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
-
-    @Mock
-    private AwsPlatformParameters awsPlatformParameters;
 
     @Mock
     private AmazonIdentityManagement amazonCFClient;
@@ -99,30 +98,29 @@ public class AwsPlatformResourcesTest {
     @Mock
     private DescribeAvailabilityZonesResult describeAvailabilityZonesResult;
 
-    @Mock
-    private Region region;
+    private final Region region = new Region();
 
-    @Mock
-    private AvailabilityZone availabilityZone;
+    private final AvailabilityZone availabilityZone = new AvailabilityZone();
 
     @Mock
     private AmazonDynamoDB amazonDynamoDB;
 
     @Before
     public void setUp() {
+        availabilityZone.setZoneName(AZ_NAME);
+        region.setRegionName(REGION_NAME);
+
         Mockito.reset(awsClient);
 
-        when(awsDefaultZoneProvider.getDefaultZone(any(CloudCredential.class))).thenReturn("eu-central-1");
+        when(awsDefaultZoneProvider.getDefaultZone(any(CloudCredential.class))).thenReturn(REGION_NAME);
         when(awsClient.createAccess(any(CloudCredential.class))).thenReturn(amazonEC2Client);
         when(amazonEC2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(describeRegionsResult);
-        when(amazonEC2Client.describeAvailabilityZones(any(DescribeAvailabilityZonesRequest.class))).thenReturn(describeAvailabilityZonesResult);
         when(describeRegionsResult.getRegions()).thenReturn(Collections.singletonList(region));
-        when(describeAvailabilityZonesResult.getAvailabilityZones()).thenReturn(Collections.singletonList(availabilityZone));
-        when(availabilityZone.getZoneName()).thenReturn("eu-central-1a");
-        when(region.getRegionName()).thenReturn("eu-central-1");
+        when(awsAvailabilityZoneProvider.describeAvailabilityZones(any(), any(), any(), any()))
+                .thenReturn(List.of(availabilityZone));
 
         ReflectionTestUtils.setField(underTest, "vmTypes",
-                Collections.singletonMap(region("eu-central-1"), Collections.singleton(VmType.vmType("m5.2xlarge"))));
+                Collections.singletonMap(region(REGION_NAME), Collections.singleton(VmType.vmType("m5.2xlarge"))));
         ReflectionTestUtils.setField(underTest, "fetchMaxItems", 500);
         ReflectionTestUtils.setField(underTest, "deniedAZs", List.of("us-east-1e"));
     }
@@ -139,7 +137,7 @@ public class AwsPlatformResourcesTest {
         thrown.expectMessage("unauthorized.");
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), new HashMap<>());
+                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), new HashMap<>());
 
         Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
@@ -157,7 +155,7 @@ public class AwsPlatformResourcesTest {
         thrown.expectMessage("Amazon problem.");
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
 
         Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
@@ -173,7 +171,7 @@ public class AwsPlatformResourcesTest {
         thrown.expectMessage("BadRequestException problem.");
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
 
         Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
@@ -195,7 +193,7 @@ public class AwsPlatformResourcesTest {
         when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenReturn(listInstanceProfilesResult);
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
 
         Assert.assertEquals(4L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
@@ -240,36 +238,36 @@ public class AwsPlatformResourcesTest {
     public void testVirtualMachinesDisabledTypesEmpty() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.emptyList());
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
 
-        Assert.assertEquals("m5.2xlarge", result.getCloudVmResponses().get("eu-central-1a").iterator().next().value());
+        Assert.assertEquals("m5.2xlarge", result.getCloudVmResponses().get(AZ_NAME).iterator().next().value());
     }
 
     @Test
     public void testVirtualMachinesDisabledTypesContainsEmpty() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList(""));
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
 
-        Assert.assertEquals("m5.2xlarge", result.getCloudVmResponses().get("eu-central-1a").iterator().next().value());
+        Assert.assertEquals("m5.2xlarge", result.getCloudVmResponses().get(AZ_NAME).iterator().next().value());
     }
 
     @Test
     public void testVirtualMachinesOkStartWith() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList("m5"));
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
 
-        Assert.assertTrue(result.getCloudVmResponses().get("eu-central-1a").isEmpty());
+        Assert.assertTrue(result.getCloudVmResponses().get(AZ_NAME).isEmpty());
     }
 
     @Test
     public void testVirtualMachinesOkFullMatch() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList("m5.2xlarge"));
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
 
-        Assert.assertTrue(result.getCloudVmResponses().get("eu-central-1a").isEmpty());
+        Assert.assertTrue(result.getCloudVmResponses().get(AZ_NAME).isEmpty());
     }
 
     private InstanceProfile instanceProfile(int i) {
