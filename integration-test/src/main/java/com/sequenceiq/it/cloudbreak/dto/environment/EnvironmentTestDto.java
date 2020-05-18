@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -35,6 +33,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -52,11 +51,11 @@ public class EnvironmentTestDto
 
     private static final int ORDER = 600;
 
-    @Value("${integrationtest.aws.cloudstorage.s3Guard.dynamoTableName:apitesting}")
-    private String dynamoTableName;
-
     @Inject
     private EnvironmentTestClient environmentTestClient;
+
+    @Inject
+    private AwsProperties awsProperties;
 
     private Collection<SimpleEnvironmentResponse> response;
 
@@ -210,7 +209,7 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withS3Guard() {
         if (CloudPlatform.AWS.equals(getTestContext().getCloudProvider().getCloudPlatform())) {
-            String tableName = dynamoTableName + '-' + UUID.randomUUID().toString();
+            String tableName = awsProperties.getDynamoTableName() + '-' + UUID.randomUUID().toString();
             return withS3Guard(tableName);
         } else {
             LOGGER.info("S3guard is ignored on cloudplatform {}.", getTestContext().getCloudProvider().getCloudPlatform());

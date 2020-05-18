@@ -23,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.mock.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
@@ -59,10 +60,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     private static final String DEFAULT_SDX_NAME = "test-sdx" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
 
-    private static final String DEFAULT_SDX_BLUEPRINT_NAME = "7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas";
-
-    private static final String DEFAULT_SDX_RUNTIME = "7.1.0";
-
     private static final String DEFAULT_CM_PASSWORD = "Admin123";
 
     private static final String DEFAULT_CM_USER = "admin";
@@ -72,6 +69,9 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Inject
     private TestNameExtractorUtil testNameExtractorUtil;
@@ -158,20 +158,20 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .given("master", InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1)
                 .given("idbroker", InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1);
         cluster.withName(cluster.getName())
-                .withBlueprintName(DEFAULT_SDX_BLUEPRINT_NAME)
+                .withBlueprintName(commonClusterManagerProperties.getInternalSdxBlueprintName())
                 .withValidateBlueprint(Boolean.FALSE);
         stack.withName(stack.getName())
                 .withInstanceGroupsEntity(InstanceGroupTestDto.sdxHostGroup(getTestContext()))
                 .withInstanceGroups(MASTER.getName(), IDBROKER.getName())
                 .withCluster(cluster);
         SdxInternalTestDto sdxInternalTestDto = withStackRequest(stack.getRequest());
-        sdxInternalTestDto.withRuntimeVersion(DEFAULT_SDX_RUNTIME);
+        sdxInternalTestDto.withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
         return sdxInternalTestDto;
     }
 
     public SdxInternalTestDto withTemplate(String template) {
         ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
-        cluster.withBlueprintName(template);
+        cluster.withBlueprintName(String.format(template, commonClusterManagerProperties.getRuntimeVersion()));
         return this;
     }
 
@@ -180,7 +180,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
 
         cluster.withName(cluster.getName())
-                .withBlueprintName(DEFAULT_SDX_BLUEPRINT_NAME)
+                .withBlueprintName(getBlueprintName())
                 .withValidateBlueprint(Boolean.FALSE)
                 .withPassword(getClusterPassword(templateJson))
                 .withUserName(getClusterUser(templateJson));
@@ -193,8 +193,12 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withGatewayPort(getGatewayPort(stack, templateJson))
                 .withCluster(cluster);
         SdxInternalTestDto sdxInternalTestDto = withStackRequest(stack.getRequest());
-        sdxInternalTestDto.withRuntimeVersion(DEFAULT_SDX_RUNTIME);
+        sdxInternalTestDto.withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
         return sdxInternalTestDto;
+    }
+
+    private String getBlueprintName() {
+        return commonClusterManagerProperties().getInternalSdxBlueprintName();
     }
 
     public SdxInternalTestDto withTags(Map<String, String> tags) {
@@ -327,7 +331,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
             return templateJson.getJSONObject("cluster").getString("password");
         } catch (JSONException e) {
             LOGGER.error("Cannot get Cluster Password from template: {}", templateJson, e);
-            String password = commonCloudProperties.getClouderaManager().getDefaultPassword();
+            String password = commonClusterManagerProperties.getClouderaManager().getDefaultPassword();
             return password == null ? DEFAULT_CM_PASSWORD : password;
         }
     }
@@ -337,7 +341,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
             return templateJson.getJSONObject("cluster").getString("userName");
         } catch (JSONException e) {
             LOGGER.error("Cannot get Cluster User from template: {}", templateJson, e);
-            String user = commonCloudProperties.getClouderaManager().getDefaultUser();
+            String user = commonClusterManagerProperties.getClouderaManager().getDefaultUser();
             return user == null ? DEFAULT_CM_USER : user;
         }
     }
@@ -358,6 +362,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         String crn = getResponse().getCrn();
 
         return "SDX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), "stacks", null, crn);
+    }
+
+    protected CommonClusterManagerProperties commonClusterManagerProperties() {
+        return commonClusterManagerProperties;
     }
 
     @Override

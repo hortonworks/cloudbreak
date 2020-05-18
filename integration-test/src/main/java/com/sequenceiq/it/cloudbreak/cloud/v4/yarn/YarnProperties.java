@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "integrationtest.yarn")
 public class YarnProperties {
 
-    private String defaultBlueprintName;
-
     private String availabilityZone;
 
     private String region;
@@ -19,21 +17,11 @@ public class YarnProperties {
 
     private String networkCidr;
 
-    private String blueprintCdhVersion;
-
     private final Credential credential = new Credential();
 
     private final Instance instance = new Instance();
 
     private final Baseimage baseimage = new Baseimage();
-
-    public String getDefaultBlueprintName() {
-        return defaultBlueprintName;
-    }
-
-    public void setDefaultBlueprintName(String defaultBlueprintName) {
-        this.defaultBlueprintName = defaultBlueprintName;
-    }
 
     public String getAvailabilityZone() {
         return availabilityZone;
@@ -81,14 +69,6 @@ public class YarnProperties {
 
     public Instance getInstance() {
         return instance;
-    }
-
-    public String getBlueprintCdhVersion() {
-        return blueprintCdhVersion;
-    }
-
-    public void setBlueprintCdhVersion(String blueprintCdhVersion) {
-        this.blueprintCdhVersion = blueprintCdhVersion;
     }
 
     public Baseimage getBaseimage() {

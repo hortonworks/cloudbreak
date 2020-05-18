@@ -37,7 +37,7 @@ public class MockedTestContext extends TestContext implements MockTestContext {
     private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
 
     public void initModelAndImageCatalogIfNecessary() {
-        initImageCatalogIfNecessary();
+        initImageCatalogIfNecessary(commonClusterManagerProperties().getRuntimeVersion());
         initModelIfNecessary();
     }
 
@@ -58,7 +58,7 @@ public class MockedTestContext extends TestContext implements MockTestContext {
     @Override
     public SparkServer getSparkServer() {
         initSparkServerIfNecessary();
-        initImageCatalogIfNecessary();
+        initImageCatalogIfNecessary(commonClusterManagerProperties().getRuntimeVersion());
         return sparkServer;
     }
 
@@ -70,16 +70,16 @@ public class MockedTestContext extends TestContext implements MockTestContext {
         }
     }
 
-    private void initImageCatalogIfNecessary() {
+    private void initImageCatalogIfNecessary(String runtime) {
         if (imageCatalogMockServerSetup == null) {
             imageCatalogMockServerSetup = new ImageCatalogMockServerSetup(sparkServerPool.popInsecure());
-            imageCatalogMockServerSetup.configureImgCatalogWithExistingSparkServer(testParameter);
+            imageCatalogMockServerSetup.configureImgCatalogWithExistingSparkServer(testParameter, runtime);
         }
     }
 
     @Override
     public ImageCatalogMockServerSetup getImageCatalogMockServerSetup() {
-        initImageCatalogIfNecessary();
+        initImageCatalogIfNecessary(commonClusterManagerProperties().getRuntimeVersion());
         return imageCatalogMockServerSetup;
     }
 

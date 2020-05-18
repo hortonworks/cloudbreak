@@ -42,7 +42,7 @@ public class ImageCatalogBasicTest extends AbstractMinimalTest {
                 .given(HttpMock.class)
                 .whenRequested(ImageCatalogEndpoint.Base.class).getCatalog().thenReturn(
                 (model, uriParameters) -> testContext.getImageCatalogMockServerSetup()
-                        .patchCbVersion(responseFromJsonFile("imagecatalog/catalog.json"), testParameter))
+                        .patchCbVersionAndRuntime(responseFromJsonFile("imagecatalog/catalog.json"), testParameter))
                 .whenRequested(ImageCatalogEndpoint.Base.class).head()
                 .thenReturnHeader("Content-Length", "38")
                 .thenReturn((model, uriParameters) -> RETURN_WITH_EMPTY)

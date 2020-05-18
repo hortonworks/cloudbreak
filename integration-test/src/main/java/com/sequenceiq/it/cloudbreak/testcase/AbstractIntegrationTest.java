@@ -102,7 +102,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
         setUpFreeIpaRouteStubbing(mockedTestContext);
         testContext
-                .given(FreeIPATestDto.class).withCatalog(mockedTestContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .given(FreeIPATestDto.class).withCatalog(mockedTestContext
+                    .getImageCatalogMockServerSetup()
+                    .getFreeIpaImageCatalogUrl())
                 .when(freeIPATestClient.create())
                 .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .validate();

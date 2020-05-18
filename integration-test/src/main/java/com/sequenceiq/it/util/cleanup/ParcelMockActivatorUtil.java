@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
-import com.sequenceiq.it.config.IntTestCdhParcels;
+import com.sequenceiq.it.config.InTestCdhParcelProvider;
 
 @Component
 public class ParcelMockActivatorUtil {
@@ -32,7 +32,7 @@ public class ParcelMockActivatorUtil {
     private ParcelGeneratorUtil parcelGeneratorUtil;
 
     @Inject
-    private IntTestCdhParcels intTestCdhParcels;
+    private InTestCdhParcelProvider inTestCdhParcelProvider;
 
     public void mockActivateWithDefaultParcels(MockedTestContext testContext, String clusterName, ApiParcel... parcels) {
         List<ApiParcel> apiParcels = getDefaultApiParcels(testContext);
@@ -42,7 +42,9 @@ public class ParcelMockActivatorUtil {
 
     private List<ApiParcel> getDefaultApiParcels(MockedTestContext testContext) {
         String blueprintCdhVersion = testContext.getCloudProvider().getBlueprintCdhVersion();
-        DefaultCDHInfo defaultCDHInfo = intTestCdhParcels.getCdhParcels().get(blueprintCdhVersion);
+        DefaultCDHInfo defaultCDHInfo = inTestCdhParcelProvider
+                .getParcels(blueprintCdhVersion)
+                .get(blueprintCdhVersion);
         return defaultCDHInfo.getParcels().stream().map(product -> {
             ApiParcel apiParcel = new ApiParcel();
             apiParcel.setVersion(product.getVersion());

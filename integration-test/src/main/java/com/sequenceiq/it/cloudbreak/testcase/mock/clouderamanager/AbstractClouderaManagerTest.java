@@ -18,9 +18,13 @@ public abstract class AbstractClouderaManagerTest extends AbstractIntegrationTes
 
     protected void createCmBlueprint(TestContext testContext) {
         try {
+            String bp = ResourceUtil
+                    .readResourceAsString(applicationContext, "classpath:/blueprint/clouderamanager.bp")
+                    .replaceAll("CDH_RUNTIME", commonClusterManagerProperties().getRuntimeVersion());
+
             testContext.given(BlueprintTestDto.class)
                     .withName(resourcePropertyProvider().getName())
-                    .withBlueprint(ResourceUtil.readResourceAsString(applicationContext, "classpath:/blueprint/clouderamanager.bp"))
+                    .withBlueprint(bp)
                     .when(blueprintTestClient().createV4());
         } catch (IOException e) {
             throw new IllegalStateException(e);
