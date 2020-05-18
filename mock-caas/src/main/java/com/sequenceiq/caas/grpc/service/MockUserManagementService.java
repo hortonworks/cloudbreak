@@ -182,6 +182,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_CLOUD_STORAGE_VALIDATION = "CDP_CLOUD_STORAGE_VALIDATION";
 
+    private static final String CDP_RAZ_ENABLEMENT = "CDP_RAZ";
+
     private static final String RUNTIME_UPGRADE = "CDP_RUNTIME_UPGRADE";
 
     private static final String MOCK_RESOURCE = "mock_resource";
@@ -489,6 +491,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_AUTOMATIC_USERSYNC_POLLER))
                                 .addEntitlements(createEntitlement(CLOUDERA_INTERNAL_ACCOUNT))
                                 .addEntitlements(createEntitlement(LOCAL_DEV))
+                                .addEntitlements(createEntitlement(CDP_RAZ_ENABLEMENT))
                                 .setPasswordPolicy(workloadPasswordPolicy)
                                 .build())
                         .build());

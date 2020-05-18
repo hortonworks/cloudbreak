@@ -115,6 +115,9 @@ public class ClusterV4Response implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.REDBEAMS_DB_SERVER_CRN)
     private String databaseServerCrn;
 
+    @ApiModelProperty(ClusterModelDescription.ENABLE_RANGER_RAZ)
+    private boolean rangerRazEnabled;
+
     public Long getId() {
         return id;
     }
@@ -337,5 +340,13 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setDatabaseServerCrn(String databaseServerCrn) {
         this.databaseServerCrn = databaseServerCrn;
+    }
+
+    public boolean isRangerRazEnabled() {
+        return rangerRazEnabled;
+    }
+
+    public void setRangerRazEnabled(boolean rangerRazEnabled) {
+        this.rangerRazEnabled = rangerRazEnabled;
     }
 }

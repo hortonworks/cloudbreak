@@ -64,6 +64,15 @@ public class CMRepositoryVersionUtil {
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_1_0);
     }
 
+    public static boolean isRazConfigurationSupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        return isRazConfigurationSupported(clouderaManagerRepoDetails.getVersion());
+    }
+
+    public static boolean isRazConfigurationSupported(String version) {
+        LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger support");
+        return isVersionNewerOrEqualThanLimited(version, CLOUDERAMANAGER_VERSION_7_2_0);
+    }
+
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
         LOGGER.info("Compared: Versioned {} with Versioned {}", currentVersion.getVersion(), limitedAPIVersion.getVersion());
         Comparator<Versioned> versionComparator = new VersionComparator();

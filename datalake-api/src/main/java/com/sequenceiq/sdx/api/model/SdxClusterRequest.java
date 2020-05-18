@@ -25,6 +25,8 @@ public class SdxClusterRequest {
 
     private Map<String, String> tags;
 
+    private boolean enableRangerRaz;
+
     public String getEnvironment() {
         return environment;
     }
@@ -90,5 +92,13 @@ public class SdxClusterRequest {
 
     public void setAws(SdxAwsRequest aws) {
         this.aws = aws;
+    }
+
+    public boolean isEnableRangerRaz() {
+        return enableRangerRaz;
+    }
+
+    public void setEnableRangerRaz(boolean enableRangerRaz) {
+        this.enableRangerRaz = enableRangerRaz;
     }
 }
