@@ -1,8 +1,11 @@
 package com.sequenceiq.common.api.telemetry.response;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.telemetry.base.TelemetryBase;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
+import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,6 +22,9 @@ public class TelemetryResponse extends TelemetryBase {
 
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_FEATURES)
     private FeaturesResponse features;
+
+    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_RULES)
+    private List<AnonymizationRule> rules;
 
     public LoggingResponse getLogging() {
         return logging;
@@ -42,5 +48,13 @@ public class TelemetryResponse extends TelemetryBase {
 
     public void setFeatures(FeaturesResponse features) {
         this.features = features;
+    }
+
+    public List<AnonymizationRule> getRules() {
+        return rules;
+    }
+
+    public void setRules(List<AnonymizationRule> rules) {
+        this.rules = rules;
     }
 }

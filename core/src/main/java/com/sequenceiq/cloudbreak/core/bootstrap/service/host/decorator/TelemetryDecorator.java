@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 import static com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails.CLUSTER_CRN_KEY;
 import static java.util.Collections.singletonMap;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,10 +14,9 @@ import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
-import com.sequenceiq.cloudbreak.service.environment.telemetry.AccountTelemetryClientService;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
-import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
@@ -28,7 +26,6 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringAuthConfig;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigView;
-import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 /**
@@ -79,21 +76,17 @@ public class TelemetryDecorator {
 
     private final AltusMachineUserService altusMachineUserService;
 
-    private final AccountTelemetryClientService accountTelemetryClientService;
-
     public TelemetryDecorator(DatabusConfigService databusConfigService,
             FluentConfigService fluentConfigService,
             MeteringConfigService meteringConfigService,
             MonitoringConfigService monitoringConfigService,
             AltusMachineUserService altusMachineUserService,
-            AccountTelemetryClientService accountTelemetryClientService,
             @Value("${info.app.version:}") String version) {
         this.databusConfigService = databusConfigService;
         this.fluentConfigService = fluentConfigService;
         this.meteringConfigService = meteringConfigService;
         this.monitoringConfigService = monitoringConfigService;
         this.altusMachineUserService = altusMachineUserService;
-        this.accountTelemetryClientService = accountTelemetryClientService;
         this.version = version;
     }
 
@@ -126,9 +119,8 @@ public class TelemetryDecorator {
                 .withPlatform(stack.getCloudPlatform())
                 .withVersion(version)
                 .build();
-        List<AnonymizationRule> rules = accountTelemetryClientService.getAnonymizationRules();
         FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
-                databusConfigView.isEnabled(), meteringEnabled, telemetry, rules);
+                databusConfigView.isEnabled(), meteringEnabled, telemetry);
         if (fluentConfigView.isEnabled()) {
             Map<String, Object> fluentConfig = fluentConfigView.toMap();
             servicePillar.put("fluent",

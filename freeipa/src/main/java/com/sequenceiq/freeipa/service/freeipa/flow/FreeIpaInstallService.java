@@ -33,12 +33,10 @@ import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
-import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
-import com.sequenceiq.freeipa.service.AccountTelemetryService;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigService;
@@ -71,9 +69,6 @@ public class FreeIpaInstallService {
 
     @Inject
     private DatabusConfigService databusConfigService;
-
-    @Inject
-    private AccountTelemetryService accountTelemetryService;
 
     @Inject
     private AltusMachineUserService altusMachineUserService;
@@ -139,9 +134,8 @@ public class FreeIpaInstallService {
                     .withPlatform(stack.getCloudPlatform())
                     .withVersion(version)
                     .build();
-            List<AnonymizationRule> rules = accountTelemetryService.getAnonymizationRules();
             FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
-                    databusEnabled, false, telemetry, rules);
+                    databusEnabled, false, telemetry);
             servicePillarConfig.put("fluent", new SaltPillarProperties("/fluent/init.sls", Collections.singletonMap("fluent", fluentConfigView.toMap())));
             if (databusEnabled) {
                 Optional<AltusCredential> credential = altusMachineUserService.createMachineUserWithAccessKeys(stack, telemetry);
