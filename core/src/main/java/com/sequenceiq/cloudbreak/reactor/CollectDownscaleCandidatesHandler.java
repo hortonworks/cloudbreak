@@ -79,7 +79,7 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
                         privateIds = collectCandidates(request, stack, defaultRootVolumeSize);
                     } else {
                         List<InstanceMetaData> removableInstances =
-                                stackService.getInstanceMetaDataForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
+                                stackService.getInstanceMetaDataForPrivateIdsWithoutTerminatedInstances(stack.getInstanceMetaDataAsList(), privateIds);
                         List<InstanceMetaData> removableAndNotDeletedInstances = removableInstances.stream()
                                 .filter(instanceMetaData -> !instanceMetaData.isTerminated() && !instanceMetaData.isDeletedOnProvider())
                                 .collect(Collectors.toList());
