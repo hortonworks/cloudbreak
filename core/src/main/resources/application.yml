@@ -369,6 +369,13 @@ cb:
             baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2365123/cm7/7.1.0/redhat7/yum/
           centos7:
             baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2365123/cm7/7.1.0/redhat7/yum/
+      7.2:
+        version: 7.2.0
+        repo:
+          redhat7:
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2978394/cm7/7.2.0/redhat7/yum/
+          centos7:
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2978394/cm7/7.2.0/redhat7/yum/
 
   cdh:
     entries:
@@ -417,6 +424,14 @@ cb:
             repoid: CDH-7.1.0
             redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922354/cdh/7.x/parcels/
             centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922354/cdh/7.x/parcels/
+      "[7.2.0]":
+        version: 7.2.0-1.cdh7.2.0.p0.2972937
+        minCM: 7.2
+        repo:
+          stack:
+            repoid: CDH-7.2.0
+            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2972937/cdh/7.x/parcels/
+            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2972937/cdh/7.x/parcels/
 
   workspace.service.cache.ttl: 15
 
