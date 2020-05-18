@@ -1,26 +1,40 @@
+{%- if "ipa_member" in grains.get('roles', []) -%}
+includedir /etc/krb5.conf.d/
+includedir /var/lib/sss/pubconf/krb5.include.d/
+{%- endif %}
+
 [logging]
  default = FILE:/var/log/krb5libs.log
  kdc = FILE:/var/log/krb5kdc.log
  admin_server = FILE:/var/log/kadmind.log
 
 [libdefaults]
- dns_lookup_realm = false
-{%- if "ipa_member" in grains.get('roles', []) %}
- dns_lookup_kdc = true
-{%- endif %}
- ticket_lifetime = 24h
- renew_lifetime = 7d
- forwardable = true
- rdns = false
- default_realm = {{ salt['pillar.get']('kerberos:realm')|upper }}
- default_ccache_name = /tmp/krb5cc_%{uid}
+  default_realm = {{ salt['pillar.get']('kerberos:realm')|upper }}
+  {%- if "ipa_member" in grains.get('roles', []) %}
+  dns_lookup_realm = true
+  dns_lookup_kdc = true
+  {%- else %}
+  dns_lookup_realm = false
+  {%- endif %}
+  rdns = false
+  dns_canonicalize_hostname = false
+  ticket_lifetime = 24h
+  forwardable = true
+  udp_preference_limit = 0
+  default_ccache_name = /tmp/krb5cc_%{uid}
+  renew_lifetime = 7d
 
 [realms]
- {{ salt['pillar.get']('kerberos:realm')|upper }} = {
+  {{ salt['pillar.get']('kerberos:realm')|upper }} = {
+  {%- if "ipa_member" in grains.get('roles', []) %}
+    pkinit_anchors = FILE:/var/lib/ipa-client/pki/kdc-ca-bundle.pem
+    pkinit_pool = FILE:/var/lib/ipa-client/pki/ca-bundle.pem
+  {%- else %}
   {% for kdchost in salt['pillar.get']('kerberos:url').split(',') %}
-   kdc = {{ kdchost }}
+    kdc = {{ kdchost }}
   {% endfor %}
-  admin_server = {{ salt['pillar.get']('kerberos:adminUrl') }}
+    admin_server = {{ salt['pillar.get']('kerberos:adminUrl') }}
+  {%- endif %}
  }
 
 [domain_realm]
