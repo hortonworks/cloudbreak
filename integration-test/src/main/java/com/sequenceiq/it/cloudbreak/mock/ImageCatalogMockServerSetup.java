@@ -43,11 +43,16 @@ public class ImageCatalogMockServerSetup {
         }
     }
 
-    private void startMockImageCatalogs(TestParameter testParameter) {
-        String jsonPreparedICResponse = patchCbVersion(responseFromJsonFile("imagecatalog/catalog.json"), testParameter);
+    private void startMockImageCatalogs(TestParameter testParameter, String runTime) {
+        String jsonPreparedICResponse = patchCbVersionAndRuntime(responseFromJsonFile("imagecatalog/catalog.json"), testParameter);
         String jsonFreeIPACatalogResponse = responseFromJsonFile("imagecatalog/freeipa.json");
-        String jsonPreparedPrewarmICResponse = patchCbVersion(responseFromJsonFile("imagecatalog/catalog-with-prewarmed.json"), testParameter);
-        String upgradeImageCatalog = patchCbVersion(responseFromJsonFile("imagecatalog/catalog-with-for-upgrade.json"), testParameter);
+        String jsonPreparedPrewarmICResponseString = responseFromJsonFile("imagecatalog/catalog-with-prewarmed.json")
+                .replaceAll("CDH_RUNTIME", runTime);
+        String jsonPreparedPrewarmICResponse = patchCbVersionAndRuntime(jsonPreparedPrewarmICResponseString, testParameter);
+
+        String upgradeImageCatalogString = responseFromJsonFile("imagecatalog/catalog-with-for-upgrade.json")
+                .replaceAll("CDH_RUNTIME", runTime);
+        String upgradeImageCatalog = patchCbVersionAndRuntime(upgradeImageCatalogString, testParameter);
 
         startImageCatalog(IMAGE_CATALOG, jsonPreparedICResponse);
         startImageCatalog(FREEIPA_IMAGE_CATALOG, jsonFreeIPACatalogResponse);
@@ -68,8 +73,8 @@ public class ImageCatalogMockServerSetup {
         }
     }
 
-    public void configureImgCatalogWithExistingSparkServer(TestParameter testParameter) {
-        startMockImageCatalogs(testParameter);
+    public void configureImgCatalogWithExistingSparkServer(TestParameter testParameter, String runtime) {
+        startMockImageCatalogs(testParameter, runtime);
     }
 
     public void startImageCatalog(String url, String imageCatalogText) {
@@ -108,7 +113,9 @@ public class ImageCatalogMockServerSetup {
         return sparkServer;
     }
 
-    public String patchCbVersion(String catalogJson, TestParameter testParameter) {
-        return catalogJson.replace("CB_VERSION", getCloudbreakUnderTestVersion(testParameter.get(CLOUDBREAK_SERVER_ROOT)));
+    public String patchCbVersionAndRuntime(String catalogJson, TestParameter testParameter) {
+        return catalogJson
+                .replace("CB_VERSION", getCloudbreakUnderTestVersion(testParameter.get(CLOUDBREAK_SERVER_ROOT)))
+                .replace("RUNTIME", getCloudbreakUnderTestVersion(testParameter.get(CLOUDBREAK_SERVER_ROOT)));
     }
 }

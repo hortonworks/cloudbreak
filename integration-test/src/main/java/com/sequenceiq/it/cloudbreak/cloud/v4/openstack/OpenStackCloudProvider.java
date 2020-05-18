@@ -176,12 +176,12 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBlueprintName() {
-        return openStackProperties.getDefaultBlueprintName();
+        return commonClusterManagerProperties().getInternalDistroXBlueprintName();
     }
 
     @Override
     public String getBlueprintCdhVersion() {
-        return openStackProperties.getBlueprintCdhVersion();
+        return commonClusterManagerProperties().getRuntimeVersion();
     }
 
     @Override

@@ -13,7 +13,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -31,9 +30,6 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
     private static final Logger LOGGER = LoggerFactory.getLogger(PreconditionSdxE2ETest.class);
 
     private static final String CREATE_FILE_RECIPE = "classpath:/recipes/post-install.sh";
-
-    @Value("${integrationtest.sdx.internal.blueprintName}")
-    private String internalBlueprintName;
 
     private Map<String, InstanceStatus> instancesHealthy = new HashMap<>() {{
         put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
@@ -86,7 +82,7 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
     }
 
     protected String getDefaultSDXBlueprintName() {
-        return internalBlueprintName;
+        return commonClusterManagerProperties().getInternalSdxBlueprintName();
     }
 
     protected SdxTestDto compareVolumeIdsAfterRepair(SdxTestDto sdxTestDto, List<String> actualVolumeIds, List<String> expectedVolumeIds) {

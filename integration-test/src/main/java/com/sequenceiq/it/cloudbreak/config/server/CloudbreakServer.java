@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.config;
+package com.sequenceiq.it.cloudbreak.config.server;
 
 import java.io.IOException;
 import java.util.Map;
@@ -13,26 +13,34 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.SdxTest;
+import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 
 @Component
-public class SdxServer {
+public class CloudbreakServer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakServer.class);
 
     private static final String WARNING_TEXT_FORMAT = "Following variable must be set whether as environment variables or (test) application.yaml: %s";
 
-    @Value("${integrationtest.sdx.server}")
+    private static final int DEFAULT_CLOUDBREAK_PORT = 9091;
+
+    @Value("${cloudbreak.url:localhost:" + DEFAULT_CLOUDBREAK_PORT + "}")
+    private String cloudbreakUrl;
+
+    @Value("${integrationtest.cloudbreak.server}")
     private String server;
 
-    @Value("${sdx.server.contextPath:/dl}")
-    private String sdxRootContextPath;
+    @Value("${server.contextPath:/cb}")
+    private String cbRootContextPath;
 
     @Value("${integrationtest.user.accesskey:}")
     private String accessKey;
 
     @Value("${integrationtest.user.secretkey:}")
     private String secretKey;
+
+    @Value("${integrationtest.dp.profile:}")
+    private String profile;
 
     @Inject
     private TestParameter testParameter;
@@ -45,16 +53,19 @@ public class SdxServer {
 
     @PostConstruct
     private void init() throws IOException {
+
         configureFromCliProfile();
 
-        checkNonEmpty("integrationtest.sdx.server", server);
-        checkNonEmpty("sdx.server.contextPath", sdxRootContextPath);
+        checkNonEmpty("integrationtest.cloudbreak.server", server);
+        checkNonEmpty("cloudbreak.url", cloudbreakUrl);
+        checkNonEmpty("server.contextPath", cbRootContextPath);
         checkNonEmpty("integrationtest.user.accesskey", accessKey);
-        checkNonEmpty("integrationtest.user.privatekey", secretKey);
+        checkNonEmpty("integrationtest.user.secretkey", secretKey);
 
-        testParameter.put(SdxTest.SDX_SERVER_ROOT, server + sdxRootContextPath);
-        testParameter.put(SdxTest.ACCESS_KEY, accessKey);
-        testParameter.put(SdxTest.SECRET_KEY, secretKey);
+        testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
+        testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_INTERNAL_ROOT, "http://" + cloudbreakUrl + cbRootContextPath);
+        testParameter.put(CloudbreakTest.ACCESS_KEY, accessKey);
+        testParameter.put(CloudbreakTest.SECRET_KEY, secretKey);
     }
 
     private void configureFromCliProfile() throws IOException {

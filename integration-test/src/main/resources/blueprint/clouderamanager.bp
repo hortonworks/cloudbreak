@@ -1,7 +1,7 @@
 {
-  "description": "7.2.0 - Data Engineering",
+  "description": "CDH_RUNTIME - Data Engineering",
   "blueprint": {
-    "cdhVersion": "7.2.0",
+    "cdhVersion": "CDH_RUNTIME",
     "displayName": "dataengineering",
     "services": [
       {

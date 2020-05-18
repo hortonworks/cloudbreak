@@ -187,12 +187,12 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBlueprintName() {
-        return gcpProperties.getDefaultBlueprintName();
+        return commonClusterManagerProperties().getInternalDistroXBlueprintName();
     }
 
     @Override
     public String getBlueprintCdhVersion() {
-        return gcpProperties.getBlueprintCdhVersion();
+        return commonClusterManagerProperties().getRuntimeVersion();
     }
 
     @Override

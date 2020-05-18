@@ -5,8 +5,6 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.sdx.api.model.SdxClusterShape;
-
 @Configuration
 @ConfigurationProperties(prefix = "integrationtest")
 public class CommonCloudProperties {
@@ -21,21 +19,13 @@ public class CommonCloudProperties {
 
     private Map<String, String> tags;
 
-    private SdxClusterShape clusterShape;
-
-    private SdxClusterShape internalClusterShape;
-
     private String imageCatalogName;
 
     private String imageCatalogUrl;
 
     private Integer gatewayPort;
 
-    private String defaultCredentialDescription;
-
-    private final Ambari ambari = new Ambari();
-
-    private final ClouderaManager cm = new ClouderaManager();
+    private ImageValidation imageValidation = new ImageValidation();
 
     public String getCloudProvider() {
         return cloudProvider;
@@ -77,22 +67,6 @@ public class CommonCloudProperties {
         this.tags = tags;
     }
 
-    public SdxClusterShape getClusterShape() {
-        return clusterShape;
-    }
-
-    public void setClusterShape(SdxClusterShape clusterShape) {
-        this.clusterShape = clusterShape;
-    }
-
-    public SdxClusterShape getInternalClusterShape() {
-        return internalClusterShape;
-    }
-
-    public void setInternalClusterShape(SdxClusterShape internalClusterShape) {
-        this.internalClusterShape = internalClusterShape;
-    }
-
     public String getImageCatalogName() {
         return imageCatalogName;
     }
@@ -118,82 +92,37 @@ public class CommonCloudProperties {
     }
 
     public String getDefaultCredentialDescription() {
-        return defaultCredentialDescription;
+        return "autotesting credential default description.";
     }
 
-    public void setDefaultCredentialDescription(String defaultCredentialDescription) {
-        this.defaultCredentialDescription = defaultCredentialDescription;
+    public ImageValidation getImageValidation() {
+        return imageValidation;
     }
 
-    public Ambari getAmbari() {
-        return ambari;
+    public void setImageValidation(ImageValidation imageValidation) {
+        this.imageValidation = imageValidation;
     }
 
-    public ClouderaManager getClouderaManager() {
-        return cm;
-    }
+    public static class ImageValidation {
 
-    public static class Ambari {
-        private String defaultUser;
+        private String sourceCatalogName;
 
-        private String defaultPassword;
+        private String sourceCatalogUrl;
 
-        private String defaultPort;
-
-        public String getDefaultUser() {
-            return defaultUser;
+        public String getSourceCatalogName() {
+            return sourceCatalogName;
         }
 
-        public void setDefaultUser(String defaultUser) {
-            this.defaultUser = defaultUser;
+        public void setSourceCatalogName(String sourceCatalogName) {
+            this.sourceCatalogName = sourceCatalogName;
         }
 
-        public String getDefaultPassword() {
-            return defaultPassword;
+        public String getSourceCatalogUrl() {
+            return sourceCatalogUrl;
         }
 
-        public void setDefaultPassword(String defaultPassword) {
-            this.defaultPassword = defaultPassword;
-        }
-
-        public String getDefaultPort() {
-            return defaultPort;
-        }
-
-        public void setDefaultPort(String defaultPort) {
-            this.defaultPort = defaultPort;
-        }
-    }
-
-    public static class ClouderaManager {
-        private String defaultUser;
-
-        private String defaultPassword;
-
-        private String defaultPort;
-
-        public String getDefaultUser() {
-            return defaultUser;
-        }
-
-        public void setDefaultUser(String defaultUser) {
-            this.defaultUser = defaultUser;
-        }
-
-        public String getDefaultPassword() {
-            return defaultPassword;
-        }
-
-        public void setDefaultPassword(String defaultPassword) {
-            this.defaultPassword = defaultPassword;
-        }
-
-        public String getDefaultPort() {
-            return defaultPort;
-        }
-
-        public void setDefaultPort(String defaultPort) {
-            this.defaultPort = defaultPort;
+        public void setSourceCatalogUrl(String sourceCatalogUrl) {
+            this.sourceCatalogUrl = sourceCatalogUrl;
         }
     }
 }

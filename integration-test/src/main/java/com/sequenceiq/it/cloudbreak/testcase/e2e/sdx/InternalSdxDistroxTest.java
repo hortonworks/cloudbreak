@@ -36,16 +36,16 @@ public class InternalSdxDistroxTest extends ImageValidatorE2ETest {
         sdxDatabaseRequest.setCreate(false);
         testContext.given(SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequest)
-                .withTemplate(sdxTemplateName)
-                .withRuntimeVersion(runtimeVersion)
-                .withImageCatalogNameOnly(sourceImageCatalogName)
+                .withTemplate(commonClusterManagerProperties().getInternalSdxBlueprintName())
+                .withRuntimeVersion(commonClusterManagerProperties().getRuntimeVersion())
+                .withImageCatalogNameOnly(commonCloudProperties().getImageValidation().getSourceCatalogName())
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .when(sdxTestClient.describeInternal())
                 .validate();
         testContext.given(DistroXTestDto.class)
-                .withTemplate(distroxTemplateName)
+                .withTemplate(commonClusterManagerProperties().getInternalDistroXBlueprintName())
                 .withImageSettings(testContext
                         .given(DistroXImageTestDto.class)
                         .withImageCatalog(testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getCatalogName())

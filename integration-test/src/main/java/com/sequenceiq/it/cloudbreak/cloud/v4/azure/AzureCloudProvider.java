@@ -235,12 +235,12 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBlueprintName() {
-        return azureProperties.getDefaultBlueprintName();
+        return commonClusterManagerProperties().getInternalDistroXBlueprintName();
     }
 
     @Override
     public String getBlueprintCdhVersion() {
-        return azureProperties.getBlueprintCdhVersion();
+        return commonClusterManagerProperties().getRuntimeVersion();
     }
 
     @Override

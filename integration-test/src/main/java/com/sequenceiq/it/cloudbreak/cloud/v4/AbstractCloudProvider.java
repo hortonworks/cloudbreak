@@ -42,12 +42,19 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
+
     protected TestParameter getTestParameter() {
         return testParameter;
     }
 
     protected CommonCloudProperties commonCloudProperties() {
         return commonCloudProperties;
+    }
+
+    protected CommonClusterManagerProperties commonClusterManagerProperties() {
+        return commonClusterManagerProperties;
     }
 
     @Override
@@ -98,12 +105,12 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public SdxClusterShape getClusterShape() {
-        return commonCloudProperties.getClusterShape();
+        return commonClusterManagerProperties.getClusterShape();
     }
 
     @Override
     public SdxClusterShape getInternalClusterShape() {
-        return commonCloudProperties.getInternalClusterShape();
+        return commonClusterManagerProperties.getInternalClusterShape();
     }
 
     @Override
@@ -133,15 +140,15 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public final ClusterTestDto cluster(ClusterTestDto clusterTestDto) {
-        clusterTestDto.withUserName(commonCloudProperties.getAmbari().getDefaultUser())
-                .withPassword(commonCloudProperties.getAmbari().getDefaultPassword());
+        clusterTestDto.withUserName(commonClusterManagerProperties.getClouderaManager().getDefaultUser())
+                .withPassword(commonClusterManagerProperties.getClouderaManager().getDefaultPassword());
         return withCluster(clusterTestDto);
     }
 
     @Override
     public final DistroXClusterTestDto cluster(DistroXClusterTestDto clusterTestDto) {
-        clusterTestDto.withUserName(commonCloudProperties.getAmbari().getDefaultUser())
-                .withPassword(commonCloudProperties.getAmbari().getDefaultPassword());
+        clusterTestDto.withUserName(commonClusterManagerProperties.getClouderaManager().getDefaultUser())
+                .withPassword(commonClusterManagerProperties.getClouderaManager().getDefaultPassword());
         return withCluster(clusterTestDto);
     }
 

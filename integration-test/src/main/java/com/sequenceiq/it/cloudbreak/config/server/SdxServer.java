@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.config;
+package com.sequenceiq.it.cloudbreak.config.server;
 
 import java.io.IOException;
 import java.util.Map;
@@ -13,25 +13,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.EnvironmentTest;
+import com.sequenceiq.it.cloudbreak.SdxTest;
 
 @Component
-public class EnvironmentServer {
+public class SdxServer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxServer.class);
 
     private static final String WARNING_TEXT_FORMAT = "Following variable must be set whether as environment variables or (test) application.yaml: %s";
 
-    private static final int DEFAULT_ENVIRONMENT_PORT = 8088;
-
-    @Value("${integrationtest.environment.server}")
+    @Value("${integrationtest.sdx.server}")
     private String server;
 
-    @Value("${environment.url:localhost:" + DEFAULT_ENVIRONMENT_PORT + "}")
-    private String environmentUrl;
-
-    @Value("${environment.server.contextPath:/environmentservice}")
-    private String environmentRootContextPath;
+    @Value("${sdx.server.contextPath:/dl}")
+    private String sdxRootContextPath;
 
     @Value("${integrationtest.user.accesskey:}")
     private String accessKey;
@@ -52,16 +47,14 @@ public class EnvironmentServer {
     private void init() throws IOException {
         configureFromCliProfile();
 
-        checkNonEmpty("integrationtest.environment.server", server);
-        checkNonEmpty("environment.server.contextPath", environmentRootContextPath);
-        checkNonEmpty("environment.url", environmentUrl);
+        checkNonEmpty("integrationtest.sdx.server", server);
+        checkNonEmpty("sdx.server.contextPath", sdxRootContextPath);
         checkNonEmpty("integrationtest.user.accesskey", accessKey);
         checkNonEmpty("integrationtest.user.privatekey", secretKey);
 
-        testParameter.put(EnvironmentTest.ENVIRONMENT_SERVER_ROOT, server + environmentRootContextPath);
-        testParameter.put(EnvironmentTest.ENVIRONMENT_INTERNAL_SERVER_ROOT, "http://" + environmentUrl + environmentRootContextPath);
-        testParameter.put(EnvironmentTest.ACCESS_KEY, accessKey);
-        testParameter.put(EnvironmentTest.SECRET_KEY, secretKey);
+        testParameter.put(SdxTest.SDX_SERVER_ROOT, server + sdxRootContextPath);
+        testParameter.put(SdxTest.ACCESS_KEY, accessKey);
+        testParameter.put(SdxTest.SECRET_KEY, secretKey);
     }
 
     private void configureFromCliProfile() throws IOException {

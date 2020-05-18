@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.config;
+package com.sequenceiq.it.cloudbreak.config.server;
 
 import java.io.IOException;
 import java.util.Map;
@@ -13,34 +13,31 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.EnvironmentTest;
 
 @Component
-public class CloudbreakServer {
+public class EnvironmentServer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentServer.class);
 
     private static final String WARNING_TEXT_FORMAT = "Following variable must be set whether as environment variables or (test) application.yaml: %s";
 
-    private static final int DEFAULT_CLOUDBREAK_PORT = 9091;
+    private static final int DEFAULT_ENVIRONMENT_PORT = 8088;
 
-    @Value("${cloudbreak.url:localhost:" + DEFAULT_CLOUDBREAK_PORT + "}")
-    private String cloudbreakUrl;
-
-    @Value("${integrationtest.cloudbreak.server}")
+    @Value("${integrationtest.environment.server}")
     private String server;
 
-    @Value("${server.contextPath:/cb}")
-    private String cbRootContextPath;
+    @Value("${environment.url:localhost:" + DEFAULT_ENVIRONMENT_PORT + "}")
+    private String environmentUrl;
+
+    @Value("${environment.server.contextPath:/environmentservice}")
+    private String environmentRootContextPath;
 
     @Value("${integrationtest.user.accesskey:}")
     private String accessKey;
 
     @Value("${integrationtest.user.secretkey:}")
     private String secretKey;
-
-    @Value("${integrationtest.dp.profile:}")
-    private String profile;
 
     @Inject
     private TestParameter testParameter;
@@ -53,19 +50,18 @@ public class CloudbreakServer {
 
     @PostConstruct
     private void init() throws IOException {
-
         configureFromCliProfile();
 
-        checkNonEmpty("integrationtest.cloudbreak.server", server);
-        checkNonEmpty("cloudbreak.url", cloudbreakUrl);
-        checkNonEmpty("server.contextPath", cbRootContextPath);
+        checkNonEmpty("integrationtest.environment.server", server);
+        checkNonEmpty("environment.server.contextPath", environmentRootContextPath);
+        checkNonEmpty("environment.url", environmentUrl);
         checkNonEmpty("integrationtest.user.accesskey", accessKey);
-        checkNonEmpty("integrationtest.user.secretkey", secretKey);
+        checkNonEmpty("integrationtest.user.privatekey", secretKey);
 
-        testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
-        testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_INTERNAL_ROOT, "http://" + cloudbreakUrl + cbRootContextPath);
-        testParameter.put(CloudbreakTest.ACCESS_KEY, accessKey);
-        testParameter.put(CloudbreakTest.SECRET_KEY, secretKey);
+        testParameter.put(EnvironmentTest.ENVIRONMENT_SERVER_ROOT, server + environmentRootContextPath);
+        testParameter.put(EnvironmentTest.ENVIRONMENT_INTERNAL_SERVER_ROOT, "http://" + environmentUrl + environmentRootContextPath);
+        testParameter.put(EnvironmentTest.ACCESS_KEY, accessKey);
+        testParameter.put(EnvironmentTest.SECRET_KEY, secretKey);
     }
 
     private void configureFromCliProfile() throws IOException {

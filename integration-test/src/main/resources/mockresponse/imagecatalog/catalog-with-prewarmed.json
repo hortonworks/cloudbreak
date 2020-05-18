@@ -17,21 +17,21 @@
           "cm": "7.x.0",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "7.0.1"
+          "stack": "CDH_RUNTIME"
         },
         "stack-details": {
           "repo": {
             "stack": {
               "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1454941/cdh/7.x/parcels/",
-              "repoid": "CDH-7.0.1",
-              "repository-version": "7.0.1-1.cdh7.0.1.p0.1454941"
+              "repoid": "CDH-CDH_RUNTIME",
+              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1454941"
             },
             "util": null
           },
-          "version": "7.0.1"
+          "version": "CDH_RUNTIME"
         },
         "repo": {
-          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1455819/cm7/7.0.1/redhat7/yum/"
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1455819/cm7/CDH_RUNTIME/redhat7/yum/"
         },
         "version": "7.x.0",
         "pre_warm_parcels": [
@@ -72,21 +72,21 @@
           "cm": "7.x.0",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "7.0.1"
+          "stack": "CDH_RUNTIME"
         },
         "stack-details": {
           "repo": {
             "stack": {
               "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1454941/cdh/7.x/parcels/",
-              "repoid": "CDH-7.0.1",
-              "repository-version": "7.0.1-1.cdh7.0.1.p0.1454941"
+              "repoid": "CDH-CDH_RUNTIME",
+              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1454941"
             },
             "util": null
           },
-          "version": "7.0.1"
+          "version": "CDH_RUNTIME"
         },
         "repo": {
-          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1455819/cm7/7.0.1/redhat7/yum/"
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1455819/cm7/CDH_RUNTIME/redhat7/yum/"
         },
         "version": "7.x.0",
         "pre_warm_parcels": [
