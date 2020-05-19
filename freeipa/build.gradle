@@ -50,6 +50,7 @@ dependencies {
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                   version: opentracingJaxrs2Version
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                     version: opentracingJdbcVersion
 
+  implementation     group: 'com.cloudera.api.swagger',    name: 'cloudera-manager-api-swagger',       version: cmClientVersion
 
   implementation     group: 'org.apache.kerby',          name: 'kerb-util',                            version: '2.0.0'
   
@@ -98,7 +99,9 @@ dependencies {
   implementation project(':notification-sender')
   implementation project(':environment-api')
   implementation project(':environment-common')
+  implementation project(':datalake-api')
   implementation project(':cluster-proxy')
+  implementation project(':client-cm')
   implementation project(':status-checker')
   implementation project(':template-manager-tag')
 
