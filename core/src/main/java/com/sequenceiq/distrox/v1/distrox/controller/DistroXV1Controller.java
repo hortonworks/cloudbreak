@@ -125,7 +125,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
     public void deleteMultiple(DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
         validateMultidelete(multiDeleteRequest);
         if (CollectionUtils.isNotEmpty(multiDeleteRequest.getNames())) {
