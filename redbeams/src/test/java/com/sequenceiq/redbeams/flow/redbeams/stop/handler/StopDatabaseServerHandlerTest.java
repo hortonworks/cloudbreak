@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -34,7 +35,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class StopDatabaseServerHandlerTest {
 
-    private static final String DB_INSTANCE_IDENTIFIER = "dbInstanceIdentifier";
+    @Mock
+    private DatabaseStack dbStack;
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -86,30 +88,30 @@ public class StopDatabaseServerHandlerTest {
 
     @Test
     public void shouldCallStopDatabaseAndNotifyEventBusWithoutWaitingForPermanentStatus() throws Exception {
-        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER)).thenReturn(ExternalDatabaseStatus.STARTED);
+        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(ExternalDatabaseStatus.STARTED);
 
         victim.accept(anEvent());
 
-        verify(resourceConnector).stopDatabaseServer(authenticatedContext, DB_INSTANCE_IDENTIFIER);
+        verify(resourceConnector).stopDatabaseServer(authenticatedContext, dbStack);
         verify(eventBus).notify(eq(StopDatabaseServerSuccess.class.getSimpleName().toUpperCase()), Mockito.any(Event.class));
         verifyZeroInteractions(statusCheckFactory, externalDatabaseStatusSyncPollingScheduler);
     }
 
     @Test
     public void shouldCallStopDatabaseAndNotifyEventBusWithWaitingForPermanentStatus() throws Exception {
-        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER)).thenReturn(ExternalDatabaseStatus.UPDATE_IN_PROGRESS);
-        when(statusCheckFactory.newPollPermanentExternalDatabaseStateTask(authenticatedContext, DB_INSTANCE_IDENTIFIER))
+        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(ExternalDatabaseStatus.UPDATE_IN_PROGRESS);
+        when(statusCheckFactory.newPollPermanentExternalDatabaseStateTask(authenticatedContext, dbStack))
                 .thenReturn(externalDatabaseStatusPollTask);
         when(externalDatabaseStatusSyncPollingScheduler.schedule(externalDatabaseStatusPollTask)).thenReturn(ExternalDatabaseStatus.STARTED);
         victim.accept(anEvent());
 
-        verify(resourceConnector).stopDatabaseServer(authenticatedContext, DB_INSTANCE_IDENTIFIER);
+        verify(resourceConnector).stopDatabaseServer(authenticatedContext, dbStack);
         verify(eventBus).notify(eq(StopDatabaseServerSuccess.class.getSimpleName().toUpperCase()), Mockito.any(Event.class));
     }
 
     @Test
     public void shouldNotCallStopDatabaseButShouldNotifyEventBus() throws Exception {
-        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER)).thenReturn(ExternalDatabaseStatus.STOPPED);
+        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(ExternalDatabaseStatus.STOPPED);
 
         victim.accept(anEvent());
 
@@ -119,8 +121,8 @@ public class StopDatabaseServerHandlerTest {
 
     @Test
     public void shouldCallStopDatabaseAndNotifyEventBusOnFailure() throws Exception {
-        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER)).thenReturn(ExternalDatabaseStatus.STARTED);
-        doThrow(new Exception()).when(resourceConnector).stopDatabaseServer(authenticatedContext, DB_INSTANCE_IDENTIFIER);
+        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(ExternalDatabaseStatus.STARTED);
+        doThrow(new Exception()).when(resourceConnector).stopDatabaseServer(authenticatedContext, dbStack);
 
         victim.accept(anEvent());
 
@@ -135,6 +137,6 @@ public class StopDatabaseServerHandlerTest {
     }
 
     private StopDatabaseServerRequest aStopDatabaseServerRequest() {
-        return new StopDatabaseServerRequest(cloudContext, cloudCredential, DB_INSTANCE_IDENTIFIER);
+        return new StopDatabaseServerRequest(cloudContext, cloudCredential, dbStack);
     }
 }

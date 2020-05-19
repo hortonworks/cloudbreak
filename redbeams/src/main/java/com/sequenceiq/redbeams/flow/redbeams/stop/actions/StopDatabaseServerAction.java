@@ -29,6 +29,6 @@ public class StopDatabaseServerAction extends AbstractRedbeamsStopAction<Redbeam
     @Override
     protected Selectable createRequest(RedbeamsStopContext context) {
         return new StopDatabaseServerRequest(context.getCloudContext(), context.getCloudCredential(),
-                context.getDbInstanceIdentifier());
+                context.getDatabaseStack());
     }
 }

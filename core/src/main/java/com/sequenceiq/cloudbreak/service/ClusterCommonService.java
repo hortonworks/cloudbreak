@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -77,6 +79,9 @@ public class ClusterCommonService {
 
     @Inject
     private EnvironmentService environmentService;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     public FlowIdentifier put(String crn, UpdateClusterV4Request updateJson) {
         Stack stack = stackService.getByCrn(crn);
@@ -205,12 +210,13 @@ public class ClusterCommonService {
         String clusterName = cluster.getName();
         String serverHost = cluster.getClusterManagerIp();
 
-        Set<InstanceMetaData> agentHostsSet = stack.getRunningInstanceMetaDataSet();
+        List<InstanceMetaData> agentHostsSet = instanceMetaDataService.getAllInstanceMetadataByStackId(stack.getId())
+                .stream().filter(i -> i.getInstanceStatus() != InstanceStatus.TERMINATED).collect(Collectors.toList());
         if (agentHostsSet.isEmpty()) {
             throw new NotFoundException(String.format("Not found any agent hosts (yet) for cluster '%s'", cluster.getId()));
         }
         String agentHosts = agentHostsSet.stream()
-                .map(InstanceMetaData::getDiscoveryFQDN)
+                .map(InstanceMetaData::getPublicIpWrapper)
                 .collect(Collectors.joining("\n"));
 
         List<String> hostGroupHostsStrings = agentHostsSet.stream()
@@ -218,7 +224,8 @@ public class ClusterCommonService {
                 .entrySet().stream()
                 .map(s -> addSectionWithBody(
                         s.getKey(),
-                        s.getValue().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.joining("\n"))))
+                        s.getValue().stream()
+                                .map(InstanceMetaData::getPublicIpWrapper).collect(Collectors.joining("\n"))))
                 .collect(Collectors.toList());
 
         return String.join(
@@ -227,7 +234,10 @@ public class ClusterCommonService {
                 addSectionWithBody("server", serverHost),
                 String.join("\n", hostGroupHostsStrings),
                 addSectionWithBody("agent", agentHosts),
-                addSectionWithBody("all:vars", String.format("ansible_ssh_user=%s", loginUser))
+                addSectionWithBody("all:vars",
+                        String.join("\n", String.format("ansible_ssh_user=%s", loginUser),
+                                "ansible_ssh_common_args='-o StrictHostKeyChecking=no'",
+                                "ansible_become=yes"))
         );
     }
 

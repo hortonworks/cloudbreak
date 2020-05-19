@@ -56,7 +56,7 @@ public class ClusterDownscaleService {
     private InstanceMetaDataService instanceMetaDataService;
 
     public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds, ClusterDownscaleDetails details) {
-        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_DOWN);
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_DOWN, hostGroupName);
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
         if (scalingAdjustment != null) {
             LOGGER.info("Decommissioning {} hosts from host group '{}'", Math.abs(scalingAdjustment), hostGroupName);
@@ -72,10 +72,10 @@ public class ClusterDownscaleService {
         }
     }
 
-    public void finalizeClusterScaleDown(Long stackId) {
+    public void finalizeClusterScaleDown(Long stackId, String hostGroupName) {
         StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
         clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
-        flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SCALED_DOWN);
+        flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SCALED_DOWN, hostGroupName);
     }
 
     public void updateMetadataStatusToFailed(DecommissionResult payload) {

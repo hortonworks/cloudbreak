@@ -239,6 +239,6 @@ clusterProxy:
   timeoutInSec: 5
   # the login page returns a 400, update this after CDPAM-609 which will provide a better health check
   healthyStatusCode: 400
-  maxAttempts: 3
+  maxAttempts: 10
   maxFailure: 1
 

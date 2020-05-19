@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +20,12 @@ public class AwsRdsStatusLookupService {
     @Inject
     private AwsClient awsClient;
 
-    public ExternalDatabaseStatus getStatus(AuthenticatedContext ac, String dbInstanceIdentifier) {
+    public ExternalDatabaseStatus getStatus(AuthenticatedContext ac, DatabaseStack dbStack) {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AmazonRDS rdsClient = awsClient.createRdsClient(credentialView, regionName);
+
+        String dbInstanceIdentifier = dbStack.getDatabaseServer().getServerId();
 
         DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest().withDBInstanceIdentifier(dbInstanceIdentifier);
         DescribeDBInstancesResult describeDBInstancesResult;

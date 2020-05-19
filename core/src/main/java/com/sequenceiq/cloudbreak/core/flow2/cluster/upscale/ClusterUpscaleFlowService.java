@@ -71,9 +71,10 @@ class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SINGLE_MASTER_REPAIR_FINISHED);
     }
 
-    void upscalingClusterManager(long stackId) {
-        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Upscaling the cluster.");
-        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_UP);
+    void upscalingClusterManager(long stackId, String hostGroupName) {
+        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS,
+                String.format("Scaling up host group: %s", hostGroupName));
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_UP, hostGroupName);
     }
 
     void reRegisterWithClusterProxy(long stackId) {
@@ -120,7 +121,7 @@ class ClusterUpscaleFlowService {
         if (success) {
             LOGGER.debug("Cluster upscaled successfully");
             clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
-            flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_SCALED_UP);
+            flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_SCALED_UP, hostgroupName);
         } else {
             LOGGER.debug("Cluster upscale failed. {} hosts failed to upscale", numOfFailedHosts);
             clusterService.updateClusterStatusByStackId(stackView.getId(), UPDATE_FAILED);

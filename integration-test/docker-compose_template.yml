@@ -87,4 +87,4 @@ services:
     networks:
       cbreak_default: {}
     command: validate http://cloudbreak:8080/cb/api/swagger.json
-    image: quay.io/goswagger/swagger:0.12.0
+    image: docker-private.infra.cloudera.com/cloudera_thirdparty/goswagger/swagger:0.12.0

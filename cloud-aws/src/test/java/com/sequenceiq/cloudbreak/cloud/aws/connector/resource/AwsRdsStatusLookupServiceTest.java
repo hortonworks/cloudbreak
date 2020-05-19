@@ -11,6 +11,8 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -66,6 +68,12 @@ public class AwsRdsStatusLookupServiceTest {
     @Mock
     private DBInstance dbInstance;
 
+    @Mock
+    private DatabaseStack dbStack;
+
+    @Mock
+    private DatabaseServer databaseServer;
+
     @InjectMocks
     private AwsRdsStatusLookupService victim;
 
@@ -79,6 +87,8 @@ public class AwsRdsStatusLookupServiceTest {
         when(location.getRegion()).thenReturn(region);
         when(region.value()).thenReturn(REGION);
         when(awsClient.createRdsClient(any(AwsCredentialView.class), eq(REGION))).thenReturn(amazonRDS);
+        when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
     }
 
     @Test
@@ -87,7 +97,7 @@ public class AwsRdsStatusLookupServiceTest {
         when(describeDBInstancesResult.getDBInstances()).thenReturn(Arrays.asList(dbInstance));
         when(dbInstance.getDBInstanceStatus()).thenReturn(DB_INSTANCE_STATUS_STARTED);
 
-        ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER);
+        ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, dbStack);
 
         assertEquals(ExternalDatabaseStatus.STARTED, result);
     }
@@ -98,7 +108,7 @@ public class AwsRdsStatusLookupServiceTest {
         when(describeDBInstancesResult.getDBInstances()).thenReturn(Arrays.asList(dbInstance));
         when(dbInstance.getDBInstanceStatus()).thenReturn(DB_INSTANCE_STATUS_STOPPED);
 
-        ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER);
+        ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, dbStack);
 
         assertEquals(ExternalDatabaseStatus.STOPPED, result);
     }
@@ -109,7 +119,7 @@ public class AwsRdsStatusLookupServiceTest {
         when(describeDBInstancesResult.getDBInstances()).thenReturn(Arrays.asList(dbInstance));
         when(dbInstance.getDBInstanceStatus()).thenReturn(DB_INSTANCE_STATUS_ANY);
 
-        ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER);
+        ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, dbStack);
 
         assertEquals(ExternalDatabaseStatus.UPDATE_IN_PROGRESS, result);
     }
@@ -118,7 +128,7 @@ public class AwsRdsStatusLookupServiceTest {
     public void shouldReturnDeletedInCaseOfDBInstanceNotFoundException() {
         when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(DBInstanceNotFoundException.class);
 
-        ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER);
+        ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, dbStack);
 
         assertEquals(ExternalDatabaseStatus.DELETED, result);
     }
@@ -127,6 +137,6 @@ public class AwsRdsStatusLookupServiceTest {
     public void shouldThrowCloudConnectorExceptionInCaseOfAnyRuntimeException() {
         when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(RuntimeException.class);
 
-        victim.getStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER);
+        victim.getStatus(authenticatedContext, dbStack);
     }
 }

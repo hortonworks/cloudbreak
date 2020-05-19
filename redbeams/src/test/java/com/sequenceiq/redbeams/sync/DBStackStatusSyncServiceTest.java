@@ -8,12 +8,13 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
+import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
@@ -40,11 +41,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class DBStackStatusSyncServiceTest {
 
-    private static final String DB_INSTANCE_IDENTIFIER = "db instance identifier";
-
     private static final String ENVIRONMENT_ID = "environment id";
 
     private static final Long DB_STACK_ID = 1234L;
+
+    @Mock
+    private DatabaseStack databaseStack;
 
     @Mock
     private CredentialService credentialService;
@@ -80,13 +82,13 @@ public class DBStackStatusSyncServiceTest {
     private DBStack dbStack;
 
     @Mock
-    private DatabaseServer databaseServer;
-
-    @Mock
     private Crn crn;
 
     @Mock
     private DBStackJobService dbStackJobService;
+
+    @Mock
+    private DBStackToDatabaseStackConverter databaseStackConverter;
 
     private ArgumentCaptor<CloudContext> cloudContextArgumentCaptor;
 
@@ -114,21 +116,20 @@ public class DBStackStatusSyncServiceTest {
         cloudContextArgumentCaptor = ArgumentCaptor.forClass(CloudContext.class);
 
         when(dbStack.getEnvironmentId()).thenReturn(ENVIRONMENT_ID);
-        when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
-        when(databaseServer.getName()).thenReturn(DB_INSTANCE_IDENTIFIER);
         when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_ID)).thenReturn(credential);
         when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(authenticator.authenticate(cloudContextArgumentCaptor.capture(), Mockito.eq(cloudCredential))).thenReturn(authenticatedContext);
         when(cloudConnector.resources()).thenReturn(resourceConnector);
+        when(databaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
     }
 
     @ParameterizedTest
     @MethodSource("provideTestData")
     public void testStatusUpdate(Status savedStatus, ExternalDatabaseStatus externalDatabaseStatus, DetailedDBStackStatus newDetailedDBStackStatus)
             throws Exception {
-        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER)).thenReturn(externalDatabaseStatus);
+        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, databaseStack)).thenReturn(externalDatabaseStatus);
         when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(savedStatus);
         when(dbStack.getOwnerCrn()).thenReturn(crn);
@@ -146,7 +147,7 @@ public class DBStackStatusSyncServiceTest {
     @Test
     public void shouldSetStatusAndUnscheduleInCaseOfStopCompleted()
             throws Exception {
-        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, DB_INSTANCE_IDENTIFIER)).thenReturn(ExternalDatabaseStatus.DELETED);
+        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.DELETED);
         when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(Status.DELETE_IN_PROGRESS);
         when(dbStack.getOwnerCrn()).thenReturn(crn);

@@ -71,7 +71,7 @@ public class ClusterDownscaleServiceTest {
         verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID,
                 Status.UPDATE_IN_PROGRESS.name(), HOST_GROUP_NAME, ResourceEvent.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, "1", HOST_GROUP_NAME);
         verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(),
-                ResourceEvent.CLUSTER_SCALING_DOWN);
+                ResourceEvent.CLUSTER_SCALING_DOWN, "worker");
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.UPDATE_IN_PROGRESS);
         verify(stackService, times(0)).getByIdWithListsInTransaction(anyLong());
         verify(stackService, times(0)).getByIdWithListsInTransaction(STACK_ID);
@@ -89,7 +89,7 @@ public class ClusterDownscaleServiceTest {
         verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID,
                 Status.UPDATE_IN_PROGRESS.name(), HOST_GROUP_NAME, ResourceEvent.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, "1", HOST_GROUP_NAME);
         verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(),
-                ResourceEvent.CLUSTER_SCALING_DOWN);
+                ResourceEvent.CLUSTER_SCALING_DOWN, "worker");
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.UPDATE_IN_PROGRESS);
         verify(stackService, times(0)).getByIdWithListsInTransaction(anyLong());
         verify(stackService, times(0)).getByIdWithListsInTransaction(STACK_ID);

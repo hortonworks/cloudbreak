@@ -10,6 +10,8 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -68,6 +70,12 @@ public class AwsRdsStartServiceTest {
     @Mock
     private PollTask<Boolean> task;
 
+    @Mock
+    private DatabaseStack dbStack;
+
+    @Mock
+    private DatabaseServer databaseServer;
+
     @InjectMocks
     private AwsRdsStartService victim;
 
@@ -81,6 +89,8 @@ public class AwsRdsStartServiceTest {
         when(location.getRegion()).thenReturn(region);
         when(region.value()).thenReturn(REGION);
         when(awsClient.createRdsClient(any(AwsCredentialView.class), eq(REGION))).thenReturn(amazonRDS);
+        when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
     }
 
     @Test
@@ -89,7 +99,7 @@ public class AwsRdsStartServiceTest {
         when(amazonRDS.startDBInstance(startDBInstanceRequestArgumentCaptor.capture())).thenReturn(null);
         when(awsPollTaskFactory.newRdbStatusCheckerTask(authenticatedContext, DB_INSTANCE_IDENTIFIER, SUCCESS_STATUS, amazonRDS)).thenReturn(task);
 
-        victim.start(authenticatedContext, DB_INSTANCE_IDENTIFIER);
+        victim.start(authenticatedContext, dbStack);
 
         assertEquals(DB_INSTANCE_IDENTIFIER, startDBInstanceRequestArgumentCaptor.getValue().getDBInstanceIdentifier());
         verify(awsBackoffSyncPollingScheduler).schedule(task);
@@ -101,7 +111,7 @@ public class AwsRdsStartServiceTest {
 
         when(amazonRDS.startDBInstance(startDBInstanceRequestArgumentCaptor.capture())).thenThrow(new RuntimeException());
 
-        victim.start(authenticatedContext, DB_INSTANCE_IDENTIFIER);
+        victim.start(authenticatedContext, dbStack);
     }
 
     @Test(expected = CloudConnectorException.class)
@@ -111,6 +121,6 @@ public class AwsRdsStartServiceTest {
         when(awsPollTaskFactory.newRdbStatusCheckerTask(authenticatedContext, DB_INSTANCE_IDENTIFIER, SUCCESS_STATUS, amazonRDS)).thenReturn(task);
         doThrow(RuntimeException.class).when(awsBackoffSyncPollingScheduler).schedule(task);
 
-        victim.start(authenticatedContext, DB_INSTANCE_IDENTIFIER);
+        victim.start(authenticatedContext, dbStack);
     }
 }
