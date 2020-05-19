@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
-import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
@@ -63,9 +62,10 @@ public class ProvisionerService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    private AttemptResult<StackV4Response> sdxCreationFailed(SdxCluster sdxCluster, String statusReason) {
-        LOGGER.info("SDX creation failed, statusReason: " + statusReason);
-        return AttemptResults.breakFor("SDX creation failed '" + sdxCluster.getClusterName() + "', " + statusReason);
+    private AttemptResult<StackV4Response> sdxCreationFailed(String statusReason) {
+        String errorMessage = "Data Lake creation failed: " + statusReason;
+        LOGGER.info(errorMessage);
+        return AttemptResults.breakFor(errorMessage);
     }
 
     private boolean stackAndClusterAvailable(StackV4Response stackV4Response, ClusterV4Response cluster) {
@@ -80,7 +80,7 @@ public class ProvisionerService {
             try {
                 stackV4Endpoint.delete(0L, sdxCluster.getClusterName(), forced);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS,
-                        "Datalake stack deletion in progress", sdxCluster);
+                        "Data Lake stack deletion in progress", sdxCluster);
             } catch (NotFoundException e) {
                 LOGGER.info("Cannot find stack on cloudbreak side {}", sdxCluster.getClusterName());
             } catch (WebApplicationException e) {
@@ -216,15 +216,16 @@ public class ProvisionerService {
                             } else {
                                 if (Status.CREATE_FAILED.equals(stackV4Response.getStatus())) {
                                     LOGGER.info("Stack creation failed {}", stackV4Response.getName());
-                                    return sdxCreationFailed(sdxCluster, stackV4Response.getStatusReason());
+                                    return sdxCreationFailed(stackV4Response.getStatusReason());
                                 } else if (Status.CREATE_FAILED.equals(stackV4Response.getCluster().getStatus())) {
                                     LOGGER.info("Cluster creation failed {}", stackV4Response.getCluster().getName());
-                                    return sdxCreationFailed(sdxCluster, stackV4Response.getCluster().getStatusReason());
+                                    return sdxCreationFailed(stackV4Response.getCluster().getStatusReason());
                                 } else {
                                     if (FINISHED.equals(flowState)) {
-                                        LOGGER.warn("Stack is in improper state! FlowState: {}, stackV4Response: {}",
+                                        LOGGER.warn("Flow finished but stack is in improper state! FlowState: {}, stackV4Response: {}",
                                                 flowState, JsonUtil.writeValueAsStringSilent(stackV4Response));
-                                        return sdxCreationFailed(sdxCluster, "cluster is not in proper state");
+                                        return sdxCreationFailed("Provisioning failed (" + stackV4Response.getStatus() +
+                                                "), reason: " + stackV4Response.getStatusReason());
                                     } else {
                                         return AttemptResults.justContinue();
                                     }

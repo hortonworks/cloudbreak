@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -36,9 +37,9 @@ public class PollTaskFactory {
     }
 
     public PollTask<ExternalDatabaseStatus> newPollPermanentExternalDatabaseStateTask(AuthenticatedContext authenticatedContext,
-            String dbInstanceIdentifier) {
+            DatabaseStack dbStack) {
         CloudConnector<Object> connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatformVariant());
-        return createPollTask(PollPermanentExternalDatabaseStateTask.NAME, authenticatedContext, dbInstanceIdentifier, connector.resources());
+        return createPollTask(PollPermanentExternalDatabaseStateTask.NAME, authenticatedContext, dbStack, connector.resources());
     }
 
     @SuppressWarnings("unchecked")

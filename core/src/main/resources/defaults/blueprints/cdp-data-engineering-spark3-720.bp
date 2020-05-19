@@ -54,6 +54,17 @@
             "refName": "hms-HIVEMETASTORE-BASE",
             "roleType": "HIVEMETASTORE",
             "base": true
+          },
+          {
+            "refName": "hdfs-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_client_use_trash",
+                "value": false
+              }
+            ]
           }
         ]
       },
@@ -163,6 +174,7 @@
           "hdfs-BALANCER-BASE",
           "hdfs-NAMENODE-BASE",
           "hdfs-SECONDARYNAMENODE-BASE",
+          "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "hms-HIVEMETASTORE-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
@@ -178,6 +190,7 @@
         "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
+          "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
           "yarn-NODEMANAGER-WORKER"

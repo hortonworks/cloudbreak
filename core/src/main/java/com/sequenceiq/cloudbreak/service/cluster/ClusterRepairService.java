@@ -382,7 +382,8 @@ public class ClusterRepairService {
             if (!repairValidationResult.getSuccess().isEmpty()) {
                 FlowIdentifier flowIdentifier = flowManager.triggerClusterRepairFlow(stackId, toStringMap(repairValidationResult.getSuccess()),
                         removeOnly);
-                eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_REQUESTED, recoveryMessageArgument);
+                eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_REQUESTED,
+                        List.of(String.join(",", recoveryMessageArgument)));
                 return flowIdentifier;
             } else {
                 eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER, recoveryMessageArgument);

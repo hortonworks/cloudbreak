@@ -107,9 +107,9 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackScalingFlowContext context, StackScaleTriggerEvent payload, Map<Object, Object> variables) {
                 int instanceCountToCreate = getInstanceCountToCreate(context.getStack(), payload.getInstanceGroup(), payload.getAdjustment());
-                stackUpscaleService.addInstanceFireEventAndLog(context.getStack(), payload.getAdjustment());
+                stackUpscaleService.addInstanceFireEventAndLog(context.getStack(), payload.getAdjustment(), payload.getInstanceGroup());
                 if (instanceCountToCreate > 0) {
-                    stackUpscaleService.startAddInstances(context.getStack(), payload.getAdjustment());
+                    stackUpscaleService.startAddInstances(context.getStack(), payload.getAdjustment(), payload.getInstanceGroup());
                     sendEvent(context);
                 } else {
                     List<CloudResourceStatus> list = resourceService.getAllAsCloudResourceStatus(payload.getResourceId());
@@ -308,10 +308,6 @@ public class StackUpscaleActions {
                 CleanupFreeIpaEvent cleanupFreeIpaEvent = new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips, isRepair(variables));
                 sendEvent(context, cleanupFreeIpaEvent);
             }
-
-            private boolean isRepair(Map<Object, Object> variables) {
-                return (boolean) variables.getOrDefault(REPAIR, Boolean.FALSE);
-            }
         };
     }
 
@@ -343,7 +339,7 @@ public class StackUpscaleActions {
         return new AbstractStackFailureAction<StackUpscaleState, StackUpscaleEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                stackUpscaleService.handleStackUpscaleFailure(payload.getException(), payload.getResourceId());
+                stackUpscaleService.handleStackUpscaleFailure(isRepair(variables), payload.getException(), payload.getResourceId());
                 getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context);
             }
@@ -353,5 +349,9 @@ public class StackUpscaleActions {
                 return new StackEvent(StackUpscaleEvent.UPSCALE_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
             }
         };
+    }
+
+    private boolean isRepair(Map<Object, Object> variables) {
+        return (boolean) variables.getOrDefault(AbstractStackUpscaleAction.REPAIR, Boolean.FALSE);
     }
 }

@@ -2,12 +2,14 @@ package com.sequenceiq.redbeams.flow.redbeams.start.actions;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
+import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
@@ -30,8 +32,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 public abstract class AbstractRedbeamsStartAction<P extends Payload>
         extends AbstractAction<RedbeamsStartState, RedbeamsStartEvent, RedbeamsStartContext, P> {
 
-    private static final String UNKOWN_VENDOR_DISPLAY_NAME = "UNKNOWN";
-
     @Inject
     private DBStackService dbStackService;
 
@@ -40,6 +40,9 @@ public abstract class AbstractRedbeamsStartAction<P extends Payload>
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
+
+    @Inject
+    private DBStackToDatabaseStackConverter databaseStackConverter;
 
     protected AbstractRedbeamsStartAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -57,33 +60,19 @@ public abstract class AbstractRedbeamsStartAction<P extends Payload>
 
     @Override
     protected RedbeamsStartContext createFlowContext(FlowParameters flowParameters,
-                                                StateContext<RedbeamsStartState, RedbeamsStartEvent> stateContext, P payload) {
-        Optional<DBStack> optionalDBStack = dbStackService.findById(payload.getResourceId());
+            StateContext<RedbeamsStartState, RedbeamsStartEvent> stateContext, P payload) {
+        DBStack dbStack = dbStackService.getById(payload.getResourceId());
+        MDCBuilder.buildMdcContext(dbStack);
+        Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
+        String userName = dbStack.getOwnerCrn().getUserId();
+        String accountId = dbStack.getOwnerCrn().getAccountId();
+        CloudContext cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getCloudPlatform(), dbStack.getPlatformVariant(),
+                location, userName, accountId);
+        Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
+        CloudCredential cloudCredential = credentialConverter.convert(credential);
+        DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
 
-        CloudContext cloudContext = null;
-        CloudCredential cloudCredential = null;
-        String dbInstanceIdentifier = null;
-        String dbVendorDisplayName = UNKOWN_VENDOR_DISPLAY_NAME;
-
-        if (optionalDBStack.isPresent()) {
-            DBStack dbStack = optionalDBStack.get();
-            MDCBuilder.buildMdcContext(dbStack);
-            Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
-            String userName = dbStack.getOwnerCrn().getUserId();
-            String accountId = dbStack.getOwnerCrn().getAccountId();
-            cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getCloudPlatform(), dbStack.getPlatformVariant(),
-                    location, userName, accountId);
-            Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
-            cloudCredential = credentialConverter.convert(credential);
-
-            if (dbStack.getDatabaseServer() != null) {
-                dbInstanceIdentifier = dbStack.getDatabaseServer().getName();
-                if (dbStack.getDatabaseServer().getDatabaseVendor() != null) {
-                    dbVendorDisplayName = dbStack.getDatabaseServer().getDatabaseVendor().displayName();
-                }
-            }
-        }
-        return new RedbeamsStartContext(flowParameters, cloudContext, cloudCredential, dbInstanceIdentifier, dbVendorDisplayName);
+        return new RedbeamsStartContext(flowParameters, cloudContext, cloudCredential, databaseStack);
     }
 
     @Override

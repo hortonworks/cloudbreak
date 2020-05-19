@@ -57,20 +57,20 @@ public class StartDatabaseServerHandler implements EventHandler<StartDatabaseSer
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
 
-            ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatus(ac, request.getDbInstanceIdentifier());
+            ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatus(ac, request.getDbStack());
             if (status != null && status.isTransient()) {
-                LOGGER.debug("Database server '{}' is in '{}' status. Start waiting for a permanent status.", request.getDbInstanceIdentifier(), status);
+                LOGGER.debug("Database server '{}' is in '{}' status. Start waiting for a permanent status.", request.getDbStack(), status);
 
-                PollTask<ExternalDatabaseStatus> task = statusCheckFactory.newPollPermanentExternalDatabaseStateTask(ac, request.getDbInstanceIdentifier());
+                PollTask<ExternalDatabaseStatus> task = statusCheckFactory.newPollPermanentExternalDatabaseStateTask(ac, request.getDbStack());
                 status = externalDatabaseStatusPollingScheduler.schedule(task);
             }
 
             if (status != STARTED) {
                 LOGGER.debug("Database server '{}' is in '{}' status. Calling for '{}' status.",
-                        request.getDbInstanceIdentifier(), status, STARTED);
-                connector.resources().startDatabaseServer(ac, request.getDbInstanceIdentifier());
+                        request.getDbStack(), status, STARTED);
+                connector.resources().startDatabaseServer(ac, request.getDbStack());
             } else {
-                LOGGER.debug("Database server '{}' is already in '{}' status.", request.getDbInstanceIdentifier(), STARTED);
+                LOGGER.debug("Database server '{}' is already in '{}' status.", request.getDbStack(), STARTED);
             }
 
             RedbeamsEvent success = new StartDatabaseServerSuccess(request.getResourceId());

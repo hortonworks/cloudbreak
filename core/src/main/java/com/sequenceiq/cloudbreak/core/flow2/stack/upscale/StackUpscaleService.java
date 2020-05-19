@@ -5,9 +5,9 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_ADDING_INSTANCES;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_BOOTSTRAP_NEW_NODES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_METADATA_EXTEND_WITH_COUNT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_FAILED;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -76,13 +76,13 @@ public class StackUpscaleService {
     @Inject
     private TransactionService transactionService;
 
-    public void startAddInstances(Stack stack, Integer scalingAdjustment) {
-        String statusReason = format("Adding %s new instance(s) to the infrastructure.", scalingAdjustment);
+    public void startAddInstances(Stack stack, Integer scalingAdjustment, String hostGroupName) {
+        String statusReason = format("Adding %s new instance(s) to instance group %s", scalingAdjustment, hostGroupName);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ADDING_NEW_INSTANCES, statusReason);
     }
 
-    public void addInstanceFireEventAndLog(Stack stack, Integer scalingAdjustment) {
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_ADDING_INSTANCES, String.valueOf(scalingAdjustment));
+    public void addInstanceFireEventAndLog(Stack stack, Integer scalingAdjustment, String hostGroupName) {
+        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_ADDING_INSTANCES, String.valueOf(scalingAdjustment), hostGroupName);
     }
 
     public void finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
@@ -137,7 +137,6 @@ public class StackUpscaleService {
 
     public void bootstrappingNewNodes(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.BOOTSTRAPPING_NEW_NODES);
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_BOOTSTRAP_NEW_NODES);
     }
 
     public void extendingHostMetadata(Stack stack) {
@@ -148,13 +147,18 @@ public class StackUpscaleService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
     }
 
-    public void handleStackUpscaleFailure(Exception exception, Long stackId) {
+    public void handleStackUpscaleFailure(Boolean upscaleForRepair, Exception exception, Long stackId) {
         LOGGER.info("Exception during the upscale of stack", exception);
         try {
             String errorReason = exception.getMessage();
             metadataSetupService.cleanupRequestedInstances(stackId);
-            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
-            flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_INFRASTRUCTURE_UPDATE_FAILED, errorReason);
+            if (!upscaleForRepair) {
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
+                flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_INFRASTRUCTURE_UPDATE_FAILED, errorReason);
+            } else {
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.REPAIR_FAILED, "Stack repair failed. " + errorReason);
+                flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_REPAIR_FAILED, errorReason);
+            }
         } catch (Exception e) {
             LOGGER.info("Exception during the handling of stack scaling failure: {}", e.getMessage());
         }

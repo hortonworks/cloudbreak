@@ -1,8 +1,9 @@
 package com.sequenceiq.datalake.entity;
 
+import com.sequenceiq.datalake.converter.DatalakeStatusEnumConverter;
+
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -31,7 +32,7 @@ public class SdxStatusEntity {
     private String statusReason;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = DatalakeStatusEnumConverter.class)
     private DatalakeStatusEnum status;
 
     public Long getId() {

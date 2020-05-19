@@ -2,13 +2,14 @@ package com.sequenceiq.redbeams.flow.redbeams.stop.actions;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
+import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
@@ -26,8 +27,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.StateContext;
-
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -57,8 +56,6 @@ public class StopDatabaseServerFailedActionTest {
     private static final String DB_STACK_AZ = "dbStackAz";
 
     private static final String DB_STACK_ENV_ID = "dbStackEnvId";
-
-    private static final String DB_SERVER_NAME = "dbServerName";
 
     @Mock
     private DBStackService dbStackService;
@@ -106,7 +103,10 @@ public class StopDatabaseServerFailedActionTest {
     private CloudCredential cloudCredential;
 
     @Mock
-    private DatabaseServer databaseServer;
+    private DatabaseStack databaseStack;
+
+    @Mock
+    private DBStackToDatabaseStackConverter databaseStackConverter;
 
     @InjectMocks
     private StopDatabaseServerFailedAction victim;
@@ -139,7 +139,7 @@ public class StopDatabaseServerFailedActionTest {
         when(runningFlows.get(FLOW_ID)).thenReturn(flow);
         when(payload.getException()).thenReturn(exception);
         when(payload.getResourceId()).thenReturn(RESOURCE_ID);
-        when(dbStackService.findById(RESOURCE_ID)).thenReturn(Optional.of(dbStack));
+        when(dbStackService.getById(RESOURCE_ID)).thenReturn(dbStack);
         when(dbStack.getOwnerCrn()).thenReturn(ownerCrn);
         when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getName()).thenReturn(DB_STACK_NAME);
@@ -148,12 +148,11 @@ public class StopDatabaseServerFailedActionTest {
         when(dbStack.getRegion()).thenReturn(DB_STACK_REGION);
         when(dbStack.getAvailabilityZone()).thenReturn(DB_STACK_AZ);
         when(dbStack.getEnvironmentId()).thenReturn(DB_STACK_ENV_ID);
-        when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
         when(ownerCrn.getUserId()).thenReturn(USER_NAME);
         when(ownerCrn.getAccountId()).thenReturn(ACCOUNT_ID);
         when(credentialService.getCredentialByEnvCrn(DB_STACK_ENV_ID)).thenReturn(credential);
         when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
-        when(databaseServer.getName()).thenReturn(DB_SERVER_NAME);
+        when(databaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
 
         RedbeamsStopContext redbeamsStopContext = victim.createFlowContext(flowParameters, stateContext, payload);
 
@@ -170,7 +169,7 @@ public class StopDatabaseServerFailedActionTest {
         assertEquals(ACCOUNT_ID, redbeamsStopContext.getCloudContext().getAccountId());
         assertEquals(flowParameters, redbeamsStopContext.getFlowParameters());
         assertEquals(cloudCredential, redbeamsStopContext.getCloudCredential());
-        assertEquals(DB_SERVER_NAME, redbeamsStopContext.getDbInstanceIdentifier());
+        assertEquals(databaseStack, redbeamsStopContext.getDatabaseStack());
     }
 
     @Test

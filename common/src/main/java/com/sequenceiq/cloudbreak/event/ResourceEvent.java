@@ -144,7 +144,6 @@ public enum ResourceEvent {
     STACK_DELETE_IN_PROGRESS("stack.delete.in.progress"),
     STACK_ADDING_INSTANCES("stack.adding.instances"),
     STACK_METADATA_EXTEND_WITH_COUNT("stack.metadata.extend.with.count"),
-    STACK_BOOTSTRAP_NEW_NODES("stack.bootstrap.new.nodes"),
     STACK_INFRASTRUCTURE_UPDATE_FAILED("stack.infrastructure.update.failed"),
     STACK_IMAGE_UPDATE_STARTED("stack.image.update.started"),
     STACK_IMAGE_UPDATE_FINISHED("stack.image.update.finished"),
