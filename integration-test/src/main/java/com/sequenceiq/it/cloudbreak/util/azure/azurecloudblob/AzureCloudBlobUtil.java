@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.storage.StorageException;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -40,11 +41,13 @@ public class AzureCloudBlobUtil {
         azureCloudBlobClientActions.listAllFolders(baseLocation);
     }
 
-    public void listDataLakeFoldersInAContaier(String baseLocation) {
-        azureCloudBlobClientActions.listSelectedDirectory(baseLocation, "datalake", false);
+    public void listDataLakeFoldersInAContaier(String baseLocation, String clusterName, String crn) {
+        azureCloudBlobClientActions.listSelectedDirectory(baseLocation,
+                "datalake/" + clusterName + "_" + Crn.fromString(crn).getResource(), false);
     }
 
-    public void listFreeIPAFoldersInAContaier(String baseLocation) {
-        azureCloudBlobClientActions.listSelectedDirectory(baseLocation, "freeipa", false);
+    public void listFreeIPAFoldersInAContaier(String baseLocation, String clusterName, String crn) {
+        azureCloudBlobClientActions.listSelectedDirectory(baseLocation,
+                "freeipa/" + clusterName + "_" + Crn.fromString(crn).getResource(), false);
     }
 }

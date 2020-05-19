@@ -45,13 +45,13 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public void cloudStorageListContainerFreeIPA(String baseLocation) {
-        azureCloudBlobUtil.listFreeIPAFoldersInAContaier(baseLocation);
+    public void cloudStorageListContainerFreeIPA(String baseLocation, String clusterName, String crn) {
+        azureCloudBlobUtil.listFreeIPAFoldersInAContaier(baseLocation, clusterName, crn);
     }
 
     @Override
-    public void cloudStorageListContainerDataLake(String baseLocation) {
-        azureCloudBlobUtil.listDataLakeFoldersInAContaier(baseLocation);
+    public void cloudStorageListContainerDataLake(String baseLocation, String clusterName, String crn) {
+        azureCloudBlobUtil.listDataLakeFoldersInAContaier(baseLocation, clusterName, crn);
     }
 
     @Override
