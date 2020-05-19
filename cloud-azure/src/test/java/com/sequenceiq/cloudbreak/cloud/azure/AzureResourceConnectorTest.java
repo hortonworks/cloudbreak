@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.AdjustmentType;
 
@@ -82,9 +81,6 @@ public class AzureResourceConnectorTest {
     private AzureStorage azureStorage;
 
     @Mock
-    private CloudResourceHelper cloudResourceHelper;
-
-    @Mock
     private Retry retryService;
 
     @Mock
@@ -92,6 +88,9 @@ public class AzureResourceConnectorTest {
 
     @Mock
     private AzureComputeResourceService azureComputeResourceService;
+
+    @Mock
+    private AzureCloudResourceService azureCloudResourceService;
 
     private List<CloudResource> instances;
 
@@ -121,7 +120,8 @@ public class AzureResourceConnectorTest {
         when(deployment.exportTemplate()).thenReturn(deploymentExportResult);
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack)).thenReturn(RESOURCE_GROUP_NAME);
-        when(azureUtils.getInstanceCloudResources(cloudContext, deployment, groups)).thenReturn(instances);
+        when(azureCloudResourceService.getCloudResources(deployment)).thenReturn(instances);
+        when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME)).thenReturn(instances);
         when(azureStackViewProvider.getAzureStack(any(), eq(stack), eq(client), eq(ac))).thenReturn(azureStackView);
     }
 
@@ -133,7 +133,7 @@ public class AzureResourceConnectorTest {
 
         verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(eq(ac), eq(stack), eq(ADJUSTMENT_TYPE),
                 eq(THRESHOLD), eq(instances), any());
-        verify(azureUtils, times(1)).getInstanceCloudResources(cloudContext, deployment, groups);
+        verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
         verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(azureUtils, times(1)).getCustomSubnetIds(network);
     }
@@ -146,7 +146,7 @@ public class AzureResourceConnectorTest {
 
         verify(azureComputeResourceService, times(0)).buildComputeResourcesForLaunch(any(AuthenticatedContext.class),
                 any(CloudStack.class), any(AdjustmentType.class), anyLong(), any(), any());
-        verify(azureUtils, times(0)).getInstanceCloudResources(cloudContext, deployment, groups);
+        verify(azureCloudResourceService, times(0)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
         verify(azureUtils, times(0)).getCustomNetworkId(network);
     }
 

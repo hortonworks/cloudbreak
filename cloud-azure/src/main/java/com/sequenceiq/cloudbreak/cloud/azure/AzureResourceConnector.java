@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -82,9 +81,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     private AzureStorage azureStorage;
 
     @Inject
-    private CloudResourceHelper cloudResourceHelper;
-
-    @Inject
     private AzureVirtualMachineService azureVirtualMachineService;
 
     @Inject
@@ -106,24 +102,29 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     @Inject
     private AzureStackViewProvider azureStackViewProvider;
 
+    @Inject
+    private AzureCloudResourceService azureCloudResourceService;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) {
         AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
-        String stackName = azureUtils.getStackName(ac.getCloudContext());
-        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
+        CloudContext cloudContext = ac.getCloudContext();
+        String stackName = azureUtils.getStackName(cloudContext);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
         AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, ac);
 
         String customImageId = azureStorage.getCustomImageId(client, ac, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
-                ac.getCloudContext(), stack, AzureInstanceTemplateOperation.PROVISION);
+                cloudContext, stack, AzureInstanceTemplateOperation.PROVISION);
+
         String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
         Boolean encrytionNeeded = azureStorage.isEncrytionNeeded(stack.getParameters());
 
         try {
-            String region = ac.getCloudContext().getLocation().getRegion().value();
+            String region = cloudContext.getLocation().getRegion().value();
             if (AzureUtils.hasUnmanagedDisk(stack)) {
                 Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
                 for (Entry<String, AzureDiskType> entry : storageAccounts.entrySet()) {
@@ -133,13 +134,17 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
                 Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
                 LOGGER.debug("Created template deployment for launch: {}", templateDeployment.exportTemplate().template());
+
+                List<CloudResource> cloudResources = azureCloudResourceService.getCloudResources(templateDeployment);
+                azureCloudResourceService.saveCloudResources(notifier, cloudContext, cloudResources);
+
                 String networkName = azureUtils.getCustomNetworkId(stack.getNetwork());
                 List<String> subnetNameList = azureUtils.getCustomSubnetIds(stack.getNetwork());
-                List<CloudResource> networkResources = client.collectAndSaveNetworkAndSubnet(
-                        resourceGroupName, stackName, notifier, ac.getCloudContext(), subnetNameList, networkName);
-                List<CloudResource> instances = azureUtils.getInstanceCloudResources(ac.getCloudContext(), templateDeployment, stack.getGroups());
+                List<CloudResource> networkResources = azureCloudResourceService.collectAndSaveNetworkAndSubnet(
+                        resourceGroupName, stackName, notifier, cloudContext, subnetNameList, networkName, client);
+                List<CloudResource> instances = azureCloudResourceService.getInstanceCloudResources(
+                        stackName, cloudResources, stack.getGroups(), resourceGroupName);
                 azureComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentType, threshold, instances, networkResources);
-
             }
         } catch (CloudException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);
@@ -155,7 +160,10 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", stackName, e.getMessage()));
         }
 
-        CloudResource cloudResource = new Builder().type(ResourceType.ARM_TEMPLATE).name(resourceGroupName).build();
+        CloudResource cloudResource = new Builder()
+                .type(ResourceType.ARM_TEMPLATE)
+                .name(resourceGroupName)
+                .build();
         List<CloudResourceStatus> resources = check(ac, Collections.singletonList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
@@ -191,8 +199,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         for (CloudResource resource : resources) {
             switch (resource.getType()) {
             case ARM_TEMPLATE:
-                LOGGER.debug("Checking Azure group stack status of: {}", stackName);
-                handleArmTemplate(result, client, stackName, resource);
+                LOGGER.debug("Checking Azure stack status of: {}", stackName);
+                checkTemplateDeployment(result, client, stackName, resource);
                 break;
             case AZURE_NETWORK:
             case AZURE_SUBNET:
@@ -206,7 +214,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         return result;
     }
 
-    private void handleArmTemplate(List<CloudResourceStatus> result, AzureClient client, String stackName, CloudResource resource) {
+    private void checkTemplateDeployment(List<CloudResourceStatus> result, AzureClient client, String stackName, CloudResource resource) {
         try {
             String resourceGroupName = resource.getName();
             CloudResourceStatus templateResourceStatus;
@@ -364,7 +372,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         AzureClient client = ac.getParameter(AzureClient.class);
         String diskContainer = azureStorage.getDiskContainerName(ac.getCloudContext());
 
-        List<CloudResource> networkResources = cloudResourceHelper.getNetworkResources(resources);
+        List<CloudResource> networkResources = azureCloudResourceService.getNetworkResources(resources);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
 
         Map<String, VirtualMachine> vmsFromAzure = azureVirtualMachineService.getVmsFromAzureAndFillStatuses(ac, vms, new ArrayList<>());
@@ -480,10 +488,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     private String getNameFromConnectionString(String connection) {
         return connection.split("/")[connection.split("/").length - 1];
-    }
-
-    private Collection<String> emptyIfNull(Object collection) {
-        return collection == null ? Collections.emptySet() : (Collection<String>) collection;
     }
 
 }

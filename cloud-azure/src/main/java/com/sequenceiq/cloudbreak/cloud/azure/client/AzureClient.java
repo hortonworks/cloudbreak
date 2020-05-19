@@ -52,7 +52,6 @@ import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentMode;
 import com.microsoft.azure.management.resources.DeploymentOperations;
-import com.microsoft.azure.management.resources.Deployments;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.ResourceGroups;
 import com.microsoft.azure.management.resources.Subscription;
@@ -78,11 +77,7 @@ import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.common.api.type.ResourceType;
 
 import rx.Completable;
 import rx.Observable;
@@ -192,16 +187,8 @@ public class AzureClient {
         handleAuthException(() -> azure.deployments().getByResourceGroup(resourceGroupName, deploymentName).cancel());
     }
 
-    public Deployments getTemplateDeployments(String resourceGroupName) {
-        return handleAuthException(azure::deployments);
-    }
-
     public StorageAccounts getStorageAccounts() {
         return handleAuthException(azure::storageAccounts);
-    }
-
-    public PagedList<StorageAccount> getStorageAccountsForResourceGroup(String resourceGroup) {
-        return handleAuthException(() -> azure.storageAccounts().listByResourceGroup(resourceGroup));
     }
 
     public void deleteStorageAccount(String resourceGroup, String storageName) {
@@ -605,43 +592,6 @@ public class AzureClient {
             }
         }
         return resultList;
-    }
-
-    public List<CloudResource> collectAndSaveNetworkAndSubnet(String resourceGroupName, String virtualNetwork, PersistenceNotifier notifier,
-            CloudContext cloudContext, List<String> subnetNameList, String networkName) {
-        List<CloudResource> resources = new ArrayList<>();
-
-        if (subnetNameList.isEmpty()) {
-            Optional<Subnet> first = getSubnets(resourceGroupName, virtualNetwork).values().stream().findFirst();
-            if (first.isPresent()) {
-                Subnet subnet = first.get();
-                String subnetName = subnet.name();
-                subnetNameList.add(subnetName);
-                networkName = subnet.parent().name();
-            }
-        }
-        CloudResource resourceGroupResource = CloudResource.builder().
-                name(resourceGroupName).
-                type(ResourceType.AZURE_RESOURCE_GROUP).
-                build();
-        resources.add(resourceGroupResource);
-        notifier.notifyAllocation(resourceGroupResource, cloudContext);
-
-        CloudResource networkResource = CloudResource.builder().
-                name(networkName).
-                type(ResourceType.AZURE_NETWORK).
-                build();
-        resources.add(networkResource);
-        notifier.notifyAllocation(networkResource, cloudContext);
-        for (String subnetName : subnetNameList) {
-            CloudResource subnetResource = CloudResource.builder().
-                    name(subnetName).
-                    type(ResourceType.AZURE_SUBNET).
-                    build();
-            resources.add(subnetResource);
-            notifier.notifyAllocation(subnetResource, cloudContext);
-        }
-        return resources;
     }
 
     private Set<VirtualMachineSize> getAllElement(Collection<VirtualMachineSize> virtualMachineSizes, Set<VirtualMachineSize> resultList) {

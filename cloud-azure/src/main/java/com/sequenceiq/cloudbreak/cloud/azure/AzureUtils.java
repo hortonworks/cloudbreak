@@ -1,15 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureResourceConnector.RESOURCE_GROUP_NAME;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -24,12 +20,10 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
-import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentOperation;
 import com.microsoft.azure.management.resources.DeploymentOperations;
-import com.microsoft.azure.management.resources.TargetResource;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
 import com.sequenceiq.cloudbreak.cloud.azure.task.AzurePollTaskFactory;
@@ -51,7 +45,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 import rx.Completable;
@@ -68,8 +61,6 @@ public class AzureUtils {
     private static final String NO_PUBLIC_IP = "noPublicIp";
 
     private static final int HOST_GROUP_LENGTH = 3;
-
-    private static final String MICROSOFT_COMPUTE_VIRTUAL_MACHINES = "Microsoft.Compute/virtualMachines";
 
     private static final int NETWORKINTERFACE_DETACH_CHECKING_INTERVAL = 5000;
 
@@ -237,41 +228,6 @@ public class AzureUtils {
                 throw new CloudConnectorException("Only the DS instance types supports the premium storage.");
             }
         }
-    }
-
-    public List<CloudResource> getInstanceCloudResources(CloudContext cc,
-            Deployment templateDeployment, List<Group> groups) {
-        PagedList<DeploymentOperation> operations = templateDeployment.deploymentOperations().list();
-        List<CloudResource> cloudResourceList = new ArrayList<>();
-        for (DeploymentOperation operation : operations) {
-            TargetResource resource = operation.targetResource();
-            if (Objects.nonNull(resource) && resource.resourceType().equals(MICROSOFT_COMPUTE_VIRTUAL_MACHINES)) {
-                String vmName = operation.targetResource().resourceName();
-                String resourceGroupNm = templateDeployment.resourceGroupName();
-                for (Group group : groups) {
-                    for (CloudInstance instance : group.getInstances()) {
-                        String id = getPrivateInstanceId(
-                                getStackName(cc), group.getName(), Long.toString(instance.getTemplate().getPrivateId()));
-                        if (vmName.equals(id) && instance.getTemplate().getStatus().equals(InstanceStatus.CREATE_REQUESTED)) {
-                            Map<String, Object> paramsMap = new HashMap<>();
-                            paramsMap.put(RESOURCE_GROUP_NAME, resourceGroupNm);
-                            CloudResource vm = CloudResource.builder()
-                                    .type(ResourceType.AZURE_INSTANCE)
-                                    .instanceId(id)
-                                    .name(id)
-                                    .group(group.getName())
-                                    .status(CommonStatus.CREATED)
-                                    .persistent(false)
-                                    .params(paramsMap)
-                                    .build();
-                            cloudResourceList.add(vm);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        return cloudResourceList;
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
