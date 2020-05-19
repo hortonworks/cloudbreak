@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.microsoft.azure.management.resources.ResourceGroup;
-import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,6 +14,7 @@ import com.google.common.collect.Lists;
 import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
@@ -26,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -153,7 +153,7 @@ public class AzureDatabaseResourceService {
     public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext ac, DatabaseStack stack) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
-        String resourceGroupName = azureUtils.getResourceGroupName(cloudContext, stack);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
 
         try {
             ResourceGroup resourceGroup = client.getResourceGroup(resourceGroupName);
