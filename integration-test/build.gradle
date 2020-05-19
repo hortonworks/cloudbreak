@@ -99,7 +99,7 @@ dependencies {
   compile (group: 'com.microsoft.azure',          name: 'azure',                          version: azureSdkVersion) { exclude group: 'org.slf4j' }
   compile group:  'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev133-1.22.0'
   compile group: 'com.google.apis',               name: 'google-api-services-storage',    version: 'v1-rev94-1.22.0'
-  compile group: 'com.microsoft.azure',           name: 'azure-storage',                  version: '5.0.0'
+  compile group: 'com.microsoft.azure',           name: 'azure-storage',                  version: azureStorageSdkVersion
   compile group: 'com.microsoft.azure',           name: 'azure-data-lake-store-sdk',      version: '2.1.5'
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion

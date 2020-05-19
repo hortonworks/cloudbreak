@@ -49,12 +49,12 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public void cloudStorageListContainerFreeIPA(String baseLocation) {
+    public void cloudStorageListContainerFreeIPA(String baseLocation, String clusterName, String crn) {
         amazonS3Util.listFreeIPAObject(baseLocation);
     }
 
     @Override
-    public void cloudStorageListContainerDataLake(String baseLocation) {
+    public void cloudStorageListContainerDataLake(String baseLocation, String clusterName, String crn) {
         amazonS3Util.listDataLakeObject(baseLocation);
     }
 
