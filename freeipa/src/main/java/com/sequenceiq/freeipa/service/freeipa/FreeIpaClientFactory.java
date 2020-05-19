@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
+import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -204,8 +205,8 @@ public class FreeIpaClientFactory {
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(
                 stack, instanceMetaData.getPublicIpWrapper(), instanceMetaData);
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), httpClientConfig, stack.getGatewayport(),
-                instanceMetaData.getDiscoveryFQDN());
+        int gatewayPort = Optional.ofNullable(stack.getGatewayport()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
+        return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), httpClientConfig, gatewayPort, instanceMetaData.getDiscoveryFQDN());
     }
 
     private FreeIpaClientException createFreeIpaStateIsInvalidException(Status stackStatus) {

@@ -14,11 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceHealthCheck;
+import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequestBuilder;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
@@ -48,12 +50,6 @@ public class ClusterProxyService {
     private static final String FREEIPA_SERVICE_NAME = "freeipa";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyService.class);
-
-    private static final String VAULT_KEY_SUFFIX = ":secret";
-
-    private static final Boolean NO_TLS_STRICT_CHECK = false;
-
-    private static final Boolean USE_TUNNEL = true;
 
     private static final String GATEWAY_SERVICE_TYPE = "GATEWAY";
 
@@ -151,15 +147,16 @@ public class ClusterProxyService {
             serviceConfigs.addAll(createDnsMappedServiceConfigs(stack, gatewayConfigs, clientCertificate, usePrivateIpToTls));
             tunnelGatewayConfigs = gatewayConfigs;
         } else {
-            tunnelGatewayConfigs = List.of();
+            tunnelGatewayConfigs = List.of(primaryGatewayConfig);
         }
 
-        LOGGER.debug("Registering service configs [{}]", serviceConfigs);
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withServices(serviceConfigs)
                 .withTunnelEntries(createTunnelEntries(stack, tunnelGatewayConfigs))
                 .withAccountId(stack.getAccountId());
-        ConfigRegistrationResponse response = clusterProxyRegistrationClient.registerConfig(requestBuilder.build());
+        ConfigRegistrationRequest request = requestBuilder.build();
+        LOGGER.debug("Registring cluser proxy configuration [{}]", request);
+        ConfigRegistrationResponse response = clusterProxyRegistrationClient.registerConfig(request);
 
         if (waitForGoodHealth) {
             pollForGoodHealth(stack);
@@ -207,8 +204,7 @@ public class ClusterProxyService {
         return new ClusterServiceConfig(serviceName,
                 List.of(getNginxEndpointForRegistration(stack, gatewayConfig, usePrivateIpToTls)),
                 List.of(),
-                clientCertificate,
-                NO_TLS_STRICT_CHECK
+                clientCertificate
         );
     }
 
@@ -225,7 +221,6 @@ public class ClusterProxyService {
                 endpoints,
                 List.of(),
                 clientCertificate,
-                NO_TLS_STRICT_CHECK,
                 new ClusterServiceHealthCheck(intervalInSec, healthStatusEndpoint, timeoutInSec, healthyStatusCode)
         ));
         return serviceConfigs;
@@ -238,7 +233,7 @@ public class ClusterProxyService {
                             gatewayConfig.getInstanceId(),
                             GATEWAY_SERVICE_TYPE,
                             gatewayConfig.getPrivateAddress(),
-                            gatewayConfig.getGatewayPort(),
+                            getNginxPort(stack),
                             stack.getMinaSshdServiceId()))
                     .collect(Collectors.toList());
         } else {
@@ -281,7 +276,11 @@ public class ClusterProxyService {
         if (usePrivateIpToTls) {
             ipAddresss = gatewayConfig.getPrivateAddress();
         }
-        return String.format("%s://%s:%d", NGINX_PROTOCOL, ipAddresss, stack.getGatewayport());
+        return String.format("%s://%s:%d", NGINX_PROTOCOL, ipAddresss, getNginxPort(stack));
+    }
+
+    private int getNginxPort(Stack stack) {
+        return Optional.ofNullable(stack.getGatewayport()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
     }
 
     public void pollForGoodHealth(Stack stack) {
