@@ -441,6 +441,10 @@ public class AzureClient {
         handleAuthException(() -> azure.availabilitySets().deleteByResourceGroup(resourceGroup, asName));
     }
 
+    public Completable deleteAvailabilitySetAsync(String resourceGroup, String asName) {
+        return handleAuthException(() -> azure.availabilitySets().deleteByResourceGroupAsync(resourceGroup, asName));
+    }
+
     public Completable deallocateVirtualMachineAsync(String resourceGroup, String vmName) {
         return handleAuthException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName));
     }
