@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -70,7 +71,7 @@ public class NetworkServiceTest {
         when(environmentNetworkConverterMap.get(any(CloudPlatform.class))).thenReturn(environmentNetworkConverter);
         when(environmentNetworkConverter.convert(environment, networkDto, Collections.emptyMap())).thenReturn(baseNetwork);
         when(environmentNetworkConverter.convertToNetwork(baseNetwork)).thenReturn(network);
-        when(environmentNetworkService.getNetworkCidr(eq(network), anyString(), eq(credential))).thenReturn(cidr);
+        when(environmentNetworkService.getNetworkCidr(eq(network), anyString(), eq(credential))).thenReturn(new NetworkCidr(cidr));
         when(networkRepository.save(baseNetwork)).thenReturn(baseNetwork);
 
         BaseNetwork result = underTest.saveNetwork(environment, networkDto, "accountId", Collections.emptyMap());

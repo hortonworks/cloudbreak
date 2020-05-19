@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
+import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
@@ -221,8 +222,8 @@ public class AzureNetworkConnectorTest {
         when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(azureNetwork);
         when(azureNetwork.addressSpaces()).thenReturn(List.of(cidrBlock));
 
-        String result = underTest.getNetworkCidr(network, credential);
-        assertEquals(cidrBlock, result);
+        NetworkCidr result = underTest.getNetworkCidr(network, credential);
+        assertEquals(cidrBlock, result.getCidr());
     }
 
     @Test
@@ -264,8 +265,8 @@ public class AzureNetworkConnectorTest {
         when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(azureNetwork);
         when(azureNetwork.addressSpaces()).thenReturn(List.of(cidrBlock1, cidrBlock2));
 
-        String result = underTest.getNetworkCidr(network, credential);
-        assertEquals(cidrBlock1, result);
+        NetworkCidr result = underTest.getNetworkCidr(network, credential);
+        assertEquals(cidrBlock1, result.getCidr());
     }
 
     @Test

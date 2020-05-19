@@ -7,6 +7,7 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAI
 import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,6 +48,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Vpc;
+import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
@@ -70,6 +72,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
+import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.common.api.type.Tunnel;
 
@@ -293,8 +296,8 @@ public class AwsNetworkConnectorTest {
         when(awsClient.createAccess(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
         when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
 
-        String result = underTest.getNetworkCidr(network, credential);
-        assertEquals(cidrBlock, result);
+        NetworkCidr result = underTest.getNetworkCidr(network, credential);
+        assertEquals(cidrBlock, result.getCidr());
     }
 
     @Test
@@ -316,7 +319,7 @@ public class AwsNetworkConnectorTest {
     }
 
     @Test
-    public void testGetNetworkCidrMoreThanOne() {
+    public void testGetNetworkCidrMoreThanOneAssociatedCidrOnOneVpcShouldReturn2Cidr() {
         String existingVpc = "vpc-1";
         String cidrBlock1 = "10.0.0.0/16";
         String cidrBlock2 = "10.23.0.0/16";
@@ -329,8 +332,10 @@ public class AwsNetworkConnectorTest {
         when(awsClient.createAccess(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
         when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
 
-        String result = underTest.getNetworkCidr(network, credential);
-        assertEquals(cidrBlock1, result);
+        NetworkCidr result = underTest.getNetworkCidr(network, credential);
+        assertEquals(cidrBlock1, result.getCidr());
+        assertTrue(result.getCidrs().contains(cidrBlock1));
+        assertTrue(result.getCidrs().contains(cidrBlock2));
     }
 
     @Test
@@ -484,6 +489,12 @@ public class AwsNetworkConnectorTest {
         for (String block : cidrBlocks) {
             Vpc vpc = new Vpc();
             vpc.setCidrBlock(block);
+
+            VpcCidrBlockAssociation vpcCidrBlockAssociation = new VpcCidrBlockAssociation();
+            vpcCidrBlockAssociation.setCidrBlock(block);
+
+            vpc.getCidrBlockAssociationSet().add(vpcCidrBlockAssociation);
+
             vpcs.add(vpc);
         }
         describeVpcsResult.withVpcs(vpcs);

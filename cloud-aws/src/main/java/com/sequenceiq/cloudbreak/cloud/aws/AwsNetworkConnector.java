@@ -35,6 +35,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Vpc;
+import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
@@ -57,6 +58,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
+import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 @Service
@@ -124,20 +126,35 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
     }
 
     @Override
-    public String getNetworkCidr(Network network, CloudCredential credential) {
+    public NetworkCidr getNetworkCidr(Network network, CloudCredential credential) {
         AwsCredentialView awsCredentialView = new AwsCredentialView(credential);
         AmazonEC2Client awsClientAccess = awsClient.createAccess(awsCredentialView, network.getStringParameter(AwsNetworkView.REGION));
         AwsNetworkView awsNetworkView = new AwsNetworkView(network);
         String existingVpc = awsNetworkView.getExistingVpc();
         DescribeVpcsResult describeVpcsResult = awsClientAccess.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc));
-        List<String> vpcCidrs = describeVpcsResult.getVpcs().stream().map(Vpc::getCidrBlock).collect(Collectors.toList());
+        List<String> vpcCidrs = new ArrayList<>();
+        for (Vpc vpc : describeVpcsResult.getVpcs()) {
+            if (vpc.getCidrBlockAssociationSet() != null) {
+                LOGGER.info("The VPC {} has associated CIDR block so using the CIDR blocks in the VPC.", vpc.getVpcId());
+                List<String> cidrs = vpc.getCidrBlockAssociationSet()
+                        .stream()
+                        .map(VpcCidrBlockAssociation::getCidrBlock)
+                        .collect(Collectors.toList());
+                LOGGER.info("The VPC {} CIDRs block are {}.", vpc.getVpcId(), cidrs);
+                vpcCidrs.addAll(cidrs);
+            } else {
+                LOGGER.info("The VPC {} has no associated CIDR block so using the CIDR block in the VPC.", vpc.getVpcId());
+                vpcCidrs.add(vpc.getCidrBlock());
+            }
+        }
+
         if (vpcCidrs.isEmpty()) {
             throw new BadRequestException("VPC cidr could not fetch from AWS: " + existingVpc);
         }
         if (vpcCidrs.size() > 1) {
             LOGGER.info("More than one vpc cidrs for VPC {}. We will use the first one: {}", existingVpc, vpcCidrs.get(0));
         }
-        return vpcCidrs.get(0);
+        return new NetworkCidr(vpcCidrs.get(0), vpcCidrs);
     }
 
     @Override

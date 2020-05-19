@@ -28,6 +28,7 @@ public class NetworkDtoToResponseConverter {
                 .withCrn(network.getResourceCrn())
                 .withSubnetIds(network.getSubnetIds())
                 .withNetworkCidr(network.getNetworkCidr())
+                .withNetworkCidrs(network.getNetworkCidrs())
                 .withSubnetMetas(network.getSubnetMetas())
                 .withCbSubnets(network.getCbSubnets())
                 .withDwxSubnets(network.getDwxSubnets())

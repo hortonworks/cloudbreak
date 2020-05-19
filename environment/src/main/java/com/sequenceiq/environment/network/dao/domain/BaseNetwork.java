@@ -58,6 +58,8 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     private String networkCidr;
 
+    private String networkCidrs;
+
     @Enumerated(EnumType.STRING)
     private RegistrationType registrationType;
 
@@ -128,6 +130,14 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     public void setNetworkCidr(String networkCidr) {
         this.networkCidr = networkCidr;
+    }
+
+    public String getNetworkCidrs() {
+        return networkCidrs;
+    }
+
+    public void setNetworkCidrs(String networkCidrs) {
+        this.networkCidrs = networkCidrs;
     }
 
     public RegistrationType getRegistrationType() {

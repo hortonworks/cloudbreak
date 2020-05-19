@@ -17,6 +17,9 @@ public class AwsNetworkView {
     static final String VPC_CIDR = "vpcCidr";
 
     @VisibleForTesting
+    static final String VPC_CIDRS = "vpcCidrs";
+
+    @VisibleForTesting
     static final String IGW = "internetGatewayId";
 
     @VisibleForTesting
@@ -63,4 +66,13 @@ public class AwsNetworkView {
     public String getExistingVpcCidr() {
         return network.getStringParameter(VPC_CIDR);
     }
+
+    public List<String> getExistingVpcCidrs() {
+        List<String> cidrs = network.getParameter(VPC_CIDRS, List.class);
+        if (cidrs == null) {
+            return List.of(getExistingVpcCidr());
+        }
+        return cidrs;
+    }
+
 }

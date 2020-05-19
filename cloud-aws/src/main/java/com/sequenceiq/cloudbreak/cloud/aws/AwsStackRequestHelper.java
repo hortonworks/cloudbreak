@@ -214,7 +214,6 @@ public class AwsStackRequestHelper {
             parameters.addAll(
                     asList(
                             new Parameter().withParameterKey("VPCIdParameter").withParameterValue(String.valueOf(awsNetworkView.getExistingVpc())),
-                            new Parameter().withParameterKey("VPCCidrParameter").withParameterValue(String.valueOf(awsNetworkView.getExistingVpcCidr())),
                             new Parameter().withParameterKey("DBSecurityGroupNameParameter")
                                     .withParameterValue(awsRdsVpcSecurityGroupView.getDBSecurityGroupName())
                     )

@@ -30,6 +30,7 @@ public class YarnNetwork extends BaseNetwork {
     public void setNetworkCidr(String networkCidr) {
         if (Objects.nonNull(networkCidr)) {
             super.setNetworkCidr(networkCidr);
+            super.setNetworkCidrs(networkCidr);
         }
     }
 }

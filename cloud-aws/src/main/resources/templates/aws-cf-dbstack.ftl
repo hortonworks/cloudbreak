@@ -98,10 +98,6 @@
     "VPCIdParameter": {
         "Type":"AWS::EC2::VPC::Id",
         "Description":"VPC ID"
-    },
-    "VPCCidrParameter": {
-        "Type":"String",
-        "Description":"VPC Cidr"
     }
     </#if>
   },
@@ -124,6 +120,7 @@
                     }
               ],
               "SecurityGroupIngress" : [
+                    <#list networkCidrs as cidr>
                     {
                       "IpProtocol" : "tcp",
                       <#if !hasPort>
@@ -133,8 +130,9 @@
                       "FromPort": { "Ref": "PortParameter" },
                       "ToPort" : { "Ref": "PortParameter" },
                       </#if>
-                      "CidrIp" : {"Ref":"VPCCidrParameter"}
-                    }
+                      "CidrIp" : "${cidr}"
+                    }<#if cidr_has_next>,</#if>
+                    </#list>
               ],
               "Tags" : [
                     { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } }

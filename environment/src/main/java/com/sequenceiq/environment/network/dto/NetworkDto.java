@@ -34,6 +34,8 @@ public class NetworkDto {
 
     private final String networkCidr;
 
+    private final Set<String> networkCidrs;
+
     private Map<String, CloudSubnet> subnetMetas;
 
     private final Map<String, CloudSubnet> cbSubnets;
@@ -61,6 +63,7 @@ public class NetworkDto {
         dwxSubnets = builder.dwxSubnets;
         mlxSubnets = builder.mlxSubnets;
         networkCidr = builder.networkCidr;
+        networkCidrs = builder.networkCidrs;
         networkId = builder.networkId;
         privateSubnetCreation = builder.privateSubnetCreation;
         registrationType = builder.registrationType;
@@ -113,6 +116,10 @@ public class NetworkDto {
 
     public String getNetworkCidr() {
         return networkCidr;
+    }
+
+    public Set<String> getNetworkCidrs() {
+        return networkCidrs;
     }
 
     public Map<String, CloudSubnet> getSubnetMetas() {
@@ -171,6 +178,7 @@ public class NetworkDto {
                 ", yarn=" + yarn +
                 ", mock=" + mock +
                 ", networkCidr='" + networkCidr + '\'' +
+                ", networkCidrs='" + networkCidrs + '\'' +
                 ", subnetMetas=" + subnetMetas +
                 ", privateSubnetCreation=" + privateSubnetCreation +
                 ", registrationType=" + registrationType +
@@ -206,6 +214,8 @@ public class NetworkDto {
 
         private String networkCidr;
 
+        private Set<String> networkCidrs;
+
         private PrivateSubnetCreation privateSubnetCreation;
 
         private RegistrationType registrationType;
@@ -232,6 +242,7 @@ public class NetworkDto {
             cbSubnets = networkDto.cbSubnets;
             mlxSubnets = networkDto.mlxSubnets;
             dwxSubnets = networkDto.dwxSubnets;
+            networkCidrs = networkDto.networkCidrs;
         }
 
         public Builder withId(Long id) {
@@ -310,6 +321,11 @@ public class NetworkDto {
 
         public Builder withRegistrationType(RegistrationType registrationType) {
             this.registrationType = registrationType;
+            return this;
+        }
+
+        public Builder withNetworkCidrs(Set<String> networkCidrs) {
+            this.networkCidrs = networkCidrs;
             return this;
         }
 
