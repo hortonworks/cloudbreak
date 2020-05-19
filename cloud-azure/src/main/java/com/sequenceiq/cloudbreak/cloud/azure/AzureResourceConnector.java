@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,6 +105,9 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     @Inject
     private AzureStackViewProvider azureStackViewProvider;
 
+    @Inject
+    private AzureDownscaleService azureDownscaleService;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) {
@@ -138,7 +140,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                         resourceGroupName, stackName, notifier, ac.getCloudContext(), subnetNameList, networkName);
                 List<CloudResource> instances = azureUtils.getInstanceCloudResources(ac.getCloudContext(), templateDeployment, stack.getGroups());
                 azureComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentType, threshold, instances, networkResources);
-
             }
         } catch (CloudException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);
@@ -360,62 +361,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
             Map<String, Map<String, Object>> resourcesToRemove) {
-        AzureClient client = ac.getParameter(AzureClient.class);
-        String diskContainer = azureStorage.getDiskContainerName(ac.getCloudContext());
-
-        List<CloudResource> networkResources = cloudResourceHelper.getNetworkResources(resources);
-        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
-
-        Map<String, VirtualMachine> vmsFromAzure = azureVirtualMachineService.getVmsFromAzureAndFillStatuses(ac, vms, new ArrayList<>());
-        List<CloudInstance> cloudInstancesSyncedWithAzure = vms.stream()
-                .filter(cloudInstance -> vmsFromAzure.containsKey(cloudInstance.getInstanceId()))
-                .collect(Collectors.toList());
-        azureUtils.deleteInstances(ac, cloudInstancesSyncedWithAzure);
-
-        List<String> networkInterfaceNames = getResourcesByResourceType(resourcesToRemove, NETWORK_INTERFACES_NAMES);
-        azureUtils.waitForDetachNetworkInterfaces(ac, client, resourceGroupName, networkInterfaceNames);
-        azureUtils.deleteNetworkInterfaces(client, resourceGroupName, networkInterfaceNames);
-
-        List<String> publicAddressNames = getResourcesByResourceType(resourcesToRemove, PUBLIC_ADDRESS_NAME);
-        azureUtils.deletePublicIps(client, resourceGroupName, publicAddressNames);
-
-        List<String> managedDiskIds = getResourcesByResourceType(resourcesToRemove, MANAGED_DISK_IDS);
-        azureUtils.deleteManagedDisks(client, managedDiskIds);
-
-        for (CloudInstance instance : vms) {
-            String instanceId = instance.getInstanceId();
-            Map<String, Object> instanceResources = resourcesToRemove.get(instanceId);
-            try {
-                if (instanceResources != null) {
-                    // TODO: blocking foreach!
-                    //       it can be slow only on clusters with unmanaged disks!
-                    deleteDisk(CollectionUtils.emptyIfNull((Collection<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES)), client, resourceGroupName,
-                            (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), diskContainer);
-                    if (azureStorage.getArmAttachedStorageOption(stack.getParameters()) == ArmAttachedStorageOption.PER_VM) {
-                        azureStorage.deleteStorage(client, (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), resourceGroupName);
-                    }
-                    List<CloudResource> resourcesToDownscale = resources.stream()
-                            .filter(resource -> vms.stream()
-                                    .map(CloudInstance::getInstanceId)
-                                    .collect(Collectors.toList())
-                                    .contains(resource.getInstanceId()))
-                            .collect(Collectors.toList());
-                        azureComputeResourceService.deleteComputeResources(ac, stack, resourcesToDownscale, networkResources);
-                }
-            } catch (CloudConnectorException e) {
-                throw e;
-            } catch (RuntimeException e) {
-                throw new CloudConnectorException(String.format("Failed to cleanup resources after downscale: %s", resourceGroupName), e);
-            }
-        }
-        return check(ac, resources);
-    }
-
-    private List<String> getResourcesByResourceType(Map<String, Map<String, Object>> resourcesToRemove, String resourceType) {
-        return resourcesToRemove.entrySet().stream()
-                .filter(instanceResources -> instanceResources.getValue().get(resourceType) != null)
-                .flatMap(instanceResources -> ((Collection<String>) instanceResources.getValue().get(resourceType)).stream())
-                .collect(Collectors.toList());
+        return azureDownscaleService.downscale(ac, stack, resources, vms, resourcesToRemove);
     }
 
     @Override
@@ -458,21 +404,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             } else {
                 LOGGER.debug("Container not found: resourcegroup={}, storagename={}, container={}",
                         resourceGroup, storageName, container);
-            }
-        }
-    }
-
-    private void deleteDisk(Collection<String> storageProfileDiskNames, AzureClient azureClient, String resourceGroup, String storageName, String container) {
-        for (String storageProfileDiskName : storageProfileDiskNames) {
-            try {
-                azureClient.deleteBlobInStorageContainer(resourceGroup, storageName, container, storageProfileDiskName);
-            } catch (CloudException e) {
-                if (e.response().code() != AzureConstants.NOT_FOUND) {
-                    throw new CloudConnectorException(String.format("Could not delete blob: %s", storageProfileDiskName), e);
-                } else {
-                    LOGGER.debug("Disk not found: resourceGroup={}, storageName={}, container={}, storageProfileDiskName: {}",
-                            resourceGroup, storageName, container, storageProfileDiskName);
-                }
             }
         }
     }

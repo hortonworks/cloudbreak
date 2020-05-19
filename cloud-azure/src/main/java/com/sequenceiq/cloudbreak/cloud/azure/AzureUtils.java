@@ -368,6 +368,26 @@ public class AzureUtils {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteAvailabilitySets(AzureClient azureClient, String resourceGroupName, Collection<String> availabilitySetNames) {
+        LOGGER.info("Delete availability sets: {}", availabilitySetNames);
+        List<Completable> deleteCompletables = new ArrayList<>();
+        List<String> failedToDeleteAvailabiltySets = new ArrayList<>();
+        for (String availabilitySetName : availabilitySetNames) {
+            deleteCompletables.add(azureClient.deleteAvailabilitySetAsync(resourceGroupName, availabilitySetName)
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happend on azure availability set delete: {}", availabilitySetName, throwable);
+                        failedToDeleteAvailabiltySets.add(availabilitySetName);
+                    })
+                    .subscribeOn(Schedulers.io()));
+        }
+        Completable.merge(deleteCompletables).await();
+        if (!failedToDeleteAvailabiltySets.isEmpty()) {
+            LOGGER.error("Can't delete every availability set: {}", failedToDeleteAvailabiltySets);
+            throw new CloudbreakServiceException("Can't delete availability sets: " + failedToDeleteAvailabiltySets);
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public void deleteManagedDisks(AzureClient azureClient, Collection<String> managedDiskIds) {
         LOGGER.info("Delete managed disks: {}", managedDiskIds);
         List<Completable> deleteCompletables = new ArrayList<>();
