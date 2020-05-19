@@ -154,7 +154,7 @@ public class ClusterProxyService {
 
         List<ClusterServiceCredential> credentials = asList(new ClusterServiceCredential(cloudbreakUser, cloudbreakPasswordVaultPath),
                 new ClusterServiceCredential(dpUser, dpPasswordVaultPath, true));
-        return new ClusterServiceConfig(serviceName, singletonList(clusterManagerUrl), credentials, clientCertificate, null);
+        return new ClusterServiceConfig(serviceName, singletonList(clusterManagerUrl), credentials, clientCertificate);
     }
 
     private ClientCertificate clientCertificates(Stack stack) {

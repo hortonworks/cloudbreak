@@ -23,7 +23,7 @@ public class ServiceEndpointHealthListenerTask implements StatusCheckerTask<Serv
     public boolean checkStatus(ServiceEndpointHealthPollerObject serviceEndpointHealthPollerObject) {
         boolean healthy = false;
         String clusterIdentifer = serviceEndpointHealthPollerObject.getClusterIdentifier();
-        LOGGER.debug("Check cluter proxy endpoint health for {}.", clusterIdentifer);
+        LOGGER.debug("Check cluster proxy endpoint health for {}.", clusterIdentifer);
         try {
             ClusterProxyRegistrationClient client = serviceEndpointHealthPollerObject.getClient();
             ReadConfigResponse response = client.readConfig(clusterIdentifer);
@@ -37,7 +37,7 @@ public class ServiceEndpointHealthListenerTask implements StatusCheckerTask<Serv
                 healthy = stillWaitingForHealthyCount == 0;
             }
         } catch (Exception e) {
-            LOGGER.debug("Failed to check cluter proxy endpoint health for {}, error: {}", clusterIdentifer, e.getMessage());
+            LOGGER.debug("Failed to check cluster proxy endpoint health for {}, error: {}", clusterIdentifer, e.getMessage());
         }
         return healthy;
     }
