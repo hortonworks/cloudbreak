@@ -4,7 +4,7 @@ public enum CommonStatus {
     REQUESTED,
     CREATED,
     DETACHED,
-    TRANSITIONAL;
+    FAILED;
 
     public boolean resourceExists() {
         return CREATED.equals(this) || DETACHED.equals(this);

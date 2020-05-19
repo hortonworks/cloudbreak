@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -59,6 +61,12 @@ public class AzureUpscaleService {
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
+    @Inject
+    private ResourceNotifier resourceNotifier;
+
+    @Inject
+    private AzureCloudResourceService azureCloudResourceService;
+
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, AzureStackView azureStackView,
             AzureClient client) {
         CloudContext cloudContext = ac.getCloudContext();
@@ -77,9 +85,14 @@ public class AzureUpscaleService {
             Deployment templateDeployment =
                     azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
             LOGGER.info("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
-            List<CloudResource> newInstances = azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups);
+
+            List<CloudResource> cloudResources = azureCloudResourceService.getCloudResources(templateDeployment);
+            azureCloudResourceService.saveCloudResources(resourceNotifier, cloudContext, cloudResources);
+
+            List<CloudResource> newInstances = azureCloudResourceService.getInstanceCloudResources(stackName, cloudResources, scaledGroups, resourceGroupName);
             List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(resources, newInstances);
-            List<CloudResource> networkResources = cloudResourceHelper.getNetworkResources(resources);
+            List<CloudResource> networkResources = azureCloudResourceService.getNetworkResources(resources);
+
             azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, reattachableVolumeSets, networkResources);
 
             return Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS));

@@ -28,7 +28,7 @@
         },
         "resourceGroupName": {
             "type": "string",
-            "defaultValue": "testEnv"
+            "defaultValue": "testRg"
         }
     },
     "variables": {

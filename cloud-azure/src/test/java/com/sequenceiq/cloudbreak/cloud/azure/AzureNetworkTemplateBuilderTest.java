@@ -38,6 +38,8 @@ public class AzureNetworkTemplateBuilderTest {
 
     private static final String ENV_NAME = "testEnv";
 
+    private static final String RG_NAME = "testRg";
+
     private static final String STACK_NAME = "testEnv-1";
 
     private static final String REGION = "US-WEST";
@@ -90,6 +92,7 @@ public class AzureNetworkTemplateBuilderTest {
                 .withPrivateSubnets(createSubnets())
                 .withNoPublicIp(false)
                 .withStackName(STACK_NAME)
+                .withResourceGroup(RG_NAME)
                 .build();
     }
 

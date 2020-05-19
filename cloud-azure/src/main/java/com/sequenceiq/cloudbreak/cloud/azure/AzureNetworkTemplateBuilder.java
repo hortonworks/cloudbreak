@@ -61,7 +61,7 @@ public class AzureNetworkTemplateBuilder {
         model.put("region", networkRequest.getRegion().value());
         model.put("networkPrefix", networkRequest.getNetworkCidr());
         model.put("subnetDetails", subnets);
-        model.put("resourceGroupName", networkRequest.getEnvName());
+        model.put("resourceGroupName", networkRequest.getResourceGroup());
         model.put("noPublicIp", networkRequest.isNoPublicIp());
         model.put("noFirewallRules", false);
         return model;

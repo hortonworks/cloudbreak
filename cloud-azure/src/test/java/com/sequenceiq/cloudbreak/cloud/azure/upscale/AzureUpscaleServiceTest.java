@@ -22,6 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentExportResult;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -91,6 +93,12 @@ public class AzureUpscaleServiceTest {
     @Mock
     private Deployment templateDeployment;
 
+    @Mock
+    private ResourceNotifier resourceNotifier;
+
+    @Mock
+    private AzureCloudResourceService azureCloudResourceService;
+
     @Before
     public void before() {
         when(azureStackView.getStorageAccounts()).thenReturn(Map.of("storageAccount", AzureDiskType.STANDARD_SSD_LRS));
@@ -115,8 +123,10 @@ public class AzureUpscaleServiceTest {
         CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
                 .name("instance").params(Map.of()).build();
         List<CloudResource> newInstances = List.of(newInstance);
-        when(azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups)).thenReturn(newInstances);
-        when(cloudResourceHelper.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
+        when(azureCloudResourceService.getCloudResources(templateDeployment)).thenReturn(newInstances);
+        when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
+
+        when(azureCloudResourceService.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
 
         List<CloudResourceStatus> actual = underTest.upscale(ac, stack, resources, azureStackView, client);
 
@@ -127,8 +137,8 @@ public class AzureUpscaleServiceTest {
         verify(cloudResourceHelper).getScaledGroups(stack);
         verify(azureTemplateDeploymentService).getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
         verify(templateDeployment).exportTemplate();
-        verify(azureUtils).getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups);
-        verify(cloudResourceHelper).getNetworkResources(resources);
+        verify(azureCloudResourceService).getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP);
+        verify(azureCloudResourceService).getNetworkResources(resources);
         verify(azureStackView).getStorageAccounts();
         verify(azureUtils).getStackName(any(CloudContext.class));
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(any(CloudContext.class), eq(stack));
@@ -156,8 +166,9 @@ public class AzureUpscaleServiceTest {
         CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
                 .name("instance").params(Map.of()).build();
         List<CloudResource> newInstances = List.of(newInstance);
-        when(azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups)).thenReturn(newInstances);
-        when(cloudResourceHelper.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
+        when(azureCloudResourceService.getCloudResources(templateDeployment)).thenReturn(newInstances);
+        when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
+        when(azureCloudResourceService.getNetworkResources(resources)).thenReturn(NETWORK_RESOURCES);
 
         underTest.upscale(ac, stack, resources, azureStackView, client);
 

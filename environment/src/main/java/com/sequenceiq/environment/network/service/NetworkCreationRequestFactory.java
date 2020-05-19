@@ -75,7 +75,7 @@ public class NetworkCreationRequestFactory {
                 .withPrivateSubnets(cidrs.getPrivateSubnets())
                 .withPublicSubnets(cidrs.getPublicSubnets());
         getNoPublicIp(networkDto).ifPresent(builder::withNoPublicIp);
-        getResourceGroupName(environment).ifPresent(builder::withResourceGroup);
+        getResourceGroupName(environment).ifPresentOrElse(builder::withResourceGroup, () -> builder.withResourceGroup(environment.getName()));
         return builder.build();
     }
 
