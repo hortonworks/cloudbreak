@@ -18,7 +18,7 @@ net.ipv6.conf.lo.disable_ipv6:
       - {{ host['fqdn'] }}
 {% endfor %}
 
-{% if salt['pillar.get']('freeipa:hosts') > 1 %}
+{% if salt['pillar.get']('freeipa:hosts') | length > 1 %}
 /cdp/ipahealthagent/freeipa_cluster_node:
   file.managed:
     - makedirs: True
