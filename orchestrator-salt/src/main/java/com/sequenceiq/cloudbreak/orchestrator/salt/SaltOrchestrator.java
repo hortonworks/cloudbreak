@@ -742,7 +742,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel, boolean adJoinable,
-            boolean ipaJoinable) throws CloudbreakOrchestratorFailedException {
+            boolean ipaJoinable, boolean forced) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
             Set<Node> responsiveNodes = getResponsiveNodes(nodes, sc);
             if (!responsiveNodes.isEmpty()) {
@@ -775,6 +775,12 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for cluster manager agent stop).", e);
+            throwExceptionIfNotForced(forced, e);
+        }
+    }
+
+    private void throwExceptionIfNotForced(boolean forced, Exception e) throws CloudbreakOrchestratorFailedException {
+        if (!forced) {
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }
@@ -970,7 +976,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         if (minionIpAddressesResponse != null) {
             nodes.forEach(node -> {
                 if (minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {
-                    LOGGER.info("Salt-minion is not responding on host: {}, yet", node);
+                    LOGGER.info("Salt-minion is responding on host: {}", node);
                     responsiveNodes.add(node);
                 }
             });
