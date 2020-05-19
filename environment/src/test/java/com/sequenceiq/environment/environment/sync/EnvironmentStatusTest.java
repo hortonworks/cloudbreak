@@ -35,8 +35,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = EnvironmentStatusIntegrationTest.TestAppContext.class)
-class EnvironmentStatusIntegrationTest {
+@SpringBootTest(classes = EnvironmentStatusTest.TestAppContext.class)
+class EnvironmentStatusTest {
 
     private static final Long ENVIRONMENT_ID = 123L;
 

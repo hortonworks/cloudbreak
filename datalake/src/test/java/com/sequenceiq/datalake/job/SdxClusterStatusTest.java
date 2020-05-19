@@ -36,8 +36,8 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.statuschecker.service.JobService;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = SdxClusterStatusIntegrationTest.TestAppContext.class)
-class SdxClusterStatusIntegrationTest {
+@SpringBootTest(classes = SdxClusterStatusTest.TestAppContext.class)
+class SdxClusterStatusTest {
 
     private static final Long SDX_ID = 456L;
 

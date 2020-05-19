@@ -42,8 +42,8 @@ import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = StackStatusIntegrationTest.TestAppContext.class)
-class StackStatusIntegrationTest {
+@SpringBootTest(classes = StackStatusTest.TestAppContext.class)
+class StackStatusTest {
 
     private static final Long STACK_ID = 123L;
 
