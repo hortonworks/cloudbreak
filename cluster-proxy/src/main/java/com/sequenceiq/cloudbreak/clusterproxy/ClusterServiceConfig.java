@@ -21,42 +21,20 @@ public class ClusterServiceConfig {
     private ClientCertificate clientCertificate;
 
     @JsonProperty
-    private Boolean tlsStrictCheck;
-
-    @JsonProperty
-    private Boolean useTunnel;
-
-    @JsonProperty
-    private List<Tunnel> tunnels;
-
-    @JsonProperty
-    private String accountId;
-
-    @JsonProperty
     private ClusterServiceHealthCheck healthCheck;
 
     @JsonCreator
     public ClusterServiceConfig(String serviceName, List<String> endpoints, List<ClusterServiceCredential> credentials, ClientCertificate clientCertificate,
-                                Boolean tlsStrictCheck, Boolean useTunnel, List<Tunnel> tunnels, String accountId, ClusterServiceHealthCheck healthCheck) {
+                                ClusterServiceHealthCheck healthCheck) {
         this.name = serviceName;
         this.endpoints = endpoints;
         this.credentials = credentials;
         this.clientCertificate = clientCertificate;
-        this.tlsStrictCheck = tlsStrictCheck;
-        this.useTunnel = useTunnel;
-        this.tunnels = tunnels;
-        this.accountId = accountId;
         this.healthCheck = healthCheck;
     }
 
-    public ClusterServiceConfig(String serviceName, List<String> endpoints, List<ClusterServiceCredential> credentials, ClientCertificate clientCertificate,
-            Boolean tlsStrictCheck) {
-        this(serviceName, endpoints, credentials, clientCertificate, tlsStrictCheck, null);
-    }
-
-    public ClusterServiceConfig(String serviceName, List<String> endpoints, List<ClusterServiceCredential> credentials, ClientCertificate clientCertificate,
-                                Boolean tlsStrictCheck, ClusterServiceHealthCheck healthCheck) {
-        this(serviceName, endpoints, credentials, clientCertificate, tlsStrictCheck, false, List.of(), null, healthCheck);
+    public ClusterServiceConfig(String serviceName, List<String> endpoints, List<ClusterServiceCredential> credentials, ClientCertificate clientCertificate) {
+        this(serviceName, endpoints, credentials, clientCertificate, null);
     }
 
     //CHECKSTYLE:OFF: CyclomaticComplexity
@@ -75,17 +53,13 @@ public class ClusterServiceConfig {
                 Objects.equals(endpoints, that.endpoints) &&
                 Objects.equals(credentials, that.credentials) &&
                 Objects.equals(clientCertificate, that.clientCertificate) &&
-                Objects.equals(tlsStrictCheck, that.tlsStrictCheck) &&
-                Objects.equals(useTunnel, that.useTunnel) &&
-                Objects.equals(tunnels, that.tunnels) &&
-                Objects.equals(accountId, that.accountId) &&
-                Objects.equals(healthCheck,that.healthCheck);
+                Objects.equals(healthCheck, that.healthCheck);
     }
     //CHECKSTYLE:ON
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, endpoints, credentials, clientCertificate, tlsStrictCheck, useTunnel, tunnels, accountId, healthCheck);
+        return Objects.hash(name, endpoints, credentials, clientCertificate, healthCheck);
     }
 
     @Override
@@ -94,10 +68,6 @@ public class ClusterServiceConfig {
                 + ", endpoints=" + endpoints
                 + ", credentials=" + credentials
                 + ", clientCertificate=" + clientCertificate
-                + ", tlsStrictCheck=" + tlsStrictCheck
-                + ", useTunnel=" + useTunnel
-                + ", tunnels=" + tunnels
-                + ", accountId=" + accountId
                 + ", healthCheck=" + healthCheck
                 + '}';
     }
