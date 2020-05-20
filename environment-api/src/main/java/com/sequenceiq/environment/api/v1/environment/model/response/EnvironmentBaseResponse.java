@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
@@ -102,6 +103,7 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
     }
 
     @Override
+    @JsonIgnore
     public String getResourceCrn() {
         return crn;
     }

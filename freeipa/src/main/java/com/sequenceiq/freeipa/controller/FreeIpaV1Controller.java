@@ -13,7 +13,11 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
@@ -99,8 +103,8 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     private ClusterProxyService clusterProxyService;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public DescribeFreeIpaResponse create(@Valid CreateFreeIpaRequest request) {
+    @CheckPermissionByResourceObject
+    public DescribeFreeIpaResponse create(@ResourceObject @Valid CreateFreeIpaRequest request) {
         ValidationResult validationResult = createFreeIpaRequestValidator.validate(request);
         if (validationResult.getState() == State.ERROR) {
             LOGGER.debug("FreeIPA request has validation error(s): {}.", validationResult.getFormattedErrors());
@@ -111,8 +115,8 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public void attachChildEnvironment(@Valid AttachChildEnvironmentRequest request) {
+    @CheckPermissionByResourceObject
+    public void attachChildEnvironment(@ResourceObject @Valid AttachChildEnvironmentRequest request) {
         ValidationResult validationResult = attachChildEnvironmentRequestValidator.validate(request);
         if (validationResult.hasError()) {
             LOGGER.debug("AttachChildEnvironmentRequest has validation error(s): {}.", validationResult.getFormattedErrors());
@@ -123,44 +127,44 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public void detachChildEnvironment(@Valid DetachChildEnvironmentRequest request) {
+    @CheckPermissionByResourceObject
+    public void detachChildEnvironment(@ResourceObject @Valid DetachChildEnvironmentRequest request) {
         String accountId = crnService.getCurrentAccountId();
         childEnvironmentService.detachChildEnvironment(request, accountId);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
-    public DescribeFreeIpaResponse describe(String environmentCrn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public DescribeFreeIpaResponse describe(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return freeIpaDescribeService.describe(environmentCrn, accountId);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public List<ListFreeIpaResponse> list() {
         String accountId = crnService.getCurrentAccountId();
         return freeIpaListService.list(accountId);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public HealthDetailsFreeIpaResponse healthDetails(String environmentCrn) {
+    public HealthDetailsFreeIpaResponse healthDetails(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return freeIpaHealthDetailsService.getHealthDetails(environmentCrn, accountId);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public String getRootCertificate(String environmentCrn) {
+    public String getRootCertificate(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         try {
             return freeIpaRootCertificateService.getRootCertificate(environmentCrn, accountId);
@@ -170,54 +174,54 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public void delete(String environmentCrn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_ENVIRONMENT)
+    public void delete(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         freeIpaDeletionService.delete(environmentCrn, accountId);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public OperationStatus cleanup(@Valid CleanupRequest request) {
+    @CheckPermissionByResourceObject
+    public OperationStatus cleanup(@ResourceObject @Valid CleanupRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return cleanupService.cleanup(accountId, request);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByResourceObject
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void rebootInstances(@Valid RebootInstancesRequest request) {
+    public void rebootInstances(@ResourceObject @Valid RebootInstancesRequest request) {
         String accountId = crnService.getCurrentAccountId();
         rebootInstancesService.rebootInstances(accountId, request);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public void start(@NotEmpty String environmentCrn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_ENVIRONMENT)
+    public void start(@ResourceCrn @NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         freeIpaStartService.start(environmentCrn, accountId);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public void stop(@NotEmpty String environmentCrn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_ENVIRONMENT)
+    public void stop(@ResourceCrn @NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         freeIpaStopService.stop(environmentCrn, accountId);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public String registerWithClusterProxy(@NotEmpty String environmentCrn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public String registerWithClusterProxy(@ResourceCrn @NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return clusterProxyService.registerFreeIpa(accountId, environmentCrn).toString();
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public void deregisterWithClusterProxy(@NotEmpty String environmentCrn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public void deregisterWithClusterProxy(@ResourceCrn @NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         clusterProxyService.deregisterFreeIpa(accountId, environmentCrn);
     }

@@ -178,5 +178,11 @@
     "resourceType": "CLUSTER_TEMPLATE",
     "actionType": "RESOURCE_DEPENDENT",
     "legacyRight": "datahub/write"
+  },
+  "GET_OPERATION_STATUS": {
+    "right": "environments/getFreeipaOperationStatus",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "environments/read"
   }
 }
