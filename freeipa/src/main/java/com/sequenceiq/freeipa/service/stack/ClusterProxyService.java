@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceHealthCheck;
@@ -101,6 +102,9 @@ public class ClusterProxyService {
     private ClusterProxyConfiguration clusterProxyConfiguration;
 
     @Inject
+    private ClusterProxyEnablementService clusterProxyEnablementService;
+
+    @Inject
     private SecurityConfigService securityConfigService;
 
     @Inject
@@ -129,7 +133,7 @@ public class ClusterProxyService {
 
     private Optional<ConfigRegistrationResponse> registerFreeIpa(Stack stack, boolean bootstrap, boolean waitForGoodHealth) {
 
-        if (!clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+        if (!clusterProxyEnablementService.isClusterProxyApplicable(stack.getCloudPlatform())) {
             LOGGER.debug("Cluster Proxy integration disabled. Skipping registering FreeIpa [{}]", stack);
             return Optional.empty();
         }
@@ -170,12 +174,12 @@ public class ClusterProxyService {
         return Optional.of(response);
     }
 
-    public boolean useClusterProxyForCommunication(Tunnel tunnel) {
-        return clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && tunnel.useClusterProxy();
+    public boolean useClusterProxyForCommunication(Tunnel tunnel, String cloudPlatform) {
+        return clusterProxyEnablementService.isClusterProxyApplicable(cloudPlatform) && tunnel.useClusterProxy();
     }
 
     public boolean useClusterProxyForCommunication(Stack stack) {
-        return useClusterProxyForCommunication(stack.getTunnel());
+        return useClusterProxyForCommunication(stack.getTunnel(), stack.getCloudPlatform());
     }
 
     public boolean isCreateConfigForClusterProxy(Stack stack) {
@@ -191,7 +195,7 @@ public class ClusterProxyService {
     }
 
     private void deregisterFreeIpa(Stack stack) {
-        if (!clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+        if (!clusterProxyEnablementService.isClusterProxyApplicable(stack.getCloudPlatform())) {
             LOGGER.debug("Cluster Proxy integration disabled. Skipping deregistering FreeIpa [{}]", stack);
             return;
         }

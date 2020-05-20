@@ -1,6 +1,12 @@
 package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.BootstrapNewNodesEvent;
@@ -11,13 +17,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReR
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import javax.inject.Inject;
 
 @Component
 public class ClusterProxyReRegistrationHandler implements EventHandler<ClusterProxyReRegistrationRequest> {
@@ -25,7 +27,7 @@ public class ClusterProxyReRegistrationHandler implements EventHandler<ClusterPr
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyReRegistrationHandler.class);
 
     @Inject
-    private ClusterProxyConfiguration clusterProxyConfiguration;
+    private ClusterProxyEnablementService clusterProxyEnablementService;
 
     @Inject
     private EventBus eventBus;
@@ -49,7 +51,7 @@ public class ClusterProxyReRegistrationHandler implements EventHandler<ClusterPr
     }
 
     private Selectable registerCluster(ClusterProxyReRegistrationRequest request) {
-        if (!clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+        if (!clusterProxyEnablementService.isClusterProxyApplicable(request.getCloudPlatform())) {
             LOGGER.info("Cluster Proxy integration is DISABLED, skipping re-registering with Cluster Proxy service");
             return new BootstrapNewNodesEvent(StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT.event(), request.getResourceId());
         }

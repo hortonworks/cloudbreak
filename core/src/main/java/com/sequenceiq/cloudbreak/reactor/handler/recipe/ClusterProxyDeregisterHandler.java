@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationService;
@@ -29,7 +29,7 @@ public class ClusterProxyDeregisterHandler implements EventHandler<ClusterProxyD
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyDeregisterHandler.class);
 
     @Inject
-    private ClusterProxyConfiguration clusterProxyConfiguration;
+    private ClusterProxyEnablementService clusterProxyEnablementService;
 
     @Inject
     private EventBus eventBus;
@@ -49,7 +49,7 @@ public class ClusterProxyDeregisterHandler implements EventHandler<ClusterProxyD
         Selectable result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+            if (clusterProxyEnablementService.isClusterProxyApplicable(request.getCloudPlatform())) {
                 try {
                     clusterProxyService.deregisterCluster(stack);
                 } catch (Exception ex) {

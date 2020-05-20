@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
@@ -243,11 +243,11 @@ public class StackUpscaleActions {
     public Action<?, ?> reRegisterWithClusterProxy() {
         return new AbstractStackUpscaleAction<>(StackEvent.class) {
             @Inject
-            private ClusterProxyConfiguration clusterProxyConfiguration;
+            private ClusterProxyEnablementService clusterProxyEnablementService;
 
             @Override
             protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+                if (clusterProxyEnablementService.isClusterProxyApplicable(context.getStack().cloudPlatform())) {
                     stackUpscaleService.reRegisterWithClusterProxy(context.getStack().getId());
                     sendEvent(context);
                 } else {
@@ -260,7 +260,9 @@ public class StackUpscaleActions {
 
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
-                return new ClusterProxyReRegistrationRequest(context.getStack().getId(), context.getInstanceGroupName());
+                return new ClusterProxyReRegistrationRequest(context.getStack().getId(),
+                        context.getInstanceGroupName(),
+                        context.getStack().getCloudPlatform());
             }
         };
     }

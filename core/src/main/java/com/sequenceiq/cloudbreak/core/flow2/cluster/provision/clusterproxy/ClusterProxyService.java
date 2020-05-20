@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceCredential;
@@ -58,6 +59,9 @@ public class ClusterProxyService {
     private StackUpdater stackUpdater;
 
     @Inject
+    private ClusterProxyEnablementService clusterProxyEnablementService;
+
+    @Inject
     private ClusterProxyConfiguration clusterProxyConfiguration;
 
     public ConfigRegistrationResponse registerCluster(Stack stack) {
@@ -82,12 +86,12 @@ public class ClusterProxyService {
         registerGateway(stack);
     }
 
-    public boolean useClusterProxyForCommunication(Tunnel tunnel) {
-        return clusterProxyConfiguration.isClusterProxyIntegrationEnabled() && tunnel.useClusterProxy();
+    public boolean useClusterProxyForCommunication(Tunnel tunnel, String cloudPlatform) {
+        return clusterProxyEnablementService.isClusterProxyApplicable(cloudPlatform) && tunnel.useClusterProxy();
     }
 
     public boolean useClusterProxyForCommunication(Stack stack) {
-        return useClusterProxyForCommunication(stack.getTunnel());
+        return useClusterProxyForCommunication(stack.getTunnel(), stack.cloudPlatform());
     }
 
     public boolean isCreateConfigForClusterProxy(Stack stack) {

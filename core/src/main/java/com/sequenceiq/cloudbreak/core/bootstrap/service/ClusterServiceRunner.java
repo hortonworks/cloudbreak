@@ -119,6 +119,6 @@ public class ClusterServiceRunner {
     }
 
     private HttpClientConfig buildAmbariClientConfig(Stack stack, String gatewayPublicIp) {
-        return tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), gatewayPublicIp);
+        return tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), gatewayPublicIp, stack.cloudPlatform());
     }
 }

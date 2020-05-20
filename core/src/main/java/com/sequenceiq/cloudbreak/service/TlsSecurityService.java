@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -44,6 +45,9 @@ public class TlsSecurityService {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private ClusterProxyEnablementService clusterProxyEnablementService;
 
     @Inject
     private ClusterProxyConfiguration clusterProxyConfiguration;
@@ -113,7 +117,7 @@ public class TlsSecurityService {
         SecurityConfig securityConfig = getSecurityConfigByStackIdOrThrowNotFound(stackId);
         Stack stack = stackService.getById(stackId);
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance, stack);
-        HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
+        HttpClientConfig conf = buildTLSClientConfig(stackId, stack.getCloudPlatform(), connectionIp, gatewayInstance);
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
         String saltSignPrivateKeyB64 = saltSecurityConfig.getSaltSignPrivateKey();
         GatewayConfig gatewayConfig = new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(),
@@ -148,27 +152,27 @@ public class TlsSecurityService {
         }
     }
 
-    public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Long stackId, String apiAddress) {
+    public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Long stackId, String apiAddress, String cloudPlatform) {
         InstanceMetaData primaryGateway = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stackId).orElse(null);
-        return buildTLSClientConfig(stackId, apiAddress, primaryGateway);
+        return buildTLSClientConfig(stackId, cloudPlatform, apiAddress, primaryGateway);
     }
 
-    public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress, InstanceMetaData gateway) {
+    public HttpClientConfig buildTLSClientConfig(Long stackId, String cloudPlatform, String apiAddress, InstanceMetaData gateway) {
         Optional<SecurityConfig> securityConfig = securityConfigService.findOneByStackId(stackId);
         if (securityConfig.isEmpty()) {
-            return decorateWithCLusterProxyConfig(stackId, new HttpClientConfig(apiAddress));
+            return decorateWithCLusterProxyConfig(stackId, cloudPlatform, new HttpClientConfig(apiAddress));
         } else {
             String serverCert = gateway == null ? null : gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
             String clientCertB64 = securityConfig.get().getClientCert();
             String clientKeyB64 = securityConfig.get().getClientKey();
             HttpClientConfig httpClientConfig = new HttpClientConfig(apiAddress, serverCert,
                     new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
-            return decorateWithCLusterProxyConfig(stackId, httpClientConfig);
+            return decorateWithCLusterProxyConfig(stackId, cloudPlatform, httpClientConfig);
         }
     }
 
-    private HttpClientConfig decorateWithCLusterProxyConfig(Long stackId, HttpClientConfig httpClientConfig) {
-        if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+    private HttpClientConfig decorateWithCLusterProxyConfig(Long stackId, String cloudPlatform, HttpClientConfig httpClientConfig) {
+        if (clusterProxyEnablementService.isClusterProxyApplicable(cloudPlatform)) {
             Stack stack = stackService.getById(stackId);
             if (clusterProxyService.useClusterProxyForCommunication(stack)) {
                 return httpClientConfig.withClusterProxy(clusterProxyConfiguration.getClusterProxyUrl(), stack.getResourceCrn());
