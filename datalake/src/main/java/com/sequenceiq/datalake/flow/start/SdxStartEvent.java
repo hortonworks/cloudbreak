@@ -3,7 +3,7 @@ package com.sequenceiq.datalake.flow.start;
 import com.sequenceiq.datalake.flow.start.event.RdsStartSuccessEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartFailedEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartSuccessEvent;
-import com.sequenceiq.datalake.flow.start.event.SdxSyncSuccessEvent;
+import com.sequenceiq.datalake.flow.sync.event.SdxSyncSuccessEvent;
 import com.sequenceiq.flow.core.FlowEvent;
 
 public enum SdxStartEvent implements FlowEvent {

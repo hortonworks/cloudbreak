@@ -1,26 +1,15 @@
 package com.sequenceiq.datalake.flow.start.event;
 
-import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.SdxFailedEvent;
 
-public class SdxStartFailedEvent extends SdxEvent {
-
-    private Exception exception;
+public class SdxStartFailedEvent extends SdxFailedEvent {
 
     public SdxStartFailedEvent(Long sdxId, String userId, Exception exception) {
-        super(sdxId, userId);
-        this.exception = exception;
-    }
-
-    public static SdxStartFailedEvent from(SdxEvent event, Exception exception) {
-        return new SdxStartFailedEvent(event.getResourceId(), event.getUserId(), exception);
+        super(sdxId, userId, exception);
     }
 
     @Override
     public String selector() {
         return "SdxStartFailedEvent";
-    }
-
-    public Exception getException() {
-        return exception;
     }
 }

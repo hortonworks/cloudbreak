@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.flow.start.event;
+package com.sequenceiq.datalake.flow.sync.event;
 
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
