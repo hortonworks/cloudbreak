@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class UserSyncPollerEntitlementCheckerTest {
@@ -25,13 +26,13 @@ class UserSyncPollerEntitlementCheckerTest {
     void accountIsNotEntitled() {
         when(entitlementService.automaticUsersyncPollerEnabled(anyString(), anyString())).thenReturn(false);
 
-        assertFalse(underTest.isAccountEntitled(UserSyncPollerTestUtils.ACCOUNT_ID));
+        assertFalse(underTest.isAccountEntitled(UserSyncTestUtils.ACCOUNT_ID));
     }
 
     @Test
     void accountIsEntitled() {
         when(entitlementService.automaticUsersyncPollerEnabled(anyString(), anyString())).thenReturn(true);
 
-        assertTrue(underTest.isAccountEntitled(UserSyncPollerTestUtils.ACCOUNT_ID));
+        assertTrue(underTest.isAccountEntitled(UserSyncTestUtils.ACCOUNT_ID));
     }
 }

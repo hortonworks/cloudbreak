@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.freeipa.user.poller;
+package com.sequenceiq.freeipa.service.freeipa.user;
 
 import java.util.Map;
 import java.util.UUID;
@@ -7,28 +7,28 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
 
-public class UserSyncPollerTestUtils {
-    static final String ACCOUNT_ID = UUID.randomUUID().toString();
+public class UserSyncTestUtils {
+    public static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
-    static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
+    public static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
 
-    private UserSyncPollerTestUtils() {
+    private UserSyncTestUtils() {
     }
 
-    static Stack createStack() {
+    public static Stack createStack() {
         Stack stack = new Stack();
         stack.setAccountId(ACCOUNT_ID);
         stack.setEnvironmentCrn(ENVIRONMENT_CRN);
         return stack;
     }
 
-    static UserSyncStatus createUserSyncStatus(Stack stack) {
+    public static UserSyncStatus createUserSyncStatus(Stack stack) {
         UserSyncStatus userSyncStatus = new UserSyncStatus();
         userSyncStatus.setStack(stack);
         return userSyncStatus;
     }
 
-    static UmsEventGenerationIds createUniqueUmsEventGenerationIds() {
+    public static UmsEventGenerationIds createUniqueUmsEventGenerationIds() {
         UmsEventGenerationIds umsEventGenerationIds = new UmsEventGenerationIds();
         umsEventGenerationIds.setEventGenerationIds(Map.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
         return umsEventGenerationIds;

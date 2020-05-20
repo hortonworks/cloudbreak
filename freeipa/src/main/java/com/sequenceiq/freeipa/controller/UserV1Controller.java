@@ -3,20 +3,24 @@ package com.sequenceiq.freeipa.controller;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
@@ -25,11 +29,13 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningException;
 import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
+import com.sequenceiq.freeipa.service.freeipa.user.EnvironmentUserSyncStateCalculator;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
 @Controller
+@InternalReady
 @AuthorizationResource
 public class UserV1Controller implements UserV1Endpoint {
 
@@ -47,10 +53,13 @@ public class UserV1Controller implements UserV1Endpoint {
     @Inject
     private OperationToSyncOperationStatus operationToSyncOperationStatus;
 
+    @Inject
+    private EnvironmentUserSyncStateCalculator environmentUserSyncStateCalculator;
+
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
-        String userCrn = checkUserCrn();
+        String userCrn = checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeUser() requested for user {} in account {}", userCrn, accountId);
         Set<String> environmentCrnFilter = request == null ? Set.of() : nullToEmpty(request.getEnvironments());
@@ -76,7 +85,7 @@ public class UserV1Controller implements UserV1Endpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
-        String userCrn = checkUserCrn();
+        String userCrn = checkActorCrn();
         String accountId = determineAccountId(userCrn, request.getAccountId());
 
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
@@ -90,7 +99,7 @@ public class UserV1Controller implements UserV1Endpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
-        String userCrn = checkUserCrn();
+        String userCrn = checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("setPassword() requested for user {} in account {}", userCrn, accountId);
 
@@ -102,11 +111,20 @@ public class UserV1Controller implements UserV1Endpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public SyncOperationStatus getSyncOperationStatus(@NotNull String operationId) {
-        checkUserCrn();
+        checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("getSyncOperationStatus() requested for operation '{}' in account '{}'", operationId, accountId);
         return operationToSyncOperationStatus.convert(
                 operationService.getOperationForAccountIdAndOperationId(accountId, operationId));
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    public EnvironmentUserSyncState getUserSyncState(@TenantAwareParam @NotEmpty String environmentCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        Crn envCrn = Crn.safeFromString(environmentCrn);
+
+        return environmentUserSyncStateCalculator.calculateEnvironmentUserSyncState(accountId, envCrn);
     }
 
     private String determineAccountId(String callingActor, String requestedAccountId) {
@@ -127,10 +145,10 @@ public class UserV1Controller implements UserV1Endpoint {
         return syncOperationStatus;
     }
 
-    private String checkUserCrn() {
+    private String checkActorCrn() {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (userCrn == null) {
-            throw new BadRequestException("User CRN must be provided");
+            throw new BadRequestException("Actor CRN must be provided");
         }
         return userCrn;
     }
