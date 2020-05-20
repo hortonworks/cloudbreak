@@ -23,7 +23,7 @@ services:
     volumes:
       - ./:/it
       - /etc/localtime:/etc/localtime:ro
-    command: java -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp --integrationtest.command=suiteurls --integrationtest.suiteFiles=${INTEGRATIONTEST_SUITEFILES} | tee cbtest.log
+    command: java -XX:OnOutOfMemoryError="kill -9 %p" -XX:+HeapDumpOnOutOfMemoryError -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp --integrationtest.command=suiteurls --integrationtest.suiteFiles=${INTEGRATIONTEST_SUITEFILES} | tee cbtest.log
     environment:
       - INTEGRATIONTEST_USER_ACCESSKEY=${INTEGRATIONTEST_USER_ACCESSKEY}
       - INTEGRATIONTEST_USER_SECRETKEY=${INTEGRATIONTEST_USER_SECRETKEY}
