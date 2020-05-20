@@ -50,7 +50,7 @@ freeipa:
       cert.file: database.crt
       ssl: false
   image.catalog:
-    url: https://cloudbreak-imagecatalog.s3.amazonaws.com/freeipa-image-catalog-221.json
+    url: https://cloudbreak-imagecatalog.s3.amazonaws.com/freeipa-image-catalog.json
     default.os: centos7
     cache.ttl: 15
   platform.default.instanceType:
