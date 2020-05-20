@@ -7,14 +7,16 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,28 +27,26 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.handler.InstanceStateQuery;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
-import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.statuschecker.service.JobService;
@@ -73,19 +73,7 @@ public class StackStatusCheckerJobTest {
     private ClusterApiConnectors clusterApiConnectors;
 
     @Mock
-    private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
-
-    @Mock
-    private InstanceStateQuery instanceStateQuery;
-
-    @Mock
-    private EnvironmentInternalCrnClient environmentInternalCrnClient;
-
-    @Mock
-    private CredentialConverter credentialConverter;
-
-    @Mock
-    private CredentialToCloudCredentialConverter cloudCredentialConverter;
+    private StackInstanceStatusChecker stackInstanceStatusChecker;
 
     @Mock
     private StackSyncService stackSyncService;
@@ -105,16 +93,13 @@ public class StackStatusCheckerJobTest {
     @Mock
     private ClusterStatusService clusterStatusService;
 
-    @Mock
     private Stack stack;
 
     @Mock
     private ClusterStatusResult clusterStatusResult;
 
-    @Mock
     private User user;
 
-    @Mock
     private Workspace workspace;
 
     @Mock
@@ -131,6 +116,22 @@ public class StackStatusCheckerJobTest {
         when(flowLogService.isOtherFlowRunning(anyLong())).thenReturn(Boolean.FALSE);
         underTest.setLocalId("1");
         underTest.setRemoteResourceCrn("remote:crn");
+
+        stack = new Stack();
+        stack.setId(1L);
+        workspace = new Workspace();
+        workspace.setId(1L);
+        stack.setWorkspace(workspace);
+        user = new User();
+        user.setUserId("1");
+        stack.setCreator(user);
+
+        when(stackService.get(anyLong())).thenReturn(stack);
+    }
+
+    @After
+    public void tearDown() {
+        validateMockitoUsage();
     }
 
     @Test
@@ -143,8 +144,7 @@ public class StackStatusCheckerJobTest {
 
     @Test
     public void testNotRunningIfStackFailedOrBeingDeleted() throws JobExecutionException {
-        when(stackService.get(anyLong())).thenReturn(stack);
-        when(stack.getStatus()).thenReturn(Status.DELETE_COMPLETED);
+        setStackStatus(DetailedStackStatus.DELETE_COMPLETED);
         underTest.executeInternal(jobExecutionContext);
 
         verify(clusterApiConnectors, times(0)).getConnector(stack);
@@ -155,16 +155,7 @@ public class StackStatusCheckerJobTest {
         setupForCMNotAccessible();
         underTest.executeInternal(jobExecutionContext);
 
-        verify(instanceStateQuery, times(1)).getCloudVmInstanceStatuses(any(), any(), any());
-    }
-
-    @Test
-    public void testInstanceSyncIfCMNotAccessibleAndNoInstances() throws JobExecutionException {
-        setupForCMNotAccessible();
-        when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(Collections.emptySet());
-        underTest.executeInternal(jobExecutionContext);
-
-        verify(instanceStateQuery, times(0)).getCloudVmInstanceStatuses(any(), any(), any());
+        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
     }
 
     @Test
@@ -173,7 +164,7 @@ public class StackStatusCheckerJobTest {
         underTest.executeInternal(jobExecutionContext);
 
         verify(clusterOperationService, times(0)).reportHealthChange(anyString(), anySet(), anySet());
-        verify(instanceStateQuery, times(1)).getCloudVmInstanceStatuses(any(), any(), any());
+        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
     }
 
     @Test
@@ -185,7 +176,7 @@ public class StackStatusCheckerJobTest {
         underTest.executeInternal(jobExecutionContext);
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), anySet(), anySet());
-        verify(instanceStateQuery, times(1)).getCloudVmInstanceStatuses(any(), any(), any());
+        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
     }
 
     @Test
@@ -206,32 +197,18 @@ public class StackStatusCheckerJobTest {
     }
 
     private void setupForCM() {
-        when(stackService.get(anyLong())).thenReturn(stack);
-        when(stack.getStatus()).thenReturn(Status.AVAILABLE);
-        when(stack.isStopped()).thenReturn(false);
-        when(stack.getId()).thenReturn(1L);
-        when(stack.getCreator()).thenReturn(user);
-        when(user.getUserId()).thenReturn("1");
-        when(stack.getWorkspace()).thenReturn(workspace);
-        when(workspace.getId()).thenReturn(1L);
-        when(environmentInternalCrnClient.withInternalCrn()).thenReturn(environmentServiceCrnEndpoints);
-        when(environmentServiceCrnEndpoints.credentialV1Endpoint()).thenReturn(credentialEndpoint);
+        setStackStatus(DetailedStackStatus.AVAILABLE);
         when(clusterStatusService.getStatus(anyBoolean())).thenReturn(clusterStatusResult);
         when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
         when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.SERVICES_HEALTHY);
     }
 
     private void setupForCMNotAccessible() {
-        when(stackService.get(anyLong())).thenReturn(stack);
-        when(stack.getStatus()).thenReturn(Status.STOPPED);
-        when(stack.isStopped()).thenReturn(true);
-        when(stack.getId()).thenReturn(1L);
-        when(stack.getCreator()).thenReturn(user);
-        when(user.getUserId()).thenReturn("1");
-        when(stack.getWorkspace()).thenReturn(workspace);
-        when(workspace.getId()).thenReturn(1L);
-        when(environmentInternalCrnClient.withInternalCrn()).thenReturn(environmentServiceCrnEndpoints);
-        when(environmentServiceCrnEndpoints.credentialV1Endpoint()).thenReturn(credentialEndpoint);
+        setStackStatus(DetailedStackStatus.STOPPED);
         when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
+    }
+
+    private void setStackStatus(DetailedStackStatus detailedStackStatus) {
+        stack.setStackStatus(new StackStatus(stack, detailedStackStatus));
     }
 }
