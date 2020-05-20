@@ -5,6 +5,17 @@
     "displayName": "dataengineering_spark3",
     "services": [
       {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "hdfs",
         "serviceType": "HDFS",
         "roleConfigGroups": [
@@ -184,7 +195,8 @@
           "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
-          "yarn-NODEMANAGER-WORKER"
+          "yarn-NODEMANAGER-WORKER",
+          "zookeeper-SERVER-BASE"
         ]
       },
       {
