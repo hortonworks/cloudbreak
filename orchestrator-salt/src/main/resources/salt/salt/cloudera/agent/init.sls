@@ -11,10 +11,12 @@ install-cloudera-manager-agent:
     - unless:
       - rpm -q cloudera-manager-daemons cloudera-manager-agent
 
+{%- if not salt['pkg.version']('python-psycopg2') and not salt['pkg.version']('python2-psycopg2') %}
 install-psycopg2:
   cmd.run:
     - name: pip install psycopg2==2.7.5 --ignore-installed
     - unless: pip list --no-index | grep -E 'psycopg2.*2.7.5'
+{%- endif %}
 
 replace_server_host:
   file.replace:
