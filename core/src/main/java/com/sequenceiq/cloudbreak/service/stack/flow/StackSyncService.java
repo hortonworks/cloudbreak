@@ -234,6 +234,7 @@ public class StackSyncService {
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
         } else if (isAllDeletedOnProvider(instanceStateCounts, instances.size()) && stack.getStatus() != DELETE_FAILED) {
             updateStackStatusIfEnabled(stack.getId(), DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, SYNC_STATUS_REASON, stackStatusUpdateEnabled);
+            updateClusterStatusIfEnabled(stack.getId(), DELETED_ON_PROVIDER_SIDE, stackStatusUpdateEnabled);
             eventService.fireCloudbreakEvent(stack.getId(), DELETED_ON_PROVIDER_SIDE.name(), STACK_SYNC_INSTANCE_STATE_SYNCED);
         }
     }
