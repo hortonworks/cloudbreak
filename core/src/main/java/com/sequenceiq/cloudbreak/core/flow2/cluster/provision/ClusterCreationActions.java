@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
@@ -60,11 +60,11 @@ public class ClusterCreationActions {
     public Action<?, ?> clusterProxyRegistrationAction() {
         return new AbstractStackCreationAction<>(StackEvent.class) {
             @Inject
-            private ClusterProxyConfiguration clusterProxyConfiguration;
+            private ClusterProxyEnablementService clusterProxyEnablementService;
 
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-                if (clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+                if (clusterProxyEnablementService.isClusterProxyApplicable(context.getStack().cloudPlatform())) {
                     clusterCreationService.registeringToClusterProxy(context.getStack());
                     sendEvent(context);
                 } else {
@@ -75,7 +75,7 @@ public class ClusterCreationActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new ClusterProxyRegistrationRequest(context.getStack().getId());
+                return new ClusterProxyRegistrationRequest(context.getStack().getId(), context.getStack().cloudPlatform());
             }
         };
     }
@@ -289,7 +289,7 @@ public class ClusterCreationActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new ClusterProxyGatewayRegistrationRequest(context.getStack().getId());
+                return new ClusterProxyGatewayRegistrationRequest(context.getStack().getId(), context.getStack().cloudPlatform());
             }
         };
     }

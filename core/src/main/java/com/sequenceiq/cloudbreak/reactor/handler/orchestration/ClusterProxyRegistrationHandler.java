@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
@@ -29,13 +29,13 @@ public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProx
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyRegistrationHandler.class);
 
     @Inject
-    private ClusterProxyConfiguration clusterProxyConfiguration;
-
-    @Inject
     private EventBus eventBus;
 
     @Inject
     private ClusterProxyService clusterProxyService;
+
+    @Inject
+    private ClusterProxyEnablementService clusterProxyEnablementService;
 
     @Inject
     private StackService stackService;
@@ -58,7 +58,7 @@ public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProx
     private Selectable registerCluster(ClusterProxyRegistrationRequest request) {
         Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
         try {
-            if (!clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
+            if (!clusterProxyEnablementService.isClusterProxyApplicable(request.getCloudPlatform())) {
                 LOGGER.info("Cluster Proxy integration is DISABLED, skipping registering with Cluster Proxy service. Cluster CRN: {}", stack.getResourceCrn());
                 return new ClusterProxyRegistrationSuccess(request.getResourceId());
             }
