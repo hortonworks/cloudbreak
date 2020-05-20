@@ -25,6 +25,7 @@ public enum AuthorizationResourceAction {
     DESCRIBE_CLUSTER_TEMPLATE,
     DELETE_CLUSTER_TEMPLATE,
     CREATE_CLUSTER_TEMPLATE,
+    GET_OPERATION_STATUS,
     // deprecated actions, please do not use them
     ENVIRONMENT_READ,
     ENVIRONMENT_WRITE,

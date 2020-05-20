@@ -28,9 +28,12 @@ import org.springframework.security.access.AccessDeniedException;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PermissionCheckServiceTest {
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -68,7 +71,7 @@ public class PermissionCheckServiceTest {
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage("You have no access to this resource.");
 
-        underTest.hasPermission(proceedingJoinPoint);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
     }
 
     @Test
@@ -77,7 +80,7 @@ public class PermissionCheckServiceTest {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("disabledAuthorization"));
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
 
-        underTest.hasPermission(proceedingJoinPoint);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(permissionChecker, times(0)).checkPermissions(any(), anyString(), any(), any(), anyLong());
     }
@@ -87,7 +90,7 @@ public class PermissionCheckServiceTest {
         when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("tooManyAnnotation"));
 
-        underTest.hasPermission(proceedingJoinPoint);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(permissionChecker, times(0)).checkPermissions(any(), anyString(), any(), any(), anyLong());
         verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
@@ -102,7 +105,7 @@ public class PermissionCheckServiceTest {
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
 
         underTest.populatePermissionCheckMap();
-        underTest.hasPermission(proceedingJoinPoint);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(permissionChecker).checkPermissions(any(), any(), any(), any(), anyLong());
         verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());

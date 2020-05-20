@@ -54,17 +54,17 @@ public class KerberosConfigV1Service {
         return convertKerberosConfigToDescribeKerberosConfigResponse(kerberosConfig);
     }
 
-    public DescribeKerberosConfigResponse describe(String environmentId) {
-        KerberosConfig kerberosConfig = kerberosConfigService.get(environmentId);
+    public DescribeKerberosConfigResponse describe(String environmentCrn) {
+        KerberosConfig kerberosConfig = kerberosConfigService.get(environmentCrn);
         return convertKerberosConfigToDescribeKerberosConfigResponse(kerberosConfig);
     }
 
-    public void delete(String environmentId) {
-        kerberosConfigService.delete(environmentId);
+    public void delete(String environmentCrn) {
+        kerberosConfigService.delete(environmentCrn);
     }
 
-    public CreateKerberosConfigRequest getCreateRequest(String environmentId) {
-        return kerberosConfigToCreateKerberosConfigRequestConverter.convert(kerberosConfigService.get(environmentId));
+    public CreateKerberosConfigRequest getCreateRequest(String environmentCrn) {
+        return kerberosConfigToCreateKerberosConfigRequestConverter.convert(kerberosConfigService.get(environmentCrn));
     }
 
     private DescribeKerberosConfigResponse convertKerberosConfigToDescribeKerberosConfigResponse(KerberosConfig source) {

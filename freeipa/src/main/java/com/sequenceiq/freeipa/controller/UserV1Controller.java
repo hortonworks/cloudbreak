@@ -13,6 +13,8 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -57,6 +59,8 @@ public class UserV1Controller implements UserV1Endpoint {
     private EnvironmentUserSyncStateCalculator environmentUserSyncStateCalculator;
 
     @Override
+    // TODO we need to handle the case when environments is empty and the sync will applied to all env in account
+    // until that resource based authz cannot be applied
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
         String userCrn = checkActorCrn();
@@ -83,6 +87,8 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
+    // TODO we need to handle the case when environments is empty and the sync will applied to all env in account
+    // until that resource based authz cannot be applied
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String userCrn = checkActorCrn();
@@ -97,6 +103,8 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
+    // TODO we need to handle the case when environments is empty and the setPassword will applied to all env in account
+    // until that resource based authz cannot be applied
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
         String userCrn = checkActorCrn();
@@ -109,7 +117,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.GET_OPERATION_STATUS)
     public SyncOperationStatus getSyncOperationStatus(@NotNull String operationId) {
         checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -119,8 +127,8 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
-    public EnvironmentUserSyncState getUserSyncState(@TenantAwareParam @NotEmpty String environmentCrn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public EnvironmentUserSyncState getUserSyncState(@ResourceCrn @TenantAwareParam @NotEmpty String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Crn envCrn = Crn.safeFromString(environmentCrn);
 

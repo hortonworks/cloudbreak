@@ -12,7 +12,10 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
@@ -38,8 +41,8 @@ public class DnsV1Controller implements DnsV1Endpoint {
     private DnsRecordService dnsRecordService;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnets(AddDnsZoneForSubnetsRequest request) {
+    @CheckPermissionByResourceObject
+    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnets(@ResourceObject AddDnsZoneForSubnetsRequest request) {
         String accountId = crnService.getCurrentAccountId();
         try {
             return dnsZoneService.addDnsZonesForSubnets(request, accountId);
@@ -49,12 +52,12 @@ public class DnsV1Controller implements DnsV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByResourceObject
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@Valid AddDnsZoneForSubnetIdsRequest request) {
+    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@ResourceObject @Valid AddDnsZoneForSubnetIdsRequest request) {
         String accountId = crnService.getCurrentAccountId();
         try {
             return dnsZoneService.addDnsZonesForSubnetIds(request, accountId);
@@ -64,12 +67,12 @@ public class DnsV1Controller implements DnsV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public Set<String> listDnsZones(String environmentCrn) {
+    public Set<String> listDnsZones(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         try {
             return dnsZoneService.listDnsZones(environmentCrn, accountId);
@@ -79,12 +82,12 @@ public class DnsV1Controller implements DnsV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void deleteDnsZoneBySubnet(String environmentCrn, String subnet) {
+    public void deleteDnsZoneBySubnet(@ResourceCrn String environmentCrn, String subnet) {
         String accountId = crnService.getCurrentAccountId();
         try {
             dnsZoneService.deleteDnsZoneBySubnet(environmentCrn, accountId, subnet);
@@ -94,12 +97,12 @@ public class DnsV1Controller implements DnsV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void deleteDnsZoneBySubnetId(String environmentCrn, String networkId, String subnetId) {
+    public void deleteDnsZoneBySubnetId(@ResourceCrn String environmentCrn, String networkId, String subnetId) {
         String accountId = crnService.getCurrentAccountId();
         try {
             dnsZoneService.deleteDnsZoneBySubnetId(environmentCrn, accountId, networkId, subnetId);
@@ -109,12 +112,12 @@ public class DnsV1Controller implements DnsV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void deleteDnsRecordsByFqdn(@NotEmpty String environmentCrn, @NotEmpty List<String> fqdns) {
+    public void deleteDnsRecordsByFqdn(@ResourceCrn @NotEmpty String environmentCrn, @NotEmpty List<String> fqdns) {
         String accountId = crnService.getCurrentAccountId();
         try {
             dnsRecordService.deleteDnsRecordByFqdn(environmentCrn, accountId, fqdns);

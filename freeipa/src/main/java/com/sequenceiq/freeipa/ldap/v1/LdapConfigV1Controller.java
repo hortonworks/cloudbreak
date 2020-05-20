@@ -8,8 +8,11 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
@@ -35,43 +38,43 @@ public class LdapConfigV1Controller extends NotificationController implements Ld
     private CrnService crnService;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
-    public DescribeLdapConfigResponse describe(String environmentId) {
-        return ldapConfigV1Service.describe(environmentId);
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public DescribeLdapConfigResponse describe(@ResourceCrn String environmentCrn) {
+        return ldapConfigV1Service.describe(environmentCrn);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public DescribeLdapConfigResponse getForCluster(@TenantAwareParam String environmentCrn, String clusterName) throws FreeIpaClientException {
+    public DescribeLdapConfigResponse getForCluster(@ResourceCrn @TenantAwareParam String environmentCrn, String clusterName) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
         return ldapConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public DescribeLdapConfigResponse create(CreateLdapConfigRequest request) {
+    @CheckPermissionByResourceObject
+    public DescribeLdapConfigResponse create(@ResourceObject CreateLdapConfigRequest request) {
         return ldapConfigV1Service.post(request);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public void delete(String environmentId) {
-        ldapConfigV1Service.delete(environmentId);
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public void delete(@ResourceCrn String environmentCrn) {
+        ldapConfigV1Service.delete(environmentCrn);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
-    public TestLdapConfigResponse test(TestLdapConfigRequest ldapValidationRequest) {
+    @CheckPermissionByResourceObject
+    public TestLdapConfigResponse test(@ResourceObject TestLdapConfigRequest ldapValidationRequest) {
         return ldapConfigV1Service.testConnection(ldapValidationRequest);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
-    public CreateLdapConfigRequest getRequest(String environmentId) {
-        return ldapConfigV1Service.getCreateLdapConfigRequest(environmentId);
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public CreateLdapConfigRequest getRequest(@ResourceCrn String environmentCrn) {
+        return ldapConfigV1Service.getCreateLdapConfigRequest(environmentCrn);
     }
 }

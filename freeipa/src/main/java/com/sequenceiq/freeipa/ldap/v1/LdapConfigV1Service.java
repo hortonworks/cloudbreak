@@ -53,17 +53,17 @@ public class LdapConfigV1Service {
         return convertLdapConfigToDescribeLdapConfigResponse(ldapConfig);
     }
 
-    public DescribeLdapConfigResponse describe(String environmentId) {
-        LdapConfig ldapConfig = ldapConfigService.get(environmentId);
+    public DescribeLdapConfigResponse describe(String environmentCrn) {
+        LdapConfig ldapConfig = ldapConfigService.get(environmentCrn);
         return convertLdapConfigToDescribeLdapConfigResponse(ldapConfig);
     }
 
-    public void delete(String environmentId) {
-        ldapConfigService.delete(environmentId);
+    public void delete(String environmentCrn) {
+        ldapConfigService.delete(environmentCrn);
     }
 
-    public CreateLdapConfigRequest getCreateLdapConfigRequest(String environmentId) {
-        return convertLdapConfigToCreateLdapConfigRequest(ldapConfigService.get(environmentId));
+    public CreateLdapConfigRequest getCreateLdapConfigRequest(String environmentCrn) {
+        return convertLdapConfigToCreateLdapConfigRequest(ldapConfigService.get(environmentCrn));
     }
 
     public TestLdapConfigResponse testConnection(TestLdapConfigRequest testLdapConfigRequest) {
