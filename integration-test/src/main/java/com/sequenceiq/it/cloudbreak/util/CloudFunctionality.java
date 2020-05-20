@@ -13,9 +13,9 @@ public interface CloudFunctionality {
 
     void cloudStorageListContainer(String baseLocation);
 
-    void cloudStorageListContainerFreeIPA(String baseLocation);
+    void cloudStorageListContainerFreeIPA(String baseLocation, String clusterName, String crn);
 
-    void cloudStorageListContainerDataLake(String baseLocation);
+    void cloudStorageListContainerDataLake(String baseLocation, String clusterName, String crn);
 
     void cloudStorageDeleteContainer(String baseLocation);
 

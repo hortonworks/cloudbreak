@@ -13,11 +13,14 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
@@ -34,6 +37,9 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     @Inject
     private StackTestClient stackTestClient;
+
+    @Inject
+    private FreeIPATestClient freeIPATestClient;
 
     @Inject
     private WaitUtil waitUtil;
@@ -106,6 +112,10 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
         List<String> actualIDBrokerVolumeIds = new ArrayList<>();
         List<String> expectedIDBrokerVolumeIds = new ArrayList<>();
 
+        DescribeFreeIpaResponse describeFreeIpaResponse = testContext.given(FreeIPATestDto.class)
+                .when(freeIPATestClient.describe())
+                .getResponse();
+
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
@@ -143,11 +153,13 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                             new ArrayList<>(expectedIDBrokerVolumeIds));
                 })
                 .then((tc, testDto, client) -> {
-                    getCloudFunctionality(tc).cloudStorageListContainerDataLake(getBaseLocation(testDto));
+                    getCloudFunctionality(tc).cloudStorageListContainerDataLake(getBaseLocation(testDto),
+                            testDto.getResponse().getName(), testDto.getResponse().getStackCrn());
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    getCloudFunctionality(tc).cloudStorageListContainerFreeIPA(getBaseLocation(testDto));
+                    getCloudFunctionality(tc).cloudStorageListContainerFreeIPA(getBaseLocation(testDto),
+                            describeFreeIpaResponse.getName(), describeFreeIpaResponse.getCrn());
                     return testDto;
                 })
                 .skipWhenFailure();
@@ -164,6 +176,10 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
         List<String> actualMasterVolumeIds = new ArrayList<>();
         List<String> expectedMasterVolumeIds = new ArrayList<>();
+
+        DescribeFreeIpaResponse describeFreeIpaResponse = testContext.given(FreeIPATestDto.class)
+                .when(freeIPATestClient.describe())
+                .getResponse();
 
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
@@ -202,11 +218,13 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                             new ArrayList<>(expectedMasterVolumeIds));
                 })
                 .then((tc, testDto, client) -> {
-                    getCloudFunctionality(tc).cloudStorageListContainerDataLake(getBaseLocation(testDto));
+                    getCloudFunctionality(tc).cloudStorageListContainerDataLake(getBaseLocation(testDto),
+                            testDto.getResponse().getName(), testDto.getResponse().getStackCrn());
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    getCloudFunctionality(tc).cloudStorageListContainerFreeIPA(getBaseLocation(testDto));
+                    getCloudFunctionality(tc).cloudStorageListContainerFreeIPA(getBaseLocation(testDto),
+                            describeFreeIpaResponse.getName(), describeFreeIpaResponse.getCrn());
                     return testDto;
                 })
                 .validate();
