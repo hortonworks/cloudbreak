@@ -15,6 +15,7 @@ public class UserModelDescriptions {
     public static final String SUCCESS_ENVIRONMENTS = "details about environments where operation succeeded";
     public static final String FAILURE_ENVIRONMENTS = "details about environments where operation failed";
     public static final String USER_PASSWORD = "the user's password";
+    public static final String USERSYNC_STATE = "state of user synchronization";
 
     private UserModelDescriptions() {
     }

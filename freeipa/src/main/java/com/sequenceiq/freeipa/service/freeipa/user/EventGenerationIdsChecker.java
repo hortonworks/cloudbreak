@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.freeipa.user.poller;
+package com.sequenceiq.freeipa.service.freeipa.user;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
 
 @Component
-class EventGenerationIdsChecker {
+public class EventGenerationIdsChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventGenerationIdsChecker.class);
 
     public boolean isInSync(UserSyncStatus userSyncStatus, UmsEventGenerationIds currentGeneration) {
