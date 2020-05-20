@@ -23,12 +23,13 @@ import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.start.event.RdsStartSuccessEvent;
 import com.sequenceiq.datalake.flow.start.event.RdsWaitingToStartRequest;
+import com.sequenceiq.datalake.flow.SdxFailedEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartFailedEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartSuccessEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartWaitRequest;
-import com.sequenceiq.datalake.flow.start.event.SdxSyncSuccessEvent;
-import com.sequenceiq.datalake.flow.start.event.SdxSyncWaitRequest;
+import com.sequenceiq.datalake.flow.sync.event.SdxSyncSuccessEvent;
+import com.sequenceiq.datalake.flow.sync.event.SdxSyncWaitRequest;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
@@ -184,15 +185,15 @@ public class SdxStartActions {
 
     @Bean(name = "SDX_START_FAILED_STATE")
     public Action<?, ?> failedAction() {
-        return new AbstractSdxAction<>(SdxStartFailedEvent.class) {
+        return new AbstractSdxAction<>(SdxFailedEvent.class) {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    SdxStartFailedEvent payload) {
+                    SdxFailedEvent payload) {
                 return SdxContext.from(flowParameters, payload);
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxStartFailedEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, SdxFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Exception exception = payload.getException();
                 DatalakeStatusEnum failedStatus = DatalakeStatusEnum.START_FAILED;
                 LOGGER.info("Update SDX status to {} for resource: {}", failedStatus, payload.getResourceId(), exception);
@@ -206,7 +207,7 @@ public class SdxStartActions {
             }
 
             @Override
-            protected Object getFailurePayload(SdxStartFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(SdxFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return null;
             }
         };
