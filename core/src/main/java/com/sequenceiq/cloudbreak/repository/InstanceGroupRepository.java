@@ -32,8 +32,4 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
             "FROM InstanceMetaData i " +
             "WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
     Optional<InstanceGroup> findInstanceGroupInStackByHostName(@Param("stackId") Long stackId, @Param("hostName") String hostName);
-
-    @Query("SELECT i FROM InstanceGroup i LEFT JOIN FETCH i.instanceMetaData im "
-            + "WHERE i.stack.id = :stackId AND (im IS NULL OR im.instanceStatus <> 'TERMINATED')")
-    Set<InstanceGroup> findNotTerminatedByStackId(@Param("stackId") Long stackId);
 }
