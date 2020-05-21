@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -88,14 +89,14 @@ public class AzureNetworkConnector implements NetworkConnector {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);
             if (e.body() != null && e.body().details() != null) {
                 String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
-                throw new CloudConnectorException(String.format("Stack provisioning failed, status code %s, error message: %s, details: %s",
+                throw new CloudConnectorException(String.format("Network provisioning failed, status code %s, error message: %s, details: %s",
                         e.body().code(), e.body().message(), details));
             } else {
-                throw new CloudConnectorException(String.format("Stack provisioning failed: '%s', please go to Azure Portal for detailed message", e));
+                throw new CloudConnectorException(String.format("Network provisioning failed: '%s', please go to Azure Portal for detailed message", e));
             }
         } catch (Exception e) {
             LOGGER.warn("Provisioning error:", e);
-            throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", networkRequest.getStackName(), e.getMessage()));
+            throw new CloudConnectorException(String.format("Error in provisioning network %s: %s", networkRequest.getStackName(), e.getMessage()));
         }
         Map<String, Map> outputMap = (HashMap) templateDeployment.outputs();
         String networkName = cropId((String) outputMap.get(NETWORK_ID_KEY).get("value"));
@@ -120,10 +121,10 @@ public class AzureNetworkConnector implements NetworkConnector {
                 LOGGER.warn("Deletion error, cloud exception happened: ", e);
                 if (e.body() != null && e.body().details() != null) {
                     String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
-                    throw new CloudConnectorException(String.format("Stack deletion failed, status code %s, error message: %s, details: %s",
+                    throw new CloudConnectorException(String.format("Network deletion failed, status code %s, error message: %s, details: %s",
                             e.body().code(), e.body().message(), details));
                 } else {
-                    throw new CloudConnectorException(String.format("Stack deletion failed: '%s', please go to Azure Portal for detailed message", e));
+                    throw new CloudConnectorException(String.format("Network deletion failed: '%s', please go to Azure Portal for detailed message", e));
                 }
             }
         }
@@ -131,7 +132,6 @@ public class AzureNetworkConnector implements NetworkConnector {
 
     private ResourceGroup getOrCreateResourceGroup(AzureClient azureClient, NetworkCreationRequest networkRequest) {
         String region = networkRequest.getRegion().value();
-        String envName = networkRequest.getEnvName();
         Map<String, String> tags = Collections.unmodifiableMap(networkRequest.getTags());
         String resourceGroupName = networkRequest.getResourceGroup();
         ResourceGroup resourceGroup;
@@ -140,7 +140,10 @@ public class AzureNetworkConnector implements NetworkConnector {
             resourceGroup = azureClient.getResourceGroup(resourceGroupName);
         } else {
             LOGGER.debug("Creating resource group {}", resourceGroupName);
-            resourceGroup = azureClient.createResourceGroup(envName, region, tags);
+            String resourceGroupNameForCreation = azureUtils.generateResourceGroupNameByNameAndId(
+                    String.format("%s-", networkRequest.getEnvName()),
+                    UUID.randomUUID().toString());
+            resourceGroup = azureClient.createResourceGroup(resourceGroupNameForCreation, region, tags);
         }
         return resourceGroup;
     }

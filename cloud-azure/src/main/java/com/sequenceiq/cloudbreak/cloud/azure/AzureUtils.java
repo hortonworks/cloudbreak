@@ -114,8 +114,12 @@ public class AzureUtils {
     }
 
     public String getStackName(CloudContext cloudContext) {
-        return Splitter.fixedLength(maxResourceNameLength - cloudContext.getId().toString().length())
-                .splitToList(cloudContext.getName()).get(0) + cloudContext.getId();
+        return generateResourceGroupNameByNameAndId(cloudContext.getName(), cloudContext.getId().toString());
+    }
+
+    public String generateResourceGroupNameByNameAndId(String name, String id) {
+        return Splitter.fixedLength(maxResourceNameLength - id.length())
+                .splitToList(name).get(0) + id;
     }
 
     public CloudResourceStatus getTemplateStatus(CloudResource resource, Deployment templateDeployment, AzureClient access, String stackName) {

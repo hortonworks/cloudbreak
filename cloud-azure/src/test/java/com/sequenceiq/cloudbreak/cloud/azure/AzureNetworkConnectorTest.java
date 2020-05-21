@@ -136,7 +136,9 @@ public class AzureNetworkConnectorTest {
 
 
         NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnets);
+        when(resourceGroup.name()).thenReturn(ENV_NAME);
         when(azureSubnetRequestProvider.provide(anyString(), anyList(), anyList(), anyBoolean())).thenReturn(subnetRequests);
+        when(azureUtils.generateResourceGroupNameByNameAndId(anyString(), anyString())).thenReturn(ENV_NAME);
         when(azureClientService.getClient(networkCreationRequest.getCloudCredential())).thenReturn(azureClient);
         when(azureNetworkTemplateBuilder.build(networkCreationRequest, subnetRequests)).thenReturn(TEMPLATE);
         when(azureClient.createTemplateDeployment(ENV_NAME, STACK_NAME, TEMPLATE, PARAMETER)).thenReturn(templateDeployment);
