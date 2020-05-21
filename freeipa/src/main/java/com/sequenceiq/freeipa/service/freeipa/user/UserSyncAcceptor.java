@@ -11,6 +11,7 @@ import com.sequenceiq.freeipa.service.operation.OperationAcceptor;
 
 @Component
 public class UserSyncAcceptor extends OperationAcceptor {
+
     @Inject
     public UserSyncAcceptor(OperationRepository operationRepository) {
         super(operationRepository);
@@ -39,7 +40,7 @@ public class UserSyncAcceptor extends OperationAcceptor {
     @Override
     protected boolean doOperationsConflict(Operation operation, Operation other) {
         if (operation.getUserList().size() == 1) {
-            return true;
+            return false;
         } else if (!operation.getUserList().isEmpty()) {
             return super.doOperationsConflict(operation, other);
         } else {
