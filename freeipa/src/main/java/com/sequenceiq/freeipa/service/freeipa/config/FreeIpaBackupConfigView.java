@@ -29,6 +29,8 @@ public class FreeIpaBackupConfigView {
 
     private final String proxyUrl;
 
+    private final String awsRegion;
+
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaBackupConfigView(FreeIpaBackupConfigView.Builder builder) {
         enabled = builder.enabled;
@@ -39,6 +41,7 @@ public class FreeIpaBackupConfigView {
         platform = builder.platform;
         azureInstanceMsi = builder.azureInstanceMsi;
         proxyUrl = builder.proxyUrl;
+        awsRegion = builder.awsRegion;
     }
 
     public String getLocation() {
@@ -73,6 +76,10 @@ public class FreeIpaBackupConfigView {
         return proxyUrl;
     }
 
+    public String getAwsRegion() {
+        return awsRegion;
+    }
+
     @SuppressWarnings("ExecutableStatementCount")
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -84,6 +91,7 @@ public class FreeIpaBackupConfigView {
         map.put("platform", ObjectUtils.defaultIfNull(platform, EMPTY_CONFIG_DEFAULT));
         map.put("azure_instance_msi", ObjectUtils.defaultIfNull(azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
         map.put("http_proxy", ObjectUtils.defaultIfNull(proxyUrl, EMPTY_CONFIG_DEFAULT));
+        map.put("aws_region", ObjectUtils.defaultIfNull(awsRegion, EMPTY_CONFIG_DEFAULT));
         return map;
     }
 
@@ -104,6 +112,8 @@ public class FreeIpaBackupConfigView {
         private String azureInstanceMsi;
 
         private String proxyUrl;
+
+        private String awsRegion;
 
         public FreeIpaBackupConfigView build() {
             return new FreeIpaBackupConfigView(this);
@@ -146,6 +156,11 @@ public class FreeIpaBackupConfigView {
 
         public Builder withProxyUrl(String proxyUrl) {
             this.proxyUrl = proxyUrl;
+            return this;
+        }
+
+        public Builder withAwsRegion(String awsRegion) {
+            this.awsRegion = awsRegion;
             return this;
         }
     }
