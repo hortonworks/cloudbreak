@@ -11,8 +11,10 @@ import com.sequenceiq.cloudbreak.audit.model.ActorCrn;
 import com.sequenceiq.cloudbreak.audit.model.ActorService;
 import com.sequenceiq.cloudbreak.audit.model.ApiRequestData;
 import com.sequenceiq.cloudbreak.audit.model.AuditEvent;
+import com.sequenceiq.cloudbreak.audit.model.AuditEventName;
 import com.sequenceiq.cloudbreak.audit.model.EventData;
 import com.sequenceiq.cloudbreak.audit.model.ServiceEventData;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 
 class AuditEventToGrpcAuditEventConverterTest {
 
@@ -26,7 +28,7 @@ class AuditEventToGrpcAuditEventConverterTest {
 
     private static final String SOURCE_IP = "1.2.3.4";
 
-    private static final String EVENT_NAME = "EVENT_NAME";
+    private static final String EVENT_NAME = "DATAHUB_CLUSTER_CREATION";
 
     private static final String EVENT_SOURCE = "environments";
 
@@ -159,8 +161,8 @@ class AuditEventToGrpcAuditEventConverterTest {
                 .withId(UUID_ID)
                 .withAccountId(ACCOUNT_ID)
                 .withRequestId(REQUEST_ID)
-                .withEventName(EVENT_NAME)
-                .withEventSource(EVENT_SOURCE)
+                .withEventName(AuditEventName.DATAHUB_CLUSTER_CREATION)
+                .withEventSource(Crn.Service.ENVIRONMENTS)
                 .withSourceIp(SOURCE_IP)
                 .withActor(actor)
                 .withEventData(eventData)
@@ -170,8 +172,8 @@ class AuditEventToGrpcAuditEventConverterTest {
     private AuditEvent makeMinimalAuditEvent(ActorBase actor, EventData eventData) {
         return AuditEvent.builder()
                 .withAccountId(ACCOUNT_ID)
-                .withEventName(EVENT_NAME)
-                .withEventSource(EVENT_SOURCE)
+                .withEventName(AuditEventName.DATAHUB_CLUSTER_CREATION)
+                .withEventSource(Crn.Service.ENVIRONMENTS)
                 .withActor(actor)
                 .withEventData(eventData)
                 .build();

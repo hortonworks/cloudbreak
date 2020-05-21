@@ -16,11 +16,11 @@ public class AuditEvent {
 
     private final String requestId;
 
-    private final String eventName;
+    private final AuditEventName eventName;
 
     private final String sourceIp;
 
-    private final String eventSource;
+    private final Crn.Service eventSource;
 
     private final ActorBase actor;
 
@@ -49,7 +49,7 @@ public class AuditEvent {
         return requestId;
     }
 
-    public String getEventName() {
+    public AuditEventName getEventName() {
         return eventName;
     }
 
@@ -57,7 +57,7 @@ public class AuditEvent {
         return sourceIp;
     }
 
-    public String getEventSource() {
+    public Crn.Service getEventSource() {
         return eventSource;
     }
 
@@ -95,11 +95,11 @@ public class AuditEvent {
 
         private String requestId;
 
-        private String eventName;
+        private AuditEventName eventName;
 
         private String sourceIp;
 
-        private String eventSource;
+        private Crn.Service eventSource;
 
         private ActorBase actor;
 
@@ -120,7 +120,7 @@ public class AuditEvent {
             return this;
         }
 
-        public Builder withEventName(String eventName) {
+        public Builder withEventName(AuditEventName eventName) {
             this.eventName = eventName;
             return this;
         }
@@ -130,7 +130,7 @@ public class AuditEvent {
             return this;
         }
 
-        public Builder withEventSource(String eventSource) {
+        public Builder withEventSource(Crn.Service eventSource) {
             this.eventSource = eventSource;
             return this;
         }
@@ -148,8 +148,8 @@ public class AuditEvent {
         public AuditEvent build() {
             checkArgument(StringUtils.isBlank(id) || UuidUtil.isValid(id), "ID must be a valid UUID.");
             checkArgument(StringUtils.isNotBlank(accountId), "Account ID name must be provided.");
-            checkArgument(StringUtils.isNotBlank(eventName), "Event name must be provided.");
-            checkArgument(Crn.Service.fromString(eventSource) != null, "Event source must be a valid service name as represented in a CRN.");
+            checkArgument(eventName != null, "Event name must be provided.");
+            checkArgument(eventSource != null, "Event source must be a valid service name as represented in a CRN.");
             checkNotNull(actor);
             return new AuditEvent(this);
         }

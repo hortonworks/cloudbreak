@@ -35,8 +35,8 @@ public class AuditEventToGrpcAuditEventConverter {
                 .setTimestamp(System.currentTimeMillis())
                 .setAccountId(source.getAccountId())
                 .setRequestId(requestId)
-                .setEventName(source.getEventName())
-                .setEventSource(source.getEventSource());
+                .setEventName(source.getEventName().name())
+                .setEventSource(source.getEventSource().getName());
         doIfTrue(source.getSourceIp(), StringUtils::isNotEmpty, builder::setSourceIPAddress);
         return builder;
     }
