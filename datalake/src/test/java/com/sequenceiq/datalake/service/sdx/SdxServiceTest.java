@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -145,6 +146,9 @@ class SdxServiceTest {
 
     @Mock
     private TransactionService transactionService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private SdxService underTest;
@@ -448,6 +452,116 @@ class SdxServiceTest {
         verify(stackV4Endpoint, times(1)).sync(0L, CLUSTER_NAME);
     }
 
+    @Test
+    void testSdxCreateRazEnabled() throws IOException, TransactionExecutionException {
+        when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setRuntime("7.2.0");
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        Map<String, String> tags = new HashMap<>();
+        tags.put("mytag", "tagecske");
+        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.setEnvironment("envir");
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        long id = 10L;
+        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
+            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
+            sdxWithId.setId(id);
+            return sdxWithId;
+        });
+        when(clock.getCurrentTimeMillis()).thenReturn(1L);
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
+        sdxClusterRequest.setEnableRangerRaz(true);
+        when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(true);
+        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        SdxCluster createdSdxCluster = result.getLeft();
+        Assertions.assertEquals(id, createdSdxCluster.getId());
+        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxClusterRepository, times(1)).save(captor.capture());
+        SdxCluster capturedSdx = captor.getValue();
+        assertTrue(capturedSdx.isRangerRazEnabled());
+    }
+
+    @Test
+    void testSdxCreateRazEnabledNoEntitlement() throws IOException {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setRuntime("7.2.0");
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        Map<String, String> tags = new HashMap<>();
+        tags.put("mytag", "tagecske");
+        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.setEnvironment("envir");
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        long id = 10L;
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
+        sdxClusterRequest.setEnableRangerRaz(true);
+        when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(false);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        assertEquals("1. Provisioning Ranger Raz is not enabled for this account.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxCreateRazEnabledNotAzure() throws IOException {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setRuntime("7.2.0");
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        Map<String, String> tags = new HashMap<>();
+        tags.put("mytag", "tagecske");
+        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.setEnvironment("envir");
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        long id = 10L;
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
+        sdxClusterRequest.setEnableRangerRaz(true);
+        when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(true);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        assertEquals("1. Provisioning Ranger Raz is only valid for Microsft Azure.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxCreateRazEnabledNoEntitlmentAndNotAzure() throws IOException {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setRuntime("7.2.0");
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        Map<String, String> tags = new HashMap<>();
+        tags.put("mytag", "tagecske");
+        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.setEnvironment("envir");
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        long id = 10L;
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
+        sdxClusterRequest.setEnableRangerRaz(true);
+        when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(false);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        assertEquals("1. Provisioning Ranger Raz is not enabled for this account.\n" +
+                "2. Provisioning Ranger Raz is only valid for Microsft Azure.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxCreateRazEnabled710Runtime() {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setRuntime("7.1.0");
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        Map<String, String> tags = new HashMap<>();
+        tags.put("mytag", "tagecske");
+        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.setEnvironment("envir");
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        long id = 10L;
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
+        sdxClusterRequest.setEnableRangerRaz(true);
+        when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(true);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        assertEquals("1. Provisioning Ranger Raz is only valid for CM version > 7.2.0 and not 7.1.0", badRequestException.getMessage());
+    }
+
     private void setSpot(SdxClusterRequest sdxClusterRequest) {
         SdxAwsRequest aws = new SdxAwsRequest();
         SdxAwsSpotParameters spot = new SdxAwsSpotParameters();
@@ -471,6 +585,7 @@ class SdxServiceTest {
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId(UUID.randomUUID().toString())
                 .build().toString());
+        detailedEnvironmentResponse.setCreator(detailedEnvironmentResponse.getCrn());
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
     }
 

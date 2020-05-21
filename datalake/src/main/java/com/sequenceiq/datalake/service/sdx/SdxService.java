@@ -1,10 +1,12 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +41,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Req
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -47,6 +51,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -120,6 +125,9 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     @Inject
     private TransactionService transactionService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
         List<SdxStatusEntity> sdxStatusEntities = sdxStatusService.findDistinctFirstByStatusInAndDatalakeIdOrderByIdDesc(statuses, resourceIds);
@@ -176,6 +184,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         DetailedEnvironmentResponse environment = getEnvironment(sdxClusterRequest.getEnvironment());
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest.getClusterShape());
         validateEnv(environment);
+        validateRazEnablement(sdxClusterRequest, environment);
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setInitiatorUserCrn(userCrn);
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
@@ -185,6 +194,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         sdxCluster.setCreated(clock.getCurrentTimeMillis());
         sdxCluster.setEnvName(environment.getName());
         sdxCluster.setEnvCrn(environment.getCrn());
+        sdxCluster.setRangerRazEnabled(sdxClusterRequest.isEnableRangerRaz());
         setTagsSafe(sdxClusterRequest, sdxCluster);
 
         if (isCloudStorageConfigured(sdxClusterRequest)) {
@@ -249,6 +259,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
                 throw new BadRequestException("Can't find template for cloudplatform: " + cloudPlatform + ", shape: " + sdxClusterRequest.getClusterShape() +
                         ", runtime version: " + runtimeVersion);
             }
+            stackRequest.getCluster().setRangerRazEnabled(sdxClusterRequest.isEnableRangerRaz());
             return stackRequest;
         } else {
             return internalStackV4Request;
@@ -411,6 +422,37 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
                 throw new BadRequestException(validationResult.getFormattedErrors());
             }
         }
+    }
+
+    private void validateRazEnablement(SdxClusterRequest sdxClusterRequest, DetailedEnvironmentResponse environment) {
+        ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
+        if (sdxClusterRequest.isEnableRangerRaz())  {
+            boolean razEntitlementEnabled = entitlementService.razEnabled(environment.getCreator(), Crn.safeFromString(environment.getCreator()).getAccountId());
+            if (!razEntitlementEnabled) {
+                validationBuilder.error("Provisioning Ranger Raz is not enabled for this account.");
+            }
+            if (!AZURE.name().equalsIgnoreCase(environment.getCloudPlatform())) {
+                validationBuilder.error("Provisioning Ranger Raz is only valid for Microsft Azure.");
+            }
+            if (!isRazSupported(sdxClusterRequest.getRuntime())) {
+                validationBuilder.error("Provisioning Ranger Raz is only valid for CM version > 7.2.0 and not " + sdxClusterRequest.getRuntime());
+            }
+        }
+        ValidationResult validationResult = validationBuilder.build();
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
+    /**
+     * Ranger Raz is only on 7.2.0 and later.  If runtime is empty, then sdx-internal call was used.
+     */
+    private boolean isRazSupported(String runtime) {
+        if (StringUtils.isEmpty(runtime)) {
+            return true;
+        }
+        Comparator<Versioned> versionComparator = new VersionComparator();
+        return versionComparator.compare(() -> runtime, () -> "7.2.0") > -1;
     }
 
     private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {

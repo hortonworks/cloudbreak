@@ -33,13 +33,16 @@ public class SdxClusterResponse {
 
     private FlowIdentifier flowIdentifier;
 
+    private boolean rangerRazEnabled;
+
     public SdxClusterResponse() {
     }
 
     public SdxClusterResponse(String crn, String name, SdxClusterStatusResponse status,
             String statusReason, String environmentName, String environmentCrn, String stackCrn,
             SdxClusterShape clusterShape, String cloudStorageBaseLocation,
-            FileSystemType cloudStorageFileSystemType, String runtime) {
+            FileSystemType cloudStorageFileSystemType, String runtime,
+            boolean rangerRazEnabled) {
         this.crn = crn;
         this.name = name;
         this.status = status;
@@ -51,6 +54,7 @@ public class SdxClusterResponse {
         this.cloudStorageBaseLocation = cloudStorageBaseLocation;
         this.cloudStorageFileSystemType = cloudStorageFileSystemType;
         this.runtime = runtime;
+        this.rangerRazEnabled = rangerRazEnabled;
     }
 
     public String getCrn() {
@@ -163,5 +167,13 @@ public class SdxClusterResponse {
 
     public void setFlowIdentifier(FlowIdentifier flowIdentifier) {
         this.flowIdentifier = flowIdentifier;
+    }
+
+    public void setRangerRazEnabled(boolean rangerRazEnabled) {
+        this.rangerRazEnabled = rangerRazEnabled;
+    }
+
+    public boolean getRangerRazEnabled() {
+        return rangerRazEnabled;
     }
 }

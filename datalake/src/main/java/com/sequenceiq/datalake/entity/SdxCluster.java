@@ -102,6 +102,9 @@ public class SdxCluster implements AccountIdAwareResource {
     @Enumerated(EnumType.STRING)
     private SdxDatabaseAvailabilityType databaseAvailabilityType;
 
+    @Column(name = "ranger_raz_enabled")
+    private boolean rangerRazEnabled;
+
     public Long getId() {
         return id;
     }
@@ -307,6 +310,14 @@ public class SdxCluster implements AccountIdAwareResource {
         }
     }
 
+    public boolean isRangerRazEnabled() {
+        return rangerRazEnabled;
+    }
+
+    public void setRangerRazEnabled(boolean rangerRazEnabled) {
+        this.rangerRazEnabled = rangerRazEnabled;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -332,14 +343,15 @@ public class SdxCluster implements AccountIdAwareResource {
                 Objects.equals(databaseCrn, that.databaseCrn) &&
                 Objects.equals(cloudStorageBaseLocation, that.cloudStorageBaseLocation) &&
                 cloudStorageFileSystemType == that.cloudStorageFileSystemType &&
-                databaseAvailabilityType == that.databaseAvailabilityType;
+                databaseAvailabilityType == that.databaseAvailabilityType &&
+                rangerRazEnabled == that.rangerRazEnabled;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, initiatorUserCrn, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
                 stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType,
-                databaseAvailabilityType);
+                databaseAvailabilityType, rangerRazEnabled);
     }
     //CHECKSTYLE:ON
 }

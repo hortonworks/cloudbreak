@@ -45,6 +45,8 @@ public class GeneralClusterConfigs {
 
     private boolean knoxUserFacingCertConfigured;
 
+    private boolean enableRangerRaz;
+
     public OrchestratorType getOrchestratorType() {
         return orchestratorType;
     }
@@ -195,5 +197,13 @@ public class GeneralClusterConfigs {
 
     public void setExternalFQDN(String externalFQDN) {
         this.externalFQDN = externalFQDN;
+    }
+
+    public boolean isEnableRangerRaz() {
+        return enableRangerRaz;
+    }
+
+    public void setEnableRangerRaz(boolean enableRangerRaz) {
+        this.enableRangerRaz = enableRangerRaz;
     }
 }

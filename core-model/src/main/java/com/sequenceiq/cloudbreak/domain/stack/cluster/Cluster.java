@@ -210,6 +210,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Column(nullable = false)
     private Boolean autoTlsEnabled = Boolean.FALSE;
 
+    @Column(name = "ranger_raz_enabled")
+    private boolean rangerRazEnabed;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -685,6 +688,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setFqdn(String fqdn) {
         this.fqdn = fqdn;
+    }
+
+    public boolean isRangerRazEnabed() {
+        return rangerRazEnabed;
+    }
+
+    public void setRangerRazEnabed(boolean rangerRazEnabed) {
+        this.rangerRazEnabed = rangerRazEnabed;
     }
 
     @Override

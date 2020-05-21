@@ -91,6 +91,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         updateDatabases(source, cluster, workspace);
         extractClusterManagerAndHdpRepoConfig(cluster, source);
         cluster.setProxyConfigCrn(source.getProxyConfigCrn());
+        cluster.setRangerRazEnabed(source.isRangerRazEnabled());
         return cluster;
     }
 
