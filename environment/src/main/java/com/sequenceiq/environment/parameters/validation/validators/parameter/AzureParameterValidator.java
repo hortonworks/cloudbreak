@@ -2,6 +2,7 @@ package com.sequenceiq.environment.parameters.validation.validators.parameter;
 
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation.USE_EXISTING;
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_MULTIPLE;
+import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_SINGLE;
 
 import java.util.Objects;
 
@@ -47,8 +48,16 @@ public class AzureParameterValidator implements ParameterValidator {
     public ValidationResult validate(EnvironmentDto environmentDto, ParametersDto parametersDto, ValidationResultBuilder validationResultBuilder) {
         LOGGER.debug("ParametersDto: {}, featureSwitch: {}", parametersDto, azureSingleResourceGroupFeatureSwitch.isActive());
         AzureParametersDto azureParametersDto = parametersDto.azureParametersDto();
-        if (!azureSingleResourceGroupFeatureSwitch.isActive() || Objects.isNull(azureParametersDto)) {
+        if (Objects.isNull(azureParametersDto)) {
             return validationResultBuilder.build();
+        }
+        if (!azureSingleResourceGroupFeatureSwitch.isActive()) {
+            if (Objects.nonNull(azureParametersDto.getAzureResourceGroupDto())
+                    && USE_SINGLE.equals(azureParametersDto.getAzureResourceGroupDto().getResourceGroupUsagePattern())) {
+                return validationResultBuilder.error("'SINGLE' usage pattern for Resource Groups could not be specified, as feature is disabled").build();
+            } else {
+                return validationResultBuilder.build();
+            }
         }
 
         AzureResourceGroupDto azureResourceGroupDto = azureParametersDto.getAzureResourceGroupDto();

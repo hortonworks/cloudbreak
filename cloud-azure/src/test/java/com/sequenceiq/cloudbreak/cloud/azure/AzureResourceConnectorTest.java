@@ -28,9 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -100,8 +98,6 @@ public class AzureResourceConnectorTest {
 
     @Before
     public void setUp() {
-        Location location = mock(Location.class);
-        Region region = mock(Region.class);
         DeploymentExportResult deploymentExportResult = mock(DeploymentExportResult.class);
         Group group = mock(Group.class);
         AzureStackView azureStackView = mock(AzureStackView.class);
@@ -111,16 +107,14 @@ public class AzureResourceConnectorTest {
         network = new Network(new Subnet("0.0.0.0/16"));
         when(stack.getGroups()).thenReturn(groups);
         when(stack.getNetwork()).thenReturn(network);
-        when(location.getRegion()).thenReturn(region);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(ac.getParameter(AzureClient.class)).thenReturn(client);
         when(ac.getCloudCredential()).thenReturn(new CloudCredential("aCredentialId", "aCredentialName"));
-        when(cloudContext.getLocation()).thenReturn(location);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(deployment.exportTemplate()).thenReturn(deploymentExportResult);
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack)).thenReturn(RESOURCE_GROUP_NAME);
-        when(azureCloudResourceService.getCloudResources(deployment)).thenReturn(instances);
+        when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(instances);
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME)).thenReturn(instances);
         when(azureStackViewProvider.getAzureStack(any(), eq(stack), eq(client), eq(ac))).thenReturn(azureStackView);
     }

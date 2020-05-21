@@ -89,7 +89,7 @@ public class PrerequisitesCreationHandler extends EventSenderAwareHandler<Enviro
                                 if (AZURE.name().equals(environmentDto.getCloudPlatform())) {
                                     createResourceGroup(environmentDto, environment);
                                 } else {
-                                    LOGGER.debug("Cloudplatform not azure, not creating resource group.");
+                                    LOGGER.debug("Cloudplatform not Azure, not creating resource group.");
                                 }
                                 goToNetworkCreationState(environmentDtoEvent);
                             } catch (Exception e) {

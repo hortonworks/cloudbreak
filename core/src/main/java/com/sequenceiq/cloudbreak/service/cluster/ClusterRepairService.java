@@ -387,7 +387,7 @@ public class ClusterRepairService {
                 return flowIdentifier;
             } else {
                 eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER, recoveryMessageArgument);
-                throw new BadRequestException(String.format("Could not trigger cluster repair  for stack %s, because node list is incorrect", stackId));
+                throw new BadRequestException(String.format("Could not trigger cluster repair for stack %s because node list is incorrect", stackId));
             }
         }
     }
