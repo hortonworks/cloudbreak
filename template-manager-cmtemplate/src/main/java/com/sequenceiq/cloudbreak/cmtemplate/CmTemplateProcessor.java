@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -46,10 +47,13 @@ import com.cloudera.api.swagger.model.ApiDataContextRef;
 import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Enums;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
+import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
@@ -205,6 +209,18 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     @Override
+    public Map<String, Set<String>> getNonGatewayComponentsByHostGroup() {
+        return getServiceComponentsByHostGroup().entrySet().stream()
+                .collect(toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().stream()
+                                .map(ServiceComponent::getComponent)
+                                .filter(i -> !i.equalsIgnoreCase("GATEWAY"))
+                                .collect(toSet())
+                ));
+    }
+
+    @Override
     public Map<String, Set<String>> getComponentsByHostGroup() {
         return getServiceComponentsByHostGroup().entrySet().stream()
                 .collect(toMap(
@@ -233,6 +249,41 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 .findFirst()
                 .map(hostGroup -> new GatewayRecommendation(Set.of(hostGroup)))
                 .orElseGet(() -> new GatewayRecommendation(Set.of()));
+    }
+
+    @Override
+    public AutoscaleRecommendation recommendAutoscale() {
+        Set<String> time = getRecommendationByBlacklist(BlackListedTimeBasedAutoscaleRole.class, true);
+        Set<String> load = getRecommendationByBlacklist(BlackListedLoadBasedAutoscaleRole.class, true);
+        return new AutoscaleRecommendation(time, load);
+    }
+
+    private <T extends Enum<T>> Set<String> getRecommendationByBlacklist(Class<T> enumClass, boolean emptyServiceListBlacklisted) {
+        Map<String, Set<String>> componentsByHostGroup = getNonGatewayComponentsByHostGroup();
+        Set<String> recos = new HashSet<>();
+        for (Entry<String, Set<String>> hostGroupServices : componentsByHostGroup.entrySet()) {
+            if (emptyServiceListBlacklisted && hostGroupServices.getValue().isEmpty()) {
+                continue;
+            }
+            boolean foundBlackListItem = false;
+            for (String service : hostGroupServices.getValue()) {
+                if (Enums.getIfPresent(enumClass, service).isPresent()) {
+                    foundBlackListItem = true;
+                    break;
+                }
+            }
+            if (!foundBlackListItem) {
+                recos.add(hostGroupServices.getKey());
+            }
+        }
+        return recos;
+    }
+
+    @Override
+    public ResizeRecommendation recommendResize() {
+        Set<String> upRecos = getRecommendationByBlacklist(BlackListedUpScaleRole.class, false);
+        Set<String> downRecos = getRecommendationByBlacklist(BlackListedDownScaleRole.class, false);
+        return new ResizeRecommendation(upRecos, downRecos);
     }
 
     @Override

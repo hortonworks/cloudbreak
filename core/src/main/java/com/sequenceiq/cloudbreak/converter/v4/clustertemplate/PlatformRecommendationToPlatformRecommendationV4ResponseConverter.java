@@ -11,9 +11,11 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.RecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.DiskV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.GatewayRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.InstanceCountV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.ResizeRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
@@ -56,6 +58,12 @@ public class PlatformRecommendationToPlatformRecommendationV4ResponseConverter
 
         GatewayRecommendationV4Response gateway = new GatewayRecommendationV4Response(source.getGatewayRecommendation().getHostGroups());
 
-        return new RecommendationV4Response(result, vmTypes, diskResponses, instanceCounts, gateway);
+        AutoscaleRecommendationV4Response autoscaleRecommendation = new AutoscaleRecommendationV4Response(
+                source.getAutoscaleRecommendation().getTimeBasedHostGroups(), source.getAutoscaleRecommendation().getLoadBasedHostGroups());
+
+        ResizeRecommendationV4Response resizeRecommendation = new ResizeRecommendationV4Response(source.getResizeRecommendation().getScaleUpHostGroups(),
+                source.getResizeRecommendation().getScaleDownHostGroups());
+
+        return new RecommendationV4Response(result, vmTypes, diskResponses, instanceCounts, gateway, autoscaleRecommendation, resizeRecommendation);
     }
 }
