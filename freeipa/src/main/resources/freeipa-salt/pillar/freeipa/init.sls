@@ -14,3 +14,4 @@ freeipa:
     location:
     azure_instance_msi:
     http_proxy:
+    aws_region:
