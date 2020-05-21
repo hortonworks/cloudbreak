@@ -34,6 +34,7 @@ config=( # set default values in config array
     [statusfileprefix]="/var/log/ipabackup_status_"
     [backup_path]="/var/lib/ipa/backup"
     [http_proxy]=""
+    [aws_region]=""
 )
 
 set +x
@@ -146,7 +147,12 @@ doLog "DEBUG Uploading backup to ${BACKUP_LOCATION} on ${config[backup_platform]
 
 if [[ "${config[backup_platform]}" = "AWS" ]]; then
     doLog "INFO Syncing backups to AWS S3"
-    /usr/bin/aws s3 cp --recursive --sse AES256 --no-progress ${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR} >> $LOGFILE 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
+
+    REGION_OPTION=""
+    if [[ -n "${config[aws_region]}" ]]; then
+      REGION_OPTION="--region ${config[aws_region]}"
+    fi
+    /usr/bin/aws ${REGION_OPTION} s3 cp --recursive --sse AES256 --no-progress ${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR} >> $LOGFILE 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
     remove_local_backups
 elif [[ "${config[backup_platform]}" = "AZURE" ]]; then
     doLog "INFO Syncing backups to Azure Blog Storage"

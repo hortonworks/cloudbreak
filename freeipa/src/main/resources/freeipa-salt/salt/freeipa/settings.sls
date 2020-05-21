@@ -4,11 +4,13 @@
      {% set azure_instance_msi = salt['pillar.get']('freeipa:backup:azure_instance_msi') %}
      {% set http_proxy = salt['pillar.get']('freeipa:backup:http_proxy') %}
      {% set hostname = salt['grains.get']('fqdn') %}
+     {% set aws_region = salt['pillar.get']('freeipa:backup:aws_region') %}
 
      {% do freeipa.update({
          "backup_platform" : backup_platform,
          "backup_location" : backup_location,
          "hostname": hostname,
          "azure_instance_msi": azure_instance_msi,
-         "http_proxy": http_proxy
+         "http_proxy": http_proxy,
+         "aws_region": aws_region
      }) %}
