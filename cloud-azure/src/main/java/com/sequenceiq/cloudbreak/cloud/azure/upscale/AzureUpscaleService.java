@@ -15,6 +15,7 @@ import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
@@ -73,7 +74,8 @@ public class AzureUpscaleService {
                 azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region, isEncryptionNeeded(stack), stack.getTags());
             }
             purgeExistingInstances(azureStackView);
-            Deployment templateDeployment = azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView);
+            Deployment templateDeployment =
+                    azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
             LOGGER.info("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
             List<CloudResource> newInstances = azureUtils.getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups);
             List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(resources, newInstances);
@@ -97,7 +99,7 @@ public class AzureUpscaleService {
 
     private void purgeExistingInstances(AzureStackView azureStackView) {
         azureStackView.getGroups().forEach((key, value) -> value.removeIf(AzureInstanceView::hasRealInstanceId));
-        azureStackView.getGroups().entrySet().removeIf(group -> group.getValue() == null || group.getValue().size() == 0);
+        azureStackView.getGroups().entrySet().removeIf(group -> group.getValue() == null || group.getValue().isEmpty());
     }
 
     private CloudResource getArmTemplate(List<CloudResource> resources, String stackName) {
