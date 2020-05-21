@@ -49,7 +49,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
-class ReourceGroupCreationHandlerTest {
+class PrerequisitesCreationHandlerTest {
 
     private static final String ENVIRONMENT_NAME = "environmentName";
 
@@ -89,7 +89,7 @@ class ReourceGroupCreationHandlerTest {
     private EventSender eventSender;
 
     @InjectMocks
-    private ResourceGroupCreationHandler underTest;
+    private PrerequisitesCreationHandler underTest;
 
     @Mock
     private Setup setup;

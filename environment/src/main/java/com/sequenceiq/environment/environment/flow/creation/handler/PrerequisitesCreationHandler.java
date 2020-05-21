@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.creation.handler;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.RESOURCEGROUP_CREATE_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PREREQUISITES_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation.CREATE_NEW;
 
@@ -41,9 +41,9 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ResourceGroupCreationHandler extends EventSenderAwareHandler<EnvironmentDto> {
+public class PrerequisitesCreationHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceGroupCreationHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrerequisitesCreationHandler.class);
 
     private final CloudPlatformConnectors cloudPlatformConnectors;
 
@@ -61,7 +61,7 @@ public class ResourceGroupCreationHandler extends EventSenderAwareHandler<Enviro
 
     private final Clock clock;
 
-    protected ResourceGroupCreationHandler(EventSender eventSender,
+    protected PrerequisitesCreationHandler(EventSender eventSender,
             CloudPlatformConnectors cloudPlatformConnectors,
             CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
             AzureSingleResourceGroupFeatureSwitch azureSingleResourceGroupFeatureSwitch,
@@ -179,7 +179,7 @@ public class ResourceGroupCreationHandler extends EventSenderAwareHandler<Enviro
 
     @Override
     public String selector() {
-        return RESOURCEGROUP_CREATE_EVENT.selector();
+        return CREATE_PREREQUISITES_EVENT.selector();
     }
 
 }
