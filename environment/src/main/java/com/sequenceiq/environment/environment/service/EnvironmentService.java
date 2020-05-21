@@ -259,7 +259,7 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
         }
     }
 
-    void setAdminGroupName(Environment environment, String adminGroupName) {
+    public void setAdminGroupName(Environment environment, String adminGroupName) {
         if (isEmpty(adminGroupName)) {
             environment.setAdminGroupName(adminGroupNamePrefix + environment.getName());
         } else {

@@ -546,9 +546,9 @@ public class AwsPlatformResources implements PlatformResources {
 
     private void fetchAZsIfNeeded(boolean availabilityZonesNeeded, AmazonEC2Client ec2Client, Map<Region, List<AvailabilityZone>> regionListMap,
             com.amazonaws.services.ec2.model.Region awsRegion, CloudCredential cloudCredential) {
-        DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = getDescribeAvailabilityZonesRequest(ec2Client, awsRegion);
         List<AvailabilityZone> collectedAZs = new ArrayList<>();
         if (availabilityZonesNeeded) {
+            DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = getDescribeAvailabilityZonesRequest(ec2Client, awsRegion);
             LOGGER.debug("Describing AZs in region {}", awsRegion.getRegionName());
             List<com.amazonaws.services.ec2.model.AvailabilityZone> availabilityZones
                     = awsAvailabilityZoneProvider.describeAvailabilityZones(cloudCredential, describeAvailabilityZonesRequest, ec2Client, awsRegion);

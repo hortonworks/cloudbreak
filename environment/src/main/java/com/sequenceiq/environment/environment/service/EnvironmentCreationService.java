@@ -3,8 +3,6 @@ package com.sequenceiq.environment.environment.service;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
@@ -16,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
-import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -55,8 +51,6 @@ public class EnvironmentCreationService {
 
     private final EntitlementService entitlementService;
 
-    private final VirtualGroupService virtualGroupService;
-
     public EnvironmentCreationService(
             EnvironmentService environmentService,
             EnvironmentValidatorService environmentValidatorService,
@@ -65,8 +59,7 @@ public class EnvironmentCreationService {
             EnvironmentReactorFlowManager reactorFlowManager,
             AuthenticationDtoConverter authenticationDtoConverter,
             ParametersService parametersService,
-            EntitlementService entitlementService,
-            VirtualGroupService virtualGroupService) {
+            EntitlementService entitlementService) {
         this.environmentService = environmentService;
         validatorService = environmentValidatorService;
         this.environmentResourceService = environmentResourceService;
@@ -75,7 +68,6 @@ public class EnvironmentCreationService {
         this.authenticationDtoConverter = authenticationDtoConverter;
         this.parametersService = parametersService;
         this.entitlementService = entitlementService;
-        this.virtualGroupService = virtualGroupService;
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
@@ -94,12 +86,6 @@ public class EnvironmentCreationService {
         }
 
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
-        String environmentCrnForVirtualGroups = getEnvironmentCrnForVirtualGroups(environment);
-        if (!createVirtualGroups(creationDto, environmentCrnForVirtualGroups)) {
-            // To keep backward compatibility, if somebody passes the group name, then we shall just use it
-            environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
-        }
-        environmentService.assignEnvironmentAdminAndOwnerRole(creationDto.getCreator(), environmentCrnForVirtualGroups);
         validateCreation(creationDto, environment);
         try {
             environment = environmentService.save(environment);
@@ -128,24 +114,6 @@ public class EnvironmentCreationService {
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
         LOGGER.info("Environment is initialized for creation.");
         return environment;
-    }
-
-    private String getEnvironmentCrnForVirtualGroups(Environment environment) {
-        String environmentCrnForVirtualGroups = environment.getResourceCrn();
-        if (Objects.nonNull(environment.getParentEnvironment())) {
-            environmentCrnForVirtualGroups = environment.getParentEnvironment().getResourceCrn();
-        }
-        return environmentCrnForVirtualGroups;
-    }
-
-    private boolean createVirtualGroups(EnvironmentCreationDto creationDto, String envCrn) {
-        boolean result = false;
-        if (StringUtils.isEmpty(creationDto.getAdminGroupName())) {
-            Map<UmsRight, String> virtualGroups = virtualGroupService.createVirtualGroups(creationDto.getAccountId(), envCrn);
-            LOGGER.info("The virtualgroups for [{}] environment are created: {}", creationDto.getName(), virtualGroups);
-            result = true;
-        }
-        return result;
     }
 
     private void createAndSetParameters(Environment environment, ParametersDto parameters) {

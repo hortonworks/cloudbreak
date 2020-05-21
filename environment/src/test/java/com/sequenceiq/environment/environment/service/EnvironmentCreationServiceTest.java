@@ -34,7 +34,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -89,9 +88,6 @@ class EnvironmentCreationServiceTest {
 
     @MockBean
     private GrpcUmsClient grpcUmsClient;
-
-    @MockBean
-    private VirtualGroupService virtualGroupService;
 
     @MockBean
     private CloudNetworkService cloudNetworkService;
@@ -194,7 +190,6 @@ class EnvironmentCreationServiceTest {
         verify(environmentService, times(2)).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
-        verify(virtualGroupService, times(1)).createVirtualGroups(anyString(), eq(environmentCrn));
         verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
     }
 
@@ -250,7 +245,6 @@ class EnvironmentCreationServiceTest {
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
-        verify(virtualGroupService, times(1)).createVirtualGroups(anyString(), eq(parentEnvironmentResourceCrn));
         assertEquals(environmentArgumentCaptor.getValue().getParentEnvironment(), parentEnvironment);
     }
 
