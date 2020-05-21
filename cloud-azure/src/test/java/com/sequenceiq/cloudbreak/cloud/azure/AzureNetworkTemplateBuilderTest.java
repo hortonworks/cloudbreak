@@ -81,7 +81,7 @@ public class AzureNetworkTemplateBuilderTest {
                 publicSubnetRequest("10.0.1.0/24", 0),
                 publicSubnetRequest("10.0.1.0/24", 1),
                 publicSubnetRequest("10.0.1.0/24", 2)),
-                resourceGroup);
+                resourceGroup.name());
 
         JsonNode json = objectMapper.readTree(actual);
         assertEquals(expectedJson, json);

@@ -318,7 +318,7 @@ public class ClusterRepairServiceTest {
             underTest.repairHostGroups(1L, Set.of("hostGroup1"), false);
         });
 
-        assertEquals("Could not trigger cluster repair  for stack 1, because node list is incorrect", exception.getMessage());
+        assertEquals("Could not trigger cluster repair for stack 1 because node list is incorrect", exception.getMessage());
         verifyEventArguments(CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER, "hostGroup1");
         verifyZeroInteractions(stackUpdater);
     }

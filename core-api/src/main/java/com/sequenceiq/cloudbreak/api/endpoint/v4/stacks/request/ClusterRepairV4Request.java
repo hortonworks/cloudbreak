@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 import javax.validation.Valid;
 
@@ -46,5 +47,14 @@ public class ClusterRepairV4Request {
 
     public void setNodes(ClusterRepairNodesV4Request nodes) {
         this.nodes = nodes;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ClusterRepairV4Request.class.getSimpleName() + "[", "]")
+                .add("hostGroups=" + hostGroups)
+                .add("nodes=" + nodes)
+                .add("removeOnly=" + removeOnly)
+                .toString();
     }
 }

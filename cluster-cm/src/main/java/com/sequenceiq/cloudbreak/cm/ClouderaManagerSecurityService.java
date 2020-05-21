@@ -154,7 +154,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         try {
             kerberosService.deleteCredentials(clientConfig, stack);
         } catch (Exception e) {
-            LOGGER.warn("Couldn't cleanup kerberos. It's possible CM isn't started.", e);
+            LOGGER.warn("Couldn't cleanup kerberos. It is possible that CM is not started.", e);
         }
     }
 
@@ -163,7 +163,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         try {
             clouderaManagerDeregisterService.deregisterServices(clientConfig, stack);
         } catch (Exception e) {
-            LOGGER.warn("Couldn't remove services. It's possible CM isn't started.", e);
+            LOGGER.warn("Couldn't remove services. It's possible that CM is not started.", e);
         }
     }
 

@@ -19,10 +19,16 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.microsoft.azure.PagedList;
+import com.microsoft.azure.management.compute.ManagedDiskParameters;
+import com.microsoft.azure.management.compute.OSDisk;
+import com.microsoft.azure.management.compute.StorageProfile;
+import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentOperation;
 import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.microsoft.azure.management.resources.TargetResource;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -54,6 +60,12 @@ public class AzureCloudResourceServiceTest {
     @Mock
     private AzureUtils azureUtils;
 
+    @Mock
+    private AuthenticatedContext ac;
+
+    @Mock
+    private AzureClient azureClient;
+
     @InjectMocks
     private AzureCloudResourceService underTest;
 
@@ -75,7 +87,7 @@ public class AzureCloudResourceServiceTest {
         when(operation.targetResource()).thenReturn(t);
         when(operation.provisioningState()).thenReturn("succeeded");
 
-        List<CloudResource> cloudResourceList = underTest.getCloudResources(deployment);
+        List<CloudResource> cloudResourceList = underTest.getDeploymentCloudResources(deployment);
 
         assertEquals(1, cloudResourceList.size());
         CloudResource cloudResource = cloudResourceList.get(0);
@@ -98,7 +110,7 @@ public class AzureCloudResourceServiceTest {
         when(operation.targetResource()).thenReturn(t);
         when(operation.provisioningState()).thenReturn("failed");
 
-        List<CloudResource> cloudResourceList = underTest.getCloudResources(deployment);
+        List<CloudResource> cloudResourceList = underTest.getDeploymentCloudResources(deployment);
 
         assertEquals(1, cloudResourceList.size());
         CloudResource cloudResource = cloudResourceList.get(0);
@@ -121,7 +133,7 @@ public class AzureCloudResourceServiceTest {
         when(operation.targetResource()).thenReturn(t);
         when(operation.provisioningState()).thenReturn("succeeded");
 
-        List<CloudResource> cloudResourceList = underTest.getCloudResources(deployment);
+        List<CloudResource> cloudResourceList = underTest.getDeploymentCloudResources(deployment);
 
         assertEquals(0, cloudResourceList.size());
     }
@@ -171,6 +183,36 @@ public class AzureCloudResourceServiceTest {
                 () -> underTest.getInstanceCloudResources(STACK_NAME, cloudResourceList, groupList, "resourceGroupName"));
 
         assertTrue(exception.getMessage().contains("No VM resource found amongst cloud resources"));
+    }
+
+    @Test
+    public void getAttachedOsDiskResourcesFound() {
+        CloudResource vm1 = createCloudResource(INSTANCE_1, ResourceType.AZURE_INSTANCE);
+        CloudResource vm2 = createCloudResource(INSTANCE_2, ResourceType.AZURE_INSTANCE);
+        CloudResource vm3 = createCloudResource(INSTANCE_3, ResourceType.AZURE_INSTANCE);
+        PagedList<VirtualMachine> virtualMachines = Mockito.spy(PagedList.class);
+        VirtualMachine vm = Mockito.mock(VirtualMachine.class);
+        StorageProfile storageProfile = Mockito.mock(StorageProfile.class);
+        OSDisk osDisk = Mockito.mock(OSDisk.class);
+        ManagedDiskParameters managedDiskParameters = Mockito.mock(ManagedDiskParameters.class);
+        virtualMachines.add(vm);
+
+        when(vm.name()).thenReturn(INSTANCE_1);
+        when(vm.storageProfile()).thenReturn(storageProfile);
+        when(vm.storageProfile().osDisk()).thenReturn(osDisk);
+        when(osDisk.managedDisk()).thenReturn(managedDiskParameters);
+        when(managedDiskParameters.id()).thenReturn("diskId1");
+        when(osDisk.name()).thenReturn("diskName1");
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+
+        when(azureClient.getVirtualMachines("resourceGroupName")).thenReturn(virtualMachines);
+
+        List<CloudResource> osDiskResources = underTest.getAttachedOsDiskResources(ac, List.of(vm1, vm2, vm3), "resourceGroupName");
+
+        assertEquals(1, osDiskResources.size());
+        CloudResource diskResource = osDiskResources.get(0);
+        assertEquals("diskName1", diskResource.getName());
+        assertEquals("diskId1", diskResource.getReference());
     }
 
     private CloudResource createCloudResource(String name, ResourceType resourceType) {

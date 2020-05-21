@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -50,19 +49,17 @@ public class AzureStackView {
                 for (CloudInstance instance : group.getInstances()) {
                     InstanceTemplate template = instance.getTemplate();
                     String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
-                    boolean managedDisk = !Boolean.FALSE.equals(instance.getTemplate().getParameter("managedDisk", Boolean.class));
                     String attachedDiskStorageType = template.getVolumes().isEmpty() ? AzurePlatformParameters.defaultDiskType().value()
                             : template.getVolumes().get(0).getType();
                     AzureInstanceView azureInstance = new AzureInstanceView(stackName, stackNamePrefixLength, instance, group.getType(),
                             attachedDiskStorageName, attachedDiskStorageType, group.getName(), instanceGroupView.getAvailabilitySetName(),
-                            managedDisk, getInstanceSubnetId(instance, subnetStrategy), group.getRootVolumeSize(),
+                            true, getInstanceSubnetId(instance, subnetStrategy), group.getRootVolumeSize(),
                             customImageNamePerInstance.get(instance.getInstanceId()), getManagedIdentity(group));
                     existingInstances.add(azureInstance);
                 }
-                boolean managedDisk = !Boolean.FALSE.equals(group.getReferenceInstanceConfiguration().getTemplate()
-                        .getParameter("managedDisk", Boolean.class));
-                instanceGroupView.setManagedDisk(managedDisk);
+                instanceGroupView.setManagedDisk(true);
             }
+
             instanceGroupNames.add(group.getName());
             instanceGroups.add(instanceGroupView);
         }
@@ -78,18 +75,6 @@ public class AzureStackView {
 
     public List<String> getInstanceGroupNames() {
         return instanceGroupNames;
-    }
-
-    public Map<String, AzureDiskType> getStorageAccounts() {
-        Map<String, AzureDiskType> storageAccounts = new HashMap<>();
-        for (List<AzureInstanceView> list : groups.values()) {
-            for (AzureInstanceView armInstanceView : list) {
-                if (StringUtils.isNoneBlank(armInstanceView.getAttachedDiskStorageName(), armInstanceView.getAttachedDiskStorageType())) {
-                    storageAccounts.put(armInstanceView.getAttachedDiskStorageName(), AzureDiskType.getByValue(armInstanceView.getAttachedDiskStorageType()));
-                }
-            }
-        }
-        return storageAccounts;
     }
 
     private String getInstanceSubnetId(CloudInstance instance, AzureSubnetStrategy subnetStrategy) {

@@ -356,24 +356,14 @@
                        },
                        "storageProfile": {
                            "osDisk" : {
-                               <#if instance.managedDisk == false>
-                               "image" : {
-                                    "uri" : "[variables('userImageName')]"
-                               },
-                               "vhd" : {
-                                    "uri" : "[concat(variables('osDiskVhdName'), '${instance.instanceId}','.vhd')]"
-                               },
-                               <#else>
                                "diskSizeGB": "${instance.rootVolumeSize}",
                                "managedDisk": {
                                     "storageAccountType": "${instance.attachedDiskStorageType}"
                                },
-                               </#if>
                                "name" : "[concat(parameters('vmNamePrefix'),'-osDisk', '${instance.instanceId}')]",
                                "osType" : "linux",
                                "createOption": "FromImage"
                            },
-                           <#if instance.managedDisk == true>
                            "imageReference": {
                                <#if instance.customImageId?? && instance.customImageId?has_content>
                                "id": "${instance.customImageId}"
@@ -381,7 +371,6 @@
                                "id": "${customImageId}"
                                </#if>
                            }
-                           </#if>
                        },
                        "networkProfile": {
                            "networkInterfaces": [
@@ -390,14 +379,6 @@
                                }
                            ]
                        }
-                       <#if instance.managedDisk == false>
-                       ,"diagnosticsProfile": {
-                         "bootDiagnostics": {
-                           "enabled": true,
-                           "storageUri": "${instance.attachedDiskStorageUrl}"
-                         }
-                       }
-                       </#if>
                    }
                  }<#if (instance_index + 1) != groups[instanceGroup]?size>,</#if>
              </#list>

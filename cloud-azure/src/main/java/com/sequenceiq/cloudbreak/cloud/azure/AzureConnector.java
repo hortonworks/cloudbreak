@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -27,11 +26,12 @@ import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureSubnetValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureTagValidator;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
-public class AzureConnector implements CloudConnector<Map<String, Map<String, Object>>> {
+public class AzureConnector implements CloudConnector<List<CloudResource>> {
 
     @Inject
     private AzureAuthenticator azureAuthenticator;
@@ -102,7 +102,7 @@ public class AzureConnector implements CloudConnector<Map<String, Map<String, Ob
     }
 
     @Override
-    public ResourceConnector<Map<String, Map<String, Object>>> resources() {
+    public ResourceConnector<List<CloudResource>> resources() {
         return azureResourceConnector;
     }
 

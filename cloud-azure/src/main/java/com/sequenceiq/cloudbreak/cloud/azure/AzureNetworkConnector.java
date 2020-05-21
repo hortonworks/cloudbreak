@@ -83,7 +83,7 @@ public class AzureNetworkConnector implements NetworkConnector {
         ResourceGroup resourceGroup;
         try {
             resourceGroup = getOrCreateResourceGroup(azureClient, networkRequest);
-            String template = azureNetworkTemplateBuilder.build(networkRequest, subnetRequests, resourceGroup);
+            String template = azureNetworkTemplateBuilder.build(networkRequest, subnetRequests, resourceGroup.name());
             templateDeployment = azureClient.createTemplateDeployment(resourceGroup.name(), networkRequest.getStackName(), template, "");
         } catch (CloudException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);

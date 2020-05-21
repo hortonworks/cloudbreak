@@ -97,7 +97,7 @@ public class AzureDatabaseResourceService {
         List<CloudResource> databaseResources = createCloudResources(resourceGroupName, fqdn);
         databaseResources.forEach(dbr -> persistenceNotifier.notifyAllocation(dbr, cloudContext));
 
-        List<CloudResource> cloudResources = azureCloudResourceService.getCloudResources(deployment);
+        List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
         cloudResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, cloudContext));
 
         return databaseResources.stream()

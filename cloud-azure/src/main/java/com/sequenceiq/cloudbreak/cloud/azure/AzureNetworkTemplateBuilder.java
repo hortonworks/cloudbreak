@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
@@ -36,9 +35,9 @@ public class AzureNetworkTemplateBuilder {
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
-    public String build(NetworkCreationRequest networkRequest, List<SubnetRequest> subnets, ResourceGroup resourceGroup) {
+    public String build(NetworkCreationRequest networkRequest, List<SubnetRequest> subnets, String resourceGroupName) {
         try {
-            Map<String, Object> model = createModel(networkRequest, subnets, resourceGroup);
+            Map<String, Object> model = createModel(networkRequest, subnets, resourceGroupName);
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(), model);
             LOGGER.debug("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;
@@ -56,13 +55,13 @@ public class AzureNetworkTemplateBuilder {
         }
     }
 
-    private Map<String, Object> createModel(NetworkCreationRequest networkRequest, List<SubnetRequest> subnets, ResourceGroup resourceGroup) {
+    private Map<String, Object> createModel(NetworkCreationRequest networkRequest, List<SubnetRequest> subnets, String resourceGroupName) {
         Map<String, Object> model = new HashMap<>();
         model.put("virtualNetworkName", networkRequest.getEnvName());
         model.put("region", networkRequest.getRegion().value());
         model.put("networkPrefix", networkRequest.getNetworkCidr());
         model.put("subnetDetails", subnets);
-        model.put("resourceGroupName", resourceGroup.name());
+        model.put("resourceGroupName", resourceGroupName);
         model.put("noPublicIp", networkRequest.isNoPublicIp());
         model.put("noFirewallRules", false);
         return model;

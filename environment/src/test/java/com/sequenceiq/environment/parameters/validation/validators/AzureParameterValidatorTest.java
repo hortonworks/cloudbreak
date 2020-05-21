@@ -189,7 +189,31 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenFeatureTurnedOffThenNoError() {
+    public void testWhenFeatureTurnedOffAndUseMultipleThenNoError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
+                                .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW)
+                                .withName("myResourceGroup").build())
+                        .build())
+                .build();
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
+        AzureClient azureClient = mock(AzureClient.class);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+        when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
+        when(azureSingleResourceGroupFeatureSwitch.isActive()).thenReturn(false);
+
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertFalse(validationResult.hasError());
+        verify(credentialToCloudCredentialConverter, never()).convert(any());
+        verify(azureClientService, never()).getClient(any());
+        verify(azureSingleResourceGroupFeatureSwitch, times(2)).isActive();
+    }
+
+    @Test
+    public void testWhenFeatureTurnedOffAndUseSingleThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
@@ -206,10 +230,9 @@ public class AzureParameterValidatorTest {
 
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
-        assertFalse(validationResult.hasError());
-        verify(credentialToCloudCredentialConverter, never()).convert(any());
-        verify(azureClientService, never()).getClient(any());
-        verify(azureSingleResourceGroupFeatureSwitch, times(2)).isActive();
+        assertTrue(validationResult.hasError());
+        assertEquals("1. 'SINGLE' usage pattern for Resource Groups could not be specified, as feature is disabled",
+                validationResult.getFormattedErrors());
     }
 
     @Test

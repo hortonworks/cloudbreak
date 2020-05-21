@@ -193,6 +193,7 @@ public class StackOperations implements ResourceBasedCrnProvider {
     }
 
     public FlowIdentifier repairCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid ClusterRepairV4Request clusterRepairRequest) {
+        LOGGER.debug("Starting to repair cluster with request: {}", clusterRepairRequest.toString());
         return stackCommonService.repairCluster(workspaceId, nameOrCrn, clusterRepairRequest);
     }
 
