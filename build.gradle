@@ -1,3 +1,6 @@
+import groovy.json.JsonSlurper
+import org.ajoberstar.grgit.Grgit
+
 buildscript {
   repositories {
     mavenLocal()
@@ -224,5 +227,105 @@ subprojects {
         }
       }
     }
+  }
+
+  task ('buildInfo', type: BuildInfoTask, dependsOn: processResources)
+
+  afterEvaluate { Project project ->
+    if (project.name in ['core', 'autoscale', 'freeipa', 'redbeams', 'environment', 'datalake', 'integration-test'] && project.plugins.hasPlugin('org.springframework.boot') ) {
+      buildInfo.configure {
+        destination = file("$project.buildDir")
+        basename = project.bootJar.baseName
+        buildVersion = project.version
+      }
+    }
+  }
+
+  compileJava {
+    dependsOn buildInfo
+  }
+}
+
+class BuildInfoTask extends DefaultTask {
+  File destination
+  String basename
+  String buildVersion
+
+  @TaskAction
+  def writeBuildInfo() {
+    if (basename != null && !basename.empty) {
+      println "buildVersion: " + buildVersion
+      println "basename: " + basename
+      println "build destination: " + destination
+      List<File> applicationDestinations = []
+
+      applicationDestinations += project.file("out/production/resources")
+      applicationDestinations += new File(destination.toString() + "/resources/main")
+
+      destination.mkdirs()
+
+      // if using dev environment this condition is true
+      if (buildVersion.contains("+") || buildVersion == "unspecified") {
+        def grgit = Grgit.open(currentDir: project.projectDir)
+        buildVersion = grgit.describe()
+        println "buildVersion from git: " + buildVersion
+      }
+      String activeProfile = determineActiveProfile()
+      println "selected profile based on version: " + activeProfile
+      new File(destination, "build.info").withWriter { out ->
+        [
+                "ARTIFACT_BASENAME=" + basename,
+                "ARTIFACT_VERSION=" + buildVersion,
+        ].each { out.println it }
+      }
+      applicationDestinations.each {
+        it.mkdirs()
+        new File(it, "application.properties").withWriter { out ->
+          [
+                  "info.app.name=" + basename,
+                  "info.app.version=" + buildVersion,
+                  "spring.profiles.active=" + activeProfile
+          ].each { out.println it }
+        }
+      }
+      def propertiesFile = destination.toString() + "/resources/main/application.properties"
+      String fileContents = new File(propertiesFile).text
+      println "Content of $propertiesFile:\n" + fileContents
+    } else {
+      println "no build info is needed for this module"
+    }
+  }
+
+  private String determineActiveProfile() {
+    String activeProfile = "dev"
+    if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
+      activeProfile = "dev"
+    } else if (buildVersion.contains("rc")) {
+      activeProfile = "rc"
+    } else if (buildVersion.contains("-b")) {
+      activeProfile = determineProfileBasedOnGbnVersion()
+    } else {
+      activeProfile = "prod"
+    }
+    return activeProfile
+  }
+
+  private String determineProfileBasedOnGbnVersion() {
+    String activeProfile = "dev"
+    try {
+      def masterReleaseVersionResp = new URL('http://release.infra.cloudera.com/hwre-api/getreleaseversion?stack=CB&releaseline=master')
+              .getText('utf-8', connectTimeout: 5000, readTimeout:5000)
+      def json = new JsonSlurper().parseText(masterReleaseVersionResp)
+      println "determine GBN version on master branch:" + json.version
+      String latestVersionOnMaster = json.version
+      if (buildVersion.startsWith(latestVersionOnMaster)) {
+        activeProfile = "dev"
+      } else {
+        activeProfile = "rc"
+      }
+    } catch(Exception ex) {
+      println "Could not query version of master branch from http://release.infra.cloudera.com, falling back to 'dev' profile!"
+    }
+    return activeProfile
   }
 }
