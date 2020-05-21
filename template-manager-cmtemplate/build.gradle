@@ -29,7 +29,7 @@ dependencies {
   testImplementation(group: "org.mockito",               name: "mockito-core",                   version: mockitoVersion) {
     exclude group: "org.hamcrest"
   }
-  testImplementation "org.hamcrest:java-hamcrest:2.0.0.0"
+  testImplementation (group: 'org.hamcrest', name: 'java-hamcrest', version: hamcrestVersion)
   testImplementation "net.javacrumbs.json-unit:json-unit:1.28.2"
   testImplementation project(path: ":template-manager-core", configuration: "tests")
   testImplementation project(path: ":core-model", configuration: "tests")

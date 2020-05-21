@@ -19,7 +19,7 @@ dependencies {
     compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
 
 
-    testCompile group: 'org.hamcrest',              name: 'hamcrest-all',                   version: '1.3'
+    testCompile (group: 'org.hamcrest',               name: 'java-hamcrest',                 version: hamcrestVersion)
 
     testCompile (group: 'org.powermock',             name: 'powermock-module-junit4',        version: powermockVersion)
     testCompile (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -39,39 +41,48 @@ class GrainPropertiesService {
     private ExposedServiceCollector exposedServiceCollector;
 
     List<GrainProperties> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs, Cluster cluster, Set<Node> nodes) {
+        List<GrainProperties> grainPropertiesList = new ArrayList<>();
+        Optional.ofNullable(addGatewayAddress(gatewayConfigs)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addNameNodeRoleForHosts(cluster)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addKnoxRoleForHosts(cluster)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addCloudIdentityRolesForHosts(cluster, nodes)).ifPresent(grainPropertiesList::add);
+        return grainPropertiesList;
+    }
+
+    private GrainProperties addGatewayAddress(Iterable<GatewayConfig> gatewayConfigs) {
         GrainProperties grainProperties = new GrainProperties();
         for (GatewayConfig gatewayConfig : gatewayConfigs) {
             Map<String, String> hostGrain = new HashMap<>();
             hostGrain.put("gateway-address", gatewayConfig.getPublicAddress());
             grainProperties.put(gatewayConfig.getHostname(), hostGrain);
         }
-        addNameNodeRoleForHosts(grainProperties, cluster);
-        addKnoxRoleForHosts(grainProperties, cluster);
-        return addCloudIdentityRolesForHosts(grainProperties, cluster, nodes);
+        return grainProperties.getProperties().isEmpty() ? null : grainProperties;
     }
 
-    private void addNameNodeRoleForHosts(GrainProperties grainProperties, Cluster cluster) {
+    private GrainProperties addNameNodeRoleForHosts(Cluster cluster) {
+        GrainProperties grainProperties = new GrainProperties();
         ExposedService nameNodeService = exposedServiceCollector.getNameNodeService();
         Map<String, List<String>> nameNodeServiceLocations = getComponentLocationByHostname(cluster,
                 nameNodeService.getServiceName());
         nameNodeServiceLocations.getOrDefault(nameNodeService.getServiceName(), List.of())
                 .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "namenode"));
+        return grainProperties.getProperties().isEmpty() ? null : grainProperties;
     }
 
-    private void addKnoxRoleForHosts(GrainProperties grainProperties, Cluster cluster) {
-        Map<String, List<String>> knoxServiceLocations = getComponentLocationByHostname(cluster, "KNOX_GATEWAY");
-        knoxServiceLocations.getOrDefault("KNOX_GATEWAY", List.of())
+    private GrainProperties addKnoxRoleForHosts(Cluster cluster) {
+        GrainProperties grainProperties = new GrainProperties();
+        Map<String, List<String>> knoxServiceLocations = getComponentLocationByHostname(cluster, KnoxRoles.KNOX_GATEWAY);
+        knoxServiceLocations.getOrDefault(KnoxRoles.KNOX_GATEWAY, List.of())
                 .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "knox"));
+        return grainProperties.getProperties().isEmpty() ? null : grainProperties;
     }
 
     private Map<String, List<String>> getComponentLocationByHostname(Cluster cluster, String componentName) {
         return componentLocator.getComponentLocationByHostname(cluster, List.of(componentName));
     }
 
-    private List<GrainProperties> addCloudIdentityRolesForHosts(GrainProperties grainProperties, Cluster cluster, Set<Node> nodes) {
+    private GrainProperties addCloudIdentityRolesForHosts(Cluster cluster, Set<Node> nodes) {
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.getAllInstanceMetadataByStackId(cluster.getStack().getId());
-        List<GrainProperties> results = new ArrayList<>();
-        results.add(grainProperties);
         GrainProperties propertiesForIdentityRoles = new GrainProperties();
         Set<String> hostNames = nodes.stream().map(Node::getHostname).collect(toSet());
         for (InstanceMetaData instanceMetaData : instanceMetaDataSet) {
@@ -79,8 +90,7 @@ class GrainPropertiesService {
                 setCloudIdentityRoles(propertiesForIdentityRoles, instanceMetaData);
             }
         }
-        results.add(propertiesForIdentityRoles);
-        return results;
+        return propertiesForIdentityRoles.getProperties().isEmpty() ? null : propertiesForIdentityRoles;
     }
 
     private void setCloudIdentityRoles(GrainProperties propertiesForIdentityRoles, InstanceMetaData instanceMetaData) {

@@ -25,7 +25,7 @@ dependencies {
   testCompile(group: 'org.mockito', name: 'mockito-core', version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
-  testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
+  testCompile (group: 'org.hamcrest', name: 'java-hamcrest', version: hamcrestVersion)
 
   runtime group: 'org.glassfish.jersey.core', name: 'jersey-common', version: jerseyCoreVersion
   compile(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion) {
