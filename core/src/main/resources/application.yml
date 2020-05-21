@@ -400,7 +400,6 @@ cb:
       contentlogging: true
 
   image.catalog:
-    url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
     cache.ttl: 15
     legacy.enabled: true
 
