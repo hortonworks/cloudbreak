@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -76,25 +77,27 @@ public class AzureNetworkConnector implements NetworkConnector {
                 Lists.newArrayList(networkRequest.getPrivateSubnets()),
                 networkRequest.isPrivateSubnetEnabled());
         String template = azureNetworkTemplateBuilder.build(networkRequest, subnetRequests);
-        String envName = networkRequest.getEnvName();
+        String resourceGroupName = azureUtils.generateResourceGroupNameByNameAndId(
+                String.format("%s-", networkRequest.getEnvName()),
+                UUID.randomUUID().toString());
         Deployment templateDeployment;
         ResourceGroup resourceGroup;
         try {
             Map<String, String> tags = Collections.unmodifiableMap(networkRequest.getTags());
-            resourceGroup = azureClient.createResourceGroup(envName, networkRequest.getRegion().value(), tags);
+            resourceGroup = azureClient.createResourceGroup(resourceGroupName, networkRequest.getRegion().value(), tags);
             templateDeployment = azureClient.createTemplateDeployment(resourceGroup.name(), networkRequest.getStackName(), template, "");
         } catch (CloudException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);
             if (e.body() != null && e.body().details() != null) {
                 String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
-                throw new CloudConnectorException(String.format("Stack provisioning failed, status code %s, error message: %s, details: %s",
+                throw new CloudConnectorException(String.format("Network provisioning failed, status code %s, error message: %s, details: %s",
                         e.body().code(), e.body().message(), details));
             } else {
-                throw new CloudConnectorException(String.format("Stack provisioning failed: '%s', please go to Azure Portal for detailed message", e));
+                throw new CloudConnectorException(String.format("Network provisioning failed: '%s', please go to Azure Portal for detailed message", e));
             }
         } catch (Exception e) {
             LOGGER.warn("Provisioning error:", e);
-            throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", networkRequest.getStackName(), e.getMessage()));
+            throw new CloudConnectorException(String.format("Error in provisioning network %s: %s", networkRequest.getStackName(), e.getMessage()));
         }
         Map<String, Map> outputMap = (HashMap) templateDeployment.outputs();
         String networkName = cropId((String) outputMap.get(NETWORK_ID_KEY).get("value"));
@@ -119,10 +122,10 @@ public class AzureNetworkConnector implements NetworkConnector {
                 LOGGER.warn("Deletion error, cloud exception happened: ", e);
                 if (e.body() != null && e.body().details() != null) {
                     String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
-                    throw new CloudConnectorException(String.format("Stack deletion failed, status code %s, error message: %s, details: %s",
+                    throw new CloudConnectorException(String.format("Network deletion failed, status code %s, error message: %s, details: %s",
                             e.body().code(), e.body().message(), details));
                 } else {
-                    throw new CloudConnectorException(String.format("Stack deletion failed: '%s', please go to Azure Portal for detailed message", e));
+                    throw new CloudConnectorException(String.format("Network deletion failed: '%s', please go to Azure Portal for detailed message", e));
                 }
             }
         }
