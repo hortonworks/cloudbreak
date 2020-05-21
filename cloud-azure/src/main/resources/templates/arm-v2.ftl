@@ -93,7 +93,7 @@
   	},
     "resources": [
             <#list igs as group>
-                <#if group.availabilitySetName?? && group.availabilitySetName?has_content>
+                <#if !isUpscale && group.availabilitySetName?? && group.availabilitySetName?has_content>
             {
                 "type": "Microsoft.Compute/availabilitySets",
                 "name": "[variables('${group.compressedName}AsName')]",
@@ -118,7 +118,7 @@
                  <#if !noFirewallRules>
                  "dependsOn": [
                     <#list igs as group>
-                        <#if ! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content>
+                        <#if !isUpscale && (! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content)>
                         "[concat('Microsoft.Network/networkSecurityGroups/', variables('${group.compressedName}secGroupName'))]"<#if (group_index + 1) != igs?size -securityGroups?size>,</#if>
                         </#if>
                     </#list>
@@ -152,7 +152,7 @@
              </#if>
              <#if !noFirewallRules>
              <#list igs as group>
-             <#if ! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content>
+             <#if !isUpscale && (! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content)>
              {
                "apiVersion": "2015-05-01-preview",
                "type": "Microsoft.Network/networkSecurityGroups",
@@ -240,13 +240,13 @@
                     },
                    "dependsOn": [
                        <#if !noFirewallRules>
-                       <#if ! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content>
+                       <#if !isUpscale && (! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content)>
                        "[concat('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
                        </#if>
                        </#if>
                        <#if !noPublicIp>
                        <#if !noFirewallRules>
-                       <#if ! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content>
+                       <#if !isUpscale && (! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content)>
                        ,
                        </#if>
                        </#if>
@@ -308,7 +308,7 @@
                      },
                     </#if>
                    "dependsOn": [
-                    <#if instance.availabilitySetName?? && instance.availabilitySetName?has_content>
+                    <#if !isUpscale && instance.availabilitySetName?? && instance.availabilitySetName?has_content>
                        "[concat('Microsoft.Compute/availabilitySets/', '${instance.availabilitySetName}')]",
                     </#if>
                        "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), '${instance.instanceId}')]"

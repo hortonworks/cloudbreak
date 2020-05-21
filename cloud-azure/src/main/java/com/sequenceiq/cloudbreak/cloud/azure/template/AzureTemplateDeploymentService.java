@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.management.resources.Deployment;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
@@ -31,19 +32,20 @@ public class AzureTemplateDeploymentService {
     @Inject
     private AzureTemplateBuilder azureTemplateBuilder;
 
-    public Deployment getTemplateDeployment(AzureClient client, CloudStack stack, AuthenticatedContext ac, AzureStackView azureStackView) {
+    public Deployment getTemplateDeployment(AzureClient client, CloudStack stack, AuthenticatedContext ac, AzureStackView azureStackView,
+            AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
         CloudContext cloudContext = ac.getCloudContext();
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
-        String template = getTemplate(stack, azureStackView, ac, ac.getCloudContext(), stackName, client);
+        String template = getTemplate(stack, azureStackView, ac, ac.getCloudContext(), stackName, client, azureInstanceTemplateOperation);
         String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
         return client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
     }
 
     private String getTemplate(CloudStack stack, AzureStackView azureStackView, AuthenticatedContext ac, CloudContext cloudContext,
-            String stackName, AzureClient client) {
+            String stackName, AzureClient client, AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
         String customImageId = azureStorage.getCustomImageId(client, ac, stack);
-        return azureTemplateBuilder.build(stackName, customImageId, createCredential(ac), azureStackView, cloudContext, stack);
+        return azureTemplateBuilder.build(stackName, customImageId, createCredential(ac), azureStackView, cloudContext, stack, azureInstanceTemplateOperation);
     }
 
     private AzureCredentialView createCredential(AuthenticatedContext ac) {

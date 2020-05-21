@@ -117,7 +117,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, ac);
 
         String customImageId = azureStorage.getCustomImageId(client, ac, stack);
-        String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView, ac.getCloudContext(), stack);
+        String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
+                ac.getCloudContext(), stack, AzureInstanceTemplateOperation.PROVISION);
         String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
         Boolean encrytionNeeded = azureStorage.isEncrytionNeeded(stack.getParameters());
 

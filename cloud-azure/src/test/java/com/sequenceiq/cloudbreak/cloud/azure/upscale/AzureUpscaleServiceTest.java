@@ -23,6 +23,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentExportResult;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
@@ -108,7 +109,8 @@ public class AzureUpscaleServiceTest {
         List<Group> scaledGroups = createScaledGroups();
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
-        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView)).thenReturn(templateDeployment);
+        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
+                .thenReturn(templateDeployment);
         when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
         CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
                 .name("instance").params(Map.of()).build();
@@ -123,7 +125,7 @@ public class AzureUpscaleServiceTest {
         assertEquals(ResourceStatus.IN_PROGRESS, actual.get(0).getStatus());
 
         verify(cloudResourceHelper).getScaledGroups(stack);
-        verify(azureTemplateDeploymentService).getTemplateDeployment(client, stack, ac, azureStackView);
+        verify(azureTemplateDeploymentService).getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
         verify(templateDeployment).exportTemplate();
         verify(azureUtils).getInstanceCloudResources(cloudContext, templateDeployment, scaledGroups);
         verify(cloudResourceHelper).getNetworkResources(resources);
@@ -148,7 +150,8 @@ public class AzureUpscaleServiceTest {
         List<Group> scaledGroups = createScaledGroups();
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
-        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView)).thenReturn(templateDeployment);
+        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
+                .thenReturn(templateDeployment);
         when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
         CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
                 .name("instance").params(Map.of()).build();

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation.UPSCALE;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,7 +69,7 @@ public class AzureTemplateBuilder {
     private AzureAcceleratedNetworkValidator azureAcceleratedNetworkValidator;
 
     public String build(String stackName, String customImageId, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext,
-            CloudStack cloudStack) {
+            CloudStack cloudStack, AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
         try {
             String imageUrl = cloudStack.getImage().getImageName();
             String imageName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
@@ -104,6 +106,7 @@ public class AzureTemplateBuilder {
             model.put("noFirewallRules", false);
             model.put("userDefinedTags", cloudStack.getTags());
             model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator.validate(armStack));
+            model.put("isUpscale", UPSCALE.equals(azureInstanceTemplateOperation));
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(cloudStack), model);
             LOGGER.info("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;
