@@ -16,18 +16,26 @@ public class PlatformRecommendation {
 
     private GatewayRecommendation gatewayRecommendation;
 
+    private AutoscaleRecommendation autoscaleRecommendation;
+
+    private ResizeRecommendation resizeRecommendation;
+
     public PlatformRecommendation(
             Map<String, VmType> recommendations,
             Set<VmType> virtualMachines,
             DiskTypes diskTypes,
             Map<String, InstanceCount> instanceCounts,
-            GatewayRecommendation gatewayRecommendation
+            GatewayRecommendation gatewayRecommendation,
+            AutoscaleRecommendation autoscaleRecommendation,
+            ResizeRecommendation resizeRecommendation
     ) {
         this.recommendations = recommendations;
         this.virtualMachines = virtualMachines;
         this.diskTypes = diskTypes;
         this.instanceCounts = instanceCounts;
         this.gatewayRecommendation = gatewayRecommendation;
+        this.autoscaleRecommendation = autoscaleRecommendation;
+        this.resizeRecommendation = resizeRecommendation;
     }
 
     public Map<String, VmType> getRecommendations() {
@@ -60,5 +68,13 @@ public class PlatformRecommendation {
 
     public GatewayRecommendation getGatewayRecommendation() {
         return gatewayRecommendation;
+    }
+
+    public AutoscaleRecommendation getAutoscaleRecommendation() {
+        return autoscaleRecommendation;
+    }
+
+    public ResizeRecommendation getResizeRecommendation() {
+        return resizeRecommendation;
     }
 }

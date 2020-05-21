@@ -2,5 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 
 public enum BlackListedDownScaleRole {
     KAFKA_BROKER,
-    NIFI_NODE
+    NIFI_NODE,
+    ZEPPELIN_SERVER,
+    NAMENODE
 }
