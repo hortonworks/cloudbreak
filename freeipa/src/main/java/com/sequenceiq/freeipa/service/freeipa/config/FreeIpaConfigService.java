@@ -90,7 +90,8 @@ public class FreeIpaConfigService {
                     .withLocation(backup.getStorageLocation());
             if (backup.getS3() != null) {
                 builder.withPlatform(CloudPlatform.AWS.name());
-                LOGGER.debug("Backups will be configured to use S3 output.");
+                builder.withAwsRegion(stack.getRegion());
+                LOGGER.debug("Backups will be configured to use S3 storage in {} region.", stack.getRegion());
             } else if (backup.getAdlsGen2() != null) {
                 builder.withPlatform(CloudPlatform.AZURE.name())
                         .withAzureInstanceMsi(backup.getAdlsGen2().getManagedIdentity());
