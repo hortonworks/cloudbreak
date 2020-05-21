@@ -9,7 +9,7 @@ import static com.sequenceiq.environment.environment.flow.creation.EnvCreationSt
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.INIT_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.NETWORK_CREATION_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.PUBLICKEY_CREATION_STARTED_STATE;
-import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.RESOURCEGROUP_CREATION_STATE;
+import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.PREREQUISITES_CREATION_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINALIZE_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
@@ -19,7 +19,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_PUBLICKEY_CREATION_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_RESOURCEGROUP_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_PREREQUISITES_CREATION_EVENT;
 
 import java.util.List;
 
@@ -47,12 +47,12 @@ public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreation
             .failureState(ENV_CREATION_FAILED_STATE)
             .defaultFailureEvent()
 
-            .from(ENVIRONMENT_CREATION_VALIDATION_STATE).to(RESOURCEGROUP_CREATION_STATE)
-            .event(START_RESOURCEGROUP_CREATION_EVENT)
+            .from(ENVIRONMENT_CREATION_VALIDATION_STATE).to(PREREQUISITES_CREATION_STATE)
+            .event(START_PREREQUISITES_CREATION_EVENT)
             .failureState(ENV_CREATION_FAILED_STATE)
             .defaultFailureEvent()
 
-            .from(RESOURCEGROUP_CREATION_STATE).to(NETWORK_CREATION_STARTED_STATE)
+            .from(PREREQUISITES_CREATION_STATE).to(NETWORK_CREATION_STARTED_STATE)
             .event(START_NETWORK_CREATION_EVENT)
             .failureState(ENV_CREATION_FAILED_STATE)
             .defaultFailureEvent()

@@ -3,7 +3,7 @@ package com.sequenceiq.environment.environment.flow.creation;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PUBLICKEY_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.RESOURCEGROUP_CREATE_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PREREQUISITES_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.INITIALIZE_ENVIRONMENT_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.VALIDATE_ENVIRONMENT_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINALIZE_ENV_CREATION_EVENT;
@@ -117,27 +117,27 @@ public class EnvCreationActions {
         };
     }
 
-    @Bean(name = "RESOURCEGROUP_CREATION_STATE")
+    @Bean(name = "PREREQUISITES_CREATION_STATE")
     public Action<?, ?> resourceGroupCreateAction() {
         return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
-                    LOGGER.info("RESOURCEGROUP_CREATION_STATE");
-                    environment.setStatus(EnvironmentStatus.RESOURCEGROUP_CREATE_IN_PROGRESS);
+                    LOGGER.info("PREREQUISITES_CREATION_STATE");
+                    environment.setStatus(EnvironmentStatus.PREREQUISITES_CREATE_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                     SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
-                    notificationService.send(ResourceEvent.ENVIRONMENT_RESOURCEGROUP_CREATE_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
-                    sendEvent(context, RESOURCEGROUP_CREATE_EVENT.selector(), environmentDto);
+                    notificationService.send(ResourceEvent.ENVIRONMENT_PREREQUISITES_CREATE_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
+                    sendEvent(context, CREATE_PREREQUISITES_EVENT.selector(), environmentDto);
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
                             payload.getResourceId(),
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
-                    notificationService.send(ResourceEvent.ENVIRONMENT_RESOURCEGROUP_CREATE_FAILED, payload, context.getFlowTriggerUserCrn());
-                    LOGGER.warn("Failed to create resource group in environment! No environment found with id '{}'.", payload.getResourceId());
+                    notificationService.send(ResourceEvent.ENVIRONMENT_PREREQUISITES_CREATE_FAILED, payload, context.getFlowTriggerUserCrn());
+                    LOGGER.warn("Failed to create prerequisites in environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
             }
