@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.domain;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class RegionWrapper implements Serializable {
@@ -66,6 +67,27 @@ public class RegionWrapper implements Serializable {
 
     public Set<String> getRegions() {
         return new HashSet<>(regions);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        RegionWrapper that = (RegionWrapper) o;
+        return Objects.equals(name, that.name)
+                && Objects.equals(displayName, that.displayName)
+                && Objects.equals(latitude, that.latitude)
+                && Objects.equals(longitude, that.longitude)
+                && Objects.equals(regions, that.regions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, displayName, latitude, longitude, regions);
     }
 
     @Override
