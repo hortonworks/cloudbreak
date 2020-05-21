@@ -40,6 +40,7 @@ import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.service.AccountTelemetryService;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
@@ -106,6 +107,9 @@ public class FreeIpaCreationService {
     @Inject
     private SecurityConfigService securityConfigService;
 
+    @Inject
+    private AccountTelemetryService accountTelemetryService;
+
     @Value("${info.app.version:}")
     private String appVersion;
 
@@ -116,8 +120,10 @@ public class FreeIpaCreationService {
         Stack stack = stackConverter.convert(request, accountId, userFuture, userCrn, credential.getCloudPlatform());
         stack.setAppVersion(appVersion);
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack, credential);
-
         Telemetry telemetry = stack.getTelemetry();
+        if (telemetry != null) {
+            telemetry.setRules(accountTelemetryService.getAnonymizationRules());
+        }
         cloudStorageFolderResolverService.updateStorageLocation(telemetry,
                 FluentClusterType.FREEIPA.value(), stack.getName(), stack.getResourceCrn());
 

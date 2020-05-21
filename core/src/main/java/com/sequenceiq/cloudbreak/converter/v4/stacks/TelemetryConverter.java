@@ -74,6 +74,7 @@ public class TelemetryConverter {
             response.setLogging(loggingResponse);
             response.setWorkloadAnalytics(waResponse);
             response.setFluentAttributes(telemetry.getFluentAttributes());
+            response.setRules(telemetry.getRules());
             createFeaturesResponseFromSource(response, telemetry.getFeatures());
         }
         return response;

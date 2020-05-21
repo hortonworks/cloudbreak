@@ -59,6 +59,7 @@ public class TelemetryConverter {
             response.setFluentAttributes(telemetry.getFluentAttributes());
             response.setLogging(createLoggingResponseFromSource(telemetry.getLogging()));
             response.setFeatures(createFeaturesResponseFromSource(telemetry.getFeatures()));
+            response.setRules(telemetry.getRules());
         }
         return response;
     }

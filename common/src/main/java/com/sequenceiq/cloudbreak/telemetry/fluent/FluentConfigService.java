@@ -49,12 +49,6 @@ public class FluentConfigService {
 
     public FluentConfigView createFluentConfigs(TelemetryClusterDetails clusterDetails,
             boolean databusEnabled, boolean meteringEnabled, Telemetry telemetry) {
-        return createFluentConfigs(clusterDetails, databusEnabled, meteringEnabled, telemetry, null);
-    }
-
-    public FluentConfigView createFluentConfigs(TelemetryClusterDetails clusterDetails,
-            boolean databusEnabled, boolean meteringEnabled, Telemetry telemetry,
-            List<AnonymizationRule> anonymizationRules) {
         final FluentConfigView.Builder builder = new FluentConfigView.Builder();
         boolean enabled = false;
         if (telemetry != null) {
@@ -66,7 +60,7 @@ public class FluentConfigService {
             enabled = determineAndSetLogging(builder, telemetry, databusEnabled, meteringEnabled);
             if (telemetry.isClusterLogsCollectionEnabled()) {
                 LOGGER.debug("Set anonymization rules (only for cluster log collection)");
-                builder.withAnonymizationRules(decodeRules(anonymizationRules));
+                builder.withAnonymizationRules(decodeRules(telemetry.getRules()));
             }
         }
         if (!enabled) {
