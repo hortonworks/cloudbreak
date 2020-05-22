@@ -205,10 +205,17 @@ class BuildInfoTask extends DefaultTask {
     def writeBuildInfo() {
         List<File> applicationDestinations = []
 
+        println "destination: " + destination
+        println "applicationPropertiesPath: " + applicationPropertiesPath
+        println "baseName: " + basename
+        println "buildVersion: " + buildVersion
+
         applicationDestinations += project.file("out/production/resources")
         applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
 
-        destination.mkdirs()
+        println "applicationDestinations: " + applicationDestinations
+
+      destination.mkdirs()
         String activeProfile = determineActiveProfile()
 
         // if using dev environment this condition is true
