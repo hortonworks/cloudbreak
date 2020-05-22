@@ -222,8 +222,6 @@ integrationtest:
       baseLocation:
       fileSystemType: S3
 
-
-
   cleanup:
       retryCount: 3
       cleanupBeforeStart: false
