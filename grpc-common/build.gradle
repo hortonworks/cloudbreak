@@ -19,10 +19,16 @@ dependencies {
     exclude group: 'org.mockito'
     exclude group: 'junit', module: 'junit'
     exclude group: 'com.squareup.okhttp'
+    exclude group: 'org.hamcrest'
+    exclude group: 'io.grpc', module: 'grpc-testing'
   }
   compile group: 'com.squareup.okhttp',     name: 'okhttp',       version: '2.7.4'
-  testImplementation group: 'org.mockito',  name: 'mockito-core', version: mockitoVersion
-  testImplementation group: 'junit',        name: 'junit',        version: junitVersion
+  testImplementation (group: 'org.mockito',  name: 'mockito-core', version: mockitoVersion) {
+    exclude group: 'org.hamcrest'
+  }
+  testImplementation (group: 'junit',        name: 'junit',        version: junitVersion) {
+    exclude group: 'org.hamcrest'
+  }
 }
 
 checkstyle {

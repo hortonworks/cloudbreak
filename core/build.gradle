@@ -264,7 +264,9 @@ dependencies {
 
   testCompile group: 'org.powermock',            name: 'powermock-module-junit4'
   testCompile group: 'org.powermock',            name: 'powermock-api-mockito2'
-  testCompile group: 'org.mockito',              name: 'mockito-core'
+  testCompile (group: 'org.mockito',              name: 'mockito-core') {
+    exclude group: 'org.hamcrest'
+  }
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker'
   testCompile group: 'com.jayway.restassured',   name: 'rest-assured'
@@ -272,6 +274,7 @@ dependencies {
   testCompile group: 'com.h2database',           name: 'h2'
   testImplementation group: 'org.assertj',       name: 'assertj-core',        version: assertjVersion
   testImplementation group: "org.yaml",          name: "snakeyaml"
+  testCompile (group: 'org.hamcrest', name: 'java-hamcrest', version: hamcrestVersion)
 
 }
 
