@@ -107,6 +107,9 @@ public abstract class TestContext implements ApplicationContextAware {
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
+
     private DefaultModel model;
 
     private boolean validated;
@@ -138,6 +141,14 @@ public abstract class TestContext implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    public CommonCloudProperties commonCloudProperties() {
+        return commonCloudProperties;
+    }
+
+    public CommonClusterManagerProperties commonClusterManagerProperties() {
+        return commonClusterManagerProperties;
     }
 
     public <T extends CloudbreakTestDto, U extends MicroserviceClient> T when(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,
