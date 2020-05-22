@@ -16,4 +16,8 @@ public class CloudbreakInternalCrnClient {
     public CloudbreakServiceCrnEndpoints withInternalCrn() {
         return client.withCrn(internalCrnBuilder.getInternalCrnForServiceAsString());
     }
+
+    public CloudbreakServiceCrnEndpoints withUserCrn(String userCrn) {
+        return client.withCrn(userCrn);
+    }
 }

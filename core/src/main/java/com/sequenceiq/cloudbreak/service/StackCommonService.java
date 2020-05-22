@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
@@ -254,7 +253,6 @@ public class StackCommonService {
         return response;
     }
 
-    @PreAuthorize("hasRole('AUTOSCALE')")
     public CertificateV4Response getCertificate(String crn) {
         Stack stack = stackService.findByCrn(crn);
         return tlsSecurityService.getCertificates(stack.getId());

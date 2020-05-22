@@ -224,7 +224,7 @@ public class StackServiceTest {
             Supplier<AutoscaleStackV4Response> callback = invocation.getArgument(0);
             return callback.get();
         });
-        when(stackRepository.findAliveOnesWithAmbari()).thenReturn(null);
+        when(stackRepository.findAliveOnesWithClusterManager()).thenReturn(null);
         ArgumentCaptor<Set> aliveStackCaptor = ArgumentCaptor.forClass(Set.class);
         when(converterUtil.convertAllAsSet(aliveStackCaptor.capture(), eq(AutoscaleStackV4Response.class))).thenReturn(Set.of());
 
@@ -245,7 +245,7 @@ public class StackServiceTest {
 
         AutoscaleStack stack = mock(AutoscaleStack.class);
         when(stack.getStackStatus()).thenReturn(Status.AVAILABLE);
-        when(stackRepository.findAliveOnesWithAmbari()).thenReturn(Set.of(stack));
+        when(stackRepository.findAliveOnesWithClusterManager()).thenReturn(Set.of(stack));
 
         ArgumentCaptor<Set> aliveStackCaptor = ArgumentCaptor.forClass(Set.class);
         AutoscaleStackV4Response autoscaleStackResponse = new AutoscaleStackV4Response();
@@ -272,7 +272,7 @@ public class StackServiceTest {
 
         AutoscaleStack deleteInProgressStack = mock(AutoscaleStack.class);
         when(deleteInProgressStack.getStackStatus()).thenReturn(Status.AVAILABLE);
-        when(stackRepository.findAliveOnesWithAmbari()).thenReturn(Set.of(availableStack, deleteInProgressStack));
+        when(stackRepository.findAliveOnesWithClusterManager()).thenReturn(Set.of(availableStack, deleteInProgressStack));
 
         ArgumentCaptor<Set> aliveStackCaptor = ArgumentCaptor.forClass(Set.class);
         AutoscaleStackV4Response autoscaleStackResponse = new AutoscaleStackV4Response();

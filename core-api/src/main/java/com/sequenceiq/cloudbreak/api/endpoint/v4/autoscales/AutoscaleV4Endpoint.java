@@ -2,14 +2,20 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.util.List;
+
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
 import com.cloudera.cdp.shaded.javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
@@ -42,18 +48,18 @@ public interface AutoscaleV4Endpoint {
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putStackForAutoscale")
     void putStack(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateStackV4Request updateRequest);
 
-    @PUT
-    @Path("/stack/crn/{crn}/{userId}/cluster")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putClusterForAutoscale")
-    void putCluster(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateClusterV4Request updateRequest);
-
     @POST
     @Path("ambari")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_BY_AMBARI_ADDRESS, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "getStackForAmbariForAutoscale")
     StackV4Response getStackForAmbari(@Valid AmbariAddressV4Request json);
+
+    @PUT
+    @Path("/stack/crn/{crn}/{userId}/cluster")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putClusterForAutoscale")
+    void putCluster(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateClusterV4Request updateRequest);
 
     @GET
     @Path("stack/all")
@@ -85,6 +91,16 @@ public interface AutoscaleV4Endpoint {
     @ApiOperation(value = StackOpDescription.GET_STACK_CERT, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "getCertificateStackForAutoscale")
     CertificateV4Response getCertificate(@PathParam("crn") String crn);
+
+    @DELETE
+    @Path("/stack/crn/{crn}/instances")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "decommissionInstancesForClusterCrn")
+    void decommissionInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
+            @QueryParam("workspaceId") @Valid Long workspaceId,
+            @QueryParam("instanceId") @NotEmpty List<String> instanceIds,
+            @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @GET
     @Path("clusterproxy")
