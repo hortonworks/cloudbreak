@@ -35,6 +35,18 @@ public class DefaultCostTaggingService implements CostTagging {
         addCDPCrnIfPresent(result, DefaultApplicationTag.CREATOR_CRN, request.getCreatorCrn(), platform);
         addCDPCrnIfPresent(result, DefaultApplicationTag.RESOURCE_CRN, request.getResourceCrn(), platform);
 
+        Map<String, String> accountTagResult = generateAccountTags(request);
+        for (Map.Entry<String, String> entry : accountTagResult.entrySet()) {
+            addAccountTag(result, entry.getKey(), entry.getValue(), request.getPlatform());
+        }
+        LOGGER.debug("The following default tag(s) has prepared: {}", result);
+        return result;
+    }
+
+    @Override
+    public Map<String, String> generateAccountTags(CDPTagGenerationRequest request) {
+        Map<String, String> result = new HashMap<>();
+
         TagPreparationObject preparationObject = TagPreparationObject.Builder.builder()
                 .withAccountId(request.getAccountId())
                 .withCloudPlatform(request.getPlatform())
@@ -47,9 +59,8 @@ public class DefaultCostTaggingService implements CostTagging {
             LOGGER.debug("The tag template is: {}", entry.getValue());
             String generatedValue = centralTagUpdater.getTagText(preparationObject, entry.getValue());
             LOGGER.debug("The generated tag value is: {}", generatedValue);
-            addAccountTag(result, entry.getKey(), generatedValue, request.getPlatform());
+            result.put(entry.getKey(), generatedValue);
         }
-        LOGGER.debug("The following default tag(s) has prepared: {}", result);
         return result;
     }
 

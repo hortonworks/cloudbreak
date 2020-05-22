@@ -10,4 +10,6 @@ public interface CostTagging {
     Map<String, String> prepareDefaultTags(CDPTagGenerationRequest t);
 
     Map<String, String> mergeTags(CDPTagMergeRequest t);
+
+    Map<String, String> generateAccountTags(CDPTagGenerationRequest t);
 }

@@ -6,12 +6,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.tag.TagDescription;
 import com.sequenceiq.environment.api.v1.tags.model.request.AccountTagRequests;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponses;
+import com.sequenceiq.environment.api.v1.tags.model.response.GeneratedAccountTagResponses;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,4 +35,11 @@ public interface AccountTagEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = TagDescription.PUT, produces = MediaType.APPLICATION_JSON, notes = TagDescription.PUT_NOTES, nickname = "putTagsV1")
     AccountTagResponses put(@Valid AccountTagRequests request);
+
+    @GET
+    @Path("generate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = TagDescription.GET_GENERATED, produces = MediaType.APPLICATION_JSON, notes = TagDescription.GET_GENERATED_NOTES,
+            nickname = "getGeneratedTagsV1")
+    GeneratedAccountTagResponses generate(@QueryParam("environmentName") String environmentName, @QueryParam("environmentCrn") String environmentCrn);
 }
