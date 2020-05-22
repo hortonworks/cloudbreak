@@ -206,7 +206,7 @@
             "configs": [
               {
                 "name": "resourcemanager_config_safety_valve",
-                "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>zk</value></property>"
+                "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>zk</value></property><property><name>yarn.cluster.scaling.recommendation.enable</name><value>true</value></property><property><name>yarn.scheduler.capacity.multi-node-placement-enabled</name><value>true</value></property><property><name>yarn.scheduler.capacity.multi-node-sorting.policy.names</name><value>instancetype-based</value></property><property><name>yarn.scheduler.capacity.multi-node-sorting.policy</name><value>instancetype-based</value></property><property><name>yarn.scheduler.capacity.multi-node-sorting.policy.instancetype-based.class</name><value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.placement.NodeInstanceTypeBinPackingPolicy</value></property>"
               },
               {
                 "name": "yarn_resourcemanager_scheduler_class",
