@@ -52,7 +52,7 @@ public class GeneralClusterConfigsProvider {
                 && StringUtils.isNotEmpty(stack.getSecurityConfig().getUserFacingCert());
         generalClusterConfigs.setKnoxUserFacingCertConfigured(userFacingCertHasBeenGenerated);
         generalClusterConfigs.setExternalFQDN(cluster.getFqdn());
-        generalClusterConfigs.setEnableRangerRaz(cluster.isRangerRazEnabed());
+        generalClusterConfigs.setEnableRangerRaz(cluster.isRangerRazEnabled());
         return generalClusterConfigs;
     }
 
