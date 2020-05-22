@@ -38,6 +38,16 @@ create-image:
 create-cloudbreak-context:
 	./scripts/create-cloudbreak-context.sh
 
+fetch-secrets:
+	./scripts/fetch-secrets.sh
+
+fetch-secrets-docker:
+	docker run --rm -v "${PWD}/:/tmp/" \
+	-e AZURE_CLIENT_ID=${AZURE_CLIENT_ID} \
+	-e AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET} \
+	-e AZURE_TENANT_ID=${AZURE_TENANT_ID} \
+	mcr.microsoft.com/azure-cli /bin/bash -c 'cd /tmp/ && ./scripts/fetch-secrets.sh'
+
 docker-compose:
 	./scripts/docker-compose.sh
 
@@ -69,3 +79,7 @@ upload-s3:
 	aws s3 cp ./apidefinitions/redbeams.json s3://redbeams-swagger/swagger-$(VERSION).json --acl public-read
 	aws s3 cp ./apidefinitions/datalake.json s3://datalake-swagger/swagger-$(VERSION).json --acl public-read
 	aws s3 cp ./apidefinitions/autoscale.json s3://autoscale-swagger/swagger-$(VERSION).json --acl public-read
+
+
+
+
