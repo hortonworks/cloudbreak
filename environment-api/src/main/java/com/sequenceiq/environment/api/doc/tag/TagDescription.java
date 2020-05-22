@@ -12,6 +12,11 @@ public class TagDescription {
             + "information as a shared resource so that you can provide the tag information to multiple "
             + "resource that you create with CDP";
 
+    public static final String GET_GENERATED = "get generated tag configurations";
+    public static final String GET_GENERATED_NOTES = "CDP allows you to define your tag configuration "
+            + "information as a shared resource so that you can provide the tag information to multiple "
+            + "resource that you create with CDP. This endpoint generate accountTags.";
+
     public static final String KEY = "key of the tag configurations";
     public static final String VALUE = "value of the tag configurations";
 
