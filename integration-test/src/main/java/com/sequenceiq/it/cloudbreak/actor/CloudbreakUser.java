@@ -2,11 +2,14 @@ package com.sequenceiq.it.cloudbreak.actor;
 
 public class CloudbreakUser {
 
-    private final String accessKey;
+    private String accessKey;
 
-    private final String secretKey;
+    private String secretKey;
 
     private String displayName;
+
+    public CloudbreakUser() {
+    }
 
     public CloudbreakUser(String accessKey, String secretKey) {
         this.accessKey = accessKey;

@@ -26,3 +26,4 @@ integcb/docker-compose.yml
 integcb/uaa.yml
 test.out
 ImageId*
+/src/main/resources/ums-users/api-credentials.json
