@@ -60,9 +60,17 @@ public class StackUpdater {
                 stack = handleStatusChange(stack, newDetailedStatus, newStatusReason, newStatus, stackStatus);
             } else {
                 LOGGER.debug("Statuses are the same, it will not update");
+                updateInMemoryStoreIfStackIsMissing(stack, newStatus);
             }
         }
         return stack;
+    }
+
+    private void updateInMemoryStoreIfStackIsMissing(Stack stack, Status newStatus) {
+        if (InMemoryStateStore.getStack(stack.getId()) == null) {
+            LOGGER.debug("Although status hasn't changed, the stack is missing from 'InMemoryStateStore'. Updating 'InMemoryStateStore'");
+            updateInMemoryStore(stack, newStatus);
+        }
     }
 
     private Stack handleStatusChange(Stack stack, DetailedStackStatus newDetailedStatus, String newStatusReason, Status newStatus, StackStatus stackStatus) {

@@ -20,6 +20,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -59,6 +60,9 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Inject
     private TagAdderUtil tagAdderUtil;
 
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
+
     public SdxTestDto(TestContext testContex) {
         super(new SdxClusterRequest(), testContex);
     }
@@ -69,7 +73,8 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
                 .withEnvironment(getTestContext().get(EnvironmentTestDto.class).getName())
                 .withClusterShape(getCloudProvider().getClusterShape())
                 .withTestNameAsTag()
-                .withTags(getCloudProvider().getTags());
+                .withTags(getCloudProvider().getTags())
+                .withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
         return getCloudProvider().sdx(this);
     }
 
@@ -229,6 +234,11 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     private SdxTestDto withTestNameAsTag() {
         String callingMethodName = testNameExtractorUtil.getExecutingTestName();
         tagAdderUtil.addTestNameTag(getRequest().initAndGetTags(), callingMethodName);
+        return this;
+    }
+
+    public SdxTestDto withRuntimeVersion(String runtimeVersion) {
+        getRequest().setRuntime(runtimeVersion);
         return this;
     }
 

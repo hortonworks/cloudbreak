@@ -83,7 +83,7 @@ public class StackUtil {
         Set<Node> agents = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             if (instanceGroup.getNodeCount() != 0) {
-                for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+                for (InstanceMetaData im : instanceGroup.getReachableInstanceMetaDataSet()) {
                     if (im.getDiscoveryFQDN() != null && hostnames.contains(im.getDiscoveryFQDN())) {
                         String instanceId = im.getInstanceId();
                         String instanceType = instanceGroup.getTemplate().getInstanceType();

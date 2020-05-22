@@ -33,15 +33,17 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
         }
         if (lastThrowable instanceof ApiException) {
             if (context.getRetryCount() <= maxAttempts) {
-                int code = ApiException.class.cast(lastThrowable).getCode();
-                HttpStatus httpStatus = HttpStatus.valueOf(code);
-                boolean httpStatus5xxServerError = httpStatus.is5xxServerError();
-                LOGGER.warn("{} Exception occurred during CM API call, retryable: {} ({}/{})",
-                        code,
-                        httpStatus5xxServerError,
-                        context.getRetryCount(),
-                        maxAttempts);
-                return httpStatus5xxServerError;
+                int code = ((ApiException) lastThrowable).getCode();
+                if (code != 0) {
+                    HttpStatus httpStatus = HttpStatus.valueOf(code);
+                    boolean httpStatus5xxServerError = httpStatus.is5xxServerError();
+                    LOGGER.warn("{} Exception occurred during CM API call, retryable: {} ({}/{})",
+                            code,
+                            httpStatus5xxServerError,
+                            context.getRetryCount(),
+                            maxAttempts);
+                    return httpStatus5xxServerError;
+                }
             } else {
                 return false;
             }
