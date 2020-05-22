@@ -10,8 +10,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,6 +20,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.converter.InstanceGroupTypeConverter;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -56,7 +55,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     private String groupName;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = InstanceGroupTypeConverter.class)
     private InstanceGroupType instanceGroupType = InstanceGroupType.CORE;
 
     @ManyToOne

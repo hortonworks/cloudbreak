@@ -3,8 +3,6 @@ package com.sequenceiq.freeipa.entity;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -12,6 +10,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.converter.CommonStatusConverter;
+import com.sequenceiq.cloudbreak.converter.ResourceTypeConverter;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -28,11 +28,11 @@ public class Resource {
     private String instanceGroup;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ResourceTypeConverter.class)
     private ResourceType resourceType;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = CommonStatusConverter.class)
     private CommonStatus resourceStatus;
 
     private String resourceName;

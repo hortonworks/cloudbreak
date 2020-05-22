@@ -1,9 +1,8 @@
 package com.sequenceiq.freeipa.entity;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,6 +12,9 @@ import javax.persistence.SequenceGenerator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceLifeCycle;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.entity.util.InstanceLifeCycleConverter;
+import com.sequenceiq.freeipa.entity.util.InstanceMetadataTypeConverter;
+import com.sequenceiq.freeipa.entity.util.InstanceStatusConverter;
 
 @Entity
 public class InstanceMetaData {
@@ -36,10 +38,10 @@ public class InstanceMetaData {
     @Column(columnDefinition = "TEXT")
     private String serverCert;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = InstanceStatusConverter.class)
     private InstanceStatus instanceStatus;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = InstanceMetadataTypeConverter.class)
     private InstanceMetadataType instanceMetadataType;
 
     private String localityIndicator;
@@ -55,7 +57,7 @@ public class InstanceMetaData {
     @ManyToOne
     private InstanceGroup instanceGroup;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = InstanceLifeCycleConverter.class)
     private InstanceLifeCycle lifeCycle;
 
     public String getPrivateIp() {

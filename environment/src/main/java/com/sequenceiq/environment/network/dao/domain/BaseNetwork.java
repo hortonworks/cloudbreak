@@ -9,8 +9,6 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,6 +19,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.sequenceiq.environment.parameters.dao.converter.PrivateSubnetCreationConverter;
+import com.sequenceiq.environment.parameters.dao.converter.RegistrationTypeConverter;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -62,7 +62,7 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     private String networkCidrs;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = RegistrationTypeConverter.class)
     private RegistrationType registrationType;
 
     @Convert(converter = JsonToString.class)
@@ -70,7 +70,7 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     private Json subnetMetas;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = PrivateSubnetCreationConverter.class)
     private PrivateSubnetCreation privateSubnetCreation;
 
     @Column(nullable = false)

@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.converter.AdjustmentTypeConverter;
 import com.sequenceiq.common.api.type.AdjustmentType;
 
 @Entity
@@ -20,7 +20,7 @@ public class FailurePolicy implements ProvisionEntity {
 
     private Long threshold;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = AdjustmentTypeConverter.class)
     private AdjustmentType adjustmentType;
 
     public Long getId() {

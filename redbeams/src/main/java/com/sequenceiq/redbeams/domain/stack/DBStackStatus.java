@@ -3,8 +3,6 @@ package com.sequenceiq.redbeams.domain.stack;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapsId;
@@ -14,6 +12,7 @@ import javax.persistence.Table;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.repository.converter.DetailedDBStackStatusConverter;
+import com.sequenceiq.redbeams.repository.converter.StatusConverter;
 
 @Entity
 @Table
@@ -30,7 +29,7 @@ public class DBStackStatus {
     private Long created;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = StatusConverter.class)
     private Status status;
 
     @Column(columnDefinition = "TEXT")

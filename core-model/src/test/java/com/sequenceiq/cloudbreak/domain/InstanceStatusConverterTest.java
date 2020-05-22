@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class InstanceStatusConverterTest {
 
-    private static final String NON_BACKWARD_COMPATIBLE_NAME = "non bakward compatible";
+    private static final String NON_BACKWARD_COMPATIBLE_NAME = "non backward compatible";
 
     private InstanceStatusConverter victim;
 

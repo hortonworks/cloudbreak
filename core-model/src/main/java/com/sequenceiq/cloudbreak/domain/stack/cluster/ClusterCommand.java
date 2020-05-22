@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster;
 
+import com.sequenceiq.cloudbreak.domain.converter.ClusterCommandTypeConverter;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -27,7 +28,7 @@ public class ClusterCommand {
     @Column(name = "command_id", nullable = false)
     private BigDecimal commandId;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ClusterCommandTypeConverter.class)
     @Column(name = "cluster_command_type", nullable = false)
     private ClusterCommandType clusterCommandType;
 

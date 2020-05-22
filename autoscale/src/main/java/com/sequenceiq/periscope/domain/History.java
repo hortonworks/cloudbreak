@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -20,6 +19,9 @@ import javax.persistence.SequenceGenerator;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
+import com.sequenceiq.periscope.converter.AdjustmentTypeConverter;
+import com.sequenceiq.periscope.converter.AlertTypeConverter;
+import com.sequenceiq.periscope.converter.ScalingStatusConverter;
 
 @Entity
 @NamedQueries({
@@ -61,11 +63,11 @@ public class History {
     private int adjustment;
 
     @Column(name = "adjustment_type")
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = AdjustmentTypeConverter.class)
     private AdjustmentType adjustmentType;
 
     @Column(name = "status")
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ScalingStatusConverter.class)
     private ScalingStatus scalingStatus;
 
     @Column(name = "status_reason")
@@ -77,7 +79,7 @@ public class History {
     private String hostGroup;
 
     @Column(name = "alert_type")
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = AlertTypeConverter.class)
     private AlertType alertType;
 
     @ElementCollection(fetch = FetchType.EAGER)

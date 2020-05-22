@@ -25,8 +25,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -49,6 +47,8 @@ import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.converter.ConfigStrategyConverter;
+import com.sequenceiq.cloudbreak.domain.converter.ExecutorTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.StatusConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -87,7 +87,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Convert(converter = StatusConverter.class)
     private Status status;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ExecutorTypeConverter.class)
     private ExecutorType executorType;
 
     private Long creationStarted;
@@ -178,7 +178,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     private FileSystem fileSystem;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ConfigStrategyConverter.class)
     private ConfigStrategy configStrategy;
 
     @Convert(converter = SecretToString.class)

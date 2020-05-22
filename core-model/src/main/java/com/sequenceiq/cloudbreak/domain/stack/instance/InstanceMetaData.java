@@ -5,8 +5,6 @@ import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,6 +22,8 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.InstanceStatusConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.converter.InstanceLifeCycleConverter;
+import com.sequenceiq.cloudbreak.domain.converter.InstanceMetadataTypeConverter;
 
 @NamedEntityGraphs({
         @NamedEntityGraph(name = "InstanceMetaData.instanceGroup",
@@ -65,7 +65,7 @@ public class InstanceMetaData implements ProvisionEntity {
     @Convert(converter = InstanceStatusConverter.class)
     private InstanceStatus instanceStatus;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = InstanceMetadataTypeConverter.class)
     private InstanceMetadataType instanceMetadataType;
 
     private String localityIndicator;
@@ -81,10 +81,9 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private String instanceName;
 
-    @Column(columnDefinition = "TEXT")
     private String statusReason;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = InstanceLifeCycleConverter.class)
     private InstanceLifeCycle lifeCycle;
 
     public InstanceGroup getInstanceGroup() {
