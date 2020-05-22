@@ -11,13 +11,9 @@ public class AzureProperties {
 
     private String availabilityZone;
 
-    private String defaultBlueprintName;
-
     private String region;
 
     private String location;
-
-    private String blueprintCdhVersion;
 
     private final Credential credential = new Credential();
 
@@ -35,14 +31,6 @@ public class AzureProperties {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
-    }
-
-    public String getDefaultBlueprintName() {
-        return defaultBlueprintName;
-    }
-
-    public void setDefaultBlueprintName(String defaultBlueprintName) {
-        this.defaultBlueprintName = defaultBlueprintName;
     }
 
     public String getRegion() {
@@ -79,14 +67,6 @@ public class AzureProperties {
 
     public Network getNetwork() {
         return network;
-    }
-
-    public String getBlueprintCdhVersion() {
-        return blueprintCdhVersion;
-    }
-
-    public void setBlueprintCdhVersion(String blueprintCdhVersion) {
-        this.blueprintCdhVersion = blueprintCdhVersion;
     }
 
     public static class Credential {

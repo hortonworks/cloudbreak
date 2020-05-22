@@ -32,6 +32,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MeasuredTestContext;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -74,6 +75,9 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Value("${integrationtest.cleanup.purge:false}")
     private boolean purge;
@@ -192,6 +196,10 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
 
     protected CommonCloudProperties commonCloudProperties() {
         return commonCloudProperties;
+    }
+
+    protected CommonClusterManagerProperties commonClusterManagerProperties() {
+        return commonClusterManagerProperties;
     }
 
     protected List<String> testProfiles() {

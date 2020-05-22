@@ -80,8 +80,8 @@ public class YarnSmokeTest extends AbstractE2ETest {
     }
 
     private String generateCreateCMUserRecipeContent(String filePath) throws IOException {
-        String cmUser = commonCloudProperties.getClouderaManager().getDefaultUser();
-        String cmPassword = commonCloudProperties.getClouderaManager().getDefaultPassword();
+        String cmUser = commonClusterManagerProperties().getClouderaManager().getDefaultUser();
+        String cmPassword = commonClusterManagerProperties().getClouderaManager().getDefaultPassword();
         String recipeContentFromFile = ResourceUtil.readResourceAsString(applicationContext, filePath);
 
         recipeContentFromFile = recipeContentFromFile.replaceAll("CM_USER", cmUser);

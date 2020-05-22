@@ -22,8 +22,6 @@ public class MockProperties {
 
     private String publicKeyId;
 
-    private String defaultBlueprintName;
-
     private String internetGateway;
 
     private final Instance instance = new Instance();
@@ -80,14 +78,6 @@ public class MockProperties {
 
     public void setPublicKeyId(String publicKeyId) {
         this.publicKeyId = publicKeyId;
-    }
-
-    public String getDefaultBlueprintName() {
-        return defaultBlueprintName;
-    }
-
-    public void setDefaultBlueprintName(String defaultBlueprintName) {
-        this.defaultBlueprintName = defaultBlueprintName;
     }
 
     public Instance getInstance() {

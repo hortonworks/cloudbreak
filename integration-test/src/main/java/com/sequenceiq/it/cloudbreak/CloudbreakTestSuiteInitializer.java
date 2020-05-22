@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.util.CleanupService;
 import com.sequenceiq.it.config.ITProps;
@@ -52,20 +53,14 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     @Value("${integrationtest.defaultBlueprintName}")
     private String defaultBlueprintName;
 
+    @Value("${integrationtest.runtimeVersion}")
+    private String runtimeVersion;
+
     @Value("${integrationtest.testsuite.skipRemainingTestsAfterOneFailed}")
     private boolean skipRemainingSuiteTestsAfterOneFailed;
 
     @Value("${integrationtest.cleanup.cleanupBeforeStart}")
     private boolean cleanUpBeforeStart;
-
-    @Value("${integrationtest.ambari.defaultAmbariUser}")
-    private String defaultAmbariUser;
-
-    @Value("${integrationtest.ambari.defaultAmbariPassword}")
-    private String defaultAmbariPassword;
-
-    @Value("${integrationtest.ambari.defaultAmbariPort}")
-    private String defaultAmbariPort;
 
     @Value("${integrationtest.user.crn}")
     private String userCrn;
@@ -78,6 +73,9 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
     @Inject
     private TemplateAdditionHelper templateAdditionHelper;
+
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Inject
     private SuiteContext suiteContext;
@@ -145,7 +143,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     private void putBlueprintToContextIfExist(BlueprintV4Endpoint endpoint, String blueprintName, Long workspaceId) {
         endpoint.list(workspaceId, false);
         if (StringUtils.isEmpty(blueprintName)) {
-            blueprintName = defaultBlueprintName;
+            blueprintName = String.format(defaultBlueprintName, runtimeVersion);
         }
         if (StringUtils.hasLength(blueprintName)) {
             String resourceName = endpoint.getByName(workspaceId, blueprintName).getName();
@@ -155,13 +153,13 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
     private void putAmbariCredentialsToContext(String ambariUser, String ambariPassword, String ambariPort) {
         if (StringUtils.isEmpty(ambariUser)) {
-            ambariUser = defaultAmbariUser;
+            ambariUser = commonClusterManagerProperties.getClouderaManager().getDefaultUser();
         }
         if (StringUtils.isEmpty(ambariPassword)) {
-            ambariPassword = defaultAmbariPassword;
+            ambariPassword = commonClusterManagerProperties.getClouderaManager().getDefaultPassword();
         }
         if (StringUtils.isEmpty(ambariPort)) {
-            ambariPort = defaultAmbariPort;
+            ambariPort = commonClusterManagerProperties.getClouderaManager().getDefaultPort();
         }
 
         itContext.putContextParam(CloudbreakITContextConstants.AMBARI_USER_ID, ambariUser);

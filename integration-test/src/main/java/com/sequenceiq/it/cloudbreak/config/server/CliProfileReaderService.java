@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.config;
+package com.sequenceiq.it.cloudbreak.config.server;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.Yaml;
 
 @Service
-class CliProfileReaderService {
+public class CliProfileReaderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CliProfileReaderService.class);
 

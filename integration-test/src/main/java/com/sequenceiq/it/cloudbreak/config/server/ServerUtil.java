@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.config;
+package com.sequenceiq.it.cloudbreak.config.server;
 
 import java.net.MalformedURLException;
 import java.net.URL;

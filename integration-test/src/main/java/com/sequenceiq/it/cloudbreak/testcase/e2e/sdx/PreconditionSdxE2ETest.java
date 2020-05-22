@@ -31,8 +31,6 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
 
     private static final String CREATE_FILE_RECIPE = "classpath:/recipes/post-install.sh";
 
-    private static final String DEFAULT_SDX_BLUEPRINT_NAME = "7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas";
-
     private Map<String, InstanceStatus> instancesHealthy = new HashMap<>() {{
         put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
         put(HostGroupType.IDBROKER.getName(), InstanceStatus.SERVICES_HEALTHY);
@@ -84,7 +82,7 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
     }
 
     protected String getDefaultSDXBlueprintName() {
-        return DEFAULT_SDX_BLUEPRINT_NAME;
+        return commonClusterManagerProperties().getInternalSdxBlueprintName();
     }
 
     protected SdxTestDto compareVolumeIdsAfterRepair(SdxTestDto sdxTestDto, List<String> actualVolumeIds, List<String> expectedVolumeIds) {

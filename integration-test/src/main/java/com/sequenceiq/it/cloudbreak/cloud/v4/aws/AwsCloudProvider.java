@@ -232,12 +232,12 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBlueprintName() {
-        return awsProperties.getDefaultBlueprintName();
+        return commonClusterManagerProperties().getInternalDistroXBlueprintName();
     }
 
     @Override
     public String getBlueprintCdhVersion() {
-        return awsProperties.getBlueprintCdhVersion();
+        return commonClusterManagerProperties().getRuntimeVersion();
     }
 
     public AwsCredentialParameters awsCredentialDetailsArn() {

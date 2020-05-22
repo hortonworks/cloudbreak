@@ -41,6 +41,7 @@ import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -106,6 +107,9 @@ public abstract class TestContext implements ApplicationContextAware {
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
+
     private DefaultModel model;
 
     private boolean validated;
@@ -137,6 +141,14 @@ public abstract class TestContext implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    public CommonCloudProperties commonCloudProperties() {
+        return commonCloudProperties;
+    }
+
+    public CommonClusterManagerProperties commonClusterManagerProperties() {
+        return commonClusterManagerProperties;
     }
 
     public <T extends CloudbreakTestDto, U extends MicroserviceClient> T when(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,

@@ -21,9 +21,7 @@ public class AwsProperties {
 
     private String publicKeyId;
 
-    private String defaultBlueprintName;
-
-    private String blueprintCdhVersion;
+    private String dynamoTableName;
 
     private final Instance instance = new Instance();
 
@@ -81,22 +79,6 @@ public class AwsProperties {
         this.publicKeyId = publicKeyId;
     }
 
-    public String getDefaultBlueprintName() {
-        return defaultBlueprintName;
-    }
-
-    public void setDefaultBlueprintName(String defaultBlueprintName) {
-        this.defaultBlueprintName = defaultBlueprintName;
-    }
-
-    public String getBlueprintCdhVersion() {
-        return blueprintCdhVersion;
-    }
-
-    public void setBlueprintCdhVersion(String blueprintCdhVersion) {
-        this.blueprintCdhVersion = blueprintCdhVersion;
-    }
-
     public Instance getInstance() {
         return instance;
     }
@@ -111,6 +93,14 @@ public class AwsProperties {
 
     public Cloudstorage getCloudstorage() {
         return cloudstorage;
+    }
+
+    public String getDynamoTableName() {
+        return dynamoTableName;
+    }
+
+    public void setDynamoTableName(String dynamoTableName) {
+        this.dynamoTableName = dynamoTableName;
     }
 
     public static class Instance {
