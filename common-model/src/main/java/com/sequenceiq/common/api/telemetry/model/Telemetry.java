@@ -2,6 +2,7 @@ package com.sequenceiq.common.api.telemetry.model;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -27,6 +28,9 @@ public class Telemetry implements Serializable {
 
     @JsonProperty("fluentAttributes")
     private Map<String, Object> fluentAttributes = new HashMap<>();
+
+    @JsonProperty("rules")
+    private List<AnonymizationRule> rules;
 
     public Logging getLogging() {
         return logging;
@@ -66,6 +70,14 @@ public class Telemetry implements Serializable {
 
     public void setFluentAttributes(Map<String, Object> fluentAttributes) {
         this.fluentAttributes = fluentAttributes;
+    }
+
+    public List<AnonymizationRule> getRules() {
+        return rules;
+    }
+
+    public void setRules(List<AnonymizationRule> rules) {
+        this.rules = rules;
     }
 
     @JsonIgnore

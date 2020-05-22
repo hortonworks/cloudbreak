@@ -7,6 +7,7 @@ public class TelemetryModelDescription {
     public static final String TELEMETRY_WORKLOAD_ANALYTICS_ATTRIBUTES = "Workload analytics (telemetry) attributes.";
     public static final String TELEMETRY_FLUENT_ATTRIBUTES = "Telemetry fluent settings (overrides).";
     public static final String TELEMETRY_FEATURES = "Telemetry features settings";
+    public static final String TELEMETRY_RULES = "Telemetry anonymization rules (persistent on cluster level) that are applied on shipped logs.";
     public static final String TELEMETRY_METERING = "Telemetry metering feature setting";
     public static final String TELEMETRY_LOGGING_S3_ATTRIBUTES = "telemetry - logging s3 attributes";
     public static final String TELEMETRY_LOGGING_ADLS_GEN_2_ATTRIBUTES = "telemetry - logging adls gen2 attributes";

@@ -83,6 +83,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
+import com.sequenceiq.cloudbreak.service.environment.telemetry.AccountTelemetryClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
@@ -186,6 +187,9 @@ public class StackService implements ResourceIdProvider {
 
     @Inject
     private AccountTagClientService accountTagClientService;
+
+    @Inject
+    private AccountTelemetryClientService accountTelemetryClientService;
 
     @Inject
     private ResourceService resourceService;
@@ -715,6 +719,9 @@ public class StackService implements ResourceIdProvider {
                             ? FluentClusterType.DATALAKE : FluentClusterType.DATAHUB;
                     try {
                         Telemetry telemetry = component.getAttributes().get(Telemetry.class);
+                        if (telemetry != null) {
+                            telemetry.setRules(accountTelemetryClientService.getAnonymizationRules());
+                        }
                         cloudStorageFolderResolverService.updateStorageLocation(telemetry,
                                 fluentClusterType.value(),
                                 stack.getCluster().getName(), stack.getResourceCrn());

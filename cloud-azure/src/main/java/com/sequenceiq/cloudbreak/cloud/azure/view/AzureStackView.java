@@ -59,10 +59,10 @@ public class AzureStackView {
                             customImageNamePerInstance.get(instance.getInstanceId()), getManagedIdentity(group));
                     existingInstances.add(azureInstance);
                 }
+                boolean managedDisk = !Boolean.FALSE.equals(group.getReferenceInstanceConfiguration().getTemplate()
+                        .getParameter("managedDisk", Boolean.class));
+                instanceGroupView.setManagedDisk(managedDisk);
             }
-            boolean managedDisk = !Boolean.FALSE.equals(group.getReferenceInstanceConfiguration().getTemplate()
-                    .getParameter("managedDisk", Boolean.class));
-            instanceGroupView.setManagedDisk(managedDisk);
             instanceGroupNames.add(group.getName());
             instanceGroups.add(instanceGroupView);
         }

@@ -14,7 +14,7 @@ public class EnvCreationStateSelectorsConverter extends DefaultEnumConverter<Env
 
     @Override
     public Optional<EnvCreationStateSelectors> tryConvertUnknownField(String attribute) {
-        if ("START_RESOURCEGROUP_CREATION_EVENT".equals(attribute)) {
+        if ("START_PREREQUISITES_CREATION_EVENT".equals(attribute)) {
             return Optional.of(EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT);
         }
         return Optional.empty();
