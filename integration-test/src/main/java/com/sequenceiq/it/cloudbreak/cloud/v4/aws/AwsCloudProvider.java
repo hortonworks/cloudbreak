@@ -76,11 +76,14 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Inject
     private AwsCloudFunctionality awsCloudFunctionality;
 
+    @Inject
+    private SpotUtil spotUtil;
+
     @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
         AwsInstanceTemplateV4Parameters aws = new AwsInstanceTemplateV4Parameters();
         AwsInstanceTemplateV4SpotParameters spot = new AwsInstanceTemplateV4SpotParameters();
-        spot.setPercentage(SpotUtil.getSpotPercentage());
+        spot.setPercentage(getSpotPercentage());
         aws.setSpot(spot);
         return template.withInstanceType(awsProperties.getInstance().getType())
                 .withAws(aws);
@@ -392,7 +395,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     private AwsInstanceTemplateV1SpotParameters getAwsInstanceTemplateV1SpotParameters() {
         AwsInstanceTemplateV1SpotParameters awsInstanceTemplateV1SpotParameters = new AwsInstanceTemplateV1SpotParameters();
-        awsInstanceTemplateV1SpotParameters.setPercentage(SpotUtil.getSpotPercentage());
+        awsInstanceTemplateV1SpotParameters.setPercentage(getSpotPercentage());
         return awsInstanceTemplateV1SpotParameters;
     }
 
@@ -401,9 +404,13 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         AttachedFreeIpaRequest attachedFreeIpaRequest = super.getAttachedFreeIpaRequest();
         AwsFreeIpaParameters awsFreeIpaParameters = new AwsFreeIpaParameters();
         AwsFreeIpaSpotParameters awsFreeIpaSpotParameters = new AwsFreeIpaSpotParameters();
-        awsFreeIpaSpotParameters.setPercentage(SpotUtil.getSpotPercentage());
+        awsFreeIpaSpotParameters.setPercentage(getSpotPercentage());
         awsFreeIpaParameters.setSpot(awsFreeIpaSpotParameters);
         attachedFreeIpaRequest.setAws(awsFreeIpaParameters);
         return attachedFreeIpaRequest;
+    }
+
+    private int getSpotPercentage() {
+        return spotUtil.isUseSpotInstances() ? 100 : 0;
     }
 }

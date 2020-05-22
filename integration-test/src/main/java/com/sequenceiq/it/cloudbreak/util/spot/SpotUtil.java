@@ -3,23 +3,39 @@ package com.sequenceiq.it.cloudbreak.util.spot;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
+import com.sequenceiq.it.cloudbreak.config.SpotProperties;
+
+@Component
 public class SpotUtil {
 
     private static final ThreadLocal<Boolean> USE_SPOT_INSTANCES = new ThreadLocal<>();
 
-    private SpotUtil() {
+    private final SpotProperties spotProperties;
 
+    private final CommonCloudProperties commonCloudProperties;
+
+    public SpotUtil(SpotProperties spotProperties, CommonCloudProperties commonCloudProperties) {
+        this.spotProperties = spotProperties;
+        this.commonCloudProperties = commonCloudProperties;
     }
 
-    public static boolean shouldUseSpotInstances(Method testMethod) {
-        return testMethod.isAnnotationPresent(UseSpotInstances.class);
+    public boolean shouldUseSpotInstancesForTest(Method testMethod) {
+        return spotIsEnabledOnCurrentCloudPlatform()
+                && testMethod.isAnnotationPresent(UseSpotInstances.class);
     }
 
-    public static void useSpotInstances(Boolean useSpotInstances) {
+    private boolean spotIsEnabledOnCurrentCloudPlatform() {
+        return spotProperties.getEnabledCloudPlatforms().contains(commonCloudProperties.getCloudProvider());
+    }
+
+    public void setUseSpotInstances(Boolean useSpotInstances) {
         USE_SPOT_INSTANCES.set(useSpotInstances);
     }
 
-    public static int getSpotPercentage() {
-        return Optional.ofNullable(USE_SPOT_INSTANCES.get()).orElse(Boolean.FALSE) ? 100 : 0;
+    public boolean isUseSpotInstances() {
+        return Optional.ofNullable(USE_SPOT_INSTANCES.get()).orElse(Boolean.FALSE);
     }
 }

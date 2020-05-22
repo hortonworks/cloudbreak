@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.junit.Assert.assertThat;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
@@ -19,11 +20,17 @@ import com.sequenceiq.it.cloudbreak.util.spot.SpotUtil;
 @Listeners(SpotRetryOnceTestListener.class)
 public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
+    @Inject
+    private SpotUtil spotUtil;
+
+    @Inject
+    private SpotRetryUtil spotRetryUtil;
+
     @Override
     protected void setupTest(ITestResult testResult) {
-        boolean shouldUseSpotInstances = SpotUtil.shouldUseSpotInstances(testResult.getMethod().getConstructorOrMethod().getMethod());
-        boolean retried = SpotRetryUtil.isRetried(testResult.getMethod());
-        SpotUtil.useSpotInstances(shouldUseSpotInstances && !retried);
+        boolean shouldUseSpotInstances = spotUtil.shouldUseSpotInstancesForTest(testResult.getMethod().getConstructorOrMethod().getMethod());
+        boolean retried = spotRetryUtil.isRetried(testResult.getMethod());
+        spotUtil.setUseSpotInstances(shouldUseSpotInstances && !retried);
     }
 
     @Override
@@ -36,7 +43,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
     @AfterMethod
     public void tearDownSpot() {
-        SpotUtil.useSpotInstances(Boolean.FALSE);
+        spotUtil.setUseSpotInstances(Boolean.FALSE);
     }
 
     /**
