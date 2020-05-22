@@ -55,7 +55,7 @@ public class ClusterToClusterV4RequestConverter extends AbstractConversionServic
         if (source.getGateway() != null) {
             clusterRequest.setGateway(getConversionService().convert(source.getGateway(), GatewayV4Request.class));
         }
-        clusterRequest.setRangerRazEnabled(source.isRangerRazEnabed());
+        clusterRequest.setRangerRazEnabled(source.isRangerRazEnabled());
         return clusterRequest;
     }
 
