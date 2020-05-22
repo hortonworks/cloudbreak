@@ -136,6 +136,13 @@ public class AwsDownscaleService {
         } catch (AmazonServiceException e) {
             if (!INSTANCE_NOT_FOUND_ERROR_CODE.equals(e.getErrorCode())) {
                 throw e;
+            } else {
+                List<String> runningInstances = instanceIds.stream()
+                        .filter(instanceId -> !e.getMessage().contains(instanceId))
+                        .collect(Collectors.toList());
+                if (!runningInstances.isEmpty()) {
+                    amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(runningInstances));
+                }
             }
             LOGGER.debug(e.getErrorMessage());
         }
