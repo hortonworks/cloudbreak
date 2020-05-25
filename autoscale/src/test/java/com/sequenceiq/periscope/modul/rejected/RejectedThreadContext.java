@@ -13,6 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
@@ -59,6 +60,7 @@ public class RejectedThreadContext {
     @MockBean({Clock.class, ClusterService.class, CloudbreakClientConfiguration.class,
             MetricUtils.class, InternalCrnBuilder.class, FailedNodeRepository.class})
     @EnableAsync
+    @Profile("dev")
     public static class SpringConfig implements AsyncConfigurer {
 
         @Inject

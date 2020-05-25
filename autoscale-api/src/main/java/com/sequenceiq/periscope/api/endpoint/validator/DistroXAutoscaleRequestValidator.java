@@ -35,6 +35,13 @@ public class DistroXAutoscaleRequestValidator
         Set<String> distinctLoadBasedHostGroups = new HashSet<>();
         Set<AdjustmentType> distinctLoadBasedAdjustmentTypes = new HashSet<>();
 
+        if (request.getLoadAlertRequests().size() > 1) {
+            String message = String.format("LoadBased autoscaling currently supports a single HostGroup in a Cluster.");
+            com.sequenceiq.cloudbreak.validation.ValidatorUtil.addConstraintViolation(context, message, "loadAlertRequests")
+                    .disableDefaultConstraintViolation();
+            return false;
+        }
+
         Set<String> duplicateHostGroups =
                 request.getLoadAlertRequests().stream()
                         .map(loadAlertRequest -> loadAlertRequest.getScalingPolicy())

@@ -13,6 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -60,6 +61,7 @@ public class StackCollectorContext {
     @MockBean({ClusterService.class, CloudbreakClientConfiguration.class, TlsSecurityService.class, SecurityConfigService.class,
             HistoryService.class, HttpNotificationSender.class, MetricUtils.class, Clock.class, ClouderaManagerApiFactory.class, SecretService.class})
     @EnableAsync
+    @Profile("dev")
     public static class StackCollectorSpringConfig implements AsyncConfigurer {
 
         @Inject

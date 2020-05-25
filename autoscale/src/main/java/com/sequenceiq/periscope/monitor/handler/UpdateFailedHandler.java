@@ -109,7 +109,9 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     }
 
     private void suspendCluster(Cluster cluster) {
-        clusterService.setState(cluster, ClusterState.SUSPENDED);
+        if (!cluster.getState().equals(ClusterState.SUSPENDED)) {
+            clusterService.setState(cluster, ClusterState.SUSPENDED);
+        }
     }
 
     private void reportClusterManagerServerFailure(Cluster cluster, StackV4Response stackResponse) {
