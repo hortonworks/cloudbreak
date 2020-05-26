@@ -32,7 +32,7 @@ import freemarker.template.TemplateException;
 
 @Component
 public class AwsNetworkCfTemplateProvider {
-    static final String VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN = "com.amazonaws.%s.%s";
+    public static final String VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN = "com.amazonaws.%s.%s";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNetworkCfTemplateProvider.class);
 

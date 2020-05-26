@@ -138,6 +138,7 @@ cb:
     default.inbound.security.group:
     vpc:
     vpcendpoints:
+      enabled.gateway.services:
       gateway:
         services: s3,dynamodb
       interface:

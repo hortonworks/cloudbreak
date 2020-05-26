@@ -27,6 +27,8 @@ public class NetworkToNetworkResponseConverter implements Converter<Stack, Netwo
         Network network = source.getNetwork();
         if (network != null) {
             networkResp = new NetworkResponse();
+            networkResp.setNetworkCidrs(network.getNetworkCidrs());
+            networkResp.setOutboundInternetTraffic(network.getOutboundInternetTraffic());
             if (network.getAttributes() != null) {
                 Map<String, Object> parameters = cleanMap(network.getAttributes().getMap());
                 providerParameterCalculator.parse(parameters, networkResp);

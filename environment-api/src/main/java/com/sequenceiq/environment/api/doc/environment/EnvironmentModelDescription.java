@@ -12,6 +12,7 @@ public class EnvironmentModelDescription {
     public static final String NETWORKCIDRS = "The network cidrs for the configured vpc";
     public static final String PRIVATE_SUBNET_CREATION = "A flag to enable or disable the private subnet creation.";
     public static final String SERVICE_ENDPOINT_CREATION = "A flag to enable or disable the service endpoint creation.";
+    public static final String OUTBOUND_INTERNET_TRAFFIC = "A flag to enable or disable the outbound internet traffic from the instances.";
     public static final String AWS_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
     public static final String AZURE_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
     public static final String YARN_SPECIFIC_PARAMETERS = "Yarn parameters";

@@ -29,6 +29,8 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         Network result = new Network();
         result.setName(missingResourceNameGenerator.generateName(APIResourceType.NETWORK));
         result.setSubnetCIDR(null);
+        result.setOutboundInternetTraffic(source.getOutboundInternetTraffic());
+        result.setNetworkCidrs(source.getNetworkCidrs());
         Map<String, Object> attributes = new HashMap<>();
         Optional<CloudSubnet> cloudSubnet;
         if (StringUtils.isNotBlank(source.getPreferedSubnetId())) {

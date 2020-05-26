@@ -19,8 +19,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.sequenceiq.environment.parameters.dao.converter.PrivateSubnetCreationConverter;
-import com.sequenceiq.environment.parameters.dao.converter.RegistrationTypeConverter;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -29,11 +27,15 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.converter.OutboundInternetTrafficConverter;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.EnvironmentAwareResource;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.network.dao.domain.converter.ServiceEndpointCreationConverter;
+import com.sequenceiq.environment.parameters.dao.converter.PrivateSubnetCreationConverter;
+import com.sequenceiq.environment.parameters.dao.converter.RegistrationTypeConverter;
 
 @Entity
 @Where(clause = "archived = false")
@@ -76,6 +78,10 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     @Column(nullable = false)
     @Convert(converter = ServiceEndpointCreationConverter.class)
     private ServiceEndpointCreation serviceEndpointCreation;
+
+    @Column(nullable = false)
+    @Convert(converter = OutboundInternetTrafficConverter.class)
+    private OutboundInternetTraffic outboundInternetTraffic = OutboundInternetTraffic.ENABLED;
 
     @Column(nullable = false)
     private String accountId;
@@ -195,6 +201,14 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     public void setServiceEndpointCreation(ServiceEndpointCreation serviceEndpointCreation) {
         this.serviceEndpointCreation = serviceEndpointCreation;
+    }
+
+    public OutboundInternetTraffic getOutboundInternetTraffic() {
+        return outboundInternetTraffic;
+    }
+
+    public void setOutboundInternetTraffic(OutboundInternetTraffic outboundInternetTraffic) {
+        this.outboundInternetTraffic = outboundInternetTraffic;
     }
 
     @Override

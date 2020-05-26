@@ -123,6 +123,8 @@ cb:
     cf.template.newdb.path: templates/aws-cf-dbstack.ftl
     default.inbound.security.group:
     vpc:
+    vpcendpoints:
+      enabled.gateway.services:
     credential.cache.ttl: 60
 
   azure:

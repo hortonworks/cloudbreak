@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
@@ -143,6 +144,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         private ServiceEndpointCreation serviceEndpointCreation;
 
+        private OutboundInternetTraffic outboundInternetTraffic;
+
         private String preferedSubnetId;
 
         private Set<String> networkCidrs;
@@ -217,6 +220,11 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             return this;
         }
 
+        public EnvironmentNetworkResponseBuilder withOutboundInternetTraffic(OutboundInternetTraffic outboundInternetTraffic) {
+            this.outboundInternetTraffic = outboundInternetTraffic;
+            return this;
+        }
+
         public EnvironmentNetworkResponseBuilder withAws(EnvironmentNetworkAwsParams aws) {
             this.aws = aws;
             return this;
@@ -263,6 +271,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setPreferedSubnetId(preferedSubnetId);
             environmentNetworkResponse.setPrivateSubnetCreation(privateSubnetCreation);
             environmentNetworkResponse.setServiceEndpointCreation(serviceEndpointCreation);
+            environmentNetworkResponse.setOutboundInternetTraffic(outboundInternetTraffic);
             environmentNetworkResponse.setCbSubnets(cbSubnets);
             environmentNetworkResponse.setMlxSubnets(mlxSubnets);
             environmentNetworkResponse.setDwxSubnets(dwxSubnets);

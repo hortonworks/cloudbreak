@@ -405,6 +405,18 @@
             </#list>
           </#if>
         ]
+        <#if outboundInternetTraffic == "DISABLED" && (prefixListIds?has_content || vpcCidrs?has_content)>
+        ,
+        "SecurityGroupEgress" : [
+          <#list vpcCidrs as vpcCidr>
+                { "IpProtocol" : "-1", "CidrIp" : "${vpcCidr}" }<#if (vpcCidr_index + 1) != vpcCidrs?size> ,</#if>
+          </#list>
+          <#if prefixListIds?has_content && vpcCidrs?has_content>,</#if>
+          <#list prefixListIds as pl>
+                { "IpProtocol" : "-1", "FromPort" : "0", "ToPort" : "65535", "DestinationPrefixListId" : "${pl}" }<#if (pl_index + 1) != prefixListIds?size> ,</#if>
+          </#list>
+        ]
+        </#if>
       }
     }
     </#if>

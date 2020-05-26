@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @Component
 public class StackV4RequestToStackConverter extends AbstractConversionServiceAwareConverter<StackV4Request, Stack> {
@@ -367,7 +368,13 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private void setNetworkIfApplicable(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
         if (source.getNetwork() != null) {
             source.getNetwork().setCloudPlatform(source.getCloudPlatform());
-            stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
+            Network network = getConversionService().convert(source.getNetwork(), Network.class);
+            EnvironmentNetworkResponse envNetwork = environment.getNetwork();
+            if (envNetwork != null) {
+                network.setNetworkCidrs(envNetwork.getNetworkCidrs());
+                network.setOutboundInternetTraffic(envNetwork.getOutboundInternetTraffic());
+            }
+            stack.setNetwork(network);
         } else {
             EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(source.getCloudPlatform());
             String availabilityZone = source.getPlacement() != null ? source.getPlacement().getAvailabilityZone() : null;

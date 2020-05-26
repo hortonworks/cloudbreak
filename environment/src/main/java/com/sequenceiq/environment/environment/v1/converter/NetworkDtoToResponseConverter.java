@@ -36,6 +36,7 @@ public class NetworkDtoToResponseConverter {
                 .withPreferedSubnetId(subnetIdProvider.provide(network, tunnel, network.getCloudPlatform()))
                 .withPrivateSubnetCreation(network.getPrivateSubnetCreation())
                 .withServiceEndpointCreation(network.getServiceEndpointCreation())
+                .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
                 .withExistingNetwork(RegistrationType.EXISTING == network.getRegistrationType())
                 .withAws(getIfNotNull(network.getAws(), p -> EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder
                         .anEnvironmentNetworkAwsParams()

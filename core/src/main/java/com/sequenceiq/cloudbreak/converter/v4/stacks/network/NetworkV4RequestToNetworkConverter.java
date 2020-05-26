@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 @Component
 public class NetworkV4RequestToNetworkConverter extends AbstractConversionServiceAwareConverter<NetworkV4Request, Network> {
@@ -29,6 +30,7 @@ public class NetworkV4RequestToNetworkConverter extends AbstractConversionServic
         Network network = new Network();
         network.setName(missingResourceNameGenerator.generateName(APIResourceType.NETWORK));
         network.setSubnetCIDR(source.getSubnetCIDR());
+        network.setOutboundInternetTraffic(OutboundInternetTraffic.ENABLED);
 
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
         if (parameters != null) {

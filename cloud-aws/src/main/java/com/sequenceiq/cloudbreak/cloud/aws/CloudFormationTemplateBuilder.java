@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -83,6 +84,9 @@ public class CloudFormationTemplateBuilder {
         model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone() != null
                 && context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
+        model.put("outboundInternetTraffic", context.outboundInternetTraffic);
+        model.put("vpcCidrs", context.vpcCidrs);
+        model.put("prefixListIds", context.prefixListIds);
         try {
             String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-template", context.template, freemarkerConfiguration), model);
             return template.replaceAll("\\t|\\n| [\\s]+", "");
@@ -161,6 +165,12 @@ public class CloudFormationTemplateBuilder {
 
         private Map<String, String> encryptedAMIByGroupName = new HashMap<>();
 
+        private OutboundInternetTraffic outboundInternetTraffic;
+
+        private List<String> vpcCidrs;
+
+        private List<String> prefixListIds;
+
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
             this.ac = ac;
             return this;
@@ -221,11 +231,25 @@ public class CloudFormationTemplateBuilder {
             return this;
         }
 
+        public ModelContext withOutboundInternetTraffic(OutboundInternetTraffic outboundInternetTraffic) {
+            this.outboundInternetTraffic = outboundInternetTraffic;
+            return this;
+        }
+
+        public ModelContext withVpcCidrs(List<String> vpcCidrs) {
+            this.vpcCidrs = vpcCidrs;
+            return this;
+        }
+
+        public ModelContext withPrefixListIds(List<String> prefixListIds) {
+            this.prefixListIds = prefixListIds;
+            return this;
+        }
+
         public ModelContext withEncryptedAMIByGroupName(Map<String, String> encryptedAMIByGroupName) {
             this.encryptedAMIByGroupName.putAll(encryptedAMIByGroupName);
             return this;
         }
-
     }
 
     public static class RDSModelContext {
