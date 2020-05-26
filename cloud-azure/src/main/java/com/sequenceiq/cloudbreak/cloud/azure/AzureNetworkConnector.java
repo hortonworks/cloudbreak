@@ -78,12 +78,12 @@ public class AzureNetworkConnector implements NetworkConnector {
                 Lists.newArrayList(networkRequest.getPublicSubnets()),
                 Lists.newArrayList(networkRequest.getPrivateSubnets()),
                 networkRequest.isPrivateSubnetEnabled());
-        String template = azureNetworkTemplateBuilder.build(networkRequest, subnetRequests);
 
         Deployment templateDeployment;
         ResourceGroup resourceGroup;
         try {
             resourceGroup = getOrCreateResourceGroup(azureClient, networkRequest);
+            String template = azureNetworkTemplateBuilder.build(networkRequest, subnetRequests, resourceGroup);
             templateDeployment = azureClient.createTemplateDeployment(resourceGroup.name(), networkRequest.getStackName(), template, "");
         } catch (CloudException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);
