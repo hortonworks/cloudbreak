@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -220,6 +221,9 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private ResourceService resourceService;
+
+    @Mock
+    private GatewayConfigService gatewayConfigService;
 
     @Before
     public void setUp() throws IOException {
@@ -476,5 +480,20 @@ public class StackToTemplatePreparationObjectConverterTest {
         assertTrue(result.getPlacementView().isPresent());
         assertEquals(REGION, result.getPlacementView().get().getRegion());
         assertEquals(AVAILABILITY_ZONE, result.getPlacementView().get().getAvailabilityZone());
+    }
+
+    @Test
+    public void testMissingClouderaManagerIp() {
+        GeneralClusterConfigs configs = new GeneralClusterConfigs();
+        Optional<String> primaryGatewayFqdn = Optional.of("primaryFqdn");
+        configs.setPrimaryGatewayInstanceDiscoveryFQDN(primaryGatewayFqdn);
+        when(generalClusterConfigsProvider.generalClusterConfigs(any(Stack.class), any(Cluster.class))).thenReturn(configs);
+        when(gatewayConfigService.getPrimaryGatewayIp(any(Stack.class))).thenReturn("10.0.0.1");
+        InstanceMetaData dummyMetadata = new InstanceMetaData();
+        when(stackMock.getPrimaryGatewayInstance()).thenReturn(dummyMetadata);
+
+        TemplatePreparationObject result = underTest.convert(stackMock);
+        assertEquals("10.0.0.1", result.getGeneralClusterConfigs().getClusterManagerIp());
+        verify(gatewayConfigService, times(1)).getPrimaryGatewayIp(any(Stack.class));
     }
 }

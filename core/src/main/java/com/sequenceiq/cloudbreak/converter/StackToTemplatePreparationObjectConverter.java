@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -62,6 +63,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
@@ -144,6 +146,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private ResourceService resourceService;
 
+    @Inject
+    private GatewayConfigService gatewayConfigService;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -192,7 +197,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withFixInputs(fixInputs)
                     .withBlueprintView(blueprintViewProvider.getBlueprintView(cluster.getBlueprint()))
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
-                    .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster))
+                    .withGeneralClusterConfigs(calculateGeneralClusterConfigs(source, cluster))
                     .withLdapConfig(ldapView.orElse(null))
                     .withKerberosConfig(kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null))
                     .withProductDetails(cm, products)
@@ -295,6 +300,21 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     private boolean isCloudStorageConfigured(Stack source) {
         return source.getCluster().getFileSystem() != null && source.getCluster().getFileSystem().getCloudStorage() != null;
+    }
+
+    private GeneralClusterConfigs calculateGeneralClusterConfigs(Stack source, Cluster cluster) {
+        GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, cluster);
+        if (source.getPrimaryGatewayInstance() != null) {
+            if (StringUtils.isBlank(generalClusterConfigs.getClusterManagerIp())) {
+                String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(source);
+                generalClusterConfigs.setClusterManagerIp(primaryGatewayIp);
+            }
+            Optional<String> instanceDiscoveryFQDN = generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN();
+            if (instanceDiscoveryFQDN.isEmpty()) {
+                generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(source.getPrimaryGatewayInstance().getDiscoveryFQDN()));
+            }
+        }
+        return generalClusterConfigs;
     }
 
 }
