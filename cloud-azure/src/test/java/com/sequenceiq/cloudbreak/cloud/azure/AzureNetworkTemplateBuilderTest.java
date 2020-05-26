@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +25,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
@@ -67,15 +69,19 @@ public class AzureNetworkTemplateBuilderTest {
     @Test
     public void testBuildShouldReturnTheRenderedTemplate() throws IOException, TemplateException {
         NetworkCreationRequest networkCreationRequest = createRequest();
+        ResourceGroup resourceGroup = mock(ResourceGroup.class);
+
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode expectedJson = objectMapper.readTree(new File("src/test/resources/json/arm-network.json"));
 
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
+        when(resourceGroup.name()).thenReturn("testRg");
 
         String actual = underTest.build(networkCreationRequest, Lists.newArrayList(
                 publicSubnetRequest("10.0.1.0/24", 0),
                 publicSubnetRequest("10.0.1.0/24", 1),
-                publicSubnetRequest("10.0.1.0/24", 2)));
+                publicSubnetRequest("10.0.1.0/24", 2)),
+                resourceGroup);
 
         JsonNode json = objectMapper.readTree(actual);
         assertEquals(expectedJson, json);
