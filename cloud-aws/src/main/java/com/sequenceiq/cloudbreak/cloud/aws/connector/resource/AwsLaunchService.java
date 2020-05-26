@@ -7,13 +7,16 @@ import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResource
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
@@ -23,7 +26,9 @@ import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
+import com.amazonaws.services.ec2.model.PrefixList;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsNetworkCfTemplateProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -44,9 +49,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -57,6 +64,9 @@ public class AwsLaunchService {
     private static final String CREATED_VPC = "CreatedVpc";
 
     private static final String CREATED_SUBNET = "CreatedSubnet";
+
+    @Value("${cb.aws.vpcendpoints.enabled.gateway.services}")
+    private Set<String> enabledGatewayServices;
 
     @Inject
     private CloudFormationStackUtil cfStackUtil;
@@ -108,7 +118,8 @@ public class AwsLaunchService {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
-        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        Network network = stack.getNetwork();
+        AwsNetworkView awsNetworkView = new AwsNetworkView(network);
         boolean mapPublicIpOnLaunch = awsNetworkService.isMapPublicOnLaunch(awsNetworkView, amazonEC2Client);
         try {
             cfRetryClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
@@ -119,7 +130,7 @@ public class AwsLaunchService {
             CloudResource cloudFormationStack = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
             resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
 
-            String cidr = stack.getNetwork().getSubnet().getCidr();
+            String cidr = network.getSubnet().getCidr();
             String subnet = isNoCIDRProvided(existingVPC, existingSubnet, cidr) ? awsNetworkService.findNonOverLappingCIDR(ac, stack) : cidr;
             AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
             ModelContext modelContext = new ModelContext()
@@ -135,6 +146,9 @@ public class AwsLaunchService {
                     .withInstanceProfileAvailable(awsInstanceProfileView.isInstanceProfileAvailable())
                     .withTemplate(stack.getTemplate())
                     .withDefaultSubnet(subnet)
+                    .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
+                    .withVpcCidrs(network.getNetworkCidrs())
+                    .withPrefixListIds(getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()))
                     .withEncryptedAMIByGroupName(encryptedImageCopyService.createEncryptedImages(ac, stack, resourceNotifier));
             String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
@@ -286,5 +300,19 @@ public class AwsLaunchService {
             throw new CloudConnectorException(amazonAutoscalingFailed);
         }
         awsAutoScalingService.suspendAutoScaling(ac, stack);
+    }
+
+    private List<String> getPrefixListIds(AmazonEC2Client amazonEC2Client, String regionName, OutboundInternetTraffic outboundInternetTraffic) {
+        List<String> result = List.of();
+        if (outboundInternetTraffic == OutboundInternetTraffic.DISABLED && CollectionUtils.isNotEmpty(enabledGatewayServices)) {
+            Set<String> gatewayRegionServices = enabledGatewayServices.stream()
+                    .map(s -> String.format(AwsNetworkCfTemplateProvider.VPC_INTERFACE_SERVICE_ENDPOINT_NAME_PATTERN, regionName, s))
+                    .collect(Collectors.toSet());
+            result = amazonEC2Client.describePrefixLists().getPrefixLists().stream()
+                    .filter(pl -> gatewayRegionServices.contains(pl.getPrefixListName()))
+                    .map(PrefixList::getPrefixListId)
+                    .collect(Collectors.toList());
+        }
+        return result;
     }
 }

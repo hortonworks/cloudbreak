@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.validation.SubnetType;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
@@ -38,6 +39,9 @@ public abstract class EnvironmentNetworkBase {
 
     @ApiModelProperty(EnvironmentModelDescription.SERVICE_ENDPOINT_CREATION)
     private ServiceEndpointCreation serviceEndpointCreation = ServiceEndpointCreation.DISABLED;
+
+    @ApiModelProperty(EnvironmentModelDescription.OUTBOUND_INTERNET_TRAFFIC)
+    private OutboundInternetTraffic outboundInternetTraffic = OutboundInternetTraffic.ENABLED;
 
     @ApiModelProperty(EnvironmentModelDescription.AWS_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkAwsParams aws;
@@ -81,6 +85,14 @@ public abstract class EnvironmentNetworkBase {
 
     public void setServiceEndpointCreation(ServiceEndpointCreation serviceEndpointCreation) {
         this.serviceEndpointCreation = serviceEndpointCreation;
+    }
+
+    public OutboundInternetTraffic getOutboundInternetTraffic() {
+        return outboundInternetTraffic;
+    }
+
+    public void setOutboundInternetTraffic(OutboundInternetTraffic outboundInternetTraffic) {
+        this.outboundInternetTraffic = outboundInternetTraffic;
     }
 
     public EnvironmentNetworkAwsParams getAws() {
