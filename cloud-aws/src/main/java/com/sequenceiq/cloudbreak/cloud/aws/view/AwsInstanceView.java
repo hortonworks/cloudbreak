@@ -82,6 +82,10 @@ public class AwsInstanceView {
         return instanceTemplate.getParameter(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, Integer.class);
     }
 
+    public Double getSpotMaxPrice() {
+        return instanceTemplate.getParameter(AwsInstanceTemplate.EC2_SPOT_MAX_PRICE, Double.class);
+    }
+
     public int getOnDemandPercentage() {
         return HUNDRED_PERCENT - Objects.requireNonNullElse(getSpotPercentage(), 0);
     }

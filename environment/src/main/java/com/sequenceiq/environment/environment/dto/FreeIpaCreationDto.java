@@ -31,6 +31,10 @@ public class FreeIpaCreationDto {
         return aws;
     }
 
+    public void setAws(FreeIpaCreationAwsParametersDto aws) {
+        this.aws = aws;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaCreationDto{" +

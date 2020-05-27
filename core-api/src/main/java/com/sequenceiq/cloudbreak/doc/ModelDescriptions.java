@@ -72,6 +72,7 @@ public class ModelDescriptions {
         public static final String AZURE_PARAMETERS = "azure specific parameters for template";
         public static final String AWS_SPOT_PARAMETERS = "aws specific spot instance parameters for template";
         public static final String SPOT_PERCENTAGE = "percentage of spot instances launched in instance group";
+        public static final String SPOT_MAX_PRICE = "max price per hour of spot instances launched in instance group";
         public static final String AZURE_PRIVATE_ID = "private id for azure";
         public static final String ENCRYPTION = "encryption for vm";
         public static final String ENCRYPTION_TYPE = "encryption type for vm (DEFAULT|CUSTOM|NONE)";

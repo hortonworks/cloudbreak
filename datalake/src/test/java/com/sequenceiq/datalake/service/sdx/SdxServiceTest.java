@@ -298,8 +298,9 @@ class SdxServiceTest {
         Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
         SdxCluster createdSdxCluster = result.getLeft();
         // AWS 7.1.0 light duty contains exactly 2 instance groups
-        assertThat(createdSdxCluster.getStackRequest())
-                .containsSubsequence("{\"aws\":{\"spot\":{\"percentage\":100}}", "{\"aws\":{\"spot\":{\"percentage\":100}}");
+        assertThat(createdSdxCluster.getStackRequest()).containsSubsequence(
+                "{\"aws\":{\"spot\":{\"percentage\":100,\"maxPrice\":0.9}}",
+                "{\"aws\":{\"spot\":{\"percentage\":100,\"maxPrice\":0.9}}");
     }
 
     @Test
@@ -607,6 +608,7 @@ class SdxServiceTest {
         SdxAwsRequest aws = new SdxAwsRequest();
         SdxAwsSpotParameters spot = new SdxAwsSpotParameters();
         spot.setPercentage(100);
+        spot.setMaxPrice(0.9);
         aws.setSpot(spot);
         sdxClusterRequest.setAws(aws);
     }

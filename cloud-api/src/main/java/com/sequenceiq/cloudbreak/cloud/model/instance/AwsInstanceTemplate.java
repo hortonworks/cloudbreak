@@ -44,6 +44,21 @@ public class AwsInstanceTemplate extends InstanceTemplate {
     public static final String EC2_SPOT_PERCENTAGE = "spotPercentage";
 
     /**
+     * Key of the optional dynamic parameter denoting the max hourly price of EC2 instances to be allocated to spot instances.
+     *
+     * <p>
+     *     Permitted values:
+     *     <ul>
+     *         <li>{@code null}: AWS will automatically determine the maximum price, which is the current price of an on-demand instance.</li>
+     *         <li>A {@link Double} in the range [0.001, 255] with maximum 4 fraction digits.</li>
+     *     </ul>
+     * </p>
+     *
+     * @see #putParameter(String, Object)
+     */
+    public static final String EC2_SPOT_MAX_PRICE = "spotMaxPrice";
+
+    /**
      * Key of the optional dynamic parameter denoting whether speed optimizations for the EBS encryption setup logic are enabled or not. This applies to both
      * root & attached (data) volumes.
      *

@@ -65,7 +65,8 @@ public class CloudFormationTemplateBuilder {
                     group.getSecurity().isUseNetworkCidrAsSourceForDefaultRules(),
                     getInstanceProfile(group),
                     awsInstanceView.getOnDemandPercentage(),
-                    awsInstanceView.isFastEbsEncryptionEnabled());
+                    awsInstanceView.isFastEbsEncryptionEnabled(),
+                    awsInstanceView.getSpotMaxPrice());
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);

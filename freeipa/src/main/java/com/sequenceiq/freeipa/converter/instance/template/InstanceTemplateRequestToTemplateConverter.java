@@ -25,7 +25,6 @@ import com.sequenceiq.freeipa.api.model.ResourceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceTypeProvider;
@@ -60,8 +59,13 @@ public class InstanceTemplateRequestToTemplateConverter {
         }
         Optional.ofNullable(source.getAws())
                 .map(AwsInstanceTemplateParameters::getSpot)
-                .map(AwsInstanceTemplateSpotParameters::getPercentage)
-                .ifPresent(spotPercentage -> attributes.put(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, spotPercentage));
+                .ifPresent(spotParameters -> {
+                            attributes.put(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, spotParameters.getPercentage());
+                            if (Objects.nonNull(spotParameters.getMaxPrice())) {
+                                attributes.put(AwsInstanceTemplate.EC2_SPOT_MAX_PRICE, spotParameters.getMaxPrice());
+                            }
+                        }
+                );
         template.setAttributes(new Json(attributes));
         return template;
     }

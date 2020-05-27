@@ -37,6 +37,7 @@ public class FreeIpaConverter {
     private AwsFreeIpaSpotParameters convertAwsSpot(FreeIpaCreationAwsSpotParametersDto spot) {
         AwsFreeIpaSpotParameters result = new AwsFreeIpaSpotParameters();
         result.setPercentage(spot.getPercentage());
+        result.setMaxPrice(spot.getMaxPrice());
         return result;
     }
 
@@ -48,10 +49,10 @@ public class FreeIpaConverter {
                     .ifPresent(builder::withInstanceCountByGroup);
             Optional.ofNullable(request.getAws())
                     .map(AwsFreeIpaParameters::getSpot)
-                    .map(AwsFreeIpaSpotParameters::getPercentage)
-                    .ifPresent(percentage -> builder.withAws(FreeIpaCreationAwsParametersDto.builder()
+                    .ifPresent(spotParameters -> builder.withAws(FreeIpaCreationAwsParametersDto.builder()
                             .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
-                                    .withPercentage(percentage)
+                                    .withPercentage(spotParameters.getPercentage())
+                                    .withMaxPrice(spotParameters.getMaxPrice())
                                     .build())
                             .build()));
         }

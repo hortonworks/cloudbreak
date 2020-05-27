@@ -240,6 +240,7 @@ public class EnvironmentApiConverterTest {
     private void assertAwsParameters(EnvironmentRequest request, ParametersDto actual) {
         assertEquals(request.getAws().getS3guard().getDynamoDbTableName(), actual.getAwsParametersDto().getS3GuardTableName());
         assertEquals(request.getFreeIpa().getAws().getSpot().getPercentage(), actual.getAwsParametersDto().getFreeIpaSpotPercentage());
+        assertEquals(request.getFreeIpa().getAws().getSpot().getMaxPrice(), actual.getAwsParametersDto().getFreeIpaSpotMaxPrice());
     }
 
     private void assertSecurityAccess(SecurityAccessRequest request, SecurityAccessDto actual) {
@@ -317,6 +318,7 @@ public class EnvironmentApiConverterTest {
     private AttachedFreeIpaRequest createFreeIpaRequest() {
         AwsFreeIpaSpotParameters awsFreeIpaSpotParameters = new AwsFreeIpaSpotParameters();
         awsFreeIpaSpotParameters.setPercentage(50);
+        awsFreeIpaSpotParameters.setMaxPrice(0.9);
         AwsFreeIpaParameters awsFreeIpaParameters = new AwsFreeIpaParameters();
         awsFreeIpaParameters.setSpot(awsFreeIpaSpotParameters);
         AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();

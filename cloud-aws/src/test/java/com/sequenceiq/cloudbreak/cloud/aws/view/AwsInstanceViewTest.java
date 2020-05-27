@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,6 +87,25 @@ public class AwsInstanceViewTest {
                 Map.of(), 0L, IMAGE_ID);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
         assertThat(actual.getOnDemandPercentage()).isEqualTo(100);
+    }
+
+    @Test
+    public void testSpotMaxPrice() {
+        Map<String, Object> map = new HashMap<>();
+        Double spotMaxPrice = 0.9;
+        map.put(AwsInstanceTemplate.EC2_SPOT_MAX_PRICE, spotMaxPrice);
+        InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
+                map, 0L, "imageId");
+        AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
+        assertEquals(spotMaxPrice, actual.getSpotMaxPrice());
+    }
+
+    @Test
+    public void testMissingSpotMaxPrice() {
+        InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
+                Map.of(), 0L, "imageId");
+        AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
+        assertNull(actual.getSpotMaxPrice());
     }
 
 }

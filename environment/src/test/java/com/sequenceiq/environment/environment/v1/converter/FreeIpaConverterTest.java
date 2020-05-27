@@ -52,6 +52,7 @@ public class FreeIpaConverterTest {
                 .withAws(FreeIpaCreationAwsParametersDto.builder()
                         .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
                                 .withPercentage(100)
+                                .withMaxPrice(0.9)
                                 .build())
                         .build())
                 .build();
@@ -62,6 +63,7 @@ public class FreeIpaConverterTest {
         assertNotNull(result.getInstanceCountByGroup());
         assertEquals(2, result.getInstanceCountByGroup());
         assertEquals(100, result.getAws().getSpot().getPercentage());
+        assertEquals(0.9, result.getAws().getSpot().getMaxPrice());
     }
 
 }
