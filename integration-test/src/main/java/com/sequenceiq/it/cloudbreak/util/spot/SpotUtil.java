@@ -27,15 +27,15 @@ public class SpotUtil {
                 && testMethod.isAnnotationPresent(UseSpotInstances.class);
     }
 
-    private boolean spotIsEnabledOnCurrentCloudPlatform() {
-        return spotProperties.getEnabledCloudPlatforms().contains(commonCloudProperties.getCloudProvider());
-    }
-
     public void setUseSpotInstances(Boolean useSpotInstances) {
         USE_SPOT_INSTANCES.set(useSpotInstances);
     }
 
     public boolean isUseSpotInstances() {
         return Optional.ofNullable(USE_SPOT_INSTANCES.get()).orElse(Boolean.FALSE);
+    }
+
+    private boolean spotIsEnabledOnCurrentCloudPlatform() {
+        return spotProperties.getEnabledCloudPlatforms().contains(commonCloudProperties.getCloudProvider());
     }
 }

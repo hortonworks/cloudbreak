@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Sta
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
-import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -313,11 +312,6 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request) {
         getDelegate(instanceTemplateV1Request.getCloudPlatform()).setInstanceTemplateV1Parameters(instanceTemplateV1Request);
-    }
-
-    @Override
-    public AttachedFreeIpaRequest getAttachedFreeIpaRequest() {
-        return delegate.getAttachedFreeIpaRequest();
     }
 
     private CloudProvider getDelegate(CloudPlatform cloudPlatform) {

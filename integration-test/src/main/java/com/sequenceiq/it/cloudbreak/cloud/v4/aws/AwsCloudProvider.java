@@ -51,6 +51,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
@@ -400,8 +401,13 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public AttachedFreeIpaRequest getAttachedFreeIpaRequest() {
-        AttachedFreeIpaRequest attachedFreeIpaRequest = super.getAttachedFreeIpaRequest();
+    public EnvironmentTestDto environment(EnvironmentTestDto environment) {
+        return super.environment(environment)
+                .withFreeIpa(getAttachedFreeIpaRequest());
+    }
+
+    private AttachedFreeIpaRequest getAttachedFreeIpaRequest() {
+        AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
         AwsFreeIpaParameters awsFreeIpaParameters = new AwsFreeIpaParameters();
         AwsFreeIpaSpotParameters awsFreeIpaSpotParameters = new AwsFreeIpaSpotParameters();
         awsFreeIpaSpotParameters.setPercentage(getSpotPercentage());

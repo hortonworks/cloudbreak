@@ -77,8 +77,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
+        AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
+        attachedFreeIpaRequest.setCreate(Boolean.FALSE);
         return environment.withRegions(Collections.singleton(region()))
-                .withLocation(location());
+                .withLocation(location())
+                .withFreeIpa(attachedFreeIpaRequest);
     }
 
     @Override
@@ -179,11 +182,6 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     @Override
     public EnvironmentSecurityAccessTestDto environmentSecurityAccess(EnvironmentSecurityAccessTestDto environmentSecurityAccessTestDto) {
         return environmentSecurityAccessTestDto;
-    }
-
-    @Override
-    public AttachedFreeIpaRequest getAttachedFreeIpaRequest() {
-        return new AttachedFreeIpaRequest();
     }
 
     protected abstract ClusterTestDto withCluster(ClusterTestDto cluster);
