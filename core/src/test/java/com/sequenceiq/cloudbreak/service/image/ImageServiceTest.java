@@ -61,7 +61,7 @@ public class ImageServiceTest {
 
     private static final String STACK_VERSION = "7.1.0";
 
-    private static final String TARGET_STACK_VERSION = "7.1.1";
+    private static final String TARGET_STACK_VERSION = "7.2.0";
 
     private static final String CUSTOM_IMAGE_CATALOG_URL = "http://localhost/custom-imagecatalog-url";
 

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_3;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
 import java.util.EnumSet;
@@ -30,13 +31,13 @@ public class KafkaConfigProviderUtils {
     Since it is difficult to predict future CDH releases and their content, the following is assumed on a best-effort basis:
     - 7.0.x (7.0.4, 7.0.5, ...) versions will use the same logic as 7.0.2 and 7.0.3
     - 7.1.0 and later versions will use the logic in 7.0.2.2
-    Update for 7.1.0 and 7.1.1:
+    Update for 7.1.0:
     - 7.1.0 introduced SSL connection between Kafka and Zookeeper. Due to a CM issue, the Ranger Kafka plugin's Zookeeper
     config doesn't use the SSL port, causing problems for Ranger connecting to Zookeeper.
      */
     public static CdhVersionForStreaming getCdhVersionForStreaming(TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getVersion().orElse("");
-        if (isVersionNewerOrEqualThanLimited(cdhVersion, () -> "7.1.1")) {
+        if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_0)) {
             return CdhVersionForStreaming.VERSION_7_X_X;
         } else if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
             return CdhVersionForStreaming.VERSION_7_1_0;
