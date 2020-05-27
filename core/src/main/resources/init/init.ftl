@@ -53,3 +53,4 @@ ${customUserData}
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
 
 chmod o-rwx /var/log/user-data.log
+chmod o-rwx /cdp/bin/*
