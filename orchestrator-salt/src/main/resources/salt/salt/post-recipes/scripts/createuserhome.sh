@@ -48,6 +48,7 @@ webhdfs_command()   {
     local http_code=$(curl --cookie-jar $WEBHDFS_COOKIE_JAR --cookie $WEBHDFS_COOKIE_JAR \
       -o >(cat >&${out_fd}) \
       --silent \
+      --noproxy '*' \
       -w "%{http_code}" \
       -X $method --negotiate -u : \
       "$WEBHDFS_URL$path?$query")
