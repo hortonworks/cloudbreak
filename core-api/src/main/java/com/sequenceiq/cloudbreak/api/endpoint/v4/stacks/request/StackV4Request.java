@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 
 import io.swagger.annotations.ApiModel;
@@ -94,6 +95,10 @@ public class StackV4Request extends StackV4Base {
     @Valid
     @ApiModelProperty(StackModelDescription.EXTERNAL_DATABASE)
     private DatabaseRequest externalDatabase;
+
+    @ValidCrn
+    @ApiModelProperty(value = StackModelDescription.RESOURCE_CRN)
+    private String resourceCrn;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -220,5 +225,13 @@ public class StackV4Request extends StackV4Base {
 
     public void setExternalDatabase(DatabaseRequest externalDatabase) {
         this.externalDatabase = externalDatabase;
+    }
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 }

@@ -452,7 +452,7 @@ public class StackService implements ResourceIdProvider {
     }
 
     @Measure(StackService.class)
-    public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace) {
+    public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace, Optional<String> crn) {
         if (stack.getGatewayPort() == null) {
             stack.setGatewayPort(nginxPort);
         }
@@ -476,7 +476,12 @@ public class StackService implements ResourceIdProvider {
         stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
 
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        stack.setResourceCrn(createCRN(accountId));
+
+        if (crn.isPresent()) {
+            stack.setResourceCrn(crn.get());
+        } else {
+            stack.setResourceCrn(createCRN(accountId));
+        }
         setDefaultTags(stack);
 
         Stack savedStack = measure(() -> stackRepository.save(stack),
