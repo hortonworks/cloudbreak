@@ -551,6 +551,12 @@ public class StackService implements ResourceIdProvider {
     public List<InstanceMetaData> getInstanceMetaDataForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
         return instanceMetaDataList.stream()
                 .filter(instanceMetaData -> privateIds.contains(instanceMetaData.getPrivateId()))
+                .collect(Collectors.toList());
+    }
+
+    public List<InstanceMetaData> getInstanceMetaDataForPrivateIdsWithoutTerminatedInstances(List<InstanceMetaData> instanceMetaDataList,
+            Collection<Long> privateIds) {
+        return getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds).stream()
                 .filter(instanceMetaData -> !instanceMetaData.isTerminated())
                 .collect(Collectors.toList());
     }
@@ -663,7 +669,7 @@ public class StackService implements ResourceIdProvider {
     }
 
     public List<String> getHostNamesForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
-        return getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds).stream()
+        return getInstanceMetaDataForPrivateIdsWithoutTerminatedInstances(instanceMetaDataList, privateIds).stream()
                 .map(InstanceMetaData::getInstanceId)
                 .collect(Collectors.toList());
     }
@@ -671,7 +677,13 @@ public class StackService implements ResourceIdProvider {
     public List<String> getInstanceIdsForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
         List<InstanceMetaData> instanceMetaDataForPrivateIds = getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds);
         return instanceMetaDataForPrivateIds.stream()
-                .map(InstanceMetaData::getInstanceId)
+                .map(instanceMetaData -> {
+                    if (instanceMetaData.getInstanceId() != null) {
+                        return instanceMetaData.getInstanceId();
+                    } else {
+                        return instanceMetaData.getPrivateId().toString();
+                    }
+                })
                 .collect(Collectors.toList());
     }
 

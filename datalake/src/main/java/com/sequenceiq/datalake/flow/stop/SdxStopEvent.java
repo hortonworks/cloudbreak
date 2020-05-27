@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.flow.stop;
 
-import com.sequenceiq.datalake.flow.start.event.SdxSyncSuccessEvent;
+import com.sequenceiq.datalake.flow.sync.event.SdxSyncSuccessEvent;
 import com.sequenceiq.datalake.flow.stop.event.RdsStopSuccessEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStopFailedEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStopSuccessEvent;

@@ -1,18 +1,11 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade.event;
 
-import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.SdxFailedEvent;
 
-public class DatalakeUpgradeFailedEvent extends SdxEvent {
-
-    private final Exception exception;
+public class DatalakeUpgradeFailedEvent extends SdxFailedEvent {
 
     public DatalakeUpgradeFailedEvent(Long sdxId, String userId, Exception exception) {
-        super(sdxId, userId);
-        this.exception = exception;
-    }
-
-    public static DatalakeUpgradeFailedEvent from(SdxEvent event, Exception exception) {
-        return new DatalakeUpgradeFailedEvent(event.getResourceId(), event.getUserId(), exception);
+        super(sdxId, userId, exception);
     }
 
     @Override
@@ -20,14 +13,10 @@ public class DatalakeUpgradeFailedEvent extends SdxEvent {
         return "DatalakeUpgradeFailedEvent";
     }
 
-    public Exception getException() {
-        return exception;
-    }
-
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer("DatalakeUpgradeFailedEvent{");
-        sb.append("exception=").append(exception);
+        sb.append("exception=").append(getException());
         sb.append('}');
         return sb.toString();
     }

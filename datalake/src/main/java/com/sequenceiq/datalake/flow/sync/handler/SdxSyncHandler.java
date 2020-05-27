@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.flow.start.handler;
+package com.sequenceiq.datalake.flow.sync.handler;
 
 import static com.sequenceiq.datalake.flow.start.handler.SdxStartWaitHandler.DURATION_IN_MINUTES;
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
@@ -27,10 +27,10 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.flow.start.event.SdxStartFailedEvent;
-import com.sequenceiq.datalake.flow.start.event.SdxSyncSuccessEvent;
-import com.sequenceiq.datalake.flow.start.event.SdxSyncWaitRequest;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
+import com.sequenceiq.datalake.flow.sync.event.SdxSyncFailedEvent;
+import com.sequenceiq.datalake.flow.sync.event.SdxSyncSuccessEvent;
+import com.sequenceiq.datalake.flow.sync.event.SdxSyncWaitRequest;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -66,7 +66,7 @@ public class SdxSyncHandler extends ExceptionCatcherEventHandler<SdxSyncWaitRequ
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new SdxStartFailedEvent(resourceId, null, e);
+        return new SdxSyncFailedEvent(resourceId, null, e);
     }
 
     @Override
@@ -85,14 +85,14 @@ public class SdxSyncHandler extends ExceptionCatcherEventHandler<SdxSyncWaitRequ
             response = new SdxSyncSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Sync polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxStartFailedEvent(sdxId, userId, userBreakException);
+            response = new SdxSyncFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Sync poller stopped for stack: {}", sdxId);
-            response = new SdxStartFailedEvent(sdxId, userId,
+            response = new SdxSyncFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake sync timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Sync polling failed for stack: {}", sdxId);
-            response = new SdxStartFailedEvent(sdxId, userId, exception);
+            response = new SdxSyncFailedEvent(sdxId, userId, exception);
         }
         sendEvent(response, event);
     }
