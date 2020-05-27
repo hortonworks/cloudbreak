@@ -9,7 +9,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DOWNSCALE_SUCC
 import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,12 +55,14 @@ public class StackDownscaleService {
         LOGGER.debug("Downscaling of stack {}", context.getStack().getId());
         stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
         Set<Long> privateIds = stackDownscaleTriggerEvent.getPrivateIds();
-        List<String> instanceIdList = Collections.emptyList();
+        String msgParam;
         if (privateIds != null) {
             Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
-            instanceIdList = stackService.getInstanceIdsForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
+            List<String> instanceIdList = stackService.getInstanceIdsForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
+            msgParam = String.join(",", instanceIdList);
+        } else {
+            msgParam = String.valueOf(Math.abs(stackDownscaleTriggerEvent.getAdjustment()));
         }
-        String msgParam = instanceIdList.isEmpty() ? String.valueOf(Math.abs(stackDownscaleTriggerEvent.getAdjustment())) : String.join(",", instanceIdList);
         flowMessageService.fireEventAndLog(context.getStack().getId(), UPDATE_IN_PROGRESS.name(), STACK_DOWNSCALE_INSTANCES, msgParam);
     }
 
