@@ -197,18 +197,14 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
 
         for (CloudResource resource : resources) {
-            switch (resource.getType()) {
-            case ARM_TEMPLATE:
+            ResourceType resourceType = resource.getType();
+            if (resourceType == ResourceType.ARM_TEMPLATE) {
                 LOGGER.debug("Checking Azure stack status of: {}", stackName);
                 checkTemplateDeployment(result, client, stackName, resource);
-                break;
-            case AZURE_NETWORK:
-            case AZURE_SUBNET:
-            case AZURE_VOLUMESET:
-            case AZURE_RESOURCE_GROUP:
-                break;
-            default:
-                throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
+            } else {
+                if (!resourceType.name().startsWith("AZURE")) {
+                    throw new CloudConnectorException(String.format("Invalid resource type: %s", resourceType));
+                }
             }
         }
         return result;
