@@ -252,7 +252,8 @@ public class StackCreatorService {
 
                 LOGGER.info("Get image catalog for stack {}.", stackName);
                 StatedImage imgFromCatalog = getImageCatalog(imgFromCatalogFuture);
-                Stack newStack = stackService.create(stack, platformString, imgFromCatalog, user, workspace);
+                Stack newStack = stackService.create(stack, platformString, imgFromCatalog, user, workspace,
+                        Optional.ofNullable(stackRequest.getResourceCrn()));
 
                 try {
                     LOGGER.info("Create cluster enity in the database with name {}.", stackName);

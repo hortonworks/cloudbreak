@@ -213,6 +213,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
         prepareProviderSpecificParameters(stackRequest, sdxClusterRequest, cloudPlatform);
+        stackRequest.setResourceCrn(sdxCluster.getCrn());
         try {
             sdxCluster.setStackRequest(JsonUtil.writeValueAsString(stackRequest));
         } catch (JsonProcessingException e) {

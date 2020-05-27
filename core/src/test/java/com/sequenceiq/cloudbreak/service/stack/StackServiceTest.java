@@ -189,7 +189,7 @@ public class StackServiceTest {
 
         try {
             stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                    () -> underTest.create(stack, platformString, mock(StatedImage.class), user, workspace));
+                    () -> underTest.create(stack, platformString, mock(StatedImage.class), user, workspace, Optional.empty()));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
         }
@@ -207,7 +207,7 @@ public class StackServiceTest {
 
         try {
             stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                    () -> underTest.create(stack, "AWS", mock(StatedImage.class), user, workspace));
+                    () -> underTest.create(stack, "AWS", mock(StatedImage.class), user, workspace, Optional.empty()));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(stack).setResourceCrn(crnCaptor.capture());
