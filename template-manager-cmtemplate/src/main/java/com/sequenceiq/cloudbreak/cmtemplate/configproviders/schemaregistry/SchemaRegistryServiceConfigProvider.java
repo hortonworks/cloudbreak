@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaDatahubConfigProvider.GENERATED_RANGER_SERVICE_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.StreamingAppRdsRoleConfigProviderUtil.dataBaseTypeForCM;
 import static java.util.Collections.emptyList;
 
@@ -32,6 +33,8 @@ public class SchemaRegistryServiceConfigProvider extends AbstractRdsRoleConfigPr
 
     static final String DATABASE_PASSWORD = "database_password";
 
+    static final String RANGER_PLUGIN_SR_SERVICE_NAME = "ranger.plugin.schema-registry.service.name";
+
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
@@ -54,21 +57,17 @@ public class SchemaRegistryServiceConfigProvider extends AbstractRdsRoleConfigPr
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
-        if (!isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_0)) {
-            switch (roleType) {
-                case SchemaRegistryRoles.SCHEMA_REGISTRY_SERVER:
-                    RdsView schemaRegistryRdsView = getRdsView(source);
-                    return List.of(
-                            config("schema.registry.storage.connector.connectURI", schemaRegistryRdsView.getConnectionURL()),
-                            config("schema.registry.storage.connector.user", schemaRegistryRdsView.getConnectionUserName()),
-                            config("schema.registry.storage.connector.password", schemaRegistryRdsView.getConnectionPassword())
-                    );
-                default:
-                    return List.of();
-            }
+        if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_0)) {
+            return List.of(config(RANGER_PLUGIN_SR_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME));
+        } else {
+            // Legacy db configs
+            RdsView schemaRegistryRdsView = getRdsView(source);
+            return List.of(
+                    config("schema.registry.storage.connector.connectURI", schemaRegistryRdsView.getConnectionURL()),
+                    config("schema.registry.storage.connector.user", schemaRegistryRdsView.getConnectionUserName()),
+                    config("schema.registry.storage.connector.password", schemaRegistryRdsView.getConnectionPassword())
+            );
         }
-
-        return emptyList();
     }
 
     @Override

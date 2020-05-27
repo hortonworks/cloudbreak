@@ -19,9 +19,9 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class KafkaDatahubConfigProvider implements CmTemplateComponentConfigProvider {
 
-    static final String RANGER_PLUGIN_KAFKA_SERVICE_NAME = "ranger_plugin_kafka_service_name";
+    public static final String RANGER_PLUGIN_KAFKA_SERVICE_NAME = "ranger_plugin_kafka_service_name";
 
-    static final String GENERATED_RANGER_SERVICE_NAME = "{{GENERATED_RANGER_SERVICE_NAME}}";
+    public static final String GENERATED_RANGER_SERVICE_NAME = "{{GENERATED_RANGER_SERVICE_NAME}}";
 
     static final String PRODUCER_METRICS_ENABLE = "producer.metrics.enable";
 

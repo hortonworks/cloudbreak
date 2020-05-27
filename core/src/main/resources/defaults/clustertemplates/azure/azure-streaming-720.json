@@ -3,7 +3,6 @@
   "description": "",
   "type": "STREAMING",
   "cloudPlatform": "AZURE",
-  "featureState": "PREVIEW",
   "distroXTemplate": {
     "cluster": {
       "blueprintName": "7.2.0 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager"
@@ -78,8 +77,8 @@
           "instanceType": "Standard_D8_v3",
           "attachedVolumes": [
             {
-              "count": 1,
-              "size": 1000,
+              "count": 2,
+              "size": 500,
               "type": "StandardSSD_LRS"
             }
           ]

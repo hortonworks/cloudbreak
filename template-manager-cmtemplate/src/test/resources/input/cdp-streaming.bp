@@ -1,5 +1,5 @@
 {
-    "cdhVersion": "7.2.0",
+    "cdhVersion": "__CDH_VERSION__",
     "displayName": "CDP - STREAMING",
     "cmVersion": "7.x.0",
     "repositories": [
