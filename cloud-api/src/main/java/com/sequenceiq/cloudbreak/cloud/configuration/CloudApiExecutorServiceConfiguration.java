@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.configuration;
 
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +21,7 @@ public class CloudApiExecutorServiceConfiguration {
     ListeningScheduledExecutorService cloudApiListeningScheduledExecutorService() {
         return MoreExecutors
                 .listeningDecorator(new MDCCleanerScheduledExecutor(executorServicePoolSize,
-                        new ThreadFactoryBuilder().setNameFormat("cloud-api-%d").build()));
+                        new ThreadFactoryBuilder().setNameFormat("cloud-api-%d").build(),
+                        new CallerRunsPolicy()));
     }
 }
