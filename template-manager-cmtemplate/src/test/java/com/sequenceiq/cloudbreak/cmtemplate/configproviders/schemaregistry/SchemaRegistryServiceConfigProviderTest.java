@@ -1,12 +1,8 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.DATABASE_HOST;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.DATABASE_NAME;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.DATABASE_PASSWORD;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.DATABASE_PORT;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.DATABASE_TYPE;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.DATABASE_USER;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaDatahubConfigProvider.GENERATED_RANGER_SERVICE_NAME;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.RANGER_PLUGIN_SR_SERVICE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -33,21 +29,41 @@ public class SchemaRegistryServiceConfigProviderTest {
     private final SchemaRegistryServiceConfigProvider underTest = new SchemaRegistryServiceConfigProvider();
 
     @Test
-    public void testGetSchemaRegistryServerConfigs() {
-        String inputJson = getBlueprintText("input/cdp-streaming.bp");
+    public void testGetSchemaRegistryServiceConfigs710() {
+        String inputJson = loadBlueprint("7.1.0");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor);
 
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+        assertThat(serviceConfigs).isEmpty();
+    }
 
-        assertThat(serviceConfigs).hasSameElementsAs(List.of(
-                config(DATABASE_TYPE, "postgresql"),
-                config(DATABASE_NAME, "schema_registry"),
-                config(DATABASE_HOST, "testhost"),
-                config(DATABASE_PORT, "5432"),
-                config(DATABASE_USER, "schema_registry_server"),
-                config(DATABASE_PASSWORD, "schema_registry_server_password")
-        ));
+    @Test
+    public void testGetSchemaRegistryRoleConfigs710() {
+        String inputJson = loadBlueprint("7.1.0");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor);
+
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(SchemaRegistryRoles.SCHEMA_REGISTRY_SERVER,
+                preparationObject);
+
+        assertThat(roleConfigs).hasSameElementsAs(
+                List.of(config("schema.registry.storage.connector.connectURI", "jdbc:postgresql://testhost:5432/schema_registry"),
+                        config("schema.registry.storage.connector.user", "schema_registry_server"),
+                        config("schema.registry.storage.connector.password", "schema_registry_server_password")));
+    }
+
+    @Test
+    public void testGetSchemaRegistryRoleConfigs720() {
+        String inputJson = loadBlueprint("7.2.0");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor);
+
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(SchemaRegistryRoles.SCHEMA_REGISTRY_SERVER,
+                preparationObject);
+
+        assertThat(roleConfigs).hasSameElementsAs(List.of(
+                config(RANGER_PLUGIN_SR_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME)));
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor) {
@@ -69,7 +85,8 @@ public class SchemaRegistryServiceConfigProviderTest {
                 .build();
     }
 
-    private String getBlueprintText(String path) {
-        return FileReaderUtils.readFileFromClasspathQuietly(path);
+    private String loadBlueprint(String cdhVersion) {
+        return FileReaderUtils.readFileFromClasspathQuietly("input/cdp-streaming.bp").replace("__CDH_VERSION__", cdhVersion);
     }
+
 }

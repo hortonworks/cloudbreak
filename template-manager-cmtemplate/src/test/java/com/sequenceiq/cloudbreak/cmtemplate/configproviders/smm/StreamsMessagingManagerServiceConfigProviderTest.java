@@ -34,7 +34,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
 
     @Test
     public void testGetStreamsMessagingManagerServerConfigs() {
-        String inputJson = getBlueprintText("input/cdp-streaming.bp");
+        String inputJson = getBlueprintText("input/cdp-streaming.bp").replace("__CDH_VERSION__", "7.2.0");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, false, cmTemplateProcessor);
 
