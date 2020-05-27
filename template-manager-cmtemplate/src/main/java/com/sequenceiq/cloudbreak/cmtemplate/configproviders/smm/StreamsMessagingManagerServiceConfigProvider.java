@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_1;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.StreamingAppRdsRoleConfigProviderUtil.dataBaseTypeForCM;
@@ -38,7 +38,7 @@ public class StreamsMessagingManagerServiceConfigProvider extends AbstractRdsRol
         final List<ApiClusterTemplateConfig> configList;
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
-        if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_1)) {
+        if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_0)) {
             RdsView smmRdsView = getRdsView(source);
             configList = List.of(
                     config(DATABASE_TYPE, dataBaseTypeForCM(smmRdsView.getDatabaseVendor())),
@@ -68,7 +68,7 @@ public class StreamsMessagingManagerServiceConfigProvider extends AbstractRdsRol
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
-        if (!isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_1)) {
+        if (!isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_0)) {
             switch (roleType) {
                 case StreamsMessagingManagerRoles.STREAMS_MESSAGING_MANAGER_SERVER:
                     RdsView streamsMessagingManagerRdsView = getRdsView(source);

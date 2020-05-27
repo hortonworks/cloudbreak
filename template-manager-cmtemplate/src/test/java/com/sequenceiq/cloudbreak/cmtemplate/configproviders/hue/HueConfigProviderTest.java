@@ -97,7 +97,7 @@ public class HueConfigProviderTest {
 
     @Test
     public void getServiceConfigVariables() {
-        BlueprintView blueprintView = getMockBlueprintView("7.1.1", "7.1.0");
+        BlueprintView blueprintView = getMockBlueprintView("7.2.0", "7.1.0");
 
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setType(HUE);

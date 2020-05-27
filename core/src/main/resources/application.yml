@@ -234,15 +234,6 @@ cb:
         7.1.0 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-710;
         7.1.0 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-710;
         7.1.0 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-710;
-        7.1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-711;
-        7.1.1 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha-711;
-        7.1.1 - Data Mart: Apache Impala, Hue=cdp-data-mart-711;
-        7.1.1 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart-711;
-        7.1.1 - Operational Database: Apache HBase, Phoenix=cdp-opdb-711;
-        7.1.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-711;
-        7.1.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-711;
-        7.1.1 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-711;
-        7.1.1 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-711;
         7.2.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-720;
         7.2.0 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha-720;
         7.2.0 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3-720;
@@ -378,13 +369,6 @@ cb:
             baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2365123/cm7/7.1.0/redhat7/yum/
           centos7:
             baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2365123/cm7/7.1.0/redhat7/yum/
-      7.1.1:
-        version: 7.1.1
-        repo:
-          redhat7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2417484/cm7/7.1.1/redhat7/yum/
-          centos7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2417484/cm7/7.1.1/redhat7/yum/
       7.2:
         version: 7.2.0
         repo:
@@ -440,14 +424,6 @@ cb:
             repoid: CDH-7.1.0
             redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922354/cdh/7.x/parcels/
             centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922354/cdh/7.x/parcels/
-      "[7.1.1]":
-        version: 7.1.1-1.cdh7.1.1.p0.2424606
-        minCM: 7.1
-        repo:
-          stack:
-            repoid: CDH-7.1.1
-            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2424606/cdh/7.x/parcels/
-            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2424606/cdh/7.x/parcels/
       "[7.2.0]":
         version: 7.2.0-1.cdh7.2.0.p0.2972937
         minCM: 7.2
