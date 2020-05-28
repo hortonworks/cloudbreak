@@ -9,6 +9,7 @@ import javax.ws.rs.ForbiddenException;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -21,10 +22,6 @@ public class CredentialCreateTest extends AbstractIntegrationTest {
 
     private static final Set<String> INVALID_REGION = new HashSet<>(Collections.singletonList("MockRegion"));
 
-    private static final String BASE_USER = "CB-AccountAdmin";
-
-    private static final String ZERO_RIGHTS = "CB-zero-roles";
-
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
@@ -33,16 +30,18 @@ public class CredentialCreateTest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-
+        useRealUmsUser(testContext, AuthUserKeys.BASE_USER);
+        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_B);
+        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
-            when = "a create environment request is sent with no region in it",
-            then = "a BadRequestException should be returned")
-    public void testCreateCredentialWithManagementConsoleAdmin(TestContext testContext) {
-        useRealUmsUser(testContext, BASE_USER);
+            when = "a create credential request is sent with no region in it",
+            then = "a credential should be created")
+    public void testCreateCredentialWithAccountAdmin(TestContext testContext) {
+        useRealUmsUser(testContext, AuthUserKeys.BASE_USER);
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
@@ -52,10 +51,26 @@ public class CredentialCreateTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
+            when = "a create credential request is sent",
+            then = "a credential should be created, but MgmtConsoleAdminB should not be able to retrieve it")
+    public void testCreateCredentialWithManagementConsoleAdmin(TestContext testContext) {
+        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
+        testContext
+                .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
+                .when(credentialTestClient.get(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
+                .expect(ForbiddenException.class, RunningParameter.key("CredentialGetAction")
+                        .withExpectedMessage("You have no right to perform environments/describeCredential on resource crn:cdp.*"))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
             when = "a create environment request is sent with no region in it",
-            then = "a BadRequestException should be returned")
+            then = "with a different user with no privilige Unathorized request should be returned")
     public void testCreateCredentialWithZeroRoles(TestContext testContext) {
-        useRealUmsUser(testContext, ZERO_RIGHTS);
+        useRealUmsUser(testContext, AuthUserKeys.ZERO_RIGHTS);
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create(), RunningParameter.key("Unauthorized"))
