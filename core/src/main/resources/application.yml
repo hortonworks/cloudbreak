@@ -251,8 +251,6 @@ cb:
         7.2.0 - Operational Database: Apache HBase, Phoenix=cdp-opdb-720;
         7.2.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-720;
         7.2.0 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-720;
-        7.2.0 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-720;
-        7.2.0 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-720;
         7.2.0 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small-720;
         7.2.0 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-720;
 
