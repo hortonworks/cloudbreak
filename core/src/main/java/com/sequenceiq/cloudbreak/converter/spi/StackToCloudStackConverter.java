@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -378,17 +377,16 @@ public class StackToCloudStackConverter {
         if (Objects.nonNull(environmentCrn) && CloudPlatform.AZURE.equals(platform)) {
             DetailedEnvironmentResponse environment = measure(() -> environmentClientService.getByCrn(environmentCrn),
                     LOGGER, "Environment properties were queried under {} ms for environment {}", environmentCrn);
-            return Optional.of(getResourceGroupFromEnv(environment));
+            return getResourceGroupFromEnv(environment);
         } else {
             return Optional.empty();
         }
     }
 
-    private AzureResourceGroup getResourceGroupFromEnv(DetailedEnvironmentResponse environment) {
+    private Optional<AzureResourceGroup> getResourceGroupFromEnv(DetailedEnvironmentResponse environment) {
         return Optional.ofNullable(environment)
                 .map(DetailedEnvironmentResponse::getAzure)
-                .map(AzureEnvironmentParameters::getResourceGroup)
-                .orElseThrow(NotFoundException::new);
+                .map(AzureEnvironmentParameters::getResourceGroup);
     }
 
 }
