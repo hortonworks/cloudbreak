@@ -22,13 +22,17 @@ public class SdxClientService {
     @Inject
     private SdxEndpoint sdxEndpoint;
 
-    public List<SdxClusterResponse> getByEnvironmentCrn(String crn) {
+    public List<SdxClusterResponse> getByEnvironmentCrn(String environmentCrn) {
         try {
-            return sdxEndpoint.getByEnvCrn(crn);
+            return sdxEndpoint.getByEnvCrn(environmentCrn);
         } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
-            LOGGER.error(String.format("Failed to get datalake clusters for environment %s", crn), e);
+            LOGGER.error(String.format("Failed to get datalake clusters for environment %s", environmentCrn), e);
             return new ArrayList<>();
         }
+    }
+
+    public SdxClusterResponse getByCrn(String crn) {
+        return sdxEndpoint.getByCrn(crn);
     }
 
     public List<SdxClusterResponse> list() {
