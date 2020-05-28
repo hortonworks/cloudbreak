@@ -136,7 +136,10 @@ cb:
       from.format: qcow2
       disk.format: qcow2
       container.format: bare
-
+  featureswitch:
+    azure:
+      single:
+        resourcegroup: false
 
 
   yarn:

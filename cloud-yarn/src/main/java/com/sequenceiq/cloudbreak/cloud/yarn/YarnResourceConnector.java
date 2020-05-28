@@ -225,7 +225,8 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, boolean force) {
+    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            List<CloudResource> resources, boolean force) {
         throw new UnsupportedOperationException("Database server termination is not supported for " + getClass().getName());
     }
 

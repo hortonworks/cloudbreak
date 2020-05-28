@@ -271,8 +271,9 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     }
 
     @Override
-    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, boolean force) {
-        return azureDatabaseResourceService.terminateDatabaseServer(authenticatedContext, stack, force);
+    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            List<CloudResource> resources, boolean force) {
+        return azureDatabaseResourceService.terminateDatabaseServer(authenticatedContext, stack, resources, force);
     }
 
     @Override
@@ -405,7 +406,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                                     .collect(Collectors.toList())
                                     .contains(resource.getInstanceId()))
                             .collect(Collectors.toList());
-                        azureComputeResourceService.deleteComputeResources(ac, stack, resourcesToDownscale, networkResources);
+                    azureComputeResourceService.deleteComputeResources(ac, stack, resourcesToDownscale, networkResources);
                 }
             } catch (CloudConnectorException e) {
                 throw e;

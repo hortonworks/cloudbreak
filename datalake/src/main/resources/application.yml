@@ -95,5 +95,10 @@ cb:
   authentication:
     disabled: false
 
+  featureswitch:
+    azure:
+      single:
+        resourcegroup: false
+
 notification:
   urls: http://localhost:3000/notifications

@@ -59,6 +59,10 @@ periscope:
 cb:
   server:
     contextPath: "/cb"
+  featureswitch:
+    azure:
+      single:
+        resourcegroup: false
 
 rest:
   debug: false

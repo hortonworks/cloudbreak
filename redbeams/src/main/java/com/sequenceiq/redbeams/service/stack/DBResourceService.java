@@ -1,8 +1,8 @@
 package com.sequenceiq.redbeams.service.stack;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -28,14 +28,14 @@ public class DBResourceService {
     private ConversionService conversionService;
 
     public List<CloudResourceStatus> getAllAsCloudResourceStatus(Long dbStackId) {
-        List<DBResource> resources = dbResourceRepository.findAllByStackId(dbStackId);
-        List<CloudResourceStatus> list = new ArrayList<>();
-        resources.forEach(r -> {
-            CloudResource cloudResource = conversionService.convert(r, CloudResource.class);
-            list.add(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED));
-        });
+        return getAllAsCloudResource(dbStackId).stream()
+                .map(r -> new CloudResourceStatus(r, ResourceStatus.CREATED))
+                .collect(Collectors.toList());
+    }
 
-        return list;
+    public List<CloudResource> getAllAsCloudResource(Long dbStackId) {
+        return dbResourceRepository.findAllByStackId(dbStackId).stream()
+            .map(r -> conversionService.convert(r, CloudResource.class)).collect(Collectors.toList());
     }
 
     public DBResource save(DBResource resource) {

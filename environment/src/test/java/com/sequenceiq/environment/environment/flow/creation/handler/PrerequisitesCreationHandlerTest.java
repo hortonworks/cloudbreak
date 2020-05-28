@@ -159,6 +159,7 @@ class PrerequisitesCreationHandlerTest {
         Event<EnvironmentDto> event = getEnvironmentDtoEvent(
                 AzureResourceGroupDto.builder()
                         .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
+                        .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW)
                         .build()
         );
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(getEnvironment()));
