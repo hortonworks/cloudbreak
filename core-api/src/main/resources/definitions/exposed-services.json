@@ -577,10 +577,12 @@
       "serviceName": "MASTER",
       "knoxService": "HBASEJARS",
       "knoxUrl": "/hbase/jars",
+      "port": 16010,
+      "tlsPort": 16010,
       "apiOnly": true,
       "apiIncluded": true,
       "visibleForDatalake": false,
-      "visibleForDatahub": false
+      "visibleForDatahub": true
     }
   ]
 }
