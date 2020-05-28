@@ -65,6 +65,7 @@ class ExposedServiceCollectorTest {
         assertEquals("CLOUDERA_MANAGER_UI", underTest.getClouderaManagerUIService().getName());
         assertEquals("HBASE_REST", underTest.getHBaseRestService().getName());
         assertEquals("HBASE_UI", underTest.getHBaseUIService().getName());
+        assertEquals("HBASEJARS", underTest.getHBaseJarsService().getName());
         assertEquals("HIVE_SERVER", underTest.getHiveServerService().getName());
         assertEquals("HUE", underTest.getHueService().getName());
         assertEquals("IMPALA", underTest.getImpalaService().getName());
@@ -125,7 +126,7 @@ class ExposedServiceCollectorTest {
     }
 
     @Test
-    void geKnoxExposedServicesNames() {
+    void getKnoxExposedServicesNames() {
         underTest.init();
         assertThat(underTest.getAllKnoxExposed()).containsExactlyInAnyOrder(
                 "ATLAS",
@@ -182,6 +183,7 @@ class ExposedServiceCollectorTest {
                 Map.entry("CM-UI", 7180),
                 Map.entry("DAS", 30800),
                 Map.entry("HBASEUI", 16010),
+                Map.entry("HBASEJARS", 16010),
                 Map.entry("HDFSUI", 9870),
                 Map.entry("HIVE", 10001),
                 Map.entry("HUE", 8889),
@@ -228,6 +230,7 @@ class ExposedServiceCollectorTest {
                 Map.entry("CM-UI", 7183),
                 Map.entry("DAS", 30800),
                 Map.entry("HBASEUI", 16010),
+                Map.entry("HBASEJARS", 16010),
                 Map.entry("HDFSUI", 9871),
                 Map.entry("HIVE", 10001),
                 Map.entry("HUE", 8889),
