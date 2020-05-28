@@ -194,7 +194,8 @@ public class StackDecorator {
 
     private Optional<AzureResourceGroup> getResourceGroupFromEnv(Stack stack, DetailedEnvironmentResponse environment) {
         if (Objects.nonNull(stack) && CloudPlatform.AZURE.name().equals(stack.getCloudPlatform())) {
-            return Optional.ofNullable(environment.getAzure())
+            return Optional.ofNullable(environment)
+                    .map(DetailedEnvironmentResponse::getAzure)
                     .map(AzureEnvironmentParameters::getResourceGroup);
         } else {
             return Optional.empty();
