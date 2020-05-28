@@ -80,6 +80,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
@@ -193,6 +194,9 @@ public class StackService implements ResourceIdProvider {
 
     @Inject
     private ResourceService resourceService;
+
+    @Inject
+    private SdxClientService sdxClientService;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -452,7 +456,7 @@ public class StackService implements ResourceIdProvider {
     }
 
     @Measure(StackService.class)
-    public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace, Optional<String> crn) {
+    public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace, Optional<String> externalCrn) {
         if (stack.getGatewayPort() == null) {
             stack.setGatewayPort(nginxPort);
         }
@@ -477,8 +481,10 @@ public class StackService implements ResourceIdProvider {
 
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
 
-        if (crn.isPresent()) {
-            stack.setResourceCrn(crn.get());
+        if (externalCrn.isPresent()) {
+            // it means it is a DL cluster, double check it in sdx service
+            sdxClientService.getByCrn(externalCrn.get());
+            stack.setResourceCrn(externalCrn.get());
         } else {
             stack.setResourceCrn(createCRN(accountId));
         }
