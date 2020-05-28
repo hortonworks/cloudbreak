@@ -121,7 +121,7 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
             given = "there is an available child environment with a referenced available parent environment",
             when = "a delete request is sent for the child environment",
             then = "the child environment should be deleted",
-            and = "dns zone should be deleted")
+            and = "dns zone should be deleted....")
     public void testDeleteChildEnvironment(TestContext testContext) {
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
