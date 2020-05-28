@@ -677,4 +677,9 @@ public class AzureClient {
     public PagedList<Subscription> listSubscriptions() {
         return azure.subscriptions().list();
     }
+
+    public Completable deleteDatabaseServer(String databaseServerId) {
+        return handleAuthException(() ->
+            azure.genericResources().deleteByIdAsync(databaseServerId));
+    }
 }

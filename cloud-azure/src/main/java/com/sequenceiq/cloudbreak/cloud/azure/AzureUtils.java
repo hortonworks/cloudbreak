@@ -346,4 +346,21 @@ public class AzureUtils {
             throw new CloudbreakServiceException("Can't delete managed disks: " + failedToDeleteManagedDisks);
         }
     }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteDatabaseServer(AzureClient azureClient, String databaseServerId) {
+        LOGGER.info("Delete database server: {}", databaseServerId);
+        List<String> failedToDeleteDatabaseServer = new ArrayList<>();
+        Completable databaseServerDeleteCompletable = azureClient.deleteDatabaseServer(databaseServerId)
+                .doOnError(throwable -> {
+                    LOGGER.error("Error happend on azure database server delete: {}", databaseServerId, throwable);
+                    failedToDeleteDatabaseServer.add(databaseServerId);
+                })
+                .subscribeOn(Schedulers.io());
+        databaseServerDeleteCompletable.await();
+        if (!failedToDeleteDatabaseServer.isEmpty()) {
+            LOGGER.error("Can't delete database server: {}", failedToDeleteDatabaseServer);
+            throw new CloudbreakServiceException("Can't delete database server: " + failedToDeleteDatabaseServer);
+        }
+    }
 }

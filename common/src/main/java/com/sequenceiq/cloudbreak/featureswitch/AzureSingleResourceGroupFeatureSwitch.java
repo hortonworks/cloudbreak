@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AzureSingleResourceGroupFeatureSwitch implements FeatureSwitch {
 
-    @Value("${cb.featureswitch.azure.single.resourcegroup:false}")
+    @Value("${cb.featureswitch.azure.single.resourcegroup}")
     private boolean active;
 
     @Override
