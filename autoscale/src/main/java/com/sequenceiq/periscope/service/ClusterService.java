@@ -211,8 +211,8 @@ public class ClusterService implements ResourceBasedCrnProvider {
         return AuthorizationResourceType.DATAHUB;
     }
 
-    public String findStackCrnById(Long clusterId) {
-        return clusterRepository.findStackCrnById(clusterId);
+    public List<Cluster> findAllByPeriscopeNodeId(String nodeId) {
+        return clusterRepository.findAllByPeriscopeNodeId(nodeId);
     }
 
     public List<Cluster> findAllByStateAndNode(ClusterState state, String nodeId) {

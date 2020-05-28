@@ -56,6 +56,8 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     List<Cluster> findByStateAndPeriscopeNodeId(ClusterState state, String nodeId);
 
+    List<Cluster> findAllByPeriscopeNodeId(String nodeId);
+
     List<Cluster> findByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState state, boolean autoscalingEnabled, String nodeId);
 
     int countByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState state, boolean autoscalingEnabled, String nodeId);

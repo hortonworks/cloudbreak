@@ -32,7 +32,6 @@ management:
 periscope:
   cert:
     dir: /certs/
-
   db:
     env:
       user: postgres
@@ -52,8 +51,8 @@ periscope:
     load-monitor:
       enabled: true
     cluster-manager-host-health-monitor:
-      enabled: true
-    suspended-cluster-monitor:
+      enabled: false
+    removable-cluster-monitor:
       enabled: true
     prometheus-monitor:
       enabled: false
