@@ -1,11 +1,12 @@
 package com.sequenceiq.flow.domain;
 
+import com.sequenceiq.flow.converter.StateStatusConverter;
+
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -49,7 +50,7 @@ public class FlowLog {
 
     private String cloudbreakNodeId;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = StateStatusConverter.class)
     private StateStatus stateStatus = StateStatus.PENDING;
 
     @Version

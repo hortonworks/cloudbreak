@@ -164,6 +164,7 @@ dependencies {
     testCompile group: 'org.powermock',             name: 'powermock-api-mockito2'
     testCompile group: 'org.ow2.asm',               name: 'asm'
     testCompile group: 'com.openpojo',              name: 'openpojo'
+    testCompile project(path: ':common', configuration: 'tests')
 
     compile project(':core-api')
     compile project(':autoscale-api')

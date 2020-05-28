@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.domain.view;
 
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import com.sequenceiq.cloudbreak.domain.converter.RecipeV4TypeConverter;
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
@@ -13,7 +13,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 @Where(clause = "archived = false")
 @Table(name = "Recipe")
 public class RecipeView extends CompactView {
-    @Enumerated(EnumType.STRING)
+
+    @Convert(converter = RecipeV4TypeConverter.class)
     private RecipeV4Type recipeType;
 
     private String resourceCrn;

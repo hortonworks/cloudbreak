@@ -103,6 +103,7 @@ dependencies {
   implementation project(':template-manager-tag')
 
   testCompile project(path: ':secret-engine', configuration: 'tests')
+  testCompile project(path: ':common', configuration: 'tests')
   runtime project(':orchestrator-salt')
   runtime project(':cloud-openstack')
   runtime project(':cloud-gcp')

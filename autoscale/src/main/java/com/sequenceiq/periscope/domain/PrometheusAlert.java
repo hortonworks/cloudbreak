@@ -4,13 +4,12 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import com.sequenceiq.periscope.api.model.AlertState;
+import com.sequenceiq.periscope.converter.AlertStateConverter;
 import com.sequenceiq.periscope.model.json.Json;
 import com.sequenceiq.periscope.model.json.JsonToString;
 
@@ -27,7 +26,7 @@ public class PrometheusAlert extends BaseAlert {
     @Column(name = "alert_rule")
     private String alertRule;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = AlertStateConverter.class)
     @Column(name = "alert_state")
     private AlertState alertState;
 

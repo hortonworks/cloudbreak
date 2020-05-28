@@ -6,8 +6,6 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -19,6 +17,7 @@ import javax.persistence.Transient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
+import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import com.sequenceiq.common.api.type.Tunnel;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -50,7 +49,7 @@ public class StackApiView extends CompactView {
 
     private Long datalakeId;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = StackTypeConverter.class)
     private StackType type = StackType.WORKLOAD;
 
     @ManyToOne

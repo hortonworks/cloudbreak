@@ -5,8 +5,6 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,6 +14,7 @@ import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.domain.converter.ComponentTypeConverter;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 
@@ -37,7 +36,7 @@ public class ClusterComponent implements ProvisionEntity {
     @SequenceGenerator(name = "component_generator", sequenceName = "component_id_seq", allocationSize = 20)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ComponentTypeConverter.class)
     private ComponentType componentType;
 
     @Column(nullable = false)

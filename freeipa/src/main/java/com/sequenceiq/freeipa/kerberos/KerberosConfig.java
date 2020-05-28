@@ -3,13 +3,12 @@ package com.sequenceiq.freeipa.kerberos;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.freeipa.entity.util.KerberosTypeConverter;
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
@@ -47,7 +46,7 @@ public class KerberosConfig implements ArchivableResource, AuthResource, Account
 
     private Long deletionTimestamp = -1L;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = KerberosTypeConverter.class)
     private KerberosType type;
 
     @Column(name = "kerberospassword")

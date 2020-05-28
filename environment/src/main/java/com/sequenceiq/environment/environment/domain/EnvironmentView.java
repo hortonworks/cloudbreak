@@ -7,8 +7,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -22,6 +20,7 @@ import com.sequenceiq.environment.credential.domain.CredentialView;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.parameters.dao.converter.EnvironmentStatusConverter;
 
 @Entity
 @Table(name = "Environment")
@@ -66,7 +65,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
     @Column(nullable = false)
     private String resourceCrn;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = EnvironmentStatusConverter.class)
     private EnvironmentStatus status;
 
     public Json getRegions() {

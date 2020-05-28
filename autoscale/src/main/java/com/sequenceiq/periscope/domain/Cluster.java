@@ -7,8 +7,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -21,6 +19,7 @@ import javax.persistence.SequenceGenerator;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.converter.ClusterStateConverter;
 import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.monitor.Monitored;
 
@@ -48,7 +47,7 @@ public class Cluster implements Monitored, Clustered {
     @OneToOne(mappedBy = "cluster", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private SecurityConfig securityConfig;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ClusterStateConverter.class)
     private ClusterState state = ClusterState.PENDING;
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

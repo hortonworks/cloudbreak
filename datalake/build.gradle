@@ -68,6 +68,8 @@ dependencies {
   implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                      version: '1.9.12'
 
   testImplementation project(path: ':authorization-common', configuration: 'tests')
+
+  testCompile project(path: ':common', configuration: 'tests')
 }
 
 bootRun {

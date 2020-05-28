@@ -3,28 +3,30 @@ package com.sequenceiq.environment.environment.domain;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
+import com.sequenceiq.environment.parameters.dao.converter.CloudStorageValidationConverter;
+import com.sequenceiq.environment.parameters.dao.converter.IdBrokerMappingSourceConverter;
 
 @Embeddable
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExperimentalFeatures implements Serializable {
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = TunnelConverter.class)
     private Tunnel tunnel;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = IdBrokerMappingSourceConverter.class)
     @Column(name = "idbroker_mapping_source")
     private IdBrokerMappingSource idBrokerMappingSource;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = CloudStorageValidationConverter.class)
     private CloudStorageValidation cloudStorageValidation;
 
     public Tunnel getTunnel() {

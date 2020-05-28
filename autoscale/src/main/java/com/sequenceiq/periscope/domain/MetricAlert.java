@@ -1,14 +1,14 @@
 package com.sequenceiq.periscope.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import com.sequenceiq.periscope.api.model.AlertState;
+import com.sequenceiq.periscope.converter.AlertStateConverter;
 
 @Entity
 @DiscriminatorValue("METRIC")
@@ -23,7 +23,7 @@ public class MetricAlert extends BaseAlert {
 
     private int period;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = AlertStateConverter.class)
     @Column(name = "alert_state")
     private AlertState alertState;
 

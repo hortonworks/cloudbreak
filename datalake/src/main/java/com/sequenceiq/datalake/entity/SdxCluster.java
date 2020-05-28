@@ -5,8 +5,6 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -17,11 +15,14 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.converter.FileSystemTypeConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.datalake.converter.SdxClusterShapeConverter;
+import com.sequenceiq.datalake.converter.SdxDatabaseAvailabilityTypeConverter;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
@@ -56,7 +57,7 @@ public class SdxCluster implements AccountIdAwareResource {
     private String runtime;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = SdxClusterShapeConverter.class)
     private SdxClusterShape clusterShape;
 
     @NotNull
@@ -86,7 +87,7 @@ public class SdxCluster implements AccountIdAwareResource {
     @Column(columnDefinition = "TEXT")
     private String cloudStorageBaseLocation;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = FileSystemTypeConverter.class)
     private FileSystemType cloudStorageFileSystemType;
 
     /**
@@ -99,7 +100,7 @@ public class SdxCluster implements AccountIdAwareResource {
 
     private String lastCbFlowId;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = SdxDatabaseAvailabilityTypeConverter.class)
     private SdxDatabaseAvailabilityType databaseAvailabilityType;
 
     @Column(name = "ranger_raz_enabled")

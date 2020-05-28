@@ -46,4 +46,5 @@ dependencies {
   testCompile group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: springBootVersion
   testCompile group: 'org.reflections',                   name: 'reflections',                    version: '0.9.11'
   testCompile project(path: ':authorization-common', configuration: 'tests')
+  testCompile project(path: ':common', configuration: 'tests')
 }

@@ -9,8 +9,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -28,6 +26,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.parameters.dao.converter.EnvironmentStatusConverter;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.store.EnvironmentStatusUpdater;
@@ -95,7 +94,7 @@ public class Environment implements AuthResource {
     @Column(nullable = false)
     private String resourceCrn;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = EnvironmentStatusConverter.class)
     private EnvironmentStatus status;
 
     @JoinColumn(name = "environment_authentication_id")
