@@ -69,7 +69,7 @@ public class AwsNetworkView {
 
     public List<String> getExistingVpcCidrs() {
         List<String> cidrs = network.getParameter(VPC_CIDRS, List.class);
-        if (cidrs == null) {
+        if (cidrs == null || cidrs.isEmpty()) {
             return List.of(getExistingVpcCidr());
         }
         return cidrs;
