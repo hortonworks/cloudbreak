@@ -66,6 +66,8 @@ public class OpdbServiceEndpointCollectorTest {
 
     private static final String GATEWAY_PATH = "gateway-path";
 
+    private static final Map<String, ExposedService> EXPOSED_SERVICES = parseExposedServices();
+
     @Mock
     private BlueprintService blueprintService;
 
@@ -93,8 +95,6 @@ public class OpdbServiceEndpointCollectorTest {
 
     @Mock
     private Workspace workspace;
-
-    private static final Map<String, ExposedService> EXPOSED_SERVICES = parseExposedServices();
 
     private static Map<String, ExposedService> parseExposedServices() {
         String rawJson;
@@ -145,19 +145,19 @@ public class OpdbServiceEndpointCollectorTest {
         // over what ServiceEndpointCollectorTest does is that this actually reads the real exposed-service.json
         // file to populate the data that the test uses.
         when(exposedServiceCollector.knoxServicesForComponents(any())).thenAnswer(new Answer<>() {
-          @Override
-          public Collection<ExposedService> answer(InvocationOnMock invocation) throws Throwable {
-            @SuppressWarnings("unchecked")
-            Collection<String> components = (Collection<String>) invocation.getArgument(0);
-            Collection<ExposedService> services = filterSupportedKnoxServices();
-            return services.stream().filter(exposedService -> components.contains(exposedService.getServiceName()))
-                .collect(Collectors.toList());
-          }
+            @Override
+            public Collection<ExposedService> answer(InvocationOnMock invocation) throws Throwable {
+                @SuppressWarnings("unchecked")
+                Collection<String> components = (Collection<String>) invocation.getArgument(0);
+                Collection<ExposedService> services = filterSupportedKnoxServices();
+                return services.stream().filter(exposedService -> components.contains(exposedService.getServiceName()))
+                    .collect(Collectors.toList());
+            }
         });
     }
 
     Collection<ExposedService> filterSupportedKnoxServices() {
-      return EXPOSED_SERVICES.values();
+        return EXPOSED_SERVICES.values();
     }
 
     private void mockTemplateComponents() {
