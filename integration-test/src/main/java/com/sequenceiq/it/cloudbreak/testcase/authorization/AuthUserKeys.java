@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
 public class AuthUserKeys {
 
-    public static final String BASE_USER = "CB-AccountAdmin";
+    public static final String ACCOUNT_ADMIN = "CB-AccountAdmin";
 
     public static final String MGMT_CONSOLE_ADMIN_A = "CB-Machine-MgmtConsoleUserA";
 
