@@ -1,5 +1,9 @@
 server.servlet.context-path: "/as"
 
+audit:
+  service:
+    enabled: false
+
 opentracing:
   jaeger:
     log-spans: false

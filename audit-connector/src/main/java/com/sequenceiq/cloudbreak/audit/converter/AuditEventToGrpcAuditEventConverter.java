@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.audit.AuditProto;
+import com.google.common.base.CaseFormat;
 import com.sequenceiq.cloudbreak.audit.model.ActorBase;
 import com.sequenceiq.cloudbreak.audit.model.ActorCrn;
 import com.sequenceiq.cloudbreak.audit.model.ActorService;
@@ -35,10 +36,15 @@ public class AuditEventToGrpcAuditEventConverter {
                 .setTimestamp(System.currentTimeMillis())
                 .setAccountId(source.getAccountId())
                 .setRequestId(requestId)
-                .setEventName(source.getEventName().name())
+                .setEventName(formatAuditEventName(source))
                 .setEventSource(source.getEventSource().getName());
         doIfTrue(source.getSourceIp(), StringUtils::isNotEmpty, builder::setSourceIPAddress);
         return builder;
+    }
+
+    private String formatAuditEventName(AuditEvent source) {
+        String camelCaseFormat = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, source.getEventName().name());
+        return StringUtils.capitalize(camelCaseFormat);
     }
 
     private void updateAuditEventActor(AuditProto.AuditEvent.Builder auditEventBuilder, ActorBase actorBase) {
