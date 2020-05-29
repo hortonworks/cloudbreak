@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.view;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.IGW;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC_CIDR;
+import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC_CIDRS;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -98,6 +99,26 @@ public class AwsNetworkViewTest {
         assertNull(underTest.getExistingSubnet());
         assertFalse(underTest.isSubnetList());
         assertEquals(List.of(), underTest.getSubnetList());
+    }
+
+    @Test
+    public void testMultipleSubnetCidr() {
+        when(network.getParameter(VPC_CIDRS, List.class)).thenReturn(List.of("1.1.1.1", "2.2.2.2"));
+        assertTrue(underTest.getExistingVpcCidrs().containsAll(List.of("1.1.1.1", "2.2.2.2")));
+    }
+
+    @Test
+    public void testMultipleSubnetCidrNull() {
+        when(network.getParameter(VPC_CIDRS, List.class)).thenReturn(null);
+        when(network.getStringParameter(VPC_CIDR)).thenReturn("1.1.1.1");
+        assertTrue(underTest.getExistingVpcCidrs().contains("1.1.1.1"));
+    }
+
+    @Test
+    public void testMultipleSubnetCidrEmpty() {
+        when(network.getParameter(VPC_CIDRS, List.class)).thenReturn(List.of());
+        when(network.getStringParameter(VPC_CIDR)).thenReturn("1.1.1.1");
+        assertTrue(underTest.getExistingVpcCidrs().contains("1.1.1.1"));
     }
 
 }
