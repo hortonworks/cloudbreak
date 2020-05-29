@@ -283,8 +283,13 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     case AZURE:
                         groupMappings = azureMockAccountMappingService.getGroupMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
                                 credential, virtualGroup);
-                        userMappings = azureMockAccountMappingService.getUserMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
-                                credential);
+                        if (source.getCluster() != null && source.getCluster().isRangerRazEnabled()) {
+                            userMappings = azureMockAccountMappingService.getUserMappingsWithRaz(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
+                                    credential);
+                        } else {
+                            userMappings = azureMockAccountMappingService.getUserMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
+                                    credential);
+                        }
                         break;
                     default:
                         return;

@@ -23,6 +23,11 @@ public class AzureMockAccountMappingService {
             .map(user -> Map.entry(user, FIXED_MANAGED_IDENTITY))
             .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
 
+    private static final Map<String, String> MOCK_IDBROKER_USER_MAPPINGS_WITH_RAZ = AccountMappingSubject.DATA_ACCESS_RANGER_AUDIT_RANGER_RAZ_USERS
+            .stream()
+            .map(user -> Map.entry(user, FIXED_MANAGED_IDENTITY))
+            .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
+
     public Map<String, String> getGroupMappings(String resourceGroup, Credential credential, String adminGroupName) {
         String subscriptionId = credential.getAzure().getSubscriptionId();
         if (StringUtils.isNotEmpty(adminGroupName)) {
@@ -35,6 +40,11 @@ public class AzureMockAccountMappingService {
     public Map<String, String> getUserMappings(String resourceGroup, Credential credential) {
         String subscriptionId = credential.getAzure().getSubscriptionId();
         return replacePlaceholders(MOCK_IDBROKER_USER_MAPPINGS, resourceGroup, subscriptionId);
+    }
+
+    public Map<String, String> getUserMappingsWithRaz(String resourceGroup, Credential credential) {
+        String subscriptionId = credential.getAzure().getSubscriptionId();
+        return replacePlaceholders(MOCK_IDBROKER_USER_MAPPINGS_WITH_RAZ, resourceGroup, subscriptionId);
     }
 
     private Map<String, String> replacePlaceholders(Map<String, String> mappings, String resourceGroup, String subscriptionId) {
