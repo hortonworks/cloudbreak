@@ -66,6 +66,7 @@ base:
     - gateway.ldap
     - gateway.settings
     - monitoring.init
+    - postgresql.disaster_recovery
 
   'roles:knox_gateway':
     - match: grain
