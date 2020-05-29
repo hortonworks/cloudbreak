@@ -30,7 +30,7 @@ public class CredentialCreateTest extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.BASE_USER);
+        useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
         useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_B);
         useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
     }
@@ -41,7 +41,7 @@ public class CredentialCreateTest extends AbstractIntegrationTest {
             when = "a create credential request is sent with no region in it",
             then = "a credential should be created")
     public void testCreateCredentialWithAccountAdmin(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.BASE_USER);
+        useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
