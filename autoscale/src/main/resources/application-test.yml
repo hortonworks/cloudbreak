@@ -3,6 +3,9 @@ server.servlet.context-path: "/as"
 opentracing:
   jaeger:
     log-spans: false
+audit:
+  service:
+    enabled: false
 
 management:
   endpoints:

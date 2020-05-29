@@ -27,6 +27,9 @@ management:
       percentiles:
         "[http.server.requests]": "0.5, 0.95"
 
+audit:
+  service:
+    enabled: false
 
 freeipa:
   cert.dir: /certs/

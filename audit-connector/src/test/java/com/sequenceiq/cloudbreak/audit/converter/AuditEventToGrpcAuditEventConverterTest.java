@@ -28,7 +28,7 @@ class AuditEventToGrpcAuditEventConverterTest {
 
     private static final String SOURCE_IP = "1.2.3.4";
 
-    private static final String EVENT_NAME = "DATAHUB_CLUSTER_CREATION";
+    private static final String EVENT_NAME = "CreateDatahubCluster";
 
     private static final String EVENT_SOURCE = "environments";
 
@@ -161,7 +161,7 @@ class AuditEventToGrpcAuditEventConverterTest {
                 .withId(UUID_ID)
                 .withAccountId(ACCOUNT_ID)
                 .withRequestId(REQUEST_ID)
-                .withEventName(AuditEventName.DATAHUB_CLUSTER_CREATION)
+                .withEventName(AuditEventName.CREATE_DATAHUB_CLUSTER)
                 .withEventSource(Crn.Service.ENVIRONMENTS)
                 .withSourceIp(SOURCE_IP)
                 .withActor(actor)
@@ -172,7 +172,7 @@ class AuditEventToGrpcAuditEventConverterTest {
     private AuditEvent makeMinimalAuditEvent(ActorBase actor, EventData eventData) {
         return AuditEvent.builder()
                 .withAccountId(ACCOUNT_ID)
-                .withEventName(AuditEventName.DATAHUB_CLUSTER_CREATION)
+                .withEventName(AuditEventName.CREATE_DATAHUB_CLUSTER)
                 .withEventSource(Crn.Service.ENVIRONMENTS)
                 .withActor(actor)
                 .withEventData(eventData)

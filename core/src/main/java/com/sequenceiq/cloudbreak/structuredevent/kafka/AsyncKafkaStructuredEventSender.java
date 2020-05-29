@@ -4,10 +4,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.conf.StructuredEventSenderConfig;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventSenderService;
+import com.sequenceiq.cloudbreak.structuredevent.conf.StructuredEventEnablementConfig;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -18,7 +18,7 @@ public class AsyncKafkaStructuredEventSender implements StructuredEventSenderSer
     public static final String KAFKA_EVENT_LOG_MESSAGE = "KAFKA_EVENT_LOG_MESSAGE";
 
     @Inject
-    private StructuredEventSenderConfig structuredEventSenderConfig;
+    private StructuredEventEnablementConfig structuredEventEnablementConfig;
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
@@ -28,7 +28,7 @@ public class AsyncKafkaStructuredEventSender implements StructuredEventSenderSer
 
     @Override
     public boolean isEnabled() {
-        return structuredEventSenderConfig.isKafkaConfigured();
+        return structuredEventEnablementConfig.isKafkaConfigured();
     }
 
     @Override

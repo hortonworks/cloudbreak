@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
@@ -233,7 +234,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         }
         Long id = getResponse().getId();
 
-        return "DistroX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), "stacks", id, null);
+        return "DistroX audit events: "
+                + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), CloudbreakEventService.DATAHUB_RESOURCE_TYPE, id, null);
     }
 
     @Override

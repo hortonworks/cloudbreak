@@ -19,6 +19,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
@@ -43,8 +44,8 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
     @Parameters(name = "Current StructuredNotificationEvent {0}, and the following fields should be skipped on null check: {1}")
     public static Object[][] data() {
-        OperationDetails operation = new OperationDetails(Calendar.getInstance().getTimeInMillis(), NOTIFICATION, "stacks", 1L,
-                "usagestack", "cbId", "cbVersion", 1L, "horton@hortonworks.com", "Alma Ur", "tenant", "crn");
+        OperationDetails operation = new OperationDetails(Calendar.getInstance().getTimeInMillis(), NOTIFICATION, CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
+                1L, "usagestack", "cbId", "cbVersion", 1L, "horton@hortonworks.com", "Alma Ur", "tenant", "crn", "userCrn", "environemntCrn", "resourceEvent");
         return new Object[][]{
                 {new StructuredNotificationEvent(operation, TestUtil.notificationDetails(MESSAGE, TYPE)), List.of("ldapDetails", "rdsDetails")},
                 {new StructuredNotificationEvent(operation, TestUtil.ldapNotificationDetails(MESSAGE, TYPE)), getFieldNamesExcept(List.of("ldapDetails"))},

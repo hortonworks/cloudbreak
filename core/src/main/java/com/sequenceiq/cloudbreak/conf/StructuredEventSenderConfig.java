@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.conf;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,28 +17,6 @@ public class StructuredEventSenderConfig {
 
     @Value("${cb.kafka.bootstrap.servers:}")
     private String bootstrapServers;
-
-    @Value("${cb.audit.filepath:}")
-    private String auditFilePath;
-
-    @Value("${cb.kafka.structured.events.topic:StructuredEvents}")
-    private String structuredEventsTopic;
-
-    public boolean isKafkaConfigured() {
-        return StringUtils.isNotEmpty(bootstrapServers);
-    }
-
-    public boolean isFilePathConfigured() {
-        return StringUtils.isNotEmpty(auditFilePath);
-    }
-
-    public String getAuditFilePath() {
-        return auditFilePath;
-    }
-
-    public String getStructuredEventsTopic() {
-        return structuredEventsTopic;
-    }
 
     @Bean
     public Map<String, Object> kafkaProducerConfigs() {

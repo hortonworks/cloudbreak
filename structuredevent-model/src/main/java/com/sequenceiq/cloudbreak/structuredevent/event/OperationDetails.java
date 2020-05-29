@@ -40,11 +40,18 @@ public class OperationDetails implements Serializable {
 
     private String uuid;
 
+    private String userCrn;
+
+    private String environmentCrn;
+
+    private String resourceEvent;
+
     public OperationDetails() {
     }
 
     public OperationDetails(Long timestamp, StructuredEventType eventType, String resourceType, Long resourceId, String resourceName, String cloudbreakId,
-            String cloudbreakVersion, Long workspaceId, String userId, String userName, String tenant, String resourceCrn) {
+            String cloudbreakVersion, Long workspaceId, String userId, String userName, String tenant, String resourceCrn, String userCrn,
+            String environmentCrn, String resourceEvent) {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.resourceId = resourceId;
@@ -57,6 +64,9 @@ public class OperationDetails implements Serializable {
         this.userName = userName;
         this.tenant = tenant;
         this.resourceCrn = resourceCrn;
+        this.userCrn = userCrn;
+        this.environmentCrn = environmentCrn;
+        this.resourceEvent = resourceEvent;
         uuid = UUID.randomUUID().toString();
     }
 
@@ -170,5 +180,29 @@ public class OperationDetails implements Serializable {
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
+    }
+
+    public String getUserCrn() {
+        return userCrn;
+    }
+
+    public void setUserCrn(String userCrn) {
+        this.userCrn = userCrn;
+    }
+
+    public String getEnvironmentCrn() {
+        return environmentCrn;
+    }
+
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
+    }
+
+    public String getResourceEvent() {
+        return resourceEvent;
+    }
+
+    public void setResourceEvent(String resourceEvent) {
+        this.resourceEvent = resourceEvent;
     }
 }
