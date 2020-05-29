@@ -13,14 +13,14 @@ if [ $# -ne 5 ]; then
   echo "Invalid inputs provided"
   echo "Script accepts 5 inputs:"
   echo "  1. Cloud Provider (azure | aws)"
-  echo "  2. Object Storage Service url to retrieve backups."
+  echo "  2. Object Storage Service url to place backups."
   echo "  3. PostgreSQL host name."
   echo "  4. PostgreSQL port."
   echo "  5. PostgreSQL user name."
   exit 1
 fi
 
-CLOUD_PROVIDER="$1"
+CLOUD_PROVIDER=$(echo "$1" | tr '[:upper:]' '[:lower:]')
 BACKUP_LOCATION=$(echo "$2" | sed 's/\/\+$//g') # Clear trailng '/' (if present) for later path joining.
 HOST="$3"
 PORT="$4"
@@ -31,7 +31,7 @@ LOGFILE=/var/log/dl_postgres_backup.log
 echo "Logs at ${LOGFILE}"
 
 doLog() {
-  type_of_msg=$(echo $* | cut -d" " -f1)
+  type_of_msg=$(echo "$@" | cut -d" " -f1)
   msg=$(echo "$*" | cut -d" " -f2-)
   [[ $type_of_msg == INFO ]] && type_of_msg="INFO " # one space for aligning
   [[ $type_of_msg == WARN ]] && type_of_msg="WARN " # as well
