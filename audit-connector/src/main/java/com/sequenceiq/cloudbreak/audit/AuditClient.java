@@ -94,6 +94,7 @@ public class AuditClient {
     public void createAuditEvent(AuditEvent auditEvent) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             String actorCrn = actorUtil.getActorCrn(auditEvent.getActor());
+            LOGGER.info("Audit log entry will be created: {}", auditEvent);
             AuditProto.AuditEvent protoAuditEvent = auditEventConverter.convert(auditEvent);
             newStub(channelWrapper.getChannel(), protoAuditEvent.getRequestId(), actorCrn)
                     .createAuditEvent(CreateAuditEventRequest.newBuilder()

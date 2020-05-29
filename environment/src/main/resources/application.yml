@@ -6,6 +6,10 @@ opentracing:
   jaeger:
     log-spans: false
 
+audit:
+  service:
+    enabled: false
+
 management:
   endpoints:
     web:

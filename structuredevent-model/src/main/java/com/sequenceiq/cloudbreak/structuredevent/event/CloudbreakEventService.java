@@ -10,6 +10,10 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 public interface CloudbreakEventService {
 
+    String DATAHUB_RESOURCE_TYPE = "datahub";
+
+    String DATALAKE_RESOURCE_TYPE = "datalake";
+
     void fireCloudbreakEvent(Long entityId, String eventType, ResourceEvent resourceEvent);
 
     void fireCloudbreakEvent(Long entityId, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs);
@@ -21,5 +25,5 @@ public interface CloudbreakEventService {
 
     List<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId);
 
-    Page<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId, Pageable pageable);
+    Page<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId, String stackType, Pageable pageable);
 }

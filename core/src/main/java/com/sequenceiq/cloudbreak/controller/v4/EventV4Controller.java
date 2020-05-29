@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEven
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Responses;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -56,12 +57,13 @@ public class EventV4Controller implements EventV4Endpoint {
     @Override
     public Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(String name, Integer page, Integer size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
-        return cloudbreakEventsFacade.retrieveEventsByStack(getStackIdIfAvailable(name), pageable);
+        StackView stackView = getStackViewIfAvailable(name);
+        return cloudbreakEventsFacade.retrieveEventsByStack(stackView.getId(), stackView.getType(), pageable);
     }
 
-    private Long getStackIdIfAvailable(String name) {
+    private StackView getStackViewIfAvailable(String name) {
         Long workspaceId = workspaceService.getForCurrentUser().getId();
-        return Optional.ofNullable(stackService.getIdByNameInWorkspace(name, workspaceId)).orElseThrow(notFound("stack", name));
+        return Optional.ofNullable(stackService.getViewByNameInWorkspace(name, workspaceId)).orElseThrow(notFound("stack", name));
     }
 
     @Override
