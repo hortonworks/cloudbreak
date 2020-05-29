@@ -242,11 +242,11 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             if (prewarmed) {
                 refreshParcelRepos(clouderaManagerResourceApi);
             }
+            clouderaManagerConfigService.setCdpEnvironmentIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_0_2, apiClient, clientConfig);
             installCluster(cluster, apiClusterTemplate, clouderaManagerResourceApi, prewarmed);
             clouderaManagerMgmtLaunchService.startManagementServices(stack, apiClient);
             clouderaManagerYarnSetupService.suppressWarnings(stack, apiClient);
             configureKerberos(kerberosConfig, clouderaManagerRepoDetails);
-            clouderaManagerConfigService.setCdpEnvironmentIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_0_2, apiClient, clientConfig);
         } catch (CancellationException cancellationException) {
             throw cancellationException;
         } catch (ApiException e) {
