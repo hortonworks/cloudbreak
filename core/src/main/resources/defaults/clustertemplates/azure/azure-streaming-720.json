@@ -2,11 +2,14 @@
   "name": "7.2.0 - Streams Messaging Heavy Duty for Azure",
   "description": "",
   "type": "STREAMING",
-  "cloudPlatform": "AZURE",
   "featureState": "PREVIEW",
+  "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
       "blueprintName": "7.2.0 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager"
+    },
+    "externalDatabase": {
+      "availabilityType": "HA"
     },
     "instanceGroups": [
       {
@@ -26,18 +29,46 @@
         "recoveryMode": "MANUAL"
       },
       {
-        "name": "quorum",
+        "name": "registry",
         "template": {
-          "instanceType": "Standard_D8_v3",
           "attachedVolumes": [
             {
               "count": 1,
               "size": 100,
-              "type": "StandardSSD_LRS"
+              "type": "Standard_LRS"
             }
-          ]
+          ],
+          "azure": {
+            "manageDisk": true
+          },
+          "instanceType": "Standard_D8_v3",
+          "rootVolume": {
+            "size": 50
+          }
         },
-        "nodeCount": 3,
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "smm",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "Standard_LRS"
+            }
+          ],
+          "azure": {
+            "manageDisk": true
+          },
+          "instanceType": "Standard_D8_v3",
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 1,
         "type": "CORE",
         "recoveryMode": "MANUAL"
       },
@@ -47,8 +78,8 @@
           "instanceType": "Standard_D8_v3",
           "attachedVolumes": [
             {
-              "count": 1,
-              "size": 1000,
+              "count": 2,
+              "size": 500,
               "type": "StandardSSD_LRS"
             }
           ]

@@ -2,11 +2,14 @@
   "name": "7.2.0 - Streams Messaging Heavy Duty for AWS",
   "description": "",
   "type": "STREAMING",
-  "cloudPlatform": "AWS",
   "featureState": "PREVIEW",
+  "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
       "blueprintName": "7.2.0 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager"
+    },
+    "externalDatabase": {
+      "availabilityType": "HA"
     },
     "instanceGroups": [
       {
@@ -29,9 +32,8 @@
         "recoveryMode": "MANUAL"
       },
       {
-        "name": "quorum",
+        "name": "registry",
         "template": {
-          "instanceType": "m5.2xlarge",
           "attachedVolumes": [
             {
               "count": 1,
@@ -39,11 +41,41 @@
               "type": "standard"
             }
           ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge",
           "rootVolume": {
             "size": 50
           }
         },
-        "nodeCount": 3,
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "smm",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge",
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 1,
         "type": "CORE",
         "recoveryMode": "MANUAL"
       },
@@ -55,7 +87,7 @@
             {
               "count": 1,
               "size": 1000,
-              "type": "st1"
+              "type": "gp2"
             }
           ],
           "rootVolume": {
