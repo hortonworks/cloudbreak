@@ -8,6 +8,9 @@
     "cluster": {
       "blueprintName": "7.2.0 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager"
     },
+    "externalDatabase": {
+      "availabilityType": "NON_HA"
+    },
     "instanceGroups": [
       {
         "name": "master",
@@ -32,8 +35,8 @@
           "attachedVolumes": [
             {
               "count": 1,
-              "size": 500,
-              "type": "StandardSSD_LRS"
+              "size": 1000,
+              "type": "Standard_LRS"
             }
           ]
         },

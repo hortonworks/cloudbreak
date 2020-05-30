@@ -651,6 +651,10 @@
                 {% for hostloc in salt['pillar.get']('gateway:location')['SCHEMA_REGISTRY_SERVER'] -%}
                 <url>{{ protocol }}://{{ hostloc }}:{{ ports['SCHEMA-REGISTRY'] }}</url>
                 {%- endfor %}
+                <param>
+                    <name>replayBufferSize</name>
+                    <value>512</value>
+                </param>
             </service>
         {%- endif %}
      {%- endif %}
