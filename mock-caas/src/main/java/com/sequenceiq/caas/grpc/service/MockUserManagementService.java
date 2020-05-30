@@ -232,6 +232,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.runtime.upgrade.enable}")
     private boolean runtimeUpgradeEnabled;
 
+    @Value("${auth.mock.raz.enable}")
+    private boolean razEnabled;
+
     private String cbLicense;
 
     private AltusCredential telemetyPublisherCredential;
@@ -482,6 +485,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (runtimeUpgradeEnabled) {
             builder.addEntitlements(createEntitlement(RUNTIME_UPGRADE));
         }
+        if (razEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_RAZ_ENABLEMENT));
+        }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
                         .setAccount(builder
@@ -491,7 +497,6 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_AUTOMATIC_USERSYNC_POLLER))
                                 .addEntitlements(createEntitlement(CLOUDERA_INTERNAL_ACCOUNT))
                                 .addEntitlements(createEntitlement(LOCAL_DEV))
-                                .addEntitlements(createEntitlement(CDP_RAZ_ENABLEMENT))
                                 .setPasswordPolicy(workloadPasswordPolicy)
                                 .build())
                         .build());
