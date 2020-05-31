@@ -35,11 +35,14 @@ public class RangerRazConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public Map<String, ApiClusterTemplateService> getAdditionalServices(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        ApiClusterTemplateService coreSettings = createTemplate();
-        Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
-        return hostgroupViews.stream()
-                .filter(hg -> InstanceGroupType.CORE.equals(hg.getInstanceGroupType()))
-                .collect(Collectors.toMap(HostgroupView::getName, v -> coreSettings));
+        if (isConfigurationNeeded(cmTemplateProcessor, source)) {
+            ApiClusterTemplateService coreSettings = createTemplate();
+            Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
+            return hostgroupViews.stream()
+                    .filter(hg -> InstanceGroupType.CORE.equals(hg.getInstanceGroupType()))
+                    .collect(Collectors.toMap(HostgroupView::getName, v -> coreSettings));
+        }
+        return Map.of();
     }
 
     @Override
