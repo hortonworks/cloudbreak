@@ -28,6 +28,9 @@ public class AutoscaleClusterResponse extends ClusterBaseJson {
     @ApiModelProperty(ClusterJsonsProperties.PROMETHEUS_ALERTS)
     private List<PrometheusAlertResponse> prometheusAlerts;
 
+    @ApiModelProperty(ClusterJsonsProperties.LOAD_ALERTS)
+    private List<LoadAlertResponse> loadAlerts;
+
     @ApiModelProperty(ClusterJsonsProperties.SCALING_CONFIGURATION)
     private ScalingConfigurationRequest scalingConfiguration;
 
@@ -87,6 +90,14 @@ public class AutoscaleClusterResponse extends ClusterBaseJson {
 
     public void setPrometheusAlerts(List<PrometheusAlertResponse> prometheusAlerts) {
         this.prometheusAlerts = prometheusAlerts;
+    }
+
+    public List<LoadAlertResponse> getLoadAlerts() {
+        return loadAlerts;
+    }
+
+    public void setLoadAlerts(List<LoadAlertResponse> loadAlerts) {
+        this.loadAlerts = loadAlerts;
     }
 
     public ScalingConfigurationRequest getScalingConfiguration() {

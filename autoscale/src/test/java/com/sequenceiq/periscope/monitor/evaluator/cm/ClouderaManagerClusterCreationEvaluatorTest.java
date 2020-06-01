@@ -28,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -106,7 +107,6 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
         Cluster cluster = getCluster(SUSPENDED);
         History history = new History();
         StackV4Response stack = new StackV4Response();
-
         setUpMocks(cluster, true, stack, history);
 
         underTest.execute();
@@ -180,7 +180,7 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
 
         verify(clusterService).findOneByStackId(STACK_ID);
         verify(clusterService).validateClusterUniqueness(any());
-        verify(clusterService).create(any(MonitoredStack.class), eq(RUNNING), captor.capture());
+        verify(clusterService).create(any(MonitoredStack.class), eq(PENDING), captor.capture());
         ClusterPertain clusterPertain = captor.getValue();
         assertThat(clusterPertain.getTenant(), is("TENANT"));
         assertThat(clusterPertain.getWorkspaceId(), is(10L));
@@ -199,7 +199,7 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
         when(evaluatorContext.getData()).thenReturn(stack);
         when(securityConfigService.getSecurityConfig(anyLong())).thenReturn(new SecurityConfig());
         when(clusterService.findOneByStackId(anyLong())).thenReturn(cluster);
-        when(requestLogging.logging(any(), any())).thenReturn(healthy);
+        when(requestLogging.logResponseTime(any(), any())).thenReturn(healthy);
         if (cluster != null) {
             when(historyService.createEntry(any(), anyString(), anyInt(), any(Cluster.class))).thenReturn(history);
         }
@@ -218,6 +218,7 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
         stack.setTenant("TENANT");
         stack.setWorkspaceId(10L);
         stack.setUserId("USER_ID");
+        stack.setClusterStatus(Status.AVAILABLE);
         return stack;
     }
 

@@ -17,11 +17,19 @@ public class ClusterBaseJson implements Json {
     @ApiModelProperty(ClusterJsonsProperties.USERNAME)
     private String user;
 
+    @ApiModelProperty(ClusterJsonsProperties.STACK_NAME)
+    private String stackName;
+
     @NotNull
     @ApiModelProperty(ClusterJsonsProperties.STACK_CRN)
     private String stackCrn;
 
     public ClusterBaseJson() {
+    }
+
+    public ClusterBaseJson(String stackCrn, String stackName) {
+        this.stackCrn = stackCrn;
+        this.stackName = stackName;
     }
 
     public ClusterBaseJson(String host, String port, String user, String stackCrn) {
@@ -63,4 +71,11 @@ public class ClusterBaseJson implements Json {
         this.stackCrn = stackCrn;
     }
 
+    public String getStackName() {
+        return stackName;
+    }
+
+    public void setStackName(String stackName) {
+        this.stackName = stackName;
+    }
 }
