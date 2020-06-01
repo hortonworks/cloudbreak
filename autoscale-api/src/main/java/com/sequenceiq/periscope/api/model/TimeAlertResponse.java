@@ -19,10 +19,7 @@ public class TimeAlertResponse extends AbstractAlertJson {
     private String cron;
 
     @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
-    private Long scalingPolicyId;
-
-    @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
-    private ScalingPolicyRequest scalingPolicy;
+    private ScalingPolicyResponse scalingPolicy;
 
     public String getTimeZone() {
         return timeZone;
@@ -48,19 +45,11 @@ public class TimeAlertResponse extends AbstractAlertJson {
         this.id = id;
     }
 
-    public Long getScalingPolicyId() {
-        return scalingPolicyId;
-    }
-
-    public void setScalingPolicyId(Long scalingPolicyId) {
-        this.scalingPolicyId = scalingPolicyId;
-    }
-
-    public ScalingPolicyRequest getScalingPolicy() {
+    public ScalingPolicyResponse getScalingPolicy() {
         return scalingPolicy;
     }
 
-    public void setScalingPolicy(ScalingPolicyRequest scalingPolicy) {
+    public void setScalingPolicy(ScalingPolicyResponse scalingPolicy) {
         this.scalingPolicy = scalingPolicy;
     }
 }

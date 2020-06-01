@@ -1,0 +1,95 @@
+server.servlet.context-path: "/as"
+
+opentracing:
+  jaeger:
+    log-spans: false
+
+management:
+  endpoints:
+    web:
+      base-path: "/"
+      exposure:
+        include: info,health,prometheus,metrics
+      path-mapping:
+        prometheus: metrics
+  endpoint:
+    metrics:
+      enabled: true
+      export:
+        prometheus:
+          enabled: true
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+  metrics:
+    distribution:
+      sla:
+        "[http.server.requests]": "125ms, 250ms, 500ms, 1s, 2s"
+      percentiles:
+        "[http.server.requests]": "0.5, 0.95"
+
+periscope:
+  cert:
+    dir: /certs/
+
+  db:
+    enabled: false
+#    env:
+#      user: postgres
+#      pass:
+#      db: periscopedb
+#      schema: public
+#      cert.file: database.crt
+#      ssl: false
+#    port.5432.tcp:
+#      addr: localhost
+#      port: 5432
+  cloudbreak.url: http://localhost:9091
+  entitlementCheckEnabled: false
+  enabledAutoscaleMonitors:
+    time-monitor:
+      enabled: true
+    load-monitor:
+      enabled: true
+    cluster-manager-host-health-monitor:
+      enabled: true
+    prometheus-monitor:
+      enabled: false
+
+cb:
+  server:
+    contextPath: "/cb"
+  schema:
+    migration:
+      auto: false
+
+rest:
+  debug: false
+
+cert:
+  validation: true
+  ignorePreValidation: false
+
+spring:
+  cloud:
+    consul:
+      host: consul.service.consul
+  freemarker:
+    template-loader-path: classpath:/
+    prefer-file-system-access: false
+  datasource:
+    maxActive: 30
+  profiles: test
+
+secret:
+  application: as/shared
+  engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
+
+vault:
+  config.enabled: false
+
+altus:
+  ums:
+    host: localhost
+

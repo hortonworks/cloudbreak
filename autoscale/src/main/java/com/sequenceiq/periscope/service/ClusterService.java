@@ -7,6 +7,7 @@ import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
@@ -17,6 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -27,13 +31,14 @@ import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.MonitoredStack;
+import com.sequenceiq.periscope.repository.ClusterPertainRepository;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
 @Service
-public class ClusterService {
+public class ClusterService implements ResourceBasedCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterService.class);
 
@@ -45,6 +50,9 @@ public class ClusterService {
 
     @Inject
     private SecurityConfigRepository securityConfigRepository;
+
+    @Inject
+    private ClusterPertainRepository clusterPertainRepository;
 
     @Inject
     private AlertService alertService;
@@ -65,14 +73,23 @@ public class ClusterService {
     }
 
     public Cluster create(Cluster cluster, ClusterPertain clusterPertain, MonitoredStack stack, ClusterState clusterState) {
-        cluster.setClusterPertain(clusterPertain);
+        cluster.setStackName(stack.getStackName());
         cluster.setClusterManager(stack.getClusterManager());
         cluster.setStackCrn(stack.getStackCrn());
         cluster.setStackId(stack.getStackId());
+        cluster.setStackType(stack.getStackType());
         cluster.setTunnel(stack.getTunnel());
+        if (stack.getCloudPlatform() != null) {
+            cluster.setCloudPlatform(stack.getCloudPlatform().toUpperCase());
+        }
         if (clusterState != null) {
             cluster.setState(clusterState);
         }
+
+        cluster.setClusterPertain(
+                clusterPertainRepository.findByUserCrn(clusterPertain.getUserCrn())
+                        .orElseGet(() -> clusterPertainRepository.save(clusterPertain)));
+
         cluster = save(cluster);
         if (stack.getSecurityConfig() != null) {
             SecurityConfig securityConfig = stack.getSecurityConfig();
@@ -92,6 +109,7 @@ public class ClusterService {
         ClusterState newState = clusterState != null ? clusterState : cluster.getState();
         cluster.setState(newState);
         cluster.setAutoscalingEnabled(enableAutoscaling);
+        cluster.setStackName(stack.getStackName());
         cluster.update(stack);
         SecurityConfig sSecConf = stack.getSecurityConfig();
         if (sSecConf != null) {
@@ -117,8 +135,24 @@ public class ClusterService {
         return clusterRepository.findByUserId(user.getUserId());
     }
 
+    public List<Cluster> findDistroXByWorkspace(Long workspaceId) {
+        return clusterRepository.findByWorkspaceIdAndStackType(workspaceId, StackType.WORKLOAD);
+    }
+
     public Cluster findOneByStackId(Long stackId) {
         return clusterRepository.findByStackId(stackId);
+    }
+
+    public Optional<Cluster> findOneByStackCrnAndWorkspaceId(String stackCrn, Long workspaceId) {
+        return  clusterRepository.findByStackCrnAndWorkspaceId(stackCrn, workspaceId);
+    }
+
+    public Optional<Cluster> findOneByStackNameAndWorkspaceId(String stackName, Long workspaceId) {
+        return  clusterRepository.findByStackNameAndWorkspaceId(stackName, workspaceId);
+    }
+
+    public Optional<Cluster> findOneByClusterIdAndWorkspaceId(Long clusterId, Long workspaceId) {
+        return  clusterRepository.findByClusterIdAndWorkspaceId(clusterId, workspaceId);
     }
 
     public Cluster save(Cluster cluster) {
@@ -159,18 +193,13 @@ public class ClusterService {
     public Cluster setState(Long clusterId, ClusterState state) {
         Cluster cluster = findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
-        addPrometheusAlertsToConsul(cluster);
-        return setState(cluster, state);
-    }
-
-    public Cluster setState(Cluster cluster, ClusterState state) {
         cluster.setState(state);
-        cluster = clusterRepository.save(cluster);
         calculateClusterStateMetrics();
-        return cluster;
+        addPrometheusAlertsToConsul(cluster);
+        return clusterRepository.save(cluster);
     }
 
-    public Cluster setAutoscaleState(Long clusterId, boolean enableAutoscaling) {
+    public Cluster setAutoscaleState(Long clusterId, Boolean enableAutoscaling) {
         Cluster cluster = findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
         cluster.setAutoscalingEnabled(enableAutoscaling);
@@ -180,12 +209,30 @@ public class ClusterService {
         return cluster;
     }
 
+    @Override
+    public AuthorizationResourceType getResourceType() {
+        return AuthorizationResourceType.DATAHUB;
+    }
+
+    public List<Cluster> findAllByPeriscopeNodeId(String nodeId) {
+        return clusterRepository.findAllByPeriscopeNodeId(nodeId);
+    }
+
     public List<Cluster> findAllByStateAndNode(ClusterState state, String nodeId) {
         return clusterRepository.findByStateAndPeriscopeNodeId(state, nodeId);
     }
 
     public List<Cluster> findAllForNode(ClusterState state, boolean autoscalingEnabled, String nodeId) {
         return clusterRepository.findByStateAndAutoscalingEnabledAndPeriscopeNodeId(state, autoscalingEnabled, nodeId);
+    }
+
+    public List<Cluster> findClustersByClusterIds(List<Long> clusterIds) {
+        return clusterRepository.findClustersByClusterIds(clusterIds);
+    }
+
+    public List<Long> findLoadAlertClustersForNode(StackType stackType, ClusterState state,
+            boolean autoscalingEnabled, String nodeId) {
+        return clusterRepository.findByLoadAlertAndStackTypeAndClusterStateAndAutoscaling(stackType, state, autoscalingEnabled, nodeId);
     }
 
     public void validateClusterUniqueness(MonitoredStack stack) {
@@ -203,6 +250,13 @@ public class ClusterService {
         if (clusterForTheSameStackAndClusterManager) {
             throw new BadRequestException("Cluster exists for the same Cloudbreak stack crn and " + stack.getClusterManager().getVariant().name() + " host.");
         }
+    }
+
+    public void deleteAlertsForCluster(Long clusterId) {
+        Cluster cluster = findById(clusterId);
+        cluster.getLoadAlerts().clear();
+        cluster.getTimeAlerts().clear();
+        save(cluster);
     }
 
     private void addPrometheusAlertsToConsul(Cluster cluster) {

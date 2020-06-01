@@ -21,7 +21,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
@@ -78,12 +77,6 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putCluster(String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
         clusterCommonService.put(crn, updateRequest);
-    }
-
-    @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
-    public StackV4Response getStackForAmbari(@Valid AmbariAddressV4Request json) {
-        return stackCommonService.getStackForAmbari(json);
     }
 
     @Override

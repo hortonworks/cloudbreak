@@ -38,5 +38,4 @@ public class TimeAlertRequestConverter extends AbstractConverter<TimeAlertReques
         }
         return json;
     }
-
 }
