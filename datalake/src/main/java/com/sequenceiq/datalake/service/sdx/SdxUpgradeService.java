@@ -219,8 +219,9 @@ public class SdxUpgradeService {
                 return sdxUpgradeFailed(sdxCluster, stackV4Response.getCluster().getStatusReason(), pollingMessage);
             } else {
                 if (FINISHED.equals(flowState)) {
-                    LOGGER.info("Flow finished, but stack hasn't been upgraded: {}", sdxCluster.getClusterName());
-                    return sdxUpgradeFailed(sdxCluster, "stack is in improper state", pollingMessage);
+                    String message = sdxStatusService.getShortStatusMessage(stackV4Response);
+                    LOGGER.info("Flow finished, but stack or cluster is  not available: {}", message);
+                    return sdxUpgradeFailed(sdxCluster, message, pollingMessage);
                 } else {
                     return AttemptResults.justContinue();
                 }
@@ -229,7 +230,7 @@ public class SdxUpgradeService {
     }
 
     private AttemptResult<StackV4Response> sdxUpgradeFailed(SdxCluster sdxCluster, String statusReason, String pollingMessage) {
-        LOGGER.info("{} failed, statusReason: {}", pollingMessage, statusReason);
+        LOGGER.info("{} failed: {}", pollingMessage, statusReason);
         return AttemptResults.breakFor("SDX " + pollingMessage + " failed '" + sdxCluster.getClusterName() + "', " + statusReason);
     }
 

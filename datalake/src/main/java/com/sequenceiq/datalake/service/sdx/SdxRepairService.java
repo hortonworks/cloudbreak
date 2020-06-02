@@ -158,8 +158,9 @@ public class SdxRepairService {
                 return sdxRepairFailed(sdxCluster, stackV4Response.getCluster().getStatusReason());
             } else {
                 if (FINISHED.equals(flowState)) {
-                    LOGGER.info("Flow finished, but stack hasn't repaired: {}", sdxCluster.getClusterName());
-                    return sdxRepairFailed(sdxCluster, "stack is in improper state");
+                    String message = sdxStatusService.getShortStatusMessage(stackV4Response);
+                    LOGGER.info("Repair flow finished, but stack or cluster is not available. {}", message);
+                    return sdxRepairFailed(sdxCluster, message);
                 } else {
                     return AttemptResults.justContinue();
                 }
@@ -168,7 +169,7 @@ public class SdxRepairService {
     }
 
     private AttemptResult<StackV4Response> sdxRepairFailed(SdxCluster sdxCluster, String statusReason) {
-        LOGGER.info("SDX repair failed, statusReason: " + statusReason);
+        LOGGER.info("SDX repair failed: " + statusReason);
         return AttemptResults.breakFor("SDX repair failed '" + sdxCluster.getClusterName() + "', " + statusReason);
     }
 

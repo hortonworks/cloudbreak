@@ -215,6 +215,12 @@
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
              {%- endif %}
+             {% if 'HBASEJARS' in exposed and 'MASTER' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                <name>HBASEJARS</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+             </param>
+             {%- endif %}
         </provider>
     </gateway>
 
@@ -446,4 +452,14 @@
     {%- endif %}
     {%- endif %}
 
+    {% if 'MASTER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'HBASEJARS' in exposed -%}
+    <service>
+        <role>HBASEJARS</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['MASTER'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['HBASEJARS'] }}/static/maven</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
 </topology>

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -143,5 +144,24 @@ public class SdxStatusService {
             DatalakeInMemoryStateStore.put(sdxCluster.getId(), PollGroup.POLLABLE);
             LOGGER.info("Update {} datalake status in inmemory store to {}", sdxCluster.getClusterName(), PollGroup.POLLABLE.name());
         }
+    }
+
+    public String getShortStatusMessage(StackV4Response stack) {
+        String stackStatus = stack.getStatus() == null ? "N/A" : stack.getStatus().name();
+        String stackStatusReason = stack.getStatusReason() == null ? "N/A" : stack.getStatusReason();
+        String clusterStatus;
+        if (stack.getCluster() == null || stack.getCluster().getStatus() == null) {
+            clusterStatus = "N/A";
+        } else {
+            clusterStatus = stack.getCluster().getStatus().name();
+        }
+        String clusterStatusReason;
+        if (stack.getCluster() == null || stack.getCluster().getStatusReason() == null) {
+            clusterStatusReason = "N/A";
+        } else {
+            clusterStatusReason = stack.getCluster().getStatusReason();
+        }
+        return String.format("Stack status: %s, reason: %s, cluster status: %s, reason: %s",
+                stackStatus, stackStatusReason, clusterStatus, clusterStatusReason);
     }
 }
