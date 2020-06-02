@@ -48,7 +48,11 @@ public class UserV1Controller implements UserV1Endpoint {
     private OperationToSyncOperationStatus operationToSyncOperationStatus;
 
     @Override
+<<<<<<< HEAD
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+=======
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+>>>>>>> rc-2.20
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
         String userCrn = checkUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -74,7 +78,11 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
+<<<<<<< HEAD
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+=======
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+>>>>>>> rc-2.20
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String userCrn = checkUserCrn();
         String accountId = determineAccountId(userCrn, request.getAccountId());
@@ -88,7 +96,11 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
+<<<<<<< HEAD
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+=======
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+>>>>>>> rc-2.20
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
         String userCrn = checkUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -100,7 +112,11 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
+<<<<<<< HEAD
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+=======
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
+>>>>>>> rc-2.20
     public SyncOperationStatus getSyncOperationStatus(@NotNull String operationId) {
         checkUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
