@@ -394,9 +394,10 @@ public class StackCreatorService {
             return null;
         }
         Set<Blueprint> blueprints = blueprintService.getAllAvailableInWorkspace(workspace);
+        String bpName = stackRequest.getCluster().getBlueprintName();
         return blueprints.stream()
-                .filter(cd -> cd.getName().equals(stackRequest.getCluster().getBlueprintName()))
-                .findFirst().orElseThrow(() -> new BadRequestException("Cluster definition not found!"));
+                .filter(cd -> cd.getName().equals(bpName))
+                .findFirst().orElseThrow(() -> new BadRequestException(String.format("Cluster definition with name %s not found!", bpName)));
     }
 
     private Future<StatedImage> determineImageCatalog(String stackName, String platformString, StackV4Request stackRequest, Blueprint blueprint,
