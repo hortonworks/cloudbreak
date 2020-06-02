@@ -1,5 +1,13 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
+import static com.sequenceiq.it.cloudbreak.assertion.distrox.DistroXExternalDatabaseAssertion.validateTemplateContainsExternalDatabaseHostname;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.testng.annotations.Test;
+
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -10,12 +18,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.externaldatabase.DistroXExternal
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.util.List;
-
-import static com.sequenceiq.it.cloudbreak.assertion.distrox.DistroXExternalDatabaseAssertion.validateTemplateContainsExternalDatabaseHostname;
+import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
 public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
 
@@ -35,6 +38,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
             when = "a valid DistroX create request is sent with encrypted discs",

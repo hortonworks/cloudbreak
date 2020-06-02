@@ -26,6 +26,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 
 public class DistroXImagesTests extends AbstractE2ETest {
@@ -53,6 +54,7 @@ public class DistroXImagesTests extends AbstractE2ETest {
 
     @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
     @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak",
             when = "a basic DistroX create request is sent",
@@ -74,6 +76,7 @@ public class DistroXImagesTests extends AbstractE2ETest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
             when = "a valid DistroX create request is sent (latest Base Image)",

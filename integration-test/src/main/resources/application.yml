@@ -70,6 +70,10 @@ integrationtest:
   cloudProvider: MOCK
   runtimeVersion: 7.2.0
 
+  spot:
+    enabledCloudPlatforms:
+      - AWS
+
   # aws parameters
   aws:
     region: eu-central-1

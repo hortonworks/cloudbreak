@@ -13,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -26,6 +27,7 @@ public class InternalSdxDistroxTest extends ImageValidatorE2ETest {
     private DistroXTestClient distroXTestClient;
 
     @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
     @Description(
             given = "a SDX internal request and a DistroX request",
             when = "a SDX internal create request is sent",

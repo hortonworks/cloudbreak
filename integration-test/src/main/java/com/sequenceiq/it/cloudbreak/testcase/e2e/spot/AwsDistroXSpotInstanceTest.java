@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.spot;
 
-import static org.testng.Assert.fail;
-
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -16,7 +14,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -27,16 +24,11 @@ public class AwsDistroXSpotInstanceTest extends AbstractE2ETest {
     private static final SpotTestResultProvider RESULT_PROVIDER = new SpotTestResultProvider("DistroX");
 
     @Inject
-    private CommonCloudProperties commonCloudProperties;
-
-    @Inject
     private DistroXTestClient distroXTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
-        if (!CloudPlatform.AWS.name().equals(commonCloudProperties.getCloudProvider())) {
-            fail(String.format("%s cloud provider is not supported for this test case!", commonCloudProperties.getCloudProvider()));
-        }
+        checkCloudPlatform(CloudPlatform.AWS);
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createEnvironmentWithNetworkAndFreeIPA(testContext);

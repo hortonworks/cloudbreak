@@ -13,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
 public class BasicEnvironmentTests extends AbstractE2ETest {
 
@@ -29,6 +30,7 @@ public class BasicEnvironmentTests extends AbstractE2ETest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
             when = "valid create environment request is sent, then a valid force delete request is sent",

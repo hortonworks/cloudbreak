@@ -13,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
 public class StackCreateTests extends AbstractE2ETest {
     @Inject
@@ -27,6 +28,7 @@ public class StackCreateTests extends AbstractE2ETest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
             when = "a valid stack create request is sent",

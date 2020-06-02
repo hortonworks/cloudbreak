@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.ITestResult;
 import org.testng.annotations.BeforeMethod;
 
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
@@ -81,8 +82,13 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     private AzureCloudBlobUtil azureCloudBlobUtil;
 
     @BeforeMethod
-    public final void minimalSetupForClusterCreation(Object[] data) {
+    public final void minimalSetupForClusterCreation(Object[] data, ITestResult testResult) {
+        setupTest(testResult);
         setupTest((TestContext) data[0]);
+    }
+
+    protected void setupTest(ITestResult testResult) {
+
     }
 
     protected void setupTest(TestContext testContext) {
