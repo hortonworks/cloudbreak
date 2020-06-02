@@ -212,6 +212,7 @@ public class ProvisionerService {
                             LOGGER.debug("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
                             ClusterV4Response cluster = stackV4Response.getCluster();
                             if (stackAndClusterAvailable(stackV4Response, cluster)) {
+                                LOGGER.info("Stack and cluster is available.");
                                 return AttemptResults.finishWith(stackV4Response);
                             } else {
                                 if (Status.CREATE_FAILED.equals(stackV4Response.getStatus())) {
@@ -221,12 +222,12 @@ public class ProvisionerService {
                                     LOGGER.info("Cluster creation failed {}", stackV4Response.getCluster().getName());
                                     return sdxCreationFailed(stackV4Response.getCluster().getStatusReason());
                                 } else {
+                                    String message = sdxStatusService.getShortStatusMessage(stackV4Response);
                                     if (FINISHED.equals(flowState)) {
-                                        LOGGER.warn("Flow finished but stack is in improper state! FlowState: {}, stackV4Response: {}",
-                                                flowState, JsonUtil.writeValueAsStringSilent(stackV4Response));
-                                        return sdxCreationFailed("Provisioning failed (" + stackV4Response.getStatus() +
-                                                "), reason: " + stackV4Response.getStatusReason());
+                                        LOGGER.warn("Cluster creation flow finished but stack or cluster is not available! {}", message);
+                                        return sdxCreationFailed(message);
                                     } else {
+                                        LOGGER.info("Cluster creation polling will continue, {}", message);
                                         return AttemptResults.justContinue();
                                     }
                                 }
