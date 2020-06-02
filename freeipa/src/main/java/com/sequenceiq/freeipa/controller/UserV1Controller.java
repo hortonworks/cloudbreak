@@ -57,7 +57,7 @@ public class UserV1Controller implements UserV1Endpoint {
     private EnvironmentUserSyncStateCalculator environmentUserSyncStateCalculator;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
         String userCrn = checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -83,7 +83,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String userCrn = checkActorCrn();
         String accountId = determineAccountId(userCrn, request.getAccountId());
@@ -97,7 +97,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
         String userCrn = checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -109,7 +109,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus getSyncOperationStatus(@NotNull String operationId) {
         checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
