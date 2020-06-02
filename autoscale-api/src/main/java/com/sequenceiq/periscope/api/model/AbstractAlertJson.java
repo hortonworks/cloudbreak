@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 public abstract class AbstractAlertJson implements Json {
 
     @Pattern(regexp = "(^[a-zA-Z][-a-zA-Z0-9]*$)",
-            message = "The name can only contain alphanumeric characters and hyphens and has start with an alphanumeric character")
+            message = "The name can only contain alphanumeric characters and hyphens and has to start with an alphabetic character")
     @ApiModelProperty(BaseAlertJsonProperties.ALERTNAME)
     private String alertName;
 
