@@ -47,7 +47,7 @@ public class UserV1Controller implements UserV1Endpoint {
     private OperationToSyncOperationStatus operationToSyncOperationStatus;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
         String userCrn = checkUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -73,7 +73,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String userCrn = checkUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -86,7 +86,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
         String userCrn = checkUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -98,7 +98,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
     public SyncOperationStatus getSyncOperationStatus(@NotNull String operationId) {
         checkUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
