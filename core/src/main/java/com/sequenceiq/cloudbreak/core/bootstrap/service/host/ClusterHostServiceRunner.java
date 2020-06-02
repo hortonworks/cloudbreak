@@ -112,6 +112,9 @@ public class ClusterHostServiceRunner {
     @Value("${cb.cm.missed.heartbeat.interval}")
     private String cmMissedHeartbeatInterval;
 
+    @Value("${cb.cm.kerberos.encryption.type}")
+    private String defaultKerberosEncryptionType;
+
     @Inject
     private StackService stackService;
 
@@ -294,6 +297,7 @@ public class ClusterHostServiceRunner {
                 putIfNotNull(kerberosPillarConf, properties.get("admin_server_host"), "adminUrl");
                 putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
             }
+            putIfNotNull(kerberosPillarConf, defaultKerberosEncryptionType, "encryptionType");
             putIfNotNull(kerberosPillarConf, kerberosConfig.getVerifyKdcTrust().toString(), "verifyKdcTrust");
             servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
         }

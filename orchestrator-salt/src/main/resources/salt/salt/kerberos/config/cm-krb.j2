@@ -4,3 +4,6 @@ setsettings SECURITY_REALM {{ salt['pillar.get']('kerberos:realm')|upper }}
 setsettings KDC_HOST {{ salt['pillar.get']('kerberos:url') }}
 setsettings KDC_ADMIN_HOST {{ salt['pillar.get']('kerberos:adminUrl') }}
 setsettings KDC_TYPE "Red Hat IPA"
+{%- if salt['pillar.get']('kerberos:encryptionType') %}
+setsettings KRB_ENC_TYPES {{ salt['pillar.get']('kerberos:encryptionType') }}
+{%- endif %}
