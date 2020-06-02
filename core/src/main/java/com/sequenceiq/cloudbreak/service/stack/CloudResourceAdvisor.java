@@ -78,10 +78,7 @@ public class CloudResourceAdvisor {
         LOGGER.debug("Advising resources for blueprintName: {}, provider: {} and region: {}.",
                 blueprintName, cloudPlatform, region);
 
-        Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
-        String blueprintText = blueprint.getBlueprintText();
-        BlueprintTextProcessor blueprintTextProcessor =
-                blueprintTextProcessorFactory.createBlueprintTextProcessor(blueprintText);
+        BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
         Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
         componentsByHostGroup.forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName,
                 isThereMasterComponents(blueprintTextProcessor.getClusterManagerType(), hGName, components)));
@@ -147,6 +144,20 @@ public class CloudResourceAdvisor {
         ResizeRecommendation resize = recommendResize(blueprintTextProcessor);
 
         return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes, instanceCounts, gateway, autoscale, resize);
+    }
+
+    public AutoscaleRecommendation getAutoscaleRecommendation(Long workspaceId, String blueprintName) {
+        LOGGER.debug("Autoscale advice for blueprintName: {}.", blueprintName);
+
+        BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
+
+        return recommendAutoscale(blueprintTextProcessor);
+    }
+
+    private BlueprintTextProcessor getBlueprintTextProcessor(Long workspaceId, String blueprintName) {
+        Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
+        String blueprintText = blueprint.getBlueprintText();
+        return blueprintTextProcessorFactory.createBlueprintTextProcessor(blueprintText);
     }
 
     private GatewayRecommendation recommendGateway(BlueprintTextProcessor blueprintTextProcessor) {

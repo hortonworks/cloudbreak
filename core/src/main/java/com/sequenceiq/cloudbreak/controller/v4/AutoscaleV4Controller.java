@@ -26,18 +26,22 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeFo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
@@ -66,6 +70,12 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
     private ClusterProxyService clusterProxyService;
+
+    @Inject
+    private ConverterUtil converterUtil;
+
+    @Inject
+    private BlueprintService blueprintService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
@@ -137,5 +147,14 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @PreAuthorize("hasRole('AUTOSCALE')")
     public ClusterProxyConfiguration getClusterProxyconfiguration() {
         return clusterProxyService.getClusterProxyConfigurationForAutoscale();
+    }
+
+    @Override
+    @DisableCheckPermissions
+    @PreAuthorize("hasRole('AUTOSCALE')")
+    public AutoscaleRecommendationV4Response getRecommendation(Long workspaceId, String blueprintName) {
+        AutoscaleRecommendation autoscaleRecommendation = blueprintService.getAutoscaleRecommendation(workspaceId, blueprintName);
+
+        return converterUtil.convert(autoscaleRecommendation, AutoscaleRecommendationV4Response.class);
     }
 }
