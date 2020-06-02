@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeFo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -97,4 +98,10 @@ public interface AutoscaleV4Endpoint {
     @Path("clusterproxy")
     @Produces(MediaType.APPLICATION_JSON)
     ClusterProxyConfiguration getClusterProxyconfiguration();
+
+    @GET
+    @Path("recommendation")
+    @Produces(MediaType.APPLICATION_JSON)
+    AutoscaleRecommendationV4Response getRecommendation(@QueryParam("workspaceId") Long workspaceId,
+                                                        @QueryParam("blueprintName") String blueprintName);
 }
