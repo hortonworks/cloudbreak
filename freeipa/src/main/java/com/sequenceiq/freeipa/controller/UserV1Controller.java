@@ -5,17 +5,17 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -48,11 +48,7 @@ public class UserV1Controller implements UserV1Endpoint {
     private OperationToSyncOperationStatus operationToSyncOperationStatus;
 
     @Override
-<<<<<<< HEAD
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-=======
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
->>>>>>> rc-2.20
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
         String userCrn = checkUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -78,11 +74,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-<<<<<<< HEAD
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-=======
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
->>>>>>> rc-2.20
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String userCrn = checkUserCrn();
         String accountId = determineAccountId(userCrn, request.getAccountId());
@@ -96,11 +88,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-<<<<<<< HEAD
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-=======
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
->>>>>>> rc-2.20
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
         String userCrn = checkUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -112,11 +100,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-<<<<<<< HEAD
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-=======
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.READ)
->>>>>>> rc-2.20
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus getSyncOperationStatus(@NotNull String operationId) {
         checkUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
