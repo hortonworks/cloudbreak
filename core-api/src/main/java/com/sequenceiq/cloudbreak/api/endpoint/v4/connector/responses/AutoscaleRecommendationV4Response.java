@@ -13,8 +13,8 @@ public class AutoscaleRecommendationV4Response implements JsonEntity {
     private final Set<String> loadBasedHostGroups;
 
     public AutoscaleRecommendationV4Response(Set<String> timeBasedHostGroups, Set<String> loadBasedHostGroups) {
-        this.timeBasedHostGroups = timeBasedHostGroups;
-        this.loadBasedHostGroups = loadBasedHostGroups;
+        this.timeBasedHostGroups = Set.copyOf(timeBasedHostGroups);
+        this.loadBasedHostGroups = Set.copyOf(loadBasedHostGroups);
     }
 
     public Set<String> getTimeBasedHostGroups() {
