@@ -65,11 +65,17 @@ public class FreeIpaPostInstallService {
     @Inject
     private FreeIpaService freeIpaService;
 
-    public void postInstallFreeIpa(Long stackId) throws Exception {
-        LOGGER.debug("Performing post-install configuration for stack {}", stackId);
+    public void postInstallFreeIpa(Long stackId, boolean fullPostInstall) throws Exception {
+        LOGGER.debug("Performing post-install configuration for stack {}. {}.", stackId, fullPostInstall ? "Full post install" : "Partial post install");
         Stack stack = stackService.getStackById(stackId);
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         freeIpaTopologyService.updateReplicationTopology(stackId, freeIpaClient);
+        if (fullPostInstall) {
+            setInitialFreeIpaPolicies(stack, freeIpaClient);
+        }
+    }
+
+    private void setInitialFreeIpaPolicies(Stack stack, FreeIpaClient freeIpaClient) throws Exception {
         Set<Permission> permission = freeIpaClient.findPermission(SET_PASSWORD_EXPIRATION_PERMISSION);
         if (permission.isEmpty()) {
             freeIpaClient.addPasswordExpirationPermission(SET_PASSWORD_EXPIRATION_PERMISSION);

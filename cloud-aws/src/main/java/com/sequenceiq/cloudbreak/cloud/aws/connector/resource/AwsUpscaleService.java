@@ -71,8 +71,13 @@ public class AwsUpscaleService {
     @Inject
     private AwsTaggingService awsTaggingService;
 
+    @Inject
+    private AwsCloudWatchService awsCloudWatchService;
+
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         AmazonCloudFormationRetryClient cloudFormationClient = getCloudFormationRetryClient(ac);
+        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
+        String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AmazonAutoScalingRetryClient amazonASClient = getAutoScalingRetryClient(ac);
         AmazonEC2Client amazonEC2Client = getEC2Client(ac);
 
@@ -103,6 +108,8 @@ public class AwsUpscaleService {
         awsComputeResourceService.buildComputeResourcesForUpscale(ac, stack, groupsWithNewInstances, newInstances, reattachableVolumeSets, networkResources);
 
         awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
+
+        awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, stack, regionName, credentialView);
 
         return singletonList(new CloudResourceStatus(cfStackUtil.getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
     }

@@ -29,7 +29,7 @@ public class GatewayConfigService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public List<GatewayConfig> getNotTerminatedGatewayConfigs(Stack stack) {
+    public List<GatewayConfig> getNotDeletedGatewayConfigs(Stack stack) {
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
         return getGatewayConfigs(stack, instanceMetaDatas);
     }

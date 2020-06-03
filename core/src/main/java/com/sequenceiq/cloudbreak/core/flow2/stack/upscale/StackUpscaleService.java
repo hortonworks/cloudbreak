@@ -206,22 +206,14 @@ public class StackUpscaleService {
 
     private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
         LOGGER.debug("Get first valid PrivateId of instanceGroups");
-        long highest = 0;
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            LOGGER.debug("Checking of instanceGroup: {}", instanceGroup.getGroupName());
-            for (InstanceMetaData metaData : instanceGroup.getAllInstanceMetaData()) {
-                Long privateId = metaData.getPrivateId();
-                LOGGER.debug("InstanceMetaData metaData: privateId: {}, instanceGroupName: {}, instanceId: {}, status: {}",
-                        privateId, metaData.getInstanceGroupName(), metaData.getInstanceId(), metaData.getInstanceStatus());
-                if (privateId == null) {
-                    continue;
-                }
-                if (privateId > highest) {
-                    highest = privateId;
-                }
-            }
-        }
-        LOGGER.debug("Highest privateId: {}", highest);
-        return highest == 0 ? 0 : highest + 1;
+        long id = instanceGroups.stream()
+                .flatMap(ig -> ig.getAllInstanceMetaData().stream())
+                .filter(im -> im.getPrivateId() != null)
+                .map(InstanceMetaData::getPrivateId)
+                .map(i -> i + 1)
+                .max(Long::compare)
+                .orElse(0L);
+        LOGGER.debug("First valid privateId: {}", id);
+        return id;
     }
 }
