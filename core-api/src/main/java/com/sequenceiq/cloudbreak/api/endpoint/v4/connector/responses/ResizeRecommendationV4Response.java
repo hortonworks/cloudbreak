@@ -13,8 +13,8 @@ public class ResizeRecommendationV4Response implements JsonEntity {
     private final Set<String> scaleDownHostGroups;
 
     public ResizeRecommendationV4Response(Set<String> scaleUpHostGroups, Set<String> scaleDownHostGroups) {
-        this.scaleUpHostGroups = scaleUpHostGroups;
-        this.scaleDownHostGroups = scaleDownHostGroups;
+        this.scaleUpHostGroups = Set.copyOf(scaleUpHostGroups);
+        this.scaleDownHostGroups = Set.copyOf(scaleDownHostGroups);
     }
 
     public Set<String> getScaleUpHostGroups() {
