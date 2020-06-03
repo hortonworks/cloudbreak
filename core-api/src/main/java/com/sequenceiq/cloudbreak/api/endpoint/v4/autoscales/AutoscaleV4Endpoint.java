@@ -100,8 +100,7 @@ public interface AutoscaleV4Endpoint {
     ClusterProxyConfiguration getClusterProxyconfiguration();
 
     @GET
-    @Path("recommendation")
+    @Path("/stack/crn/{crn}/recommendation")
     @Produces(MediaType.APPLICATION_JSON)
-    AutoscaleRecommendationV4Response getRecommendation(@QueryParam("workspaceId") Long workspaceId,
-                                                        @QueryParam("blueprintName") String blueprintName);
+    AutoscaleRecommendationV4Response getRecommendation(@PathParam("crn") String clusterCrn);
 }
