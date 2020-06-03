@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.flow.freeipa.downscale;
+package com.sequenceiq.freeipa.flow.freeipa.repair;
 
 import javax.inject.Inject;
 

@@ -86,6 +86,9 @@ class AwsUpscaleServiceTest {
     @Mock
     private AwsTaggingService awsTaggingService;
 
+    @Mock
+    private AwsCloudWatchService awsCloudWatchService;
+
     @InjectMocks
     private AwsUpscaleService awsUpscaleService;
 
@@ -174,6 +177,8 @@ class AwsUpscaleServiceTest {
         verify(awsComputeResourceService, times(1))
                 .buildComputeResourcesForUpscale(eq(authenticatedContext), eq(cloudStack), anyList(), captor.capture(), any(), any());
         verify(awsTaggingService, times(1)).tagRootVolumes(eq(authenticatedContext), any(AmazonEC2Client.class), eq(allInstances), eq(tags));
+        verify(awsCloudWatchService, times(1)).addCloudWatchAlarmsForSystemFailures(any(), eq(cloudStack), eq("eu-west-1"),
+                any(AwsCredentialView.class));
         List<CloudResource> newInstances = captor.getValue();
         assertEquals("Two new instances should be created", 2, newInstances.size());
         assertThat(newInstances, hasItem(workerInstance4));

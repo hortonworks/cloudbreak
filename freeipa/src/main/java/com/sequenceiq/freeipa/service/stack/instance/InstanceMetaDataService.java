@@ -99,4 +99,20 @@ public class InstanceMetaDataService {
     public Optional<StackAuthenticationView> getStackAuthenticationViewByInstanceMetaDataId(Long instanceId) {
         return instanceMetaDataRepository.getStackAuthenticationViewByInstanceMetaDataId(instanceId);
     }
+
+    public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances) {
+        for (CloudInstance cloudInstance : cloudInstances) {
+            InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), cloudInstance.getTemplate().getGroupName());
+            if (instanceGroup != null) {
+                InstanceMetaData instanceMetaData = new InstanceMetaData();
+                instanceMetaData.setPrivateId(cloudInstance.getTemplate().getPrivateId());
+                instanceMetaData.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED);
+                instanceMetaData.setInstanceGroup(instanceGroup);
+                instanceMetaDataRepository.save(instanceMetaData);
+                instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
+            }
+        }
+        return stack;
+    }
+
 }

@@ -42,7 +42,7 @@ public class ClientCertificate {
     public String toString() {
         return "ClientCertificate{"
                 + "keyRef='" + keyRef + '\''
-                + "certificateRef='" + certificateRef + '\''
+                + ", certificateRef='" + certificateRef + '\''
                 + '}';
     }
 }
