@@ -269,8 +269,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     @Override
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-            List<CloudResource> resources, boolean force) {
-        return azureDatabaseResourceService.terminateDatabaseServer(authenticatedContext, stack, resources, force);
+            List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) {
+        return azureDatabaseResourceService.terminateDatabaseServer(authenticatedContext, stack, resources, force, persistenceNotifier);
     }
 
     @Override

@@ -106,7 +106,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Override
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-            List<CloudResource> resources, boolean force) {
+            List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) {
         throw new UnsupportedOperationException("Database server termination is not supported for " + getClass().getName());
     }
 

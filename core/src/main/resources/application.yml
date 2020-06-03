@@ -441,10 +441,6 @@ cb:
           - name: cloudera-manager-agent
             pattern: "(.*)-.*"
         prewarmed: true
-  featureswitch:
-    azure:
-      single:
-        resourcegroup: false
 
 clusterProxy:
   url: http://localhost:10180/cluster-proxy

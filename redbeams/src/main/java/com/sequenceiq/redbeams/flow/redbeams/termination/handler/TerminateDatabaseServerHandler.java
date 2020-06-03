@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
@@ -51,6 +52,9 @@ public class TerminateDatabaseServerHandler implements EventHandler<TerminateDat
     @Inject
     private DBResourceService dbResourceService;
 
+    @Inject
+    private PersistenceNotifier persistenceNotifier;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(TerminateDatabaseServerRequest.class);
@@ -66,7 +70,7 @@ public class TerminateDatabaseServerHandler implements EventHandler<TerminateDat
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudResource> resourcesToTerminate = dbResourceService.getAllAsCloudResource(request.getResourceId());
             List<CloudResourceStatus> resourceStatuses =
-                connector.resources().terminateDatabaseServer(ac, request.getDatabaseStack(), resourcesToTerminate, request.isForced());
+                connector.resources().terminateDatabaseServer(ac, request.getDatabaseStack(), resourcesToTerminate, persistenceNotifier, request.isForced());
             List<CloudResource> resources = ResourceLists.transform(resourceStatuses);
 
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);

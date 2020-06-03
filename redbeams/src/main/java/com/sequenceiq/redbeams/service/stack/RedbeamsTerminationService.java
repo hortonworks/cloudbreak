@@ -41,6 +41,9 @@ public class RedbeamsTerminationService {
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
 
+    @Inject
+    private DBResourceService dbResourceService;
+
     public DatabaseServerConfig terminateByCrn(String crn, boolean force) {
         return terminate(databaseServerConfigService.getByCrn(crn), force);
     }

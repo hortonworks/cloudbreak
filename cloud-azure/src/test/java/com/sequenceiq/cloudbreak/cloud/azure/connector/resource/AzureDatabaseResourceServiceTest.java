@@ -5,6 +5,7 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
 
 @ExtendWith(MockitoExtension.class)
@@ -95,8 +98,10 @@ class AzureDatabaseResourceServiceTest {
 
     @Test
     void shouldReturnDeletedDbServerWhenTerminateDatabaseServerAndSingleResourceGroup() {
+        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
         DatabaseStack databaseStack = mock(DatabaseStack.class);
         when(azureResourceGroupMetadataProvider.useSingleResourceGroup(any(DatabaseStack.class))).thenReturn(true);
+        when(azureUtils.deleteDatabaseServer(any(), anyString(), anyBoolean())).thenReturn(Optional.empty());
         List<CloudResource> cloudResources = List.of(
                 CloudResource.builder()
                         .type(AZURE_DATABASE)
@@ -106,20 +111,23 @@ class AzureDatabaseResourceServiceTest {
                         .params(Map.of())
                         .build());
 
-        List<CloudResourceStatus> resourceStatuses = victim.terminateDatabaseServer(ac, databaseStack, cloudResources, false);
+        List<CloudResourceStatus> resourceStatuses = victim.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
 
         assertEquals(1, resourceStatuses.size());
         assertEquals(AZURE_DATABASE, resourceStatuses.get(0).getCloudResource().getType());
         assertEquals(DELETED, resourceStatuses.get(0).getStatus());
-        verify(azureUtils).deleteDatabaseServer(any(), eq("dbReference"));
+        verify(azureUtils).deleteDatabaseServer(any(), eq("dbReference"), anyBoolean());
         verify(client, never()).deleteResourceGroup(anyString());
+        verify(persistenceNotifier).notifyDeletion(any(), any());
     }
 
     @Test
     void shouldReturnDeletedResourceGroupWhenTerminateDatabaseServerAndMultipleResourceGroups() {
+        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
         DatabaseStack databaseStack = mock(DatabaseStack.class);
         when(azureResourceGroupMetadataProvider.useSingleResourceGroup(any(DatabaseStack.class))).thenReturn(false);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureUtils.deleteResourceGroup(any(), anyString(), anyBoolean())).thenReturn(Optional.empty());
         List<CloudResource> cloudResources = List.of(
                 CloudResource.builder()
                         .type(AZURE_DATABASE)
@@ -129,12 +137,13 @@ class AzureDatabaseResourceServiceTest {
                         .params(Map.of())
                         .build());
 
-        List<CloudResourceStatus> resourceStatuses = victim.terminateDatabaseServer(ac, databaseStack, cloudResources, false);
+        List<CloudResourceStatus> resourceStatuses = victim.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
 
         assertEquals(1, resourceStatuses.size());
         assertEquals(AZURE_RESOURCE_GROUP, resourceStatuses.get(0).getCloudResource().getType());
         assertEquals(DELETED, resourceStatuses.get(0).getStatus());
-        verify(client).deleteResourceGroup(eq(RESOURCE_GROUP_NAME));
-        verify(azureUtils, never()).deleteDatabaseServer(any(), anyString());
+        verify(azureUtils).deleteResourceGroup(any(), eq(RESOURCE_GROUP_NAME), eq(false));
+        verify(azureUtils, never()).deleteDatabaseServer(any(), anyString(), anyBoolean());
+        verify(persistenceNotifier).notifyDeletion(any(), any());
     }
 }
