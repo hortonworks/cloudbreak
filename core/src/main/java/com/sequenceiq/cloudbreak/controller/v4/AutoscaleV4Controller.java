@@ -150,8 +150,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-    @PreAuthorize("hasRole('AUTOSCALE')")
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public AutoscaleRecommendationV4Response getRecommendation(Long workspaceId, String blueprintName) {
         AutoscaleRecommendation autoscaleRecommendation = blueprintService.getAutoscaleRecommendation(workspaceId, blueprintName);
 
