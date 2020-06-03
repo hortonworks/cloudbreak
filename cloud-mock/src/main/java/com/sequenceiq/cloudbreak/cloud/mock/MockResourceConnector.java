@@ -107,7 +107,7 @@ public class MockResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-            List<CloudResource> resources, boolean force) {
+            List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) {
         return emptyList();
     }
 

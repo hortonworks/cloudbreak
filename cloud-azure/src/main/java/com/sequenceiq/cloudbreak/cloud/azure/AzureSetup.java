@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.microsoft.azure.AzureEnvironment;
+import com.microsoft.azure.CloudException;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.management.datalake.store.DataLakeStoreAccountManagementClient;
@@ -51,6 +52,8 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
+import com.sequenceiq.cloudbreak.cloud.model.prerequisite.AzurePrerequisiteDeleteRequest;
+import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisiteDeleteRequest;
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.ImageStatus;
@@ -73,6 +76,9 @@ public class AzureSetup implements Setup {
 
     @Inject
     private AzureClientService azureClientService;
+
+    @Inject
+    private AzureUtils azureUtils;
 
     @Override
     public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
@@ -166,6 +172,31 @@ public class AzureSetup implements Setup {
                 environmentPrerequisitesCreateRequest.getAzure().getResourceGroupName(),
                 environmentPrerequisitesCreateRequest.getAzure().getLocationName(),
                 environmentPrerequisitesCreateRequest.getAzure().getTags());
+    }
+
+    @Override
+    public void deleteEnvironmentPrerequisites(EnvironmentPrerequisiteDeleteRequest environmentPrerequisiteDeleteRequest) {
+        AzureClient azureClient = azureClientService.getClient(environmentPrerequisiteDeleteRequest.getCloudCredential());
+        environmentPrerequisiteDeleteRequest.getAzurePrerequisiteDeleteRequest()
+                .map(AzurePrerequisiteDeleteRequest::getResourceGroupName)
+                .ifPresentOrElse(
+                        resourceGroupName -> deleteResourceGroup(azureClient, resourceGroupName),
+                        () -> LOGGER.debug("No azure resource group was defined, not deleting resource group.")
+                );
+    }
+
+    private void deleteResourceGroup(AzureClient azureClient, String resourceGroupName) {
+        try {
+            if (!azureClient.isResourceGroupEmpty(resourceGroupName)) {
+                String message = String.format("Resource group %s is not empty, cannot proceed with deleting the environment. " +
+                        "Please check contents on azure portal.", resourceGroupName);
+                LOGGER.warn(message);
+                throw new CloudConnectorException(message);
+            }
+            azureUtils.deleteResourceGroup(azureClient, resourceGroupName, false);
+        } catch (CloudException e) {
+            throw new CloudConnectorException("Could not delete resource group", e);
+        }
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisiteDeleteRequest;
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.ImageStatusResult;
@@ -55,6 +56,14 @@ public interface Setup {
      */
     default void createEnvironmentPrerequisites(EnvironmentPrerequisitesCreateRequest environmentPrerequisitesCreateRequest) {
         throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    /**
+     * Implementation of this method shall contain deletion of basic infrastructure that was needed before resources could be created in an environment.
+     * This is currently a special case for deleting azure resource groups
+     *
+     */
+    default void deleteEnvironmentPrerequisites(EnvironmentPrerequisiteDeleteRequest environmentPrerequisiteDeleteRequest) {
     }
 
     /**

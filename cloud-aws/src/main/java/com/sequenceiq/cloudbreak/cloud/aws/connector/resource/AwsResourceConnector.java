@@ -117,8 +117,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
-            List<CloudResource> resources, boolean force) throws Exception {
-        return awsRdsTerminateService.terminate(ac, stack, force);
+            List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) throws Exception {
+        return awsRdsTerminateService.terminate(ac, stack, force, persistenceNotifier, resources);
     }
 
     @Override
