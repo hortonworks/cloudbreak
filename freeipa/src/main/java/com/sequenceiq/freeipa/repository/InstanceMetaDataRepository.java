@@ -21,7 +21,10 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     Set<InstanceMetaData> findAllByInstanceIdIn(Iterable<String> instanceId);
 
-    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceStatus <> 'TERMINATED'")
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId " +
+            "AND i.instanceStatus <> 'TERMINATED' " +
+            "AND i.instanceStatus <> 'DELETED_ON_PROVIDER_SIDE' " +
+            "AND i.instanceStatus <> 'DELETED_BY_PROVIDER'")
     Set<InstanceMetaData> findNotTerminatedForStack(@Param("stackId") Long stackId);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId")
@@ -36,23 +39,9 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
             "WHERE i.id = :instanceId")
     Optional<StackAuthenticationView> getStackAuthenticationViewByInstanceMetaDataId(@Param("instanceId") Long id);
 
-    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
-    InstanceMetaData findHostInStack(@Param("stackId") Long stackId, @Param("hostName") String hostName);
-
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId "
             + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED', 'DECOMMISSIONED', 'FAILED', 'STOPPED')")
     Set<InstanceMetaData> findRemovableInstances(@Param("stackId") Long stackId);
-
-    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.privateIp= :privateAddress AND i.instanceStatus <> 'TERMINATED'")
-    InstanceMetaData findNotTerminatedByPrivateAddress(@Param("stackId") Long stackId, @Param("privateAddress") String privateAddress);
-
-    @Query("SELECT i.serverCert FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceMetadataType = 'GATEWAY_PRIMARY' "
-            + "AND i.instanceStatus <> 'TERMINATED'")
-    String getServerCertByStackId(@Param("stackId") Long stackId);
-
-    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceStatus <> 'TERMINATED' "
-            + "AND i.instanceGroup.stack.id= :stackId")
-    InstanceMetaData getPrimaryGatewayInstanceMetadata(@Param("stackId") Long stackId);
 
     List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatus(InstanceGroup instanceGroup, InstanceStatus status);
 

@@ -119,6 +119,12 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                 instanceAuthentication.getPublicKey(), null);
     }
 
+    public CloudInstance buildInstance(Stack stack, InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
+            StackAuthentication stackAuthentication, Long privateId, InstanceStatus status) {
+        ImageEntity imageEntity = imageService.getByStack(stack);
+        return buildInstance(instanceMetaData, instanceGroup, stackAuthentication, privateId, status, imageEntity.getImageName(), stack.getEnvironmentCrn());
+    }
+
     private CloudInstance buildInstance(InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
             StackAuthentication stackAuthentication, Long privateId, InstanceStatus status, String imageName, String environmentCrn) {
         String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
