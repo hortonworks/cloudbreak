@@ -127,6 +127,24 @@ remove_local_backups() {
     find ${config[backup_path]}/ -name ipa-* -type d  -print0 | xargs -0 /usr/bin/rm -vrf >> $LOGFILE 2>&1 || error_exit "Unable to remove local backup copies"
 }
 
+upload_aws_backup() {
+    echo "try to upload with AES256 encryption"
+    ret_code=$(/usr/bin/aws ${REGION_OPTION} s3 cp --recursive --sse AES256 --no-progress ${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR} >> $LOGFILE 2>&1 || echo $?)
+
+    if [[ -n "$ret_code" ]] && [[ "$ret_code" == 1 ]]
+    then
+        echo "try to upload with aws:kms encryption"
+        ret_code=$(/usr/bin/aws ${REGION_OPTION} s3 cp --recursive --sse aws:kms --no-progress ${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR} >> $LOGFILE 2>&1 || echo $?)
+    fi
+
+    if [[ -n "$ret_code" ]] && [[ "$ret_code" == 1 ]]
+    then
+        error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
+    else
+        echo "Uploaded successfully"
+    fi
+}
+
 doLog "INFO Running ${TYPE} IPA backup."
 
 exlock_now || error_exit "A backup seems to be currently running. Lock file is at ${LOCKFILE}"
@@ -152,7 +170,7 @@ if [[ "${config[backup_platform]}" = "AWS" ]]; then
     if [[ -n "${config[aws_region]}" ]]; then
       REGION_OPTION="--region ${config[aws_region]}"
     fi
-    /usr/bin/aws ${REGION_OPTION} s3 cp --recursive --sse AES256 --no-progress ${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR} >> $LOGFILE 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
+    upload_aws_backup
     remove_local_backups
 elif [[ "${config[backup_platform]}" = "AZURE" ]]; then
     doLog "INFO Syncing backups to Azure Blog Storage"
