@@ -13,6 +13,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
@@ -74,7 +75,8 @@ public class EndpointConfig extends ResourceConfig {
             DistroXInternalV1Controller.class,
             DatalakeV4Controller.class,
             CloudProviderServicesV4Controller.class,
-            FlowController.class
+            FlowController.class,
+            AuthorizationInfoController.class
     );
 
     @Value("${info.app.version:unspecified}")
@@ -112,7 +114,7 @@ public class EndpointConfig extends ResourceConfig {
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(CoreApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/hortonworks/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api,com.sequenceiq.distrox.api,com.sequenceiq.flow.api");
+        swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api,com.sequenceiq.distrox.api,com.sequenceiq.flow.api,com.sequenceiq.authorization");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);

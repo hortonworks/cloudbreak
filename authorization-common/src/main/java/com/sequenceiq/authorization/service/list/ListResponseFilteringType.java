@@ -1,4 +1,4 @@
-package com.sequenceiq.authorization.service;
+package com.sequenceiq.authorization.service.list;
 
 import java.util.List;
 import java.util.Set;

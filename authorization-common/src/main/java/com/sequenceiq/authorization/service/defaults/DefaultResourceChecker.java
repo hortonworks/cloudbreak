@@ -1,4 +1,4 @@
-package com.sequenceiq.authorization.service;
+package com.sequenceiq.authorization.service.defaults;
 
 import java.util.Collection;
 

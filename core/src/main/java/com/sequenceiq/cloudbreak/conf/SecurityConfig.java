@@ -61,6 +61,8 @@ public class SecurityConfig {
 
         private static final String FLOW_API = API_ROOT_CONTEXT + "/flow/**";
 
+        private static final String AUTHORIZATION_API = API_ROOT_CONTEXT + "/authorization/**";
+
         @Inject
         private GrpcUmsClient umsClient;
 
@@ -114,6 +116,8 @@ public class SecurityConfig {
                     .antMatchers(AUTOSCALE_API)
                     .authenticated()
                     .antMatchers(FLOW_API)
+                    .authenticated()
+                    .antMatchers(AUTHORIZATION_API)
                     .authenticated()
                     .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()

@@ -12,6 +12,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.datalake.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.datalake.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.datalake.controller.sdx.SdxController;
@@ -32,7 +33,7 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = Arrays.asList(SdxController.class, SdxUpgradeController.class, SdxInternalController.class,
-            UtilController.class, FlowController.class);
+            UtilController.class, FlowController.class, AuthorizationInfoController.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;
@@ -71,7 +72,7 @@ public class EndpointConfig extends ResourceConfig {
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(SdxApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.sdx.api,com.sequenceiq.flow.api");
+        swaggerConfig.setResourcePackage("com.sequenceiq.sdx.api,com.sequenceiq.flow.api,com.sequenceiq.authorization");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);

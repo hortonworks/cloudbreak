@@ -9,6 +9,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
 import com.sequenceiq.environment.environment.v1.EnvironmentController;
@@ -37,7 +38,8 @@ public class EndpointConfig extends ResourceConfig {
             EnvironmentController.class,
             PlatformResourceController.class,
             UtilController.class,
-            FlowController.class);
+            FlowController.class,
+            AuthorizationInfoController.class);
 
     private final String applicationVersion;
 
@@ -68,7 +70,7 @@ public class EndpointConfig extends ResourceConfig {
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(EnvironmentApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.environment.api,com.sequenceiq.flow.api");
+        swaggerConfig.setResourcePackage("com.sequenceiq.environment.api,com.sequenceiq.flow.api,com.sequenceiq.authorization");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);

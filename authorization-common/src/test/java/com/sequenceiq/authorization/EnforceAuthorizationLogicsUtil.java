@@ -12,6 +12,9 @@ import javax.ws.rs.Path;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.MemberUsageScanner;
+import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.scanners.MethodParameterNamesScanner;
+import org.reflections.scanners.MethodParameterScanner;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.springframework.stereotype.Controller;
@@ -28,7 +31,10 @@ public class EnforceAuthorizationLogicsUtil {
             new FieldAnnotationsScanner(),
             new TypeAnnotationsScanner(),
             new SubTypesScanner(false),
-            new MemberUsageScanner());
+            new MemberUsageScanner(),
+            new MethodAnnotationsScanner(),
+            new MethodParameterScanner(),
+            new MethodParameterNamesScanner());
 
     private EnforceAuthorizationLogicsUtil() {
 

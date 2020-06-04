@@ -1,4 +1,4 @@
-package com.sequenceiq.authorization.service;
+package com.sequenceiq.authorization.service.defaults;
 
 import java.lang.annotation.Annotation;
 
@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
+import com.sequenceiq.authorization.service.PermissionChecker;
 
 @Component
 public class DefaultPermissionChecker implements PermissionChecker<CheckPermissionByAccount> {

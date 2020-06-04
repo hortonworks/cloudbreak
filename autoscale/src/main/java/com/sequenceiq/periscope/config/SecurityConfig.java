@@ -98,6 +98,7 @@ public class SecurityConfig {
                     .antMatchers(API_ROOT_CONTEXT + "/v1/clusters/**").authenticated()
                     .antMatchers(API_ROOT_CONTEXT + "/v2/clusters/**").authenticated()
                     .antMatchers(API_ROOT_CONTEXT + "/v1/distrox/**").authenticated()
+                    .antMatchers(API_ROOT_CONTEXT + "/authorization/**").authenticated()
                     .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/**").denyAll()
