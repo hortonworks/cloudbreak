@@ -1,21 +1,9 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.environment;
 
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ARCHIVED;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.CLUSTER_DEFINITION_CLEANUP_PROGRESS;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.CREATE_FAILED;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.DATAHUB_CLUSTERS_DELETE_IN_PROGRESS;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.DELETE_INITIATED;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.S3GUARD_TABLE_DELETE_IN_PROGRESS;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UMS_RESOURCE_DELETE_IN_PROGRESS;
 
 import java.util.Map;
-import java.util.Set;
 
 import javax.ws.rs.ProcessingException;
 
@@ -43,7 +31,7 @@ public class EnvironmentOperationChecker<T extends EnvironmentWaitObject> extend
             String name = environment.getName();
             EnvironmentStatus status = environment.getEnvironmentStatus();
             LOGGER.info("Waiting for the '{}' state of '{}' '{}' environment. Actual state is: '{}'", desiredStatus, name, crn, status);
-            if (isDeletionInProgress(status) || status.equals(ARCHIVED)) {
+            if (status.isDeleteInProgress() || status.equals(ARCHIVED)) {
                 LOGGER.error("Environment '{}' '{}' has been getting terminated (status:'{}'), waiting is cancelled.", name, crn, status);
                 throw new TestFailException(String.format("Environment '%s' '%s' has been getting terminated (status:'%s'), waiting is cancelled.", name, crn,
                         status));
@@ -114,12 +102,5 @@ public class EnvironmentOperationChecker<T extends EnvironmentWaitObject> extend
     @Override
     public Map<String, String> getStatuses(T waitObject) {
         return Map.of("status", waitObject.getEndpoint().getByCrn(waitObject.getCrn()).getEnvironmentStatus().name());
-    }
-
-    private boolean isDeletionInProgress(EnvironmentStatus environmentStatus) {
-        Set<EnvironmentStatus> deleteInProgressStatuses = Set.of(DELETE_INITIATED, NETWORK_DELETE_IN_PROGRESS, RDBMS_DELETE_IN_PROGRESS,
-                FREEIPA_DELETE_IN_PROGRESS, CLUSTER_DEFINITION_CLEANUP_PROGRESS, UMS_RESOURCE_DELETE_IN_PROGRESS, IDBROKER_MAPPINGS_DELETE_IN_PROGRESS,
-                S3GUARD_TABLE_DELETE_IN_PROGRESS, DATAHUB_CLUSTERS_DELETE_IN_PROGRESS, DATALAKE_CLUSTERS_DELETE_IN_PROGRESS, PUBLICKEY_DELETE_IN_PROGRESS);
-        return deleteInProgressStatuses.contains(environmentStatus);
     }
 }

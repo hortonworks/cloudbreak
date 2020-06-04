@@ -369,6 +369,49 @@ class SdxServiceTest {
         assertEquals(exceptionMessage, badRequestException.getMessage());
     }
 
+    static Object[][] deleteInProgressParamProvider() {
+        return new Object[][]{
+                {EnvironmentStatus.DELETE_INITIATED},
+                {EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.CLUSTER_DEFINITION_CLEANUP_PROGRESS},
+                {EnvironmentStatus.UMS_RESOURCE_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.S3GUARD_TABLE_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.DATAHUB_CLUSTERS_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS},
+                {EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS}
+        };
+    }
+
+    @ParameterizedTest
+    @MethodSource("deleteInProgressParamProvider")
+    void testCreateButEnvInDeleteInProgressPhase(EnvironmentStatus environmentStatus) {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        sdxClusterRequest.setEnvironment("envir");
+        Map<String, String> tags = new HashMap<>();
+        tags.put("mytag", "tag");
+        sdxClusterRequest.addTags(tags);
+
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
+        detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
+        detailedEnvironmentResponse.setCrn(Crn.builder()
+                .setService(Crn.Service.ENVIRONMENTS)
+                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+                .setResource(UUID.randomUUID().toString())
+                .setAccountId(UUID.randomUUID().toString())
+                .build().toString());
+        detailedEnvironmentResponse.setEnvironmentStatus(environmentStatus);
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null), "BadRequestException should thrown");
+        assertEquals("The environment is in delete in progress phase. Please create a new environment first!", badRequestException.getMessage());
+    }
+
     @Test
     void testListSdxClustersWhenEnvironmentNameProvidedAndTwoSdxIsInTheDatabaseShouldListAllSdxClusterWhichIsTwo() {
         List<SdxCluster> sdxClusters = List.of(new SdxCluster(), new SdxCluster());
