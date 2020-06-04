@@ -51,6 +51,9 @@ public class FlowService {
     @Named("conversionService")
     private ConversionService conversionService;
 
+    @Inject
+    private FlowStateDelayedEvaluator flowStateDelayedEvaluator;
+
     public FlowLogResponse getLastFlowById(String flowId) {
         LOGGER.info("Getting last flow log by flow id {}", flowId);
         Optional<FlowLog> lastFlowLog = flowLogDBService.getLastFlowLog(flowId);
@@ -132,24 +135,24 @@ public class FlowService {
         }
         boolean hasFinishedFlowLog = false;
         for (FlowLog flowLog : flowLogs) {
-
             String currentState = flowLog.getCurrentState();
             if (failHandledEvents.contains(flowLog.getNextEvent())
                     || (currentState != null && CANCELLED_TERMINATED_STATES.contains(currentState))) {
                 LOGGER.info("{} {} marked as completed on {} flow log", marker, flowChainId, flowLog.minimizedString());
-                return true;
+                return flowStateDelayedEvaluator.isComplete(flowChainId, true);
             } else if (FlowConstants.INIT_STATE.equals(currentState)) {
                 boolean hasEventInQueue = flowChainLogService.hasEventInFlowChainQueue(flowChainLogs);
                 LOGGER.info("{} {} state. Finished {}, hasEventInQueue {}", marker, flowChainId, hasFinishedFlowLog, hasEventInQueue);
-                return hasFinishedFlowLog && !hasEventInQueue;
+                boolean result = hasFinishedFlowLog && !hasEventInQueue;
+                return flowStateDelayedEvaluator.isComplete(flowChainId, result);
             } else if (FlowConstants.FINISHED_STATE.equals(currentState)) {
                 hasFinishedFlowLog = true;
             } else if (!hasFinishedFlowLog) {
-                return false;
+                return flowStateDelayedEvaluator.isComplete(flowChainId, false);
             }
         }
         LOGGER.info("{} {} marked as not completed", marker, flowChainId);
-        return false;
+        return flowStateDelayedEvaluator.isComplete(flowChainId, false);
     }
 
     private boolean firstIsPending(List<FlowLog> flowLogs) {

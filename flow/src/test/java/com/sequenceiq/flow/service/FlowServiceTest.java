@@ -5,8 +5,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -70,6 +72,9 @@ public class FlowServiceTest {
     @Mock
     private Set<String> failHandledEvents;
 
+    @Mock
+    private FlowStateDelayedEvaluator flowStateDelayedEvaluator;
+
     @InjectMocks
     private FlowService underTest;
 
@@ -77,6 +82,8 @@ public class FlowServiceTest {
     public void setup() {
         when(conversionService.convert(any(), eq(FlowLogResponse.class))).thenReturn(new FlowLogResponse());
         lenient().when(failHandledEvents.contains(FAIL_HANDLED_NEXT_EVENT)).thenReturn(true);
+        doAnswer(invocation -> (Boolean) invocation.getArgument(1))
+                .when(flowStateDelayedEvaluator).isComplete(anyString(), anyBoolean());
     }
 
     @Test
