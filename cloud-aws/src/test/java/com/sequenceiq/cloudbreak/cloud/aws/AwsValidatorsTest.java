@@ -110,6 +110,8 @@ public class AwsValidatorsTest {
     public Collection<DynamicTest> testCheckStatuses() {
         ArrayList<DynamicTest> tests = new ArrayList<>();
         tests.add(DynamicTest.dynamicTest("tag is too short", () -> testTagsWithExpectedException(EMPTY, VALID)));
+        tests.add(DynamicTest.dynamicTest("tag has leading white space", () -> testTagsWithExpectedException(' ' + VALID, VALID)));
+        tests.add(DynamicTest.dynamicTest("tag has trailing white space", () -> testTagsWithExpectedException(VALID + ' ', VALID)));
         tests.add(DynamicTest.dynamicTest("tag is too long", () -> testTagsWithExpectedException(testStringWithLength(128), VALID)));
         tests.add(DynamicTest.dynamicTest("tag is valid but long",
                 () -> testTagsWithExpectedTeBeFair(testStringWithLength(127), VALID)));
@@ -122,6 +124,8 @@ public class AwsValidatorsTest {
         tests.add(DynamicTest.dynamicTest("tag should not start with aws", () -> testTagsWithExpectedException("aws1234567890", VALID)));
 
         tests.add(DynamicTest.dynamicTest("value is too short", () -> testTagsWithExpectedException(VALID, EMPTY)));
+        tests.add(DynamicTest.dynamicTest("value has leading whitespace", () -> testTagsWithExpectedException(VALID, ' ' + VALID)));
+        tests.add(DynamicTest.dynamicTest("value has trailing whitespace", () -> testTagsWithExpectedException(VALID, VALID + ' ')));
         tests.add(DynamicTest.dynamicTest("value is too long", () -> testTagsWithExpectedException(VALID, testStringWithLength(256))));
         tests.add(DynamicTest.dynamicTest("value is valid but long",
                 () -> testTagsWithExpectedTeBeFair(VALID, testStringWithLength(255))));
