@@ -1,3 +1,4 @@
+{%- from 'telemetry/settings.sls' import telemetry with context %}
 {%- from 'monitoring/settings.sls' import monitoring with context %}
 config:
     metricsCollectPeriod: 120
@@ -20,11 +21,11 @@ services:
       health_checks:
 roles:
 globalFields:
-    clusterCrn: "{{ monitoring.clusterCrn }}"
-    clusterName: "{{ monitoring.clusterName }}"
-    clusterVersion: "{{ monitoring.clusterVersion }}"
-    clusterType: "{{ monitoring.clusterType }}"
-    platform: "{{ monitoring.platform }}"
+    clusterCrn: "{{ telemetry.clusterCrn }}"
+    clusterName: "{{ telemetry.clusterName }}"
+    clusterVersion: "{{ telemetry.clusterVersion }}"
+    clusterType: "{{ telemetry.clusterType }}"
+    platform: "{{ telemetry.platform }}"
 logger:
     path: /var/log/metrics-collector/metrics-collector.log
     max_bytes: 10485760

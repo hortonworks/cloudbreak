@@ -28,6 +28,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService;
+import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigView;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
@@ -42,6 +44,7 @@ import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.telemetry.VmLogsService;
 
 @Service
 public class FreeIpaInstallService {
@@ -69,6 +72,12 @@ public class FreeIpaInstallService {
 
     @Inject
     private DatabusConfigService databusConfigService;
+
+    @Inject
+    private TelemetryCommonConfigService telemetryCommonConfigService;
+
+    @Inject
+    private VmLogsService vmLogsService;
 
     @Inject
     private AltusMachineUserService altusMachineUserService;
@@ -134,6 +143,14 @@ public class FreeIpaInstallService {
                     .withPlatform(stack.getCloudPlatform())
                     .withVersion(version)
                     .build();
+
+
+            final TelemetryCommonConfigView telemetryCommonConfigs = telemetryCommonConfigService.createTelemetryCommonConfigs(
+                    telemetry, vmLogsService.getVmLogs(), FluentClusterType.FREEIPA.value(), stack.getResourceCrn(),
+                    stack.getName(), stack.getOwner(), stack.getCloudPlatform());
+            servicePillarConfig.put("telemetry",
+                    new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
+
             FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
                     databusEnabled, false, telemetry);
             servicePillarConfig.put("fluent", new SaltPillarProperties("/fluent/init.sls", Collections.singletonMap("fluent", fluentConfigView.toMap())));

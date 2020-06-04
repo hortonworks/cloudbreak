@@ -1,0 +1,14 @@
+{%- from 'telemetry/settings.sls' import telemetry with context %}
+{%- from 'filecollector/settings.sls' import filecollector with context %}
+collector:
+    files:{% for logfile in telemetry.logs %}
+    - path: {{ logfile["path"] }}
+      label: "{{ logfile["label"] }}"{% endfor %}
+    rules:{% for rule in telemetry.anonymizationRules %}{% set regex_value = rule["value"] %}{% set replacement = rule["replacement"] if rule["replacement"] else "[REDACTED]" %}
+    - pattern: {{ regex_value }}
+      replacement: "{{ replacement }}"{% endfor %}
+    compress: true
+    useFullPath: true
+    deleteCompressedFile: true
+    outputScript: /opt/filecollector/cloud_storage_upload.sh
+    outputLocation: "/var/lib/filecollector"

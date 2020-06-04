@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 import static com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails.CLUSTER_CRN_KEY;
 import static java.util.Collections.singletonMap;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,6 +16,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService;
+import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigView;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
@@ -74,18 +77,22 @@ public class TelemetryDecorator {
 
     private final MonitoringConfigService monitoringConfigService;
 
+    private final TelemetryCommonConfigService telemetryCommonConfigService;
+
     private final AltusMachineUserService altusMachineUserService;
 
     public TelemetryDecorator(DatabusConfigService databusConfigService,
             FluentConfigService fluentConfigService,
             MeteringConfigService meteringConfigService,
             MonitoringConfigService monitoringConfigService,
+            TelemetryCommonConfigService telemetryCommonConfigService,
             AltusMachineUserService altusMachineUserService,
             @Value("${info.app.version:}") String version) {
         this.databusConfigService = databusConfigService;
         this.fluentConfigService = fluentConfigService;
         this.meteringConfigService = meteringConfigService;
         this.monitoringConfigService = monitoringConfigService;
+        this.telemetryCommonConfigService = telemetryCommonConfigService;
         this.altusMachineUserService = altusMachineUserService;
         this.version = version;
     }
@@ -111,14 +118,20 @@ public class TelemetryDecorator {
         boolean meteringFeatureEnabled = telemetry.isMeteringFeatureEnabled();
         // for datalake - metering is not enabled yet
         boolean meteringEnabled = meteringFeatureEnabled && !datalakeCluster;
+        String clusterCrn = datalakeCluster ? getDatalakeCrn(telemetry, stack.getResourceCrn()) : stack.getResourceCrn();
         final TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
                 .withOwner(stack.getCreator().getUserCrn())
                 .withName(stack.getName())
                 .withType(clusterType)
-                .withCrn(datalakeCluster ? getDatalakeCrn(telemetry, stack.getResourceCrn()) : stack.getResourceCrn())
+                .withCrn(clusterCrn)
                 .withPlatform(stack.getCloudPlatform())
                 .withVersion(version)
                 .build();
+        final TelemetryCommonConfigView telemetryCommonConfigs = telemetryCommonConfigService.createTelemetryCommonConfigs(
+                telemetry, null, clusterType, clusterCrn, stack.getName(), stack.getCreator().getUserCrn(), stack.getCloudPlatform());
+        servicePillar.put("telemetry",
+                new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
+
         FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
                 databusConfigView.isEnabled(), meteringEnabled, telemetry);
         if (fluentConfigView.isEnabled()) {
@@ -138,7 +151,7 @@ public class TelemetryDecorator {
             char[] monitoringPassword = stack.getCluster().getCloudbreakClusterManagerMonitoringPassword().toCharArray();
             MonitoringAuthConfig authConfig = new MonitoringAuthConfig(monitoringUser, monitoringPassword);
             MonitoringConfigView monitoringConfigView = monitoringConfigService.createMonitoringConfig(
-                    MonitoringClusterType.CLOUDERA_MANAGER, authConfig, clusterDetails);
+                    MonitoringClusterType.CLOUDERA_MANAGER, authConfig);
             if (monitoringConfigView.isEnabled()) {
                 Map<String, Object> monitoringConfig = monitoringConfigView.toMap();
                 servicePillar.put("monitoring",

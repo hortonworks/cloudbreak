@@ -1,0 +1,8 @@
+#!/bin/sh
+{%- from 'filecollector/settings.sls' import filecollector with context %}
+filename="$1"
+s3_filename="$(basename -- $filename)"
+s3_file_path="s3://{{ filecollector.s3LogBucket}}/{{ filecollector.logFolder}}/bundles/${s3_filename}"
+
+# --sse AES256
+/usr/bin/aws s3 cp --no-progress "${filename}" "${s3_file_path}"

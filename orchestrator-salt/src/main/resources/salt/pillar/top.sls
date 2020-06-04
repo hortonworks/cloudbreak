@@ -8,6 +8,7 @@ base:
     - docker
     - metadata.init
     - proxy.proxy
+    - telemetry.init
     - databus
     - cloudera-manager.csd
     - fluent
