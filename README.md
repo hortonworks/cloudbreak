@@ -210,13 +210,13 @@ The database migration scripts are run automatically by Cloudbreak, but this mig
 
 ### Configure Before launch task
 
-In order to be able to determine the local Cloudbreak version automatically, a `Before launch` task has to be configured for the project in IntelliJ IDEA. The required steps are the following:
+In order to be able to determine the local `Cloudbreak` and `FreeIPA` version automatically, a `Before launch` task has to be configured for the project in IntelliJ IDEA. The required steps are the following:
 
 1. Open `Run/Debug Configurations` for the project
 2. Select your project's application
 3. Click on `Add` in the `Before launch` panel
 4. Select `Run Gradle Task` with the following parameters
-    1. `Gradle project`: `cloudbreak:core`
+    1. `Gradle project`: `cloudbreak:core` or `cloudbreak:freeipa` depending on the service
     2. `Tasks`: `buildInfo`
 5. Confirm and restart the application
 
