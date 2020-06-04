@@ -1,4 +1,4 @@
-package com.sequenceiq.authorization.service;
+package com.sequenceiq.authorization.service.defaults;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -17,6 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultPermissionCheckerTest {

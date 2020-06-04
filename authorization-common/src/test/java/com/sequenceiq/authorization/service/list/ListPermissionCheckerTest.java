@@ -1,4 +1,4 @@
-package com.sequenceiq.authorization.service;
+package com.sequenceiq.authorization.service.list;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,6 +31,8 @@ import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationFilterableResponseCollection;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
+import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
+import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ListPermissionCheckerTest {

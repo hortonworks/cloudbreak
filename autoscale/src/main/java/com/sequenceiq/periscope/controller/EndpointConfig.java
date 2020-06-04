@@ -9,6 +9,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.controller.mapper.AccessDeniedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.BadRequestExceptionMapper;
@@ -57,7 +58,7 @@ public class EndpointConfig extends ResourceConfig {
         beanConfig.setSchemes(new String[]{"http", "https"});
         beanConfig.setBasePath(AutoscaleApi.API_ROOT_CONTEXT);
         beanConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        beanConfig.setResourcePackage("com.sequenceiq.periscope.api");
+        beanConfig.setResourcePackage("com.sequenceiq.periscope.api,com.sequenceiq.authorization");
         beanConfig.setScan(true);
         beanConfig.setContact("https://hortonworks.com/contact-sales/");
         beanConfig.setPrettyPrint(true);
@@ -89,6 +90,8 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         register(DistroXAutoScaleClusterV1Controller.class);
+        register(AlertController.class);
+        register(AuthorizationInfoController.class);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);

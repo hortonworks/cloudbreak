@@ -25,6 +25,7 @@ import org.springframework.security.access.AccessDeniedException;
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
 
 @RunWith(Parameterized.class)
 public class CommonPermissionCheckingUtilsBulkTest {

@@ -1,4 +1,4 @@
-package com.sequenceiq.authorization.service;
+package com.sequenceiq.authorization.service.list;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,6 +19,7 @@ import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationFilterableResponseCollection;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
+import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 
 @Component
 public class ListPermissionChecker {

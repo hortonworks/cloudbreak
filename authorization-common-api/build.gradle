@@ -22,6 +22,9 @@ jar {
 dependencies {
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
+  compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  compile group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
+  compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
 
   testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
   testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion

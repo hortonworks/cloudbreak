@@ -47,6 +47,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.sequenceiq.cloudbreak.logger",
         "com.sequenceiq.cloudbreak.util",
         "com.sequenceiq.flow",
+        "com.sequenceiq.authorization",
         "com.sequenceiq.statuschecker",
         "com.sequenceiq.environment.client",
         "com.sequenceiq.cloudbreak.client",

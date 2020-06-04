@@ -47,13 +47,21 @@ public class UmsRightProvider {
 
     public String getRight(AuthorizationResourceAction action, String actorCrn, String accountId) {
         if (grpcUmsClient.isAuthorizationEntitlementRegistered(actorCrn, accountId)) {
-            return getActionModel(action).getRight();
+            return getNewRight(action);
         }
-        return getActionModel(action).getLegacyRight();
+        return getLegacyRight(action);
     }
 
     public String getRight(AuthorizationResourceAction action) {
         return getRight(action, ThreadBasedUserCrnProvider.getUserCrn(), ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    public String getLegacyRight(AuthorizationResourceAction action) {
+        return getActionModel(action).getLegacyRight();
+    }
+
+    public String getNewRight(AuthorizationResourceAction action) {
+        return getActionModel(action).getRight();
     }
 
     public Optional<AuthorizationResourceAction> getByName(String name) {

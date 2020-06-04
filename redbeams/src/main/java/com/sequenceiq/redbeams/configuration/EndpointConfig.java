@@ -11,6 +11,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 // import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.controller.mapper.DefaultExceptionMapper;
@@ -28,7 +29,8 @@ public class EndpointConfig extends ResourceConfig {
     private static final List<Class<?>> CONTROLLERS = List.of(
         DatabaseV4Controller.class,
         DatabaseServerV4Controller.class,
-        FlowController.class
+        FlowController.class,
+        AuthorizationInfoController.class
     );
 
     // @Value("${redbeams.structuredevent.rest.enabled:false}")
