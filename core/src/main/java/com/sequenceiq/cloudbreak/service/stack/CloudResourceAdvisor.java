@@ -148,9 +148,7 @@ public class CloudResourceAdvisor {
 
     public AutoscaleRecommendation getAutoscaleRecommendation(Long workspaceId, String blueprintName) {
         LOGGER.debug("Autoscale advice for blueprintName: {}.", blueprintName);
-
         BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
-
         return recommendAutoscale(blueprintTextProcessor);
     }
 
