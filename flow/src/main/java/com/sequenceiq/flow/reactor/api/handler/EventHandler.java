@@ -4,7 +4,7 @@ import reactor.bus.Event;
 import reactor.fn.Consumer;
 
 /**
- * @deprecated Please use ExceptionCatcherEventHanlder
+ * @deprecated Please use ExceptionCatcherEventHandler
  */
 @Deprecated
 public interface EventHandler<T> extends Consumer<Event<T>> {

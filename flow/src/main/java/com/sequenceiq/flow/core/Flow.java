@@ -4,6 +4,8 @@ import java.util.Map;
 
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 
+import io.opentracing.SpanContext;
+
 public interface Flow {
     void initialize(Map<Object, Object> contextParams);
 
@@ -11,7 +13,7 @@ public interface Flow {
 
     void stop();
 
-    void sendEvent(String key, String flowTriggerUserCrn, Object object);
+    void sendEvent(String key, String flowTriggerUserCrn, Object object, SpanContext spanContext);
 
     FlowState getCurrentState();
 

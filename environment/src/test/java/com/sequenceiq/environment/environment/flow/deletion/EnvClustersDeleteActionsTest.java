@@ -48,6 +48,10 @@ import com.sequenceiq.flow.core.MessageFactory.HEADERS;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.notification.NotificationService;
 
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.SpanContext;
+import io.opentracing.Tracer;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
@@ -81,7 +85,7 @@ class EnvClustersDeleteActionsTest {
     private EnvironmentResponseConverter environmentResponseConverter;
 
     @Mock
-    private StateContext context;
+    private StateContext stateContext;
 
     @Mock
     private ExtendedState extendedState;
@@ -136,17 +140,44 @@ class EnvClustersDeleteActionsTest {
 
     private EnvDeleteEvent actionPayload;
 
+    @Mock
+    private Tracer tracer;
+
+    @Mock
+    private Tracer.SpanBuilder spanBuilder;
+
+    @Mock
+    private Span span;
+
+    @Mock
+    private Scope scope;
+
+    @Mock
+    private SpanContext spanContext;
+
+    @Mock
+    private FlowEvent flowEvent;
+
     @BeforeEach
     void setUp() {
-        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN);
+        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
         actionPayload = new EnvDeleteEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN);
 
-        when(context.getMessageHeader(HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
-        when(context.getMessageHeader(HEADERS.DATA.name())).thenReturn(actionPayload);
-        when(context.getExtendedState()).thenReturn(extendedState);
-        when(context.getStateMachine()).thenReturn(stateMachine);
+        when(stateContext.getMessageHeader(HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(actionPayload);
+        when(stateContext.getExtendedState()).thenReturn(extendedState);
+        when(stateContext.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
+
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
+        when(spanBuilder.addReference(anyString(), any())).thenReturn(spanBuilder);
+        when(spanBuilder.ignoreActiveSpan()).thenReturn(spanBuilder);
+        when(spanBuilder.start()).thenReturn(span);
+        when(tracer.activateSpan(span)).thenReturn(scope);
+        when(span.context()).thenReturn(spanContext);
+        when(flowEvent.name()).thenReturn("eventName");
     }
 
     @Test
@@ -156,7 +187,7 @@ class EnvClustersDeleteActionsTest {
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenThrow(new UnsupportedOperationException(MESSAGE));
         when(failureEvent.event()).thenReturn(FAILURE_EVENT);
 
-        action.execute(context);
+        action.execute(stateContext);
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
@@ -174,7 +205,7 @@ class EnvClustersDeleteActionsTest {
 
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.empty());
 
-        action.execute(context);
+        action.execute(stateContext);
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
@@ -197,7 +228,7 @@ class EnvClustersDeleteActionsTest {
         when(environmentService.getEnvironmentDto(savedEnvironment)).thenReturn(environmentDto);
         when(environmentResponseConverter.dtoToSimpleResponse(environmentDto)).thenReturn(simpleEnvironmentResponse);
 
-        action.execute(context);
+        action.execute(stateContext);
 
         verify(environment).setStatus(EnvironmentStatus.DATAHUB_CLUSTERS_DELETE_IN_PROGRESS);
         verify(notificationService).send(ResourceEvent.ENVIRONMENT_DATAHUB_CLUSTERS_DELETION_STARTED, simpleEnvironmentResponse, FLOW_TRIGGER_USER_CRN);
@@ -214,7 +245,7 @@ class EnvClustersDeleteActionsTest {
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenThrow(new UnsupportedOperationException(MESSAGE));
         when(failureEvent.event()).thenReturn(FAILURE_EVENT);
 
-        action.execute(context);
+        action.execute(stateContext);
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
@@ -232,7 +263,7 @@ class EnvClustersDeleteActionsTest {
 
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.empty());
 
-        action.execute(context);
+        action.execute(stateContext);
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
@@ -255,7 +286,7 @@ class EnvClustersDeleteActionsTest {
         when(environmentService.getEnvironmentDto(savedEnvironment)).thenReturn(environmentDto);
         when(environmentResponseConverter.dtoToSimpleResponse(environmentDto)).thenReturn(simpleEnvironmentResponse);
 
-        action.execute(context);
+        action.execute(stateContext);
 
         verify(environment).setStatus(EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS);
         verify(notificationService).send(ResourceEvent.ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED, simpleEnvironmentResponse, FLOW_TRIGGER_USER_CRN);
@@ -269,6 +300,7 @@ class EnvClustersDeleteActionsTest {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
+        ReflectionTestUtils.setField(action, null, tracer, Tracer.class);
     }
 
     private Action<?, ?> configureAction(Supplier<Action<?, ?>> actionSupplier) {

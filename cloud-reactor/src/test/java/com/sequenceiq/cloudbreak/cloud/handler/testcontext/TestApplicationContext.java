@@ -56,6 +56,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
+import io.opentracing.Tracer;
 import reactor.Environment;
 
 @MockBeans({@MockBean(ApplicationFlowInformation.class), @MockBean(FlowLogDBService.class)})
@@ -102,6 +103,9 @@ public class TestApplicationContext {
     @Mock
     private Persister<?> persister;
 
+    @Mock
+    private Tracer tracer;
+
     @Inject
     private ParameterGenerator g;
 
@@ -134,6 +138,11 @@ public class TestApplicationContext {
     public CloudPlatformConnectors cloudPlatformConnectors() {
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         return cloudPlatformConnectors;
+    }
+
+    @Bean
+    public Tracer tracer() {
+        return tracer;
     }
 
     @Bean
