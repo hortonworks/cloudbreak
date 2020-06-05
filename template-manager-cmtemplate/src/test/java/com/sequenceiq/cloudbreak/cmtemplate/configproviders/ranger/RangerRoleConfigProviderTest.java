@@ -173,7 +173,7 @@ public class RangerRoleConfigProviderTest {
         assertEquals("ranger", serviceConfigs.get(1).getValue());
 
         assertEquals("ranger_database_type", serviceConfigs.get(2).getName());
-        assertEquals("PostgreSQL", serviceConfigs.get(2).getValue());
+        assertEquals("postgresql", serviceConfigs.get(2).getValue());
 
         assertEquals("ranger_database_user", serviceConfigs.get(3).getName());
         assertEquals("heyitsme", serviceConfigs.get(3).getValue());
