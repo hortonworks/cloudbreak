@@ -4,7 +4,9 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUDWATC
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -16,7 +18,9 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.cloudwatch.model.AmazonCloudWatchException;
 import com.amazonaws.services.cloudwatch.model.DeleteAlarmsRequest;
+import com.amazonaws.services.cloudwatch.model.DescribeAlarmsRequest;
 import com.amazonaws.services.cloudwatch.model.Dimension;
+import com.amazonaws.services.cloudwatch.model.MetricAlarm;
 import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -41,6 +45,9 @@ public class AwsCloudWatchService {
 
     @Value("${freeipa.aws.cloudwatch.threshold:1.0}")
     private double cloudwatchThreshhold;
+
+    @Value("${freeipa.aws.cloudwatch.max-batchsize:100}")
+    private int maxBatchsize;
 
     @Inject
     private AwsClient awsClient;
@@ -96,16 +103,45 @@ public class AwsCloudWatchService {
     }
 
     private void deleteCloudWatchAlarmsForSystemFailures(String regionName, AwsCredentialView credentialView, List<String> instanceIds) {
-        instanceIds.stream().forEach(instanceId -> {
-            try {
-                DeleteAlarmsRequest deleteAlarmsRequest = new DeleteAlarmsRequest().withAlarmNames(instanceId + alarmSuffix);
-                AmazonCloudWatchClient amazonCloudWatchClient = awsClient.createCloudWatchClient(credentialView, regionName);
-                amazonCloudWatchClient.deleteAlarms(deleteAlarmsRequest);
-                LOGGER.debug("Deleted cloudwatch alarm for instanceId {}", instanceId);
-            } catch (AmazonCloudWatchException acwe) {
-                LOGGER.error("Unable to delete cloudwatch alarm for instanceId {}: {}", instanceId, acwe.getLocalizedMessage());
-            }
-        });
+        final AtomicInteger counter = new AtomicInteger(0);
+        instanceIds.stream()
+                .map(instanceId -> instanceId + alarmSuffix)
+                .collect(Collectors.groupingBy(s -> counter.getAndIncrement() / maxBatchsize))
+                .values()
+                .stream()
+                .flatMap(alarmNames -> getExistingCloudWatchAlarms(regionName, credentialView, alarmNames))
+                .filter(alarmNames -> !alarmNames.isEmpty())
+                .forEach(alarmNames -> deleteCloudWatchAlarms(regionName, credentialView, alarmNames));
+    }
+
+    private Stream<List<String>> getExistingCloudWatchAlarms(String regionName, AwsCredentialView credentialView, List<String> alarmNames) {
+        Stream<List<String>> filteredAlarmNamesStream;
+        try {
+            DescribeAlarmsRequest request = new DescribeAlarmsRequest().withAlarmNames(alarmNames).withMaxRecords(maxBatchsize);
+            AmazonCloudWatchClient amazonCloudWatchClient = awsClient.createCloudWatchClient(credentialView, regionName);
+            List<String> filteredAlarmNames = amazonCloudWatchClient.describeAlarms(request).getMetricAlarms().stream()
+                    .map(MetricAlarm::getAlarmName)
+                    .collect(Collectors.toList());
+            filteredAlarmNamesStream = Stream.of(filteredAlarmNames);
+            LOGGER.debug("Checking cloudwatch alarms [{}] for existence and found [{}]", alarmNames, filteredAlarmNames);
+        } catch (AmazonCloudWatchException acwe) {
+            LOGGER.error("Unable to describe cloudwatch alarms falling back to delete all alarms indivdually [{}]: {}", alarmNames, acwe.getLocalizedMessage());
+            filteredAlarmNamesStream = alarmNames.stream()
+                    .map(alarmName -> List.of(alarmName));
+        }
+        return filteredAlarmNamesStream;
+    }
+
+    private void deleteCloudWatchAlarms(String regionName, AwsCredentialView credentialView, List<String> alarmNames) {
+        try {
+            DeleteAlarmsRequest deleteAlarmsRequest = new DeleteAlarmsRequest().withAlarmNames(alarmNames);
+            AmazonCloudWatchClient amazonCloudWatchClient = awsClient.createCloudWatchClient(credentialView, regionName);
+            amazonCloudWatchClient.deleteAlarms(deleteAlarmsRequest);
+            LOGGER.debug("Deleted cloudwatch alarms [{}]", alarmNames);
+        } catch (AmazonCloudWatchException acwe) {
+            LOGGER.error("Unable to delete cloudwatch alarms [{}]: {}", alarmNames, acwe.getLocalizedMessage());
+            throw new CloudConnectorException("unable to delete cloud watch alarms", acwe);
+        }
     }
 
     private boolean isCloudwatchEnabled(CloudStack stack) {
