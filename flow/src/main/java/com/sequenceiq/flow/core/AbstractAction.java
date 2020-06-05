@@ -18,10 +18,14 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.SpanContext;
+import io.opentracing.Tracer;
 import reactor.bus.EventBus;
 
 public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload> implements Action<S, E> {
@@ -47,6 +51,9 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
+
+    @Inject
+    private Tracer tracer;
 
     private final Class<P> payloadClass;
 
@@ -74,24 +81,27 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
             try {
                 Map<Object, Object> variables = context.getExtendedState().getVariables();
                 prepareExecution(payload, variables);
-                flowContext = createFlowContext(flowParameters, context, payload);
-                Object flowStartTime = variables.get(FLOW_START_TIME);
-                if (flowStartTime != null) {
-                    Object execTime = variables.get(FLOW_START_EXEC_TIME);
-                    long flowElapsed = (System.currentTimeMillis() - (long) flowStartTime) / MS_PER_SEC;
-                    long execElapsed = (System.currentTimeMillis() - (long) execTime) / MS_PER_SEC;
-                    String flowStateName = String.valueOf(variables.get(FLOW_STATE_NAME));
-                    long executionTime = Math.max(execElapsed, flowElapsed);
-                    LOGGER.debug("Stack: {}, flow state: {}, phase: {}, execution time {} sec", payload.getResourceId(),
-                            flowStateName, execElapsed > flowElapsed ? "doExec" : "service", executionTime);
-                    metricService.submit(FlowMetricType.FLOW_STEP, executionTime, Map.of("name", flowStateName.toLowerCase()));
+                String flowStateName = String.valueOf(variables.get(FLOW_STATE_NAME));
+                Span activeSpan = tracer.activeSpan();
+                String operationName = context.getEvent().name();
+                SpanContext spanContext = flowParameters.getSpanContext();
+                if (TracingUtil.isActiveSpanReusable(activeSpan, spanContext, operationName)) {
+                    LOGGER.debug("Reusing existing span. {}", activeSpan.context());
+                    flowContext = createFlowContext(flowParameters, context, payload);
+                    executeAction(context, payload, flowContext, variables, flowStateName);
+                } else {
+                    Span span = TracingUtil.getSpan(tracer, operationName, spanContext, flowParameters.getFlowId(),
+                            null, flowParameters.getFlowTriggerUserCrn());
+                    spanContext = TracingUtil.useOrCreateSpanContext(spanContext, span);
+                    flowParameters.setSpanContext(spanContext);
+                    try (Scope ignored = tracer.activateSpan(span)) {
+                        flowContext = createFlowContext(flowParameters, context, payload);
+                        executeAction(context, payload, flowContext, variables, flowStateName);
+                    } finally {
+                        span.finish();
+                    }
                 }
-                variables.put(FLOW_STATE_NAME, context.getStateMachine().getState().getId());
-                variables.put(FLOW_START_EXEC_TIME, System.currentTimeMillis());
-                doExecute(flowContext, payload, variables);
-                variables.put(FLOW_START_TIME, System.currentTimeMillis());
             } catch (Exception ex) {
-//                throw new RuntimeException("shit happened again! :D");
                 LOGGER.error("Error during execution of " + getClass().getName(), ex);
                 if (failureEvent != null) {
                     sendEvent(flowParameters, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex), Map.of());
@@ -100,6 +110,23 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 }
             }
         });
+    }
+
+    private void executeAction(StateContext<S, E> context, P payload, C flowContext, Map<Object, Object> variables, String flowStateName) throws Exception {
+        Object flowStartTime = variables.get(FLOW_START_TIME);
+        if (flowStartTime != null) {
+            Object execTime = variables.get(FLOW_START_EXEC_TIME);
+            long flowElapsed = (System.currentTimeMillis() - (long) flowStartTime) / MS_PER_SEC;
+            long execElapsed = (System.currentTimeMillis() - (long) execTime) / MS_PER_SEC;
+            long executionTime = Math.max(execElapsed, flowElapsed);
+            LOGGER.debug("Stack: {}, flow state: {}, phase: {}, execution time {} sec", payload.getResourceId(),
+                    flowStateName, execElapsed > flowElapsed ? "doExec" : "service", executionTime);
+            metricService.submit(FlowMetricType.FLOW_STEP, executionTime, Map.of("name", flowStateName.toLowerCase()));
+        }
+        variables.put(FLOW_STATE_NAME, context.getStateMachine().getState().getId());
+        variables.put(FLOW_START_EXEC_TIME, System.currentTimeMillis());
+        doExecute(flowContext, payload, variables);
+        variables.put(FLOW_START_TIME, System.currentTimeMillis());
     }
 
     public void setFailureEvent(E failureEvent) {
@@ -135,6 +162,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         Map<String, Object> headers = new HashMap<>();
         headers.put(FlowConstants.FLOW_ID, flowParameters.getFlowId());
         headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, flowParameters.getFlowTriggerUserCrn());
+        headers.put(FlowConstants.SPAN_CONTEXT, flowParameters.getSpanContext());
         String flowChainId = runningFlows.getFlowChainId(flowParameters.getFlowId());
         if (flowChainId != null) {
             headers.put(FlowConstants.FLOW_CHAIN_ID, flowChainId);

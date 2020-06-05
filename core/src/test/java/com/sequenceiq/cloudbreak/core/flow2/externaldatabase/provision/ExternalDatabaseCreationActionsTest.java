@@ -49,6 +49,10 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.MessageFactory;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.SpanContext;
+import io.opentracing.Tracer;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
@@ -76,7 +80,7 @@ class ExternalDatabaseCreationActionsTest {
     private StackUpdaterService stackUpdaterService;
 
     @Mock
-    private StateContext context;
+    private StateContext stateContext;
 
     @Mock
     private ExtendedState extendedState;
@@ -126,28 +130,55 @@ class ExternalDatabaseCreationActionsTest {
     @Mock
     private Flow flow;
 
+    @Mock
+    private Tracer tracer;
+
+    @Mock
+    private Tracer.SpanBuilder spanBuilder;
+
+    @Mock
+    private Span span;
+
+    @Mock
+    private Scope scope;
+
+    @Mock
+    private SpanContext spanContext;
+
+    @Mock
+    private FlowEvent flowEvent;
+
     @InjectMocks
     private ExternalDatabaseCreationActions underTest;
 
     @BeforeEach
-    void setUp() {
+    void setup() {
         STACK.setId(STACK_ID);
-        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN);
-        when(context.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
-        when(context.getExtendedState()).thenReturn(extendedState);
+        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
+        when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
+        when(stateContext.getExtendedState()).thenReturn(extendedState);
         when(extendedState.getVariables()).thenReturn(new HashMap<>());
-        when(context.getStateMachine()).thenReturn(stateMachine);
+        when(stateContext.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
         when(stackService.getByIdWithClusterInTransaction(any())).thenReturn(STACK);
+
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
+        when(spanBuilder.addReference(anyString(), any())).thenReturn(spanBuilder);
+        when(spanBuilder.ignoreActiveSpan()).thenReturn(spanBuilder);
+        when(spanBuilder.start()).thenReturn(span);
+        when(tracer.activateSpan(span)).thenReturn(scope);
+        when(span.context()).thenReturn(spanContext);
+        when(flowEvent.name()).thenReturn("eventName");
     }
 
     @Test
     void externalDatabaseCreation() {
         StackEvent stackEventPayload = new StackEvent(ACTION_PAYLOAD_SELECTOR, STACK_ID);
-        when(context.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(stackEventPayload);
+        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(stackEventPayload);
         Action<?, ?> action = configureAction(underTest::externalDatabaseCreation);
-        action.execute(context);
+        action.execute(stateContext);
         verifyNoMoreInteractions(stackUpdaterService);
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         assertThat(selectorArgumentCaptor.getValue()).isEqualTo("CreateExternalDatabaseRequest");
@@ -157,9 +188,9 @@ class ExternalDatabaseCreationActionsTest {
     void externalDatabaseCreationFinishedAction() {
         CreateExternalDatabaseResult createExternalDatabaseResultPayload =
                 new CreateExternalDatabaseResult(STACK_ID, EXTERNAL_DATABASE_WAIT_SUCCESS_EVENT.event(), STACK_NAME, STACK_CRN);
-        when(context.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(createExternalDatabaseResultPayload);
+        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(createExternalDatabaseResultPayload);
         Action<?, ?> action = configureAction(underTest::externalDatabaseCreationFinishedAction);
-        action.execute(context);
+        action.execute(stateContext);
 
         verifyNoMoreInteractions(stackUpdaterService);
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
@@ -182,9 +213,9 @@ class ExternalDatabaseCreationActionsTest {
         when(stackService.getByIdWithClusterInTransaction(any())).thenReturn(STACK);
 
         when(runningFlows.get(anyString())).thenReturn(flow);
-        when(context.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(createExternalDatabaseFailedPayload);
+        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(createExternalDatabaseFailedPayload);
         Action<?, ?> action = configureAction(underTest::externalDatabaseCreationFailureAction);
-        action.execute(context);
+        action.execute(stateContext);
 
         verify(stackUpdaterService).updateStatus(STACK_ID, DetailedStackStatus.EXTERNAL_DATABASE_CREATION_FAILED,
                 ResourceEvent.CLUSTER_EXTERNAL_DATABASE_CREATION_FAILED, MESSAGE);
@@ -216,5 +247,6 @@ class ExternalDatabaseCreationActionsTest {
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
         ReflectionTestUtils.setField(action, null, stackService, StackService.class);
         ReflectionTestUtils.setField(action, null, metricService, MetricService.class);
+        ReflectionTestUtils.setField(action, null, tracer, Tracer.class);
     }
 }

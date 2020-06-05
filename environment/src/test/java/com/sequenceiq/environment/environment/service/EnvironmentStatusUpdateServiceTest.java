@@ -41,7 +41,7 @@ public class EnvironmentStatusUpdateServiceTest {
 
     @Test
     public void testUpdateEnvironmentStatusAndNotify() {
-        CommonContext commonContext = new CommonContext(new FlowParameters("flowId", "userCrn"));
+        CommonContext commonContext = new CommonContext(new FlowParameters("flowId", "userCrn", null));
         EnvironmentDto environmentDto = EnvironmentDto.builder().withId(1L).withEnvironmentStatus(EnvironmentStatus.STOP_DATAHUB_FAILED).build();
         Environment environment = new Environment();
         SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();

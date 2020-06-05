@@ -50,6 +50,10 @@ import com.sequenceiq.flow.core.MessageFactory;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.notification.NotificationService;
 
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.SpanContext;
+import io.opentracing.Tracer;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
@@ -82,7 +86,7 @@ class EnvCreationActionsTest {
     private EnvironmentResponseConverter environmentResponseConverter;
 
     @Mock
-    private StateContext context;
+    private StateContext stateContext;
 
     @Mock
     private ExtendedState extendedState;
@@ -125,17 +129,44 @@ class EnvCreationActionsTest {
     @Captor
     private ArgumentCaptor<Object> payloadArgumentCaptor;
 
+    @Mock
+    private Tracer tracer;
+
+    @Mock
+    private Tracer.SpanBuilder spanBuilder;
+
+    @Mock
+    private Span span;
+
+    @Mock
+    private Scope scope;
+
+    @Mock
+    private SpanContext spanContext;
+
+    @Mock
+    private FlowEvent flowEvent;
+
     @BeforeEach
     void setUp() {
-        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN);
-        when(context.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
+        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
+        when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
         actionPayload = new EnvCreationEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN);
-        when(context.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actionPayload);
-        when(context.getExtendedState()).thenReturn(extendedState);
+        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actionPayload);
+        when(stateContext.getExtendedState()).thenReturn(extendedState);
         when(extendedState.getVariables()).thenReturn(new HashMap<>());
-        when(context.getStateMachine()).thenReturn(stateMachine);
+        when(stateContext.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
+
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
+        when(spanBuilder.addReference(anyString(), any())).thenReturn(spanBuilder);
+        when(spanBuilder.ignoreActiveSpan()).thenReturn(spanBuilder);
+        when(spanBuilder.start()).thenReturn(span);
+        when(tracer.activateSpan(span)).thenReturn(scope);
+        when(span.context()).thenReturn(spanContext);
+        when(flowEvent.name()).thenReturn("eventName");
     }
 
     @Test
@@ -160,7 +191,7 @@ class EnvCreationActionsTest {
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenThrow(new UnsupportedOperationException(MESSAGE));
         when(failureEvent.event()).thenReturn(FAILURE_EVENT);
 
-        action.execute(context);
+        action.execute(stateContext);
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
@@ -177,7 +208,7 @@ class EnvCreationActionsTest {
 
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.empty());
 
-        action.execute(context);
+        action.execute(stateContext);
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
@@ -208,7 +239,7 @@ class EnvCreationActionsTest {
         SimpleEnvironmentResponse response = mock(SimpleEnvironmentResponse.class);
         when(environmentResponseConverter.dtoToSimpleResponse(environmentDto)).thenReturn(response);
 
-        action.execute(context);
+        action.execute(stateContext);
 
         verify(environment).setStatus(environmentStatus);
         verify(notificationService).send(eventStarted, response, FLOW_TRIGGER_USER_CRN);
@@ -231,6 +262,7 @@ class EnvCreationActionsTest {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
+        ReflectionTestUtils.setField(action, null, tracer, Tracer.class);
     }
 
     private void verifyFailureEvent() {
