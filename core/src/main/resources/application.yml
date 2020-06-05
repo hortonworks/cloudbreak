@@ -247,6 +247,8 @@ cb:
         7.2.0 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small-720;
         7.2.0 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-720;
         7.2.0 - Data Discovery and Exploration=cdp-dde-720;
+        7.2.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-721;
+        7.2.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-721;
 
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
@@ -343,27 +345,34 @@ cb:
 
   clouderamanager:
     entries:
-      7.0:
+      "[7.0]":
         version: 7.0.2
         repo:
           redhat7:
             baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1717199/cm7/7.0.2/redhat7/yum/
           centos7:
             baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1717199/cm7/7.0.2/redhat7/yum/
-      7.1:
+      "[7.1]":
         version: 7.1.0
         repo:
           redhat7:
             baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2365123/cm7/7.1.0/redhat7/yum/
           centos7:
             baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2365123/cm7/7.1.0/redhat7/yum/
-      7.2:
+      "[7.2]":
         version: 7.2.0
         repo:
           redhat7:
             baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2978394/cm7/7.2.0/redhat7/yum/
           centos7:
             baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2978394/cm7/7.2.0/redhat7/yum/
+      "[7.2.1]":
+        version: 7.2.1
+        repo:
+          redhat7:
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/3574927/cm7/7.2.1/redhat7/yum/
+          centos7:
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/3574927/cm7/7.2.1/redhat7/yum/
 
   cdh:
     entries:
@@ -391,6 +400,14 @@ cb:
             repoid: CDH-7.2.0
             redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2972937/cdh/7.x/parcels/
             centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/2972937/cdh/7.x/parcels/
+      "[7.2.1]":
+        version: 7.2.1-1.cdh7.2.1.p0.3585152
+        minCM: 7.2.1
+        repo:
+          stack:
+            repoid: CDH-7.2.1
+            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/3585152/cdh/7.x/parcels/
+            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/3585152/cdh/7.x/parcels/
 
   workspace.service.cache.ttl: 15
 
