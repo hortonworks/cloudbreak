@@ -90,7 +90,7 @@ class ProvisionerServiceTest {
         long clusterId = CLUSTER_ID.incrementAndGet();
         SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
         StackV4Response stackV4Response = new StackV4Response();
-        when(stackV4Endpoint.get(anyLong(), nullable(String.class), nullable(Set.class))).thenThrow(new NotFoundException());
+        when(stackV4Endpoint.getByCrn(anyLong(), nullable(String.class), nullable(Set.class))).thenThrow(new NotFoundException());
         when(stackV4Endpoint.post(anyLong(), any(StackV4Request.class))).thenReturn(stackV4Response);
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
 
