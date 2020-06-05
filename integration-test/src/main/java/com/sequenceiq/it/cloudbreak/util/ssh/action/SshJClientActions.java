@@ -18,8 +18,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
+import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
@@ -37,8 +41,8 @@ public class SshJClientActions extends SshJClient {
     private static Pair<Integer, String> execute(SSHClient ssh, String command) throws IOException {
         LOGGER.info("Waiting to SSH command to be executed...");
         try (Session session = startSshSession(ssh);
-                Session.Command cmd = session.exec(command);
-                OutputStream os = IOUtils.readFully(cmd.getInputStream())) {
+            Session.Command cmd = session.exec(command);
+            OutputStream os = IOUtils.readFully(cmd.getInputStream())) {
             Log.log(LOGGER, format("The following SSH command [%s] is going to be executed on host [%s]", ssh.getConnection().getTransport().getRemoteHost(),
                     command));
             cmd.join(10L, TimeUnit.SECONDS);
@@ -52,21 +56,36 @@ public class SshJClientActions extends SshJClient {
         return sshSession;
     }
 
-    private List<String> getSdxInstanceGroupIps(SdxInternalTestDto testDto, SdxClient sdxClient, List<String> hostGroupNames) {
+    private List<String> getSdxInstanceGroupIps(String sdxName, SdxClient sdxClient, List<String> hostGroupNames, boolean publicIp) {
         List<String> instanceIPs = new ArrayList<>();
 
-        /**
-         * Right now only the Private IP is available for an Instance.
-         */
         hostGroupNames.forEach(hostGroupName -> {
-            InstanceMetaDataV4Response instanceMetaDataV4Response = Objects.requireNonNull(sdxClient.getSdxClient().sdxEndpoint().getDetail(testDto.getName(),
+            InstanceMetaDataV4Response instanceMetaDataV4Response = Objects.requireNonNull(sdxClient.getSdxClient().sdxEndpoint().getDetail(sdxName,
                     new HashSet<>()).getStackV4Response().getInstanceGroups().stream().filter(instanceGroup -> instanceGroup.getName().equals(hostGroupName))
                     .findFirst().orElse(null)).getMetadata().stream().findFirst().orElse(null);
             assert instanceMetaDataV4Response != null;
-            LOGGER.info("The selected Instance Group [{}] and the available Private IP [{}]", instanceMetaDataV4Response.getInstanceGroup(),
-                    instanceMetaDataV4Response.getPrivateIp());
-            instanceIPs.add(instanceMetaDataV4Response.getPrivateIp());
+            LOGGER.info("The selected Instance Group [{}] and the available Private IP [{}] and Public IP [{]]. {} ip will be used.",
+                    instanceMetaDataV4Response.getInstanceGroup(), instanceMetaDataV4Response.getPrivateIp(), instanceMetaDataV4Response.getPublicIp(),
+                    publicIp ? "Public" : "Private");
+            instanceIPs.add(publicIp ? instanceMetaDataV4Response.getPublicIp() : instanceMetaDataV4Response.getPrivateIp());
         });
+
+        return instanceIPs;
+    }
+
+    private List<String> getFreeIpaInstanceGroupIps(String environmentCrn, FreeIPAClient freeipaClient, boolean publicIp) {
+        List<String> instanceIPs = new ArrayList<>();
+
+        freeipaClient.getFreeIpaClient().getFreeIpaV1Endpoint()
+                .describe(environmentCrn).getInstanceGroups().stream()
+                .forEach(ig -> {
+                    InstanceMetaDataResponse instanceMetaDataResponse = ig.getMetaData().stream().findFirst().orElse(null);
+                    assert instanceMetaDataResponse != null;
+                    LOGGER.info("The selected Instance Group [{}] and the available Private IP [{}] and Public IP [{]]. {} ip will be used.",
+                            instanceMetaDataResponse.getInstanceGroup(), instanceMetaDataResponse.getPrivateIp(), instanceMetaDataResponse.getPublicIp(),
+                            publicIp ? "Public" : "Private");
+                    instanceIPs.add(publicIp ? instanceMetaDataResponse.getPublicIp() : instanceMetaDataResponse.getPrivateIp());
+                });
 
         return instanceIPs;
     }
@@ -76,7 +95,10 @@ public class SshJClientActions extends SshJClient {
         String fileListCommand = String.format("find %s -type f -name %s", filePath, fileName);
         AtomicLong quantity = new AtomicLong(0);
 
-        getSdxInstanceGroupIps(testDto, sdxClient, hostGroupNames).forEach(instanceIP -> {
+        /**
+         * Right now only the Private IP is available for an Instance.
+         */
+        getSdxInstanceGroupIps(testDto.getName(), sdxClient, hostGroupNames, false).forEach(instanceIP -> {
             try (SSHClient sshClient = createSshClient(instanceIP)) {
                 Pair<Integer, String> cmdOut = execute(sshClient, fileListCommand);
                 Log.log(LOGGER, format("Command exit status [%s] and result [%s].", String.valueOf(cmdOut.getKey()), cmdOut.getValue()));
@@ -104,5 +126,30 @@ public class SshJClientActions extends SshJClient {
             throw new TestFailException(" File at: " + filePath + " path is NOT available at: " + hostGroupNames.toString() + " host group(s).");
         }
         return testDto;
+    }
+
+    public SdxTestDto checkNoOutboundInternetTraffic(SdxTestDto testDto, SdxClient sdxClient, List<String> hostGroupNames) {
+        getSdxInstanceGroupIps(testDto.getName(), sdxClient, hostGroupNames, true).forEach(instanceIP -> checkNoOutboundInternetTraffic(instanceIP));
+        return testDto;
+    }
+
+    public FreeIPATestDto checkNoOutboundInternetTraffic(FreeIPATestDto testDto, FreeIPAClient freeIpaClient) {
+        getFreeIpaInstanceGroupIps(testDto.getResponse().getEnvironmentCrn(), freeIpaClient, true)
+                .forEach(instanceIP -> checkNoOutboundInternetTraffic(instanceIP));
+        return testDto;
+    }
+
+    private void checkNoOutboundInternetTraffic(String instanceIP) {
+        String checkInternetCommand = "curl --max-time 30 cloudera.com";
+        try (SSHClient sshClient = createSshClient(instanceIP)) {
+            Pair<Integer, String> cmdOut = execute(sshClient, checkInternetCommand);
+            Log.log(LOGGER, format("Command exit status [%s] and result [%s].", cmdOut.getKey(), cmdOut.getValue()));
+            if (cmdOut.getKey() == 0) {
+                throw new TestFailException("Instance [" + instanceIP + "] has internet coonection but shouldn't have!");
+            }
+        } catch (Exception e) {
+            LOGGER.error("SSH fail on [{}] while executing command [{}]", instanceIP, checkInternetCommand);
+            throw new TestFailException(" SSH fail on [" + instanceIP + "] while executing command [" + checkInternetCommand + "].");
+        }
     }
 }
