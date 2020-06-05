@@ -33,7 +33,7 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
 
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_1)) {
             RdsView rangerRdsView = getRdsView(source);
-            addDbConfigs(rangerRdsView, configList);
+            addDbConfigs(rangerRdsView, configList, cdhVersion);
             configList.add(config("ranger_database_port", rangerRdsView.getPort()));
         }
 
@@ -47,10 +47,10 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
                 String cdhVersion = getCdhVersion(source);
                 List<ApiClusterTemplateConfig> configList = new ArrayList<>();
 
-                // In CM 7.2.0 and above, the ranger database parameters have moved to the service
+                // In CM 7.2.1 and above, the ranger database parameters have moved to the service
                 // config (see above getServiceConfigs).
                 if (!isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_1)) {
-                    addDbConfigs(getRdsView(source), configList);
+                    addDbConfigs(getRdsView(source), configList, cdhVersion);
                 }
 
                 if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_0_1)) {
@@ -79,10 +79,17 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
         return DatabaseType.RANGER;
     }
 
-    private String getRangerDbType(RdsView rdsView) {
+    // There is a bug in CM (OPSAPS-56992) which makes the db names case-sensitive.
+    // To workaround this, we have to send the correctly cased ranger_database_type depending
+    // on the version of CM.
+    private String versionCorrectedPostgresString(final String cdhVersion) {
+        return isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_1) ? "postgresql" : "PostgreSQL";
+    }
+
+    private String getRangerDbType(RdsView rdsView, String cdhVersion) {
         switch (rdsView.getDatabaseVendor()) {
             case POSTGRES:
-                return "PostgreSQL";
+                return versionCorrectedPostgresString(cdhVersion);
             default:
                 throw new CloudbreakServiceException("Unsupported Ranger database type: " + rdsView.getDatabaseVendor().displayName());
         }
@@ -93,10 +100,10 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
             "" : source.getBlueprintView().getProcessor().getStackVersion();
     }
 
-    private void addDbConfigs(RdsView rangerRdsView, List<ApiClusterTemplateConfig> configList) {
+    private void addDbConfigs(RdsView rangerRdsView, List<ApiClusterTemplateConfig> configList, final String cdhVersion) {
         configList.add(config("ranger_database_host", rangerRdsView.getHost()));
         configList.add(config("ranger_database_name", rangerRdsView.getDatabaseName()));
-        configList.add(config("ranger_database_type", getRangerDbType(rangerRdsView)));
+        configList.add(config("ranger_database_type", getRangerDbType(rangerRdsView, cdhVersion)));
         configList.add(config("ranger_database_user", rangerRdsView.getConnectionUserName()));
         configList.add(config("ranger_database_password", rangerRdsView.getConnectionPassword()));
     }
