@@ -67,6 +67,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    public StackV4Response getByCrn(Long workspaceId, String crn, Set<String> entries) {
+        return stackOperations.get(NameOrCrn.ofCrn(crn), workspaceId, entries, null);
+    }
+
+    @Override
     public void delete(Long workspaceId, String name, boolean forced) {
         stackOperations.delete(NameOrCrn.ofName(name), workspaceId, forced);
     }

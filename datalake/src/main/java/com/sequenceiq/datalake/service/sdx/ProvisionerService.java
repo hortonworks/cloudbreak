@@ -165,7 +165,7 @@ public class ProvisionerService {
                 });
                 StackV4Response stackV4Response;
                 try {
-                    stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), null);
+                    stackV4Response = stackV4Endpoint.getByCrn(0L, sdxCluster.getCrn(), null);
                 } catch (NotFoundException e) {
                     LOGGER.info("Stack does not exist on cloudbreak side, POST new cluster: {}", sdxCluster.getClusterName(), e);
                     stackV4Response = stackV4Endpoint.post(0L, stackV4Request);
