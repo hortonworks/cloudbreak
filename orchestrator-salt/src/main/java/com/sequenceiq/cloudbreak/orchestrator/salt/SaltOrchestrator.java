@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUpload;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateAllRunner;
@@ -445,7 +446,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = createSaltConnector(primaryGateway)) {
             getRolesBeforeHighstateMagicWithRetry(sc);
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitModel);
+            runNewService(sc, new HighStateAllRunner(allHostnames, allNodes), exitModel);
         } catch (ExecutionException e) {
             LOGGER.info("Error occurred during bootstrap", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
@@ -497,8 +498,10 @@ public class SaltOrchestrator implements HostOrchestrator {
             runNewService(sc, new HighStateRunner(primaryServerHostname, allNodes), exitCriteriaModel);
 
             LOGGER.debug("Set replica FreeIPA: {}", replicaServersHostnames);
-            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(replicaServersHostnames, allNodes, "freeipa_replica"), exitCriteriaModel, exitCriteria);
-            runNewService(sc, new HighStateRunner(replicaServersHostnames, allNodes), exitCriteriaModel);
+            if (!replicaServersHostnames.isEmpty()) {
+                saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(replicaServersHostnames, allNodes, "freeipa_replica"), exitCriteriaModel, exitCriteria);
+                runNewService(sc, new HighStateRunner(replicaServersHostnames, allNodes), exitCriteriaModel);
+            }
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.warn("CloudbreakOrchestratorException occurred during FreeIPA installation", e);
             throw e;
@@ -547,7 +550,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, exitCriteria);
-            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, true);
+            runNewService(sc, new HighStateAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, true);
 
             // remove 'manager_upgrade' role from all nodes
             saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "roles", "manager_upgrade"),
@@ -764,7 +767,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
                 Set<String> allHostnames = responsiveNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
                 saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, responsiveNodes), exitCriteriaModel, exitCriteria);
-                runNewService(sc, new HighStateRunner(allHostnames, responsiveNodes), exitCriteriaModel, maxRetry, true);
+                runNewService(sc, new HighStateAllRunner(allHostnames, responsiveNodes), exitCriteriaModel, maxRetry, true);
 
                 saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodes, "roles", "cloudera_manager_agent_stop"),
                         exitCriteriaModel, exitCriteria);
@@ -797,7 +800,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                         exitCriteriaModel, maxRetryLeave, exitCriteria);
                 Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
                 saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, exitCriteria);
-                runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, true);
+                runNewService(sc, new HighStateAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, true);
             }
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for recipes).", e);
@@ -892,7 +895,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, exitCriteria);
             if (phase == PRE_CLOUDERA_MANAGER_START) {
                 // Execute highstate before recipe. Otherwise ipa domain names will not be resolvable in recipe scripts.
-                runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
+                runNewService(sc, new HighStateAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
             } else {
                 // Skip highstate and just execute other recipes for performace.
                 StateAllRunner stateAllRunner = new StateAllRunner(targetHostnames, allNodes, "recipes." + phase.value());

@@ -63,7 +63,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltCommandRunner;
@@ -179,8 +179,8 @@ public class SaltOrchestratorTest {
         SaltCommandTracker syncGrainsCheckerSaltCommandTracker = mock(SaltCommandTracker.class);
         whenNew(SaltCommandTracker.class).withArguments(eq(saltConnector), eq(syncAllRunner)).thenReturn(syncGrainsCheckerSaltCommandTracker);
 
-        HighStateRunner highStateRunner = mock(HighStateRunner.class);
-        whenNew(HighStateRunner.class).withAnyArguments().thenReturn(highStateRunner);
+        HighStateAllRunner highStateAllRunner = mock(HighStateAllRunner.class);
+        whenNew(HighStateAllRunner.class).withAnyArguments().thenReturn(highStateAllRunner);
 
         SaltJobIdTracker saltJobIdTracker = mock(SaltJobIdTracker.class);
         whenNew(SaltJobIdTracker.class).withAnyArguments().thenReturn(saltJobIdTracker);
@@ -206,9 +206,9 @@ public class SaltOrchestratorTest {
         verifyNew(SyncAllRunner.class, times(1)).withArguments(eq(allNodes), eq(targets));
 
         // verify run new service
-        verifyNew(HighStateRunner.class, atLeastOnce()).withArguments(eq(allNodes),
+        verifyNew(HighStateAllRunner.class, atLeastOnce()).withArguments(eq(allNodes),
                 eq(targets));
-        verifyNew(SaltJobIdTracker.class, atLeastOnce()).withArguments(eq(saltConnector), eq(highStateRunner), eq(true));
+        verifyNew(SaltJobIdTracker.class, atLeastOnce()).withArguments(eq(saltConnector), eq(highStateAllRunner), eq(true));
         verify(saltCommandRunner, times(4)).runSaltCommand(any(SaltConnector.class), any(BaseSaltJobRunner.class),
                 any(ExitCriteriaModel.class), any(ExitCriteria.class));
         verify(grainUploader, times(1)).uploadGrains(anySet(), anyList(), any(ExitCriteriaModel.class), any(SaltConnector.class),

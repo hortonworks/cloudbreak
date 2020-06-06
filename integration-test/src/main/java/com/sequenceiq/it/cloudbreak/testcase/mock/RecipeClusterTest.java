@@ -154,10 +154,10 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(2))
                 .when(stackTestClient.deleteV4())
                 .await(STACK_DELETED)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(4))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
                 .validate();
     }
 
@@ -178,7 +178,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
 //                .given(StackTestDto.class)
 //                .when(stackTestClient.createV4())
 //                .await(STACK_AVAILABLE)
-//                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
+//                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(2))
 //                .validate();
 //    }
 
@@ -220,7 +220,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(4))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
                 .validate();
     }
 
@@ -263,7 +263,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(4))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
                 .validate();
     }
 
@@ -297,20 +297,20 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 {
                         getBean(MockedTestContext.class),
                         PRE_CLOUDERA_MANAGER_START,
-                        3,
+                        2,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("pre ambari start recipes")
                                 .when("calling cluster creation with the recipes")
-                                .then("should run 3 times")
+                                .then("should run 2 times")
                 },
                 {
                         getBean(MockedTestContext.class),
                         POST_CLOUDERA_MANAGER_START,
-                        3,
+                        2,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("post ambari start recipes")
                                 .when("calling cluster creation with the recipes")
-                                .then("should run 3 times")
+                                .then("should run 2 times")
                 },
                 {
                         getBean(MockedTestContext.class),
