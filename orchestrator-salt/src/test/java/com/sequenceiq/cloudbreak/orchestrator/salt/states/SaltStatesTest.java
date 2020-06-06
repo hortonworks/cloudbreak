@@ -108,6 +108,23 @@ public class SaltStatesTest {
     }
 
     @Test
+    public void highstateTargetTest() throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jobId = "1";
+        ApplyResponse response = new ApplyResponse();
+        List<Map<String, JsonNode>> result = new ArrayList<>();
+        Map<String, JsonNode> resultMap = new HashMap<>();
+        resultMap.put("jid", objectMapper.readTree(jobId));
+        result.add(resultMap);
+        response.setResult(result);
+        when(saltConnector.run(any(), eq("state.highstate"), any(), eq(ApplyResponse.class))).thenReturn(response);
+
+        String jid = SaltStates.highstate(saltConnector, target);
+        assertEquals(jobId, jid);
+        verify(saltConnector, times(1)).run(eq(target), eq("state.highstate"), eq(LOCAL_ASYNC), eq(ApplyResponse.class));
+    }
+
+    @Test
     public void jidInfoHighTest() throws Exception {
         String jobId = "2";
 
