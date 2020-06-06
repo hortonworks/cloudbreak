@@ -83,7 +83,11 @@ public class SaltStates {
     }
 
     public static String highstate(SaltConnector sc) {
-        return sc.run(Glob.ALL, "state.highstate", LOCAL_ASYNC, ApplyResponse.class).getJid();
+        return highstate(sc, Glob.ALL);
+    }
+
+    public static String highstate(SaltConnector sc, Target<String> target) {
+        return sc.run(target, "state.highstate", LOCAL_ASYNC, ApplyResponse.class).getJid();
     }
 
     public static ApplyFullResponse showState(SaltConnector sc, String state) {
