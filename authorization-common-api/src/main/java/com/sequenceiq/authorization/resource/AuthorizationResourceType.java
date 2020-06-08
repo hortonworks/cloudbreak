@@ -7,5 +7,7 @@ public enum AuthorizationResourceType {
     DATAHUB,
     IMAGE_CATALOG,
     CLUSTER_DEFINITION,
-    CLUSTER_TEMPLATE;
+    CLUSTER_TEMPLATE,
+    DATABASE,
+    DATABASE_SERVER;
 }

@@ -1,7 +1,9 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.database.responses;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.base.DatabaseV4Base;
@@ -13,7 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = ModelDescriptions.DATABASE_RESPONSE)
 @JsonInclude(Include.NON_NULL)
-public class DatabaseV4Response extends DatabaseV4Base {
+public class DatabaseV4Response extends DatabaseV4Base implements ResourceCrnAwareApiModel {
 
     @ApiModelProperty(Database.CRN)
     private String crn;
@@ -101,5 +103,11 @@ public class DatabaseV4Response extends DatabaseV4Base {
 
     public void setResourceStatus(ResourceStatus resourceStatus) {
         this.resourceStatus = resourceStatus;
+    }
+
+    @JsonIgnore
+    @Override
+    public String getResourceCrn() {
+        return crn;
     }
 }

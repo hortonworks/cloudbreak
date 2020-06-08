@@ -12,22 +12,22 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.InternalServerErrorException;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.MapBindingResult;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -91,6 +91,9 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     @Inject
     private PasswordGeneratorService passwordGeneratorService;
 
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
+
     public Set<DatabaseServerConfig> findAll(Long workspaceId, String environmentCrn) {
         if (environmentCrn == null) {
             throw new IllegalArgumentException("No environment CRN supplied.");
@@ -101,6 +104,10 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
     public DatabaseServerConfig create(DatabaseServerConfig resource, Long workspaceId, boolean test) {
 
+        if (repository.findByName(resource.getName()).isPresent()) {
+            throw new BadRequestException(String.format("%s already exists with name '%s' in workspace %d",
+                    DatabaseServerConfig.class.getSimpleName(), resource.getName(), resource.getWorkspaceId()));
+        }
         if (resource.getConnectionDriver() == null) {
             resource.setConnectionDriver(resource.getDatabaseVendor().connectionDriver());
             LOGGER.info("Database server configuration lacked a connection driver; defaulting to {}",
@@ -127,17 +134,15 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                 resource.setAccountId(crn.getAccountId());
             }
             resource.setWorkspaceId(workspaceId);
-            return repository.save(resource);
-        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
-            Optional<Throwable> cve = Throwables.getCausalChain(e).stream()
-                    .filter(c -> c instanceof ConstraintViolationException)
-                    .findFirst();
-            if (cve.isPresent()) {
-                String message = String.format("%s already exists with name '%s' in workspace %d",
-                        DatabaseServerConfig.class.getSimpleName(), resource.getName(), resource.getWorkspaceId());
-                throw new BadRequestException(message, cve.get());
-            }
-            throw e;
+            return transactionService.required(() -> {
+                DatabaseServerConfig saved = repository.save(resource);
+                grpcUmsClient.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(),
+                        saved.getResourceCrn().toString(), ThreadBasedUserCrnProvider.getAccountId());
+                return saved;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            LOGGER.error("Error happened during database server creation: ", e);
+            throw new InternalServerErrorException(e);
         }
     }
 
@@ -320,6 +325,23 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
     @Override
     public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.DATALAKE;
+        return AuthorizationResourceType.DATABASE_SERVER;
+    }
+
+    @Override
+    public String getResourceCrnByResourceName(String resourceName) {
+        return repository.findResourceCrnByName(resourceName).orElseThrow(NotFoundException.notFound("databaseserver", resourceName)).toString();
+    }
+
+    @Override
+    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+        return repository.findResourceCrnsByNames(resourceNames)
+                .stream().map(Crn::toString).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getResourceCrnsInAccount() {
+        return repository.findAllResourceCrnsByAccountId(ThreadBasedUserCrnProvider.getAccountId())
+                .stream().map(Crn::toString).collect(Collectors.toList());
     }
 }
