@@ -143,13 +143,18 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         }
 
         String cause = null;
+        String messageTemplate;
+        long elapsedTimeRounded = Math.max(Math.round((double) retryCount * SLEEP_TIME / MS_IN_SEC / SEC_IN_MIN), MINIMUM_DISPLAYED_TIME_IN_MIN);
         if (actualException != null) {
             cause = actualException.getMessage();
+            messageTemplate = success == null
+                    ? "Timeout: Orchestrator component failed to finish in %d min(s), last message: %s"
+                    : "Failed: Orchestrator component went failed in %d min(s), message: %s";
+        } else {
+            messageTemplate = success == null
+                    ? "Timeout: Orchestrator component failed to finish in %d min(s)"
+                    : "Failed: Orchestrator component went failed in %d min(s)";
         }
-        String messageTemplate = success == null
-                ? "Timeout: Orchestrator component failed to finish in %d min(s), last message: %s"
-                : "Failed: Orchestrator component went failed in %d min(s), message: %s";
-        long elapsedTimeRounded = Math.max(Math.round((double) retryCount * SLEEP_TIME / MS_IN_SEC / SEC_IN_MIN), MINIMUM_DISPLAYED_TIME_IN_MIN);
         String errorMessage = String.format(messageTemplate, elapsedTimeRounded, cause);
         LOGGER.info(errorMessage);
         Multimap<String, String> nodesWithErrors = ArrayListMultimap.create();
@@ -157,9 +162,9 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             nodesWithErrors = ((CloudbreakOrchestratorException) actualException).getNodesWithErrors();
         }
         if (retryCount >= maxRetryCount) {
-            throw new CloudbreakOrchestratorTimeoutException(cause, nodesWithErrors, elapsedTimeRounded);
+            throw new CloudbreakOrchestratorTimeoutException(errorMessage, nodesWithErrors, elapsedTimeRounded);
         } else {
-            throw new CloudbreakOrchestratorFailedException(cause, nodesWithErrors);
+            throw new CloudbreakOrchestratorFailedException(errorMessage, nodesWithErrors);
         }
     }
 
