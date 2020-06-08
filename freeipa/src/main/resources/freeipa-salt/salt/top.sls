@@ -2,6 +2,7 @@ base:
            '*':
              - nginx
              - fluent
+             - ntp
              - freeipa
              - freeipa.services
              - dns
