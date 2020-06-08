@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -26,10 +28,21 @@ public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseSe
 
     Set<DatabaseServerConfig> findByResourceCrnIn(Set<Crn> resourceCrns);
 
+    Optional<DatabaseServerConfig> findByName(String name);
+
     @Query("SELECT s FROM DatabaseServerConfig s WHERE s.workspaceId = :workspaceId AND s.environmentId = :environmentId "
             + "AND (s.name IN :names OR s.resourceCrn IN :names)")
     Set<DatabaseServerConfig> findByNameInAndWorkspaceIdAndEnvironmentId(
             @Param("names") Set<String> names,
             @Param("workspaceId") Long workspaceId,
             @Param("environmentId") String environmentId);
+
+    @Query("SELECT c.resourceCrn FROM DatabaseServerConfig c WHERE c.accountId = :accountId")
+    List<Crn> findAllResourceCrnsByAccountId(@Param("accountId") String accountId);
+
+    @Query("SELECT c.resourceCrn FROM DatabaseServerConfig c WHERE c.name = :name")
+    Optional<Crn> findResourceCrnByName(@Param("name") String name);
+
+    @Query("SELECT c.resourceCrn FROM DatabaseServerConfig c WHERE c.name IN (:names)")
+    List<Crn> findResourceCrnsByNames(@Param("names") Collection<String> names);
 }

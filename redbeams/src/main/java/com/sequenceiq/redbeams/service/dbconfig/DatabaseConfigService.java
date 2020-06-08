@@ -12,21 +12,25 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.InternalServerErrorException;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.MapBindingResult;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
@@ -41,7 +45,7 @@ import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
 import com.sequenceiq.redbeams.service.validation.DatabaseConnectionValidator;
 
 @Service
-public class DatabaseConfigService extends AbstractArchivistService<DatabaseConfig> implements ResourceIdProvider {
+public class DatabaseConfigService extends AbstractArchivistService<DatabaseConfig> implements ResourceIdProvider, ResourceBasedCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConfigService.class);
 
@@ -63,12 +67,22 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     @Inject
     private DatabaseConnectionValidator connectionValidator;
 
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
+
+    @Inject
+    private TransactionService transactionService;
+
     public Set<DatabaseConfig> findAll(String environmentCrn) {
         return repository.findByEnvironmentId(environmentCrn);
     }
 
     public DatabaseConfig register(DatabaseConfig configToSave, boolean test) {
 
+        if (repository.findByName(configToSave.getName()).isPresent()) {
+            throw new BadRequestException(String.format("database config already exists with name '%s'",
+                    configToSave.getName()));
+        }
         if (configToSave.getConnectionDriver() == null) {
             configToSave.setConnectionDriver(configToSave.getDatabaseVendor().connectionDriver());
             LOGGER.info("Database configuration lacked a connection driver; defaulting to {}",
@@ -90,20 +104,15 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
             Crn crn = crnService.createCrn(configToSave);
             configToSave.setResourceCrn(crn);
             configToSave.setAccountId(crn.getAccountId());
-            return repository.save(configToSave);
-        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
-            ConstraintViolationException cve = null;
-            for (Throwable t = e.getCause(); t != null; t = t.getCause()) {
-                if (t instanceof ConstraintViolationException) {
-                    cve = (ConstraintViolationException) t;
-                    break;
-                }
-            }
-            if (cve != null) {
-                String message = String.format("database config already exists with name '%s'", configToSave.getName());
-                throw new BadRequestException(message, cve);
-            }
-            throw e;
+            return transactionService.required(() -> {
+                DatabaseConfig saved = repository.save(configToSave);
+                grpcUmsClient.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(),
+                        saved.getResourceCrn().toString(), ThreadBasedUserCrnProvider.getAccountId());
+                return saved;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            LOGGER.error("Error happened during database config registration: ", e);
+            throw new InternalServerErrorException(e);
         }
     }
 
@@ -270,5 +279,27 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     @Override
     public Long getResourceIdByResourceName(String resourceName) {
         return getByName(resourceName).getId();
+    }
+
+    @Override
+    public AuthorizationResourceType getResourceType() {
+        return AuthorizationResourceType.DATABASE;
+    }
+
+    @Override
+    public String getResourceCrnByResourceName(String resourceName) {
+        return repository.findResourceCrnByName(resourceName).orElseThrow(NotFoundException.notFound("database", resourceName)).toString();
+    }
+
+    @Override
+    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+        return repository.findResourceCrnsByNames(resourceNames)
+                .stream().map(Crn::toString).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getResourceCrnsInAccount() {
+        return repository.findAllResourceCrnsByAccountId(ThreadBasedUserCrnProvider.getAccountId())
+                .stream().map(Crn::toString).collect(Collectors.toList());
     }
 }

@@ -7,24 +7,26 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Supplier;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,7 +40,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.Errors;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -71,16 +75,20 @@ public class DatabaseServerConfigServiceTest {
 
     private static final String ENVIRONMENT_CRN = "envCrn";
 
+    private static final String ACCOUNT_ID = UUID.randomUUID().toString();
+
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
+
     private static final Crn SERVER_CRN = Crn.builder()
             .setService(Crn.Service.IAM)
-            .setAccountId("accountId")
+            .setAccountId(ACCOUNT_ID)
             .setResourceType(Crn.ResourceType.DATABASE_SERVER)
             .setResource("resource")
             .build();
 
     private static final Crn SERVER_2_CRN = Crn.builder()
             .setService(Crn.Service.IAM)
-            .setAccountId("accountId")
+            .setAccountId(ACCOUNT_ID)
             .setResourceType(Crn.ResourceType.DATABASE_SERVER)
             .setResource("resourceother")
             .build();
@@ -124,6 +132,9 @@ public class DatabaseServerConfigServiceTest {
     @Mock
     private PasswordGeneratorService passwordGeneratorService;
 
+    @Mock
+    private GrpcUmsClient grpcUmsClient;
+
     private DatabaseServerConfig server;
 
     private DatabaseServerConfig server2;
@@ -143,9 +154,8 @@ public class DatabaseServerConfigServiceTest {
         server2.setName("myotherserver");
         server2.setResourceCrn(SERVER_2_CRN);
 
-        when(transactionService.required(any(Supplier.class))).thenAnswer((Answer) invocation -> {
-            return ((Supplier) invocation.getArguments()[0]).get();
-        });
+        doNothing().when(grpcUmsClient).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
+        lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 
     @Test
@@ -169,7 +179,8 @@ public class DatabaseServerConfigServiceTest {
         when(crnService.createCrn(server)).thenReturn(serverCrn);
         when(repository.save(server)).thenReturn(server);
 
-        DatabaseServerConfig createdServer = underTest.create(server, 0L, false);
+        DatabaseServerConfig createdServer = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.create(server, 0L, false));
 
         assertEquals(server, createdServer);
         assertEquals(0L, createdServer.getWorkspaceId().longValue());
@@ -189,7 +200,8 @@ public class DatabaseServerConfigServiceTest {
         when(crnService.createCrn(server)).thenReturn(serverCrn);
         when(repository.save(server)).thenReturn(server);
 
-        DatabaseServerConfig createdServer = underTest.create(server, 0L, false);
+        DatabaseServerConfig createdServer = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.create(server, 0L, false));
 
         assertEquals(DatabaseVendor.POSTGRES.connectionDriver(), createdServer.getConnectionDriver());
     }
@@ -198,11 +210,7 @@ public class DatabaseServerConfigServiceTest {
     public void testCreateAlreadyExists() {
         thrown.expect(BadRequestException.class);
 
-        server.setConnectionDriver("org.postgresql.MyCustomDriver");
-        Crn serverCrn = TestData.getTestCrn("databaseServer", "myserver");
-        when(crnService.createCrn(server)).thenReturn(serverCrn);
-        ConstraintViolationException e = new ConstraintViolationException("no way", new SQLException("sql no way"), "duplicate");
-        when(repository.save(server)).thenThrow(e);
+        when(repository.findByName(anyString())).thenReturn(Optional.of(server));
 
         underTest.create(server, 0L, false);
     }

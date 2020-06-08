@@ -316,5 +316,65 @@
     "resourceType": "DATAHUB",
     "actionType": "RESOURCE_DEPENDENT",
     "legacyRight": "datahub/write"
+  },
+  "DESCRIBE_DATABASE": {
+    "right": "environments/describeDatabase",
+    "resourceType": "DATABASE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/read"
+  },
+  "DESCRIBE_DATABASE_SERVER": {
+    "right": "environments/describeDatabaseServer",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/read"
+  },
+  "DELETE_DATABASE": {
+    "right": "environments/deleteDatabase",
+    "resourceType": "DATABASE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "DELETE_DATABASE_SERVER": {
+    "right": "environments/deleteDatabaseServer",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "REGISTER_DATABASE": {
+    "right": "environments/registerDatabase",
+    "resourceType": "DATABASE",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "REGISTER_DATABASE_SERVER": {
+    "right": "environments/registerDatabaseServer",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "CREATE_DATABASE_SERVER": {
+    "right": "environments/createDatabaseServer",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "CREATE_DATABASE": {
+    "right": "environments/createDatabase",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "START_DATABASE_SERVER": {
+    "right": "environments/startDatabaseServer",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "STOP_DATABASE_SERVER": {
+    "right": "environments/stopDatabaseServer",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
   }
 }
