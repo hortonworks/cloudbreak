@@ -151,6 +151,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @SecretValue
     private Secret dpClusterManagerPassword = Secret.EMPTY;
 
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret keyStorePwd = Secret.EMPTY;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret trustStorePwd = Secret.EMPTY;
+
     @Column(nullable = false)
     private Boolean topologyValidation = Boolean.TRUE;
 
@@ -588,6 +596,24 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setDpClusterManagerPassword(String password) {
         dpClusterManagerPassword = new Secret(password);
+    }
+
+    public String getKeyStorePwd() {
+        String pwd = getIfNotNull(keyStorePwd, Secret::getRaw);
+        return isNotEmpty(pwd) ? pwd : getCloudbreakAmbariPassword();
+    }
+
+    public void setKeyStorePwd(String keyStorePwd) {
+        this.keyStorePwd = new Secret(keyStorePwd);
+    }
+
+    public String getTrustStorePwd() {
+        String pwd = getIfNotNull(trustStorePwd, Secret::getRaw);
+        return isNotEmpty(pwd) ? pwd : getCloudbreakAmbariPassword();
+    }
+
+    public void setTrustStorePwd(String trustStorePwd) {
+        this.trustStorePwd = new Secret(trustStorePwd);
     }
 
     public Boolean getTopologyValidation() {

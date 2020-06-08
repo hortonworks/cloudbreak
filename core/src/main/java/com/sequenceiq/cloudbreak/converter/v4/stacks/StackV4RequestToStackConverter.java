@@ -349,6 +349,8 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
             cluster.setDpUser(cmMgmtUsername);
             cluster.setDpPassword(PasswordUtil.generatePassword());
+            cluster.setKeyStorePwd(PasswordUtil.generatePassword());
+            cluster.setTrustStorePwd(PasswordUtil.generatePassword());
         }
     }
 
