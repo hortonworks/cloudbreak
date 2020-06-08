@@ -7,9 +7,10 @@
     @type s3
     s3_bucket {{fluent.s3LogArchiveBucketName}}
     path "{{fluent.logFolderName}}/{{fluent.serviceLogPathSuffix}}"
-    s3_object_key_format %{path}-%{index}.%{file_extension}
+    s3_object_key_format %{path}-%{hex_random}.%{file_extension}
     auto_create_bucket false
     check_apikey_on_start false
+    check_object false
 
     <buffer tag,time>
       @type file
@@ -17,7 +18,7 @@
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
       total_limit_size  2048MB
-      chunk_limit_size  60m
+      chunk_limit_size  16m
       flush_at_shutdown true
       overflow_action drop_oldest_chunk
       disable_chunk_backup  true
@@ -33,8 +34,9 @@
     @type s3
     s3_bucket {{fluent.s3LogArchiveBucketName}}
     path "{{fluent.logFolderName}}/{{fluent.cmCommandLogPathSuffix}}"
-    s3_object_key_format %{path}-%{index}.%{file_extension}
+    s3_object_key_format %{path}-%{hex_random}.%{file_extension}
     auto_create_bucket false
+    check_object false
     check_apikey_on_start false
 
     <buffer tag,time>
@@ -43,7 +45,7 @@
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
       total_limit_size  1024MB
-      chunk_limit_size  60m
+      chunk_limit_size  16m
       flush_at_shutdown true
       overflow_action drop_oldest_chunk
       disable_chunk_backup  true
