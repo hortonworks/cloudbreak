@@ -114,7 +114,7 @@ cb:
     url: http://localhost:8087
     contextPath: /redbeams
   runtimes:
-    latest: "7.2.0"
+    latest: "7.2.1"
 
   host.discovery.custom.hostname.enabled: false
 
@@ -249,6 +249,17 @@ cb:
         7.2.0 - Data Discovery and Exploration=cdp-dde-720;
         7.2.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-721;
         7.2.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-721;
+        7.2.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-721;
+        7.2.1 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha-721;
+        7.2.1 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3-721;
+        7.2.1 - Data Mart: Apache Impala, Hue=cdp-data-mart-721;
+        7.2.1 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart-721;
+        7.2.1 - Operational Database: Apache HBase, Phoenix=cdp-opdb-721;
+        7.2.1 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-721;
+        7.2.1 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-721;
+        7.2.1 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small-721;
+        7.2.1 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-721;
+        7.2.1 - Data Discovery and Exploration=cdp-dde-721;
 
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
