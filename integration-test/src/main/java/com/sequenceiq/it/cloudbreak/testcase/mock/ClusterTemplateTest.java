@@ -218,9 +218,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "a prepared environment",
-            when = "a create cluster template request is sent with too long description",
-            then = "the a cluster template should not be created"
+            given = "a cluster template list request",
+            when = " list requested",
+            then = " the response has defined number of cluster templates"
     )
     public void testListDefaultClusterTemplate(TestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
