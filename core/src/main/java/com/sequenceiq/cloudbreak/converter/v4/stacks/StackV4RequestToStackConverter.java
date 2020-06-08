@@ -269,7 +269,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             }
 
             Map<String, String> userDefined = new HashMap<>();
-            if (environment.getTags() == null || environment.getTags().getUserDefined() == null) {
+            if (environment.getTags() != null && environment.getTags().getUserDefined() != null && !environment.getTags().getUserDefined().isEmpty()) {
                 userDefined = environment.getTags().getUserDefined();
             }
 

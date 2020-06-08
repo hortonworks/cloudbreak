@@ -23,6 +23,7 @@ public class OperationDescriptions {
         public static final String GET_ALL = "retrieve all stacks";
         public static final String LIST_BY_WORKSPACE = "list stacks for the given workspace and environment name";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get stack by name in workspace";
+        public static final String GET_BY_CRN_IN_WORKSPACE = "get stack by crn in workspace";
         public static final String CREATE_IN_WORKSPACE = "create stack in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete stack by name in workspace";
         public static final String SYNC_BY_NAME_IN_WORKSPACE = "syncs the stack by name in workspace";
