@@ -353,7 +353,7 @@ then run the following Gradle command:
 -Dserver.port=9091 \
 -Daltus.ums.host=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
--Dspring.config.location=$(pwd)/core/src/main/resources/application.yml,$(pwd)/core/build/resources/main/application.properties"
+-Dspring.config.location=$(pwd)/core/src/main/resources/application.yml,$(pwd)/core/src/main/resources/application-dev.yml,$(pwd)/core/build/resources/main/application.properties"
 ```
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
@@ -404,7 +404,7 @@ then run the following Gradle command:
 ./gradlew :freeipa:bootRun --no-daemon -PjvmArgs="-Dfreeipa.db.addr=localhost \
 -Dserver.port=8090 \
 -Dvault.root.token=<VAULT_ROOT_TOKEN> \
--Dspring.config.location=$(pwd)/freeipa/src/main/resources/application.yml,$(pwd)/freeipa/build/resources/main/application.properties"
+-Dspring.config.location=$(pwd)/freeipa/src/main/resources/application.yml,$(pwd)/freeipa/src/main/resources/application-dev.yml,$(pwd)/freeipa/build/resources/main/application.properties"
 ````
 
 Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
