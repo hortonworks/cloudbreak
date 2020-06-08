@@ -18,6 +18,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3guard.S3GuardConfigProvider;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
@@ -71,6 +73,23 @@ public class HdfsConfigProviderTest {
         assertEquals(0, serviceConfigs.size());
     }
 
+    @Test
+    public void testGetHdsfServiceConfigsFor720() {
+        doNothing().when(s3GuardConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
+
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false, false);
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
+        cmRepo.setVersion("7.2.0");
+        preparationObject.getProductDetailsView().setCm(cmRepo);
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+        assertEquals(2, serviceConfigs.size());
+        assertEquals("dfs_replication", serviceConfigs.get(0).getName());
+        assertEquals("service_health_suppression_hdfs_verify_ec_with_topology", serviceConfigs.get(1).getName());
+    }
+
     private TemplatePreparationObject getTemplatePreparationObject(boolean useS3FileSystem, boolean fillDynamoTableName, boolean includeLocations) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
@@ -104,6 +123,8 @@ public class HdfsConfigProviderTest {
                 .withGateway(gateway, "/cb/secret/signkey", new HashSet<>())
                 .withPlacementView(placementView)
                 .withDefaultTags(Map.of("apple", "apple1"))
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.1.0"), List.of())
+                .withStackType(StackType.DATALAKE)
                 .build();
     }
 
