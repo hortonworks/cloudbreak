@@ -427,7 +427,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
 
     private void validateRazEnablement(SdxClusterRequest sdxClusterRequest, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
-        if (sdxClusterRequest.isEnableRangerRaz())  {
+        if (sdxClusterRequest.isEnableRangerRaz()) {
             boolean razEntitlementEnabled = entitlementService.razEnabled(environment.getCreator(), Crn.safeFromString(environment.getCreator()).getAccountId());
             if (!razEntitlementEnabled) {
                 validationBuilder.error("Provisioning Ranger Raz is not enabled for this account.");
@@ -535,7 +535,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     private FlowIdentifier deleteSdxCluster(SdxCluster sdxCluster, boolean forced) {
-        checkIfSdxIsDeletable(sdxCluster);
+        checkIfSdxIsDeletable(sdxCluster, forced);
         MDCBuilder.buildMdcContext(sdxCluster);
         sdxClusterRepository.save(sdxCluster);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
@@ -545,8 +545,8 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         return flowIdentifier;
     }
 
-    private void checkIfSdxIsDeletable(SdxCluster sdxCluster) {
-        if (sdxCluster.hasExternalDatabase() && Strings.isEmpty(sdxCluster.getDatabaseCrn())) {
+    private void checkIfSdxIsDeletable(SdxCluster sdxCluster, boolean forced) {
+        if (!forced && sdxCluster.hasExternalDatabase() && Strings.isEmpty(sdxCluster.getDatabaseCrn())) {
             throw new BadRequestException(String.format("Can not find external database for Data Lake: %s", sdxCluster.getClusterName()));
         }
         Collection<StackViewV4Response> attachedDistroXClusters = distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn());
