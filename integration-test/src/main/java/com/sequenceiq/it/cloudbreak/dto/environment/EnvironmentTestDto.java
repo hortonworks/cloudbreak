@@ -26,13 +26,14 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNe
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -101,6 +102,7 @@ public class EnvironmentTestDto
                 .withAuthentication(getTestContext().given(EnvironmentAuthenticationTestDto.class))
                 .withCloudplatform(getCloudPlatform().toString())
                 .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
+                .withResourceGroup(getResourceGroupUsage(), getResourceGroupName())
                 .withCloudStorageValidation(CloudStorageValidation.ENABLED);
     }
 
@@ -212,11 +214,15 @@ public class EnvironmentTestDto
     }
 
     public EnvironmentTestDto withS3Guard(String tableName) {
-        AwsEnvironmentParameters awsEnvironmentParameters = new AwsEnvironmentParameters();
-        S3GuardRequestParameters s3GuardRequestParameters = new S3GuardRequestParameters();
-        s3GuardRequestParameters.setDynamoDbTableName(tableName);
-        awsEnvironmentParameters.setS3guard(s3GuardRequestParameters);
+        getCloudProvider().setS3Guard(this, tableName);
+        return this;
+    }
 
+    public EnvironmentTestDto withResourceGroup(String resourceGroupUsage, String resourceGroupName) {
+        return getCloudProvider().withResourceGroup(this, resourceGroupUsage, resourceGroupName);
+    }
+
+    public EnvironmentTestDto withAws(AwsEnvironmentParameters awsEnvironmentParameters) {
         getRequest().setAws(awsEnvironmentParameters);
         return this;
     }
@@ -228,6 +234,11 @@ public class EnvironmentTestDto
         } else {
             LOGGER.info("S3guard is ignored on cloudplatform {}.", getTestContext().getCloudProvider().getCloudPlatform());
         }
+        return this;
+    }
+
+    public EnvironmentTestDto withAzure(AzureEnvironmentParameters azureEnvironmentParameters) {
+        getRequest().setAzure(azureEnvironmentParameters);
         return this;
     }
 
@@ -353,4 +364,13 @@ public class EnvironmentTestDto
     private EnvironmentTestDto withCloudplatform(String platform) {
         return this;
     }
+
+    private String getResourceGroupName() {
+        return getTestParameter().get(ResourceGroupTest.AZURE_RESOURCE_GROUP_NAME);
+    }
+
+    private String getResourceGroupUsage() {
+        return getTestParameter().get(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE);
+    }
+
 }

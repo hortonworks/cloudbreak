@@ -6,6 +6,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
@@ -36,6 +39,8 @@ public abstract class AbstractCloudProvider implements CloudProvider {
             + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
             + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
             + " centos";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCloudProvider.class);
 
     @Inject
     private TestParameter testParameter;
@@ -73,6 +78,17 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
         imageSettings.withImageCatalog(commonCloudProperties.getImageCatalogName());
         return imageSettings;
+    }
+
+    @Override
+    public EnvironmentTestDto setS3Guard(EnvironmentTestDto environmentTestDto, String tableName) {
+        LOGGER.info("S3guard is ignored on cloudplatform {}.", getCloudPlatform());
+        return environmentTestDto;
+    }
+
+    @Override
+    public EnvironmentTestDto withResourceGroup(EnvironmentTestDto environmentTestDto, String resourceGroupUsage, String resourceGroupName) {
+        return environmentTestDto;
     }
 
     @Override

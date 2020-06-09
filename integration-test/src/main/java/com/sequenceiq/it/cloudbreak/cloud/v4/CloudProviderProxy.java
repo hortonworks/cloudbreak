@@ -200,6 +200,16 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public EnvironmentTestDto setS3Guard(EnvironmentTestDto environmentTestDto, String tableName) {
+        return delegate.setS3Guard(environmentTestDto, tableName);
+    }
+
+    @Override
+    public EnvironmentTestDto withResourceGroup(EnvironmentTestDto environmentTestDto, String resourceGroupUsage, String resourceGroupName) {
+        return delegate.withResourceGroup(environmentTestDto, resourceGroupUsage, resourceGroupName);
+    }
+
+    @Override
     public String getSubnetCIDR() {
         return delegate.getSubnetCIDR();
     }

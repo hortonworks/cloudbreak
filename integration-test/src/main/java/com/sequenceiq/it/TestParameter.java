@@ -21,10 +21,10 @@ public class TestParameter {
         parameters = new HashMap<>();
     }
 
-    // TODO: 2018. 06. 22. optimalize
+    // TODO: 2018. 06. 22. optimize
     public String get(String key) {
         Optional<String> valueAsProperty = Optional.ofNullable(parameters.get(key));
-        if (!valueAsProperty.isPresent()) {
+        if (valueAsProperty.isEmpty()) {
             LOGGER.debug("key has not been found as property, trying as environment variable");
             valueAsProperty = Optional.ofNullable(parameters.get(key.toUpperCase().replaceAll("\\.", "_")));
         }
@@ -32,7 +32,7 @@ public class TestParameter {
                 ? String.format("Acquiring key %s resulting: %s", key, valueAsProperty.get())
                 : String.format("Acquiring key %s, but no result has found.", key));
 
-        if (key.startsWith(REQUIRED_KEY_PREFIX) && !valueAsProperty.isPresent()) {
+        if (key.startsWith(REQUIRED_KEY_PREFIX) && valueAsProperty.isEmpty()) {
             throw new MissingExpectedParameterException(key);
         }
         return valueAsProperty.isPresent() ? valueAsProperty.get() : null;

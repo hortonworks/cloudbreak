@@ -164,7 +164,7 @@ public class AzureParameterValidatorTest {
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. Resource group name 'myResourceGroup' could not be specified if MULTIPLE usage is defined.",
+        assertEquals("1. Resource group name 'myResourceGroup' cannot not be specified if MULTIPLE usage is defined.",
                 validationResult.getFormattedErrors());
     }
 

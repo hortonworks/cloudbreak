@@ -72,7 +72,7 @@ public class AzureParameterValidator implements ParameterValidator {
         }
         if (USE_MULTIPLE.equals(azureResourceGroupDto.getResourceGroupUsagePattern())) {
             if (StringUtils.isNotBlank(azureResourceGroupDto.getName())) {
-                return validationResultBuilder.error(String.format("Resource group name '%s' could not be specified if MULTIPLE usage is defined.",
+                return validationResultBuilder.error(String.format("Resource group name '%s' cannot not be specified if MULTIPLE usage is defined.",
                         azureResourceGroupDto.getName())).build();
             } else {
                 return validationResultBuilder.build();
