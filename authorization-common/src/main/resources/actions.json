@@ -244,5 +244,77 @@
     "resourceType": "DATALAKE",
     "actionType": "RESOURCE_DEPENDENT",
     "legacyRight": "datalake/write"
+  },
+  "CREATE_DATAHUB":  {
+    "right": "datahub/createDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "DESCRIBE_DATAHUB":  {
+    "right": "datahub/describeDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/read"
+  },
+  "DELETE_DATAHUB":  {
+    "right": "datahub/deleteDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "REPAIR_DATAHUB":  {
+    "right": "datahub/repairDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "SYNC_DATAHUB":  {
+    "right": "datahub/syncDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "RETRY_DATAHUB_OPERATION":  {
+    "right": "datahub/retryDatahubOperation",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "DESCRIBE_RETRYABLE_DATAHUB_OPERATION":  {
+    "right": "datahub/describeRetryableDatahubOperation",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/read"
+  },
+  "START_DATAHUB":  {
+    "right": "datahub/startDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "STOP_DATAHUB":  {
+    "right": "datahub/stopDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "SCALE_DATAHUB": {
+    "right": "datahub/scaleDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "DELETE_DATAHUB_INSTANCE": {
+    "right": "datahub/deleteDatahubInstance",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "SET_DATAHUB_MAINTENANCE_MODE": {
+    "right": "datahub/setDatahubMaintenanceMode",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
   }
 }

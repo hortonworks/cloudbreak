@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
@@ -80,6 +81,9 @@ public class ResourceObjectPermissionChecker implements PermissionChecker<CheckP
             throw new AccessDeniedException("Annotated field within resource object is not collection, thus access is denied!");
         }
         Collection<String> resourceCrns = (Collection<String>) resultObject;
+        if (CollectionUtils.isEmpty(resourceCrns)) {
+            return;
+        }
         commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, userCrn, resourceCrns);
     }
 
@@ -88,6 +92,9 @@ public class ResourceObjectPermissionChecker implements PermissionChecker<CheckP
             throw new AccessDeniedException("Annotated field within resource object is not collection, thus access is denied!");
         }
         Collection<String> resourceNames = (Collection<String>) resultObject;
+        if (CollectionUtils.isEmpty(resourceNames)) {
+            return;
+        }
         Collection<String> resourceCrns = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action)
                 .getResourceCrnListByResourceNameList(Lists.newArrayList(resourceNames));
         commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, userCrn, resourceCrns);

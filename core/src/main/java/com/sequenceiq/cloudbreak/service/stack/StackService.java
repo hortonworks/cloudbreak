@@ -433,22 +433,17 @@ public class StackService implements ResourceIdProvider {
                 .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
     }
 
-    public StackView getViewByNameInWorkspace(String name, Long workspaceId) {
-        return stackViewService.findNotTerminatedByName(name, workspaceId)
+    public String getResourceCrnInTenant(String name, String tenantName) {
+        return stackViewService.findResourceCrnByNameAndTenantName(name, tenantName)
                 .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
     }
 
-    public StackView getViewByCrnInWorkspace(String crn, Long workspaceId) {
-        return stackViewService.findNotTerminatedByCrn(crn, workspaceId)
-                .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
+    public Set<String> getResourceCrnsByNameListInTenant(List<String> names, String tenantName) {
+        return stackViewService.findResourceCrnsByNameListAndTenant(names, tenantName);
     }
 
-    public Set<StackView> getViewsByCrnListInWorkspace(List<String> crns, Long workspaceId) {
-        return stackViewService.findNotTerminatedByCrnList(crns, workspaceId);
-    }
-
-    public Set<StackView> getViewsByNameListInWorkspace(List<String> names, Long workspaceId) {
-        return stackViewService.findNotTerminatedByNameList(names, workspaceId);
+    public Set<String> getResourceCrnsByTenant(String tenantName) {
+        return stackViewService.findResourceCrnsByTenant(tenantName);
     }
 
     public Optional<Stack> getByNameInWorkspaceWithLists(String name, Long workspaceId) {

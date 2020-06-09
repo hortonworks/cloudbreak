@@ -676,10 +676,6 @@ public class GrpcUmsClient {
         return getRoleCrn("DbusUploader").toString();
     }
 
-    public String getBuiltInCredentialOwnerResourceRoleCrn() {
-        return getResourceRoleCrn("CredentialOwner").toString();
-    }
-
     public String getBuiltInOwnerResourceRoleCrn() {
         return getResourceRoleCrn("Owner").toString();
     }

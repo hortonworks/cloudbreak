@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
@@ -12,7 +14,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonInclude(Include.NON_NULL)
-public class StackViewV4Response implements JsonEntity {
+public class StackViewV4Response implements JsonEntity, ResourceCrnAwareApiModel {
 
     @ApiModelProperty(StackModelDescription.CRN)
     private String crn;
@@ -164,5 +166,11 @@ public class StackViewV4Response implements JsonEntity {
 
     public void setTunnel(Tunnel tunnel) {
         this.tunnel = tunnel;
+    }
+
+    @JsonIgnore
+    @Override
+    public String getResourceCrn() {
+        return crn;
     }
 }

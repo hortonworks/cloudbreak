@@ -1,8 +1,8 @@
 package com.sequenceiq.distrox.v1.distrox;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -34,6 +34,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -95,6 +97,9 @@ public class StackOperations implements ResourceBasedCrnProvider {
     @Inject
     private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
 
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
+
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
         LOGGER.info("List for Stack in workspace {} and environmentName {}.", workspaceId, environmentName);
@@ -128,6 +133,9 @@ public class StackOperations implements ResourceBasedCrnProvider {
         LOGGER.info("Cloudbreak user for the requested stack is {}.", cloudbreakUser);
         Workspace workspace = workspaceService.get(workspaceId, user);
         StackV4Response stackV4Response = stackCommonService.createInWorkspace(request, user, workspace);
+        if (StackType.WORKLOAD.equals(request.getType())) {
+            grpcUmsClient.assignResourceOwnerRoleIfEntitled(user.getUserCrn(), stackV4Response.getCrn(), ThreadBasedUserCrnProvider.getAccountId());
+        }
         LOGGER.info("Adding environment name and credential to the response.");
         environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackV4Response);
         LOGGER.info("Adding SDX CRN and name to the response.");
@@ -315,15 +323,17 @@ public class StackOperations implements ResourceBasedCrnProvider {
 
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
-        return stackService.getViewByNameInWorkspace(resourceName, workspaceService.getForCurrentUser().getId()).getEnvironmentCrn();
+        return stackService.getResourceCrnInTenant(resourceName, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceName) {
-        return stackService.getViewsByNameListInWorkspace(resourceName, workspaceService.getForCurrentUser().getId())
-                .stream()
-                .map(view -> view.getResourceCrn())
-                .collect(Collectors.toList());
+        return new ArrayList<>(stackService.getResourceCrnsByNameListInTenant(resourceName, ThreadBasedUserCrnProvider.getAccountId()));
+    }
+
+    @Override
+    public List<String> getResourceCrnsInAccount() {
+        return new ArrayList<>(stackService.getResourceCrnsByTenant(ThreadBasedUserCrnProvider.getAccountId()));
     }
 
     @Override
