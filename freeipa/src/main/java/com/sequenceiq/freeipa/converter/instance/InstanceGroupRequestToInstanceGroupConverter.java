@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.converter.instance.template.InstanceTemplateRequestToTemplateConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -17,9 +16,6 @@ import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvide
 
 @Component
 public class InstanceGroupRequestToInstanceGroupConverter {
-
-    @Inject
-    private ProviderParameterCalculator providerParameterCalculator;
 
     @Inject
     private InstanceTemplateRequestToTemplateConverter templateConverter;
@@ -42,6 +38,7 @@ public class InstanceGroupRequestToInstanceGroupConverter {
         if (source.getNodeCount() > 0) {
             addInstanceMetadatas(source, instanceGroup);
         }
+        instanceGroup.setNodeCount(source.getNodeCount());
         return instanceGroup;
     }
 
