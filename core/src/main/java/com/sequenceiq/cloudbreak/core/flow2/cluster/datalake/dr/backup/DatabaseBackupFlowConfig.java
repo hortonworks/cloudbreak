@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.backup;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.backup.DatabaseBackupEvent.DATABASE_BACKUP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.backup.DatabaseBackupEvent.DATABASE_BACKUP_FAILED_EVENT;
@@ -15,6 +16,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.backup.Da
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.backup.DatabaseBackupState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.backup.DatabaseBackupState.INIT_STATE;
 
+@Component
 public class DatabaseBackupFlowConfig extends AbstractFlowConfiguration<DatabaseBackupState, DatabaseBackupEvent>
     implements RetryableFlowConfiguration<DatabaseBackupEvent> {
 
@@ -72,6 +74,6 @@ public class DatabaseBackupFlowConfig extends AbstractFlowConfiguration<Database
 
     @Override
     public DatabaseBackupEvent getRetryableEvent() {
-        return null;
+        return DATABASE_BACKUP_FAILED_EVENT;
     }
 }
