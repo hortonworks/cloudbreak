@@ -286,7 +286,9 @@ public enum ResourceEvent {
     MAINTENANCE_MODE_VALIDATION_FINISHED_NO_WARNINGS("maintenance.mode.validation.finished.nowarn"),
     MAINTENANCE_MODE_VALIDATION_FAILED("maintenance.mode.validation.failed"),
 
-    COMMON_BAD_REQUEST_NOTIFICATION_PATTERN("common.bad.request.notification.pattern");
+    COMMON_BAD_REQUEST_NOTIFICATION_PATTERN("common.bad.request.notification.pattern"),
+
+    DATALAKE_DATABASE_BACKUP("datalake.database.backup");
 
     private final String message;
 

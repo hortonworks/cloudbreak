@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox;
 
+import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -94,6 +95,9 @@ public class StackOperations implements ResourceBasedCrnProvider {
 
     @Inject
     private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
+
+    @Inject
+    private DatabaseBackupRestoreService databaseBackupRestoreService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -311,6 +315,17 @@ public class StackOperations implements ResourceBasedCrnProvider {
 
     public List<RetryableFlow> getRetryableFlows(String name, Long workspaceId) {
         return stackCommonService.getRetryableFlows(name, workspaceId);
+    }
+
+    public FlowIdentifier backupClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location) {
+        LOGGER.info("HER StackOperations.backupClusterDatabase");
+        LOGGER.debug("Starting cluster database backup: " + nameOrCrn);
+        if (nameOrCrn.hasName()) {
+            return databaseBackupRestoreService.backupDatabase(workspaceId, nameOrCrn.getName(), location);
+        } else {
+            LOGGER.debug("No stack name provided for backup, found: " + nameOrCrn);
+            throw new BadRequestException("Please provide a stack name for backup");
+        }
     }
 
     @Override

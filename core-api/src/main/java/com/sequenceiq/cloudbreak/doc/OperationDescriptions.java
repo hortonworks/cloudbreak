@@ -44,6 +44,7 @@ public class OperationDescriptions {
         public static final String CHECK_STACK_UPGRADE = "Checks for upgrade options by name";
         public static final String STACK_UPGRADE = "Upgrades a cluster to the latest CM or CDH version";
         public static final String LIST_RETRYABLE_FLOWS = "List retryable failed flows";
+        public static final String BACKUP_DATABASE = "Backs up the datalake database";
     }
 
     public static class ClusterOpDescription {

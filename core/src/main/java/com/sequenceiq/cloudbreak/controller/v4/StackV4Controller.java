@@ -1,16 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
-import org.springframework.stereotype.Controller;
-
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -35,11 +24,22 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
 
 @Controller
 @WorkspaceEntityType(Stack.class)
 @DisableCheckPermissions
 public class StackV4Controller extends NotificationController implements StackV4Endpoint {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackV4Controller.class);
 
     @Inject
     private StackOperations stackOperations;
@@ -192,4 +192,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier updateSaltByName(Long workspaceId, String name) {
         return stackOperations.updateSalt(NameOrCrn.ofName(name), workspaceId);
     }
+
+    @Override
+    public FlowIdentifier backupClusterDatabaseByName(Long workspaceId, String name, String location) {
+        LOGGER.info("HER StackV4Controller.backupClusterDatabaseByName");
+        return stackOperations.backupClusterDatabase(NameOrCrn.ofName(name), workspaceId, location);
+    }
+
 }
