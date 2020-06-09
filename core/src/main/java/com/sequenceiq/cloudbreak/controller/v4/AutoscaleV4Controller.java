@@ -98,6 +98,20 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
+    public AutoscaleStackV4Response getAutoscaleClusterByCrn(String crn) {
+        Stack stack = stackService.getByCrnInWorkspace(crn, restRequestThreadLocalService.getRequestedWorkspaceId());
+        return converterUtil.convert(stack, AutoscaleStackV4Response.class);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
+    public AutoscaleStackV4Response getAutoscaleClusterByName(String name) {
+        Stack stack = stackService.getByNameInWorkspace(name, restRequestThreadLocalService.getRequestedWorkspaceId());
+        return converterUtil.convert(stack, AutoscaleStackV4Response.class);
+    }
+
+    @Override
     @DisableCheckPermissions
     @PreAuthorize("hasRole('AUTOSCALE')")
     public AutoscaleStackV4Responses getAllForAutoscale() {

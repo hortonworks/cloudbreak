@@ -20,7 +20,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -36,6 +38,7 @@ import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
+import com.sequenceiq.periscope.service.security.SecurityConfigService;
 
 @Service
 public class ClusterService implements ResourceBasedCrnProvider {
@@ -63,39 +66,41 @@ public class ClusterService implements ResourceBasedCrnProvider {
     @Inject
     private PeriscopeMetricService metricService;
 
-    public Cluster create(MonitoredStack stack, ClusterState clusterState, ClusterPertain clusterPertain) {
-        return create(new Cluster(), clusterPertain, stack, clusterState);
-    }
+    @Inject
+    private SecurityConfigService securityConfigService;
 
     @PostConstruct
     protected void init() {
         calculateClusterStateMetrics();
     }
 
-    public Cluster create(Cluster cluster, ClusterPertain clusterPertain, MonitoredStack stack, ClusterState clusterState) {
-        cluster.setStackName(stack.getStackName());
-        cluster.setClusterManager(stack.getClusterManager());
+    public Cluster create(AutoscaleStackV4Response stack) {
+        Cluster cluster = new Cluster();
+        cluster.setStackName(stack.getName());
         cluster.setStackCrn(stack.getStackCrn());
         cluster.setStackId(stack.getStackId());
         cluster.setStackType(stack.getStackType());
         cluster.setTunnel(stack.getTunnel());
+        cluster.setState(ClusterState.PENDING);
+
         if (stack.getCloudPlatform() != null) {
             cluster.setCloudPlatform(stack.getCloudPlatform().toUpperCase());
         }
-        if (clusterState != null) {
-            cluster.setState(clusterState);
-        }
 
+        String gatewayPort = String.valueOf(stack.getGatewayPort());
+        ClusterManager clusterManager =
+                new ClusterManager(stack.getClusterManagerIp(), gatewayPort, stack.getUserNamePath(),
+                        stack.getPasswordPath(), ClusterManagerVariant.CLOUDERA_MANAGER);
+        cluster.setClusterManager(clusterManager);
+
+        ClusterPertain clusterPertain =
+                new ClusterPertain(stack.getTenant(), stack.getWorkspaceId(), stack.getUserId(), stack.getUserCrn());
         cluster.setClusterPertain(
                 clusterPertainRepository.findByUserCrn(clusterPertain.getUserCrn())
                         .orElseGet(() -> clusterPertainRepository.save(clusterPertain)));
 
         cluster = save(cluster);
-        if (stack.getSecurityConfig() != null) {
-            SecurityConfig securityConfig = stack.getSecurityConfig();
-            securityConfig.setCluster(cluster);
-            securityConfigRepository.save(securityConfig);
-        }
+        securityConfigService.syncSecurityConfigForCluster(cluster.getId());
         calculateClusterStateMetrics();
         return cluster;
     }

@@ -1,7 +1,10 @@
 package com.sequenceiq.periscope.controller;
 
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
+
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -17,6 +20,7 @@ import com.sequenceiq.periscope.api.model.StateJson;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.model.NameOrCrn;
+import com.sequenceiq.periscope.monitor.handler.CloudbreakCommunicator;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -32,6 +36,9 @@ public class AutoScaleClusterCommonService {
 
     @Inject
     private HistoryService historyService;
+
+    @Inject
+    private CloudbreakCommunicator cloudbreakCommunicator;
 
     @Inject
     private HttpNotificationSender notificationSender;
@@ -51,22 +58,14 @@ public class AutoScaleClusterCommonService {
         return clusterService.findById(clusterId);
     }
 
-    @Retryable(value = NotFoundException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
+    @Retryable(value = NotFoundException.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
     public Cluster getClusterByStackCrn(String stackCrn) {
         return getClusterByCrnOrName(NameOrCrn.ofCrn(stackCrn));
     }
 
-    @Retryable(value = NotFoundException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
+    @Retryable(value = NotFoundException.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
     public Cluster getClusterByStackName(String stackName) {
         return getClusterByCrnOrName(NameOrCrn.ofName(stackName));
-    }
-
-    protected Cluster getClusterByCrnOrName(NameOrCrn nameOrCrn) {
-        return nameOrCrn.hasName() ?
-                clusterService.findOneByStackNameAndWorkspaceId(nameOrCrn.getName(), restRequestThreadLocalService.getRequestedWorkspaceId())
-                        .orElseThrow(NotFoundException.notFound("cluster", nameOrCrn.getName())) :
-                clusterService.findOneByStackCrnAndWorkspaceId(nameOrCrn.getCrn(), restRequestThreadLocalService.getRequestedWorkspaceId())
-                        .orElseThrow(NotFoundException.notFound("cluster", nameOrCrn.getCrn()));
     }
 
     public void deleteCluster(Long clusterId) {
@@ -105,5 +104,27 @@ public class AutoScaleClusterCommonService {
     public void deleteAlertsForClusterName(String stackName) {
         Cluster cluster = getClusterByCrnOrName(NameOrCrn.ofName(stackName));
         clusterService.deleteAlertsForCluster(cluster.getId());
+    }
+
+    protected Cluster getClusterByCrnOrName(NameOrCrn nameOrCrn) {
+        return nameOrCrn.hasName() ?
+                clusterService.findOneByStackNameAndWorkspaceId(nameOrCrn.getName(), restRequestThreadLocalService.getRequestedWorkspaceId())
+                        .orElseGet(() -> syncCBClusterByName(nameOrCrn.getName())) :
+                clusterService.findOneByStackCrnAndWorkspaceId(nameOrCrn.getCrn(), restRequestThreadLocalService.getRequestedWorkspaceId())
+                        .orElseGet(() -> syncCBClusterByCrn(nameOrCrn.getCrn()));
+    }
+
+    protected Cluster syncCBClusterByCrn(String stackCrn) {
+        return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByCrn(stackCrn))
+                .filter(stack -> WORKLOAD.equals(stack.getStackType()))
+                .map(stack -> clusterService.create(stack))
+                .orElseThrow(NotFoundException.notFound("cluster", stackCrn));
+    }
+
+    protected Cluster syncCBClusterByName(String stackName) {
+        return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByName(stackName))
+                .filter(stack -> WORKLOAD.equals(stack.getStackType()))
+                .map(stack -> clusterService.create(stack))
+                .orElseThrow(NotFoundException.notFound("cluster", stackName));
     }
 }

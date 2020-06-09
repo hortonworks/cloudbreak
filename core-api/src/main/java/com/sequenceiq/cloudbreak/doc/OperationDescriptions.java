@@ -18,12 +18,13 @@ public class OperationDescriptions {
         public static final String GET_STATUS_BY_NAME = "retrieve stack status by stack name";
         public static final String PUT_BY_ID = "update stack by id";
         public static final String PUT_BY_NAME = "update stack by name";
-        public static final String GET_BY_AMBARI_ADDRESS = "retrieve stack by ambari address";
         public static final String GET_STACK_CERT = "retrieves the TLS certificate used by the gateway";
         public static final String GET_ALL = "retrieve all stacks";
         public static final String LIST_BY_WORKSPACE = "list stacks for the given workspace and environment name";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get stack by name in workspace";
         public static final String GET_BY_CRN_IN_WORKSPACE = "get stack by crn in workspace";
+        public static final String GET_AUTOSCALE_BY_NAME = "get autoscale stack by name in workspace";
+        public static final String GET_AUTOSCALE_BY_CRN = "get autoscale stack by crn in workspace";
         public static final String CREATE_IN_WORKSPACE = "create stack in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete stack by name in workspace";
         public static final String SYNC_BY_NAME_IN_WORKSPACE = "syncs the stack by name in workspace";

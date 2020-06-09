@@ -1,6 +1,5 @@
 package com.sequenceiq.periscope.monitor.evaluator.cm;
 
-import static com.sequenceiq.periscope.api.model.ClusterState.PENDING;
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 
 import javax.annotation.Nonnull;
@@ -27,7 +26,6 @@ import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
-import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.MonitoredStack;
@@ -128,8 +126,7 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
 
     private void createCluster(AutoscaleStackV4Response stack, MonitoredStack monitoredStack) {
         LOGGER.debug("Creating cluster for Cloudera Manager host: {}", monitoredStack.getClusterManager().getHost());
-        Cluster cluster = clusterService.create(monitoredStack, PENDING,
-                new ClusterPertain(stack.getTenant(), stack.getWorkspaceId(), stack.getUserId(), stack.getUserCrn()));
+        Cluster cluster = clusterService.create(stack);
         MDCBuilder.buildMdcContext(cluster);
         History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
 
@@ -148,7 +145,7 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
     }
 
     private MonitoredStack createMonitoredStack(AutoscaleStackV4Response stack, Long clusterId) {
-        String host = stack.getAmbariServerIp();
+        String host = stack.getClusterManagerIp();
         String gatewayPort = String.valueOf(stack.getGatewayPort());
         SecurityConfig securityConfig = null;
         if (clusterId != null) {

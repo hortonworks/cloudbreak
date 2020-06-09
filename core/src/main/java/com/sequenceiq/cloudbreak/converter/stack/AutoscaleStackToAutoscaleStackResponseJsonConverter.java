@@ -34,7 +34,7 @@ public class AutoscaleStackToAutoscaleStackResponseJsonConverter extends Abstrac
 
         if (source.getClusterStatus() != null) {
             String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(source);
-            result.setAmbariServerIp(gatewayIp);
+            result.setClusterManagerIp(gatewayIp);
             result.setUserNamePath(source.getCloudbreakAmbariUser().getSecret());
             result.setPasswordPath(source.getCloudbreakAmbariPassword().getSecret());
             result.setClusterStatus(source.getClusterStatus());

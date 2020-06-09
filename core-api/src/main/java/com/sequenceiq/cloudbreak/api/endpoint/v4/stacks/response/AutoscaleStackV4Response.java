@@ -43,7 +43,7 @@ public class AutoscaleStackV4Response {
     private Integer gatewayPort;
 
     @ApiModelProperty(StackModelDescription.SERVER_IP)
-    private String ambariServerIp;
+    private String clusterManagerIp;
 
     @ApiModelProperty(StackModelDescription.USERNAME)
     private String userNamePath;
@@ -131,12 +131,12 @@ public class AutoscaleStackV4Response {
         this.gatewayPort = gatewayPort;
     }
 
-    public String getAmbariServerIp() {
-        return ambariServerIp;
+    public String getClusterManagerIp() {
+        return clusterManagerIp;
     }
 
-    public void setAmbariServerIp(String ambariServerIp) {
-        this.ambariServerIp = ambariServerIp;
+    public void setClusterManagerIp(String clusterManagerIp) {
+        this.clusterManagerIp = clusterManagerIp;
     }
 
     public String getUserNamePath() {

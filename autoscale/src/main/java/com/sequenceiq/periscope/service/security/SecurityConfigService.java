@@ -42,13 +42,18 @@ public class SecurityConfigService {
         SecurityConfig securityConfig = securityConfigRepository.findByClusterId(clusterId);
         if (securityConfig == null) {
             LOGGER.info("SecurityConfig not found by : {}", clusterId);
-            String stackCrn = clusterRepository.findStackCrnById(clusterId);
-            securityConfig = getRemoteSecurityConfig(stackCrn);
-            Optional<Cluster> cluster = clusterRepository.findById(clusterId);
-            if (cluster.isPresent()) {
-                securityConfig.setCluster(cluster.get());
-                securityConfigRepository.save(securityConfig);
-            }
+            securityConfig = syncSecurityConfigForCluster(clusterId);
+        }
+        return securityConfig;
+    }
+
+    public SecurityConfig syncSecurityConfigForCluster(Long clusterId) {
+        String stackCrn = clusterRepository.findStackCrnById(clusterId);
+        SecurityConfig securityConfig = getRemoteSecurityConfig(stackCrn);
+        Optional<Cluster> cluster = clusterRepository.findById(clusterId);
+        if (cluster.isPresent()) {
+            securityConfig.setCluster(cluster.get());
+            securityConfigRepository.save(securityConfig);
         }
         return securityConfig;
     }
