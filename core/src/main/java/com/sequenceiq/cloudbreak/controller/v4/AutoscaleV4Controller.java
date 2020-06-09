@@ -104,7 +104,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @DisableCheckPermissions
-    @PreAuthorize("hasRole('AUTOSCALE')")
+    @PreAuthorize("hasRole('AUTOSCALE') or hasRole('INTERNAL')")
     public StackStatusV4Response getStatusByCrn(@TenantAwareParam String crn) {
         return stackOperations.getStatus(crn);
     }

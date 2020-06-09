@@ -23,6 +23,7 @@ ipa-replica-install \
 {%- if not salt['pillar.get']('freeipa:dnssecValidationEnabled') %}
           --no-dnssec-validation \
 {%- endif %}
-          --unattended
+          --unattended \
+          --no-ntp
 
 set +e

@@ -101,6 +101,7 @@ public class FreeIpaInstallService {
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
         FreeIpaConfigView freeIpaConfigView = freeIpaConfigService.createFreeIpaConfigs(stack, allNodes, proxyConfig);
         servicePillarConfig.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", Collections.singletonMap("freeipa", freeIpaConfigView.toMap())));
+        servicePillarConfig.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.getCloudPlatform())));
         decoratePillarsWithTelemetryConfigs(stack, servicePillarConfig);
         decoratePillarsWithProxyConfig(proxyConfig, servicePillarConfig);
         hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
