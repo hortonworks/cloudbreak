@@ -39,7 +39,6 @@ import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.PeriscopeNodeRepository;
 import com.sequenceiq.periscope.service.DateTimeService;
 import com.sequenceiq.periscope.service.PeriscopeMetricService;
-import com.sequenceiq.periscope.service.StackCollectorService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LeaderElectionServiceTest {
@@ -64,9 +63,6 @@ public class LeaderElectionServiceTest {
 
     @Mock
     private TransactionService transactionService;
-
-    @Mock
-    private StackCollectorService stackCollectorService;
 
     @Mock
     private Timer timer;

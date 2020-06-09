@@ -10,11 +10,13 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 
 @Service
 public class CloudbreakCommunicator {
@@ -23,10 +25,23 @@ public class CloudbreakCommunicator {
     private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
 
     @Inject
+    private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
     private RequestLogging requestLogging;
 
     public StackV4Response getByCrn(String stackCrn) {
         return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().get(stackCrn);
+    }
+
+    public AutoscaleStackV4Response getAutoscaleClusterByCrn(String stackCrn) {
+        return cloudbreakInternalCrnClient.withUserCrn(restRequestThreadLocalService.getCloudbreakUser().getUserCrn())
+                .autoscaleEndpoint().getAutoscaleClusterByCrn(stackCrn);
+    }
+
+    public AutoscaleStackV4Response getAutoscaleClusterByName(String stackName) {
+        return cloudbreakInternalCrnClient.withUserCrn(restRequestThreadLocalService.getCloudbreakUser().getUserCrn())
+                .autoscaleEndpoint().getAutoscaleClusterByName(stackName);
     }
 
     public StackStatusV4Response getStackStatusByCrn(String stackCrn) {

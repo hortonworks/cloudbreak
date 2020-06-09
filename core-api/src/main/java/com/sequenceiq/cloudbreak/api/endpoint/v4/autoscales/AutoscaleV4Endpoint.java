@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.Certificate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -58,6 +59,20 @@ public interface AutoscaleV4Endpoint {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_ALL, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getAllStackForAutoscale")
     AutoscaleStackV4Responses getAllForAutoscale();
+
+    @GET
+    @Path("/autoscale_cluster/crn/{crn}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.GET_AUTOSCALE_BY_CRN, produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "getAutoscaleClusterByCrn")
+    AutoscaleStackV4Response getAutoscaleClusterByCrn(@PathParam("crn") String crn);
+
+    @GET
+    @Path("/autoscale_cluster/name/{name}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.GET_AUTOSCALE_BY_NAME, produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "getAutoscaleClusterByName")
+    AutoscaleStackV4Response getAutoscaleClusterByName(@PathParam("name") String name);
 
     @GET
     @Path("/stack/crn/{crn}")

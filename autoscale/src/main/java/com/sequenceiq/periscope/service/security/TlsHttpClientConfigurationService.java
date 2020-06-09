@@ -35,7 +35,7 @@ public class TlsHttpClientConfigurationService {
         Optional<String> clusterProxyUrl = clusterProxyConfigurationService.getClusterProxyUrl();
         HttpClientConfig httpClientConfig =
                 new HttpClientConfig(host, tlsConfiguration.getServerCert(), tlsConfiguration.getClientCert(), tlsConfiguration.getClientKey());
-        if (clusterProxyUrl.isPresent() && tunnel.useClusterProxy()) {
+        if (clusterProxyUrl.isPresent()) {
             httpClientConfig.withClusterProxy(clusterProxyUrl.get(), stackCrn);
         }
         return httpClientConfig;
