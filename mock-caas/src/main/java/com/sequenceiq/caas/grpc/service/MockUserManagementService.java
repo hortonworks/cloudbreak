@@ -38,6 +38,7 @@ import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementImplBase;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKey;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyType;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
@@ -77,6 +78,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWo
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest;
@@ -85,6 +88,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListM
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
@@ -159,6 +164,10 @@ public class MockUserManagementService extends UserManagementImplBase {
     private static final String CDP_PRIVATE_KEY = "cdp_private_key";
 
     private static final int MOCK_USER_COUNT = 10;
+
+    private static final int MOCK_RESOURCE_ROLE_COUNT = 10;
+
+    private static final int MOCK_ENTITLEMENT_COUNT = 10;
 
     private static final String ACCOUNT_SUBDOMAIN = "xcu2-8y8x";
 
@@ -328,15 +337,87 @@ public class MockUserManagementService extends UserManagementImplBase {
             }
             responseObserver.onNext(userBuilder.build());
         } else {
-            String userIdOrCrn = request.getUserIdOrCrn(0);
-            String[] splittedCrn = userIdOrCrn.split(":");
-            String userName = splittedCrn[6];
-            String accountId = splittedCrn[4];
-            responseObserver.onNext(
-                    userBuilder
-                            .addUser(createUser(accountId, userName))
-                            .build());
+            ListUsersResponse listUsersResponse = null;
+            for (int i = 0; i < request.getUserIdOrCrnCount(); i++) {
+                String userIdOrCrn = request.getUserIdOrCrn(i);
+                String[] splittedCrn = userIdOrCrn.split(":");
+                String userName = splittedCrn[6];
+                String accountId = splittedCrn[4];
+                listUsersResponse = userBuilder
+                        .addUser(createUser(accountId, userName))
+                        .build();
+            }
+            responseObserver.onNext(listUsersResponse);
         }
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listEntitlements(ListEntitlementsRequest request, StreamObserver<ListEntitlementsResponse> responseObserver) {
+        ListEntitlementsResponse.Builder builder = ListEntitlementsResponse.newBuilder();
+        String id = request.getAccountId().getId();
+        Crn actorCrn = Crn.safeFromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn());
+        String accountId = actorCrn.getAccountId();
+        for (int i = 0; i < MOCK_ENTITLEMENT_COUNT; i++) {
+            String entitlementCrn = Crn.builder()
+                    .setService(actorCrn.getService())
+                    .setAccountId(accountId)
+                    .setResourceType(actorCrn.getResourceType())
+                    .setResource("entitlement")
+                    .build().toString();
+
+            Entitlement entitlement = Entitlement.newBuilder()
+                    .setEntitlementName("entitlement" + i)
+                    .setGrantDateMs(System.currentTimeMillis())
+                    .setActorGrantorCrn(entitlementCrn + i)
+                    .build();
+            builder.addEntitlement(entitlement);
+        }
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listResourceRoles(ListResourceRolesRequest request, StreamObserver<ListResourceRolesResponse> responseObserver) {
+        ListResourceRolesResponse.Builder builder = ListResourceRolesResponse.newBuilder();
+        if (request.getResourceRoleCrnCount() == 0) {
+            String id = request.getAccountId();
+            Crn actorCrn = Crn.safeFromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn());
+            String accountId = actorCrn.getAccountId();
+            for (int i = 0; i < MOCK_RESOURCE_ROLE_COUNT; i++) {
+                String resourceRoleCrn = Crn.builder()
+                        .setService(actorCrn.getService())
+                        .setAccountId(accountId)
+                        .setResourceType(actorCrn.getResourceType())
+                        .setResource("resourceRole")
+                        .build().toString();
+                UserManagementProto.ResourceRole resourceRole = UserManagementProto.ResourceRole.newBuilder().setCreationDateMs(System.currentTimeMillis())
+                        .setCrn(resourceRoleCrn + i)
+                        .setRequiredEntitlement("entitlement" + i)
+                        .setRight(0, "write")
+                        .build();
+                builder.addResourceRole(resourceRole);
+            }
+        } else {
+            for (int i = 0; i < request.getResourceRoleCrnCount(); i++) {
+                String resourceRoleCrn = request.getResourceRoleCrn(i);
+                UserManagementProto.ResourceRole resourceRole = UserManagementProto.ResourceRole.newBuilder().setCreationDateMs(System.currentTimeMillis())
+                        .setCrn(resourceRoleCrn + i)
+                        .setRequiredEntitlement("entitlement" + i)
+                        .setRight(0, "write")
+                        .build();
+                builder.addResourceRole(resourceRole);
+            }
+        }
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getRights(GetRightsRequest request, StreamObserver<GetRightsResponse> responseObserver) {
+        String actorCrn = request.getActorCrn();
+        String accountId = Crn.fromString(actorCrn).getAccountId();
+        responseObserver.onNext(buildGetRightsResponse(accountId));
         responseObserver.onCompleted();
     }
 
@@ -365,14 +446,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         workloadGroups.forEach(group -> rightsBuilder.addGroupCrn(group.getCrn()));
         userGroups.forEach(group -> rightsBuilder.addGroupCrn(group.getCrn()));
         return rightsBuilder.build();
-    }
-
-    @Override
-    public void getRights(GetRightsRequest request, StreamObserver<GetRightsResponse> responseObserver) {
-        String actorCrn = request.getActorCrn();
-        String accountId = Crn.fromString(actorCrn).getAccountId();
-        responseObserver.onNext(buildGetRightsResponse(accountId));
-        responseObserver.onCompleted();
     }
 
     @Override
