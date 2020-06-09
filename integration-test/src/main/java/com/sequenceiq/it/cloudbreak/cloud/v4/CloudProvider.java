@@ -71,6 +71,10 @@ public interface CloudProvider {
 
     TelemetryTestDto telemetry(TelemetryTestDto telemetry);
 
+    EnvironmentTestDto setS3Guard(EnvironmentTestDto environmentTestDto, String tableName);
+
+    EnvironmentTestDto withResourceGroup(EnvironmentTestDto environmentTestDto, String resourceGroupUsage, String resourceGroupName);
+
     StackTestDtoBase stack(StackTestDtoBase stack);
 
     ClusterTestDto cluster(ClusterTestDto cluster);

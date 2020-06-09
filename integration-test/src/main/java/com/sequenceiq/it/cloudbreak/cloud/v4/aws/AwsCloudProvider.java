@@ -33,8 +33,10 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBase
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -186,6 +188,15 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
         return telemetry;
+    }
+
+    @Override
+    public EnvironmentTestDto setS3Guard(EnvironmentTestDto environmentTestDto, String tableName) {
+        AwsEnvironmentParameters awsEnvironmentParameters = new AwsEnvironmentParameters();
+        S3GuardRequestParameters s3GuardRequestParameters = new S3GuardRequestParameters();
+        s3GuardRequestParameters.setDynamoDbTableName(tableName);
+        awsEnvironmentParameters.setS3guard(s3GuardRequestParameters);
+        return environmentTestDto.withAws(awsEnvironmentParameters);
     }
 
     private EnvironmentNetworkAwsParams environmentNetworkParameters() {

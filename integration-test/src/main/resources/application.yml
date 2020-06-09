@@ -138,6 +138,9 @@ integrationtest:
         assumerIdentity:
         loggerIdentity:
       secure: false
+    resourcegroup:
+      usage: MULTIPLE
+      name:
 
   # gcp parameters
   gcp:

@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.azure;
 
+import static com.sequenceiq.it.cloudbreak.ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_SINGLE;
 import static java.lang.String.format;
 
 import java.util.List;
@@ -28,6 +29,9 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Paramet
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AppBasedRequest;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -44,6 +48,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
@@ -246,6 +251,20 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
         return telemetry;
+    }
+
+    @Override
+    public EnvironmentTestDto withResourceGroup(EnvironmentTestDto environmentTestDto, String resourceGroupUsageString, String resourceGroupName) {
+        ResourceGroupUsage resourceGroupUsage = AZURE_RESOURCE_GROUP_USAGE_SINGLE.equals(resourceGroupUsageString)
+                ? ResourceGroupUsage.SINGLE
+                : ResourceGroupUsage.MULTIPLE;
+
+        return environmentTestDto.withAzure(AzureEnvironmentParameters.builder()
+                .withAzureResourceGroup(AzureResourceGroup.builder()
+                        .withResourceGroupUsage(resourceGroupUsage)
+                        .withName(resourceGroupName)
+                        .build())
+                .build());
     }
 
     @Override
