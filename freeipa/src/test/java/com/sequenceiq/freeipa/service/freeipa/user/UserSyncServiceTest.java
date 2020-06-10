@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 
 import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -209,6 +210,26 @@ class UserSyncServiceTest {
                 throw new RuntimeException(e);
             }
         });
+
+        assertTrue(warnings.isEmpty());
+    }
+
+    @Test
+    void testRemoveUsersFromGroupsNullMembersInResponse() throws Exception {
+        Multimap<String, String> groupMapping = setupGroupMapping(1, 1);
+
+        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        Group removeResponseGroup = mock(Group.class, RETURNS_DEEP_STUBS);
+        RPCResponse<Group> mockRemoveResponse = mock(RPCResponse.class);
+        when(mockRemoveResponse.getResult()).thenReturn(removeResponseGroup);
+        // FreeIPA returns null when group is empty
+        when(removeResponseGroup.getMemberUser()).thenReturn(null);
+        when(freeIpaClient.groupRemoveMembers(any(), any())).thenReturn(mockRemoveResponse);
+        Multimap<String, String> warnings = ArrayListMultimap.create();
+
+        underTest.removeUsersFromGroups(freeIpaClient, groupMapping, warnings::put);
+
+        assertTrue(warnings.isEmpty());
     }
 
     @Test
@@ -260,7 +281,7 @@ class UserSyncServiceTest {
         Group removeResponseGroup = mock(Group.class, RETURNS_DEEP_STUBS);
         RPCResponse<Group> mockRemoveResponse = mock(RPCResponse.class);
         when(mockRemoveResponse.getResult()).thenReturn(removeResponseGroup);
-        when(removeResponseGroup.getMemberUser()).thenReturn(List.of());
+        when(removeResponseGroup.getMemberUser()).thenReturn(null);
         when(freeIpaClient.groupRemoveMembers(anyString(), anyCollection())).thenReturn(mockRemoveResponse);
 
         UsersStateDifference usersStateDifference = new UsersStateDifference(

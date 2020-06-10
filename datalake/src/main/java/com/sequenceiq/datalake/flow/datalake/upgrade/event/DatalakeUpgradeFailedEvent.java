@@ -1,11 +1,16 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade.event;
 
+import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.SdxFailedEvent;
 
 public class DatalakeUpgradeFailedEvent extends SdxFailedEvent {
 
     public DatalakeUpgradeFailedEvent(Long sdxId, String userId, Exception exception) {
         super(sdxId, userId, exception);
+    }
+
+    public static DatalakeUpgradeFailedEvent from(SdxEvent event, Exception exception) {
+        return new DatalakeUpgradeFailedEvent(event.getResourceId(), event.getUserId(), exception);
     }
 
     @Override
