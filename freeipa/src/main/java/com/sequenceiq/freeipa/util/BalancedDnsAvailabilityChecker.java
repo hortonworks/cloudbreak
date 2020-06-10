@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -13,8 +15,12 @@ public class BalancedDnsAvailabilityChecker {
     }
 
     public static boolean isBalancedDnsAvailable(Stack stack) {
-        Versioned currentVersion = () -> stack.getAppVersion();
-        return new VersionComparator().compare(currentVersion, BALANCED_DNS_NAME_AFTER_VERSION) > 0;
+        if (StringUtils.isNotBlank(stack.getAppVersion())) {
+            Versioned currentVersion = stack::getAppVersion;
+            return new VersionComparator().compare(currentVersion, BALANCED_DNS_NAME_AFTER_VERSION) > 0;
+        } else {
+            return false;
+        }
     }
 
 }

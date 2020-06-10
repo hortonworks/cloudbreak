@@ -49,4 +49,16 @@ public class BalancedDnsAvailabilityCheckerTest {
         assertFalse(BalancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack));
     }
 
+    @Test
+    public void testAppVersionIsBlank() {
+        Stack stack = new Stack();
+        assertFalse(BalancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack));
+
+        stack.setAppVersion("");
+        assertFalse(BalancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack));
+
+        stack.setAppVersion(" ");
+        assertFalse(BalancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack));
+    }
+
 }
