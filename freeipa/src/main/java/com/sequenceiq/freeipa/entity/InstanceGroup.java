@@ -57,6 +57,8 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
     @Column(columnDefinition = "TEXT")
     private Json attributes;
 
+    private Integer nodeCount;
+
     public String getGroupName() {
         return groupName;
     }
@@ -74,7 +76,11 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
     }
 
     public int getNodeCount() {
-        return getNotTerminatedInstanceMetaDataSet().size();
+        return nodeCount;
+    }
+
+    public void setNodeCount(Integer nodeCount) {
+        this.nodeCount = nodeCount;
     }
 
     public Stack getStack() {
