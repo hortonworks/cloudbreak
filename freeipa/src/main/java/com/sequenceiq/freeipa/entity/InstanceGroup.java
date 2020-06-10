@@ -76,7 +76,7 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
     }
 
     public int getNodeCount() {
-        return nodeCount;
+        return nodeCount == null ? getNotTerminatedInstanceMetaDataSet().size() : nodeCount;
     }
 
     public void setNodeCount(Integer nodeCount) {
