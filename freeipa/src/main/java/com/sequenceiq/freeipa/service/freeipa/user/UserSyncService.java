@@ -381,7 +381,8 @@ public class UserSyncService {
                 LOGGER.debug("adding users [{}] to group [{}]", users, group);
                 try {
                     RPCResponse<Group> groupAddMemberResponse = freeIpaClient.groupAddMembers(group, users);
-                    if (groupAddMemberResponse.getResult().getMemberUser().containsAll(users)) {
+                    List<String> members = Optional.ofNullable(groupAddMemberResponse.getResult().getMemberUser()).orElse(List.of());
+                    if (members.containsAll(users)) {
                         LOGGER.debug("Successfully added users {} to {}", users, groupAddMemberResponse.getResult());
                     } else {
                         // TODO specialize RPCResponse completed/failed objects
@@ -405,7 +406,8 @@ public class UserSyncService {
                 LOGGER.debug("removing users {} from group {}", users, group);
                 try {
                     RPCResponse<Group> groupRemoveMembersResponse = freeIpaClient.groupRemoveMembers(group, users);
-                    if (Collections.disjoint(groupRemoveMembersResponse.getResult().getMemberUser(), users)) {
+                    List<String> members = Optional.ofNullable(groupRemoveMembersResponse.getResult().getMemberUser()).orElse(List.of());
+                    if (Collections.disjoint(members, users)) {
                         LOGGER.debug("Successfully removed users {} from {}", users, groupRemoveMembersResponse.getResult());
                     } else {
                         // TODO specialize RPCResponse completed/failed objects
