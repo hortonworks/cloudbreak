@@ -115,7 +115,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
                 actualException = ex;
                 String elapsedTimeLog = createElapseTimeLog(initialStartTime, startTime);
                 LOGGER.debug("Orchestrator component {} failed to start, retrying [{}/{}], error count [{}/{}]. {}, Reason: {}, additional info: {}",
-                        type, retryCount, maxRetryCount, errorCount, maxRetryOnError, elapsedTimeLog, actualException, orchestratorBootstrap);
+                        type, retryCount, maxRetryCount, errorCount, maxRetryOnError, elapsedTimeLog, actualException, orchestratorBootstrap, actualException);
                 retryCount++;
                 errorCount++;
                 if (belowAttemptThreshold(retryCount, errorCount)) {
