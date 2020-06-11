@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 
 import javax.inject.Inject;
@@ -19,6 +21,8 @@ import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class FreeIpaStartStopTest extends AbstractIntegrationTest {
+
+    private static final Duration POLLING_INTERVAL = Duration.of(3000, ChronoUnit.MILLIS);
 
     @Inject
     private FreeIPATestClient freeIPATestClient;

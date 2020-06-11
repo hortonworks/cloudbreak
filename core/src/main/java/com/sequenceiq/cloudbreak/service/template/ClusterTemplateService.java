@@ -304,6 +304,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
                     .collect(toSet());
         } catch (TransactionExecutionException e) {
             LOGGER.warn("Unable to find cluster definitions due to {}", e.getMessage());
+            LOGGER.warn("Unable to find cluster definitions", e);
             throw new CloudbreakServiceException("Unable to obtain cluster definitions!");
         }
     }

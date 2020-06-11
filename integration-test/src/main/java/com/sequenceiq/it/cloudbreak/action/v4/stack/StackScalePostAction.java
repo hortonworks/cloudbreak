@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.v4.stack;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -33,10 +34,10 @@ public class StackScalePostAction implements Action<StackTestDto, CloudbreakClie
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(" StackScale post request:\n", request);
-        client.getCloudbreakClient()
+        FlowIdentifier flowIdentifier = client.getCloudbreakClient()
                 .stackV4Endpoint()
                 .putScaling(client.getWorkspaceId(), testDto.getName(), request);
-
+        testDto.setFlow("Stack scale", flowIdentifier);
         return testDto;
     }
 }
