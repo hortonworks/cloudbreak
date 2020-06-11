@@ -162,7 +162,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(2))
                 .when(stackTestClient.deleteV4())
                 .await(STACK_DELETED)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).atLeast(2))
                 .validate();
     }
 
@@ -225,7 +225,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
                 .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).atLeast(2))
                 .validate();
     }
 
@@ -268,7 +268,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
                 .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).atLeast(2))
                 .validate();
     }
 

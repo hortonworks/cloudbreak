@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock.PROFILE_RETURN_HTTP_500;
 
 import java.math.BigDecimal;
@@ -77,15 +78,17 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractIntegrationTest
                 .withClouderaManagerProduct("cmpkey")
                 .given("cmpclusterkey", ClusterTestDto.class)
                 .withClouderaManager("cmanager")
-                .given(StackTestDto.class)
+                .given(clusterName, StackTestDto.class)
                 .withName(clusterName)
                 .withCluster("cmpclusterkey")
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
-                .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
-                .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
-                .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredBackscaledWorkerCount()))
-                .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
+                .when(stackTestClient.createV4(), key(clusterName))
+                .awaitForFlow(key(clusterName))
+                .await(STACK_AVAILABLE, key(clusterName))
+                .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()), key(clusterName))
+                .awaitForFlow(key(clusterName))
+                .await(StackTestDto.class, STACK_AVAILABLE, key(clusterName), POLLING_INTERVAL)
+                .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredBackscaledWorkerCount()), key(clusterName))
+                .await(StackTestDto.class, STACK_AVAILABLE, key(clusterName), POLLING_INTERVAL)
                 .validate();
     }
 

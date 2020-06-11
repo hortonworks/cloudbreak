@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.dto;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.finder.Finders.same;
+import static java.lang.String.format;
 
 import java.time.Duration;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.Entity;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
@@ -27,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.context.TestErrorLog;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U extends MicroserviceClient> extends Entity implements CloudbreakTestDto {
 
@@ -226,6 +229,10 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         return testContext.await(entityClass, statuses, emptyRunningParameter(), pollingInteval);
     }
 
+    public T await(Class<T> entityClass, Map<String, Status> statuses, RunningParameter runningParameter, Duration pollingInteval) {
+        return testContext.await(entityClass, statuses, runningParameter, pollingInteval);
+    }
+
     public T await(Class<T> entityClass, Map<String, Status> statuses, RunningParameter runningParameter) {
         return testContext.await(entityClass, statuses, runningParameter);
     }
@@ -279,5 +286,21 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     @Override
     public void setCloudPlatform(CloudPlatform cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public void setFlow(String marker, FlowIdentifier flowIdentifier) {
+        if (flowIdentifier != null) {
+            switch (flowIdentifier.getType()) {
+                case FLOW:
+                    Log.when(LOGGER, format(" %s flow %s started ", marker, flowIdentifier.getPollableId()));
+                    setLastKnownFlowId(flowIdentifier.getPollableId());
+                    break;
+                case FLOW_CHAIN:
+                    Log.when(LOGGER, format(" %s flow chain %s started ", marker, flowIdentifier.getPollableId()));
+                    setLastKnownFlowChainId(flowIdentifier.getPollableId());
+                    break;
+                default:
+            }
+        }
     }
 }

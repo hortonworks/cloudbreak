@@ -39,6 +39,7 @@ public class DistroXScaleAction implements Action<DistroXTestDto, CloudbreakClie
         StackV4Response stackV4Response = client.getCloudbreakClient()
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), new HashSet<>(Arrays.asList("hardware_info", "events")));
+        testDto.setFlow("DistroX scale", stackV4Response.getFlowIdentifier());
         LOGGER.info("Hardware info for stack after upscale: {}", stackV4Response.getHardwareInfoGroups());
         return testDto;
     }

@@ -1,11 +1,14 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 import javax.inject.Inject;
 
 import org.testng.ITestContext;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
@@ -45,6 +48,8 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
     @Inject
     private SdxTestClient sdxTestClient;
 
+    //CB-7294
+    @Ignore
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running DistroX cluster",
@@ -52,6 +57,7 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
             then = "the cluster should be available")
     public void testCreateNewRegularDistroXClusterScaleStartStop(MockedTestContext testContext, ITestContext testNgContext) {
         DistroXStartStopTestParameters params = new DistroXStartStopTestParameters(testNgContext.getCurrentXmlTest().getAllParameters());
+        String stack = resourcePropertyProvider().getName();
         int step = params.getStep();
         int current = step;
         DistroXTestDto currentContext = testContext
@@ -63,21 +69,26 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
                 .given(CLUSTER_KEY, DistroXClusterTestDto.class)
                 .withValidateBlueprint(false)
                 .withClouderaManager(CM_FOR_DISTRO_X)
-                .given(DistroXTestDto.class)
+                .given(stack, DistroXTestDto.class)
                 .withGatewayPort(testContext.getSparkServer().getPort())
                 .withCluster(CLUSTER_KEY)
+                .withName(stack)
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
-                .when(distroXClient.create())
-                .await(STACK_AVAILABLE);
+                .when(distroXClient.create(), key(stack))
+                .awaitForFlow(key(stack))
+                .await(STACK_AVAILABLE, key(stack));
         for (int i = 0; i < params.getTimes(); i++, current += step) {
             currentContext = currentContext
-                    .when(distroXClient.stop())
-                    .await(STACK_STOPPED)
-                    .when(distroXClient.start())
-                    .await(STACK_AVAILABLE)
+                    .when(distroXClient.stop(), key(stack))
+                    .awaitForFlow(key(stack))
+                    .await(STACK_STOPPED, key(stack))
+                    .when(distroXClient.start(), key(stack))
+                    .awaitForFlow(key(stack))
+                    .await(STACK_AVAILABLE, key(stack))
                     .when(distroXClient.scale(params.getHostgroup(), current))
-                    .await(DistroXTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL);
+                    .awaitForFlow(key(stack))
+                    .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
         }
 
         currentContext
