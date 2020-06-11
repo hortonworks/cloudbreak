@@ -55,6 +55,7 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXRepairV1RequestToClust
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackScaleV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.cli.DelegatingRequestToCliRequestConverter;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
 @InternalReady
@@ -205,15 +206,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.STOP_DATAHUB)
-    public void putStopByName(@ResourceName String name) {
-        stackOperations.putStop(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId());
+    public FlowIdentifier putStopByName(@ResourceName String name) {
+        return stackOperations.putStop(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_DATAHUB)
-    public void putStopByCrn(@ResourceCrn String crn) {
-        stackOperations.putStop(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
-
+    public FlowIdentifier putStopByCrn(@ResourceCrn String crn) {
+        return stackOperations.putStop(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
@@ -230,15 +230,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.START_DATAHUB)
-    public void putStartByName(@ResourceName String name) {
-        stackOperations.putStart(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId());
-
+    public FlowIdentifier putStartByName(@ResourceName String name) {
+        return stackOperations.putStart(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId());
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATAHUB)
-    public void putStartByCrn(@ResourceCrn String crn) {
-        stackOperations.putStart(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
+    public FlowIdentifier putStartByCrn(@ResourceCrn String crn) {
+        return stackOperations.putStart(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
     @Override

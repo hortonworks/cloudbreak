@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock.PROFILE_RETURN_HTTP_500;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
@@ -120,6 +121,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
     public void testUpscale(MockedTestContext testContext) {
         String blueprintName = testContext.get(BlueprintTestDto.class).getRequest().getName();
         String clusterName = resourcePropertyProvider().getName();
+        String stack = resourcePropertyProvider().getName();
 
         int addedNodes = desiredWorkerCount - originalWorkerCount;
 
@@ -130,45 +132,46 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
                 .withBlueprintName(blueprintName)
                 .withValidateBlueprint(Boolean.FALSE)
                 .withClouderaManager(CLOUDERA_MANAGER_KEY)
-                .given(StackTestDto.class).withCluster(CLUSTER_KEY)
+                .given(stack, StackTestDto.class).withCluster(CLUSTER_KEY)
                 .withName(clusterName)
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
-                .when(StackScalePostAction.valid().withDesiredCount(desiredWorkerCount).withForced(Boolean.FALSE))
-                .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
-                .then(MockVerification.verify(POST, ITResponse.MOCK_ROOT + "/cloud_instance_statuses").atLeast(1))
+                .when(stackTestClient.createV4(), key(stack))
+                .awaitForFlow(key(stack))
+                .await(STACK_AVAILABLE, key(stack))
+                .when(StackScalePostAction.valid().withDesiredCount(desiredWorkerCount).withForced(Boolean.FALSE), key(stack))
+                .await(StackTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL)
+                .then(MockVerification.verify(POST, ITResponse.MOCK_ROOT + "/cloud_instance_statuses").atLeast(1), key(stack))
                 .then(MockVerification.verify(POST, ITResponse.MOCK_ROOT + "/cloud_metadata_statuses")
-                        .bodyContains("CREATE_REQUESTED", addedNodes).exactTimes(1))
-                .then(MockVerification.verify(GET, ITResponse.SALT_BOOT_ROOT + "/health").atLeast(1))
-                .then(MockVerification.verify(POST, ITResponse.SALT_BOOT_ROOT + "/salt/action/distribute").atLeast(1))
-                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=network.ipaddrs").atLeast(1))
-                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=saltutil.sync_all").atLeast(1))
-                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=mine.update").atLeast(1))
-                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=state.highstate").atLeast(2))
-                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=grains.remove").exactTimes(4))
+                        .bodyContains("CREATE_REQUESTED", addedNodes).exactTimes(1), key(stack))
+                .then(MockVerification.verify(GET, ITResponse.SALT_BOOT_ROOT + "/health").atLeast(1), key(stack))
+                .then(MockVerification.verify(POST, ITResponse.SALT_BOOT_ROOT + "/salt/action/distribute").atLeast(1), key(stack))
+                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=network.ipaddrs").atLeast(1), key(stack))
+                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=saltutil.sync_all").atLeast(1), key(stack))
+                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=mine.update").atLeast(1), key(stack))
+                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=state.highstate").atLeast(1), key(stack))
+                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=grains.remove").atLeast(1), key(stack))
                 .then(MockVerification.verify(GET,
                         new ClouderaManagerPathResolver(LIST_HOSTS)
                                 .pathVariableMapping(":clusterName", clusterName)
                                 .resolve())
-                        .exactTimes(1))
-                .then(MockVerification.verify(GET, READ_HOSTS).atLeast(4))
+                        .exactTimes(1), key(stack))
+                .then(MockVerification.verify(GET, READ_HOSTS).atLeast(4), key(stack))
                 .then(MockVerification.verify(POST, new ClouderaManagerPathResolver(ADD_HOSTS)
                         .pathVariableMapping(":clusterName", clusterName)
                         .resolve())
-                        .exactTimes(1))
+                        .exactTimes(1), key(stack))
                 .then(MockVerification.verify(POST, new ClouderaManagerPathResolver(DEPLOY_CLIENT_CONFIG)
                         .pathVariableMapping(":clusterName", clusterName)
                         .resolve())
-                        .exactTimes(1))
+                        .exactTimes(1), key(stack))
                 .then(MockVerification.verify(POST, new ClouderaManagerPathResolver(APPLY_HOST_TEMPLATE)
                         .pathVariableMapping(":clusterName", clusterName)
                         .pathVariableMapping(":hostTemplateName", "worker")
                         .resolve())
-                        .exactTimes(1))
+                        .exactTimes(1), key(stack))
                 .then(MockVerification.verify(GET, new ClouderaManagerPathResolver(READ_COMMAND)
                         .pathVariableMapping(":commandId", APPLY_HOST_TEMPLATE_COMMAND_ID.toString())
                         .resolve())
-                        .exactTimes(1))
+                        .exactTimes(1), key(stack))
                 .validate();
     }
 

@@ -65,6 +65,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -156,13 +157,13 @@ public interface DistroXV1Endpoint {
     @Path("name/{name}/stop")
     @ApiOperation(value = STOP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "stopDistroXV1ByName")
-    void putStopByName(@PathParam("name") String name);
+    FlowIdentifier putStopByName(@PathParam("name") String name);
 
     @PUT
     @Path("crn/{crn}/stop")
     @ApiOperation(value = STOP_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "stopDistroXV1ByCrn")
-    void putStopByCrn(@PathParam("crn") String crn);
+    FlowIdentifier putStopByCrn(@PathParam("crn") String crn);
 
     @PUT
     @Path("name/stop")
@@ -180,13 +181,13 @@ public interface DistroXV1Endpoint {
     @Path("name/{name}/start")
     @ApiOperation(value = START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "startDistroXV1ByName")
-    void putStartByName(@PathParam("name") String name);
+    FlowIdentifier putStartByName(@PathParam("name") String name);
 
     @PUT
     @Path("crn/{crn}/start")
     @ApiOperation(value = START_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "startDistroXV1ByCrn")
-    void putStartByCrn(@PathParam("crn") String crn);
+    FlowIdentifier putStartByCrn(@PathParam("crn") String crn);
 
     @PUT
     @Path("name/start")

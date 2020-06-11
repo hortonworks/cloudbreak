@@ -71,8 +71,10 @@ public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManager
                 .withCluster(cmcluster)
                 .when(stackTestClient.createV4(), key(stack))
                 .await(STACK_AVAILABLE, key(stack))
+                .awaitForFlow(key(stack))
                 .when(stackTestClient.stopV4(), key(stack))
                 .await(STACK_STOPPED, key(stack))
+                .awaitForFlow(key(stack))
                 .when(stackTestClient.startV4(), key(stack))
                 .await(STACK_AVAILABLE, key(stack))
                 .validate();
