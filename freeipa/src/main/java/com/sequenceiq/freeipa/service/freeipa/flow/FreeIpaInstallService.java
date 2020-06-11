@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import static java.util.Collections.singletonMap;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -104,6 +106,7 @@ public class FreeIpaInstallService {
         servicePillarConfig.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.getCloudPlatform())));
         decoratePillarsWithTelemetryConfigs(stack, servicePillarConfig);
         decoratePillarsWithProxyConfig(proxyConfig, servicePillarConfig);
+        decoratePillarWithTags(stack, servicePillarConfig);
         hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
         hostOrchestrator.installFreeIPA(primaryGatewayConfig, gatewayConfigs, allNodes, new StackBasedExitCriteriaModel(stackId));
     }
@@ -146,6 +149,19 @@ public class FreeIpaInstallService {
                         null, telemetry.getDatabusEndpoint());
                 servicePillarConfig.put("databus", new SaltPillarProperties("/databus/init.sls",
                         Collections.singletonMap("databus", databusConfigView.toMap())));
+            }
+        }
+    }
+
+    private void decoratePillarWithTags(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
+        if (stack.getTags() != null && isNotBlank(stack.getTags().getValue())) {
+            try {
+                StackTags stackTags = stack.getTags().get(StackTags.class);
+                Map<String, Object> tags = new HashMap<>(stackTags.getDefaultTags());
+                servicePillarConfig.put("tags", new SaltPillarProperties("/tags/init.sls",
+                        Collections.singletonMap("tags", tags)));
+            } catch (Exception e) {
+                LOGGER.debug("Exception during reading default tags.", e);
             }
         }
     }

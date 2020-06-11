@@ -4,6 +4,7 @@ base:
     - unbound
     - java
     - metadata
+    - tags
     - docker
     - recipes.runner
     - fluent
