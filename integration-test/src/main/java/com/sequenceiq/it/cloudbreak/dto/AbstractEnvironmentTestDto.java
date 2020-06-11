@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -14,8 +15,12 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 
 public abstract class AbstractEnvironmentTestDto<R, S, T extends CloudbreakTestDto> extends AbstractTestDto<R, S, T, EnvironmentClient> {
+
+    @Inject
+    private WaitUtil waitUtil;
 
     protected AbstractEnvironmentTestDto(String newId) {
         super(newId);
@@ -82,5 +87,9 @@ public abstract class AbstractEnvironmentTestDto<R, S, T extends CloudbreakTestD
         }
         return getTestContext()
                 .then((T) this, EnvironmentClient.class, assertions.get(assertions.size() - 1), runningParameters.get(runningParameters.size() - 1));
+    }
+
+    public WaitUtil getWaitUtil() {
+        return waitUtil;
     }
 }
