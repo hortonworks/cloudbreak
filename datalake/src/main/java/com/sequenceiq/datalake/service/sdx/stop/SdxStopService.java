@@ -73,7 +73,7 @@ public class SdxStopService {
     public FlowIdentifier triggerStopIfClusterNotStopped(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
         checkFreeipaRunning(cluster.getEnvCrn());
-        return sdxReactorFlowManager.triggerSdxStopFlow(cluster.getId());
+        return sdxReactorFlowManager.triggerSdxStopFlow(cluster);
     }
 
     public void stop(Long sdxId) {
@@ -84,14 +84,14 @@ public class SdxStopService {
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, "Datalake stop in progress", sdxCluster);
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (NotFoundException e) {
-            LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
+            LOGGER.error("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (ClientErrorException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.info("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
+            LOGGER.error("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
             throw new RuntimeException("Can not stop stack, client error happened on Cloudbreak side: " + errorMessage);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.info("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
+            LOGGER.error("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
             throw new RuntimeException("Can not stop stack, web application error happened on Cloudbreak side: " + errorMessage);
         }
     }

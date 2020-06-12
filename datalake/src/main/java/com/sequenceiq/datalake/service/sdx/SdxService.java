@@ -235,8 +235,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
             throw new TransactionRuntimeExecutionException(e);
         }
 
-        LOGGER.info("trigger SDX creation: {}", savedSdxCluster);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(savedSdxCluster.getId());
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(savedSdxCluster);
 
         return Pair.of(savedSdxCluster, flowIdentifier);
     }
@@ -541,9 +540,8 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         MDCBuilder.buildMdcContext(sdxCluster);
         sdxClusterRepository.save(sdxCluster);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId(), forced);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxDeletion(sdxCluster, forced);
         flowCancelService.cancelRunningFlows(sdxCluster.getId());
-        LOGGER.info("SDX delete triggered: {}", sdxCluster.getClusterName());
         return flowIdentifier;
     }
 

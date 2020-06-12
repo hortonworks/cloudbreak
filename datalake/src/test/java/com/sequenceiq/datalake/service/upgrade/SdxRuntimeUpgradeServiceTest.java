@@ -198,8 +198,8 @@ public class SdxRuntimeUpgradeServiceTest {
 
         underTest.triggerRuntimeUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest);
 
-        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(1L, IMAGE_ID_LAST);
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(1L, IMAGE_ID);
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID);
     }
 
     @Test
@@ -222,8 +222,8 @@ public class SdxRuntimeUpgradeServiceTest {
 
         underTest.triggerRuntimeUpgradeByCrn(USER_CRN, STACK_CRN, null);
 
-        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(1L, IMAGE_ID_LAST);
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(1L, IMAGE_ID);
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID);
     }
 
     @Test
@@ -249,8 +249,8 @@ public class SdxRuntimeUpgradeServiceTest {
 
         underTest.triggerRuntimeUpgradeByCrn(USER_CRN, STACK_CRN, null);
 
-        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(1L, IMAGE_ID_LAST);
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(1L, IMAGE_ID);
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID);
     }
 
     @Test

@@ -62,14 +62,14 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
             setStackCreatedStatus(sdxId);
             response = new StackCreationSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
-            LOGGER.info("Polling exited before timeout for SDX: {}. Cause: ", sdxId, userBreakException);
+            LOGGER.error("Polling exited before timeout for SDX: {}. Cause: ", sdxId, userBreakException);
             response = new SdxCreateFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.info("Poller stopped for SDX: {}", sdxId, pollerStoppedException);
+            LOGGER.error("Poller stopped for SDX: {}", sdxId, pollerStoppedException);
             response = new SdxCreateFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake stack creation timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.info("Polling failed for stack: {}", sdxId, exception);
+            LOGGER.error("Polling failed for stack: {}", sdxId, exception);
             response = new SdxCreateFailedEvent(sdxId, userId, exception);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in stack creation wait phase", anotherException);
