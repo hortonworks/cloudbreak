@@ -68,7 +68,7 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
             // To keep backward compatibility, if somebody passes the group name, then we shall just use it
             environmentService.setAdminGroupName(environment, environment.getAdminGroupName());
         }
-        environmentService.assignEnvironmentAdminAndOwnerRole(environment.getCreator(), environmentCrnForVirtualGroups);
+        environmentService.assignEnvironmentAdminRole(environment.getCreator(), environmentCrnForVirtualGroups);
         setLocationAndRegions(environment);
     }
 

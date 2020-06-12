@@ -59,9 +59,7 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
-                // role assignment may not finished, thus we checking status with account admin
-                // also this will validate the describe permission check for account admin
-                .await(EnvironmentStatus.AVAILABLE, RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
+                .await(EnvironmentStatus.AVAILABLE)
 
                 // testing unauthorized calls for environment
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
@@ -75,25 +73,24 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
         testFreeipaCreation(testContext, mockedTestContext);
         testContext
                 .given(EnvironmentTestDto.class)
-                // DL and datahub authz needed for delete also, thus execute delete with account admin for now
-                .when(environmentTestClient.delete(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
+                .when(environmentTestClient.delete())
                 .awaitForFlow(RunningParameter.key("EnvironmentDeleteAction"))
                 .validate();
     }
 
     private void testFreeipaCreation(TestContext testContext, MockedTestContext mockedTestContext) {
+        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
         testContext
                 //testing authorized freeipa calls for the environment
                 .given(FreeIPATestDto.class)
                 .withCatalog(mockedTestContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
-                // freeipa calls other api's (like accounttag API) thus we need account admin for now
-                .when(freeIPATestClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
-                .await(Status.AVAILABLE, RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_A)))
-                .when(freeIPATestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_A)))
-                .when(freeIPATestClient.stop(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_A)))
-                .await(Status.STOPPED, RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_A)))
-                .when(freeIPATestClient.start(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_A)))
-                .await(Status.AVAILABLE, RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_A)))
+                .when(freeIPATestClient.create())
+                .await(Status.AVAILABLE)
+                .when(freeIPATestClient.describe())
+                .when(freeIPATestClient.stop())
+                .await(Status.STOPPED)
+                .when(freeIPATestClient.start())
+                .await(Status.AVAILABLE)
 
                 //testing unathorized freeipa calls for the environment
                 .when(freeIPATestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
