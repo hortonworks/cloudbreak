@@ -84,14 +84,14 @@ public class SdxSyncHandler extends ExceptionCatcherEventHandler<SdxSyncWaitRequ
             updateSdxStatus(sdxCluster, stackV4Response);
             response = new SdxSyncSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
-            LOGGER.info("Sync polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.error("Sync polling exited before timeout. Cause: ", userBreakException);
             response = new SdxSyncFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.info("Sync poller stopped for stack: {}", sdxId);
+            LOGGER.error("Sync poller stopped for stack: {}", sdxId);
             response = new SdxSyncFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake sync timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.info("Sync polling failed for stack: {}", sdxId);
+            LOGGER.error("Sync polling failed for stack: {}", sdxId);
             response = new SdxSyncFailedEvent(sdxId, userId, exception);
         }
         sendEvent(response, event);

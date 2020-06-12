@@ -86,7 +86,7 @@ public class SdxStopServiceTest {
 
         underTest.triggerStopIfClusterNotStopped(sdxCluster);
 
-        verify(sdxReactorFlowManager).triggerSdxStopFlow(CLUSTER_ID);
+        verify(sdxReactorFlowManager).triggerSdxStopFlow(sdxCluster);
     }
 
     @Test
