@@ -27,4 +27,14 @@ public class UpscaleEvent extends StackEvent {
     public String getOperationId() {
         return operationId;
     }
+
+    @Override
+    public String toString() {
+        return "UpscaleEvent{"
+                + "stackId=" + getResourceId()
+                + ", instanceCountByGroup=" + instanceCountByGroup
+                + ", repair='" + repair + '\''
+                + ", operationId='" + operationId + '\''
+                + "}";
+    }
 }

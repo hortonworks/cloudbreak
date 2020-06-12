@@ -33,7 +33,6 @@ public enum DownscaleFlowEvent implements FlowEvent {
     REMOVE_HOSTS_FROM_ORCHESTRATION_FINISHED_EVENT(EventSelectorUtil.selector(RemoveHostsFromOrchestrationSuccess.class)),
     REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_EVENT(EventSelectorUtil.selector(DownscaleFailureEvent.class)),
     DOWNSCALE_FINISHED_EVENT("DOWNSCALE_FINISHED_EVENT"),
-    FINALIZED_EVENT("DOWNSCALE_FINALIZED_EVENT"),
     FAILURE_EVENT("DOWNSCALE_FAILURE_EVENT"),
     FAIL_HANDLED_EVENT("DOWNSCALE_FAIL_HANDLED_EVENT");
 

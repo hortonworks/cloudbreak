@@ -43,6 +43,6 @@ public class RepairFlowEventChainFactoryTest {
         Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(event);
 
         List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("DOWNSCALE_EVENT", "UPSCALE_EVENT"), triggeredOperations);
+        assertEquals(List.of("CHANGE_PRIMARY_GATEWAY_EVENT", "DOWNSCALE_EVENT", "UPSCALE_EVENT", "CHANGE_PRIMARY_GATEWAY_EVENT"), triggeredOperations);
     }
 }

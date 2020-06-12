@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -72,6 +73,37 @@ public class FreeIPATests extends AbstractE2ETest {
                 .await(Status.STOPPED)
                 .when(freeIPATestClient.start())
                 .await(Status.AVAILABLE)
+                .then((tc, testDto, client) -> freeIPATestClient.delete().action(tc, testDto, client))
+                .await(FREEIPA_DELETE_COMPLETED)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "a valid stack create request is sent with 2 FreeIPA instances AND the stack is repaired one node at a time",
+            then = "the stack should be available AND deletable")
+    public void testCreateThenRepairFreeIpaWithTwoInstances(TestContext testContext) {
+        String freeIpa = resourcePropertyProvider().getName();
+
+        int instanceGroupCount = 1;
+        int instanceCountByGroup = 2;
+
+        testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogs()
+                .given(freeIpa, FreeIPATestDto.class)
+                .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
+                .withTelemetry("telemetry")
+                .when(freeIPATestClient.create(), key(freeIpa))
+                .await(FREEIPA_AVAILABLE)
+                .when(freeIPATestClient.repair(InstanceMetadataType.GATEWAY_PRIMARY))
+                .await(Status.UPDATE_IN_PROGRESS)
+                .await(FREEIPA_AVAILABLE)
+                .when(freeIPATestClient.repair(InstanceMetadataType.GATEWAY))
+                .await(Status.UPDATE_IN_PROGRESS)
+                .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> freeIPATestClient.delete().action(tc, testDto, client))
                 .await(FREEIPA_DELETE_COMPLETED)
                 .validate();

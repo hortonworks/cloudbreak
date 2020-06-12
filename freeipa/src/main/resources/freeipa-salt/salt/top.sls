@@ -19,3 +19,10 @@ base:
              - freeipa.replica-install
              - freeipa.common-install
              - freeipa.backups
+
+           'roles:freeipa_primary_replacement':
+             - match: grain
+             - freeipa.replica-install
+             - freeipa.common-install
+             - freeipa.promote-replica-to-master
+             - freeipa.backups

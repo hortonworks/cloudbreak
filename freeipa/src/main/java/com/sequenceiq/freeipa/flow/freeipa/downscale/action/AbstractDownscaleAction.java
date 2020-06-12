@@ -30,14 +30,14 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState;
-import com.sequenceiq.freeipa.flow.freeipa.scale.action.AbstractScaleAction;
+import com.sequenceiq.freeipa.flow.chain.AbstractCommonChainAction;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
-public abstract class AbstractDownscaleAction<P extends Payload> extends AbstractScaleAction<DownscaleState, DownscaleFlowEvent, StackContext, P> {
+public abstract class AbstractDownscaleAction<P extends Payload> extends AbstractCommonChainAction<DownscaleState, DownscaleFlowEvent, StackContext, P> {
 
     @Inject
     private StackService stackService;

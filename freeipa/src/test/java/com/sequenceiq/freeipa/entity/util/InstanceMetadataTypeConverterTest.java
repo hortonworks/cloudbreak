@@ -9,7 +9,7 @@ public class InstanceMetadataTypeConverterTest extends DefaultEnumConverterBaseT
 
     @Override
     public InstanceMetadataType getDefaultValue() {
-        return InstanceMetadataType.CORE;
+        return InstanceMetadataType.GATEWAY;
     }
 
     @Override
