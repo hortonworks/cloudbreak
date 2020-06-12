@@ -214,7 +214,7 @@ public class YarnLoadEvaluatorTest {
 
         YarnScalingServiceV1Response yarnScalingReponse = new YarnScalingServiceV1Response();
         if (upScaleCount > 0) {
-            yarnScalingReponse.setNewNMCandidates(Map.of("newNMCandidates", candidates));
+            yarnScalingReponse.setNewNMCandidates(candidates);
         }
 
         List decommissionCandidates = new ArrayList();

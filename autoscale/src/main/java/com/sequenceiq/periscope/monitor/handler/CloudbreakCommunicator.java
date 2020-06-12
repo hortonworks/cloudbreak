@@ -10,6 +10,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -42,6 +43,10 @@ public class CloudbreakCommunicator {
     public AutoscaleStackV4Response getAutoscaleClusterByName(String stackName) {
         return cloudbreakInternalCrnClient.withUserCrn(restRequestThreadLocalService.getCloudbreakUser().getUserCrn())
                 .autoscaleEndpoint().getAutoscaleClusterByName(stackName);
+    }
+
+    public AutoscaleRecommendationV4Response getRecommendationForCluster(String stackCrn) {
+        return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getRecommendation(stackCrn);
     }
 
     public StackStatusV4Response getStackStatusByCrn(String stackCrn) {
