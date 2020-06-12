@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
 import javax.inject.Inject;
 
 import org.testng.ITestContext;
@@ -30,6 +33,8 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
     private static final String DIX_IMG_KEY = "dixImg";
 
     private static final String DIX_NET_KEY = "dixNet";
+
+    private static final Duration POLLING_INTERVAL = Duration.of(3000, ChronoUnit.MILLIS);
 
     @Inject
     private BlueprintTestClient blueprintTestClient;
@@ -72,7 +77,7 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
                     .when(distroXClient.start())
                     .await(STACK_AVAILABLE)
                     .when(distroXClient.scale(params.getHostgroup(), current))
-                    .await(STACK_AVAILABLE);
+                    .await(DistroXTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL);
         }
 
         currentContext

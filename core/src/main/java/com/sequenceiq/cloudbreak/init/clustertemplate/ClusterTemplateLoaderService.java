@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
@@ -27,6 +29,9 @@ public class ClusterTemplateLoaderService {
 
     @Inject
     private DefaultClusterTemplateCache defaultClusterTemplateCache;
+
+    @Inject
+    private ClusterTemplateService clusterTemplateService;
 
     public boolean isDefaultClusterTemplateUpdateNecessaryForUser(Collection<ClusterTemplate> clusterTemplates) {
         Map<String, String> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplateRequests();
@@ -39,7 +44,15 @@ public class ClusterTemplateLoaderService {
         if (!isAllDefaultTemplateExistsInDbByName(defaultTemplates, defaultTemplatesInDb)) {
             return true;
         }
+        if (!isEveryDefaultTemplateInDbHasCrn(defaultTemplatesInDb)) {
+            return true;
+        }
         return isAllDefaultTemplateInDbHasTheSameContentAsCached(defaultTemplates, defaultTemplatesInDb);
+    }
+
+    private boolean isEveryDefaultTemplateInDbHasCrn(List<ClusterTemplate> defaultTemplatesInDb) {
+        return defaultTemplatesInDb.stream()
+                .allMatch(template -> template.getResourceCrn() != null);
     }
 
     private List<ClusterTemplate> filterTemplatesForDefaults(Collection<ClusterTemplate> clusterTemplates) {
@@ -67,8 +80,18 @@ public class ClusterTemplateLoaderService {
     public Set<ClusterTemplate> loadClusterTemplatesForWorkspace(Set<ClusterTemplate> templatesInDb, Workspace workspace,
             Function<Iterable<ClusterTemplate>, Collection<ClusterTemplate>> saveMethod) {
         Set<ClusterTemplate> clusterTemplatesToSave = collectClusterTemplatesToSaveInDb(templatesInDb, workspace);
+        decorateWithCrn(clusterTemplatesToSave);
         Iterable<ClusterTemplate> savedClusterTemplates = saveMethod.apply(clusterTemplatesToSave);
         return unifyTemplatesUpdatedAndUnmodified(templatesInDb, clusterTemplatesToSave, savedClusterTemplates);
+    }
+
+    private void decorateWithCrn(Set<ClusterTemplate> clusterTemplate) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        clusterTemplate.stream()
+                .filter(template -> !hasCrn(template))
+                .forEach(template -> {
+                    template.setResourceCrn(clusterTemplateService.createCRN(accountId));
+                });
     }
 
     private Set<ClusterTemplate> unifyTemplatesUpdatedAndUnmodified(Set<ClusterTemplate> templatesInDb, Set<ClusterTemplate> clusterTemplatesToSave,
@@ -114,7 +137,7 @@ public class ClusterTemplateLoaderService {
             Optional<String> defaultTemplate = Optional.ofNullable(defaultTemplates.get(templateInDB.getName()));
             if (defaultTemplate.isPresent()) {
                 defaultTemplate
-                        .filter(defaultTmplBase64 -> isTemplatesContentDifferent(templateInDB, defaultTmplBase64))
+                        .filter(defaultTmplBase64 -> isTemplatesContentDifferent(templateInDB, defaultTmplBase64) || !hasCrn(templateInDB))
                         .ifPresent(defaultTmplBase64 -> {
                             templateInDB.setStatus(ResourceStatus.OUTDATED);
                             outdatedTemplates.add(templateInDB);
@@ -125,5 +148,9 @@ public class ClusterTemplateLoaderService {
             }
         }
         return outdatedTemplates;
+    }
+
+    private boolean hasCrn(ClusterTemplate template) {
+        return template.getResourceCrn() != null;
     }
 }

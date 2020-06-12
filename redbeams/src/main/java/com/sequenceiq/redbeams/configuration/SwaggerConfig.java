@@ -31,7 +31,7 @@ public class SwaggerConfig {
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(contextPath + RedbeamsApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.redbeams.api,com.sequenceiq.flow.api");
+        swaggerConfig.setResourcePackage("com.sequenceiq.redbeams.api,com.sequenceiq.flow.api,com.sequenceiq.authorization");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);

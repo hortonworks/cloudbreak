@@ -30,17 +30,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.projection.BlueprintStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
@@ -64,12 +71,18 @@ import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Service
-public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> {
+public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> implements ResourceBasedCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintService.class);
 
     private static final String MULTI_HOSTNAME_EXCEPTION_MESSAGE_FORMAT = "Host %s names must be unique! The following host %s names are invalid due to " +
             "their multiple occurrence: %s";
+
+    @Inject
+    private TransactionService transactionService;
+
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
 
     @Inject
     private BlueprintRepository blueprintRepository;
@@ -112,7 +125,15 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             throw new BadRequestException("Invalid CM template!");
         }
         decorateWithCrn(blueprint, accountId, creator);
-        return super.createForLoggedInUser(blueprint, workspaceId);
+        try {
+            return transactionService.required(() -> {
+                Blueprint created = super.createForLoggedInUser(blueprint, workspaceId);
+                grpcUmsClient.assignResourceOwnerRoleIfEntitled(creator, blueprint.getResourceCrn(), accountId);
+                return created;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
     }
 
     public Blueprint deleteByWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
@@ -169,6 +190,10 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             throw new BadRequestException("region cannot be null");
         }
         return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName, credentialName, region, platformVariant, availabilityZone, cdpResourceType);
+    }
+
+    public AutoscaleRecommendation getAutoscaleRecommendation(Long workspaceId, String blueprintName) {
+        return cloudResourceAdvisor.getAutoscaleRecommendation(workspaceId, blueprintName);
     }
 
     @Override
@@ -415,5 +440,35 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();
+    }
+
+    @Override
+    public String getResourceCrnByResourceName(String resourceName) {
+        return blueprintRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    public List<String> getResourceCrnsInAccount() {
+        return blueprintRepository.findAllResourceCrnsByAccountId(ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+        return resourceNames.stream()
+                .map(resourceName -> blueprintRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()))
+                .collect(Collectors.toList());
+    }
+
+    public Blueprint getByResourceCrn(String resourceCrn) {
+        return blueprintRepository.findByResourceCrn(resourceCrn);
+    }
+
+    @Override
+    public AuthorizationResourceType getResourceType() {
+        return AuthorizationResourceType.CLUSTER_TEMPLATE;
+    }
+
+    public BlueprintStatusView getStatusViewByResourceCrn(String resourceCrn) {
+        return blueprintRepository.findViewByResourceCrn(resourceCrn);
     }
 }

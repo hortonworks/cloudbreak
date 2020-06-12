@@ -213,11 +213,10 @@ class EnvironmentServiceTest {
         when(grpcUmsClient.getBuiltInEnvironmentAdminResourceRoleCrn()).thenReturn("EnvAdminResourceRoleCrn");
 
         ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
-            environmentServiceUnderTest.assignEnvironmentAdminAndOwnerRole(TestConstants.CRN, "envCrn");
+            environmentServiceUnderTest.assignEnvironmentAdminRole(TestConstants.CRN, "envCrn");
         });
 
         verify(grpcUmsClient).assignResourceRole(eq(TestConstants.CRN), eq("envCrn"), eq("EnvAdminResourceRoleCrn"), any());
-        verify(grpcUmsClient).assignResourceOwnerRoleIfEntitled(eq(TestConstants.CRN), eq("envCrn"), eq(TestConstants.ACCOUNT_ID));
     }
 
     @Test
@@ -227,11 +226,10 @@ class EnvironmentServiceTest {
                 .when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
 
         ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
-            environmentServiceUnderTest.assignEnvironmentAdminAndOwnerRole(TestConstants.CRN, "envCrn");
+            environmentServiceUnderTest.assignEnvironmentAdminRole(TestConstants.CRN, "envCrn");
         });
 
         verify(grpcUmsClient).assignResourceRole(eq(TestConstants.CRN), eq("envCrn"), eq("EnvAdminResourceRoleCrn"), any());
-        verify(grpcUmsClient).assignResourceOwnerRoleIfEntitled(eq(TestConstants.CRN), eq("envCrn"), eq(TestConstants.ACCOUNT_ID));
         verifyNoMoreInteractions(grpcUmsClient);
     }
 

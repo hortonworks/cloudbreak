@@ -1,9 +1,8 @@
 package com.sequenceiq.periscope.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,6 +12,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.periscope.api.model.AdjustmentType;
+import com.sequenceiq.periscope.converter.AdjustmentTypeConverter;
 
 @Entity
 @NamedQueries({
@@ -28,7 +28,7 @@ public class ScalingPolicy implements Clustered {
 
     private String name;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = AdjustmentTypeConverter.class)
     @Column(name = "adjustment_type")
     private AdjustmentType adjustmentType;
 

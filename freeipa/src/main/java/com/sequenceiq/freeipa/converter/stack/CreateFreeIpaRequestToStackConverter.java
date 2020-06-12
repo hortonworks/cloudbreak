@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -100,7 +99,7 @@ public class CreateFreeIpaRequestToStackConverter {
     @Value("#{'${freeipa.default.gateway.cidr}'.split(',')}")
     private Set<String> defaultGatewayCidr;
 
-    public Stack convert(CreateFreeIpaRequest source, String accountId, Future<User> userFuture, String userCrn, String cloudPlatform) {
+    public Stack convert(CreateFreeIpaRequest source, String accountId, Future<String> ownerFuture, String userCrn, String cloudPlatform) {
         Stack stack = new Stack();
         stack.setEnvironmentCrn(source.getEnvironmentCrn());
         stack.setAccountId(accountId);
@@ -120,7 +119,7 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setTelemetry(telemetryConverter.convert(source.getTelemetry()));
         stack.setBackup(backupConverter.convert(source.getTelemetry()));
         decorateStackWithTunnelAndCcm(stack, source);
-        updateOwnerRelatedFields(source, accountId, userFuture, userCrn, stack);
+        updateOwnerRelatedFields(source, accountId, ownerFuture, userCrn, stack);
         extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack);
         return stack;
     }
@@ -164,18 +163,17 @@ public class CreateFreeIpaRequestToStackConverter {
         return securityRule;
     }
 
-    private void updateOwnerRelatedFields(CreateFreeIpaRequest source, String accountId, Future<User> userFuture, String userCrn, Stack stack) {
+    private void updateOwnerRelatedFields(CreateFreeIpaRequest source, String accountId,
+            Future<String> ownerFuture, String userCrn, Stack stack) {
         String owner = accountId;
-        User user = User.newBuilder().setCrn(userCrn).setEmail(accountId).build();
         try {
-            user = userFuture.get(userGetTimeout, TimeUnit.SECONDS);
-            owner = user.getEmail();
+            owner = ownerFuture.get(userGetTimeout, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             String errorMessage = "Couldn't fetch user from UMS: ";
             LOGGER.error(errorMessage, e);
             stack.getStackStatus().setStatusReason(errorMessage + e.getMessage());
         }
-        stack.setTags(getTags(source, user, stack));
+        stack.setTags(getTags(source, stack, userCrn, owner));
         stack.setOwner(owner);
     }
 
@@ -208,32 +206,32 @@ public class CreateFreeIpaRequestToStackConverter {
         return source.getPlacement().getRegion();
     }
 
-    private Json getTags(CreateFreeIpaRequest source, User user, Stack stack) {
+    private Json getTags(CreateFreeIpaRequest source, Stack stack, String userCrn, String userName) {
         try {
             Map<String, String> userDefined = source.getTags();
             if (userDefined == null) {
                 userDefined =  new HashMap<>();
             }
             // userdefined tags comming from environment service
-            return new Json(new StackTags(userDefined, new HashMap<>(), getDefaultTags(user, stack)));
+            return new Json(new StackTags(userDefined, new HashMap<>(), getDefaultTags(stack, userCrn, userName)));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
     }
 
-    private Map<String, String> getDefaultTags(User user, Stack stack) {
+    private Map<String, String> getDefaultTags(Stack stack, String userCrn, String userName) {
         Map<String, String> result = new HashMap<>();
         try {
-            boolean internalTenant = entitlementService.internalTenant(user.getCrn(), stack.getAccountId());
+            boolean internalTenant = entitlementService.internalTenant(userCrn, stack.getAccountId());
             Map<String, String> accountTags = accountTagService.list();
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
-                    .withCreatorCrn(user.getCrn())
+                    .withCreatorCrn(userCrn)
                     .withEnvironmentCrn(stack.getEnvironmentCrn())
                     .withPlatform(stack.getCloudPlatform())
                     .withAccountId(stack.getAccountId())
                     .withResourceCrn(stack.getResourceCrn())
                     .withIsInternalTenant(internalTenant)
-                    .withUserName(user.getEmail())
+                    .withUserName(userName)
                     .withAccountTags(accountTags)
                     .build();
 

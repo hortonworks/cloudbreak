@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.cluster.service.DecommissionException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -73,7 +72,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private HostOrchestratorResolver hostOrchestratorResolver;
+    private HostOrchestrator hostOrchestrator;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -121,7 +120,6 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
                 executePreTerminationRecipes(stack, request.getHostGroupName(), hostsToRemove.keySet());
                 decommissionedHostNames = clusterDecomissionService.decommissionClusterNodes(hostsToRemove);
             }
-            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
             Set<Node> decommissionedNodes = stackUtil.collectNodesFromHostnames(stack, decommissionedHostNames);
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);

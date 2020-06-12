@@ -33,7 +33,11 @@ public class BootstrapMachineHandler implements EventHandler<BootstrapMachinesRe
         BootstrapMachinesRequest request = event.getData();
         Selectable response;
         try {
-            clusterBootstrapper.bootstrapMachines(request.getResourceId());
+            if (request.isReBootstrap()) {
+                clusterBootstrapper.reBootstrapMachines(request.getResourceId());
+            } else {
+                clusterBootstrapper.bootstrapMachines(request.getResourceId());
+            }
             response = new BootstrapMachinesSuccess(request.getResourceId());
         } catch (Exception e) {
             response = new BootstrapMachinesFailed(request.getResourceId(), e);

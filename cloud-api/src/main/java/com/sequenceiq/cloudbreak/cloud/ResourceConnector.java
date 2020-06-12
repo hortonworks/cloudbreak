@@ -112,11 +112,14 @@ public interface ResourceConnector<R> {
      *
      * @param authenticatedContext the authenticated context which holds the client object
      * @param stack                contains the full description of infrastructure
+     * @param resources            contains list of resources to be terminated
+     * @param persistenceNotifier  notifies the db to delete the resources
      * @param force                whether to continue termination even if infrastructure deletion fails
      * @return the status of resources terminated on the cloud platform
      * @throws Exception in case of any error
      */
-    List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, boolean force) throws Exception;
+    List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) throws Exception;
 
     /**
      * Starts the database server. The caller does not need to wait/block until

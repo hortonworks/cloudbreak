@@ -16,6 +16,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImag
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.EncryptionType;
@@ -23,12 +25,16 @@ import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsEncryptionV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1SpotParameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
+import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -45,14 +51,16 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
-import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.spot.SpotUtil;
 
 @Component
 public class AwsCloudProvider extends AbstractCloudProvider {
@@ -69,14 +77,25 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Inject
     private AwsCloudFunctionality awsCloudFunctionality;
 
+    @Inject
+    private SpotUtil spotUtil;
+
     @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
-        return template.withInstanceType(awsProperties.getInstance().getType());
+        AwsInstanceTemplateV4Parameters aws = new AwsInstanceTemplateV4Parameters();
+        AwsInstanceTemplateV4SpotParameters spot = new AwsInstanceTemplateV4SpotParameters();
+        spot.setPercentage(getSpotPercentage());
+        aws.setSpot(spot);
+        return template.withInstanceType(awsProperties.getInstance().getType())
+                .withAws(aws);
     }
 
     @Override
     public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template) {
-        return template.withInstanceType(awsProperties.getInstance().getType());
+        AwsInstanceTemplateV1Parameters awsParameters = new AwsInstanceTemplateV1Parameters();
+        awsParameters.setSpot(getAwsInstanceTemplateV1SpotParameters());
+        return template.withInstanceType(awsProperties.getInstance().getType())
+                .withAws(awsParameters);
     }
 
     @Override
@@ -371,6 +390,33 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         AwsEncryptionV1Parameters awsEncryptionV1Parameters = new AwsEncryptionV1Parameters();
         awsEncryptionV1Parameters.setType(EncryptionType.DEFAULT);
         awsInstanceTemplateV1Parameters.setEncryption(awsEncryptionV1Parameters);
+        awsInstanceTemplateV1Parameters.setSpot(getAwsInstanceTemplateV1SpotParameters());
         instanceTemplateV1Request.setAws(awsInstanceTemplateV1Parameters);
+    }
+
+    private AwsInstanceTemplateV1SpotParameters getAwsInstanceTemplateV1SpotParameters() {
+        AwsInstanceTemplateV1SpotParameters awsInstanceTemplateV1SpotParameters = new AwsInstanceTemplateV1SpotParameters();
+        awsInstanceTemplateV1SpotParameters.setPercentage(getSpotPercentage());
+        return awsInstanceTemplateV1SpotParameters;
+    }
+
+    @Override
+    public EnvironmentTestDto environment(EnvironmentTestDto environment) {
+        return super.environment(environment)
+                .withFreeIpa(getAttachedFreeIpaRequest());
+    }
+
+    private AttachedFreeIpaRequest getAttachedFreeIpaRequest() {
+        AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
+        AwsFreeIpaParameters awsFreeIpaParameters = new AwsFreeIpaParameters();
+        AwsFreeIpaSpotParameters awsFreeIpaSpotParameters = new AwsFreeIpaSpotParameters();
+        awsFreeIpaSpotParameters.setPercentage(getSpotPercentage());
+        awsFreeIpaParameters.setSpot(awsFreeIpaSpotParameters);
+        attachedFreeIpaRequest.setAws(awsFreeIpaParameters);
+        return attachedFreeIpaRequest;
+    }
+
+    private int getSpotPercentage() {
+        return spotUtil.isUseSpotInstances() ? 100 : 0;
     }
 }

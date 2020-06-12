@@ -238,7 +238,7 @@ public class SaltStates {
         return result.iterator().hasNext() ? result.iterator().next() : new HashMap<>();
     }
 
-    private static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target) {
+    public static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target) {
         return sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service);
     }
 

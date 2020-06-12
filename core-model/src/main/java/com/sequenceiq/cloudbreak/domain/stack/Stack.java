@@ -28,8 +28,6 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -44,6 +42,9 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.OnFailureActionConverter;
+import com.sequenceiq.cloudbreak.domain.converter.DatabaseAvailabilityTypeConverter;
+import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -137,7 +138,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     private Set<Resource> resources = new HashSet<>();
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = OnFailureActionConverter.class)
     private OnFailureAction onFailureActionAction = OnFailureAction.DO_NOTHING;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -189,14 +190,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private String environmentCrn;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = StackTypeConverter.class)
     private StackType type;
 
     private boolean clusterProxyRegistered;
 
     private String minaSshdServiceId;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = DatabaseAvailabilityTypeConverter.class)
     private DatabaseAvailabilityType externalDatabaseCreationType;
 
     public String getResourceCrn() {

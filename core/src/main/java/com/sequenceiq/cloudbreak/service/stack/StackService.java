@@ -80,6 +80,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
@@ -193,6 +194,9 @@ public class StackService implements ResourceIdProvider {
 
     @Inject
     private ResourceService resourceService;
+
+    @Inject
+    private SdxClientService sdxClientService;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -429,22 +433,17 @@ public class StackService implements ResourceIdProvider {
                 .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
     }
 
-    public StackView getViewByNameInWorkspace(String name, Long workspaceId) {
-        return stackViewService.findNotTerminatedByName(name, workspaceId)
+    public String getResourceCrnInTenant(String name, String tenantName) {
+        return stackViewService.findResourceCrnByNameAndTenantName(name, tenantName)
                 .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
     }
 
-    public StackView getViewByCrnInWorkspace(String crn, Long workspaceId) {
-        return stackViewService.findNotTerminatedByCrn(crn, workspaceId)
-                .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
+    public Set<String> getResourceCrnsByNameListInTenant(List<String> names, String tenantName) {
+        return stackViewService.findResourceCrnsByNameListAndTenant(names, tenantName);
     }
 
-    public Set<StackView> getViewsByCrnListInWorkspace(List<String> crns, Long workspaceId) {
-        return stackViewService.findNotTerminatedByCrnList(crns, workspaceId);
-    }
-
-    public Set<StackView> getViewsByNameListInWorkspace(List<String> names, Long workspaceId) {
-        return stackViewService.findNotTerminatedByNameList(names, workspaceId);
+    public Set<String> getResourceCrnsByTenant(String tenantName) {
+        return stackViewService.findResourceCrnsByTenant(tenantName);
     }
 
     public Optional<Stack> getByNameInWorkspaceWithLists(String name, Long workspaceId) {
@@ -452,7 +451,7 @@ public class StackService implements ResourceIdProvider {
     }
 
     @Measure(StackService.class)
-    public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace, Optional<String> crn) {
+    public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace, Optional<String> externalCrn) {
         if (stack.getGatewayPort() == null) {
             stack.setGatewayPort(nginxPort);
         }
@@ -477,8 +476,10 @@ public class StackService implements ResourceIdProvider {
 
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
 
-        if (crn.isPresent()) {
-            stack.setResourceCrn(crn.get());
+        if (externalCrn.isPresent()) {
+            // it means it is a DL cluster, double check it in sdx service
+            sdxClientService.getByCrn(externalCrn.get());
+            stack.setResourceCrn(externalCrn.get());
         } else {
             stack.setResourceCrn(createCRN(accountId));
         }

@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -59,6 +60,9 @@ public class AwsDownscaleService {
     @Inject
     private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
+    @Inject
+    private AwsCloudWatchService awsCloudWatchService;
+
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
             Object resourcesToRemove) {
         if (!vms.isEmpty()) {
@@ -67,6 +71,11 @@ public class AwsDownscaleService {
                 instanceIds.add(vm.getInstanceId());
             }
 
+            AwsCredentialView credentialView = new AwsCredentialView(auth.getCloudCredential());
+            AuthenticatedContextView authenticatedContextView = new AuthenticatedContextView(auth);
+            String regionName = authenticatedContextView.getRegion();
+            awsCloudWatchService.deleteCloudWatchAlarmsForSystemFailures(stack, regionName, credentialView, instanceIds);
+
             List<CloudResource> resourcesToDownscale = resources.stream()
                     .filter(resource -> instanceIds.contains(resource.getInstanceId()))
                     .collect(Collectors.toList());
@@ -74,10 +83,10 @@ public class AwsDownscaleService {
 
             String asGroupName = cfStackUtil.getAutoscalingGroupName(auth, vms.get(0).getTemplate().getGroupName(),
                     auth.getCloudContext().getLocation().getRegion().value());
-            AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(auth.getCloudCredential()),
+            AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(credentialView,
                     auth.getCloudContext().getLocation().getRegion().value());
             detachInstances(asGroupName, instanceIds, amazonASClient);
-            AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(auth.getCloudCredential()),
+            AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView,
                     auth.getCloudContext().getLocation().getRegion().value());
             terminateInstances(instanceIds, amazonEC2Client);
             LOGGER.debug("Terminated instances in stack '{}': '{}'", auth.getCloudContext().getId(), instanceIds);

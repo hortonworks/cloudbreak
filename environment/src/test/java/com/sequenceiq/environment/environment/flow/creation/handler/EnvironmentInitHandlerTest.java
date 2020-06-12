@@ -90,7 +90,7 @@ class EnvironmentInitHandlerTest {
         environmentInitHandler.accept(event);
 
         verify(environmentService, times(0)).setAdminGroupName(environment, null);
-        verify(environmentService, times(1)).assignEnvironmentAdminAndOwnerRole(CREATOR, CRN);
+        verify(environmentService, times(1)).assignEnvironmentAdminRole(CREATOR, CRN);
         verify(environmentService, times(1)).setLocation(environment, environment.getRegionWrapper(), cloudRegions);
         verify(environmentService, times(1)).setRegions(environment, environment.getRegionWrapper().getRegions(), cloudRegions);
         verify(environmentService, times(1)).save(environment);

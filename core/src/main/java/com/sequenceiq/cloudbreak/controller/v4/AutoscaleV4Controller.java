@@ -21,24 +21,27 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
@@ -68,6 +71,12 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Inject
     private ClusterProxyService clusterProxyService;
 
+    @Inject
+    private ConverterUtil converterUtil;
+
+    @Inject
+    private BlueprintService blueprintService;
+
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void putStack(String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
@@ -81,17 +90,25 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
-    public StackV4Response getStackForAmbari(@Valid AmbariAddressV4Request json) {
-        return stackCommonService.getStackForAmbari(json);
-    }
-
-    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
     public void decommissionInstancesForClusterCrn(String clusterCrn, Long workspaceId,
             List<String> instanceIds, Boolean forced) {
         stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), workspaceId,
                 instanceIds, forced);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
+    public AutoscaleStackV4Response getAutoscaleClusterByCrn(String crn) {
+        Stack stack = stackService.getByCrnInWorkspace(crn, restRequestThreadLocalService.getRequestedWorkspaceId());
+        return converterUtil.convert(stack, AutoscaleStackV4Response.class);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
+    public AutoscaleStackV4Response getAutoscaleClusterByName(String name) {
+        Stack stack = stackService.getByNameInWorkspace(name, restRequestThreadLocalService.getRequestedWorkspaceId());
+        return converterUtil.convert(stack, AutoscaleStackV4Response.class);
     }
 
     @Override
@@ -144,5 +161,19 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @PreAuthorize("hasRole('AUTOSCALE')")
     public ClusterProxyConfiguration getClusterProxyconfiguration() {
         return clusterProxyService.getClusterProxyConfigurationForAutoscale();
+    }
+
+    @Override
+    @DisableCheckPermissions
+    @PreAuthorize("hasRole('AUTOSCALE')")
+    public AutoscaleRecommendationV4Response getRecommendation(String crn) {
+        Stack stack = stackService.getByCrn(crn);
+
+        String blueprintName = stack.getCluster().getBlueprint().getName();
+        Long workspaceId = stack.getWorkspace().getId();
+
+        AutoscaleRecommendation autoscaleRecommendation = blueprintService.getAutoscaleRecommendation(workspaceId, blueprintName);
+
+        return converterUtil.convert(autoscaleRecommendation, AutoscaleRecommendationV4Response.class);
     }
 }

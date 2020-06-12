@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
+
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -112,50 +116,61 @@ public class AzureDatabaseResourceService {
                 .name(Integer.toString(POSTGRESQL_SERVER_PORT))
                 .build());
         databaseResources.add(CloudResource.builder()
-                .type(ResourceType.AZURE_RESOURCE_GROUP)
+                .type(AZURE_RESOURCE_GROUP)
                 .name(resourceGroupName)
                 .build());
         return databaseResources;
     }
 
-    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack, boolean force) {
+    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
+            List<CloudResource> resources, boolean force, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
+
+        return azureResourceGroupMetadataProvider.useSingleResourceGroup(stack)
+                ? deleteDatabaseServer(resources, cloudContext, force, client, persistenceNotifier)
+                : deleteResourceGroup(resources, cloudContext, force, client, persistenceNotifier, stack);
+    }
+
+    private List<CloudResourceStatus> deleteResourceGroup(List<CloudResource> resources, CloudContext cloudContext, boolean force,
+            AzureClient client, PersistenceNotifier persistenceNotifier, DatabaseStack stack) {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
-
-        try {
-            client.deleteResourceGroup(resourceGroupName);
-        } catch (CloudException e) {
-            String errorMessage = null;
-            if (e.body() != null) {
-                String errorCode = e.body().code();
-                if ("ResourceGroupNotFound".equals(errorCode)) {
-                    LOGGER.warn("Resource group {} does not exist, assuming that it has already been deleted", resourceGroupName);
-                    // leave errorMessage null => do not throw exception
-                } else {
-                    String details = e.body().details() != null ? e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", ")) : "";
-                    errorMessage = String.format("Resource group %s deletion failed, status code %s, error message: %s, details: %s",
-                            resourceGroupName, errorCode, e.body().message(), details);
-                }
-            } else {
-                errorMessage = String.format("Resource group %s deletion failed: '%s', please go to Azure Portal for details",
-                        resourceGroupName, e.getMessage());
-            }
-
-            if (errorMessage != null) {
-                if (force) {
-                    LOGGER.warn(errorMessage);
-                    LOGGER.warn("Resource group {} deletion failed, continuing because termination is forced", resourceGroupName);
-                } else {
-                    throw new CloudConnectorException(errorMessage, e);
-                }
-            }
+        Optional<String> errorMessage = azureUtils.deleteResourceGroup(client, resourceGroupName, force);
+        if (errorMessage.isEmpty()) {
+            deleteResources(resources, cloudContext, persistenceNotifier);
         }
 
         return Lists.newArrayList(new CloudResourceStatus(CloudResource.builder()
-                .type(ResourceType.AZURE_RESOURCE_GROUP)
+                .type(AZURE_RESOURCE_GROUP)
                 .name(resourceGroupName)
                 .build(), ResourceStatus.DELETED));
+    }
+
+    private List<CloudResourceStatus> deleteDatabaseServer(List<CloudResource> resources, CloudContext cloudContext, boolean force,
+            AzureClient client, PersistenceNotifier persistenceNotifier) {
+        LOGGER.debug("Deleting database server");
+        Optional<CloudResource> dbServerResourceOptional = resources.stream().filter(r -> AZURE_DATABASE.equals(r.getType())).findFirst();
+        if (dbServerResourceOptional.isEmpty()) {
+            LOGGER.warn("Azure database id not found in database, deleting nothing");
+            return List.of();
+        }
+        String databaseServerId = dbServerResourceOptional.get().getReference();
+        Optional<String> errorMessage = azureUtils.deleteDatabaseServer(client, databaseServerId, force);
+        if (errorMessage.isEmpty()) {
+            deleteResources(resources, cloudContext, persistenceNotifier);
+        }
+
+        return Lists.newArrayList(new CloudResourceStatus(CloudResource.builder()
+                .type(AZURE_DATABASE)
+                .name(databaseServerId)
+                .build(), ResourceStatus.DELETED));
+    }
+
+    private void deleteResources(List<CloudResource> cloudResourceList, CloudContext cloudContext, PersistenceNotifier persistenceNotifier) {
+        cloudResourceList.forEach(r -> {
+            LOGGER.debug("Deleting resource {} from db", r);
+            persistenceNotifier.notifyDeletion(r, cloudContext);
+        });
     }
 
     public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext ac, DatabaseStack stack) {

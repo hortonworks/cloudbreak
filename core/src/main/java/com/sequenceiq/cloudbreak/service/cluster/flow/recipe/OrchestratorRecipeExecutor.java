@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.util.Joiner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
@@ -53,7 +52,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 class OrchestratorRecipeExecutor {
 
     @Inject
-    private HostOrchestratorResolver hostOrchestratorResolver;
+    private HostOrchestrator hostOrchestrator;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -81,7 +80,6 @@ class OrchestratorRecipeExecutor {
     private ConversionService conversionService;
 
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
-        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         Map<HostGroup, List<RecipeModel>> recipeMap = getHostgroupToRecipeMap(stack, hostGroups);
         Map<String, List<RecipeModel>> hostnameToRecipeMap = recipeMap.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().getName(), Entry::getValue));
@@ -95,7 +93,6 @@ class OrchestratorRecipeExecutor {
     }
 
     public void preClusterManagerStartRecipes(Stack stack) throws CloudbreakException {
-        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
             hostOrchestrator.preClusterManagerStartRecipes(gatewayConfig, stackUtil.collectReachableNodes(stack),
@@ -109,7 +106,6 @@ class OrchestratorRecipeExecutor {
     }
 
     public void postClusterManagerStartRecipes(Stack stack) throws CloudbreakException {
-        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
             hostOrchestrator.postClusterManagerStartRecipes(gatewayConfig, stackUtil.collectReachableNodes(stack),
@@ -123,7 +119,6 @@ class OrchestratorRecipeExecutor {
     }
 
     public void postClusterInstall(Stack stack) throws CloudbreakException {
-        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
             hostOrchestrator.postInstallRecipes(gatewayConfig, stackUtil.collectReachableNodes(stack),
@@ -148,7 +143,6 @@ class OrchestratorRecipeExecutor {
         if (stack.getCluster() == null) {
             throw new NotFoundException("Cluster does not found, pre-termination will not be run.");
         }
-        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
             hostOrchestrator.preTerminationRecipes(gatewayConfig, nodes, ClusterDeletionBasedExitCriteriaModel.nonCancellableModel(), forced);

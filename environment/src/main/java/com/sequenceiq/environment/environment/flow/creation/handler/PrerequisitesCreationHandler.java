@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PREREQUISITES_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation.CREATE_NEW;
+import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_MULTIPLE;
 
 import java.util.Optional;
 
@@ -22,7 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.prerequisite.AzurePrerequisiteCreat
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.featureswitch.AzureSingleResourceGroupFeatureSwitch;
+import com.sequenceiq.environment.featureswitch.AzureSingleResourceGroupFeatureSwitch;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -109,7 +110,8 @@ public class PrerequisitesCreationHandler extends EventSenderAwareHandler<Enviro
             return;
         }
         AzureResourceGroupDto azureResourceGroupDto = azureResourceGroupDtoOptional.get();
-        if (!CREATE_NEW.equals(azureResourceGroupDto.getResourceGroupCreation())) {
+        LOGGER.debug("Azure resource group: {}", azureResourceGroupDto);
+        if (USE_MULTIPLE.equals(azureResourceGroupDto.getResourceGroupUsagePattern()) || !CREATE_NEW.equals(azureResourceGroupDto.getResourceGroupCreation())) {
             LOGGER.debug("New single azure resource group creation not requested, not creating resource group.");
             return;
         }

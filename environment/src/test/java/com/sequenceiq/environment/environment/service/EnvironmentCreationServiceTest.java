@@ -13,7 +13,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -187,7 +186,7 @@ class EnvironmentCreationServiceTest {
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
 
-        verify(environmentService, times(2)).save(any());
+        verify(environmentService).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
@@ -241,7 +240,7 @@ class EnvironmentCreationServiceTest {
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
 
-        verify(environmentService, times(2)).save(any());
+        verify(environmentService).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(CRN), anyString());

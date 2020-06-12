@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.service.freeipa.host;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -70,6 +72,7 @@ public class HostDeletionServiceTest {
         assertTrue(result.getSecond().isEmpty());
         assertEquals(1, result.getFirst().size());
         assertEquals(host.getFqdn(), result.getFirst().iterator().next());
+        verify(freeIpaClient).deleteHost(eq("host1"));
     }
 
     @Test
@@ -87,6 +90,8 @@ public class HostDeletionServiceTest {
         assertEquals(2, result.getFirst().size());
         assertTrue(result.getFirst().contains(host1.getFqdn()));
         assertTrue(result.getFirst().contains(host2.getFqdn()));
+        verify(freeIpaClient).deleteHost(eq("host1"));
+        verify(freeIpaClient).deleteHost(eq("host2"));
     }
 
     @Test
@@ -138,5 +143,39 @@ public class HostDeletionServiceTest {
         when(freeIpaClient.deleteHost(host2.getFqdn())).thenThrow(new FreeIpaClientException("not handled"));
 
         underTest.deleteHostsWithDeleteException(freeIpaClient, hosts);
+    }
+
+    @Test
+    public void successfulRemoveServersIfOneHostReturned() throws FreeIpaClientException {
+        Set<String> hosts = Set.of("host1", "host2");
+        Host host = new Host();
+        host.setFqdn("host1");
+        when(freeIpaClient.findAllHost()).thenReturn(Set.of(host));
+
+        Pair<Set<String>, Map<String, String>> result = underTest.removeServers(freeIpaClient, hosts);
+
+        assertTrue(result.getSecond().isEmpty());
+        assertEquals(1, result.getFirst().size());
+        assertEquals(host.getFqdn(), result.getFirst().iterator().next());
+        verify(freeIpaClient).deleteServer(eq("host1"));
+    }
+
+    @Test
+    public void successfulRemoveServersIfAllHostReturned() throws FreeIpaClientException {
+        Set<String> hosts = Set.of("host1", "host2");
+        Host host1 = new Host();
+        host1.setFqdn("host1");
+        Host host2 = new Host();
+        host2.setFqdn("host2");
+        when(freeIpaClient.findAllHost()).thenReturn(Set.of(host1, host2));
+
+        Pair<Set<String>, Map<String, String>> result = underTest.removeServers(freeIpaClient, hosts);
+
+        assertTrue(result.getSecond().isEmpty());
+        assertEquals(2, result.getFirst().size());
+        assertTrue(result.getFirst().contains(host1.getFqdn()));
+        assertTrue(result.getFirst().contains(host2.getFqdn()));
+        verify(freeIpaClient).deleteServer(eq("host1"));
+        verify(freeIpaClient).deleteServer(eq("host2"));
     }
 }

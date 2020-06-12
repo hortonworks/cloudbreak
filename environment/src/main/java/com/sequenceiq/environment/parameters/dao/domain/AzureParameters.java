@@ -1,10 +1,12 @@
 package com.sequenceiq.environment.parameters.dao.domain;
 
+import com.sequenceiq.environment.parameters.dao.converter.ResourceGroupCreationConverter;
+import com.sequenceiq.environment.parameters.dao.converter.ResourceGroupUsagePatternConverter;
+
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 
 @Entity
 @DiscriminatorValue("AZURE")
@@ -14,11 +16,11 @@ public class AzureParameters extends BaseParameters {
     private String resourceGroupName;
 
     @Column(name = "resource_group_creation")
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ResourceGroupCreationConverter.class)
     private ResourceGroupCreation resourceGroupCreation;
 
     @Column(name = "resource_group_single")
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ResourceGroupUsagePatternConverter.class)
     private ResourceGroupUsagePattern resourceGroupUsagePattern;
 
     public String getResourceGroupName() {

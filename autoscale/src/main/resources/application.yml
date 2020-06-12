@@ -32,7 +32,6 @@ management:
 periscope:
   cert:
     dir: /certs/
-
   db:
     env:
       user: postgres
@@ -45,13 +44,15 @@ periscope:
       addr: localhost
       port: 5432
   cloudbreak.url: http://localhost:9091
-  enabledPlatforms: AWS
+  entitlementCheckEnabled: true
   enabledAutoscaleMonitors:
     time-monitor:
       enabled: true
     load-monitor:
       enabled: true
     cluster-manager-host-health-monitor:
+      enabled: false
+    cluster-status-monitor:
       enabled: true
     prometheus-monitor:
       enabled: false

@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
+import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -75,10 +78,7 @@ public class CloudResourceAdvisor {
         LOGGER.debug("Advising resources for blueprintName: {}, provider: {} and region: {}.",
                 blueprintName, cloudPlatform, region);
 
-        Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
-        String blueprintText = blueprint.getBlueprintText();
-        BlueprintTextProcessor blueprintTextProcessor =
-                blueprintTextProcessorFactory.createBlueprintTextProcessor(blueprintText);
+        BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
         Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
         componentsByHostGroup.forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName,
                 isThereMasterComponents(blueprintTextProcessor.getClusterManagerType(), hGName, components)));
@@ -139,22 +139,42 @@ public class CloudResourceAdvisor {
 
         GatewayRecommendation gateway = recommendGateway(blueprintTextProcessor);
 
-        return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes, instanceCounts, gateway);
+        AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor);
+
+        ResizeRecommendation resize = recommendResize(blueprintTextProcessor);
+
+        return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes, instanceCounts, gateway, autoscale, resize);
+    }
+
+    public AutoscaleRecommendation getAutoscaleRecommendation(Long workspaceId, String blueprintName) {
+        LOGGER.debug("Autoscale advice for blueprintName: {}.", blueprintName);
+        BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
+        return recommendAutoscale(blueprintTextProcessor);
+    }
+
+    private BlueprintTextProcessor getBlueprintTextProcessor(Long workspaceId, String blueprintName) {
+        Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
+        String blueprintText = blueprint.getBlueprintText();
+        return blueprintTextProcessorFactory.createBlueprintTextProcessor(blueprintText);
     }
 
     private GatewayRecommendation recommendGateway(BlueprintTextProcessor blueprintTextProcessor) {
         GatewayRecommendation recommendation = blueprintTextProcessor.recommendGateway();
 
         if (recommendation.getHostGroups().isEmpty()) {
-            Set<String> gatewayGroups = blueprintTextProcessor.getComponentsByHostGroup().keySet().stream()
-                    .filter(this::fallbackGatewayFilter)
-                    .collect(Collectors.toSet());
+            Set<String> gatewayGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackGatewayFilter);
             if (!gatewayGroups.isEmpty()) {
                 recommendation = new GatewayRecommendation(gatewayGroups);
             }
         }
 
         return recommendation;
+    }
+
+    private Set<String> filterHostGroupByPredicate(BlueprintTextProcessor blueprintTextProcessor, Predicate<String> predicate) {
+        return blueprintTextProcessor.getComponentsByHostGroup().keySet().stream()
+                .filter(predicate)
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -164,6 +184,67 @@ public class CloudResourceAdvisor {
         String lowerName = hostGroupName.toLowerCase();
         return lowerName.contains("master")
                 || lowerName.contains("services");
+    }
+
+    private ResizeRecommendation recommendResize(BlueprintTextProcessor blueprintTextProcessor) {
+        ResizeRecommendation resizeRecommendation = blueprintTextProcessor.recommendResize();
+
+        if (resizeRecommendation.getScaleUpHostGroups().isEmpty()) {
+            Set<String> scaleUpHostGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackScaleUpFilter);
+            if (!scaleUpHostGroups.isEmpty()) {
+                resizeRecommendation.setScaleUpHostGroups(scaleUpHostGroups);
+            }
+        }
+        if (resizeRecommendation.getScaleDownHostGroups().isEmpty()) {
+            Set<String> scaleDownHostGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackScaleDownFilter);
+            if (!scaleDownHostGroups.isEmpty()) {
+                resizeRecommendation.setScaleDownHostGroups(scaleDownHostGroups);
+            }
+        }
+
+        return resizeRecommendation;
+    }
+
+    private boolean fallbackScaleUpFilter(String hostGroupName) {
+        String lowerCaseName = hostGroupName.toLowerCase();
+        return !lowerCaseName.contains("master")
+                && !lowerCaseName.contains("manager");
+    }
+
+    private boolean fallbackScaleDownFilter(String hostGroupName) {
+        String lowerCaseName = hostGroupName.toLowerCase();
+        return !lowerCaseName.contains("master")
+                && !lowerCaseName.contains("manager");
+    }
+
+    private AutoscaleRecommendation recommendAutoscale(BlueprintTextProcessor blueprintTextProcessor) {
+        AutoscaleRecommendation autoscaleRecommendation = blueprintTextProcessor.recommendAutoscale();
+
+        if (autoscaleRecommendation.getTimeBasedHostGroups().isEmpty()) {
+            Set<String> autoscaleGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackTimeBasedAutoscaleFilter);
+            if (!autoscaleGroups.isEmpty()) {
+                autoscaleRecommendation.setTimeBasedHostGroups(autoscaleGroups);
+            }
+        }
+
+        if (autoscaleRecommendation.getLoadBasedHostGroups().isEmpty()) {
+            Set<String> autoscaleGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackLoadBasedAutoscaleFilter);
+            if (!autoscaleGroups.isEmpty()) {
+                autoscaleRecommendation.setLoadBasedHostGroups(autoscaleGroups);
+            }
+        }
+
+        return autoscaleRecommendation;
+    }
+
+    private boolean fallbackTimeBasedAutoscaleFilter(String hostGroupName) {
+        String lowerCaseName = hostGroupName.toLowerCase();
+        return lowerCaseName.contains("compute");
+    }
+
+    private boolean fallbackLoadBasedAutoscaleFilter(String hostGroupName) {
+        String lowerCaseName = hostGroupName.toLowerCase();
+        return lowerCaseName.contains("compute");
     }
 
     private Map<String, InstanceCount> recommendInstanceCounts(BlueprintTextProcessor blueprintProcessor) {

@@ -11,6 +11,7 @@ import org.apache.commons.collections4.MapUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -49,6 +50,8 @@ public class NetworkDto {
 
     private final ServiceEndpointCreation serviceEndpointCreation;
 
+    private final OutboundInternetTraffic outboundInternetTraffic;
+
     private final RegistrationType registrationType;
 
     private final CloudPlatform cloudPlatform;
@@ -70,6 +73,7 @@ public class NetworkDto {
         networkId = builder.networkId;
         privateSubnetCreation = builder.privateSubnetCreation;
         serviceEndpointCreation = builder.serviceEndpointCreation;
+        outboundInternetTraffic = builder.outboundInternetTraffic;
         registrationType = builder.registrationType;
         cloudPlatform = builder.cloudPlatform;
     }
@@ -166,6 +170,10 @@ public class NetworkDto {
         return serviceEndpointCreation;
     }
 
+    public OutboundInternetTraffic getOutboundInternetTraffic() {
+        return outboundInternetTraffic;
+    }
+
     public RegistrationType getRegistrationType() {
         return registrationType;
     }
@@ -190,6 +198,7 @@ public class NetworkDto {
                 ", subnetMetas=" + subnetMetas +
                 ", privateSubnetCreation=" + privateSubnetCreation +
                 ", serviceEndpointCreation=" + serviceEndpointCreation +
+                ", outboundInternetTraffic=" + outboundInternetTraffic +
                 ", registrationType=" + registrationType +
                 ", cloudPlatform=" + cloudPlatform +
                 '}';
@@ -229,6 +238,8 @@ public class NetworkDto {
 
         private ServiceEndpointCreation serviceEndpointCreation;
 
+        private OutboundInternetTraffic outboundInternetTraffic;
+
         private RegistrationType registrationType;
 
         private CloudPlatform cloudPlatform;
@@ -249,6 +260,7 @@ public class NetworkDto {
             networkCidr = networkDto.networkCidr;
             privateSubnetCreation = networkDto.privateSubnetCreation;
             serviceEndpointCreation = networkDto.serviceEndpointCreation;
+            outboundInternetTraffic = networkDto.outboundInternetTraffic;
             registrationType = networkDto.registrationType;
             cloudPlatform = networkDto.cloudPlatform;
             cbSubnets = networkDto.cbSubnets;
@@ -333,6 +345,11 @@ public class NetworkDto {
 
         public Builder withServiceEndpointCreation(ServiceEndpointCreation serviceEndpointCreation) {
             this.serviceEndpointCreation = serviceEndpointCreation;
+            return this;
+        }
+
+        public Builder withOutboundInternetTraffic(OutboundInternetTraffic outboundInternetTraffic) {
+            this.outboundInternetTraffic = outboundInternetTraffic;
             return this;
         }
 

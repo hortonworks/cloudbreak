@@ -3,8 +3,6 @@ package com.sequenceiq.periscope.monitor.evaluator.cm;
 import static com.sequenceiq.periscope.api.model.ClusterState.PENDING;
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 import static com.sequenceiq.periscope.api.model.ClusterState.SUSPENDED;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -28,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -41,7 +40,6 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.SecurityConfig;
-import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -106,7 +104,6 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
         Cluster cluster = getCluster(SUSPENDED);
         History history = new History();
         StackV4Response stack = new StackV4Response();
-
         setUpMocks(cluster, true, stack, history);
 
         underTest.execute();
@@ -173,18 +170,14 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
         setUpMocks(null, false, stack, history);
 
         Cluster cluster = getCluster(null);
-        when(clusterService.create(any(), any(), any())).thenReturn(cluster);
+        when(clusterService.create(any())).thenReturn(cluster);
         when(historyService.createEntry(any(), anyString(), anyInt(), eq(cluster))).thenReturn(history);
 
         underTest.execute();
 
         verify(clusterService).findOneByStackId(STACK_ID);
         verify(clusterService).validateClusterUniqueness(any());
-        verify(clusterService).create(any(MonitoredStack.class), eq(RUNNING), captor.capture());
-        ClusterPertain clusterPertain = captor.getValue();
-        assertThat(clusterPertain.getTenant(), is("TENANT"));
-        assertThat(clusterPertain.getWorkspaceId(), is(10L));
-        assertThat(clusterPertain.getUserId(), is("USER_ID"));
+        verify(clusterService).create(any(AutoscaleStackV4Response.class));
     }
 
     private void setUpMocks(Cluster cluster, boolean healthy, StackV4Response stackV4Response, History history) {
@@ -199,7 +192,7 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
         when(evaluatorContext.getData()).thenReturn(stack);
         when(securityConfigService.getSecurityConfig(anyLong())).thenReturn(new SecurityConfig());
         when(clusterService.findOneByStackId(anyLong())).thenReturn(cluster);
-        when(requestLogging.logging(any(), any())).thenReturn(healthy);
+        when(requestLogging.logResponseTime(any(), any())).thenReturn(healthy);
         if (cluster != null) {
             when(historyService.createEntry(any(), anyString(), anyInt(), any(Cluster.class))).thenReturn(history);
         }
@@ -213,11 +206,12 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
         AutoscaleStackV4Response stack = new AutoscaleStackV4Response();
         stack.setStackId(STACK_ID);
         stack.setStackCrn(STACK_CRN);
-        stack.setAmbariServerIp("0.0.0.0");
+        stack.setClusterManagerIp("0.0.0.0");
         stack.setGatewayPort(8080);
         stack.setTenant("TENANT");
         stack.setWorkspaceId(10L);
         stack.setUserId("USER_ID");
+        stack.setClusterStatus(Status.AVAILABLE);
         return stack;
     }
 

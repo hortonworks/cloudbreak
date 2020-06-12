@@ -138,6 +138,7 @@ cb:
     default.inbound.security.group:
     vpc:
     vpcendpoints:
+      enabled.gateway.services:
       gateway:
         services: s3,dynamodb
       interface:
@@ -154,6 +155,10 @@ cb:
   azure:
     host.name.prefix.length: 255
     database.template.batchSize: 1
+  featureswitch:
+    azure:
+      single:
+        resourcegroup: false
 
 spring:
   application:

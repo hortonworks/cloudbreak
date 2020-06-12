@@ -26,9 +26,11 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateInstantiator;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroupInfo;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
+import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
@@ -476,6 +478,38 @@ public class CmTemplateProcessorTest {
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha-no-gateway.bp"));
         assertEquals(new GatewayRecommendation(Set.of()), underTest.recommendGateway());
+    }
+
+    @Test
+    public void recommendAutoscale() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-multi-gateway.bp"));
+        assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()), underTest.recommendAutoscale());
+
+        underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha.bp"));
+        assertEquals(new AutoscaleRecommendation(Set.of("gateway", "quorum"), Set.of("gateway", "quorum")), underTest.recommendAutoscale());
+
+        underTest = new CmTemplateProcessor(getBlueprintText("input/kafka.bp"));
+        assertEquals(new AutoscaleRecommendation(Set.of("quorum"), Set.of("quorum")), underTest.recommendAutoscale());
+
+        underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
+        assertEquals(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")), underTest.recommendAutoscale());
+    }
+
+    @Test
+    public void recommendResize() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/kafka.bp"));
+        assertEquals(new ResizeRecommendation(Set.of("quorum"), Set.of("quorum")), underTest.recommendResize());
+
+        underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
+        Set<String> hostGroups = Set.of("gateway", "compute", "worker");
+        assertEquals(new ResizeRecommendation(hostGroups, hostGroups), underTest.recommendResize());
+
+        underTest = new CmTemplateProcessor(getBlueprintText("input/cb5660.bp"));
+        hostGroups = Set.of("gateway", "quorum", "worker", "compute");
+        assertEquals(new ResizeRecommendation(hostGroups, hostGroups), underTest.recommendResize());
+
+        underTest = new CmTemplateProcessor(getBlueprintText("input/nifi.bp"));
+        assertEquals(new ResizeRecommendation(Set.of(), Set.of()), underTest.recommendResize());
     }
 
     @Test

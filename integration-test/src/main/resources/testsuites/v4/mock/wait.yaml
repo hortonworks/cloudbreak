@@ -2,6 +2,5 @@ name: "wait-refactor-tesztek"
 tests:
   - name: "wait refactor tesztek"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.mock.EnvironmentClusterTest
-        includedMethods:
-        - testSameEnvironmentWithDifferentClusters
+      - name: com.sequenceiq.it.cloudbreak.testcase.mock.RecoveryItTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.mock.EnvironmentTest

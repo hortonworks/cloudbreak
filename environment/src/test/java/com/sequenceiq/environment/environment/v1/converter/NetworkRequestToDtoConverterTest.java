@@ -81,6 +81,7 @@ public class NetworkRequestToDtoConverterTest {
         request.setSubnetIds(Set.of(SUBNET_ID));
         request.setPrivateSubnetCreation(PrivateSubnetCreation.ENABLED);
         request.setServiceEndpointCreation(ServiceEndpointCreation.ENABLED);
+        request.setServiceEndpointCreation(ServiceEndpointCreation.DISABLED);
         return request;
     }
 
@@ -117,6 +118,7 @@ public class NetworkRequestToDtoConverterTest {
         assertEquals(actual.getSubnetMetas().get(SUBNET_ID).getName(), SUBNET_ID);
         assertEquals(network.getPrivateSubnetCreation(), actual.getPrivateSubnetCreation());
         assertEquals(network.getServiceEndpointCreation(), actual.getServiceEndpointCreation());
+        assertEquals(network.getOutboundInternetTraffic(), actual.getOutboundInternetTraffic());
         assertEquals(network.getNetworkCidr(), actual.getNetworkCidr());
     }
 

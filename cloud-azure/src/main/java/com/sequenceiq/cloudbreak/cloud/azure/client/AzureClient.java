@@ -139,8 +139,12 @@ public class AzureClient {
         return getResourceGroups().contain(name);
     }
 
+    public boolean isResourceGroupEmpty(String name) {
+        return handleAuthException(() -> azure.genericResources().listByResourceGroup(name).isEmpty());
+    }
+
     public void deleteResourceGroup(String name) {
-        azure.resourceGroups().deleteByName(name);
+        handleAuthException(() -> azure.resourceGroups().deleteByName(name));
     }
 
     public ResourceGroup createResourceGroup(String name, String region, Map<String, String> tags) {
@@ -676,5 +680,9 @@ public class AzureClient {
 
     public PagedList<Subscription> listSubscriptions() {
         return azure.subscriptions().list();
+    }
+
+    public void deleteDatabaseServer(String databaseServerId) {
+        handleAuthException(() -> azure.genericResources().deleteById(databaseServerId));
     }
 }

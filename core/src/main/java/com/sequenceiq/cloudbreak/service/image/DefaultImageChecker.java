@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.CrnsByCategory;
-import com.sequenceiq.authorization.service.DefaultResourceChecker;
+import com.sequenceiq.authorization.service.defaults.CrnsByCategory;
+import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
 
 @Component
 public class DefaultImageChecker implements DefaultResourceChecker {

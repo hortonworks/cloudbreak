@@ -3,9 +3,8 @@ package com.sequenceiq.cloudbreak.domain.view;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -14,6 +13,7 @@ import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 
+import com.sequenceiq.cloudbreak.domain.converter.StatusConverter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @Entity
@@ -31,7 +31,7 @@ public class ClusterApiView extends CompactView {
 
     private String clusterManagerIp;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = StatusConverter.class)
     private Status status;
 
     private String environmentCrn;

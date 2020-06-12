@@ -4,8 +4,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,6 +13,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.DatabaseVendorConverter;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
@@ -42,7 +41,7 @@ public class DatabaseServer implements AccountIdAwareResource {
     private String instanceType;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = DatabaseVendorConverter.class)
     private DatabaseVendor databaseVendor;
 
     @Column

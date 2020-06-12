@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.domain;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,6 +14,7 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -47,7 +46,7 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
     private int hostGroupCount;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ResourceStatusConverter.class)
     private ResourceStatus status;
 
     @Convert(converter = JsonToString.class)

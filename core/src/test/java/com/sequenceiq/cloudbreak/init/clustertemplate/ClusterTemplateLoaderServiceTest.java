@@ -90,6 +90,21 @@ public class ClusterTemplateLoaderServiceTest {
     }
 
     @Test
+    public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenTemplateContentsAreSameButCrnIsNull() {
+        DefaultClusterTemplateV4Request clusterTemplateFromDefault = sameClusterTemplateRequest();
+        ClusterTemplate clusterTemplate = sameClusterTemplate();
+        clusterTemplate.setResourceCrn(null);
+        clusterTemplate.setTemplateContent(Base64.getEncoder().encodeToString(writeValueAsStringSilent(clusterTemplateFromDefault).getBytes()));
+
+        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests())
+                .thenReturn(singletonMap(clusterTemplateFromDefault.getName(), encode(clusterTemplateFromDefault)));
+
+        boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(singleton(clusterTemplate));
+
+        assertThat(actual, is(true));
+    }
+
+    @Test
     public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenTemplateContentsAreNotSame() {
         DefaultClusterTemplateV4Request clusterTemplateFromDefault = clusterTemplateRequest("cluster-template");
         ClusterTemplate clusterTemplateFromDB = clusterTemplate("cluster-template", "gcp", "hostgroup2", "worker");
@@ -142,6 +157,7 @@ public class ClusterTemplateLoaderServiceTest {
         stack.setInstanceGroups(singleton(instanceGroup));
         clusterTemplate.setStackTemplate(stack);
         clusterTemplate.setWorkspace(workspace);
+        clusterTemplate.setResourceCrn("crn");
         return clusterTemplate;
     }
 

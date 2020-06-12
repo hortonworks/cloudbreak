@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
@@ -115,9 +115,15 @@ public class FreeIpaCreationService {
 
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
         String userCrn = crnService.getUserCrn();
-        Future<User> userFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, userCrn, MDCUtils.getRequestId()));
+        Future<String> ownerFuture;
+        if (Crn.safeFromString(userCrn).getResourceType().equals(Crn.ResourceType.MACHINE_USER)) {
+            ownerFuture = intermediateBuilderExecutor.submit(() ->
+                    umsClient.getMachineUserDetails(userCrn, userCrn, MDCUtils.getRequestId()).getMachineUserName());
+        } else {
+            ownerFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, userCrn, MDCUtils.getRequestId()).getEmail());
+        }
         Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
-        Stack stack = stackConverter.convert(request, accountId, userFuture, userCrn, credential.getCloudPlatform());
+        Stack stack = stackConverter.convert(request, accountId, ownerFuture, userCrn, credential.getCloudPlatform());
         stack.setAppVersion(appVersion);
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack, credential);
         Telemetry telemetry = stack.getTelemetry();

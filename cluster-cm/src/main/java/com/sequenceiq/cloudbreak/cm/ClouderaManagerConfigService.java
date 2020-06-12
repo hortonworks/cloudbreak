@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -22,12 +21,10 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 @Service
-@Scope("prototype")
 public class ClouderaManagerConfigService {
 
     static final String KNOX_AUTORESTART_ON_STOP = "autorestart_on_stop";
@@ -39,7 +36,7 @@ public class ClouderaManagerConfigService {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
-    public void setCdpEnvironmentIfCmVersionAtLeast(Versioned versionAtLeast, ApiClient apiClient, HttpClientConfig httpClientConfig) {
+    public void setCdpEnvironmentIfCmVersionAtLeast(Versioned versionAtLeast, ApiClient apiClient) {
 
         try {
             ClouderaManagerResourceApi resourceApiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
@@ -73,28 +70,40 @@ public class ClouderaManagerConfigService {
         return false;
     }
 
-    public void disableKnoxAutorestartIfCmVersionAtLeast(Versioned versionAtLeast, ApiClient client, HttpClientConfig clientConfig, String clusterName) {
+    public void disableKnoxAutorestartIfCmVersionAtLeast(Versioned versionAtLeast, ApiClient client, String clusterName) {
         try {
             ClouderaManagerResourceApi resourceApiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
             if (isVersionAtLeast(versionAtLeast, resourceApiInstance)) {
-                disableKnoxAutorestart(client, clusterName);
+                modifyKnoxAutorestart(client, clusterName, false);
             }
         } catch (ApiException e) {
             LOGGER.debug("Failed to initialize CM client.", e);
         }
     }
 
-    private void disableKnoxAutorestart(ApiClient client, String clusterName) {
-            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
-            getKnoxServiceName(clusterName, servicesResourceApi)
-                    .ifPresentOrElse(
-                            doDisableKnoxAutorestart(clusterName, servicesResourceApi),
-                            () -> LOGGER.info("KNOX service name is missing, skipping disabling the autorestart property."));
+    public void enableKnoxAutorestartIfCmVersionAtLeast(Versioned versionAtLeast, ApiClient client, String clusterName) {
+        try {
+            ClouderaManagerResourceApi resourceApiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
+            if (isVersionAtLeast(versionAtLeast, resourceApiInstance)) {
+                modifyKnoxAutorestart(client, clusterName, true);
+            }
+        } catch (ApiException e) {
+            LOGGER.debug("Failed to initialize CM client.", e);
+        }
     }
 
-    private Consumer<String> doDisableKnoxAutorestart(String clusterName, ServicesResourceApi servicesResourceApi) {
+    private void modifyKnoxAutorestart(ApiClient client, String clusterName, boolean autorestart) {
+            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
+            LOGGER.info("Try to modify Knox auto restart to {}", autorestart);
+            getKnoxServiceName(clusterName, servicesResourceApi)
+                    .ifPresentOrElse(
+                            modifyKnoxAutorestart(clusterName, servicesResourceApi, autorestart),
+                            () -> LOGGER.info("KNOX service name is missing, skip modifying the autorestart property."));
+    }
+
+    private Consumer<String> modifyKnoxAutorestart(String clusterName, ServicesResourceApi servicesResourceApi, boolean autorestart) {
         return knoxServiceName -> {
-            ApiConfig autorestartConfig = new ApiConfig().name(KNOX_AUTORESTART_ON_STOP).value(Boolean.FALSE.toString());
+            ApiConfig autorestartConfig = new ApiConfig().name(KNOX_AUTORESTART_ON_STOP).value(Boolean.valueOf(autorestart).toString());
             ApiServiceConfig serviceConfig = new ApiServiceConfig().addItemsItem(autorestartConfig);
             try {
                 servicesResourceApi.updateServiceConfig(clusterName, knoxServiceName, "", serviceConfig);

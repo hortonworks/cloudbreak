@@ -56,6 +56,7 @@ dependencies {
   testImplementation group: 'org.springframework.boot',    name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.apache.tomcat.embed',     name: 'tomcat-embed-el',                version: '9.0.8'
   testImplementation group: 'com.openpojo',                name: 'openpojo',                       version: openPojoVersion
+  testCompile project(path: ':common', configuration: 'tests')
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

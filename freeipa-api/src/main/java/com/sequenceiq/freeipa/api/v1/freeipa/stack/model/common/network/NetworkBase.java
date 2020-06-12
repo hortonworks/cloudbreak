@@ -1,12 +1,21 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network;
 
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.NetworkModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public abstract class NetworkBase extends ProviderParametersBase {
+    @ApiModelProperty(NetworkModelDescription.OUTBOUND_INTERNET_TRAFFIC)
+    private OutboundInternetTraffic outboundInternetTraffic = OutboundInternetTraffic.ENABLED;
+
+    @ApiModelProperty(NetworkModelDescription.NETWORK_CIDRS)
+    private List<String> networkCidrs;
+
     @ApiModelProperty(NetworkModelDescription.AWS_PARAMETERS)
     private AwsNetworkParameters aws;
 
@@ -24,6 +33,22 @@ public abstract class NetworkBase extends ProviderParametersBase {
 
     @ApiModelProperty(hidden = true)
     private YarnNetworkParameters yarn;
+
+    public OutboundInternetTraffic getOutboundInternetTraffic() {
+        return outboundInternetTraffic;
+    }
+
+    public void setOutboundInternetTraffic(OutboundInternetTraffic outboundInternetTraffic) {
+        this.outboundInternetTraffic = outboundInternetTraffic;
+    }
+
+    public List<String> getNetworkCidrs() {
+        return networkCidrs;
+    }
+
+    public void setNetworkCidrs(List<String> networkCidrs) {
+        this.networkCidrs = networkCidrs;
+    }
 
     public void setAws(AwsNetworkParameters aws) {
         this.aws = aws;
@@ -123,13 +148,14 @@ public abstract class NetworkBase extends ProviderParametersBase {
 
     @Override
     public String toString() {
-        return "NetworkBase{"
-                + "aws=" + aws
-                + ", azure=" + azure
-                + ", gcp=" + gcp
-                + ", openstack=" + openstack
-                + ", mock=" + mock
-                + ", yarn=" + yarn
-                + '}';
+        return "NetworkBase{" +
+                "aws=" + aws +
+                ", azure=" + azure +
+                ", gcp=" + gcp +
+                ", openstack=" + openstack +
+                ", networkCidrs=" + networkCidrs +
+                ", mock=" + mock +
+                ", yarn=" + yarn +
+                '}';
     }
 }

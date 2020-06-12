@@ -3,6 +3,9 @@ package com.sequenceiq.it.cloudbreak.util.wait.service.environment;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ARCHIVED;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.DELETE_FAILED;
 
+import java.util.Map;
+
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 
 import org.slf4j.Logger;
@@ -26,7 +29,7 @@ public class EnvironmentTerminationChecker<T extends EnvironmentWaitObject> exte
             String name = environment.getName();
             EnvironmentStatus status = environment.getEnvironmentStatus();
             LOGGER.info("Waiting for the '{}' state of '{}' '{}' environment. Actual state is: '{}'", desiredStatus, name, crn, status);
-            if (environment.getEnvironmentStatus() == DELETE_FAILED) {
+            if (environment.getEnvironmentStatus().equals(DELETE_FAILED)) {
                 LOGGER.error("Environment '{}' '{}' termination failed (status:'{}'), waiting is cancelled.", name, crn, status);
                 throw new TestFailException(String.format("Environment '%s' '%s' termination failed. Status: '%s' statusReason: '%s'",
                         name, crn, status, environment.getStatusReason()));
@@ -35,13 +38,12 @@ public class EnvironmentTerminationChecker<T extends EnvironmentWaitObject> exte
                 return false;
             }
         } catch (Exception e) {
-            StringBuilder builder = new StringBuilder("Environment termination failed: ")
-                    .append(System.lineSeparator())
-                    .append(e.getMessage())
-                    .append(System.lineSeparator())
-                    .append(e);
-            LOGGER.error(builder.toString());
-            throw new TestFailException(builder.toString());
+            if (e instanceof NotFoundException) {
+                LOGGER.warn("No environment found with crn '{}'", crn, e);
+            } else {
+                LOGGER.error("Environment termination failed: {}", e.getMessage(), e);
+                throw new TestFailException(String.format("Environment termination failed: %s", e.getMessage()));
+            }
         }
         return true;
     }
@@ -54,13 +56,9 @@ public class EnvironmentTerminationChecker<T extends EnvironmentWaitObject> exte
             throw new TestFailException(String.format("Wait operation timed out, '%s' '%s' environment termination failed. Environment status: '%s' " +
                     "statusReason: '%s'", environment.getName(), crn, environment.getEnvironmentStatus(), environment.getStatusReason()));
         } catch (Exception e) {
-            StringBuilder builder = new StringBuilder("Wait operation timed out, environment termination failed. Also failed to get environment status: ")
-                    .append(System.lineSeparator())
-                    .append(e.getMessage())
-                    .append(System.lineSeparator())
-                    .append(e);
-            LOGGER.error(builder.toString());
-            throw new TestFailException(builder.toString());
+            LOGGER.error("Wait operation timed out, environment termination failed. Also failed to get environment status: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("Wait operation timed out, environment termination failed. Also failed to get environment status: %s",
+                    e.getMessage()));
         }
     }
 
@@ -75,26 +73,28 @@ public class EnvironmentTerminationChecker<T extends EnvironmentWaitObject> exte
         try {
             DetailedEnvironmentResponse environment = waitObject.getEndpoint().getByCrn(crn);
             EnvironmentStatus status = environment.getEnvironmentStatus();
-            if (status == DELETE_FAILED) {
-                return false;
+            if (status.equals(DELETE_FAILED)) {
+                return true;
             }
             return status.isFailed();
         } catch (ProcessingException clientException) {
-            StringBuilder builder = new StringBuilder("Exit waiting! Failed to get environment due to API client exception: ")
-                    .append(System.lineSeparator())
-                    .append(clientException.getMessage())
-                    .append(System.lineSeparator())
-                    .append(clientException);
-            LOGGER.error(builder.toString());
+            LOGGER.error("Exit waiting! Failed to get environment due to API client exception: {}", clientException.getMessage(), clientException);
         } catch (Exception e) {
-            StringBuilder builder = new StringBuilder("Exit waiting! Failed to get environment, because of: ")
-                    .append(System.lineSeparator())
-                    .append(e.getMessage())
-                    .append(System.lineSeparator())
-                    .append(e);
-            LOGGER.error(builder.toString());
+            LOGGER.error("Exit waiting! Failed to get environment, because of: {}", e.getMessage(), e);
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Map<String, String> getStatuses(T waitObject) {
+        String crn = waitObject.getCrn();
+        try {
+            DetailedEnvironmentResponse environment = waitObject.getEndpoint().getByCrn(crn);
+            return Map.of("status", environment.getEnvironmentStatus().name());
+        } catch (NotFoundException e) {
+            LOGGER.warn("No environment found with crn '{}'! It has been deleted successfully.", crn, e);
+            return Map.of("status", ARCHIVED.name());
+        }
     }
 }

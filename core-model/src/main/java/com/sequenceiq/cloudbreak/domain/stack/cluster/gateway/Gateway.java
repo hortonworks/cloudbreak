@@ -8,8 +8,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,6 +22,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.converter.GatewayTypeConverter;
+import com.sequenceiq.cloudbreak.domain.converter.SSOTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
@@ -42,7 +42,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
     @OneToOne
     private Cluster cluster;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = GatewayTypeConverter.class)
     private GatewayType gatewayType = GatewayType.INDIVIDUAL;
 
     private String path;
@@ -58,7 +58,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
     @SecretValue
     private Secret knoxMasterSecret = Secret.EMPTY;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = SSOTypeConverter.class)
     private SSOType ssoType = SSOType.NONE;
 
     private String ssoProvider;

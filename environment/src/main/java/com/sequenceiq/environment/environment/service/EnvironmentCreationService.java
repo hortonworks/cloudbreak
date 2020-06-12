@@ -92,7 +92,7 @@ public class EnvironmentCreationService {
             environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), creationDto.getAccountId(),
                     getIfNotNull(creationDto.getNetwork(), NetworkDto::getSubnetMetas));
             createAndSetParameters(environment, creationDto.getParameters());
-            environmentService.save(environment);
+            environmentService.saveWithOwnerRoleAssignment(environment);
             reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
         } catch (Exception e) {
             environment.setStatus(EnvironmentStatus.CREATE_FAILED);

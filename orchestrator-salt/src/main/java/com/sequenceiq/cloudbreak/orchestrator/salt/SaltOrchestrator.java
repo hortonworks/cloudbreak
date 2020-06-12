@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateAllRu
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateAllRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltCommandRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
@@ -96,6 +97,8 @@ public class SaltOrchestrator implements HostOrchestrator {
     private static final String DISK_MOUNT = "mount-disks.sh";
 
     private static final String DISK_SCRIPT_PATH = "salt/bootstrapnodes/";
+
+    private static final String FLUENT_AGENT_STOP = "fluent.agent-stop";
 
     private static final String SRV_SALT_DISK = "/srv/salt/disk";
 
@@ -232,10 +235,10 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void stopTelemetryAgent(List<GatewayConfig> allGateway, Set<Node> nodes, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
-        Set<String> gatewayTargets = getGatewayPrivateIps(allGateway);
+        Set<String> targetHostnames = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         try (SaltConnector sc = createSaltConnector(primaryGateway)) {
-            StateAllRunner stateAllJobRunner = new StateAllRunner(gatewayTargets, nodes, "fluent.agent-stop");
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateAllJobRunner);
+            StateRunner stateRunner = new StateRunner(targetHostnames, nodes, FLUENT_AGENT_STOP);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateRunner);
             Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, maxTelemetryStopRetry, false);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {

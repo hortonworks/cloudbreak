@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.statemachine.ExtendedState;
 import org.springframework.statemachine.StateContext;
@@ -60,19 +61,22 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.core.Flow;
+import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.MessageFactory.HEADERS;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.SpanContext;
+import io.opentracing.Tracer;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 public class StackImageUpdateActionsTest {
 
-    private static final String USER_ID = "horton@hortonworks.com";
-
-    private static final Long WORKSPACE_ID = 1L;
+    private static final String EVENT_NAME = "eventName";
 
     @Mock
     private CloudbreakFlowMessageService flowMessageService;
@@ -143,6 +147,21 @@ public class StackImageUpdateActionsTest {
     @Mock
     private StackFailureContext failureContext;
 
+    @Mock
+    private Tracer tracer;
+
+    @Mock
+    private Tracer.SpanBuilder spanBuilder;
+
+    @Mock
+    private Span span;
+
+    @Mock
+    private Scope scope;
+
+    @Mock
+    private SpanContext spanContext;
+
     @InjectMocks
     private final AbstractStackImageUpdateAction<?> checkImageAction = spy(new StackImageUpdateActions().checkImageVersion());
 
@@ -167,9 +186,9 @@ public class StackImageUpdateActionsTest {
     private final Map<Object, Object> variables = new HashMap<>();
 
     @Before
-    public void setUp() throws CloudbreakImageNotFoundException {
+    public void setup() throws CloudbreakImageNotFoundException {
         MockitoAnnotations.initMocks(this);
-        when(stateContext.getMessageHeader(HEADERS.FLOW_PARAMETERS.name())).thenReturn(new FlowParameters("flowId", "usercrn"));
+        when(stateContext.getMessageHeader(HEADERS.FLOW_PARAMETERS.name())).thenReturn(new FlowParameters("flowId", "usercrn", null));
         when(stateContext.getExtendedState()).thenReturn(extendedState);
         when(stateContext.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
@@ -177,6 +196,13 @@ public class StackImageUpdateActionsTest {
         when(runningFlows.getFlowChainId(anyString())).thenReturn("flowchainid");
         when(reactorEventFactory.createEvent(any(Map.class), any(Object.class))).thenReturn(new Event("dummy"));
         when(imageService.getImage(anyLong())).thenReturn(image);
+
+        when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
+        when(spanBuilder.addReference(anyString(), any())).thenReturn(spanBuilder);
+        when(spanBuilder.ignoreActiveSpan()).thenReturn(spanBuilder);
+        when(spanBuilder.start()).thenReturn(span);
+        when(tracer.activateSpan(span)).thenReturn(scope);
+        when(span.context()).thenReturn(spanContext);
 
         User user = new User();
         user.setUserId("horton@hortonworks.com");
@@ -199,6 +225,9 @@ public class StackImageUpdateActionsTest {
 
     @Test
     public void checkImageVersion() {
+        FlowEvent flowEvent = Mockito.mock(FlowEvent.class);
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(flowEvent.name()).thenReturn(EVENT_NAME);
         StackImageUpdateTriggerEvent payload = new StackImageUpdateTriggerEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), 1L, "imageId");
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_IMAGE_VERSIONS_STATE);
@@ -214,6 +243,9 @@ public class StackImageUpdateActionsTest {
 
     @Test
     public void checkImageVersionNotOk() {
+        FlowEvent flowEvent = Mockito.mock(FlowEvent.class);
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(flowEvent.name()).thenReturn(EVENT_NAME);
         StackImageUpdateTriggerEvent payload = new StackImageUpdateTriggerEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), 1L, "imageId");
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_IMAGE_VERSIONS_STATE);
@@ -231,6 +263,9 @@ public class StackImageUpdateActionsTest {
 
     @Test
     public void checkPackageVersions() {
+        FlowEvent flowEvent = Mockito.mock(FlowEvent.class);
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(flowEvent.name()).thenReturn(EVENT_NAME);
         ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), 1L, statedImage);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_IMAGE_VERSIONS_STATE);
@@ -244,6 +279,9 @@ public class StackImageUpdateActionsTest {
 
     @Test
     public void checkPackageVersionsNotOk() {
+        FlowEvent flowEvent = Mockito.mock(FlowEvent.class);
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(flowEvent.name()).thenReturn(EVENT_NAME);
         ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.CHECK_IMAGE_VERESIONS_FINISHED_EVENT.event(), 1L, statedImage);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_PACKAGE_VERSIONS_STATE);
@@ -259,6 +297,9 @@ public class StackImageUpdateActionsTest {
 
     @Test
     public void updateImage() {
+        FlowEvent flowEvent = Mockito.mock(FlowEvent.class);
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(flowEvent.name()).thenReturn(EVENT_NAME);
         ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event(), 1L, statedImage);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.UPDATE_IMAGE_STATE);
@@ -272,6 +313,9 @@ public class StackImageUpdateActionsTest {
 
     @Test
     public void prepareImageAction() {
+        FlowEvent flowEvent = Mockito.mock(FlowEvent.class);
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(flowEvent.name()).thenReturn(EVENT_NAME);
         StackEvent payload = new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), 1L);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.IMAGE_PREPARE_STATE);
@@ -284,6 +328,9 @@ public class StackImageUpdateActionsTest {
 
     @Test
     public void setImageAction() {
+        FlowEvent flowEvent = Mockito.mock(FlowEvent.class);
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(flowEvent.name()).thenReturn(EVENT_NAME);
         Stack stack = new Stack();
         StackEvent payload = new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), 1L);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
@@ -300,6 +347,9 @@ public class StackImageUpdateActionsTest {
 
     @Test
     public void finishAction() {
+        FlowEvent flowEvent = Mockito.mock(FlowEvent.class);
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(flowEvent.name()).thenReturn(EVENT_NAME);
         CloudPlatformResult payload = new CloudPlatformResult(1L);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.STACK_IMAGE_UPDATE_FINISHED);
@@ -312,6 +362,9 @@ public class StackImageUpdateActionsTest {
 
     @Test
     public void handleImageUpdateFailure() {
+        FlowEvent flowEvent = Mockito.mock(FlowEvent.class);
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(flowEvent.name()).thenReturn(EVENT_NAME);
         StackFailureEvent payload =
                 new StackFailureEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT.event(), 1L, new CloudbreakServiceException("test"));
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);

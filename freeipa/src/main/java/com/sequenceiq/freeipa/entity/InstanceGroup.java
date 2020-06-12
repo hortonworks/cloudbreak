@@ -8,8 +8,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -25,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 
+import com.sequenceiq.freeipa.entity.util.InstanceGroupTypeConverter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @NamedEntityGraph(name = "InstanceGroup.instanceMetaData",
@@ -45,7 +44,7 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
 
     private String groupName;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = InstanceGroupTypeConverter.class)
     private InstanceGroupType instanceGroupType = InstanceGroupType.MASTER;
 
     @ManyToOne(fetch = FetchType.LAZY)

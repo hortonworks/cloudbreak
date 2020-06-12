@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
@@ -68,6 +69,7 @@ public class NetworkRequestToDtoConverter {
                 .withNetworkCidrs(getNetworkCidrs(network))
                 .withPrivateSubnetCreation(getPrivateSubnetCreation(network))
                 .withServiceEndpointCreation(getServiceEndpointCreation(network))
+                .withOutboundInternetTraffic(getOutboundInternetTraffic(network))
                 .build();
     }
 
@@ -81,5 +83,9 @@ public class NetworkRequestToDtoConverter {
 
     private ServiceEndpointCreation getServiceEndpointCreation(EnvironmentNetworkRequest network) {
         return Optional.ofNullable(network.getServiceEndpointCreation()).orElse(ServiceEndpointCreation.DISABLED);
+    }
+
+    private OutboundInternetTraffic getOutboundInternetTraffic(EnvironmentNetworkRequest network) {
+        return Optional.ofNullable(network.getOutboundInternetTraffic()).orElse(OutboundInternetTraffic.ENABLED);
     }
 }

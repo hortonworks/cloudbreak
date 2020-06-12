@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -20,6 +22,8 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
+import com.microsoft.azure.CloudError;
+import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentOperation;
@@ -344,6 +348,57 @@ public class AzureUtils {
         if (!failedToDeleteManagedDisks.isEmpty()) {
             LOGGER.error("Can't delete every managed disks: {}", failedToDeleteManagedDisks);
             throw new CloudbreakServiceException("Can't delete managed disks: " + failedToDeleteManagedDisks);
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public Optional<String> deleteDatabaseServer(AzureClient azureClient, String databaseServerId, boolean cancelException) {
+        return handleDeleteErrors(azureClient::deleteDatabaseServer, "DatabaseServer", databaseServerId, cancelException);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public Optional<String> deleteResourceGroup(AzureClient azureClient, String resourceGroupId, boolean cancelException) {
+        return handleDeleteErrors(azureClient::deleteResourceGroup, "ResourceGroup", resourceGroupId, cancelException);
+    }
+
+    private <T> Optional<String> handleDeleteErrors(Consumer<String> deleteConsumer, String resourceType, String resourceId, boolean cancelException) {
+        try {
+            LOGGER.debug("Deleteing {} {}", resourceType, resourceId);
+            deleteConsumer.accept(resourceId);
+            return Optional.empty();
+        } catch (CloudException e) {
+            LOGGER.warn("Exception during resource delete", e);
+            Optional<String> errorMessageOptional = getErrorMessage(resourceType, resourceId, e);
+            if (errorMessageOptional.isEmpty()) {
+                return Optional.empty();
+            }
+            if (cancelException) {
+                LOGGER.warn(errorMessageOptional.get());
+                LOGGER.warn("{} {} deletion failed, continuing because termination is forced", resourceType, resourceId);
+                return errorMessageOptional;
+            } else {
+                LOGGER.warn(errorMessageOptional.get());
+                throw new CloudConnectorException(errorMessageOptional.get(), e);
+            }
+        }
+    }
+
+    private Optional<String> getErrorMessage(String resourceType, String resourceId, CloudException e) {
+        CloudError cloudError = e.body();
+        if (cloudError == null) {
+            return Optional.of(String.format("%s %s deletion failed: '%s', please go to Azure Portal for details",
+                    resourceType, resourceId, e.getMessage()));
+        }
+
+        String errorCode = cloudError.code();
+        if ("ResourceGroupNotFound".equals(errorCode)) {
+            LOGGER.warn("{} {} does not exist, assuming that it has already been deleted", resourceType, resourceId);
+            return Optional.empty();
+            // leave errorMessage null => do not throw exception
+        } else {
+            String details = cloudError.details() != null ? cloudError.details().stream().map(CloudError::message).collect(Collectors.joining(", ")) : "";
+            return Optional.of(String.format("%s %s deletion failed, status code %s, error message: %s, details: %s",
+                    resourceType, resourceId, errorCode, cloudError.message(), details));
         }
     }
 }

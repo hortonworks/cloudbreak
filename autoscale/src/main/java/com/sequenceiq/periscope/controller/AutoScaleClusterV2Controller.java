@@ -10,6 +10,7 @@ import com.sequenceiq.periscope.api.endpoint.v2.AutoScaleClusterV2Endpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.StateJson;
+import com.sequenceiq.periscope.converter.ClusterConverter;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.service.ClusterService;
 
@@ -24,10 +25,14 @@ public class AutoScaleClusterV2Controller implements AutoScaleClusterV2Endpoint 
     @Inject
     private ClusterService clusterService;
 
+    @Inject
+    private ClusterConverter clusterConverter;
+
     @Override
     public AutoscaleClusterResponse getByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
-        return autoScaleClusterCommonService.getCluster(cluster.getId());
+        return createClusterJsonResponse(
+                autoScaleClusterCommonService.getCluster(cluster.getId()));
     }
 
     @Override
@@ -39,25 +44,33 @@ public class AutoScaleClusterV2Controller implements AutoScaleClusterV2Endpoint 
     @Override
     public AutoscaleClusterResponse runByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
-        return autoScaleClusterCommonService.setState(cluster.getId(), StateJson.running());
+        return createClusterJsonResponse(
+                autoScaleClusterCommonService.setState(cluster.getId(), StateJson.running()));
     }
 
     @Override
     public AutoscaleClusterResponse suspendByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
-        return autoScaleClusterCommonService.setState(cluster.getId(), StateJson.suspended());
+        return createClusterJsonResponse(
+                autoScaleClusterCommonService.setState(cluster.getId(), StateJson.suspended()));
     }
 
     @Override
     public AutoscaleClusterResponse enableAutoscaleStateByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
-        return autoScaleClusterCommonService.setAutoscaleState(cluster.getId(), AutoscaleClusterState.enable());
+        return createClusterJsonResponse(
+                autoScaleClusterCommonService.setAutoscaleState(cluster.getId(), AutoscaleClusterState.enable()));
     }
 
     @Override
     public AutoscaleClusterResponse disableAutoscaleStateByCloudbreakCluster(Long stackId) {
         Cluster cluster = clusterService.findOneByStackId(stackId);
-        return autoScaleClusterCommonService.setAutoscaleState(cluster.getId(), AutoscaleClusterState.disable());
+        return createClusterJsonResponse(
+                autoScaleClusterCommonService.setAutoscaleState(cluster.getId(), AutoscaleClusterState.disable()));
+    }
+
+    private AutoscaleClusterResponse createClusterJsonResponse(Cluster cluster) {
+        return clusterConverter.convert(cluster);
     }
 
 }

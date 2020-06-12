@@ -22,7 +22,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.service.freeipa.user.EventGenerationIdsChecker;
 import com.sequenceiq.freeipa.service.freeipa.user.UmsEventGenerationIdsProvider;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncStatusService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -69,8 +71,8 @@ class UserSyncPollerTest {
 
         underTest.syncAllFreeIpaStacks();
 
-        verify(userSyncService).synchronizeUsers(UserSyncPollerTestUtils.ACCOUNT_ID, INTERNAL_ACTOR_CRN,
-                Set.of(UserSyncPollerTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of());
+        verify(userSyncService).synchronizeUsers(UserSyncTestUtils.ACCOUNT_ID, INTERNAL_ACTOR_CRN,
+                Set.of(UserSyncTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of());
     }
 
     @Test
@@ -94,8 +96,8 @@ class UserSyncPollerTest {
 
         underTest.syncAllFreeIpaStacks();
 
-        verify(userSyncService).synchronizeUsers(UserSyncPollerTestUtils.ACCOUNT_ID, INTERNAL_ACTOR_CRN,
-                Set.of(UserSyncPollerTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of());
+        verify(userSyncService).synchronizeUsers(UserSyncTestUtils.ACCOUNT_ID, INTERNAL_ACTOR_CRN,
+                Set.of(UserSyncTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of());
     }
 
     @Test
@@ -113,7 +115,7 @@ class UserSyncPollerTest {
 
     @Test
     void testDontSyncStackWhenNotEntitled() {
-        setupMockStackService(UserSyncPollerTestUtils.createStack());
+        setupMockStackService(UserSyncTestUtils.createStack());
         when(userSyncPollerEntitlementChecker.isAccountEntitled(anyString())).thenReturn(false);
 
         underTest.syncAllFreeIpaStacks();
@@ -128,12 +130,12 @@ class UserSyncPollerTest {
     }
 
     private UserSyncStatus setupMocks() {
-        Stack stack = UserSyncPollerTestUtils.createStack();
+        Stack stack = UserSyncTestUtils.createStack();
         setupMockStackService(stack);
         when(userSyncPollerEntitlementChecker.isAccountEntitled(anyString())).thenReturn(true);
-        UserSyncStatus userSyncStatus = UserSyncPollerTestUtils.createUserSyncStatus(stack);
+        UserSyncStatus userSyncStatus = UserSyncTestUtils.createUserSyncStatus(stack);
         when(userSyncStatusService.getOrCreateForStack(userSyncStatus.getStack())).thenReturn(userSyncStatus);
-        when(umsEventGenerationIdsProvider.getEventGenerationIds(any(), any())).thenReturn(UserSyncPollerTestUtils.createUniqueUmsEventGenerationIds());
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(any(), any())).thenReturn(UserSyncTestUtils.createUniqueUmsEventGenerationIds());
         return userSyncStatus;
     }
 }

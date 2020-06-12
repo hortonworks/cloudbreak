@@ -3,6 +3,8 @@ package com.sequenceiq.authorization.service;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -33,8 +34,14 @@ public class ResourceNameListPermissionChecker implements PermissionChecker<Chec
         Collection<String> resourceNames = commonPermissionCheckingUtils
                 .getParameter(proceedingJoinPoint, methodSignature, ResourceNameList.class, Collection.class);
         List<String> resourceCrnList = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action)
-                .getResourceCrnListByResourceNameList(Lists.newArrayList(resourceNames));
+                .getResourceCrnListByResourceNameList(getNotNullResourceNames(resourceNames));
         commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, userCrn, resourceCrnList);
+    }
+
+    private List<String> getNotNullResourceNames(Collection<String> resourceNames) {
+        return resourceNames.stream()
+                .filter(Predicate.not(String::isBlank))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -5,5 +5,9 @@ public enum AuthorizationResourceType {
     ENVIRONMENT,
     CREDENTIAL,
     DATAHUB,
-    IMAGE_CATALOG;
+    IMAGE_CATALOG,
+    CLUSTER_DEFINITION,
+    CLUSTER_TEMPLATE,
+    DATABASE,
+    DATABASE_SERVER;
 }

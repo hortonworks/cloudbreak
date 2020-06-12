@@ -7,13 +7,14 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
+import com.sequenceiq.periscope.api.model.LoadAlertResponse;
 import com.sequenceiq.periscope.api.model.MetricAlertResponse;
 import com.sequenceiq.periscope.api.model.PrometheusAlertResponse;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertResponse;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @Component
 public class ClusterConverter extends AbstractConverter<AutoscaleClusterResponse, Cluster> {
@@ -26,6 +27,9 @@ public class ClusterConverter extends AbstractConverter<AutoscaleClusterResponse
 
     @Inject
     private PrometheusAlertResponseConverter prometheusAlertResponseConverter;
+
+    @Inject
+    private LoadAlertResponseConverter loadAlertResponseConverter;
 
     @Inject
     private SecretService secretService;
@@ -59,6 +63,11 @@ public class ClusterConverter extends AbstractConverter<AutoscaleClusterResponse
             json.setPrometheusAlerts(prometheusAlertRequests);
         }
 
+        if (!source.getLoadAlerts().isEmpty()) {
+            List<LoadAlertResponse> loadAlertRequests =
+                    loadAlertResponseConverter.convertAllToJson(new ArrayList<>(source.getLoadAlerts()));
+            json.setLoadAlerts(loadAlertRequests);
+        }
         ScalingConfigurationRequest scalingConfig = new ScalingConfigurationRequest(source.getMinSize(), source.getMaxSize(), source.getCoolDown());
         json.setScalingConfiguration(scalingConfig);
 

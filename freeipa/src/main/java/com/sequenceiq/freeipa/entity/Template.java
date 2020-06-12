@@ -3,8 +3,6 @@ package com.sequenceiq.freeipa.entity;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -17,6 +15,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.freeipa.api.model.ResourceStatus;
+import com.sequenceiq.freeipa.entity.util.ResourceStatusConverter;
 
 @Entity
 public class Template implements AccountIdAwareResource {
@@ -43,7 +42,7 @@ public class Template implements AccountIdAwareResource {
 
     private boolean deleted;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ResourceStatusConverter.class)
     private ResourceStatus status;
 
     @Convert(converter = JsonToString.class)

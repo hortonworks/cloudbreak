@@ -25,6 +25,14 @@ public class HostDeletionService {
     private static final String HOST_DELETION_FAILED = "Failed to delete hosts.";
 
     public Pair<Set<String>, Map<String, String>> removeHosts(FreeIpaClient client, Set<String> hosts) throws FreeIpaClientException {
+        return removeHosts(client, hosts, false);
+    }
+
+    public Pair<Set<String>, Map<String, String>> removeServers(FreeIpaClient client, Set<String> hosts) throws FreeIpaClientException {
+        return removeHosts(client, hosts, true);
+    }
+
+    private Pair<Set<String>, Map<String, String>> removeHosts(FreeIpaClient client, Set<String> hosts, boolean servers) throws FreeIpaClientException {
         Set<String> hostCleanupSuccess = new HashSet<>();
         Map<String, String> hostCleanupFailed = new HashMap<>();
         Set<String> existingHostFqdn = collectExistingHostFqdns(client);
@@ -32,7 +40,11 @@ public class HostDeletionService {
         LOGGER.debug("Hosts to delete: {}", hostsToRemove);
         for (String host : hostsToRemove) {
             try {
-                client.deleteHost(host);
+                if (servers) {
+                    client.deleteServer(host);
+                } else {
+                    client.deleteHost(host);
+                }
                 hostCleanupSuccess.add(host);
             } catch (RetryableFreeIpaClientException e) {
                 throw e;

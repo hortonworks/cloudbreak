@@ -242,7 +242,9 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     private void validateEnv(DetailedEnvironmentResponse environment) {
-        if (environment.getEnvironmentStatus().isStopInProgressOrStopped()) {
+        if (environment.getEnvironmentStatus().isDeleteInProgress()) {
+            throw new BadRequestException("The environment is in delete in progress phase. Please create a new environment first!");
+        } else if (environment.getEnvironmentStatus().isStopInProgressOrStopped()) {
             throw new BadRequestException("The environment is stopped. Please start the environment first!");
         } else if (environment.getEnvironmentStatus().isStartInProgress()) {
             throw new BadRequestException("The environment is starting. Please wait until finished!");
@@ -589,6 +591,11 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         return resourceNames.stream()
                 .map(resourceName -> getSdxByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), resourceName).getCrn())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getResourceCrnsInAccount() {
+        return sdxClusterRepository.findAllCrnInAccount(ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override

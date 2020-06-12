@@ -99,6 +99,7 @@ public enum ResourceEvent {
     ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED("environment.idbroker.mappings.deletion.started"),
     ENVIRONMENT_S3GUARD_TABLE_DELETION_STARTED("environment.s3guard.table.deletion.started"),
     ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED("environment.ums.resource.deletion.started"),
+    ENVIRONMENT_PREREQUISITES_DELETION_STARTED("environment.prerequisites.deletion.started"),
     ENVIRONMENT_DATAHUB_CLUSTERS_DELETION_STARTED("environment.datahubs.deletion.started"),
     ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED("environment.datalakes.deletion.started"),
     ENVIRONMENT_DELETION_FINISHED("environment.deletion.finished"),
@@ -238,6 +239,9 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_DISTRIBUTE_PARCEL("cluster.upgrade.distribute.parcel"),
     CLUSTER_UPGRADE_START_UPGRADE("cluster.upgrade.start.upgrade"),
     CLUSTER_UPGRADE_FAILED("cluster.upgrade.failed"),
+
+    CLUSTER_SALT_UPDATE_FAILED("cluster.salt.update.failed"),
+    CLUSTER_SALT_UPDATE_FINISHED("cluster.salt.update.finished"),
     CLUSTER_STOPPING("cluster.stopping"),
     CLUSTER_STOPPED("cluster.stopped"),
     CLUSTER_STOP_FAILED("cluster.stop.failed"),

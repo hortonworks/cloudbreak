@@ -142,5 +142,239 @@
     "resourceType": "IMAGE_CATALOG",
     "actionType": "RESOURCE_DEPENDENT",
     "legacyRight": "datahub/write"
+  },
+  "CREATE_CLUSTER_DEFINITION": {
+    "right": "environments/createClusterDefinitions",
+    "resourceType": "CLUSTER_DEFINITION",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "DESCRIBE_CLUSTER_DEFINITION": {
+    "right": "environments/describeClusterDefinitions",
+    "resourceType": "CLUSTER_DEFINITION",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/read"
+  },
+  "DELETE_CLUSTER_DEFINITION": {
+    "right": "environments/deleteClusterDefinitions",
+    "resourceType": "CLUSTER_DEFINITION",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "CREATE_CLUSTER_TEMPLATE": {
+    "right": "datahub/createClusterTemplate",
+    "resourceType": "CLUSTER_TEMPLATE",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "DESCRIBE_CLUSTER_TEMPLATE": {
+    "right": "datahub/describeClusterTemplate",
+    "resourceType": "CLUSTER_TEMPLATE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/read"
+  },
+  "DELETE_CLUSTER_TEMPLATE": {
+    "right": "datahub/deleteClusterTemplate",
+    "resourceType": "CLUSTER_TEMPLATE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "GET_OPERATION_STATUS": {
+    "right": "environments/getFreeipaOperationStatus",
+    "resourceType": "ENVIRONMENT",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "environments/read"
+  },
+  "CREATE_DATALAKE":  {
+    "right": "datalake/createDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "DESCRIBE_DATALAKE":  {
+    "right": "datalake/describeDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/read"
+  },
+  "DESCRIBE_DETAILED_DATALAKE":  {
+    "right": "datalake/describeDetailedDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/read"
+  },
+  "DELETE_DATALAKE":  {
+    "right": "datalake/deleteDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "REPAIR_DATALAKE":  {
+    "right": "datalake/repairDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "SYNC_DATALAKE":  {
+    "right": "datalake/syncDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "RETRY_DATALAKE_OPERATION":  {
+    "right": "datalake/retryDatalakeOperation",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "START_DATALAKE":  {
+    "right": "datalake/startDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "STOP_DATALAKE":  {
+    "right": "datalake/stopDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "UPGRADE_DATALAKE": {
+    "right": "datalake/upgradeDatalake",
+    "resourceType": "DATALAKE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "CREATE_DATAHUB":  {
+    "right": "datahub/createDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "DESCRIBE_DATAHUB":  {
+    "right": "datahub/describeDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/read"
+  },
+  "DELETE_DATAHUB":  {
+    "right": "datahub/deleteDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "REPAIR_DATAHUB":  {
+    "right": "datahub/repairDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "SYNC_DATAHUB":  {
+    "right": "datahub/syncDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "RETRY_DATAHUB_OPERATION":  {
+    "right": "datahub/retryDatahubOperation",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "DESCRIBE_RETRYABLE_DATAHUB_OPERATION":  {
+    "right": "datahub/describeRetryableDatahubOperation",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/read"
+  },
+  "START_DATAHUB":  {
+    "right": "datahub/startDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "STOP_DATAHUB":  {
+    "right": "datahub/stopDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "SCALE_DATAHUB": {
+    "right": "datahub/scaleDatahub",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "DELETE_DATAHUB_INSTANCE": {
+    "right": "datahub/deleteDatahubInstance",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "SET_DATAHUB_MAINTENANCE_MODE": {
+    "right": "datahub/setDatahubMaintenanceMode",
+    "resourceType": "DATAHUB",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/write"
+  },
+  "DESCRIBE_DATABASE": {
+    "right": "environments/describeDatabase",
+    "resourceType": "DATABASE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/read"
+  },
+  "DESCRIBE_DATABASE_SERVER": {
+    "right": "environments/describeDatabaseServer",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/read"
+  },
+  "DELETE_DATABASE": {
+    "right": "environments/deleteDatabase",
+    "resourceType": "DATABASE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "DELETE_DATABASE_SERVER": {
+    "right": "environments/deleteDatabaseServer",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "REGISTER_DATABASE": {
+    "right": "environments/registerDatabase",
+    "resourceType": "DATABASE",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "REGISTER_DATABASE_SERVER": {
+    "right": "environments/registerDatabaseServer",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "CREATE_DATABASE_SERVER": {
+    "right": "environments/createDatabaseServer",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "CREATE_DATABASE": {
+    "right": "environments/createDatabase",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "START_DATABASE_SERVER": {
+    "right": "environments/startDatabaseServer",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
+  },
+  "STOP_DATABASE_SERVER": {
+    "right": "environments/stopDatabaseServer",
+    "resourceType": "DATABASE_SERVER",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datalake/write"
   }
 }

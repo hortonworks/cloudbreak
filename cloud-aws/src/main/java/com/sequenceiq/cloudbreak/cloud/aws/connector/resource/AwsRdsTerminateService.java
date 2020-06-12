@@ -1,5 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
+import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
@@ -11,22 +25,13 @@ import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingSchedu
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
-import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAILED;
-import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
 
 @Service
 public class AwsRdsTerminateService {
@@ -54,6 +59,8 @@ public class AwsRdsTerminateService {
      * @param  ac                      authenticated cloud context
      * @param  stack                   database stack to delete
      * @param  force                   whether to continue even if stack termination fails in AWS
+     * @param persistenceNotifier      notifies Resources table of resource deletion
+     * @param resources                list of resources tracked in DB
      * @return                         list of affected cloud resources (not yet implemented)
      * @throws AmazonServiceException  if the search for the stack fails
      * @throws ExecutionException      if stack deletion fails (and force is false)
@@ -61,7 +68,8 @@ public class AwsRdsTerminateService {
      * @throws InterruptedException    if the wait for stack deletion is interrupted
      * @throws CloudConnectorException if stack deletion fails due to a runtime exception
      */
-    public List<CloudResourceStatus> terminate(AuthenticatedContext ac, DatabaseStack stack, boolean force)
+    public List<CloudResourceStatus> terminate(AuthenticatedContext ac, DatabaseStack stack, boolean force,
+            PersistenceNotifier persistenceNotifier, List<CloudResource> resources)
             throws ExecutionException, TimeoutException, InterruptedException {
         // CloudResource stackResource = cfStackUtil.getCloudFormationStackResource(resources); get name from this?
         String cFStackName = cfStackUtil.getCfStackName(ac);
@@ -98,6 +106,9 @@ public class AwsRdsTerminateService {
                 }
             }
         }
+
+        CloudContext cloudContext = ac.getCloudContext();
+        resources.forEach(r -> persistenceNotifier.notifyDeletion(r, cloudContext));
 
         // FIXME
         return List.of();

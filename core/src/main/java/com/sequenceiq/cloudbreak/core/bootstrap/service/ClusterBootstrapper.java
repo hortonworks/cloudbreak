@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.TIMEOUT;
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -25,14 +27,13 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabilityCheckerTask;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -87,13 +89,10 @@ public class ClusterBootstrapper {
     private ClusterBootstrapperErrorHandler clusterBootstrapperErrorHandler;
 
     @Inject
-    private HostOrchestratorResolver hostOrchestratorResolver;
+    private HostOrchestrator hostOrchestrator;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
-
-    @Inject
-    private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @Inject
     private HostDiscoveryService hostDiscoveryService;
@@ -106,21 +105,121 @@ public class ClusterBootstrapper {
 
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        String stackOrchestratorType = stack.getOrchestrator().getType();
-        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stackOrchestratorType);
+        bootstrapOnHost(stack);
+    }
 
-        if (orchestratorType.hostOrchestrator()) {
-            bootstrapOnHost(stack);
-        } else if (orchestratorType.containerOrchestrator()) {
-            LOGGER.debug("Skipping bootstrap of the machines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
-        } else {
-            LOGGER.error("Orchestrator not found: {}", stackOrchestratorType);
-            throw new CloudbreakException("HostOrchestrator not found: " + stackOrchestratorType);
-        }
+    public void reBootstrapMachines(Long stackId) throws CloudbreakException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        LOGGER.info("ReBootstrapMachines for stack [{}] [{}]", stack.getName(), stack.getResourceCrn());
+        reBootstrapOnHost(stack);
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public void bootstrapOnHost(Stack stack) throws CloudbreakException {
+        bootstrapOnHostInternal(stack, this::saveSaltComponent);
+    }
+
+    private void bootstrapOnHostInternal(Stack stack, Consumer<Stack> saveOrUpdateSaltComponent) throws CloudbreakException {
+        Set<Node> nodes = collectNodesForBootstrap(stack);
+        try {
+            List<GatewayConfig> allGatewayConfig = collectAndCheckGateways(stack);
+
+            saveOrUpdateSaltComponent.accept(stack);
+
+            BootstrapParams params = createBootstrapParams(stack);
+            hostOrchestrator.bootstrap(allGatewayConfig, nodes, params, clusterDeletionBasedModel(stack.getId(), null));
+
+            InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
+            saveOrchestrator(stack, primaryGateway);
+            checkIfAllNodesAvailable(stack, nodes, primaryGateway);
+        } catch (Exception e) {
+            throw new CloudbreakException(e);
+        }
+    }
+
+    public void reBootstrapOnHost(Stack stack) throws CloudbreakException {
+        bootstrapOnHostInternal(stack, this::updateSaltComponent);
+    }
+
+    private void checkIfAllNodesAvailable(Stack stack, Set<Node> nodes, InstanceMetaData primaryGateway) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, isKnoxEnabled(stack));
+        PollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
+                hostClusterAvailabilityCheckerTask, new HostOrchestratorClusterContext(stack, hostOrchestrator, gatewayConfig, nodes),
+                POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
+        validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of all nodes availability was cancelled.");
+        if (TIMEOUT.equals(allNodesAvailabilityPolling)) {
+            clusterBootstrapperErrorHandler.terminateFailedNodes(hostOrchestrator, null, stack, gatewayConfig, nodes);
+        }
+    }
+
+    private void saveSaltComponent(Stack stack) {
+        ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getCluster().getId(), ComponentType.SALT_STATE);
+        if (saltComponent == null) {
+            try {
+                byte[] stateConfigZip = hostOrchestrator.getStateConfigZip();
+                saltComponent = createSaltComponent(stack, stateConfigZip);
+                clusterComponentProvider.store(saltComponent);
+            } catch (IOException e) {
+                throw new CloudbreakServiceException(e);
+            }
+        }
+    }
+
+    private ClusterComponent createSaltComponent(Stack stack, byte[] stateConfigZip) {
+        ClusterComponent saltComponent;
+        saltComponent = new ClusterComponent(ComponentType.SALT_STATE,
+                new Json(singletonMap(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip))), stack.getCluster());
+        return saltComponent;
+    }
+
+    private void updateSaltComponent(Stack stack) {
+        ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getCluster().getId(), ComponentType.SALT_STATE);
+        try {
+            byte[] stateConfigZip = hostOrchestrator.getStateConfigZip();
+            if (saltComponent == null) {
+                saltComponent = createSaltComponent(stack, stateConfigZip);
+            } else {
+                saltComponent.setAttributes(new Json(singletonMap(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip))));
+            }
+            clusterComponentProvider.store(saltComponent);
+        } catch (IOException e) {
+            throw new CloudbreakServiceException(e);
+        }
+    }
+
+    private void saveOrchestrator(Stack stack, InstanceMetaData primaryGateway) {
+        String gatewayIp = gatewayConfigService.getGatewayIp(stack, primaryGateway);
+        Orchestrator orchestrator = stack.getOrchestrator();
+        orchestrator.setApiEndpoint(gatewayIp + ':' + stack.getGatewayPort());
+        orchestrator.setType(hostOrchestrator.name());
+        orchestratorService.save(orchestrator);
+    }
+
+    private BootstrapParams createBootstrapParams(Stack stack) throws CloudbreakImageNotFoundException {
+        BootstrapParams params = new BootstrapParams();
+        params.setCloud(stack.cloudPlatform());
+        Image image = componentConfigProviderService.getImage(stack.getId());
+        params.setOs(image.getOs());
+        return params;
+    }
+
+    private List<GatewayConfig> collectAndCheckGateways(Stack stack) {
+        List<GatewayConfig> allGatewayConfig = new ArrayList<>();
+        for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
+            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, isKnoxEnabled(stack));
+            allGatewayConfig.add(gatewayConfig);
+            PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithTimeoutSingleFailure(
+                    hostBootstrapApiCheckerTask, new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
+            validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
+        }
+        return allGatewayConfig;
+    }
+
+    private boolean isKnoxEnabled(Stack stack) {
+        return stack.getCluster().getGateway() != null;
+    }
+
+    private Set<Node> collectNodesForBootstrap(Stack stack) {
         Set<Node> nodes = new HashSet<>();
         String domain = hostDiscoveryService.determineDomain(stack.getCustomDomain(), stack.getName(), stack.isClusterNameAsSubdomain());
         for (InstanceMetaData im : stack.getNotDeletedInstanceMetaDataSet()) {
@@ -134,51 +233,7 @@ public class ClusterBootstrapper {
                 nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, generatedHostName, domain, im.getInstanceGroupName()));
             }
         }
-        try {
-            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-            List<GatewayConfig> allGatewayConfig = new ArrayList<>();
-            Boolean enableKnox = stack.getCluster().getGateway() != null;
-            for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
-                GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
-                allGatewayConfig.add(gatewayConfig);
-                PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithTimeoutSingleFailure(
-                        hostBootstrapApiCheckerTask, new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
-                validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
-            }
-
-            ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getCluster().getId(), ComponentType.SALT_STATE);
-            if (saltComponent == null) {
-                byte[] stateConfigZip = hostOrchestrator.getStateConfigZip();
-                saltComponent = new ClusterComponent(ComponentType.SALT_STATE,
-                        new Json(singletonMap(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip))), stack.getCluster());
-                clusterComponentProvider.store(saltComponent);
-            }
-
-            BootstrapParams params = new BootstrapParams();
-            params.setCloud(stack.cloudPlatform());
-            Image image = componentConfigProviderService.getImage(stack.getId());
-            params.setOs(image.getOs());
-
-            hostOrchestrator.bootstrap(allGatewayConfig, nodes, params, clusterDeletionBasedModel(stack.getId(), null));
-
-            InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
-            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, enableKnox);
-            String gatewayIp = gatewayConfigService.getGatewayIp(stack, primaryGateway);
-            PollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
-                    hostClusterAvailabilityCheckerTask, new HostOrchestratorClusterContext(stack, hostOrchestrator, gatewayConfig, nodes),
-                    POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
-            validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of all nodes availability was cancelled.");
-
-            Orchestrator orchestrator = stack.getOrchestrator();
-            orchestrator.setApiEndpoint(gatewayIp + ':' + stack.getGatewayPort());
-            orchestrator.setType(hostOrchestrator.name());
-            orchestratorService.save(orchestrator);
-            if (TIMEOUT.equals(allNodesAvailabilityPolling)) {
-                clusterBootstrapperErrorHandler.terminateFailedNodes(hostOrchestrator, null, stack, gatewayConfig, nodes);
-            }
-        } catch (Exception e) {
-            throw new CloudbreakException(e);
-        }
+        return nodes;
     }
 
     public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Collection<String> recoveryHostNames) throws CloudbreakException {
@@ -207,17 +262,8 @@ public class ClusterBootstrapper {
             allNodes.add(node);
         }
         try {
-            String stackOrchestratorType = stack.getOrchestrator().getType();
-            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
-            if (orchestratorType.hostOrchestrator()) {
-                List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-                bootstrapNewNodesOnHost(stack, allGatewayConfigs, nodes, allNodes);
-            } else if (orchestratorType.containerOrchestrator()) {
-                LOGGER.debug("Skipping bootstrap of the new machines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
-            } else {
-                LOGGER.error("Orchestrator not found: {}", stackOrchestratorType);
-                throw new CloudbreakException("HostOrchestrator not found: " + stackOrchestratorType);
-            }
+            List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            bootstrapNewNodesOnHost(stack, allGatewayConfigs, nodes, allNodes);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
@@ -238,7 +284,6 @@ public class ClusterBootstrapper {
 
     private void bootstrapNewNodesOnHost(Stack stack, List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes)
             throws CloudbreakException, CloudbreakOrchestratorException {
-        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         Cluster cluster = stack.getCluster();
         Boolean enableKnox = cluster.getGateway() != null;
         for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
@@ -278,28 +323,6 @@ public class ClusterBootstrapper {
         }
     }
 
-    private List<Set<Node>> prepareBootstrapSegments(Iterable<Node> nodes, int maxBootstrapNodes, String gatewayIp) {
-        List<Set<Node>> result = new ArrayList<>();
-        Set<Node> newNodes = new HashSet<>();
-        Node gatewayNode = getGateWayNode(nodes, gatewayIp);
-        if (gatewayNode != null) {
-            newNodes.add(gatewayNode);
-        }
-        for (Node node : nodes) {
-            if (!gatewayIp.equals(node.getPublicIp())) {
-                newNodes.add(node);
-                if (newNodes.size() >= maxBootstrapNodes) {
-                    result.add(newNodes);
-                    newNodes = new HashSet<>();
-                }
-            }
-        }
-        if (!newNodes.isEmpty()) {
-            result.add(newNodes);
-        }
-        return result;
-    }
-
     /*
      * Generate hostname for the new nodes, retain the hostname for old nodes
      * Even if the domain has changed keep the rest of the nodes domain.
@@ -315,15 +338,6 @@ public class ClusterBootstrapper {
             String hostname = hostDiscoveryService.generateHostname(customHostname, im.getInstanceGroupName(), im.getPrivateId(), hostgroupAsHostname);
             return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, hostname, domain, im.getInstanceGroupName());
         }
-    }
-
-    private Node getGateWayNode(Iterable<Node> nodes, String gatewayIp) {
-        for (Node node : nodes) {
-            if (gatewayIp.equals(node.getPublicIp())) {
-                return node;
-            }
-        }
-        return null;
     }
 
     private void validatePollingResultForCancellation(PollingResult pollingResult, String cancelledMessage) {

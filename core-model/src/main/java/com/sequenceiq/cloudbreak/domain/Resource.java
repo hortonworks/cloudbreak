@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.domain;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,6 +12,8 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.converter.CommonStatusConverter;
+import com.sequenceiq.cloudbreak.converter.ResourceTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -29,11 +29,11 @@ public class Resource implements ProvisionEntity {
     private String instanceGroup;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ResourceTypeConverter.class)
     private ResourceType resourceType;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = CommonStatusConverter.class)
     private CommonStatus resourceStatus;
 
     private String resourceName;

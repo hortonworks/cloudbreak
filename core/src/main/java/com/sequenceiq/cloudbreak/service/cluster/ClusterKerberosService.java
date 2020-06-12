@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
@@ -27,7 +26,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 @Service
 public class ClusterKerberosService {
     @Inject
-    private HostOrchestratorResolver hostOrchestratorResolver;
+    private HostOrchestrator hostOrchestrator;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -49,7 +48,6 @@ public class ClusterKerberosService {
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         if (kerberosDetailService.isAdJoinable(kerberosConfig) || kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             try {
-                HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
                 GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
                 ExitCriteriaModel noExitModel = ClusterDeletionBasedExitCriteriaModel.nonCancellableModel();
                 if (kerberosDetailService.isAdJoinable(kerberosConfig)) {

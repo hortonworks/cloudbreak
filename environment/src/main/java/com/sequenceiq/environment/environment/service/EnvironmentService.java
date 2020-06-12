@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -66,24 +68,41 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
 
     private final GrpcUmsClient grpcUmsClient;
 
+    private final TransactionService transactionService;
+
     public EnvironmentService(
             EnvironmentValidatorService validatorService,
             EnvironmentRepository environmentRepository,
             PlatformParameterService platformParameterService,
             EnvironmentDtoConverter environmentDtoConverter,
             DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter,
-            GrpcUmsClient grpcUmsClient) {
+            GrpcUmsClient grpcUmsClient,
+            TransactionService transactionService) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.platformParameterService = platformParameterService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.delegatingCliEnvironmentRequestConverter = delegatingCliEnvironmentRequestConverter;
         this.grpcUmsClient = grpcUmsClient;
+        this.transactionService = transactionService;
     }
 
     public Environment save(Environment environment) {
         LOGGER.debug("Saving environment '{}'.", environment);
         return environmentRepository.save(environment);
+    }
+
+    public Environment saveWithOwnerRoleAssignment(Environment environment) {
+        try {
+            return transactionService.required(() -> {
+                Environment saved = save(environment);
+                grpcUmsClient.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(),
+                        saved.getResourceCrn(), ThreadBasedUserCrnProvider.getAccountId());
+                return saved;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw new InternalServerErrorException("Error happened during saving environment state and assigned owner role: ", e);
+        }
     }
 
     public EnvironmentDto getEnvironmentDto(Environment environment) {
@@ -322,7 +341,7 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
         return environmentRepository.findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(accountId, parentEnvironmentId);
     }
 
-    public void assignEnvironmentAdminAndOwnerRole(String userCrn, String environmentCrn) {
+    public void assignEnvironmentAdminRole(String userCrn, String environmentCrn) {
         try {
             grpcUmsClient.assignResourceRole(userCrn, environmentCrn, grpcUmsClient.getBuiltInEnvironmentAdminResourceRoleCrn(), MDCUtils.getRequestId());
             LOGGER.debug("EnvironmentAdmin role of {} environemnt is successfully assigned to the {} user", environmentCrn, userCrn);
@@ -334,11 +353,6 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
             }
         } catch (RuntimeException rex) {
             LOGGER.warn(String.format("EnvironmentAdmin role of %s environment cannot be assigned to the %s user", environmentCrn, userCrn), rex);
-        }
-        try {
-            grpcUmsClient.assignResourceOwnerRoleIfEntitled(userCrn, environmentCrn, ThreadBasedUserCrnProvider.getAccountId());
-        } catch (RuntimeException ex) {
-            LOGGER.warn(String.format("Owner role of %s environment cannot be assigned to the %s user", environmentCrn, userCrn), ex);
         }
     }
 

@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -46,7 +45,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
     private StackService stackService;
 
     @Inject
-    private HostOrchestratorResolver hostOrchestratorResolver;
+    private HostOrchestrator hostOrchestrator;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -69,7 +68,6 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
         Selectable result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             PollingResult orchestratorRemovalPollingResult =
                     removeHostsFromOrchestrator(stack, new ArrayList<>(hostNames), hostOrchestrator, allGatewayConfigs);

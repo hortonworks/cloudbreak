@@ -123,6 +123,8 @@ cb:
     cf.template.newdb.path: templates/aws-cf-dbstack.ftl
     default.inbound.security.group:
     vpc:
+    vpcendpoints:
+      enabled.gateway.services:
     credential.cache.ttl: 60
 
   azure:
@@ -136,8 +138,6 @@ cb:
       from.format: qcow2
       disk.format: qcow2
       container.format: bare
-
-
 
   yarn:
     domain: default.com

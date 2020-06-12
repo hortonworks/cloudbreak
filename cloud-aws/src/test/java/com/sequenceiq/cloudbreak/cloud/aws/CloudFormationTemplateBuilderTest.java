@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 import freemarker.template.Configuration;
@@ -145,6 +146,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -179,6 +181,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
@@ -208,6 +211,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
@@ -233,6 +237,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -261,6 +266,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -289,6 +295,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -316,6 +323,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -344,6 +352,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -379,6 +388,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -410,6 +420,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -438,6 +449,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -465,6 +477,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -493,6 +506,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -521,6 +535,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -549,6 +564,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -576,6 +592,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -604,6 +621,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -632,6 +650,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -660,6 +679,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -678,7 +698,7 @@ public class CloudFormationTemplateBuilderTest {
     @Test
     public void buildTestWithoutVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() {
         //GIVEN
-//WHEN
+        //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
@@ -688,6 +708,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -721,6 +742,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .withStack(cloudStack)
                 .mapPublicIpOnLaunch(false)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -749,6 +771,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .withStack(cloudStack)
                 .mapPublicIpOnLaunch(false)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -775,6 +798,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
                 .withStack(cloudStack)
                 .mapPublicIpOnLaunch(false)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -807,12 +831,157 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
         Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, stringContainsInOrder("OnDemandPercentageAboveBaseCapacity", "40"));
+    }
+
+    @Test
+    public void buildTestOutboundInternetTrafficButVpcCidrs() {
+        //GIVEN
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withVpcCidrs(List.of("vpccidr1", "vpccidr2"))
+                .withPrefixListIds(List.of())
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertThat(templateString, not(containsString("SecurityGroupEgress")));
+    }
+
+    @Test
+    public void buildTestOutboundInternetTrafficButPrefixlists() {
+        //GIVEN
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withVpcCidrs(List.of())
+                .withPrefixListIds(List.of("prefix1", "prefix2"))
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertThat(templateString, not(containsString("SecurityGroupEgress")));
+    }
+
+    @Test
+    public void buildTestNoOutboundInternetTrafficJustVpcCidrs() {
+        //GIVEN
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.DISABLED)
+                .withVpcCidrs(List.of("vpccidr1", "vpccidr2"))
+                .withPrefixListIds(List.of())
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertThat(templateString, stringContainsInOrder("SecurityGroupEgress", "vpccidr1", "vpccidr2"));
+    }
+
+    @Test
+    public void buildTestNoOutboundInternetTrafficJustPrefixLists() {
+        //GIVEN
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.DISABLED)
+                .withVpcCidrs(List.of())
+                .withPrefixListIds(List.of("prefix1", "prefix2"))
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertThat(templateString, stringContainsInOrder("SecurityGroupEgress", "prefix1", "prefix2"));
+    }
+
+    @Test
+    public void buildTestNoOutboundInternetTrafficBothVpcCidrsAndPrefixListsAreGiven() {
+        //GIVEN
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.DISABLED)
+                .withVpcCidrs(List.of("vpccidr1", "vpccidr2"))
+                .withPrefixListIds(List.of("prefix1", "prefix2"))
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertThat(templateString, stringContainsInOrder("SecurityGroupEgress", "vpccidr1", "vpccidr2", "prefix1", "prefix2"));
+    }
+
+    @Test
+    public void buildTestNoOutboundInternetTrafficButVpcCidrsAndPrefixListsAreEmpty() {
+        //GIVEN
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.DISABLED)
+                .withVpcCidrs(List.of())
+                .withPrefixListIds(List.of())
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertThat(templateString, not(containsString("SecurityGroupEgress")));
     }
 
     private CloudStack initCloudStackWithInstanceProfile() {

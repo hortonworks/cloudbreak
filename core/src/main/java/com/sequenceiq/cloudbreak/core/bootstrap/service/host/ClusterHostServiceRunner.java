@@ -112,11 +112,14 @@ public class ClusterHostServiceRunner {
     @Value("${cb.cm.missed.heartbeat.interval}")
     private String cmMissedHeartbeatInterval;
 
+    @Value("${cb.cm.kerberos.encryption.type}")
+    private String defaultKerberosEncryptionType;
+
     @Inject
     private StackService stackService;
 
     @Inject
-    private HostOrchestratorResolver hostOrchestratorResolver;
+    private HostOrchestrator hostOrchestrator;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -196,7 +199,6 @@ public class ClusterHostServiceRunner {
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
         try {
             Set<Node> nodes = stackUtil.collectReachableNodes(stack);
-            HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
@@ -233,7 +235,7 @@ public class ClusterHostServiceRunner {
             GatewayConfig newPrimary = newPrimaryCandidate.get();
             Set<Node> allNodes = stackUtil.collectNodes(stack);
             try {
-                hostOrchestratorResolver.get(stack.getOrchestrator().getType()).changePrimaryGateway(formerPrimaryGatewayConfig, newPrimary, gatewayConfigs,
+                hostOrchestrator.changePrimaryGateway(formerPrimaryGatewayConfig, newPrimary, gatewayConfigs,
                         allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
                 return newPrimary.getHostname();
             } catch (CloudbreakOrchestratorException ex) {
@@ -294,6 +296,7 @@ public class ClusterHostServiceRunner {
                 putIfNotNull(kerberosPillarConf, properties.get("admin_server_host"), "adminUrl");
                 putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
             }
+            putIfNotNull(kerberosPillarConf, defaultKerberosEncryptionType, "encryptionType");
             putIfNotNull(kerberosPillarConf, kerberosConfig.getVerifyKdcTrust().toString(), "verifyKdcTrust");
             servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
         }
@@ -387,8 +390,8 @@ public class ClusterHostServiceRunner {
     private void decoratePillarWithClouderaManagerAutoTls(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
         if (cluster.getAutoTlsEnabled()) {
             Map<String, Object> autoTls = new HashMap<>();
-            autoTls.put("keystore_password", cluster.getCloudbreakAmbariPassword());
-            autoTls.put("truststore_password", cluster.getCloudbreakAmbariPassword());
+            autoTls.put("keystore_password", cluster.getKeyStorePwd());
+            autoTls.put("truststore_password", cluster.getTrustStorePwd());
             servicePillar.put("cloudera-manager-autotls", new SaltPillarProperties("/cloudera-manager/autotls.sls",
                     singletonMap("cloudera-manager", singletonMap("autotls", autoTls))));
         }

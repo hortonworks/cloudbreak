@@ -7,9 +7,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +22,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 import org.hamcrest.core.Every;
 import org.hibernate.exception.ConstraintViolationException;
@@ -36,9 +41,12 @@ import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.ObjectError;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
@@ -54,9 +62,11 @@ public class DatabaseConfigServiceTest {
 
     private static final long CURRENT_TIME_MILLIS = 1000L;
 
+    private static final String ACCOUNT_ID = UUID.randomUUID().toString();
+
     private static final Crn DB_CRN = Crn.builder()
             .setService(Crn.Service.IAM)
-            .setAccountId("accountId")
+            .setAccountId(ACCOUNT_ID)
             .setResourceType(Crn.ResourceType.DATABASE)
             .setResource("resource")
             .build();
@@ -65,12 +75,14 @@ public class DatabaseConfigServiceTest {
 
     private static final Crn DB2_CRN = Crn.builder()
             .setService(Crn.Service.IAM)
-            .setAccountId("accountId")
+            .setAccountId(ACCOUNT_ID)
             .setResourceType(Crn.ResourceType.DATABASE)
             .setResource("resource2")
             .build();
 
     private static final String DB2_CRN_STRING = DB2_CRN.toString();
+
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
     private static final String DATABASE_NAME = "databaseName";
 
@@ -103,18 +115,27 @@ public class DatabaseConfigServiceTest {
     @Mock
     private DatabaseConnectionValidator connectionValidator;
 
+    @Mock
+    private GrpcUmsClient grpcUmsClient;
+
+    @Mock
+    private TransactionService transactionService;
+
     @InjectMocks
     private DatabaseConfigService underTest;
 
     private DatabaseConfig db;
 
     @Before
-    public void setup() {
+    public void setup() throws TransactionService.TransactionExecutionException {
         MockitoAnnotations.initMocks(this);
 
         db = new DatabaseConfig();
         db.setId(1L);
         db.setName("mydb");
+
+        doNothing().when(grpcUmsClient).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
+        lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 
     @Test
@@ -138,7 +159,8 @@ public class DatabaseConfigServiceTest {
         when(crnService.createCrn(configToRegister)).thenReturn(dbCrn);
         when(repository.save(configToRegister)).thenReturn(configToRegister);
 
-        DatabaseConfig createdConfig = underTest.register(configToRegister, false);
+        DatabaseConfig createdConfig = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.register(configToRegister, false));
 
         assertEquals(configToRegister, createdConfig);
         verify(repository).save(configToRegister);
@@ -158,7 +180,8 @@ public class DatabaseConfigServiceTest {
         when(crnService.createCrn(configToRegister)).thenReturn(dbCrn);
         when(repository.save(configToRegister)).thenReturn(configToRegister);
 
-        DatabaseConfig createdConfig = underTest.register(configToRegister, false);
+        DatabaseConfig createdConfig = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.register(configToRegister, false));
 
         assertEquals(DatabaseVendor.POSTGRES.connectionDriver(), createdConfig.getConnectionDriver());
     }
@@ -341,13 +364,13 @@ public class DatabaseConfigServiceTest {
     public void testRegisterEntityWithNameExists() {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("database config already exists with name");
-        DatabaseConfig configToRegister = new DatabaseConfig();
-        configToRegister.setConnectionDriver("org.postgresql.MyCustomDriver");
-        when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
-        when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
-        when(repository.save(configToRegister)).thenThrow(getDataIntegrityException());
 
-        underTest.register(configToRegister, false);
+        DatabaseConfig configToSave = new DatabaseConfig();
+        configToSave.setName("name");
+
+        when(repository.findByName(anyString())).thenReturn(Optional.of(configToSave));
+
+        underTest.register(configToSave, false);
     }
 
     private DatabaseConfig getDatabaseConfig(ResourceStatus resourceStatus, String name) {

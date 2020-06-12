@@ -9,8 +9,6 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -29,11 +27,15 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.converter.OutboundInternetTrafficConverter;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.EnvironmentAwareResource;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.network.dao.domain.converter.ServiceEndpointCreationConverter;
+import com.sequenceiq.environment.parameters.dao.converter.PrivateSubnetCreationConverter;
+import com.sequenceiq.environment.parameters.dao.converter.RegistrationTypeConverter;
 
 @Entity
 @Where(clause = "archived = false")
@@ -62,7 +64,7 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     private String networkCidrs;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = RegistrationTypeConverter.class)
     private RegistrationType registrationType;
 
     @Convert(converter = JsonToString.class)
@@ -70,12 +72,16 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     private Json subnetMetas;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = PrivateSubnetCreationConverter.class)
     private PrivateSubnetCreation privateSubnetCreation;
 
     @Column(nullable = false)
     @Convert(converter = ServiceEndpointCreationConverter.class)
     private ServiceEndpointCreation serviceEndpointCreation;
+
+    @Column(nullable = false)
+    @Convert(converter = OutboundInternetTrafficConverter.class)
+    private OutboundInternetTraffic outboundInternetTraffic = OutboundInternetTraffic.ENABLED;
 
     @Column(nullable = false)
     private String accountId;
@@ -195,6 +201,14 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     public void setServiceEndpointCreation(ServiceEndpointCreation serviceEndpointCreation) {
         this.serviceEndpointCreation = serviceEndpointCreation;
+    }
+
+    public OutboundInternetTraffic getOutboundInternetTraffic() {
+        return outboundInternetTraffic;
+    }
+
+    public void setOutboundInternetTraffic(OutboundInternetTraffic outboundInternetTraffic) {
+        this.outboundInternetTraffic = outboundInternetTraffic;
     }
 
     @Override

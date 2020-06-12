@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,8 +18,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -39,9 +36,6 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OrchestratorRecipeExecutorTest {
-
-    @Mock
-    private HostOrchestratorResolver hostOrchestratorResolver;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -89,20 +83,15 @@ public class OrchestratorRecipeExecutorTest {
     public void preClusterManagerStartRecipesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
             CloudbreakOrchestratorTimeoutException {
         when(stack.getId()).thenReturn(1L);
-        Orchestrator orchestrator = new Orchestrator();
-        orchestrator.setType("ORCHESTRATOR_TYPE");
-        when(stack.getOrchestrator()).thenReturn(orchestrator);
         Cluster cluster = new Cluster();
         cluster.setId(2L);
         when(stack.getCluster()).thenReturn(cluster);
-        when(hostOrchestratorResolver.get(anyString())).thenReturn(hostOrchestrator);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         Set<Node> nodes = Set.of(node);
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
 
         underTest.preClusterManagerStartRecipes(stack);
 
-        verify(hostOrchestratorResolver).get("ORCHESTRATOR_TYPE");
         verify(gatewayConfigService).getPrimaryGatewayConfig(stack);
         verify(stackUtil).collectReachableNodes(stack);
         verify(hostOrchestrator).preClusterManagerStartRecipes(eq(gatewayConfig), eq(nodes), any());
@@ -112,20 +101,15 @@ public class OrchestratorRecipeExecutorTest {
     public void postClusterManagerStartRecipesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
             CloudbreakOrchestratorTimeoutException {
         when(stack.getId()).thenReturn(1L);
-        Orchestrator orchestrator = new Orchestrator();
-        orchestrator.setType("ORCHESTRATOR_TYPE");
-        when(stack.getOrchestrator()).thenReturn(orchestrator);
         Cluster cluster = new Cluster();
         cluster.setId(2L);
         when(stack.getCluster()).thenReturn(cluster);
-        when(hostOrchestratorResolver.get(anyString())).thenReturn(hostOrchestrator);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         Set<Node> nodes = Set.of(this.node);
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
 
         underTest.postClusterManagerStartRecipes(stack);
 
-        verify(hostOrchestratorResolver).get("ORCHESTRATOR_TYPE");
         verify(gatewayConfigService).getPrimaryGatewayConfig(stack);
         verify(stackUtil).collectReachableNodes(stack);
         verify(hostOrchestrator).postClusterManagerStartRecipes(eq(gatewayConfig), eq(nodes), any());
@@ -135,20 +119,15 @@ public class OrchestratorRecipeExecutorTest {
     public void postClusterInstallShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
             CloudbreakOrchestratorTimeoutException {
         when(stack.getId()).thenReturn(1L);
-        Orchestrator orchestrator = new Orchestrator();
-        orchestrator.setType("ORCHESTRATOR_TYPE");
-        when(stack.getOrchestrator()).thenReturn(orchestrator);
         Cluster cluster = new Cluster();
         cluster.setId(2L);
         when(stack.getCluster()).thenReturn(cluster);
-        when(hostOrchestratorResolver.get(anyString())).thenReturn(hostOrchestrator);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         Set<Node> nodes = Set.of(this.node);
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
 
         underTest.postClusterInstall(stack);
 
-        verify(hostOrchestratorResolver).get("ORCHESTRATOR_TYPE");
         verify(gatewayConfigService).getPrimaryGatewayConfig(stack);
         verify(stackUtil).collectReachableNodes(stack);
         verify(hostOrchestrator).postInstallRecipes(eq(gatewayConfig), eq(nodes), any());
@@ -156,13 +135,9 @@ public class OrchestratorRecipeExecutorTest {
 
     @Test
     public void testPreTerminationRecipes() throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
-        Orchestrator orchestrator = new Orchestrator();
-        orchestrator.setType("ORCHESTRATOR_TYPE");
-        when(stack.getOrchestrator()).thenReturn(orchestrator);
         Cluster cluster = new Cluster();
         cluster.setId(2L);
         when(stack.getCluster()).thenReturn(cluster);
-        when(hostOrchestratorResolver.get(anyString())).thenReturn(hostOrchestrator);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         Set<Node> nodes = Set.of(node);
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);

@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.AzurePrerequisiteCreateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.featureswitch.AzureSingleResourceGroupFeatureSwitch;
+import com.sequenceiq.environment.featureswitch.AzureSingleResourceGroupFeatureSwitch;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -159,6 +159,7 @@ class PrerequisitesCreationHandlerTest {
         Event<EnvironmentDto> event = getEnvironmentDtoEvent(
                 AzureResourceGroupDto.builder()
                         .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
+                        .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW)
                         .build()
         );
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(getEnvironment()));

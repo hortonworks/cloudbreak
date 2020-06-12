@@ -1,12 +1,13 @@
 package com.sequenceiq.environment.parameters.dao.domain;
 
+import com.sequenceiq.environment.parameters.dao.converter.S3GuardTableCreationConverter;
+
 import java.util.Objects;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 
 @Entity
 @DiscriminatorValue("AWS")
@@ -16,7 +17,7 @@ public class AwsParameters extends BaseParameters {
     private String s3guardTableName;
 
     @Column(name = "s3guard_dynamo_table_creation")
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = S3GuardTableCreationConverter.class)
     private S3GuardTableCreation s3guardTableCreation;
 
     @Column(name = "freeipa_spot_percentage")

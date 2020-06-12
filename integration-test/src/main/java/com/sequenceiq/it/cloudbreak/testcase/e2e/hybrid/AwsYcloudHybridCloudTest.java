@@ -23,7 +23,6 @@ import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
-import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -35,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTes
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -87,14 +87,9 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
     @Inject
     private WaitUtil waitUtil;
 
-    @Inject
-    private CommonCloudProperties commonCloudProperties;
-
     @Override
     protected void setupTest(TestContext testContext) {
-        if (!CloudPlatform.AWS.name().equals(commonCloudProperties.getCloudProvider())) {
-            fail(String.format("%s cloud provider is not supported for this test case!", commonCloudProperties.getCloudProvider()));
-        }
+        checkCloudPlatform(CloudPlatform.AWS);
 
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
@@ -122,6 +117,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak with parent-child environments ",
             when = "a valid SDX create request is sent to the child environment ",

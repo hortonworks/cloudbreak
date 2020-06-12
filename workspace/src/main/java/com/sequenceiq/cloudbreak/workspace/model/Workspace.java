@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.workspace.model;
 
+import com.sequenceiq.cloudbreak.workspace.util.WorkspaceStatusConverter;
+
 import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,7 +31,7 @@ public class Workspace implements TenantAwareResource, Serializable {
     private Tenant tenant;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = WorkspaceStatusConverter.class)
     private WorkspaceStatus status = WorkspaceStatus.ACTIVE;
 
     private String resourceCrn;

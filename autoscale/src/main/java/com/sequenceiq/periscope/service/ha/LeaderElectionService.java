@@ -36,7 +36,6 @@ import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.PeriscopeNodeRepository;
 import com.sequenceiq.periscope.service.DateTimeService;
 import com.sequenceiq.periscope.service.PeriscopeMetricService;
-import com.sequenceiq.periscope.service.StackCollectorService;
 import com.sequenceiq.periscope.utils.TimeUtil;
 
 @Service
@@ -70,9 +69,6 @@ public class LeaderElectionService {
     private TransactionService transactionService;
 
     @Inject
-    private StackCollectorService stackCollectorService;
-
-    @Inject
     private DateTimeService dateTimeService;
 
     @Inject
@@ -85,18 +81,6 @@ public class LeaderElectionService {
     @PostConstruct
     public void init() {
         timer = timerFactory.get();
-        if (!periscopeNodeConfig.isNodeIdSpecified()) {
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        stackCollectorService.collectStackDetails();
-                    } catch (RuntimeException e) {
-                        LOGGER.error("Error happend during fetching stacks", e);
-                    }
-                }
-            }, 0L, STACK_COLLECTOR_PERIOD);
-        }
     }
 
     @Scheduled(initialDelay = 35000L, fixedDelay = 30000L)
@@ -126,7 +110,6 @@ public class LeaderElectionService {
                     @Override
                     public void run() {
                         try {
-                            stackCollectorService.collectStackDetails();
                             long limit = clock.getCurrentTimeMillis() - heartbeatThresholdRate;
                             List<PeriscopeNode> activeNodes = periscopeNodeRepository.findAllByLastUpdatedIsGreaterThan(limit);
                             reallocateOrphanClusters(activeNodes);

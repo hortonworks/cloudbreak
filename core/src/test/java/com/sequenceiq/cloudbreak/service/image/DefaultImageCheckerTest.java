@@ -12,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.authorization.service.CrnsByCategory;
+import com.sequenceiq.authorization.service.defaults.CrnsByCategory;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 
 @RunWith(MockitoJUnitRunner.class)

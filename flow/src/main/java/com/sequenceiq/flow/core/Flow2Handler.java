@@ -29,6 +29,10 @@ import com.sequenceiq.flow.core.exception.FlowNotFoundException;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.domain.FlowLog;
 
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.SpanContext;
+import io.opentracing.Tracer;
 import reactor.bus.Event;
 import reactor.fn.Consumer;
 
@@ -71,6 +75,9 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     @Inject
     private ApplicationFlowInformation applicationFlowInformation;
 
+    @Inject
+    private Tracer tracer;
+
     @Override
     public void accept(Event<? extends Payload> event) {
         String key = (String) event.getKey();
@@ -78,7 +85,26 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         String flowId = getFlowId(event);
         String flowChainId = getFlowChainId(event);
         String flowTriggerUserCrn = getFlowTriggerUserCrn(event);
-        FlowParameters flowParameters = new FlowParameters(flowId, flowTriggerUserCrn);
+        Span activeSpan = tracer.activeSpan();
+        SpanContext spanContext = event.getHeaders().get(FlowConstants.SPAN_CONTEXT);
+        String operationName = event.getKey().toString();
+        if (TracingUtil.isActiveSpanReusable(activeSpan, spanContext, operationName)) {
+            LOGGER.debug("Reusing existing span. {}", activeSpan.context());
+            doAccept(event, key, payload, flowId, flowChainId, flowTriggerUserCrn, spanContext);
+        } else {
+            Span span = TracingUtil.getSpan(tracer, operationName, spanContext, flowId, flowChainId, flowTriggerUserCrn);
+            spanContext = TracingUtil.useOrCreateSpanContext(spanContext, span);
+            try (Scope ignored = tracer.activateSpan(span)) {
+                doAccept(event, key, payload, flowId, flowChainId, flowTriggerUserCrn, spanContext);
+            } finally {
+                span.finish();
+            }
+        }
+    }
+
+    private void doAccept(Event<? extends Payload> event, String key, Payload payload, String flowId, String flowChainId,
+            String flowTriggerUserCrn, SpanContext spanContext) {
+        FlowParameters flowParameters = new FlowParameters(flowId, flowTriggerUserCrn, spanContext);
         Map<Object, Object> contextParams = getContextParams(event);
         try {
             handle(key, payload, flowParameters, flowChainId, contextParams);
@@ -127,7 +153,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         }
                         acceptFlow(payload, acceptResult);
                         logFlowId(flowId);
-                        flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload);
+                        flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getSpanContext());
                     }
                 } else {
                     handleFlowControlEvent(key, payload, flowParameters, flowChainId);
@@ -147,7 +173,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 lastFlowLog.ifPresent(flowLog -> updateFlowLogStatus(key, payload, flowChainId, flow, flowLog, flowParameters));
                 return null;
             });
-            flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload);
+            flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getSpanContext());
         } else {
             LOGGER.debug("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getResourceId(), flowId, key);
         }
@@ -240,8 +266,9 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     flow.initialize(flowLog.getCurrentState(), variables);
                     RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
                     if (restartAction != null) {
-                        restartAction.restart(new FlowParameters(flowLog.getFlowId(), flowLog.getFlowTriggerUserCrn()), flowLog.getFlowChainId(),
-                                flowLog.getNextEvent(), payload);
+                        Span span = tracer.buildSpan(flowLog.getCurrentState()).ignoreActiveSpan().start();
+                        restartAction.restart(new FlowParameters(flowLog.getFlowId(), flowLog.getFlowTriggerUserCrn(),
+                                span.context()), flowLog.getFlowChainId(), flowLog.getNextEvent(), payload);
                         return;
                     }
                 } catch (RuntimeException e) {

@@ -56,7 +56,8 @@ public class TracingConfiguration {
 
         @Override
         public void decorateResponse(ContainerResponseContext responseContext, Span span) {
-
+            MDCBuilder.addTraceId(span.context().toTraceId());
+            MDCBuilder.addSpanId(span.context().toSpanId());
         }
 
         @Override
@@ -67,7 +68,8 @@ public class TracingConfiguration {
 
         @Override
         public void decorateResponse(ClientResponseContext responseContext, Span span) {
-
+            MDCBuilder.addTraceId(span.context().toTraceId());
+            MDCBuilder.addSpanId(span.context().toSpanId());
         }
     }
 }

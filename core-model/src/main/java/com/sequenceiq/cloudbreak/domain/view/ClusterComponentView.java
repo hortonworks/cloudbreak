@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.domain.view;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -12,6 +10,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.converter.ComponentTypeConverter;
 
 @Entity
 @Table(name = "ClusterComponent")
@@ -19,7 +18,7 @@ public class ClusterComponentView implements ProvisionEntity {
     @Id
     private Long id;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ComponentTypeConverter.class)
     private ComponentType componentType;
 
     private String name;

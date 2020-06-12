@@ -4,7 +4,9 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUDWATC
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -16,10 +18,13 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.cloudwatch.model.AmazonCloudWatchException;
 import com.amazonaws.services.cloudwatch.model.DeleteAlarmsRequest;
+import com.amazonaws.services.cloudwatch.model.DescribeAlarmsRequest;
 import com.amazonaws.services.cloudwatch.model.Dimension;
+import com.amazonaws.services.cloudwatch.model.MetricAlarm;
 import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -41,12 +46,14 @@ public class AwsCloudWatchService {
     @Value("${freeipa.aws.cloudwatch.threshold:1.0}")
     private double cloudwatchThreshhold;
 
+    @Value("${freeipa.aws.cloudwatch.max-batchsize:100}")
+    private int maxBatchsize;
+
     @Inject
     private AwsClient awsClient;
 
     public void addCloudWatchAlarmsForSystemFailures(List<CloudResource> instances, CloudStack stack, String regionName, AwsCredentialView credentialView) {
-        String isCreate = stack.getParameters().get(CLOUDWATCH_CREATE_PARAMETER);
-        if (isCreate != null && isCreate.equals(Boolean.TRUE.toString())) {
+        if (isCloudwatchEnabled(stack)) {
             instances.stream().forEach(instance -> {
                 try {
                     PutMetricAlarmRequest metricAlarmRequest = new PutMetricAlarmRequest();
@@ -71,20 +78,74 @@ public class AwsCloudWatchService {
     }
 
     public void deleteCloudWatchAlarmsForSystemFailures(CloudStack stack, String regionName, AwsCredentialView credentialView) {
-        List<CloudInstance> instances = stack.getGroups().stream()
-                .flatMap(group -> group.getInstances().stream()).collect(Collectors.toList());
-        String isCreate = stack.getParameters().get(CLOUDWATCH_CREATE_PARAMETER);
-        if (isCreate != null && isCreate.equals(Boolean.TRUE.toString())) {
-            instances.stream().forEach(instance -> {
-                try {
-                    DeleteAlarmsRequest deleteAlarmsRequest = new DeleteAlarmsRequest().withAlarmNames(instance.getInstanceId() + alarmSuffix);
-                    AmazonCloudWatchClient amazonCloudWatchClient = awsClient.createCloudWatchClient(credentialView, regionName);
-                    amazonCloudWatchClient.deleteAlarms(deleteAlarmsRequest);
-                    LOGGER.debug("Deleted cloudwatch alarm.-", instance.getInstanceId());
-                } catch (AmazonCloudWatchException acwe) {
-                    LOGGER.error("Unable to delete cloudwatch alarm for instanceId {}: {}", instance.getInstanceId(), acwe.getLocalizedMessage());
-                }
-            });
+        List<String> instanceIds = stack.getGroups().stream()
+                .flatMap(group -> group.getInstances().stream())
+                .map(CloudInstance::getInstanceId)
+                .collect(Collectors.toList());
+        deleteCloudWatchAlarmsForSystemFailures(stack, regionName, credentialView, instanceIds);
+    }
+
+    public void deleteCloudWatchAlarmsForSystemFailures(CloudStack stack, String regionName, AwsCredentialView credentialView, List<String> instanceIds) {
+        if (isCloudwatchEnabled(stack)) {
+            List<String> instanceIdsFromStack = stack.getGroups().stream()
+                    .flatMap(group -> group.getInstances().stream())
+                    .map(CloudInstance::getInstanceId)
+                    .collect(Collectors.toList());
+            List<String> instanceIdsNotInStack = instanceIds.stream()
+                    .filter(instanceId -> !instanceIdsFromStack.contains(instanceId))
+                    .collect(Collectors.toList());
+            if (!instanceIdsNotInStack.isEmpty()) {
+                LOGGER.error("Instance IDs [{}] are not part of stack {}", instanceIdsFromStack, stack);
+                throw new CloudConnectorException("Unable to delete cloud watch alarms for system failure because instances ID are not a part of the stack.");
+            }
+            deleteCloudWatchAlarmsForSystemFailures(regionName, credentialView, instanceIds);
         }
+    }
+
+    private void deleteCloudWatchAlarmsForSystemFailures(String regionName, AwsCredentialView credentialView, List<String> instanceIds) {
+        final AtomicInteger counter = new AtomicInteger(0);
+        instanceIds.stream()
+                .map(instanceId -> instanceId + alarmSuffix)
+                .collect(Collectors.groupingBy(s -> counter.getAndIncrement() / maxBatchsize))
+                .values()
+                .stream()
+                .flatMap(alarmNames -> getExistingCloudWatchAlarms(regionName, credentialView, alarmNames))
+                .filter(alarmNames -> !alarmNames.isEmpty())
+                .forEach(alarmNames -> deleteCloudWatchAlarms(regionName, credentialView, alarmNames));
+    }
+
+    private Stream<List<String>> getExistingCloudWatchAlarms(String regionName, AwsCredentialView credentialView, List<String> alarmNames) {
+        Stream<List<String>> filteredAlarmNamesStream;
+        try {
+            DescribeAlarmsRequest request = new DescribeAlarmsRequest().withAlarmNames(alarmNames).withMaxRecords(maxBatchsize);
+            AmazonCloudWatchClient amazonCloudWatchClient = awsClient.createCloudWatchClient(credentialView, regionName);
+            List<String> filteredAlarmNames = amazonCloudWatchClient.describeAlarms(request).getMetricAlarms().stream()
+                    .map(MetricAlarm::getAlarmName)
+                    .collect(Collectors.toList());
+            filteredAlarmNamesStream = Stream.of(filteredAlarmNames);
+            LOGGER.debug("Checking cloudwatch alarms [{}] for existence and found [{}]", alarmNames, filteredAlarmNames);
+        } catch (AmazonCloudWatchException acwe) {
+            LOGGER.error("Unable to describe cloudwatch alarms falling back to delete all alarms indivdually [{}]: {}", alarmNames, acwe.getLocalizedMessage());
+            filteredAlarmNamesStream = alarmNames.stream()
+                    .map(alarmName -> List.of(alarmName));
+        }
+        return filteredAlarmNamesStream;
+    }
+
+    private void deleteCloudWatchAlarms(String regionName, AwsCredentialView credentialView, List<String> alarmNames) {
+        try {
+            DeleteAlarmsRequest deleteAlarmsRequest = new DeleteAlarmsRequest().withAlarmNames(alarmNames);
+            AmazonCloudWatchClient amazonCloudWatchClient = awsClient.createCloudWatchClient(credentialView, regionName);
+            amazonCloudWatchClient.deleteAlarms(deleteAlarmsRequest);
+            LOGGER.debug("Deleted cloudwatch alarms [{}]", alarmNames);
+        } catch (AmazonCloudWatchException acwe) {
+            LOGGER.error("Unable to delete cloudwatch alarms [{}]: {}", alarmNames, acwe.getLocalizedMessage());
+            throw new CloudConnectorException("unable to delete cloud watch alarms", acwe);
+        }
+    }
+
+    private boolean isCloudwatchEnabled(CloudStack stack) {
+        String isCreate = stack.getParameters().get(CLOUDWATCH_CREATE_PARAMETER);
+        return Boolean.TRUE.toString().equals(isCreate);
     }
 }

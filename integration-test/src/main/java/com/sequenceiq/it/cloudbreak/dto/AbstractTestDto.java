@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.dto;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.finder.Finders.same;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -221,7 +222,7 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         return await(entityClass, statuses, emptyRunningParameter());
     }
 
-    public T await(Class<T> entityClass, Map<String, Status> statuses, long pollingInteval) {
+    public T await(Class<T> entityClass, Map<String, Status> statuses, Duration pollingInteval) {
         return testContext.await(entityClass, statuses, emptyRunningParameter(), pollingInteval);
     }
 

@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,6 +36,7 @@ import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.DescribePrefixListsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
@@ -109,6 +111,7 @@ public class AwsLaunchTest extends AwsComponentTest {
         setupCreateVolumeResponse();
         setupDescribeVolumeResponse();
         setupDescribeSubnetResponse();
+        setupDescribePrefixListsResponse();
 
         InMemoryStateStore.putStack(1L, PollGroup.POLLABLE);
 
@@ -130,6 +133,7 @@ public class AwsLaunchTest extends AwsComponentTest {
         inOrder.verify(awsCreateStackStatusCheckerTask).call();
         inOrder.verify(amazonEC2Client, times(2)).createVolume(any());
         inOrder.verify(amazonEC2Client, times(2)).attachVolume(any());
+        inOrder.verify(amazonEC2Client, never()).describePrefixLists();
     }
 
     private void setupRetryService() {
@@ -216,6 +220,10 @@ public class AwsLaunchTest extends AwsComponentTest {
                 new DescribeImagesResult()
                         .withImages(new com.amazonaws.services.ec2.model.Image().withRootDeviceName(""))
         );
+    }
+
+    private void setupDescribePrefixListsResponse() {
+        when(amazonEC2Client.describePrefixLists()).thenReturn(new DescribePrefixListsResult());
     }
 
     private void setupCreateStackStatusCheckerTask() {

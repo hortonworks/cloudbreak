@@ -41,6 +41,8 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.defaults.CrnsByCategory;
+import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommonPermissionCheckingUtilsTest {

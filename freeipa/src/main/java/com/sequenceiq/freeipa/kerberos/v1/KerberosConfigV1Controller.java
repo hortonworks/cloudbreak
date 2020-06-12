@@ -10,8 +10,11 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
@@ -34,38 +37,38 @@ public class KerberosConfigV1Controller extends NotificationController implement
     private CrnService crnService;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
-    public DescribeKerberosConfigResponse describe(String environmentId) {
-        return kerberosConfigV1Service.describe(environmentId);
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public DescribeKerberosConfigResponse describe(@ResourceCrn String environmentCrn) {
+        return kerberosConfigV1Service.describe(environmentCrn);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public DescribeKerberosConfigResponse getForCluster(@NotEmpty @TenantAwareParam String environmentCrn,
+    public DescribeKerberosConfigResponse getForCluster(@ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
             @NotEmpty String clusterName) throws Exception {
         String accountId = crnService.getCurrentAccountId();
         return kerberosConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public DescribeKerberosConfigResponse create(@Valid CreateKerberosConfigRequest request) {
+    @CheckPermissionByResourceObject
+    public DescribeKerberosConfigResponse create(@ResourceObject @Valid CreateKerberosConfigRequest request) {
         return kerberosConfigV1Service.post(request);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
-    public void delete(String environmentId) {
-        kerberosConfigV1Service.delete(environmentId);
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public void delete(@ResourceCrn String environmentCrn) {
+        kerberosConfigV1Service.delete(environmentCrn);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
-    public CreateKerberosConfigRequest getRequest(String environmentId) {
-        return kerberosConfigV1Service.getCreateRequest(environmentId);
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public CreateKerberosConfigRequest getRequest(@ResourceCrn String environmentCrn) {
+        return kerberosConfigV1Service.getCreateRequest(environmentCrn);
     }
 }

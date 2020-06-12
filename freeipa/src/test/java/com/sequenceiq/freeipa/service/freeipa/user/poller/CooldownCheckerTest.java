@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
 
 class CooldownCheckerTest {
 
@@ -23,8 +24,8 @@ class CooldownCheckerTest {
 
     @Test
     void testNoStartTimeIsCool() {
-        Stack stack = UserSyncPollerTestUtils.createStack();
-        UserSyncStatus userSyncStatus = UserSyncPollerTestUtils.createUserSyncStatus(stack);
+        Stack stack = UserSyncTestUtils.createStack();
+        UserSyncStatus userSyncStatus = UserSyncTestUtils.createUserSyncStatus(stack);
         Instant cooldownExpiration = Instant.now();
 
         assertTrue(underTest.isCooldownExpired(userSyncStatus, cooldownExpiration));
@@ -32,8 +33,8 @@ class CooldownCheckerTest {
 
     @Test
     void testIsCool() {
-        Stack stack = UserSyncPollerTestUtils.createStack();
-        UserSyncStatus userSyncStatus = UserSyncPollerTestUtils.createUserSyncStatus(stack);
+        Stack stack = UserSyncTestUtils.createStack();
+        UserSyncStatus userSyncStatus = UserSyncTestUtils.createUserSyncStatus(stack);
         Instant cooldownExpiration = Instant.now();
         long lastStartTime = cooldownExpiration.toEpochMilli() - 1L;
         Operation lastRequestedOperation = new Operation();
@@ -45,8 +46,8 @@ class CooldownCheckerTest {
 
     @Test
     void testIsNotCool() {
-        Stack stack = UserSyncPollerTestUtils.createStack();
-        UserSyncStatus userSyncStatus = UserSyncPollerTestUtils.createUserSyncStatus(stack);
+        Stack stack = UserSyncTestUtils.createStack();
+        UserSyncStatus userSyncStatus = UserSyncTestUtils.createUserSyncStatus(stack);
         Instant cooldownExpiration = Instant.now();
         long lastStartTime = cooldownExpiration.toEpochMilli() + 1L;
         Operation lastRequestedOperation = new Operation();

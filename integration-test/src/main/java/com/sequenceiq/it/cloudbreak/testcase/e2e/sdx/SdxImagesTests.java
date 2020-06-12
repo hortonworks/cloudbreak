@@ -26,6 +26,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -39,6 +40,7 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
     private WaitUtil waitUtil;
 
     @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak",
             when = "a basic SDX create request is sent",
@@ -60,6 +62,7 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak",
             when = "a valid SDX create request is sent (latest Base Image)",

@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,18 +16,24 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.converter.OutboundInternetTrafficConverter;
+import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 @Entity
 @Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
 public class Network implements ProvisionEntity, WorkspaceAwareResource, ArchivableResource {
+    private static final String DELIMITER = ",";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "network_generator")
@@ -38,7 +47,7 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource, Archiva
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ResourceStatusConverter.class)
     private ResourceStatus status;
 
     private String cloudPlatform;
@@ -46,6 +55,12 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource, Archiva
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json attributes;
+
+    @Column(nullable = false)
+    @Convert(converter = OutboundInternetTrafficConverter.class)
+    private OutboundInternetTraffic outboundInternetTraffic = OutboundInternetTraffic.ENABLED;
+
+    private String networkCidrs;
 
     @ManyToOne
     private Topology topology;
@@ -119,6 +134,26 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource, Archiva
 
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
+    }
+
+    public OutboundInternetTraffic getOutboundInternetTraffic() {
+        return outboundInternetTraffic;
+    }
+
+    public void setOutboundInternetTraffic(OutboundInternetTraffic outboundInternetTraffic) {
+        this.outboundInternetTraffic = outboundInternetTraffic;
+    }
+
+    public List<String> getNetworkCidrs() {
+        return StringUtils.isNotEmpty(networkCidrs) ? Stream.of(networkCidrs.split(DELIMITER)).collect(Collectors.toList()) : List.of();
+    }
+
+    public void setNetworkCidrs(Collection<String> networkCidrs) {
+        if (CollectionUtils.isNotEmpty(networkCidrs)) {
+            this.networkCidrs = String.join(DELIMITER, networkCidrs);
+        } else {
+            this.networkCidrs = null;
+        }
     }
 
     public Topology getTopology() {

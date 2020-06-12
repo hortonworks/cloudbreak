@@ -5,8 +5,6 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,6 +20,8 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.util.ListFailureDetailsToString;
 import com.sequenceiq.freeipa.entity.util.ListStringToString;
 import com.sequenceiq.freeipa.entity.util.ListSuccessDetailsToString;
+import com.sequenceiq.freeipa.entity.util.OperationStateConverter;
+import com.sequenceiq.freeipa.entity.util.OperationTypeConverter;
 
 @Entity
 @Table(name = "operation")
@@ -37,11 +37,11 @@ public class Operation {
     @Column(nullable = false)
     private String accountId;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = OperationTypeConverter.class)
     @Column(nullable = false)
     private OperationType operationType;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = OperationStateConverter.class)
     @Column(nullable = false)
     private OperationState status;
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,15 +41,20 @@ public class TelemetryAgentService {
     }
 
     public void stopTelemetryAgent(Long stackId) {
+        stopTelemetryAgent(stackId, null);
+    }
+
+    public void stopTelemetryAgent(Long stackId, List<String> instanceIds) {
         try {
             Stack stack = stackRepository.findById(stackId).get();
             Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataRepository.findAllInStack(stackId);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, instanceMetaDataSet);
-            Set<Node> allNodes = instanceMetaDataSet.stream()
+            Set<Node> targetNodes = instanceMetaDataSet.stream()
+                    .filter(instanceMetaData -> Objects.isNull(instanceIds) || instanceIds.contains(instanceMetaData.getInstanceId()))
                     .map(im -> new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
                             im.getInstanceGroup().getTemplate().getInstanceType(), im.getDiscoveryFQDN(), im.getInstanceGroup().getGroupName()))
                     .collect(Collectors.toSet());
-            hostOrchestrator.stopTelemetryAgent(gatewayConfigs, allNodes,  StackBasedExitCriteriaModel.nonCancellableModel());
+            hostOrchestrator.stopTelemetryAgent(gatewayConfigs, targetNodes,  new StackBasedExitCriteriaModel(stackId));
         } catch (CloudbreakOrchestratorFailedException e) {
             LOGGER.warn("Non-critical error during stopping telemetry agent", e);
         } catch (Exception e) {

@@ -293,7 +293,8 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
             Subnet subnet = new Subnet(null);
             Json attributes = stackNetwork.getAttributes();
             Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
-            result = new Network(subnet, params);
+
+            result = new Network(subnet, stackNetwork.getNetworkCidrs(), stackNetwork.getOutboundInternetTraffic(), params);
         }
         return result;
     }

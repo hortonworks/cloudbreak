@@ -9,7 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
@@ -31,8 +34,8 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     private SdxRuntimeUpgradeService sdxRuntimeUpgradeService;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
-    public SdxUpgradeResponse upgradeClusterByName(String clusterName, SdxUpgradeRequest request) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
+    public SdxUpgradeResponse upgradeClusterByName(@ResourceName String clusterName, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         lockComponentsIfRuntimeUpgradeIsDisabled(request, userCrn, clusterName);
         if (isDryRun(request)) {
@@ -50,8 +53,8 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_WRITE)
-    public SdxUpgradeResponse upgradeClusterByCrn(String clusterCrn, SdxUpgradeRequest request) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
+    public SdxUpgradeResponse upgradeClusterByCrn(@ResourceCrn String clusterCrn, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         lockComponentsIfRuntimeUpgradeIsDisabled(request, userCrn, clusterCrn);
         if (isDryRun(request)) {
