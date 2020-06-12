@@ -108,7 +108,7 @@ public class FreeIpaInstallService {
         decoratePillarsWithProxyConfig(proxyConfig, servicePillarConfig);
         decoratePillarWithTags(stack, servicePillarConfig);
         hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
-        hostOrchestrator.installFreeIPA(primaryGatewayConfig, gatewayConfigs, allNodes, new StackBasedExitCriteriaModel(stackId));
+        hostOrchestrator.installFreeIpa(primaryGatewayConfig, gatewayConfigs, allNodes, new StackBasedExitCriteriaModel(stackId));
     }
 
     private void decoratePillarsWithProxyConfig(ProxyConfig proxyConfig,

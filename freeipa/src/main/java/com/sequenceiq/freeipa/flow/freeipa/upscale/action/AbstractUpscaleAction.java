@@ -23,7 +23,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.scale.action.AbstractScaleAction;
+import com.sequenceiq.freeipa.flow.chain.AbstractCommonChainAction;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
@@ -31,7 +31,7 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
-public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractScaleAction<UpscaleState, UpscaleFlowEvent, StackContext, P> {
+public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractCommonChainAction<UpscaleState, UpscaleFlowEvent, StackContext, P> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUpscaleAction.class);
 
@@ -82,7 +82,7 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractS
     protected DetailedStackStatus getUpscaleCompleteStatus(Map<Object, Object> variables) {
         DetailedStackStatus stackStatus;
         if (isRepair(variables)) {
-            stackStatus = DetailedStackStatus.REPAIR_COMPLETED;
+            stackStatus = DetailedStackStatus.REPAIR_IN_PROGRESS;
         } else {
             stackStatus = DetailedStackStatus.UPSCALE_COMPLETED;
         }

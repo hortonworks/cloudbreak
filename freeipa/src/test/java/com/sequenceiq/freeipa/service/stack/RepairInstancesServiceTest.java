@@ -141,7 +141,7 @@ class RepairInstancesServiceTest {
         verify(flowManager).notify(eq("REPAIR_TRIGGER_EVENT"), (Acceptable) acAcceptable.capture());
         assertTrue(acAcceptable.getValue() instanceof RepairEvent);
         RepairEvent repairEvent = (RepairEvent) acAcceptable.getValue();
-        assertEquals(instanceIds, repairEvent.getInstanceIds());
+        assertEquals(instanceIds, repairEvent.getRepairInstanceIds());
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
     }
 
@@ -184,7 +184,7 @@ class RepairInstancesServiceTest {
         verify(flowManager).notify(eq("REPAIR_TRIGGER_EVENT"), (Acceptable) acAcceptable.capture());
         assertTrue(acAcceptable.getValue() instanceof RepairEvent);
         RepairEvent repairEvent = (RepairEvent) acAcceptable.getValue();
-        assertEquals(instanceIds, repairEvent.getInstanceIds());
+        assertEquals(instanceIds, repairEvent.getRepairInstanceIds());
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
     }
 
@@ -210,7 +210,7 @@ class RepairInstancesServiceTest {
         verify(flowManager).notify(eq("REPAIR_TRIGGER_EVENT"), (Acceptable) acAcceptable.capture());
         assertTrue(acAcceptable.getValue() instanceof RepairEvent);
         RepairEvent repairEvent = (RepairEvent) acAcceptable.getValue();
-        assertEquals(instanceIds, repairEvent.getInstanceIds());
+        assertEquals(instanceIds, repairEvent.getRepairInstanceIds());
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
     }
 
@@ -265,7 +265,7 @@ class RepairInstancesServiceTest {
         verify(flowManager).notify(eq("REPAIR_TRIGGER_EVENT"), (Acceptable) acAcceptable.capture());
         assertTrue(acAcceptable.getValue() instanceof RepairEvent);
         RepairEvent repairEvent = (RepairEvent) acAcceptable.getValue();
-        assertEquals(instanceIds, repairEvent.getInstanceIds());
+        assertEquals(instanceIds, repairEvent.getRepairInstanceIds());
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
     }
 

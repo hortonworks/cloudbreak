@@ -57,16 +57,6 @@ public class InstanceMetaDataService {
                 });
     }
 
-    public void deleteInstanceRequest(Long stackId, Long privateId) {
-        Set<InstanceMetaData> instanceMetaData = instanceMetaDataRepository.findAllInStack(stackId);
-        for (InstanceMetaData metaData : instanceMetaData) {
-            if (metaData.getPrivateId().equals(privateId)) {
-                instanceMetaDataRepository.delete(metaData);
-                break;
-            }
-        }
-    }
-
     public Set<InstanceMetaData> findNotTerminatedForStack(Long stackId) {
         return instanceMetaDataRepository.findNotTerminatedForStack(stackId);
     }

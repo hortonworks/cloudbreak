@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.flow.freeipa.scale.action;
+package com.sequenceiq.freeipa.flow.chain;
 
 import java.util.List;
 import java.util.Map;
@@ -9,7 +9,7 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 
-public abstract class AbstractScaleAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload>
+public abstract class AbstractCommonChainAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload>
         extends AbstractStackAction<S, E, C, P> {
 
     protected static final String INSTANCE_IDS = "INSTANCE_IDS";
@@ -24,7 +24,9 @@ public abstract class AbstractScaleAction<S extends FlowState, E extends FlowEve
 
     protected static final String INSTANCE_COUNT_BY_GROUP = "INSTANCE_COUNT_BY_GROUP";
 
-    protected AbstractScaleAction(Class<P> payloadClass) {
+    protected static final String FINAL_CHAIN = "FINAL_CHAIN";
+
+    protected AbstractCommonChainAction(Class<P> payloadClass) {
         super(payloadClass);
     }
 
@@ -75,4 +77,13 @@ public abstract class AbstractScaleAction<S extends FlowState, E extends FlowEve
     protected Integer getInstanceCountByGroup(Map<Object, Object> variables) {
         return (Integer) variables.get(INSTANCE_COUNT_BY_GROUP);
     }
+
+    protected void setFinalChain(Map<Object, Object> variables, Boolean finalChain) {
+        variables.put(FINAL_CHAIN, finalChain);
+    }
+
+    protected Boolean isFinalChain(Map<Object, Object> variable) {
+        return (Boolean) variable.get(FINAL_CHAIN);
+    }
+
 }

@@ -48,17 +48,17 @@ public class GatewayConfigService {
     }
 
     private InstanceMetaData getPrimaryGwInstance(Stack stack) {
-        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findAllInStack(stack.getId());
+        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
         return getPrimaryGwInstance(instanceMetaDatas);
     }
 
-    public InstanceMetaData getPrimaryGwInstance(Collection<InstanceMetaData> instanceMetaDatas) {
+    private InstanceMetaData getPrimaryGwInstance(Collection<InstanceMetaData> instanceMetaDatas) {
         return instanceMetaDatas.stream()
                 .filter(im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceMetadataType()))
                 .findFirst().orElseThrow(() -> new NotFoundException("Gateway instance is not found"));
     }
 
-    private GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance) {
+    public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance) {
         return tlsSecurityService.buildGatewayConfig(stack, gatewayInstance, getSaltClientConfig(stack), false);
     }
 

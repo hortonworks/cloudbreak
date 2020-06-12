@@ -5,6 +5,7 @@ update_cnames:
         - FPW: {{salt['pillar.get']('freeipa:password')}}
         - DOMAIN: {{salt['pillar.get']('freeipa:domain')}}
         - REALM: {{salt['pillar.get']('freeipa:realm')}}
+        - ADMIN_USER: {{salt['pillar.get']('freeipa:admin_user')}}
     - require:
         - file: /opt/salt/scripts/update_cnames.sh
 

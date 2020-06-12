@@ -9,17 +9,17 @@ public class RepairEvent extends StackEvent {
 
     private final int instanceCountByGroup;
 
-    private final List<String> instanceIds;
+    private final List<String> repairInstanceIds;
 
-    private final List<String> additionalTermiantedInstanceIds;
+    private final List<String> additionalTerminatedInstanceIds;
 
-    public RepairEvent(String selector, Long stackId, String operationId, int instanceCountByGroup, List<String> instanceIds,
+    public RepairEvent(String selector, Long stackId, String operationId, int instanceCountByGroup, List<String> repairInstanceIds,
             List<String> additionalTerminatedInstanceIds) {
         super(selector, stackId);
         this.operationId = operationId;
         this.instanceCountByGroup = instanceCountByGroup;
-        this.instanceIds = instanceIds;
-        this.additionalTermiantedInstanceIds = additionalTerminatedInstanceIds;
+        this.repairInstanceIds = repairInstanceIds;
+        this.additionalTerminatedInstanceIds = additionalTerminatedInstanceIds;
     }
 
     public String getOperationId() {
@@ -30,11 +30,11 @@ public class RepairEvent extends StackEvent {
         return instanceCountByGroup;
     }
 
-    public List<String> getInstanceIds() {
-        return instanceIds;
+    public List<String> getRepairInstanceIds() {
+        return repairInstanceIds;
     }
 
-    public List<String> getAdditionalTermiantedInstanceIds() {
-        return additionalTermiantedInstanceIds;
+    public List<String> getAdditionalTerminatedInstanceIds() {
+        return additionalTerminatedInstanceIds;
     }
 }
