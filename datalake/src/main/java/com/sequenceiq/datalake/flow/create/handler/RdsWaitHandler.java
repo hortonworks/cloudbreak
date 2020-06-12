@@ -81,14 +81,14 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
                 throw notFound("SDX cluster", sdxId).get();
             });
         } catch (UserBreakException userBreakException) {
-            LOGGER.info("Database polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.error("Database polling exited before timeout. Cause: ", userBreakException);
             sendEvent(new SdxCreateFailedEvent(sdxId, userId, userBreakException), event);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.info("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
+            LOGGER.error("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
             sendEvent(new SdxCreateFailedEvent(sdxId, userId,
                     new PollerStoppedException("Database creation timed out after " + DURATION_IN_MINUTES_FOR_DB_POLLING + " minutes")), event);
         } catch (PollerException exception) {
-            LOGGER.info("Database polling failed for sdx: {}", sdxId, exception);
+            LOGGER.error("Database polling failed for sdx: {}", sdxId, exception);
             sendEvent(new SdxCreateFailedEvent(sdxId, userId, exception), event);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in sdx database creation wait phase", anotherException);
@@ -105,7 +105,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
         if (CloudPlatform.AWS.name().equalsIgnoreCase(env.getCloudPlatform())) {
             if (env.getNetwork().getSubnetMetas().size() < 2) {
                 message = String.format("Cannot create external database for sdx: %s, not enough subnets in the vpc", sdxId);
-                LOGGER.debug(message);
+                LOGGER.error(message);
                 throw new BadRequestException(message);
             }
             Map<String, Long> zones = env.getNetwork().getSubnetMetas().values().stream()
@@ -113,7 +113,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
             if (zones.size() < 2) {
                 message = String.format("Cannot create external database for sdx: %s, vpc subnets must cover at least two different availability zones",
                         sdxId);
-                LOGGER.debug(message);
+                LOGGER.error(message);
                 throw new BadRequestException(message);
             }
         }

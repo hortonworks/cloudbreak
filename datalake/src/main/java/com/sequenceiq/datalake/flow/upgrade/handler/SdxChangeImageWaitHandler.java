@@ -62,14 +62,14 @@ public class SdxChangeImageWaitHandler extends ExceptionCatcherEventHandler<SdxC
                 response = new SdxUpgradeFailedEvent(sdxId, userId, new IllegalStateException(message));
             }
         } catch (UserBreakException userBreakException) {
-            LOGGER.info("Change image polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.error("Change image polling exited before timeout. Cause: ", userBreakException);
             response = new SdxUpgradeFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.info("Change image poller stopped for cluster: {}", sdxId);
+            LOGGER.error("Change image poller stopped for cluster: {}", sdxId);
             response = new SdxUpgradeFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake repair timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.info("Change image polling failed for cluster: {}", sdxId);
+            LOGGER.error("Change image polling failed for cluster: {}", sdxId);
             response = new SdxUpgradeFailedEvent(sdxId, userId, exception);
         }
         sendEvent(response, event);

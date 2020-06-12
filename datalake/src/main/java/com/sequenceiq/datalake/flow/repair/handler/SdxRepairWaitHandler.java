@@ -53,14 +53,14 @@ public class SdxRepairWaitHandler extends ExceptionCatcherEventHandler<SdxRepair
             repairService.waitCloudbreakClusterRepair(sdxId, pollingConfig);
             response = new SdxRepairSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
-            LOGGER.info("Repair polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.error("Repair polling exited before timeout. Cause: ", userBreakException);
             response = new SdxRepairFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.info("Repair poller stopped for stack: {}", sdxId);
+            LOGGER.error("Repair poller stopped for stack: {}", sdxId);
             response = new SdxRepairFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake repair timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.info("Repair polling failed for stack: {}", sdxId);
+            LOGGER.error("Repair polling failed for stack: {}", sdxId);
             response = new SdxRepairFailedEvent(sdxId, userId, exception);
         }
         sendEvent(response, event);
