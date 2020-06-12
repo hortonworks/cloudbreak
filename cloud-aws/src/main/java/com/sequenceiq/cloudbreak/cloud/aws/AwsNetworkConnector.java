@@ -163,7 +163,7 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
         SubnetFilterStrategyType subnetSelectorStrategyType = preferPrivate ?
                 SubnetFilterStrategyType.MULTIPLE_PREFER_PRIVATE : SubnetFilterStrategyType.MULTIPLE_PREFER_PUBLIC;
         int azCount = subnetSelectionParameters.isHa() ? subnetCountInDifferentAzMin() : 1;
-        return subnetFilterStrategyMap.get(subnetSelectorStrategyType).filter(subnetMetas, azCount);
+        return subnetFilterStrategyMap.get(subnetSelectorStrategyType).filter(subnetMetas, azCount, subnetSelectionParameters.isInternalTenant());
     }
 
     @Override

@@ -23,6 +23,8 @@ public abstract class DefaultNetworkConnector implements NetworkConnector {
 
     private static final String NOT_ENOUGH_AZ = "Acceptable subnets are in %d different AZs, but subnets in %d different AZs required.";
 
+    private static final String NO_SUBNETS = "No suitable subnets were found";
+
     @Override
     public SubnetSelectionResult chooseSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
         LOGGER.info("Trying to choose subnets from: {}.", subnetMetas);
@@ -34,9 +36,12 @@ public abstract class DefaultNetworkConnector implements NetworkConnector {
             } else {
                 return selectForNonHAScenario(subnetSelectionResult.getResult());
             }
-        } else {
-            LOGGER.info("There is no result in the subnet selection: {}.", subnetSelectionResult);
+        } else if (subnetSelectionResult.hasError()) {
+            LOGGER.info("There are errors in the subnet selection: {}.", subnetSelectionResult.getErrorMessage());
             return subnetSelectionResult;
+        } else {
+            LOGGER.info("There is no result in the subnet selection.");
+            return new SubnetSelectionResult(NO_SUBNETS);
         }
     }
 

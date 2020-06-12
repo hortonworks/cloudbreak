@@ -8,7 +8,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.util.NullUtil;
-import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
@@ -28,7 +27,6 @@ import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
-import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
@@ -98,13 +96,13 @@ public class EnvironmentResponseConverter {
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));
         NullUtil.doIfNotNull(environmentDto.getNetwork(),
-                network -> builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel())));
+                network -> builder.withNetwork(networkDtoToResponse(environmentDto)));
         NullUtil.doIfNotNull(environmentDto.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessDtoToResponse(securityAccess)));
         return builder.build();
     }
 
-    private EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network, Tunnel tunnel) {
-        return networkDtoToResponseConverter.convert(network, tunnel);
+    private EnvironmentNetworkResponse networkDtoToResponse(EnvironmentDto environment) {
+        return networkDtoToResponseConverter.convert(environment);
     }
 
     public SimpleEnvironmentResponse dtoToSimpleResponse(EnvironmentDto environmentDto) {
@@ -133,7 +131,7 @@ public class EnvironmentResponseConverter {
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())));
         NullUtil.doIfNotNull(environmentDto.getNetwork(),
-                network -> builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel())));
+                network -> builder.withNetwork(networkDtoToResponse(environmentDto)));
         return builder.build();
     }
 

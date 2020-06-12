@@ -52,7 +52,7 @@ public class SubnetFilterStrategyMultiplePreferPrivateTest {
                 .withPublicSubnet(AZ_B)
                 .build();
 
-        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3);
+        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, false);
 
         verify(subnetSelectorService, times(1)).collectPrivateSubnets(anyCollection());
         verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
@@ -67,7 +67,7 @@ public class SubnetFilterStrategyMultiplePreferPrivateTest {
                 .withPublicSubnet(AZ_C)
                 .build();
 
-        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3);
+        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, false);
 
         verify(subnetSelectorService, times(1)).collectPrivateSubnets(anyCollection());
         verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
@@ -82,7 +82,7 @@ public class SubnetFilterStrategyMultiplePreferPrivateTest {
                 .withPrivateSubnet(AZ_B)
                 .build();
 
-        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 1);
+        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 1, false);
 
         verify(subnetSelectorService, times(1)).collectPrivateSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(3));
@@ -96,7 +96,7 @@ public class SubnetFilterStrategyMultiplePreferPrivateTest {
                 .withPublicSubnet(AZ_C)
                 .build();
 
-        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 1);
+        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 1, false);
 
         verify(subnetSelectorService, times(1)).collectPrivateSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(2));
@@ -112,7 +112,7 @@ public class SubnetFilterStrategyMultiplePreferPrivateTest {
                 .withPublicSubnet(AZ_D)
                 .build();
 
-        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3);
+        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, false);
 
         verify(subnetSelectorService, times(1)).collectPrivateSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(4));

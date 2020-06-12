@@ -19,14 +19,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +43,9 @@ class SubnetIdProviderTest {
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private SubnetIdProvider underTest;
 
@@ -51,9 +56,9 @@ class SubnetIdProviderTest {
                 .withSubnetMetas(Map.of("AZ-a", new CloudSubnet()))
                 .build();
         NetworkConnector networkConnector = setupConnectorWithSelectionResult(List.of(new CloudSubnet("id", "name")));
-        Tunnel tunnel = Tunnel.DIRECT;
+        EnvironmentDto environmentDto = createEnvironmentDto(networkDto);
 
-        String provide = underTest.provide(networkDto, tunnel, CloudPlatform.AWS);
+        String provide = underTest.provide(environmentDto);
 
         assertEquals("id", provide);
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
@@ -61,12 +66,13 @@ class SubnetIdProviderTest {
         verify(networkConnector).chooseSubnets(any(), subnetSelectionParametersCaptor.capture());
         assertFalse(subnetSelectionParametersCaptor.getValue().isPreferPrivateIfExist());
         assertFalse(subnetSelectionParametersCaptor.getValue().isHa());
-        assertEquals(tunnel, subnetSelectionParametersCaptor.getValue().getTunnel());
+        assertEquals(environmentDto.getExperimentalFeatures().getTunnel(), subnetSelectionParametersCaptor.getValue().getTunnel());
     }
 
     @Test
     void testProvideShouldReturnNullWhenNetworkNull() {
-        String actual = underTest.provide(null, Tunnel.DIRECT, CloudPlatform.AWS);
+        EnvironmentDto environmentDto = createEnvironmentDto(null);
+        String actual = underTest.provide(environmentDto);
 
         Assertions.assertNull(actual);
     }
@@ -76,8 +82,9 @@ class SubnetIdProviderTest {
         NetworkDto networkDto = NetworkDto.builder()
                 .withCbSubnets(Map.of())
                 .build();
+        EnvironmentDto environmentDto = createEnvironmentDto(networkDto);
 
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+        String actual = underTest.provide(environmentDto);
 
         Assertions.assertNull(actual);
     }
@@ -94,8 +101,9 @@ class SubnetIdProviderTest {
                         "AZ-b", new CloudSubnet("id-2", "name-2")
                 ))
                 .build();
+        EnvironmentDto environmentDto = createEnvironmentDto(networkDto);
 
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+        String actual = underTest.provide(environmentDto);
 
         Assertions.assertNotNull(actual);
     }
@@ -112,8 +120,9 @@ class SubnetIdProviderTest {
                         "AZ-b", new CloudSubnet("id-2", "name-2")
                 ))
                 .build();
+        EnvironmentDto environmentDto = createEnvironmentDto(networkDto);
 
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+        String actual = underTest.provide(environmentDto);
 
         Assertions.assertNotNull(actual);
     }
@@ -136,8 +145,9 @@ class SubnetIdProviderTest {
                         "AZ-b", new CloudSubnet("id-2", "name-2")
                 ))
                 .build();
+        EnvironmentDto environmentDto = createEnvironmentDto(networkDto);
 
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+        String actual = underTest.provide(environmentDto);
 
         Assertions.assertNotNull(actual);
     }
@@ -155,8 +165,9 @@ class SubnetIdProviderTest {
                         "AZ-b", new CloudSubnet("id-2", "name-2")
                 ))
                 .build();
+        EnvironmentDto environmentDto = createEnvironmentDto(networkDto);
 
-        String actual = underTest.provide(networkDto, Tunnel.DIRECT, CloudPlatform.AWS);
+        String actual = underTest.provide(environmentDto);
 
         Assertions.assertNull(actual);
     }
@@ -185,5 +196,13 @@ class SubnetIdProviderTest {
     private void setupNotSupportedConnector() {
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
+    }
+
+    private EnvironmentDto createEnvironmentDto(NetworkDto networkDto) {
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setNetwork(networkDto);
+        environmentDto.setExperimentalFeatures(ExperimentalFeatures.builder().withTunnel(Tunnel.DIRECT).build());
+        environmentDto.setCloudPlatform("MOCK");
+        return environmentDto;
     }
 }

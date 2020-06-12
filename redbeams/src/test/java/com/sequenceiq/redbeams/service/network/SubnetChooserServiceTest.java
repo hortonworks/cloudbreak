@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.BadRequestException;
 
@@ -62,7 +61,7 @@ public class SubnetChooserServiceTest {
         dbStack.setCloudPlatform("MyCloudPlatform");
         dbStack.setPlatformVariant("MyPlatformVariant");
 
-        underTest.chooseSubnets(subnets, CloudPlatform.AWS, dbStack);
+        underTest.chooseSubnets(subnets, dbStack);
 
         ArgumentCaptor<CloudPlatformVariant> cloudPlatformVariantArgumentCaptor = ArgumentCaptor.forClass(CloudPlatformVariant.class);
         verify(cloudPlatformConnectors).get(cloudPlatformVariantArgumentCaptor.capture());
@@ -79,7 +78,7 @@ public class SubnetChooserServiceTest {
         );
         NetworkConnector networkConnector = setupConnector();
 
-        underTest.chooseSubnets(subnets, CloudPlatform.AWS, new DBStack());
+        underTest.chooseSubnets(subnets, new DBStack());
 
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
         verify(networkConnector).chooseSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
@@ -94,7 +93,7 @@ public class SubnetChooserServiceTest {
         DBStack dbStack = mock(DBStack.class);
         when(dbStack.isHa()).thenReturn(false);
 
-        underTest.chooseSubnets(subnets, CloudPlatform.AWS, dbStack);
+        underTest.chooseSubnets(subnets, dbStack);
 
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
         verify(networkConnector).chooseSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
@@ -109,7 +108,7 @@ public class SubnetChooserServiceTest {
         DBStack dbStack = mock(DBStack.class);
         when(dbStack.isHa()).thenReturn(true);
 
-        underTest.chooseSubnets(subnets, CloudPlatform.AWS, dbStack);
+        underTest.chooseSubnets(subnets, dbStack);
 
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
         verify(networkConnector).chooseSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
@@ -126,7 +125,7 @@ public class SubnetChooserServiceTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("my error message");
 
-        underTest.chooseSubnets(subnets, CloudPlatform.AWS, dbStack);
+        underTest.chooseSubnets(subnets, dbStack);
     }
 
     private NetworkConnector setupConnector() {

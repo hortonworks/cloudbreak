@@ -222,7 +222,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private Map<String, Object> getSubnetsFromEnvironment(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
             DBStack dbStack) {
         List<CloudSubnet> subnets = subnetListerService.listSubnets(environmentResponse, cloudPlatform);
-        List<String> chosenSubnetIds = subnetChooserService.chooseSubnets(subnets, cloudPlatform, dbStack).stream()
+        List<String> chosenSubnetIds = subnetChooserService.chooseSubnets(subnets, dbStack).stream()
                 .map(CloudSubnet::getId)
                 .collect(Collectors.toList());
 

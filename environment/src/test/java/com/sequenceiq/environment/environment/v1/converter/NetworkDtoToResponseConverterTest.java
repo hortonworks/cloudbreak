@@ -19,6 +19,8 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -43,11 +45,12 @@ public class NetworkDtoToResponseConverterTest {
     @Test
     void testConvertWithAwsParams() {
         NetworkDto network = createNetworkDto().withAws(createAwsParams()).build();
-        when(subnetIdProvider.provide(network, TUNNEL, network.getCloudPlatform())).thenReturn(PREFERRED_SUBNET_ID);
+        EnvironmentDto environmentDto = createEnvironmentDto(network);
+        when(subnetIdProvider.provide(environmentDto)).thenReturn(PREFERRED_SUBNET_ID);
 
-        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL);
+        EnvironmentNetworkResponse actual = underTest.convert(environmentDto);
 
-        assertCommonFields(network, actual);
+        assertCommonFields(environmentDto, actual);
         assertEquals(network.getAws().getVpcId(), actual.getAws().getVpcId());
         assertNull(actual.getAzure());
         assertNull(actual.getYarn());
@@ -57,11 +60,12 @@ public class NetworkDtoToResponseConverterTest {
     @Test
     void testConvertWithAzureParams() {
         NetworkDto network = createNetworkDto().withAzure(createAzureParams()).build();
-        when(subnetIdProvider.provide(network, TUNNEL, network.getCloudPlatform())).thenReturn(PREFERRED_SUBNET_ID);
+        EnvironmentDto environmentDto = createEnvironmentDto(network);
+        when(subnetIdProvider.provide(environmentDto)).thenReturn(PREFERRED_SUBNET_ID);
 
-        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL);
+        EnvironmentNetworkResponse actual = underTest.convert(environmentDto);
 
-        assertCommonFields(network, actual);
+        assertCommonFields(environmentDto, actual);
         assertEquals(network.getAzure().isNoPublicIp(), actual.getAzure().getNoPublicIp());
         assertEquals(network.getAzure().getNetworkId(), actual.getAzure().getNetworkId());
         assertEquals(network.getAzure().getResourceGroupName(), actual.getAzure().getResourceGroupName());
@@ -73,11 +77,12 @@ public class NetworkDtoToResponseConverterTest {
     @Test
     void testConvertWithMockParams() {
         NetworkDto network = createNetworkDto().withMock(createMockParams()).build();
-        when(subnetIdProvider.provide(network, TUNNEL, network.getCloudPlatform())).thenReturn(PREFERRED_SUBNET_ID);
+        EnvironmentDto environmentDto = createEnvironmentDto(network);
+        when(subnetIdProvider.provide(environmentDto)).thenReturn(PREFERRED_SUBNET_ID);
 
-        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL);
+        EnvironmentNetworkResponse actual = underTest.convert(environmentDto);
 
-        assertCommonFields(network, actual);
+        assertCommonFields(environmentDto, actual);
         assertEquals(network.getMock().getVpcId(), actual.getMock().getVpcId());
         assertEquals(network.getMock().getInternetGatewayId(), actual.getMock().getInternetGatewayId());
         assertNull(actual.getAws());
@@ -88,20 +93,30 @@ public class NetworkDtoToResponseConverterTest {
     @Test
     void testConvertWithYarnParams() {
         NetworkDto network = createNetworkDto().withYarn(createYarnParams()).build();
+        EnvironmentDto environmentDto = createEnvironmentDto(network);
 
-        when(subnetIdProvider.provide(network, TUNNEL, network.getCloudPlatform())).thenReturn(PREFERRED_SUBNET_ID);
+        when(subnetIdProvider.provide(environmentDto)).thenReturn(PREFERRED_SUBNET_ID);
 
-        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL);
+        EnvironmentNetworkResponse actual = underTest.convert(environmentDto);
 
-        assertCommonFields(network, actual);
+        assertCommonFields(environmentDto, actual);
         assertEquals(network.getYarn().getQueue(), actual.getYarn().getQueue());
         assertNull(actual.getAws());
         assertNull(actual.getMock());
         assertNull(actual.getAzure());
     }
 
-    private void assertCommonFields(NetworkDto network, EnvironmentNetworkResponse actual) {
-        verify(subnetIdProvider).provide(network, TUNNEL, network.getCloudPlatform());
+    private EnvironmentDto createEnvironmentDto(NetworkDto networkDto) {
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setNetwork(networkDto);
+        environmentDto.setExperimentalFeatures(ExperimentalFeatures.builder().withTunnel(TUNNEL).build());
+        environmentDto.setCloudPlatform(networkDto.getCloudPlatform().toString());
+        return environmentDto;
+    }
+
+    private void assertCommonFields(EnvironmentDto environmentDto, EnvironmentNetworkResponse actual) {
+        verify(subnetIdProvider).provide(environmentDto);
+        NetworkDto network = environmentDto.getNetwork();
         assertEquals(network.getResourceCrn(), actual.getCrn());
         assertEquals(network.getSubnetIds(), actual.getSubnetIds());
         assertEquals(network.getNetworkCidr(), actual.getNetworkCidr());

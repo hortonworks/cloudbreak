@@ -23,11 +23,11 @@ public class SubnetFilterStrategyMultiplePreferPublic implements SubnetFilterStr
     private SubnetSelectorService subnetSelectorService;
 
     @Override
-    public SubnetSelectionResult filter(Collection<CloudSubnet> subnets, int azCount) {
+    public SubnetSelectionResult filter(Collection<CloudSubnet> subnets, int azCount, boolean internalTenant) {
         List<CloudSubnet> result = subnetSelectorService.collectPublicSubnets(subnets);
-        Set<String> uniqueAzs = result.stream().map(e -> e.getAvailabilityZone()).collect(Collectors.toSet());
-        if (uniqueAzs.size() < azCount) {
-            LOGGER.info("There is not enough different AZ in the public subnets which {}, falling back to private subnets: {}",
+        Set<String> uniqueAzs = result.stream().map(CloudSubnet::getAvailabilityZone).collect(Collectors.toSet());
+        if (uniqueAzs.size() < azCount && internalTenant) {
+            LOGGER.info("There is not enough different AZ in the public subnets which {}, on internal tenant falling back to private subnets: {}",
                     uniqueAzs.size(), subnets);
             List<CloudSubnet> privateSubnets = subnetSelectorService.collectPrivateSubnets(subnets);
             for (CloudSubnet privateSubnet : privateSubnets) {

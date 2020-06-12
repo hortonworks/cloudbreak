@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
@@ -23,7 +25,13 @@ public class SubnetIdProvider {
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
-    public String provide(NetworkDto network, Tunnel tunnel, CloudPlatform cloudPlatform) {
+    @Inject
+    private EntitlementService entitlementService;
+
+    public String provide(EnvironmentDto environment) {
+        NetworkDto network = environment.getNetwork();
+        Tunnel tunnel = environment.getExperimentalFeatures().getTunnel();
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         LOGGER.debug("Choosing subnet, network: {},  platform: {}, tunnel: {}", network, cloudPlatform, tunnel);
         if (network == null || network.getSubnetIds() == null || network.getSubnetIds().isEmpty() || network.getCbSubnets() == null
                 || network.getCbSubnets().isEmpty()) {
@@ -37,9 +45,11 @@ public class SubnetIdProvider {
             LOGGER.warn("Network connector is null for '{}' cloud platform, returning null", cloudPlatform.name());
             return null;
         }
+        boolean internalTenant = entitlementService.internalTenant(environment.getCreator(), environment.getAccountId());
         SubnetSelectionParameters subnetSelectionParameters = SubnetSelectionParameters
                 .builder()
                 .withTunnel(tunnel)
+                .withIsInternalTenant(internalTenant)
                 .build();
 
         SubnetSelectionResult subnetSelectionResult = networkConnector

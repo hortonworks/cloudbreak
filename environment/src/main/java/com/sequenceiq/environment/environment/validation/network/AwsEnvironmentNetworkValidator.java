@@ -67,7 +67,7 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
     @Override
     public void validateDuringRequest(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
         if (networkDto != null && isNetworkExisting(networkDto)) {
-            LOGGER.debug("Validation - existing - AWS network param(s) during requiest time");
+            LOGGER.debug("Validation - existing - AWS network param(s) during request time");
             if (networkDto.getAws() != null) {
                 if (StringUtils.isEmpty(networkDto.getAws().getVpcId())) {
                     resultBuilder.error(missingParamErrorMessage("VPC identifier(vpcId)", getCloudPlatform().name()));

@@ -10,10 +10,13 @@ public class SubnetSelectionParameters {
 
     private final boolean preferPrivateIfExist;
 
-    private SubnetSelectionParameters(Tunnel tunnel, boolean ha, boolean preferPrivateIfExist) {
+    private final boolean internalTenant;
+
+    private SubnetSelectionParameters(Tunnel tunnel, boolean ha, boolean preferPrivateIfExist, boolean internalTenant) {
         this.tunnel = tunnel;
         this.ha = ha;
         this.preferPrivateIfExist = preferPrivateIfExist;
+        this.internalTenant = internalTenant;
     }
 
     public Tunnel getTunnel() {
@@ -28,6 +31,10 @@ public class SubnetSelectionParameters {
         return preferPrivateIfExist;
     }
 
+    public boolean isInternalTenant() {
+        return internalTenant;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -38,6 +45,8 @@ public class SubnetSelectionParameters {
         private boolean ha;
 
         private boolean preferPrivateIfExist;
+
+        private boolean internalTenant;
 
         public Builder withTunnel(Tunnel tunnel) {
             this.tunnel = tunnel;
@@ -54,8 +63,13 @@ public class SubnetSelectionParameters {
             return this;
         }
 
+        public Builder withIsInternalTenant(boolean internalTenant) {
+            this.internalTenant = internalTenant;
+            return this;
+        }
+
         public SubnetSelectionParameters build() {
-            return new SubnetSelectionParameters(tunnel, ha, preferPrivateIfExist);
+            return new SubnetSelectionParameters(tunnel, ha, preferPrivateIfExist, internalTenant);
         }
     }
 }

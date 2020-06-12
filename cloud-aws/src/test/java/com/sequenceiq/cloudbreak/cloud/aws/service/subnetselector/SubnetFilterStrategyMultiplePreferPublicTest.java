@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetB
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,14 +48,14 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
                 .withPublicSubnet(AZ_B)
                 .build();
 
-        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3);
+        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, false);
 
         verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(3));
     }
 
     @Test
-    public void testSelectHAPublicSubnetWhenMixedSubnetPresentedShouldReturnMixedSubnets() {
+    public void testSelectHAPublicSubnetWhenMixedSubnetPresentedInInternalTenantShouldReturnMixedSubnets() {
         List<CloudSubnet> subnets = new SubnetBuilder()
                 .withPrivateSubnet(AZ_A)
                 .withPrivateSubnet(AZ_B)
@@ -63,7 +64,7 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
                 .withPublicSubnet(AZ_D)
                 .build();
 
-        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3);
+        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, true);
 
         verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
         verify(subnetSelectorService, times(1)).collectPrivateSubnets(anyCollection());
@@ -71,7 +72,24 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
     }
 
     @Test
-    public void testSelectHAPublicSubnetWhenMixedSubnetPresentedShouldReturnMixedSubnetsWithNotUniquePublicAzs() {
+    public void testSelectHAPublicSubnetWhenMixedSubnetPresentedInExternalTenantShouldReturnMixedSubnets() {
+        List<CloudSubnet> subnets = new SubnetBuilder()
+                .withPrivateSubnet(AZ_A)
+                .withPrivateSubnet(AZ_B)
+                .withPrivateSubnet(AZ_B)
+                .withPublicSubnet(AZ_C)
+                .withPublicSubnet(AZ_D)
+                .build();
+
+        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, false);
+
+        verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
+        verify(subnetSelectorService, never()).collectPrivateSubnets(anyCollection());
+        assertThat(chosenSubnets.getResult(), hasSize(2));
+    }
+
+    @Test
+    public void testSelectHAPublicSubnetWhenMixedSubnetPresentedInInternalTenantShouldReturnMixedSubnetsWithNotUniquePublicAzs() {
         List<CloudSubnet> subnets = new SubnetBuilder()
                 .withPrivateSubnet(AZ_A)
                 .withPrivateSubnet(AZ_B)
@@ -81,11 +99,29 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
                 .withPublicSubnet(AZ_D)
                 .build();
 
-        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3);
+        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, true);
 
         verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
         verify(subnetSelectorService, times(1)).collectPrivateSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(4));
+    }
+
+    @Test
+    public void testSelectHAPublicSubnetWhenMixedSubnetPresentedInExternalTenantShouldReturnMixedSubnetsWithNotUniquePublicAzs() {
+        List<CloudSubnet> subnets = new SubnetBuilder()
+                .withPrivateSubnet(AZ_A)
+                .withPrivateSubnet(AZ_B)
+                .withPrivateSubnet(AZ_B)
+                .withPublicSubnet(AZ_C)
+                .withPublicSubnet(AZ_D)
+                .withPublicSubnet(AZ_D)
+                .build();
+
+        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, false);
+
+        verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
+        verify(subnetSelectorService, never()).collectPrivateSubnets(anyCollection());
+        assertThat(chosenSubnets.getResult(), hasSize(3));
     }
 
     @Test
@@ -97,7 +133,7 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
                 .withPrivateSubnet(AZ_C)
                 .build();
 
-        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 1);
+        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 1, false);
 
         verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(3));
@@ -113,7 +149,7 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
                 .withPublicSubnet(AZ_D)
                 .build();
 
-        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 1);
+        SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 1, false);
 
         verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(2));

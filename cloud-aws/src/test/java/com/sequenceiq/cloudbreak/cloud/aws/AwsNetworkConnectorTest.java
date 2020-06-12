@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -382,6 +383,24 @@ public class AwsNetworkConnectorTest {
     }
 
     @Test
+    public void testSubnetSelectionWhenResultIsEmpty() {
+        List<CloudSubnet> cloudSubnets = Lists.newArrayList();
+
+        prepareMock(cloudSubnets);
+
+        SubnetSelectionParameters subnetSelectionParameters = SubnetSelectionParameters
+                .builder()
+                .withPreferPrivateIfExist()
+                .withTunnel(Tunnel.CCM)
+                .withHa(true)
+                .build();
+
+        SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
+        Assert.assertTrue(result.hasError());
+        Assert.assertEquals("No suitable subnets were found", result.getErrorMessage());
+    }
+
+    @Test
     public void testSubnetSelectionWhenHaRequiredAnd4DifferentAZDeclaredShouldReturn3DifferentAz() {
         List<CloudSubnet> cloudSubnets = Lists.newArrayList(
                 getSubnet("a1", 1),
@@ -432,7 +451,7 @@ public class AwsNetworkConnectorTest {
         Map<SubnetFilterStrategyType, SubnetFilterStrategy> subnetFilterStrategyMap = new HashMap<>();
         subnetFilterStrategyMap.put(SubnetFilterStrategyType.MULTIPLE_PREFER_PRIVATE, subnetFilterStrategy);
         subnetFilterStrategyMap.put(SubnetFilterStrategyType.MULTIPLE_PREFER_PUBLIC, subnetFilterStrategy);
-        when(subnetFilterStrategy.filter(any(), anyInt())).thenReturn(new SubnetSelectionResult(cloudSubnets));
+        when(subnetFilterStrategy.filter(any(), anyInt(), anyBoolean())).thenReturn(new SubnetSelectionResult(cloudSubnets));
         ReflectionTestUtils.setField(underTest, "subnetFilterStrategyMap", subnetFilterStrategyMap);
     }
 
