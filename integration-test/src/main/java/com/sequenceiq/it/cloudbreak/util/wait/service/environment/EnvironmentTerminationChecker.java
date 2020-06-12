@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.util.wait.service.environment;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ARCHIVED;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.DELETE_FAILED;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 
 import org.slf4j.Logger;
@@ -34,14 +35,11 @@ public class EnvironmentTerminationChecker<T extends EnvironmentWaitObject> exte
             if (!status.equals(ARCHIVED)) {
                 return false;
             }
+        } catch (NotFoundException e) {
+            LOGGER.warn("No environment found with crn '{}'", crn, e);
         } catch (Exception e) {
-            StringBuilder builder = new StringBuilder("Environment termination failed: ")
-                    .append(System.lineSeparator())
-                    .append(e.getMessage())
-                    .append(System.lineSeparator())
-                    .append(e);
-            LOGGER.error(builder.toString());
-            throw new TestFailException(builder.toString());
+            LOGGER.error("Environment termination failed: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("Environment termination failed: %s", e.getMessage()));
         }
         return true;
     }

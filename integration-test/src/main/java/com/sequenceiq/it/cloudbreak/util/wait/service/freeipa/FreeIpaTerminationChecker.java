@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.wait.service.freeipa;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_FAILED;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 
 import org.slf4j.Logger;
@@ -31,14 +32,11 @@ public class FreeIpaTerminationChecker<T extends FreeIpaWaitObject> extends Exce
             if (!freeIpa.getStatus().isSuccessfullyDeleted()) {
                 return false;
             }
+        } catch (NotFoundException e) {
+            LOGGER.warn("No freeIpa found with crn '{}'", crn, e);
         } catch (Exception e) {
-            StringBuilder builder = new StringBuilder("FreeIpa termination failed: ")
-                    .append(System.lineSeparator())
-                    .append(e.getMessage())
-                    .append(System.lineSeparator())
-                    .append(e);
-            LOGGER.error(builder.toString());
-            throw new TestFailException(builder.toString());
+            LOGGER.error("FreeIpa termination failed: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("FreeIpa termination failed: %s", e.getMessage()));
         }
         return true;
     }
