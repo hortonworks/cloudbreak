@@ -5,6 +5,8 @@ set -e
 FQDN=$(hostname -f)
 IPADDR=$(hostname -i)
 
+ipa-server-install --unattended --uninstall
+
 ipa-replica-install \
           --server $FREEIPA_TO_REPLICATE \
           --setup-ca \
@@ -20,6 +22,7 @@ ipa-replica-install \
           --mkhomedir \
           --ip-address $IPADDR \
           --auto-forwarders \
+          --force-join \
 {%- if not salt['pillar.get']('freeipa:dnssecValidationEnabled') %}
           --no-dnssec-validation \
 {%- endif %}
