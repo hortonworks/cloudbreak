@@ -138,7 +138,7 @@ public class CleanupWaitUtil {
         try {
             Thread.sleep(pollingInterval);
         } catch (InterruptedException e) {
-            LOG.warn("Exception has been occured during wait: ", e);
+            LOG.warn("Exception has been occurred during wait: {}", e.getMessage(), e);
         }
     }
 
@@ -154,11 +154,16 @@ public class CleanupWaitUtil {
      * @return              TRUE or FALSE based on distroxes availability
      */
     private boolean checkDistroxesAreAvailable(CloudbreakClient cloudbreak, Map<String, String> environments) {
-        return environments.entrySet().stream().anyMatch(env ->
-                !cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
-                        .map(StackViewV4Response::getName)
-                        .collect(Collectors.toList()).isEmpty()
-        );
+        try {
+            return environments.entrySet().stream().anyMatch(env ->
+                    !cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
+                            .map(StackViewV4Response::getName)
+                            .collect(Collectors.toList()).isEmpty()
+            );
+        } catch (Exception e) {
+            LOG.warn("Exception has been occurred during check distroxes: {}", e.getMessage(), e);
+            return false;
+        }
     }
 
     /**
@@ -173,11 +178,16 @@ public class CleanupWaitUtil {
      * @return              TRUE or FALSE based on sdxes availability
      */
     private boolean checkSdxesAreAvailable(SdxClient sdx, Map<String, String> environments) {
-        return environments.entrySet().stream().anyMatch(env ->
-                !sdx.sdxEndpoint().list(env.getValue()).stream()
-                        .map(SdxClusterResponse::getName)
-                        .collect(Collectors.toList()).isEmpty()
-        );
+        try {
+            return environments.entrySet().stream().anyMatch(env ->
+                    !sdx.sdxEndpoint().list(env.getValue()).stream()
+                            .map(SdxClusterResponse::getName)
+                            .collect(Collectors.toList()).isEmpty()
+            );
+        } catch (Exception e) {
+            LOG.warn("Exception has been occurred during check sdxes: {}", e.getMessage(), e);
+            return false;
+        }
     }
 
     /**
@@ -191,9 +201,14 @@ public class CleanupWaitUtil {
      * @return              TRUE or FALSE based on environments availability
      */
     private boolean checkEnvironmentsAreAvailable(EnvironmentClient environment) {
-        return !environment.environmentV1Endpoint().list().getResponses().stream()
-                .map(EnvironmentBaseResponse::getName)
-                .collect(Collectors.toList()).isEmpty();
+        try {
+            return !environment.environmentV1Endpoint().list().getResponses().stream()
+                    .map(EnvironmentBaseResponse::getName)
+                    .collect(Collectors.toList()).isEmpty();
+        } catch (Exception e) {
+            LOG.warn("Exception has been occurred during check environments: {}", e.getMessage(), e);
+            return false;
+        }
     }
 
     /**
