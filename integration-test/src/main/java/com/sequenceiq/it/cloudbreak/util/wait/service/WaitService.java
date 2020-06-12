@@ -25,7 +25,7 @@ public class WaitService<T> {
         int attempts = 0;
         int failures = 0;
         Exception actual = null;
-        boolean exit = statusChecker.exitWaiting(t);
+        boolean exit = false;
         long startTime = System.currentTimeMillis();
         while (!timeout && !exit) {
             LOGGER.info("Waiting round {} and elapsed time {} ms", attempts, System.currentTimeMillis() - startTime);
