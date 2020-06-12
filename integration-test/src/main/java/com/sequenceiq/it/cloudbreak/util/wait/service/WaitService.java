@@ -19,7 +19,7 @@ public class WaitService<T> {
         int attempts = 0;
         int failures = 0;
         Exception actual = null;
-        boolean exit = statusChecker.exitWaiting(t);
+        boolean exit = false;
         while (!timeout && !exit) {
             LOGGER.debug("Waiting round {}.", attempts);
             try {
