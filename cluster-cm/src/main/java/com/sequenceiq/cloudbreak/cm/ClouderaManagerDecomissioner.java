@@ -156,7 +156,7 @@ public class ClouderaManagerDecomissioner {
     }
 
     public Map<String, InstanceMetaData> collectHostsToRemove(Stack stack, HostGroup hostGroup, Set<String> hostNames, ApiClient client) {
-        Set<InstanceMetaData> hostsInHostGroup = hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet();
+        Set<InstanceMetaData> hostsInHostGroup = hostGroup.getInstanceGroup().getInstanceMetaDataSet();
         Map<String, InstanceMetaData> hostsToRemove = hostsInHostGroup.stream()
                 .filter(hostMetadata -> hostNames.contains(hostMetadata.getDiscoveryFQDN()))
                 .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, hostMetadata -> hostMetadata));
