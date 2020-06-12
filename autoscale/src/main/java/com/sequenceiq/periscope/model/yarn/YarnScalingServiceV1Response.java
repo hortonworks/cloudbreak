@@ -13,8 +13,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class YarnScalingServiceV1Response {
 
-    private static final String YARN_RESPONSE_NM_CANDIDATES_KEY = "newNMCandidates";
-
     private static final String YARN_RESPONSE_DECOMMISSION_CANDIDATES_KEY = "candidates";
 
     private String apiVersion;
@@ -24,7 +22,7 @@ public class YarnScalingServiceV1Response {
     @JsonIgnore
     private Map<String, List<HostGroupInstanceType>> nodeInstanceTypeList;
 
-    private Map<String, NewNodeManagerCandidates> newNMCandidates;
+    private NewNodeManagerCandidates newNMCandidates;
 
     private Map<String, List<DecommissionCandidate>> decommissionCandidates;
 
@@ -44,11 +42,11 @@ public class YarnScalingServiceV1Response {
         this.consideredResourceTypes = consideredResourceTypes;
     }
 
-    public Map<String, NewNodeManagerCandidates> getNewNMCandidates() {
-        return newNMCandidates == null ? Map.of() : newNMCandidates;
+    public NewNodeManagerCandidates getNewNMCandidates() {
+        return newNMCandidates;
     }
 
-    public void setNewNMCandidates(Map<String, NewNodeManagerCandidates> newNMCandidates) {
+    public void setNewNMCandidates(NewNodeManagerCandidates newNMCandidates) {
         this.newNMCandidates = newNMCandidates;
     }
 
@@ -69,7 +67,7 @@ public class YarnScalingServiceV1Response {
     }
 
     public Optional<NewNodeManagerCandidates> getScaleUpCandidates() {
-        return Optional.ofNullable(getNewNMCandidates().get(YARN_RESPONSE_NM_CANDIDATES_KEY));
+        return Optional.ofNullable(getNewNMCandidates());
     }
 
     public Optional<List<DecommissionCandidate>> getScaleDownCandidates() {
@@ -85,6 +83,7 @@ public class YarnScalingServiceV1Response {
                 '}';
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class DecommissionCandidate {
 
         private Integer amCount;
@@ -149,6 +148,7 @@ public class YarnScalingServiceV1Response {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class NewNodeManagerCandidates {
 
         private List<Candidate> candidates = new ArrayList<>(1);
