@@ -93,15 +93,14 @@ public class IntegrationTestApp implements CommandLineRunner {
             ConfigurableApplicationContext context = springApp.run(args);
             LOG.info("Closing Spring test context.");
             context.close();
-            LOG.info("test successfully run");
+            LOG.info("Tests have been done successfully: {} milliseconds", System.currentTimeMillis() - start);
+            System.exit(0);
         } catch (Exception e) {
-            LOG.error("Something went wrong during closing Spring Context.");
+            LOG.error("Exception occurred during closing Spring Context: {}", e.getMessage(), e);
             Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-            threadSet.stream().forEach(t -> LOG.info("Runnning threads: {}", t.getName()));
+            threadSet.stream().forEach(t -> LOG.info("Running threads: {}", t.getName()));
             System.exit(1);
         }
-        LOG.info("run successfully: {}", System.currentTimeMillis() - start);
-        System.exit(0);
     }
 
     @Override
