@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.service.UmsRightProvider;
-import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckRightV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RenewCertificateV4Request;
@@ -32,6 +30,7 @@ import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
+import com.sequenceiq.cloudbreak.service.authorization.UtilAuthorizationService;
 import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
@@ -69,13 +68,10 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     private NotificationSender notificationSender;
 
     @Inject
-    private UmsAccountAuthorizationService umsAccountAuthorizationService;
-
-    @Inject
     private StackOperationService stackOperationService;
 
     @Inject
-    private UmsRightProvider umsRightProvider;
+    private UtilAuthorizationService utilAuthorizationService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -128,10 +124,8 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Override
     public CheckRightV4Response checkRight(CheckRightV4Request checkRightV4Request) {
-        String userCrn = restRequestThreadLocalService.getCloudbreakUser().getUserCrn();
         return new CheckRightV4Response(checkRightV4Request.getRights().stream()
-                .map(rightReq -> new CheckRightV4SingleResponse(rightReq, umsAccountAuthorizationService.hasRightOfUser(userCrn,
-                        umsRightProvider.getRight(rightReq.getAction()))))
+                .map(rightReq -> new CheckRightV4SingleResponse(rightReq, utilAuthorizationService.getRightResult(rightReq)))
                 .collect(Collectors.toList()));
     }
 
@@ -140,4 +134,5 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
         stackOperationService.renewCertificate(renewCertificateV4Request.getStackName());
         return Response.ok().build();
     }
+
 }
