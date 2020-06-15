@@ -82,7 +82,7 @@ services:
     volumes:
       - ./apidefinitions:/json
     command: bash -c "for f in /json/cb*.json ; do echo check to $${f} ; swagger-diff -i $${f} /json/cb.json ; done;"
-    image: afarsang/docker-swagger-diff
+    image: docker-private.infra.cloudera.com/cloudera_thirdparty/swagger/swagger-diff:1.0.0
   swagger-validation:
     networks:
       cbreak_default: {}
