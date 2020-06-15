@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
+import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -95,6 +96,9 @@ public class StackOperations implements ResourceBasedCrnProvider {
 
     @Inject
     private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
+
+    @Inject
+    private DatabaseBackupRestoreService databaseBackupRestoreService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -313,6 +317,18 @@ public class StackOperations implements ResourceBasedCrnProvider {
 
     public List<RetryableFlow> getRetryableFlows(String name, Long workspaceId) {
         return stackCommonService.getRetryableFlows(name, workspaceId);
+    }
+
+    public FlowIdentifier backupClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location, String backupId) {
+        databaseBackupRestoreService.validate(workspaceId, nameOrCrn, location, backupId);
+        LOGGER.debug("Starting cluster database backup: " + nameOrCrn);
+        return databaseBackupRestoreService.backupDatabase(workspaceId, nameOrCrn, location, backupId);
+    }
+
+    public FlowIdentifier restoreClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location, String backupId) {
+        databaseBackupRestoreService.validate(workspaceId, nameOrCrn, location, backupId);
+        LOGGER.debug("Starting cluster database restore: " + nameOrCrn);
+        return databaseBackupRestoreService.restoreDatabase(workspaceId, nameOrCrn, location, backupId);
     }
 
     @Override

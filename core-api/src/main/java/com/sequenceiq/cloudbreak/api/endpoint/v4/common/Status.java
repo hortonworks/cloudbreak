@@ -12,11 +12,7 @@ public enum Status {
     AVAILABLE(StatusKind.FINAL),
     UPDATE_IN_PROGRESS(StatusKind.PROGRESS),
     UPDATE_REQUESTED(StatusKind.PROGRESS),
-    BACKUP_IN_PROGRESS(StatusKind.PROGRESS),
-    RESTORE_IN_PROGRESS(StatusKind.PROGRESS),
     UPDATE_FAILED(StatusKind.FINAL),
-    BACKUP_FAILED(StatusKind.FINAL),
-    RESTORE_FAILED(StatusKind.FINAL),
     CREATE_FAILED(StatusKind.FINAL),
     ENABLE_SECURITY_FAILED(StatusKind.FINAL),
     PRE_DELETE_IN_PROGRESS(StatusKind.PROGRESS),
@@ -38,7 +34,11 @@ public enum Status {
     EXTERNAL_DATABASE_CREATION_FAILED(StatusKind.FINAL),
     EXTERNAL_DATABASE_DELETION_IN_PROGRESS(StatusKind.PROGRESS),
     EXTERNAL_DATABASE_DELETION_FINISHED(StatusKind.PROGRESS),
-    EXTERNAL_DATABASE_DELETION_FAILED(StatusKind.FINAL);
+    EXTERNAL_DATABASE_DELETION_FAILED(StatusKind.FINAL),
+    BACKUP_IN_PROGRESS(StatusKind.PROGRESS),
+    BACKUP_FAILED(StatusKind.FINAL),
+    RESTORE_IN_PROGRESS(StatusKind.PROGRESS),
+    RESTORE_FAILED(StatusKind.FINAL);
 
     private StatusKind statusKind;
 
@@ -97,6 +97,10 @@ public enum Status {
                 return START_FAILED;
             case STOP_IN_PROGRESS:
                 return STOP_FAILED;
+            case BACKUP_IN_PROGRESS:
+                return BACKUP_FAILED;
+            case RESTORE_IN_PROGRESS:
+                return RESTORE_FAILED;
             default:
                 return this;
         }

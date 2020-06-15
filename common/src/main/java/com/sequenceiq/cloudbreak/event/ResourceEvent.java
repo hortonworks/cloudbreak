@@ -287,7 +287,16 @@ public enum ResourceEvent {
     MAINTENANCE_MODE_VALIDATION_FINISHED_NO_WARNINGS("maintenance.mode.validation.finished.nowarn"),
     MAINTENANCE_MODE_VALIDATION_FAILED("maintenance.mode.validation.failed"),
 
-    COMMON_BAD_REQUEST_NOTIFICATION_PATTERN("common.bad.request.notification.pattern");
+    COMMON_BAD_REQUEST_NOTIFICATION_PATTERN("common.bad.request.notification.pattern"),
+
+    DATALAKE_DATABASE_BACKUP("datalake.database.backup"),
+    DATALAKE_DATABASE_BACKUP_FINISHED("datalake.database.backup.finished"),
+    DATALAKE_DATABASE_BACKUP_FAILED("datalake.database.backup.failed"),
+    DATALAKE_DATABASE_BACKUP_COULD_NOT_START("datalake.database.backup.could.not.start"),
+    DATALAKE_DATABASE_RESTORE("datalake.database.restore"),
+    DATALAKE_DATABASE_RESTORE_FINISHED("datalake.database.restore.finished"),
+    DATALAKE_DATABASE_RESTORE_FAILED("datalake.database.restore.failed"),
+    DATALAKE_DATABASE_RESTORE_COULD_NOT_START("datalake.database.restore.could.not.start");
 
     private final String message;
 

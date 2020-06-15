@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrenew.ClusterCertificateRenewEvent.CLUSTER_CERTIFICATE_REISSUE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.backup.DatabaseBackupEvent.DATABASE_BACKUP_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.restore.DatabaseRestoreEvent.DATABASE_RESTORE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
@@ -35,6 +37,8 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTrigge
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatalakeClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
@@ -263,4 +267,15 @@ public class ReactorFlowManager {
         String selector = SALT_UPDATE_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
+
+    public FlowIdentifier triggerDatalakeDatabaseBackup(Long stackId, String location, String backupId) {
+        String selector = DATABASE_BACKUP_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new DatabaseBackupTriggerEvent(selector, stackId, location, backupId));
+    }
+
+    public FlowIdentifier triggerDatalakeDatabaseRestore(Long stackId, String location, String backupId) {
+        String selector = DATABASE_RESTORE_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new DatabaseRestoreTriggerEvent(selector, stackId, location, backupId));
+    }
+
 }
