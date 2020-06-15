@@ -37,13 +37,11 @@ public class EnvironmentTerminationChecker<T extends EnvironmentWaitObject> exte
             if (!status.equals(ARCHIVED)) {
                 return false;
             }
+        } catch (NotFoundException e) {
+            LOGGER.warn("No environment found with crn '{}'", crn, e);
         } catch (Exception e) {
-            if (e instanceof NotFoundException) {
-                LOGGER.warn("No environment found with crn '{}'", crn, e);
-            } else {
-                LOGGER.error("Environment termination failed: {}", e.getMessage(), e);
-                throw new TestFailException(String.format("Environment termination failed: %s", e.getMessage()));
-            }
+            LOGGER.error("Environment termination failed: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("Environment termination failed: %s", e.getMessage()));
         }
         return true;
     }

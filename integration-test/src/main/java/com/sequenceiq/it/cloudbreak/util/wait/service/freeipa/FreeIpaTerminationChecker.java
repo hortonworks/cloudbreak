@@ -35,13 +35,11 @@ public class FreeIpaTerminationChecker<T extends FreeIpaWaitObject> extends Exce
             if (!freeIpa.getStatus().isSuccessfullyDeleted()) {
                 return false;
             }
+        } catch (NotFoundException e) {
+            LOGGER.warn("No freeIpa found with crn '{}'", crn, e);
         } catch (Exception e) {
-            if (e instanceof NotFoundException) {
-                LOGGER.warn("No freeIpa found with crn '{}'", crn, e);
-            } else {
-                LOGGER.error("FreeIpa termination failed: {}", e.getMessage(), e);
-                throw new TestFailException(String.format("FreeIpa termination failed: %s", e.getMessage()));
-            }
+            LOGGER.error("FreeIpa termination failed: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("FreeIpa termination failed: %s", e.getMessage()));
         }
         return true;
     }
