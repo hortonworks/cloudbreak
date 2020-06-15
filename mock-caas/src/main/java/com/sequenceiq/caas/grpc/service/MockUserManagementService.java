@@ -186,6 +186,10 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String RUNTIME_UPGRADE = "CDP_RUNTIME_UPGRADE";
 
+    private static final String DATAHUB_AWS_AUTOSCALING = "DATAHUB_AWS_AUTOSCALING";
+
+    private static final String DATAHUB_AZURE_AUTOSCALING = "DATAHUB_AZURE_AUTOSCALING";
+
     private static final String MOCK_RESOURCE = "mock_resource";
 
     private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
@@ -496,6 +500,8 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_AZURE))
                                 .addEntitlements(createEntitlement(CDP_AUTOMATIC_USERSYNC_POLLER))
                                 .addEntitlements(createEntitlement(CLOUDERA_INTERNAL_ACCOUNT))
+                                .addEntitlements(createEntitlement(DATAHUB_AZURE_AUTOSCALING))
+                                .addEntitlements(createEntitlement(DATAHUB_AWS_AUTOSCALING))
                                 .addEntitlements(createEntitlement(LOCAL_DEV))
                                 .setPasswordPolicy(workloadPasswordPolicy)
                                 .build())
