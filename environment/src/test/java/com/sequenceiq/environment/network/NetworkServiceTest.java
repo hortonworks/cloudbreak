@@ -9,14 +9,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -177,8 +180,36 @@ public class NetworkServiceTest {
                 .thenReturn(new ValidationResult.ValidationResultBuilder());
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.validateAndReplaceSubnets(baseNetwork, environmentEditDto, environment));
+                () -> underTest.validate(baseNetwork, environmentEditDto, environment));
         Assertions.assertEquals("Subnet could not be attached to this environment, because it is newly created by Cloudbreak. " +
                 "You need to re-install the the environment into an existing VPC", exception.getMessage());
+    }
+
+    @Test
+    public void testRefreshMetadataFromCloudProviderWhenVpcHasMultipleCidrs() {
+        String primaryCidr = "10.0.0.0/16";
+        String secondaryCidr = "10.2.0.0/16";
+        AwsNetwork baseNetwork = new AwsNetwork();
+        baseNetwork.setSubnetMetas(Collections.emptyMap());
+        baseNetwork.setRegistrationType(RegistrationType.CREATE_NEW);
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AWS");
+        environment.setNetwork(baseNetwork);
+        NetworkDto networkDto = NetworkDto.builder().withRegistrationType(RegistrationType.CREATE_NEW).build();
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder().withNetwork(networkDto).build();
+        Network network = new Network(new Subnet(primaryCidr));
+        NetworkCidr networkCidr = new NetworkCidr(primaryCidr, List.of(primaryCidr, secondaryCidr));
+
+        when(environmentNetworkConverterMap.get(CloudPlatform.AWS)).thenReturn(environmentNetworkConverter);
+        when(environmentNetworkConverter.convertToDto(baseNetwork)).thenReturn(networkDto);
+        when(environmentNetworkConverter.convertToNetwork(baseNetwork)).thenReturn(network);
+        when(environmentNetworkService.getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential())).thenReturn(networkCidr);
+
+        BaseNetwork actualNetwork = underTest.refreshMetadataFromCloudProvider(baseNetwork, environmentEditDto, environment);
+
+        verify(cloudNetworkService, times(1)).retrieveSubnetMetadata(eq(environment), any(NetworkDto.class));
+        verify(environmentNetworkService, times(1)).getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential());
+        Assertions.assertEquals(primaryCidr, actualNetwork.getNetworkCidr());
+        Assertions.assertEquals(StringUtils.join(networkCidr.getCidrs(), ","), actualNetwork.getNetworkCidrs());
     }
 }
