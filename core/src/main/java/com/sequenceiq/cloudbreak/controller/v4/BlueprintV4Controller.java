@@ -15,6 +15,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
@@ -63,7 +64,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
     public BlueprintV4Response getByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
         Blueprint blueprint = blueprintService.getByWorkspace(NameOrCrn.ofCrn(crn), workspaceId);
         return converterUtil.convert(blueprint, BlueprintV4Response.class);
@@ -81,7 +82,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_CLUSTER_TEMPLATE)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_CLUSTER_TEMPLATE)
     public BlueprintV4Response deleteByName(Long workspaceId, @NotNull @ResourceName String name) {
         Blueprint deleted = blueprintService.deleteByWorkspace(NameOrCrn.ofName(name), workspaceId);
         notify(ResourceEvent.BLUEPRINT_DELETED);
@@ -120,7 +121,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
+    @DisableCheckPermissions
     public CreateClusterTemplateRequest getCreateClusterTemplateRequestForCli(Long workspaceId, BlueprintV4Request blueprintV4Request) {
         return converterUtil.convert(blueprintV4Request, CreateClusterTemplateRequest.class);
     }
