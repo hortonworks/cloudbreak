@@ -12,8 +12,8 @@ public class VersionPrefix {
         String[] vals1 = o1.getVersion().split("[\\.\\-]");
         String[] vals2 = o2.getVersion().split("[\\.\\-]");
 
-        // At least both of the should be long enough to compare
-        if (vals1.length <= digits || vals2.length <= digits) {
+        // At least both of the value arrays should be long enough to compare
+        if (vals1.length < digits || vals2.length < digits) {
             return false;
         }
 
@@ -22,7 +22,6 @@ public class VersionPrefix {
                 return false;
             }
         }
-
         return true;
     }
 }

@@ -104,6 +104,12 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
         this.stack = stack;
     }
 
+    public InstanceGroup replaceInstanceMetadata(Set<InstanceMetaData> instanceMetaData) {
+        this.instanceMetaData.clear();
+        Optional.ofNullable(instanceMetaData).ifPresent(this.instanceMetaData::addAll);
+        return this;
+    }
+
     public Set<InstanceMetaData> getNotTerminatedInstanceMetaDataSet() {
         return instanceMetaData.stream()
                 .filter(metaData -> !metaData.isTerminated())

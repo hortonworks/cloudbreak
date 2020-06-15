@@ -99,11 +99,9 @@
                 "name": "[variables('${group.compressedName}AsName')]",
                 "apiVersion": "2018-04-01",
                 "location": "[resourceGroup().location]",
-                <#if group.managedDisk == true>
                 "sku": {
                     "name": "Aligned"
                 },
-                </#if>
                 "properties": {
                     "platformFaultDomainCount": "[variables('${group.compressedName}AsFaultDomainCount')]",
                     "platformUpdateDomainCount": "[variables('${group.compressedName}AsUpdateDomainCount')]"

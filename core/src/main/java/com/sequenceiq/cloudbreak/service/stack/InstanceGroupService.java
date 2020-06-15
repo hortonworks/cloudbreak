@@ -36,7 +36,13 @@ public class InstanceGroupService {
     }
 
     public Set<InstanceGroup> findNotTerminatedByStackId(Long stackId) {
-        return repository.findNotTerminatedByStackId(stackId);
+        Set<InstanceGroup> instanceGroups = repository.findByStackId(stackId);
+        instanceGroups.forEach(
+                ig -> {
+                    ig.replaceInstanceMetadata(ig.getNotTerminatedInstanceMetaDataSet());
+                }
+        );
+        return instanceGroups;
     }
 
     public Set<InstanceGroup> saveAll(Set<InstanceGroup> instanceGroups, Workspace workspace) {
