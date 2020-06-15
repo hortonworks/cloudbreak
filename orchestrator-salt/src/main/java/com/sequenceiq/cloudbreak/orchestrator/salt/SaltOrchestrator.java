@@ -97,6 +97,10 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final String FREEIPA_REPLICA_ROLE = "freeipa_replica";
 
+    private static final String DATABASE_BACKUP = "postgresql.disaster_recovery.backup";
+
+    private static final String DATABASE_RESTORE = "postgresql.disaster_recovery.restore";
+
     private static final String DISK_INITIALIZE = "format-and-mount-initialize.sh";
 
     private static final String DISK_COMMON = "format-and-mount-common.sh";
@@ -931,6 +935,37 @@ public class SaltOrchestrator implements HostOrchestrator {
     public Map<String, String> getMembers(GatewayConfig gatewayConfig, List<String> privateIps) throws CloudbreakOrchestratorException {
         try (SaltConnector saltConnector = createSaltConnector(gatewayConfig)) {
             return saltConnector.members(privateIps);
+        }
+    }
+
+    @Override
+    public void backupDatabase(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+        callBackupRestore(primaryGateway, target, allNodes, saltConfig, exitModel, DATABASE_BACKUP);
+    }
+
+    @Override
+    public void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
+                                ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+        callBackupRestore(primaryGateway, target, allNodes, saltConfig, exitModel, DATABASE_RESTORE);
+    }
+
+    private void callBackupRestore(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
+            ExitCriteriaModel exitModel, String state) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = createSaltConnector(primaryGateway)) {
+            for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
+                OrchestratorBootstrap pillarSave = new PillarSave(sc, Sets.newHashSet(primaryGateway.getPrivateAddress()), propertiesEntry.getValue());
+                Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel, maxRetry, true);
+                saltPillarRunner.call();
+            }
+
+            StateRunner stateRunner = new StateRunner(target, allNodes, state);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, maxRetry, true);
+            saltJobRunBootstrapRunner.call();
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during database backup/restore", e);
+            throw new CloudbreakOrchestratorFailedException(e);
         }
     }
 

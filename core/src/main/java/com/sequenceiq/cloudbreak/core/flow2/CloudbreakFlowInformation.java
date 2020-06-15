@@ -10,6 +10,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.cluster.certrenew.ClusterCertificateRenewFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.backup.DatabaseBackupFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.restore.DatabaseRestoreFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayFlowConfig;
@@ -61,7 +63,7 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
             ClusterStartFlowConfig.class, ClusterStopFlowConfig.class,
             ClusterUpscaleFlowConfig.class, ClusterDownscaleFlowConfig.class,
             ClusterUpgradeFlowConfig.class, ClusterResetFlowConfig.class, ChangePrimaryGatewayFlowConfig.class,
-            ClusterCertificateRenewFlowConfig.class
+            ClusterCertificateRenewFlowConfig.class, DatabaseBackupFlowConfig.class, DatabaseRestoreFlowConfig.class
     );
 
     @Inject

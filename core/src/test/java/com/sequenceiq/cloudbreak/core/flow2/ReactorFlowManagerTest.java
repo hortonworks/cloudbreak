@@ -122,6 +122,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerClusterCertificationRenewal(STACK_ID);
         underTest.triggerDatalakeClusterUpgrade(STACK_ID, null);
         underTest.triggerSaltUpdate(STACK_ID);
+        underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null);
+        underTest.triggerDatalakeDatabaseRestore(STACK_ID, null, null);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

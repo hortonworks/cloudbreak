@@ -101,4 +101,10 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     Map<String, Map<String, String>> formatAndMountDisksOnNodesLegacy(List<GatewayConfig> gatewayConfigs, Set<Node> nodes, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel, String platformVariant) throws CloudbreakOrchestratorFailedException;
+
+    void backupDatabase(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
+
+    void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
+                        ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
 }
