@@ -217,6 +217,10 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return repository.findByResourceCrn(resourceCrn);
     }
 
+    public Optional<DatabaseServerConfig> getByClusterCrn(String clusterCrn) {
+        return repository.findByClusterCrn(clusterCrn);
+    }
+
     public DatabaseServerConfig deleteByCrn(String crn) {
         DatabaseServerConfig resource = getByCrn(crn);
         if (resource.getResourceStatus() == ResourceStatus.SERVICE_MANAGED) {
