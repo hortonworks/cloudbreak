@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.freeipa;
 
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_FAILED;
 
 import java.util.Map;
