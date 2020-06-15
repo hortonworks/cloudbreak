@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
-import static com.sequenceiq.cloudbreak.cloud.PrefixMatchLength.MAINTENANCE;
-import static com.sequenceiq.cloudbreak.cloud.PrefixMatchLength.MINOR;
+import static com.sequenceiq.cloudbreak.cloud.PrefixMatchLength.MAJOR;
 
 import org.springframework.stereotype.Service;
 
@@ -15,7 +14,7 @@ public class UpgradePermissionProvider {
         boolean result = false;
         if (currentVersion != null && newVersion != null) {
             VersionPrefix prefixMatcher = new VersionPrefix();
-            if (prefixMatcher.prefixMatch(() -> currentVersion, () -> newVersion, MINOR)) {
+            if (prefixMatcher.prefixMatch(() -> currentVersion, () -> newVersion, MAJOR)) {
                 VersionComparator comparator = new VersionComparator();
                 result = comparator.compare(() -> currentVersion, () -> newVersion) < 0;
             }
@@ -27,7 +26,7 @@ public class UpgradePermissionProvider {
         boolean result = false;
         if (currentVersion != null && newVersion != null) {
             VersionPrefix prefixMatcher = new VersionPrefix();
-            result = prefixMatcher.prefixMatch(() -> currentVersion, () -> newVersion, MAINTENANCE);
+            result = prefixMatcher.prefixMatch(() -> currentVersion, () -> newVersion, MAJOR);
         }
         return result;
     }
@@ -39,7 +38,7 @@ public class UpgradePermissionProvider {
             result = true;
         } else if (newVersion != null) {
             VersionPrefix prefixMatcher = new VersionPrefix();
-            if (prefixMatcher.prefixMatch(() -> currentVersion, () -> newVersion, MINOR)) {
+            if (prefixMatcher.prefixMatch(() -> currentVersion, () -> newVersion, MAJOR)) {
                 VersionComparator comparator = new VersionComparator();
                 // even if there is no new extension version we shall alow to upgrade to this image
                 result = comparator.compare(() -> currentVersion, () -> newVersion) <= 0;
