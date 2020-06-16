@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+set -ex
+
+USER_JSON_LOCATION="./src/main/resources/ums-users/api-credentials.json"
+
 if [[ -z $AZURE_CLIENT_ID ]]; then
   echo "Variable AZURE_CLIENT_ID not set, using az login."
   az login
@@ -9,5 +13,10 @@ fi
 
 mkdir -p ./src/main/resources/ums-users
 
-az keyvault secret show --name "real-ums-users-dev" --vault-name "jenkins-secret" --query 'value' -o tsv | jq >> ./src/main/resources/ums-users/api-credentials.json
+echo "Executing secret fetching from Azure 'jenkins-secret' store"
+az keyvault secret show --name "real-ums-users-dev" --vault-name "jenkins-secret" --query 'value' -o tsv | jq > $USER_JSON_LOCATION
+
+echo "Checking if valid json file was fetched: $USER_JSON_LOCATION"
+cat $USER_JSON_LOCATION | jq type
+
 

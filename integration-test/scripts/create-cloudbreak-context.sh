@@ -16,4 +16,3 @@ if [[ "$AWS" == true ]]; then
     echo "export AWS_SECRET_ACCESS_KEY=${INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY}" >> integcb/Profile
     echo "export CB_AWS_ACCOUNT_ID=${INTEGRATIONTEST_AWS_ACCOUNTID}" >> integcb/Profile
 fi
-cd $INTEGCB_LOCATION

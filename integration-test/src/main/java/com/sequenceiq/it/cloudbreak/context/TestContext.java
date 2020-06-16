@@ -60,8 +60,6 @@ import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
 import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
-import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeInternalAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeWaitObject;
@@ -69,6 +67,8 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentAwa
 import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsAwait;
+import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsWaitObject;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public abstract class TestContext implements ApplicationContextAware {
@@ -756,15 +756,15 @@ public abstract class TestContext implements ApplicationContextAware {
         checkShutdown();
         Map<String, Exception> exceptionsDuringTest = getErrors();
         if (!exceptionsDuringTest.isEmpty()) {
-            StringBuilder builder = new StringBuilder("All Exceptions that occurred during the test are logged before this message")
+            StringBuilder builder = new StringBuilder("All Exceptions that occurred during the test are logged after this message")
                     .append(System.lineSeparator());
             exceptionsDuringTest.forEach((msg, ex) -> {
-                LOGGER.error(msg, ex);
+                LOGGER.error("Exception during test: " + msg, ex);
                 builder.append(msg).append(": ").append(ResponseUtil.getErrorMessage(ex)).append(System.lineSeparator());
             });
             collectStructuredEvents(builder);
             exceptionsDuringTest.clear();
-            testErrorLog.report(LOGGER, builder.toString());
+            testErrorLog.report(LOGGER, builder.toString().replace("%", "%%"));
         }
     }
 

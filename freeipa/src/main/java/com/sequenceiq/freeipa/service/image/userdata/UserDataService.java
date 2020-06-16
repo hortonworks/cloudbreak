@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
@@ -91,8 +89,7 @@ public class UserDataService {
         try {
             PlatformParameters platformParameters = platformParametersFuture.get();
             CcmParameters ccmParameters = fetchCcmParameters(stack);
-            Optional<ProxyConfig> proxyConfig = ThreadBasedUserCrnProvider.doAs(GrpcUmsClient.INTERNAL_ACTOR_CRN,
-                    () -> proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
+            Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             String userData = userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()), cbSshKeyDer, sshUser, platformParameters,
                     saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
             imageService.decorateImageWithUserDataForStack(stack, userData);

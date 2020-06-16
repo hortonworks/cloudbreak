@@ -118,14 +118,17 @@ if [[ "$CIRCLECI" ]]; then
         mkdir ./test-output/docker_stats
         docker stats --no-stream --format "{{ .NetIO }}" cbreak_commondb_1 > ./test-output/docker_stats/pg_stat_network_io.result;
 
-        docker_stats_res=$(docker stats --no-stream --format "table {{ .Name }}\t{{ .Container }}\t{{ .MemUsage }}\t{{ .MemPerc }}\t{{ .CPUPerc }}\t{{ .NetIO }}\t{{ .BlockIO }}");
+        docker stats --no-stream --format "table {{ .Name }}\t{{ .Container }}\t{{ .MemUsage }}\t{{ .MemPerc }}\t{{ .CPUPerc }}\t{{ .NetIO }}\t{{ .BlockIO }}" > ./test-output/docker_stats/docker_stat.html
         docker exec cbreak_commondb_1 psql -U postgres --pset=pager=off -d cbdb -c "CREATE EXTENSION pg_stat_statements;";
-        cb_pg_stat=$(docker exec cbreak_commondb_1 psql -U postgres --pset=pager=off -d cbdb -c "select * from pg_stat_statements;" --html);
+        docker exec cbreak_commondb_1 psql -U postgres --pset=pager=off -d cbdb -c "select * from pg_stat_statements;" --html > ./test-output/docker_stats/query_stat.html
 
-        pg_stat_template=$(cat ./src/main/resources/pg_stats/pg_query_stat_template.html)
-        pg_stat_result=$(echo "${pg_stat_template/DOCKER_STAT_RESULT/$docker_stats_res}")
-        cbdb_stat_result=$(echo "${pg_stat_result/CB_PG_STAT/$cb_pg_stat}")
-        echo "$cbdb_stat_result" > ./test-output/docker_stats/query_stat.html
+        cp ./src/main/resources/pg_stats/pg_query_stat_template.html ./test-output/docker_stats/pg_query_stat_template.html
+
+        #FIXME, might be better not to use in place sed
+        sed -i '/<!-- CB_PG_STAT -->/r ./test-output/docker_stats/query_stat.html' ./test-output/docker_stats/pg_query_stat_template.html
+        sed -i '/<!-- DOCKER_STAT_RESULT -->/r ./test-output/docker_stats/docker_stat.html' ./test-output/docker_stats/pg_query_stat_template.html
+
+        mv ./test-output/docker_stats/pg_query_stat_template.html ./test-output/docker_stats/query_stat.html
     fi
 fi
 

@@ -2,5 +2,5 @@ name: "mock-authz-testcases"
 tests:
   - name: "authz mock testcases"
     classes:
-      - com.sequenceiq.it.cloudbreak.testcase.mock.CredentialCreateTest
+      - com.sequenceiq.it.cloudbreak.testcase.authorization.CredentialCreateTest
 
