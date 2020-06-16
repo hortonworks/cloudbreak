@@ -75,7 +75,7 @@ public class AzurePlatformResources implements PlatformResources {
 
     private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> enabledDistroxInstanceTypes.stream()
             .filter(it -> !it.isEmpty())
-            .anyMatch(di -> vmt.value().startsWith(di));
+            .anyMatch(di -> vmt.value().equals(di));
 
     @Inject
     private AzureClientService azureClientService;
