@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -31,6 +32,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningException;
 import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.service.freeipa.user.EnvironmentUserSyncStateCalculator;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
@@ -59,9 +61,8 @@ public class UserV1Controller implements UserV1Endpoint {
     private EnvironmentUserSyncStateCalculator environmentUserSyncStateCalculator;
 
     @Override
-    // TODO we need to handle the case when environments is empty and the sync will applied to all env in account
-    // until that resource based authz cannot be applied
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    // custom permission check in service layer, reason: "null to all" behavior in case of empty environment CRN list
+    @DisableCheckPermissions
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
         String userCrn = checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -82,38 +83,37 @@ public class UserV1Controller implements UserV1Endpoint {
         }
         return checkOperationRejected(
                 operationToSyncOperationStatus.convert(
-                        userSyncService.synchronizeUsers(accountId, userCrn, environmentCrnFilter,
-                userCrnFilter, machineUserCrnFilter)));
+                        userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn, environmentCrnFilter,
+                userCrnFilter, machineUserCrnFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)));
     }
 
     @Override
-    // TODO we need to handle the case when environments is empty and the sync will applied to all env in account
-    // until that resource based authz cannot be applied
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    // custom permission check in service layer, reason: "null to all" behavior in case of empty environment CRN list
+    @DisableCheckPermissions
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String userCrn = checkActorCrn();
         String accountId = determineAccountId(userCrn, request.getAccountId());
 
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
-        return checkOperationRejected(
-                operationToSyncOperationStatus.convert(
-                        userSyncService.synchronizeUsers(accountId, userCrn, nullToEmpty(request.getEnvironments()),
-                                nullToEmpty(request.getUsers()), nullToEmpty(request.getMachineUsers()))));
+        Operation syncOperation = userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn,
+                nullToEmpty(request.getEnvironments()), nullToEmpty(request.getUsers()),
+                nullToEmpty(request.getMachineUsers()), AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+        return checkOperationRejected(operationToSyncOperationStatus.convert(syncOperation));
     }
 
     @Override
-    // TODO we need to handle the case when environments is empty and the setPassword will applied to all env in account
-    // until that resource based authz cannot be applied
+    // custom permission check in service layer, reason: "null to all" behavior in case of empty environment CRN list
+    @DisableCheckPermissions
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
         String userCrn = checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("setPassword() requested for user {} in account {}", userCrn, accountId);
 
-        return checkOperationRejected(
-                operationToSyncOperationStatus.convert(
-                        passwordService.setPassword(accountId, userCrn, userCrn, request.getPassword(), nullToEmpty(request.getEnvironments()))));
+        Operation setPasswordOperation = passwordService.setPasswordWithCustomPermissionCheck(accountId, userCrn, userCrn,
+                request.getPassword(), nullToEmpty(request.getEnvironments()), AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+        return checkOperationRejected(operationToSyncOperationStatus.convert(setPasswordOperation));
     }
 
     @Override
