@@ -25,6 +25,14 @@ public class StackViewService {
         return stackViewRepository.findByNameAndWorkspaceId(name, workspaceId);
     }
 
+    public Optional<StackView> findNotTerminatedByName(String name, Long workspaceId) {
+        return stackViewRepository.findByWorkspaceIdAndName(workspaceId, name);
+    }
+
+    public Optional<StackView> findNotTerminatedByCrn(String crn, Long workspaceId) {
+        return stackViewRepository.findByWorkspaceIdAndCrn(workspaceId, crn);
+    }
+
     public Optional<String> findResourceCrnByNameAndTenantName(String name, String tenantName) {
         return stackViewRepository.findResourceCrnByTenantNameAndName(tenantName, name);
     }
