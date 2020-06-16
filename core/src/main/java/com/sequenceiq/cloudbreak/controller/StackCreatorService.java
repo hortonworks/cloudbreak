@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -158,6 +159,9 @@ public class StackCreatorService {
     @Inject
     private ImageCatalogService imageCatalogService;
 
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest) {
         long start = System.currentTimeMillis();
         blueprintService.updateDefaultBlueprintCollection(workspace.getId());
@@ -261,7 +265,9 @@ public class StackCreatorService {
                     throw new RuntimeException(e.getMessage(), e);
                 }
                 LOGGER.info("Shared service preparation if required with name {}.", stackName);
-                return prepareSharedServiceIfNeed(newStack);
+                Stack withSharedServicesIfNeeded = prepareSharedServiceIfNeed(newStack);
+                assignOwnerRoleOnDataHub(user, stackRequest, newStack);
+                return withSharedServicesIfNeeded;
             });
         } catch (TransactionExecutionException e) {
             stackUnderOperationService.off();
@@ -284,6 +290,12 @@ public class StackCreatorService {
         metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;
+    }
+
+    private void assignOwnerRoleOnDataHub(User user, StackV4Request stackRequest, Stack newStack) {
+        if (StackType.WORKLOAD.equals(stackRequest.getType())) {
+            grpcUmsClient.assignResourceOwnerRoleIfEntitled(user.getUserCrn(), newStack.getResourceCrn(), ThreadBasedUserCrnProvider.getAccountId());
+        }
     }
 
     private void checkSharedServiceVersion(StackV4Request stackRequest, Blueprint blueprint) {
