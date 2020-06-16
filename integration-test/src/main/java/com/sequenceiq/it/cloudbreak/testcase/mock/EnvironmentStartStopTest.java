@@ -81,11 +81,11 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE, key("dx2"))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop())
-                .await(EnvironmentStatus.ENV_STOPPED);
+                .await(EnvironmentStatus.ENV_STOPPED, 3000);
         getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse(false, Collections.emptyList()));
         testContext.given(EnvironmentTestDto.class)
                 .when(environmentTestClient.start())
-                .await(EnvironmentStatus.AVAILABLE)
+                .await(EnvironmentStatus.AVAILABLE, 3000)
                 .validate();
         getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
     }

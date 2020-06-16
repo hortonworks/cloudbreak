@@ -308,6 +308,14 @@ public class EnvironmentTestDto
         return getTestContext().await(this, status, runningParameter);
     }
 
+    public EnvironmentTestDto await(EnvironmentStatus status, RunningParameter runningParameter, long pollingInteval) {
+        return getTestContext().await(this, status, runningParameter, pollingInteval);
+    }
+
+    public EnvironmentTestDto await(EnvironmentStatus status, long pollingInteval) {
+        return await(status, emptyRunningParameter(), pollingInteval);
+    }
+
     @Override
     public int order() {
         return order;
