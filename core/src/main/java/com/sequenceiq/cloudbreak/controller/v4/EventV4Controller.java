@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller.v4;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
-import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -25,7 +24,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
@@ -44,7 +43,7 @@ public class EventV4Controller implements EventV4Endpoint {
     private StructuredEventService structuredEventService;
 
     @Inject
-    private StackService stackService;
+    private StackViewService stackViewService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -63,7 +62,7 @@ public class EventV4Controller implements EventV4Endpoint {
 
     private StackView getStackViewIfAvailable(String name) {
         Long workspaceId = workspaceService.getForCurrentUser().getId();
-        return Optional.ofNullable(stackService.getViewByNameInWorkspace(name, workspaceId)).orElseThrow(notFound("stack", name));
+        return stackViewService.findByName(name, workspaceId).orElseThrow(notFound("stack", name));
     }
 
     @Override
