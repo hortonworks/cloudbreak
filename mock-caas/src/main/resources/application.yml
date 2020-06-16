@@ -18,3 +18,4 @@ auth:
     runtime.upgrade.enable: true
     sshpublickey.file: key.pub
     raz.enable: true
+    freeipadlebsencryption.enable: true

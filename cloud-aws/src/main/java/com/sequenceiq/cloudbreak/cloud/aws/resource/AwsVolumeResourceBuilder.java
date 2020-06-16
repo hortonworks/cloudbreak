@@ -182,6 +182,8 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         Long ephemeralCount = group.getReferenceInstanceConfiguration().getTemplate().getVolumes().stream()
                 .filter(vol -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(vol.getType())).collect(Collectors.counting());
 
+        LOGGER.debug("Start creating data volumes for stack: '{}' group: '{}'", auth.getCloudContext().getName(), group.getName());
+
         for (CloudResource resource : requestedResources) {
             volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));
 
@@ -241,7 +243,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
         return encryptedSnapshotService.createSnapshotIfNeeded(ac, cloudStack, group, resourceNotifier)
                 .orElseThrow(() -> {
-                    String message = String.format("Failed to create Ebs encrypted volume on stack: %s", ac.getCloudContext().getId());
+                    String message = String.format("Failed to create EBS encrypted volume on stack: %s", ac.getCloudContext().getId());
                     return new CloudConnectorException(message);
                 });
     }
