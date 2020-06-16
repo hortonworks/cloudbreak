@@ -625,6 +625,11 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <T extends EnvironmentTestDto, E extends EnvironmentStatus> T await(T entity, E desiredStatus, RunningParameter runningParameter) {
+        return await(entity, desiredStatus, runningParameter, pollingInterval);
+    }
+
+    public <T extends EnvironmentTestDto, E extends EnvironmentStatus> T await(T entity, E desiredStatus, RunningParameter runningParameter,
+            long pollingInterval) {
         checkShutdown();
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, String.format("Environment await should be skipped beacause of previous error. await [%s]", desiredStatus));
