@@ -131,12 +131,13 @@ doLog "INFO Running ${TYPE} IPA backup."
 
 exlock_now || error_exit "A backup seems to be currently running. Lock file is at ${LOCKFILE}"
 
-set +x
-if [[ -n "${config[http_proxy]}" ]]; then
-    doLog "INFO Configure HTTP proxy"
-    export HTTPS_PROXY="${config[http_proxy]}"
-fi
-set -x
+# This settings is not needed because cloud service endpoints are used but http_proxy parameter has been taken for later usage
+#set +x
+#if [[ -n "${config[http_proxy]}" ]]; then
+#    doLog "INFO Configure HTTP proxy"
+#    export HTTPS_PROXY="${config[http_proxy]}"
+#fi
+#set -x
 
 # Perform a backup
 /sbin/ipa-backup $BACKUP_OPTIONS >> $LOGFILE 2>&1 || error_exit "ipa-backup failed! Aborting!"
