@@ -18,6 +18,12 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 @Transactional(TxType.REQUIRED)
 public interface StackViewRepository extends WorkspaceResourceRepository<StackView, Long> {
 
+    @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.name LIKE :name")
+    Optional<StackView> findByWorkspaceIdAndName(@Param("workspaceId") Long workspaceId, @Param("name") String name);
+
+    @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.resourceCrn LIKE :crn")
+    Optional<StackView> findByWorkspaceIdAndCrn(@Param("workspaceId") Long workspaceId, @Param("crn") String resourceCrn);
+
     @Query("SELECT s.resourceCrn FROM StackView s WHERE s.workspace.tenant.name = :tenantName AND s.terminated = null AND s.name LIKE :name")
     Optional<String> findResourceCrnByTenantNameAndName(@Param("tenantName") String tenantName, @Param("name") String name);
 
