@@ -130,7 +130,7 @@ public class AzureTerminationHelperService {
 
     private void deleteCloudResourceList(AuthenticatedContext ac, List<CloudResource> resourcesToRemove, ResourceType type) {
         List<CloudResource> resourcesByType = getCloudResourcesByType(resourcesToRemove, type);
-        azureCloudResourceService.deleteCloudResource(resourceNotifier, ac.getCloudContext(),
+        azureCloudResourceService.deleteCloudResources(resourceNotifier, ac.getCloudContext(),
                 resourcesByType);
         LOGGER.debug("The following cloud resources have been deleted from database: {}", resourcesByType.toString());
     }

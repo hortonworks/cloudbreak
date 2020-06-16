@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_CRN_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
@@ -370,6 +371,7 @@ public class StackToCloudStackConverter {
             params.put(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName);
             params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
         }
+        params.put(RESOURCE_CRN_PARAMETER, stack.getResourceCrn());
         return params;
     }
 

@@ -94,24 +94,30 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
 
         try {
+            List<CloudResource> templateResources;
+            List<CloudResource> instances;
+            List<CloudResource> osDiskResources;
             if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
                 Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
                 LOGGER.debug("Created template deployment for launch: {}", templateDeployment.exportTemplate().template());
-
-                List<CloudResource> templateResources = azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
-                List<CloudResource> instances =
-                        azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, stack.getGroups(), resourceGroupName);
-                List<CloudResource> osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(ac, instances, resourceGroupName);
-
+                templateResources = azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
+                instances = azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, stack.getGroups(), resourceGroupName);
+                osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(ac, instances, resourceGroupName);
                 azureCloudResourceService.saveCloudResources(notifier, cloudContext, ListUtils.union(templateResources, osDiskResources));
-
-                String networkName = azureUtils.getCustomNetworkId(stack.getNetwork());
-                List<String> subnetNameList = azureUtils.getCustomSubnetIds(stack.getNetwork());
-                List<CloudResource> networkResources = azureCloudResourceService.collectAndSaveNetworkAndSubnet(
-                        resourceGroupName, stackName, notifier, cloudContext, subnetNameList, networkName, client);
-
-                azureComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentType, threshold, instances, networkResources);
+            } else {
+                Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+                LOGGER.debug("Get template deployment for launch as it exists: {}", templateDeployment.exportTemplate().template());
+                templateResources = azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
+                instances = azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, stack.getGroups(), resourceGroupName);
+                osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(ac, instances, resourceGroupName);
+                azureCloudResourceService.deleteCloudResources(notifier, cloudContext, ListUtils.union(templateResources, osDiskResources));
+                azureCloudResourceService.saveCloudResources(notifier, cloudContext, ListUtils.union(templateResources, osDiskResources));
             }
+            String networkName = azureUtils.getCustomNetworkId(stack.getNetwork());
+            List<String> subnetNameList = azureUtils.getCustomSubnetIds(stack.getNetwork());
+            List<CloudResource> networkResources = azureCloudResourceService.collectAndSaveNetworkAndSubnet(
+                    resourceGroupName, stackName, notifier, cloudContext, subnetNameList, networkName, client);
+            azureComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentType, threshold, instances, networkResources);
         } catch (CloudException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);
             if (e.body() != null && e.body().details() != null) {

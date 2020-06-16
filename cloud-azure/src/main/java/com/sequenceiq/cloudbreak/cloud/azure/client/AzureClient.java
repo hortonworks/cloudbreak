@@ -406,6 +406,10 @@ public class AzureClient {
         return handleAuthException(() -> azure.virtualMachines().getByResourceGroup(resourceGroup, vmName));
     }
 
+    public VirtualMachine getVirtualMachine(String vmId) {
+        return handleAuthException(() -> azure.virtualMachines().getById(vmId));
+    }
+
     public Observable<VirtualMachine> getVirtualMachineAsync(String resourceGroup, String vmName) {
         return handleAuthException(() -> azure.virtualMachines().getByResourceGroupAsync(resourceGroup, vmName));
     }

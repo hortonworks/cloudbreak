@@ -231,7 +231,7 @@ public class AzureCloudResourceService {
         cloudResources.forEach(cloudResource -> notifier.notifyAllocation(cloudResource, cloudContext));
     }
 
-    public void deleteCloudResource(PersistenceNotifier notifier, CloudContext cloudContext, List<CloudResource> cloudResources) {
+    public void deleteCloudResources(PersistenceNotifier notifier, CloudContext cloudContext, List<CloudResource> cloudResources) {
         cloudResources.forEach(cloudResource -> notifier.notifyDeletion(cloudResource, cloudContext));
     }
 

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure.service;
 
-import java.util.Date;
-
 import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +13,9 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class AzureResourceNameService extends CloudbreakResourceNameService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureResourceNameService.class);
 
-    private static final int VOLUMESET_PART_COUNT = 3;
+    private static final int VOLUMESET_PART_COUNT = 4;
 
-    private static final int ATTACHED_DISKS_PART_COUNT = 4;
+    private static final int ATTACHED_DISKS_PART_COUNT = 5;
 
     private static final int INSTANCE_NAME_PART_COUNT = 3;
 
@@ -38,25 +36,26 @@ public class AzureResourceNameService extends CloudbreakResourceNameService {
             default:
                 throw new IllegalStateException("Unsupported resource type: " + resourceType);
         }
+        LOGGER.debug("Generated resource name for the {} resourcetype: {}", resourceType, resourceName);
         return resourceName;
     }
 
     private String volumeSetResourceName(Object[] parts) {
         checkArgs(VOLUMESET_PART_COUNT, parts);
+        String hash = String.valueOf(parts[VOLUMESET_PART_COUNT - 1]);
         String name = instanceName(parts);
-        name = trimHash(name);
-        name = appendHash(name, new Date());
+        name = appendHash(name, hash);
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }
 
     private String attachedDiskResourceName(Object[] parts) {
         checkArgs(ATTACHED_DISKS_PART_COUNT, parts);
-        String cnt = String.valueOf(parts[ATTACHED_DISKS_PART_COUNT - 1]);
+        String cnt = String.valueOf(parts[ATTACHED_DISKS_PART_COUNT - 2]);
+        String hash = String.valueOf(parts[ATTACHED_DISKS_PART_COUNT - 1]);
         String name = instanceName(parts);
-        name = trimHash(name);
         name = appendPart(name, cnt);
-        name = appendHash(name, new Date());
+        name = appendHash(name, hash);
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }
@@ -72,7 +71,6 @@ public class AzureResourceNameService extends CloudbreakResourceNameService {
         name = adjustPartLength(name);
         name = appendPart(name, normalize(instanceGroupName));
         name = appendPart(name, privateId);
-        name = appendHash(name, new Date());
         name = adjustBaseLength(name, maxResourceNameLength);
 
         return name;

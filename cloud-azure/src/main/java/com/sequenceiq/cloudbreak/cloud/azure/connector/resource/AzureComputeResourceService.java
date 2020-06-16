@@ -5,12 +5,15 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureContextService;
+import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -21,6 +24,7 @@ import com.sequenceiq.common.api.type.AdjustmentType;
 
 @Service
 public class AzureComputeResourceService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureComputeResourceService.class);
 
     @Inject
     private AzureContextBuilder contextBuilder;
@@ -33,8 +37,7 @@ public class AzureComputeResourceService {
 
     public List<CloudResourceStatus> buildComputeResourcesForLaunch(AuthenticatedContext ac, CloudStack stack, AdjustmentType adjustmentType, Long threshold,
             List<CloudResource> instances, List<CloudResource> networkResources) {
-        CloudContext cloudContext = ac.getCloudContext();
-        ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
+        ResourceBuilderContext context = initContext(ac, stack);
         context.addNetworkResources(networkResources);
 
         azureContextService.addInstancesToContext(instances, context, stack.getGroups());
@@ -43,8 +46,7 @@ public class AzureComputeResourceService {
 
     public List<CloudResourceStatus> buildComputeResourcesForUpscale(AuthenticatedContext ac, CloudStack stack, List<Group> groupsWithNewInstances,
             List<CloudResource> newInstances, List<CloudResource> reattachableVolumeSets, List<CloudResource> networkResources) {
-        CloudContext cloudContext = ac.getCloudContext();
-        ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
+        ResourceBuilderContext context = initContext(ac, stack);
         context.addNetworkResources(networkResources);
 
         if (reattachableVolumeSets.isEmpty()) {
@@ -59,10 +61,20 @@ public class AzureComputeResourceService {
 
     public List<CloudResourceStatus> deleteComputeResources(AuthenticatedContext ac, CloudStack stack, List<CloudResource> cloudResources,
             List<CloudResource> networkResources) {
-        CloudContext cloudContext = ac.getCloudContext();
-        ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), null, true);
+        ResourceBuilderContext context = initContext(ac, stack);
         context.addNetworkResources(networkResources);
 
         return computeResourceService.deleteResources(context, ac, cloudResources, false);
+    }
+
+    private AzureContext initContext(AuthenticatedContext ac, CloudStack cloudStack) {
+        AzureContext context = contextBuilder.contextInit(ac.getCloudContext(), ac, cloudStack.getNetwork(), null, true);
+        String stackCrn = cloudStack.getParameters().getOrDefault(PlatformParametersConsts.RESOURCE_CRN_PARAMETER, "");
+        if (stackCrn.isEmpty()) {
+            LOGGER.warn("Stack crn is not set in CloudStack, it can cause errors during infrastructure creation!");
+        }
+        context.putParameter(PlatformParametersConsts.RESOURCE_CRN_PARAMETER,
+                cloudStack.getParameters().getOrDefault(PlatformParametersConsts.RESOURCE_CRN_PARAMETER, ""));
+        return context;
     }
 }
