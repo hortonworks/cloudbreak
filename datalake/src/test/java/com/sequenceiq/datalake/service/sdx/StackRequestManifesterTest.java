@@ -2,6 +2,8 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -9,18 +11,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
@@ -30,6 +39,7 @@ import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -63,8 +73,15 @@ public class StackRequestManifesterTest {
 
     private static final String GROUP_ROLE_2 = "group-role2";
 
+    private static final String ACCOUNT_ID = UUID.randomUUID().toString();
+
+    private static final String ENCRYPTION_KEY = "mykey";
+
     @Mock
     private GrpcIdbmmsClient idbmmsClient;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @Mock
     private StackV4Request stackV4Request;
@@ -81,7 +98,6 @@ public class StackRequestManifesterTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         clusterV4Request = new ClusterV4Request();
         cloudStorage = new CloudStorageRequest();
     }
@@ -222,12 +238,150 @@ public class StackRequestManifesterTest {
     }
 
     @Test
-    public void testAddAzureIdbrokerMsiToTelemetrWithoutCloudStoragey() {
+    public void testAddAzureIdbrokerMsiToTelemetryWithoutCloudStorage() {
         Map<String, Object> attributes = new HashMap<>();
         underTest.addAzureIdbrokerMsiToTelemetry(attributes, stackV4Request);
 
         assertThat(clusterV4Request.getCloudStorage()).isNull();
         assertThat(attributes.size()).isEqualTo(0);
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAzure() {
+        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AZURE, ACCOUNT_ID);
+
+        verify(stackV4Request, never()).getInstanceGroups();
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAwsAndNotEntitled() {
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(false);
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AWS, ACCOUNT_ID);
+
+        verify(stackV4Request, never()).getInstanceGroups();
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAwsAndEntitledAndNoInstanceGroups() {
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+
+        List<InstanceGroupV4Request> instanceGroups = new ArrayList<>();
+        when(stackV4Request.getInstanceGroups()).thenReturn(instanceGroups);
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AWS, ACCOUNT_ID);
+
+        assertThat(instanceGroups).isEmpty();
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAwsAndEntitledAndNoInstanceTemplateParameters() {
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+
+        InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AWS, ACCOUNT_ID);
+
+        verifyEncryption(instanceGroupV4Request.getTemplate(), EncryptionType.DEFAULT);
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAwsAndEntitledAndNoEncryptionParameters() {
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+
+        InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
+        InstanceTemplateV4Request instanceTemplateV4Request = instanceGroupV4Request.getTemplate();
+        instanceTemplateV4Request.createAws();
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AWS, ACCOUNT_ID);
+
+        verifyEncryption(instanceTemplateV4Request, EncryptionType.DEFAULT);
+    }
+
+    static Object[][] encryptionTypeDataProvider() {
+        return new Object[][]{
+                // testCaseName, encryptionType, encryptionKey, encryptionTypeExpected, encryptionKeyExpected
+                {"encryptionType == null", null, null, EncryptionType.DEFAULT, null},
+                {"EncryptionType.NONE", EncryptionType.NONE, null, EncryptionType.NONE, null},
+                {"EncryptionType.DEFAULT", EncryptionType.DEFAULT, null, EncryptionType.DEFAULT, null},
+                {"EncryptionType.CUSTOM", EncryptionType.CUSTOM, ENCRYPTION_KEY, EncryptionType.CUSTOM, ENCRYPTION_KEY},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("encryptionTypeDataProvider")
+    void setupInstanceVolumeEncryptionTestWhenAwsAndEntitledAndEncryptionParameters(String testCaseName, EncryptionType encryptionType, String encryptionKey,
+            EncryptionType encryptionTypeExpected, String encryptionKeyExpected) {
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+
+        InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
+        InstanceTemplateV4Request instanceTemplateV4Request = instanceGroupV4Request.getTemplate();
+        if (encryptionKey == null) {
+            instanceTemplateV4Request.createAws().setEncryption(createAwsEncryptionV4Parameters(encryptionType));
+        } else {
+            instanceTemplateV4Request.createAws().setEncryption(createAwsEncryptionV4Parameters(encryptionType, encryptionKey));
+        }
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AWS, ACCOUNT_ID);
+
+        if (encryptionKeyExpected == null) {
+            verifyEncryption(instanceTemplateV4Request, encryptionTypeExpected);
+        } else {
+            verifyEncryption(instanceTemplateV4Request, encryptionTypeExpected, encryptionKeyExpected);
+        }
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAwsAndEntitledAndTwoInstanceGroupsAndEncryptionTypesNoneCustom() {
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+
+        InstanceGroupV4Request instanceGroupV4Request1 = createInstanceGroupV4Request();
+        InstanceTemplateV4Request instanceTemplateV4Request1 = instanceGroupV4Request1.getTemplate();
+        instanceTemplateV4Request1.createAws().setEncryption(createAwsEncryptionV4Parameters(EncryptionType.NONE));
+
+        InstanceGroupV4Request instanceGroupV4Request2 = createInstanceGroupV4Request();
+        InstanceTemplateV4Request instanceTemplateV4Request2 = instanceGroupV4Request2.getTemplate();
+        instanceTemplateV4Request2.createAws().setEncryption(createAwsEncryptionV4Parameters(EncryptionType.CUSTOM, ENCRYPTION_KEY));
+
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request1, instanceGroupV4Request2));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AWS, ACCOUNT_ID);
+
+        verifyEncryption(instanceTemplateV4Request1, EncryptionType.NONE);
+        verifyEncryption(instanceTemplateV4Request2, EncryptionType.CUSTOM, ENCRYPTION_KEY);
+    }
+
+    private InstanceGroupV4Request createInstanceGroupV4Request() {
+        InstanceGroupV4Request instanceGroupV4Request = new InstanceGroupV4Request();
+        instanceGroupV4Request.setTemplate(new InstanceTemplateV4Request());
+        return instanceGroupV4Request;
+    }
+
+    private void verifyEncryption(InstanceTemplateV4Request instanceTemplateV4Request, EncryptionType expectedEncryptionType) {
+        verifyEncryption(instanceTemplateV4Request, expectedEncryptionType, null);
+    }
+
+    private void verifyEncryption(InstanceTemplateV4Request instanceTemplateV4Request, EncryptionType expectedEncryptionType, String expectedEncryptionKey) {
+        AwsInstanceTemplateV4Parameters aws = instanceTemplateV4Request.getAws();
+        assertThat(aws).isNotNull();
+        AwsEncryptionV4Parameters encryption = aws.getEncryption();
+        assertThat(encryption).isNotNull();
+        assertThat(encryption.getType()).isEqualTo(expectedEncryptionType);
+        assertThat(encryption.getKey()).isEqualTo(expectedEncryptionKey);
+    }
+
+    private AwsEncryptionV4Parameters createAwsEncryptionV4Parameters(EncryptionType encryptionType) {
+        return createAwsEncryptionV4Parameters(encryptionType, null);
+    }
+
+    private AwsEncryptionV4Parameters createAwsEncryptionV4Parameters(EncryptionType encryptionType, String encryptionKey) {
+        AwsEncryptionV4Parameters awsEncryptionV4Parameters = new AwsEncryptionV4Parameters();
+        awsEncryptionV4Parameters.setType(encryptionType);
+        awsEncryptionV4Parameters.setKey(encryptionKey);
+        return awsEncryptionV4Parameters;
     }
 
 }

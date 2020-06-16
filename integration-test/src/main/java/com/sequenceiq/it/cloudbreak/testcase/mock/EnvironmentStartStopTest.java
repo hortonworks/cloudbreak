@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 
 import javax.inject.Inject;
@@ -27,6 +29,8 @@ import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class EnvironmentStartStopTest extends AbstractIntegrationTest {
+
+    private static final Duration POLLING_INTERVAL = Duration.of(3000, ChronoUnit.MILLIS);
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -81,11 +85,11 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE, key("dx2"))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop())
-                .await(EnvironmentStatus.ENV_STOPPED);
+                .await(EnvironmentStatus.ENV_STOPPED, POLLING_INTERVAL);
         getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse(false, Collections.emptyList()));
         testContext.given(EnvironmentTestDto.class)
                 .when(environmentTestClient.start())
-                .await(EnvironmentStatus.AVAILABLE)
+                .await(EnvironmentStatus.AVAILABLE, POLLING_INTERVAL)
                 .validate();
         getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
     }

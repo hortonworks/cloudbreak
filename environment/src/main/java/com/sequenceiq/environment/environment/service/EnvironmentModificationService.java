@@ -175,7 +175,8 @@ public class EnvironmentModificationService {
 
     private void editNetworkIfChanged(Environment environment, EnvironmentEditDto editDto) {
         if (networkChanged(editDto)) {
-            BaseNetwork network = networkService.validateAndReplaceSubnets(environment.getNetwork(), editDto, environment);
+            BaseNetwork network = networkService.validate(environment.getNetwork(), editDto, environment);
+            network = networkService.refreshMetadataFromCloudProvider(network, editDto, environment);
             if (network != null) {
                 environment.setNetwork(network);
             }

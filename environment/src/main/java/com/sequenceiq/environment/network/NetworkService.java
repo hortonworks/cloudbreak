@@ -78,7 +78,7 @@ public class NetworkService {
         return CloudPlatform.valueOf(environment.getCloudPlatform());
     }
 
-    public BaseNetwork validateAndReplaceSubnets(BaseNetwork originalNetwork, EnvironmentEditDto editDto, Environment environment) {
+    public BaseNetwork validate(BaseNetwork originalNetwork, EnvironmentEditDto editDto, Environment environment) {
         if (originalNetwork.getRegistrationType() == RegistrationType.CREATE_NEW) {
             throw new BadRequestException("Subnet could not be attached to this environment, because it is newly created by Cloudbreak. " +
                     "You need to re-install the the environment into an existing VPC");
@@ -93,8 +93,23 @@ public class NetworkService {
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+        return originalNetwork;
+    }
+
+    public BaseNetwork refreshMetadataFromCloudProvider(BaseNetwork originalNetwork, EnvironmentEditDto editDto, Environment environment) {
+        EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()));
+        NetworkDto originalNetworkDto = environmentNetworkConverter.convertToDto(originalNetwork);
+        NetworkDto cloneNetworkDto = NetworkDto.builder(originalNetworkDto)
+                .withSubnetMetas(editDto.getNetworkDto().getSubnetMetas())
+                .build();
+
         Map<String, CloudSubnet> subnetMetadatas = cloudNetworkService.retrieveSubnetMetadata(environment, cloneNetworkDto);
         originalNetwork.setSubnetMetas(subnetMetadatas.values().stream().collect(toMap(CloudSubnet::getId, c -> c)));
+
+        Network network = environmentNetworkConverter.convertToNetwork(originalNetwork);
+        NetworkCidr networkCidr = environmentNetworkService.getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential());
+        originalNetwork.setNetworkCidr(networkCidr.getCidr());
+        originalNetwork.setNetworkCidrs(StringUtils.join(networkCidr.getCidrs(), ","));
         return originalNetwork;
     }
 

@@ -1,21 +1,28 @@
 package com.sequenceiq.caas.grpc.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.migrationsupport.rules.ExpectedExceptionSupport;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Entitlement;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest;
@@ -26,7 +33,8 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 
 import io.grpc.internal.testing.StreamRecorder;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(ExpectedExceptionSupport.class)
+@ExtendWith(MockitoExtension.class)
 public class MockUserManagementServiceTest {
 
     private static final String VALID_LICENSE = "License file content";
@@ -47,12 +55,16 @@ public class MockUserManagementServiceTest {
         Path licenseFilePath = Files.createTempFile("license", "txt");
         Files.writeString(licenseFilePath, VALID_LICENSE);
         ReflectionTestUtils.setField(underTest, "cmLicenseFilePath", licenseFilePath.toString());
-        underTest.init();
 
-        String actual = ReflectionTestUtils.getField(underTest, "cbLicense").toString();
+        try {
+            underTest.init();
 
-        Assert.assertEquals(VALID_LICENSE, actual);
-        Files.delete(licenseFilePath);
+            String actual = ReflectionTestUtils.getField(underTest, "cbLicense").toString();
+
+            assertThat(actual).isEqualTo(VALID_LICENSE);
+        } finally {
+            Files.delete(licenseFilePath);
+        }
     }
 
     @Test
@@ -71,7 +83,7 @@ public class MockUserManagementServiceTest {
         String username = "&*foO$_#Bar22@baz13.com";
         String expected = "foo_bar22";
 
-        Assert.assertEquals(expected, underTest.sanitizeWorkloadUsername(username));
+        assertThat(underTest.sanitizeWorkloadUsername(username)).isEqualTo(expected);
     }
 
     @Test
@@ -95,16 +107,18 @@ public class MockUserManagementServiceTest {
                             .build().toString())
                     .build();
             StreamRecorder<GetActorWorkloadCredentialsResponse> observer = StreamRecorder.create();
+
             underTest.getActorWorkloadCredentials(req, observer);
-            Assert.assertEquals(1, observer.getValues().size());
+
+            assertThat(observer.getValues().size()).isEqualTo(1);
             GetActorWorkloadCredentialsResponse res = observer.getValues().get(0);
-            Assert.assertNotNull(res);
-            Assert.assertNotNull(res.getPasswordHash());
-            Assert.assertNotNull(res.getKerberosKeysList());
-            Assert.assertEquals(2, res.getKerberosKeysList().size());
-            Assert.assertTrue(res.getPasswordHashExpirationDate() > currentTime);
-            Assert.assertEquals(1, res.getSshPublicKeyCount());
-            Assert.assertEquals(SAMPLE_SSH_PUBLIC_KEY, res.getSshPublicKey(0).getPublicKey());
+            assertThat(res).isNotNull();
+            assertThat(res.getPasswordHash()).isNotNull();
+            assertThat(res.getKerberosKeysList()).isNotNull();
+            assertThat(res.getKerberosKeysList().size()).isEqualTo(2);
+            assertThat(res.getPasswordHashExpirationDate() > currentTime).isTrue();
+            assertThat(res.getSshPublicKeyCount()).isEqualTo(1);
+            assertThat(res.getSshPublicKey(0).getPublicKey()).isEqualTo(SAMPLE_SSH_PUBLIC_KEY);
         } finally {
             Files.delete(sshPublicKeyFilePath);
         }
@@ -115,17 +129,91 @@ public class MockUserManagementServiceTest {
         Path licenseFilePath = Files.createTempFile("license", "txt");
         Files.writeString(licenseFilePath, VALID_LICENSE);
         ReflectionTestUtils.setField(underTest, "cmLicenseFilePath", licenseFilePath.toString());
-        underTest.init();
+
+        try {
+            underTest.init();
+
+            GetAccountRequest req = GetAccountRequest.getDefaultInstance();
+            StreamRecorder<GetAccountResponse> observer = StreamRecorder.create();
+
+            underTest.getAccount(req, observer);
+
+            assertThat(observer.getValues().size()).isEqualTo(1);
+            GetAccountResponse res = observer.getValues().get(0);
+            assertThat(res.hasAccount()).isTrue();
+            Account account = res.getAccount();
+            assertThat(account.hasPasswordPolicy()).isTrue();
+            WorkloadPasswordPolicy passwordPolicy = account.getPasswordPolicy();
+            assertThat(passwordPolicy.getWorkloadPasswordMaxLifetime()).isEqualTo(MockUserManagementService.PASSWORD_LIFETIME);
+        } finally {
+            Files.delete(licenseFilePath);
+        }
+    }
+
+    @Test
+    void getAccountTestIncludesFixedEntitlements() {
+        ReflectionTestUtils.setField(underTest, "cbLicense", VALID_LICENSE);
+        underTest.initializeWorkloadPasswordPolicy();
 
         GetAccountRequest req = GetAccountRequest.getDefaultInstance();
         StreamRecorder<GetAccountResponse> observer = StreamRecorder.create();
+
         underTest.getAccount(req, observer);
-        Assert.assertEquals(1, observer.getValues().size());
+
+        assertThat(observer.getValues().size()).isEqualTo(1);
         GetAccountResponse res = observer.getValues().get(0);
-        Assert.assertTrue(res.hasAccount());
+        assertThat(res.hasAccount()).isTrue();
         Account account = res.getAccount();
-        Assert.assertTrue(account.hasPasswordPolicy());
-        WorkloadPasswordPolicy passwordPolicy = account.getPasswordPolicy();
-        Assert.assertEquals(MockUserManagementService.PASSWORD_LIFETIME, passwordPolicy.getWorkloadPasswordMaxLifetime());
+        List<String> entitlements = account.getEntitlementsList().stream().map(Entitlement::getEntitlementName).collect(Collectors.toList());
+        assertThat(entitlements).contains("CDP_AZURE", "CDP_AUTOMATIC_USERSYNC_POLLER", "CLOUDERA_INTERNAL_ACCOUNT", "LOCAL_DEV");
     }
+
+    static Object[][] conditionalEntitlementDataProvider() {
+        return new Object[][]{
+                // testCaseName conditionFieldName condition entitlementName entitlementPresentExpected
+                {"enableBaseImages false", "enableBaseImages", false, "CDP_BASE_IMAGE", false},
+                {"enableBaseImages true", "enableBaseImages", true, "CDP_BASE_IMAGE", true},
+
+                {"enableFreeIpaHa false", "enableFreeIpaHa", false, "CDP_FREEIPA_HA", false},
+                {"enableFreeIpaHa true", "enableFreeIpaHa", true, "CDP_FREEIPA_HA", true},
+
+                {"enableCloudStorageValidation false", "enableCloudStorageValidation", false, "CDP_CLOUD_STORAGE_VALIDATION", false},
+                {"enableCloudStorageValidation true", "enableCloudStorageValidation", true, "CDP_CLOUD_STORAGE_VALIDATION", true},
+
+                {"runtimeUpgradeEnabled false", "runtimeUpgradeEnabled", false, "CDP_RUNTIME_UPGRADE", false},
+                {"runtimeUpgradeEnabled true", "runtimeUpgradeEnabled", true, "CDP_RUNTIME_UPGRADE", true},
+
+                {"razEnabled false", "razEnabled", false, "CDP_RAZ", false},
+                {"razEnabled true", "razEnabled", true, "CDP_RAZ", true},
+
+                {"enableFreeIpaDlEbsEncryption false", "enableFreeIpaDlEbsEncryption", false, "CDP_FREEIPA_DL_EBS_ENCRYPTION", false},
+                {"enableFreeIpaDlEbsEncryption true", "enableFreeIpaDlEbsEncryption", true, "CDP_FREEIPA_DL_EBS_ENCRYPTION", true},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("conditionalEntitlementDataProvider")
+    void getAccountTestIncludesConditionalEntitlement(String testCaseName, String conditionFieldName, boolean condition, String entitlementName,
+            boolean entitlementPresentExpected) {
+        ReflectionTestUtils.setField(underTest, "cbLicense", VALID_LICENSE);
+        underTest.initializeWorkloadPasswordPolicy();
+        ReflectionTestUtils.setField(underTest, conditionFieldName, condition);
+
+        GetAccountRequest req = GetAccountRequest.getDefaultInstance();
+        StreamRecorder<GetAccountResponse> observer = StreamRecorder.create();
+
+        underTest.getAccount(req, observer);
+
+        assertThat(observer.getValues().size()).isEqualTo(1);
+        GetAccountResponse res = observer.getValues().get(0);
+        assertThat(res.hasAccount()).isTrue();
+        Account account = res.getAccount();
+        List<String> entitlements = account.getEntitlementsList().stream().map(Entitlement::getEntitlementName).collect(Collectors.toList());
+        if (entitlementPresentExpected) {
+            assertThat(entitlements).contains(entitlementName);
+        } else {
+            assertThat(entitlements).doesNotContain(entitlementName);
+        }
+    }
+
 }

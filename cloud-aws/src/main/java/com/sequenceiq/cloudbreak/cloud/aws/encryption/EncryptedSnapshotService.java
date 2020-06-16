@@ -102,13 +102,14 @@ public class EncryptedSnapshotService {
 
     private Optional<String> prepareSnapshotForEncryptionBecauseThatDoesNotExist(AuthenticatedContext ac, CloudStack cloudStack, AwsInstanceView instanceView,
             AmazonEC2Client client, PersistenceNotifier resourceNotifier) {
-
+        LOGGER.debug("Create an encrypted EBS volume for group: '{}'", instanceView.getGroupName());
         CreateVolumeResult volumeResult = client.createVolume(prepareCreateVolumeRequest(ac, instanceView, client, cloudStack));
         String volumeId = volumeResult.getVolume().getVolumeId();
         checkEbsVolumeStatus(ac, client, volumeId);
         saveEncryptedResource(ac, resourceNotifier, ResourceType.AWS_ENCRYPTED_VOLUME, volumeId, instanceView.getGroupName());
         LOGGER.debug("Encrypted EBS volume has been created with id: '{}', for group: '{}'", volumeId, instanceView.getGroupName());
 
+        LOGGER.debug("Create an encrypted snapshot of EBS volume for group: '{}'", instanceView.getGroupName());
         CreateSnapshotResult snapshotResult = client.createSnapshot(prepareCreateSnapshotRequest(volumeResult));
         checkSnapshotReadiness(ac, client, snapshotResult);
         LOGGER.debug("Encrypted snapshot of EBS volume has been created with id: '{}', for group: '{}'", snapshotResult.getSnapshot().getSnapshotId(),
