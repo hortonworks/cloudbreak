@@ -38,6 +38,10 @@ import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @Controller
@@ -239,4 +243,27 @@ public class SdxController implements SdxEndpoint {
         return cdpConfigService.getAdvertisedRuntimes();
     }
 
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.BACKUP_DATALAKE)
+    public SdxDatabaseBackupResponse backupDatabaseByName(@ResourceName String name, String backupId, String backupLocation) {
+        return null;
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.RESTORE_DATALAKE)
+    public SdxDatabaseRestoreResponse restoreDatabaseByName(@ResourceName String name, String backupId, String backupLocation) {
+        return null;
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.BACKUP_DATALAKE)
+    public SdxDatabaseBackupStatusResponse backupDatabaseStatusByName(@ResourceName String name, String operationId) {
+        return null;
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.RESTORE_DATALAKE)
+    public SdxDatabaseRestoreStatusResponse restoreDatabaseStatusByName(@ResourceName String name, String operationId) {
+        return null;
+    }
 }
