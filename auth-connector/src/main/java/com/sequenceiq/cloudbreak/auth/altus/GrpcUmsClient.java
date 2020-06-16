@@ -31,6 +31,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
@@ -373,7 +375,7 @@ public class GrpcUmsClient {
      */
     public List<Boolean> hasRights(String actorCrn, String memberCrn, List<AuthorizationProto.RightCheck> rightChecks, Optional<String> requestId) {
         LOGGER.info("Checking whether member [{}] has rights [{}]", memberCrn,
-                rightChecks.stream().map(AuthorizationProto.RightCheck::getRight).collect(Collectors.toList()));
+                rightChecks.stream().map(rightCheck -> rightCheckToString(rightCheck)).collect(Collectors.toList()));
         if (InternalCrnBuilder.isInternalCrn(memberCrn)) {
             LOGGER.info("InternalCrn has all rights");
             return rightChecks.stream().map(rightCheck -> Boolean.TRUE).collect(Collectors.toList());
@@ -387,6 +389,15 @@ public class GrpcUmsClient {
             }
             return Collections.emptyList();
         }
+    }
+
+    public String rightCheckToString(AuthorizationProto.RightCheck rightCheck) {
+        String right = rightCheck.getRight();
+        String resource = "account";
+        if (StringUtils.isNotBlank(rightCheck.getResource())) {
+            resource = rightCheck.getResource();
+        }
+        return Joiner.on(" ").join(Lists.newArrayList(right, "for", resource));
     }
 
     public Map<String, Boolean> hasRights(String actorCrn, String memberCrn, List<String> resources, String right, Optional<String> requestId) {
