@@ -12,8 +12,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -36,7 +38,7 @@ public class AccountTagService {
     }
 
     public Set<AccountTag> get(String accountId) {
-        return accountTagRepository.findAllInAccount(accountId);
+        return ThreadBasedUserCrnProvider.doAs(GrpcUmsClient.INTERNAL_ACTOR_CRN, () -> accountTagRepository.findAllInAccount(accountId));
     }
 
     public List<AccountTag> create(List<AccountTag> accountTags, String accountId) {
