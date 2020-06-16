@@ -161,7 +161,7 @@ public class CleanupWaitUtil {
                             .collect(Collectors.toList()).isEmpty()
             );
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred during check distroxes: {}", e.getMessage(), e);
+            LOG.warn("Exception has been occurred during check distroxes are available: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -185,7 +185,7 @@ public class CleanupWaitUtil {
                             .collect(Collectors.toList()).isEmpty()
             );
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred during check sdxes: {}", e.getMessage(), e);
+            LOG.warn("Exception has been occurred during check sdxes are available: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -206,7 +206,7 @@ public class CleanupWaitUtil {
                     .map(EnvironmentBaseResponse::getName)
                     .collect(Collectors.toList()).isEmpty();
         } catch (Exception e) {
-            LOG.warn("Exception has been occurred during check environments: {}", e.getMessage(), e);
+            LOG.warn("Exception has been occurred during check environments are available: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -223,10 +223,15 @@ public class CleanupWaitUtil {
      * @return              TRUE or FALSE based on existing DELETE_FAILED status
      */
     private boolean checkDistroxesDeleteFailedStatus(CloudbreakClient cloudbreak, Map<String, String> environments) {
-        return environments.entrySet().stream().anyMatch(env ->
-                cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
-                        .anyMatch(response -> response.getStatus().equals(Status.DELETE_FAILED))
-        );
+        try {
+            return environments.entrySet().stream().anyMatch(env ->
+                    cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
+                            .anyMatch(response -> response.getStatus().equals(Status.DELETE_FAILED))
+            );
+        } catch (Exception e) {
+            LOG.warn("Exception has been occurred during check distroxes DELETE_FAILED state: {}", e.getMessage(), e);
+            return false;
+        }
     }
 
     /**
@@ -241,10 +246,15 @@ public class CleanupWaitUtil {
      * @return              TRUE or FALSE based on existing DELETE_FAILED status
      */
     private boolean checkSdxesDeleteFailedStatus(SdxClient sdx, Map<String, String> environments) {
-        return environments.entrySet().stream().anyMatch(env ->
-                sdx.sdxEndpoint().list(env.getValue()).stream()
-                        .anyMatch(response -> response.getStatus().equals(SdxClusterStatusResponse.DELETE_FAILED))
-        );
+        try {
+            return environments.entrySet().stream().anyMatch(env ->
+                    sdx.sdxEndpoint().list(env.getValue()).stream()
+                            .anyMatch(response -> response.getStatus().equals(SdxClusterStatusResponse.DELETE_FAILED))
+            );
+        } catch (Exception e) {
+            LOG.warn("Exception has been occurred during check sdxes DELETE_FAILED state: {}", e.getMessage(), e);
+            return false;
+        }
     }
 
     /**
@@ -258,7 +268,12 @@ public class CleanupWaitUtil {
      * @return              TRUE or FALSE based on existing DELETE_FAILED status
      */
     private boolean checkEnvironmentsDeleteFailedStatus(EnvironmentClient environment) {
-        return environment.environmentV1Endpoint().list().getResponses().stream()
-                .anyMatch(response -> response.getEnvironmentStatus().equals(EnvironmentStatus.DELETE_FAILED));
+        try {
+            return environment.environmentV1Endpoint().list().getResponses().stream()
+                    .anyMatch(response -> response.getEnvironmentStatus().equals(EnvironmentStatus.DELETE_FAILED));
+        } catch (Exception e) {
+            LOG.warn("Exception has been occurred during check environments DELETE_FAILED state: {}", e.getMessage(), e);
+            return false;
+        }
     }
 }
