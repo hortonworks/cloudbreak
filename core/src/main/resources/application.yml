@@ -286,6 +286,7 @@ cb:
         7.2.1 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small-721;
         7.2.1 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-721;
         7.2.1 - Data Discovery and Exploration=cdp-dde-721;
+        7.2.1 - Streaming Analytics with Apache Flink=cdp-flink-ha-721;
 
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
