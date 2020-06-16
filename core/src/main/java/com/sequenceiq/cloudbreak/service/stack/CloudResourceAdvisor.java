@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
+import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -144,6 +145,15 @@ public class CloudResourceAdvisor {
         ResizeRecommendation resize = recommendResize(blueprintTextProcessor);
 
         return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes, instanceCounts, gateway, autoscale, resize);
+    }
+
+    public ScaleRecommendation createForBlueprint(Long workspaceId, String blueprintName) {
+        LOGGER.debug("Scale advice for blueprintName: {}.", blueprintName);
+        BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
+        AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor);
+        ResizeRecommendation resize = recommendResize(blueprintTextProcessor);
+
+        return new ScaleRecommendation(autoscale, resize);
     }
 
     public AutoscaleRecommendation getAutoscaleRecommendation(Long workspaceId, String blueprintName) {
