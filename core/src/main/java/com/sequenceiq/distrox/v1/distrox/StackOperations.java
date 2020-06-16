@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -97,9 +96,6 @@ public class StackOperations implements ResourceBasedCrnProvider {
     @Inject
     private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
 
-    @Inject
-    private GrpcUmsClient grpcUmsClient;
-
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
         LOGGER.info("List for Stack in workspace {} and environmentName {}.", workspaceId, environmentName);
@@ -133,9 +129,6 @@ public class StackOperations implements ResourceBasedCrnProvider {
         LOGGER.info("Cloudbreak user for the requested stack is {}.", cloudbreakUser);
         Workspace workspace = workspaceService.get(workspaceId, user);
         StackV4Response stackV4Response = stackCommonService.createInWorkspace(request, user, workspace);
-        if (StackType.WORKLOAD.equals(request.getType())) {
-            grpcUmsClient.assignResourceOwnerRoleIfEntitled(user.getUserCrn(), stackV4Response.getCrn(), ThreadBasedUserCrnProvider.getAccountId());
-        }
         LOGGER.info("Adding environment name and credential to the response.");
         environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackV4Response);
         LOGGER.info("Adding SDX CRN and name to the response.");
