@@ -29,7 +29,7 @@ public class StackMatrixTest extends AbstractIntegrationTest {
     @Description(
             given = "stack matrix",
             when = "list all supported stack combinations",
-            then = "validate hdp and hdf ambari descriptor")
+            then = "validate url is still available")
     public void testGetStackMatrix(MockedTestContext testContext) {
         testContext
                 .given(StackMatrixTestDto.class)
