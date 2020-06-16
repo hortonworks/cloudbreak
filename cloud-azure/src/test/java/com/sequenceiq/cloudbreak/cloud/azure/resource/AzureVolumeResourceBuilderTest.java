@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.task.AsyncTaskExecutor;
 
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -41,8 +42,9 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AzureVolumeResourceBuilderTest {
-
     private static final long PRIVATE_ID = 1L;
+
+    private static final String STACK_CRN = "crn";
 
     @Mock
     private AzureContext context;
@@ -94,12 +96,13 @@ public class AzureVolumeResourceBuilderTest {
         CloudResource cloudResource1 = mock(CloudResource.class);
         CloudResource cloudResource2 = mock(CloudResource.class);
         when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(cloudResource1, cloudResource2));
+        when(context.getStringParameter(PlatformParametersConsts.RESOURCE_CRN_PARAMETER)).thenReturn(STACK_CRN);
         when(group.getReferenceInstanceConfiguration()).thenReturn(cloudInstance);
         when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
         when(instanceTemplate.getVolumes()).thenReturn(List.of(volumeTemplate));
         when(auth.getCloudContext()).thenReturn(cloudContext);
         when(auth.getParameter(AzureClient.class)).thenReturn(azureClient);
-        when(resourceNameService.resourceName(eq(ResourceType.AZURE_VOLUMESET), any(), any(), eq(PRIVATE_ID))).thenReturn("someResourceName");
+        when(resourceNameService.resourceName(eq(ResourceType.AZURE_VOLUMESET), any(), any(), eq(PRIVATE_ID), eq(STACK_CRN))).thenReturn("someResourceName");
     }
 
     @Test

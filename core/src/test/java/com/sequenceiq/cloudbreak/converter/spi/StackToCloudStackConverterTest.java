@@ -36,6 +36,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -93,6 +94,8 @@ public class StackToCloudStackConverterTest {
     private static final String CLOUD_PLATFORM = "MOCK";
 
     private static final String ENV_CRN = "env-crn";
+
+    private static final String STACK_CRN = "stack-crn";
 
     private static final String RESOURCE_GROUP = "resource-group";
 
@@ -160,6 +163,7 @@ public class StackToCloudStackConverterTest {
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         when(cluster.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
         when(cluster.getExtendedBlueprintText()).thenReturn(BLUEPRINT_TEXT);
@@ -598,7 +602,7 @@ public class StackToCloudStackConverterTest {
 
     @Test
     public void testConvertWhenStackPassingItsParametersThenThoseShouldBeStored() {
-        Map<String, String> expected = new LinkedHashMap<>(0);
+        Map<String, String> expected = Map.of(PlatformParametersConsts.RESOURCE_CRN_PARAMETER, STACK_CRN);
         when(stack.getParameters()).thenReturn(expected);
 
         CloudStack result = underTest.convert(stack);
@@ -837,7 +841,7 @@ public class StackToCloudStackConverterTest {
 
         assertEquals(RESOURCE_GROUP, parameters.get(RESOURCE_GROUP_NAME_PARAMETER));
         assertEquals(ResourceGroupUsage.SINGLE.name(), parameters.get(RESOURCE_GROUP_USAGE_PARAMETER));
-        assertEquals(3, parameters.size());
+        assertEquals(4, parameters.size());
     }
 
     @Test
@@ -861,7 +865,7 @@ public class StackToCloudStackConverterTest {
 
         assertFalse(parameters.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
         assertFalse(parameters.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
-        assertEquals(1, parameters.size());
+        assertEquals(2, parameters.size());
     }
 
     private StackAuthentication createStackAuthentication() {

@@ -112,7 +112,6 @@ public class AzureResourceConnectorTest {
         when(ac.getCloudCredential()).thenReturn(new CloudCredential("aCredentialId", "aCredentialName"));
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(deployment.exportTemplate()).thenReturn(deploymentExportResult);
-        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(instances);
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME)).thenReturn(instances);
@@ -122,6 +121,7 @@ public class AzureResourceConnectorTest {
     @Test
     public void testWhenTemplateDeploymentDoesNotExistsThenComputeResourceServiceBuildsTheTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
+        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
 
         underTest.launch(ac, stack, notifier, ADJUSTMENT_TYPE, THRESHOLD);
 
@@ -135,13 +135,14 @@ public class AzureResourceConnectorTest {
     @Test
     public void testWhenTemplateDeploymentExistsThenComputeResourceServiceBuildsTheTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(true);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
 
         underTest.launch(ac, stack, notifier, ADJUSTMENT_TYPE, THRESHOLD);
 
-        verify(azureComputeResourceService, times(0)).buildComputeResourcesForLaunch(any(AuthenticatedContext.class),
+        verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(any(AuthenticatedContext.class),
                 any(CloudStack.class), any(AdjustmentType.class), anyLong(), any(), any());
-        verify(azureCloudResourceService, times(0)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
-        verify(azureUtils, times(0)).getCustomNetworkId(network);
+        verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
+        verify(azureUtils, times(1)).getCustomNetworkId(network);
     }
 
 }

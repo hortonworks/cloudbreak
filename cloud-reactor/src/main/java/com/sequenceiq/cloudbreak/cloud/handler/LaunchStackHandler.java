@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -73,6 +74,9 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             eventBus.notify(result.selector(), new Event<>(launchStackRequestEvent.getHeaders(), result));
             LOGGER.debug("Launching the stack successfully finished for {}", cloudContext);
         } catch (Exception e) {
+            if (ExceptionUtils.getRootCause(e) instanceof InterruptedException) {
+                LOGGER.info("Interrupted exception is ignored as it has been thrown because of graceful shutdown of the java process.");
+            }
             LaunchStackResult failure = new LaunchStackResult(e, request.getResourceId());
             LOGGER.warn("Error during launching the stack:", e);
             request.getResult().onNext(failure);

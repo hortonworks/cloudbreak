@@ -26,6 +26,8 @@ public class PlatformParametersConsts {
 
     public static final String RESOURCE_GROUP_USAGE_PARAMETER = "resourceGroupUsage";
 
+    public static final String RESOURCE_CRN_PARAMETER = "resourceCrn";
+
     private PlatformParametersConsts() {
 
     }
