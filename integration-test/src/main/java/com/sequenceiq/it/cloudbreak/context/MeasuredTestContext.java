@@ -226,9 +226,14 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public <T extends EnvironmentTestDto, E extends EnvironmentStatus> T await(T entity, E desiredStatus, RunningParameter runningParameter) {
+        return wrappedTestContext.await(entity, desiredStatus, runningParameter);
+    }
+
+    @Override
     public <T extends EnvironmentTestDto, E extends EnvironmentStatus> T await(T entity, E desiredStatus, RunningParameter runningParameter,
             long pollingInterval) {
-        return wrappedTestContext.await(entity, desiredStatus, runningParameter);
+        return wrappedTestContext.await(entity, desiredStatus, runningParameter, pollingInterval);
     }
 
     @Override
