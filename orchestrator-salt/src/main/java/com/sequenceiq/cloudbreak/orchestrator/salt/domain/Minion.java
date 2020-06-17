@@ -75,4 +75,8 @@ public class Minion {
     public void setHostName(String hostName) {
         this.hostName = hostName;
     }
+
+    public String getId() {
+        return hostName + '.' + domain;
+    }
 }

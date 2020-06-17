@@ -5,7 +5,10 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -33,6 +36,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.join.MinionAcceptor;
 
 public class SaltBootstrapTest {
 
@@ -54,15 +58,15 @@ public class SaltBootstrapTest {
         GenericResponses genericResponses = new GenericResponses();
         genericResponses.setResponses(Collections.singletonList(response));
 
-        when(saltConnector.action(ArgumentMatchers.any(SaltAction.class))).thenReturn(genericResponses);
+        when(saltConnector.action(any(SaltAction.class))).thenReturn(genericResponses);
 
         minionIpAddressesResponse = new MinionIpAddressesResponse();
-        when(saltConnector.run(ArgumentMatchers.any(), ArgumentMatchers.eq("network.ipaddrs"), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(saltConnector.run(any(), ArgumentMatchers.eq("network.ipaddrs"), any(), any()))
                 .thenReturn(minionIpAddressesResponse);
     }
 
     @Test
-    public void callTest() throws IOException {
+    public void callTest() throws Exception {
         List<Map<String, JsonNode>> result = new ArrayList<>();
         Map<String, JsonNode> ipAddressesForMinions = new HashMap<>();
         ipAddressesForMinions.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
@@ -77,11 +81,10 @@ public class SaltBootstrapTest {
         targets.add(new Node("10.0.0.3", null, null, "hg"));
 
         SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, Collections.singletonList(gatewayConfig), targets, new BootstrapParams());
-        try {
-            saltBootstrap.call();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        saltBootstrap = spy(saltBootstrap);
+        doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor(any(SaltAction.class));
+
+        saltBootstrap.call();
     }
 
     @Test
@@ -100,6 +103,8 @@ public class SaltBootstrapTest {
         targets.add(new Node(missingNodeIp, null, null, "hg"));
 
         SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, Collections.singletonList(gatewayConfig), targets, new BootstrapParams());
+        saltBootstrap = spy(saltBootstrap);
+        doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor(any(SaltAction.class));
         try {
             saltBootstrap.call();
             fail("should throw exception");

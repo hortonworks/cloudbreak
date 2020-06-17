@@ -65,7 +65,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(KerberosTestAssertion.validateCustomDomain("realm.addomain.com"))
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("realm.addomain.com", 7))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("realm.addomain.com", 12))
                 .validate();
     }
 
@@ -93,7 +93,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(KerberosTestAssertion.validateCustomDomain("custom.addomain.com"))
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("custom.addomain.com", 7))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("custom.addomain.com", 12))
                 .validate();
     }
 
@@ -118,7 +118,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(KerberosTestAssertion.validateCustomDomain("realm.freeiparealm.com"))
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("realm.freeiparealm.com", 7))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("realm.freeiparealm.com", 12))
                 .validate();
     }
 
@@ -144,7 +144,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(KerberosTestAssertion.validateCustomDomain("custom.freeipadomain.com"))
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("custom.freeipadomain.com", 7))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("custom.freeipadomain.com", 12))
                 .validate();
     }
 }
