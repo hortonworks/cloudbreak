@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.environment.flow.stop.handler;
 
-import org.springframework.stereotype.Component;
-
 import com.google.common.base.Strings;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -10,9 +8,11 @@ import com.sequenceiq.environment.environment.flow.stop.event.EnvStopFailedEvent
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
+import org.springframework.stereotype.Component;
 import reactor.bus.Event;
 
 @Component
@@ -20,9 +20,12 @@ public class StopFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> 
 
     private final FreeIpaPollerService freeIpaPollerService;
 
-    protected StopFreeIpaHandler(EventSender eventSender, FreeIpaPollerService freeIpaPollerService) {
+    private final FreeIpaService freeIpaService;
+
+    protected StopFreeIpaHandler(EventSender eventSender, FreeIpaPollerService freeIpaPollerService, FreeIpaService freeIpaService) {
         super(eventSender);
         this.freeIpaPollerService = freeIpaPollerService;
+        this.freeIpaService = freeIpaService;
     }
 
     @Override
@@ -35,6 +38,11 @@ public class StopFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> 
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             if (Strings.isNullOrEmpty(environmentDto.getParentEnvironmentCrn())) {
+                freeIpaService.describe(environmentDto.getResourceCrn()).ifPresent(freeIpa -> {
+                    if (freeIpa.getStatus() != null && !freeIpa.getStatus().isStoppable()) {
+                        throw new FreeIpaOperationFailedException("FreeIPA is not in a stoppable state! Current state is: " + freeIpa.getStatus().name());
+                    }
+                });
                 freeIpaPollerService.stopAttachedFreeipaInstances(environmentDto.getId(), environmentDto.getResourceCrn());
             }
             EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
@@ -48,4 +56,5 @@ public class StopFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> 
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }
+
 }
