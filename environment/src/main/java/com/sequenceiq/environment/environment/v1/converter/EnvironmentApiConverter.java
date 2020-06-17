@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.v1.converter;
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
 
 import java.util.Objects;
@@ -97,7 +98,7 @@ public class EnvironmentApiConverter {
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
         LOGGER.debug("Creating EnvironmentCreationDto from EnvironmentRequest: {}", request);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String cloudPlatform = credentialService.getCloudPlatformByCredential(request.getCredentialName(), accountId);
+        String cloudPlatform = credentialService.getCloudPlatformByCredential(request.getCredentialName(), accountId, ENVIRONMENT);
         Builder builder = EnvironmentCreationDto.builder()
                 .withAccountId(accountId)
                 .withCreator(ThreadBasedUserCrnProvider.getUserCrn())

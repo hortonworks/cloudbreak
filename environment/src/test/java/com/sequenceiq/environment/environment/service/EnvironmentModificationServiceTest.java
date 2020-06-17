@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
+import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -366,7 +367,7 @@ class EnvironmentModificationServiceTest {
                 .build();
         when(environmentService
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
-        when(credentialService.getByNameForAccountId(eq(credentialName), eq(ACCOUNT_ID))).thenReturn(value);
+        when(credentialService.getByNameForAccountId(eq(credentialName), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(value);
 
         environmentModificationServiceUnderTest.changeCredentialByEnvironmentName(ACCOUNT_ID, ENVIRONMENT_NAME, environmentChangeDto);
 
@@ -385,7 +386,7 @@ class EnvironmentModificationServiceTest {
                 .build();
         when(environmentService
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(CRN), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
-        when(credentialService.getByNameForAccountId(eq(credentialName), eq(ACCOUNT_ID))).thenReturn(value);
+        when(credentialService.getByNameForAccountId(eq(credentialName), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(value);
 
         environmentModificationServiceUnderTest.changeCredentialByEnvironmentCrn(ACCOUNT_ID, CRN, environmentChangeDto);
 

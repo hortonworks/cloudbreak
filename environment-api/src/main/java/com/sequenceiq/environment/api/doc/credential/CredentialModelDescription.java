@@ -21,6 +21,7 @@ public class CredentialModelDescription {
     public static final String GCP_CREDENTIAL_PREREQUISITES_CREATION_COMMAND = "GCP specific 'gcloud' CLI based commands to "
             + "create prerequisites for Cloudbreak credential creation. The field is base64 encoded.";
     public static final String CLOUD_PLATFORM = "type of cloud provider";
+    public static final String CREDENTIAL_TYPE = "type of credential";
     public static final String ATTRIBUTES = "provider specific attributes of the credential";
     public static final String VERIFICATION_STATUS_TEXT = "verification status text for credential, if empty then there is no verification issue";
     public static final String VERIFY_PERMISSIONS = "verify credential permissions";

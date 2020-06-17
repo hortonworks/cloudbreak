@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.validation;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
@@ -101,7 +102,7 @@ public class EnvironmentValidatorService {
     public ValidationResult validateAwsEnvironmentRequest(EnvironmentRequest environmentRequest) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String cloudPlatform = credentialService.getCloudPlatformByCredential(environmentRequest.getCredentialName(), accountId);
+        String cloudPlatform = credentialService.getCloudPlatformByCredential(environmentRequest.getCredentialName(), accountId, ENVIRONMENT);
         resultBuilder.ifError(() -> !AWS.name().equalsIgnoreCase(cloudPlatform),
                 "Environment request is not for AWS.");
 

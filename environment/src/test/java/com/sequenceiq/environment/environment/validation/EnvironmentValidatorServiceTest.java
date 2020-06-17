@@ -4,6 +4,7 @@ import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -77,7 +78,7 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void testValidateAwsEnvironmentRequestNotAWS() {
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn("AZURE");
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn("AZURE");
 
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("azure-credential");
@@ -88,7 +89,7 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void testValidateAwsEnvironmentRequestNoAwsParams() {
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn("AWS");
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn("AWS");
 
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("aws-credential");
@@ -99,7 +100,7 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void testValidateAwsEnvironmentNoS3GuardParams() {
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn("AWS");
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn("AWS");
 
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("aws-credential");
@@ -111,7 +112,7 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void testValidateAwsEnvironmentRequestNoDynamoTable() {
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn("AWS");
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn("AWS");
 
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("aws-credential");
@@ -125,7 +126,7 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void testValidateAwsEnvironmentRequestValid() {
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn("AWS");
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn("AWS");
 
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("aws-credential");

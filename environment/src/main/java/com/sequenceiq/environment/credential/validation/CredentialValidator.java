@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
@@ -75,11 +76,15 @@ public class CredentialValidator {
         }
     }
 
-    public ValidationResult validateCredentialUpdate(Credential original, Credential newCred) {
+    public ValidationResult validateCredentialUpdate(Credential original, Credential newCred, CredentialType type) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         if (!original.getCloudPlatform().equals(newCred.getCloudPlatform())) {
             resultBuilder.error(String.format("CloudPlatform of the credential cannot be changed! Original: '%s' New: '%s'.",
                     original.getCloudPlatform(), newCred.getCloudPlatform()));
+            return resultBuilder.build();
+        }
+        if (original.getType() != null && !type.equals(original.getType())) {
+            resultBuilder.error(String.format("Credential type must be %s type and the current is %s.", type, original.getType()));
             return resultBuilder.build();
         }
         return Optional.ofNullable(providerValidators.get(newCred.getCloudPlatform()))

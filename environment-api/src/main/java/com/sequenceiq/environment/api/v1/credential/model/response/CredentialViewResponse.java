@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.credential.CredentialDescriptor;
 import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
+import com.sequenceiq.common.model.CredentialType;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -29,6 +30,9 @@ public class CredentialViewResponse {
 
     @ApiModelProperty(CredentialModelDescription.VERIFICATION_STATUS_TEXT)
     private String verificationStatusText;
+
+    @ApiModelProperty(CredentialModelDescription.CREDENTIAL_TYPE)
+    private CredentialType type;
 
     public String getName() {
         return name;
@@ -76,5 +80,13 @@ public class CredentialViewResponse {
 
     public void setVerificationStatusText(String verificationStatusText) {
         this.verificationStatusText = verificationStatusText;
+    }
+
+    public CredentialType getType() {
+        return type;
+    }
+
+    public void setType(CredentialType type) {
+        this.type = type;
     }
 }

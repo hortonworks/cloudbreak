@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.response.AwsCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.common.model.CredentialType;
 
 @Service
 public class AwsCredentialConnector implements CredentialConnector {
@@ -83,8 +84,19 @@ public class AwsCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
-        AwsCredentialPrerequisites awsPrerequisites = new AwsCredentialPrerequisites(externalId, awsPlatformParameters.getCredentialPoliciesJson());
+    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress, CredentialType type) {
+        String policyJson;
+        switch (type) {
+            case ENVIRONMENT:
+                policyJson = awsPlatformParameters.getCredentialPoliciesJson();
+                break;
+            case AUDIT:
+                policyJson = awsPlatformParameters.getAuditPoliciesJson();
+                break;
+            default:
+                policyJson = null;
+        }
+        AwsCredentialPrerequisites awsPrerequisites = new AwsCredentialPrerequisites(externalId, policyJson);
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), accountId, awsPrerequisites);
     }
 

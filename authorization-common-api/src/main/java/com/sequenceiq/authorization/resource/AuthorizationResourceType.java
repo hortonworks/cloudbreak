@@ -10,5 +10,6 @@ public enum AuthorizationResourceType {
     CLUSTER_TEMPLATE,
     DATABASE,
     DATABASE_SERVER,
-    RECIPE;
+    RECIPE,
+    AUDIT_CREDENTIAL;
 }

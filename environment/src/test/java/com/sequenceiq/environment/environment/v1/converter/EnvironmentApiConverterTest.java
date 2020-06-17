@@ -108,7 +108,7 @@ public class EnvironmentApiConverterTest {
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
 
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn(cloudPlatform.name());
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(cloudPlatform.name());
         when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
@@ -137,7 +137,7 @@ public class EnvironmentApiConverterTest {
         assertEquals(networkDto, actual.getNetwork());
         assertSecurityAccess(request.getSecurityAccess(), actual.getSecurityAccess());
 
-        verify(credentialService).getCloudPlatformByCredential(anyString(), anyString());
+        verify(credentialService).getCloudPlatformByCredential(anyString(), anyString(), any());
         verify(freeIpaConverter).convert(request.getFreeIpa());
         verify(accountTelemetry).getFeatures();
         verify(accountTelemetryService).getOrDefault(any());
@@ -185,7 +185,7 @@ public class EnvironmentApiConverterTest {
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
 
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn(AZURE.name());
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AZURE.name());
         when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);

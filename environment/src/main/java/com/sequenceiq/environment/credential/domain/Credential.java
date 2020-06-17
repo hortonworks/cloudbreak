@@ -16,6 +16,8 @@ import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.common.model.CredentialType;
+import com.sequenceiq.environment.parameters.dao.converter.CredentialTypeConverter;
 
 @Entity
 @Table
@@ -59,6 +61,9 @@ public class Credential implements Serializable, AuthResource, AccountIdAwareRes
 
     @Column
     private boolean verifyPermissions;
+
+    @Convert(converter = CredentialTypeConverter.class)
+    private CredentialType type;
 
     private Long created = System.currentTimeMillis();
 
@@ -164,6 +169,14 @@ public class Credential implements Serializable, AuthResource, AccountIdAwareRes
 
     public void setVerificationStatusText(String verificationStatusText) {
         this.verificationStatusText = verificationStatusText;
+    }
+
+    public CredentialType getType() {
+        return type;
+    }
+
+    public void setType(CredentialType type) {
+        this.type = type;
     }
 
     public boolean isVerifyPermissions() {

@@ -63,6 +63,9 @@ public enum AuthorizationResourceAction {
     DESCRIBE_RECIPE,
     CREATE_RECIPE,
     DELETE_RECIPE,
+    CREATE_AUDIT_CREDENTIAL,
+    DESCRIBE_AUDIT_CREDENTIAL,
+    MODIFY_AUDIT_CREDENTIAL,
     // deprecated actions, please do not use them
     ENVIRONMENT_READ,
     ENVIRONMENT_WRITE,

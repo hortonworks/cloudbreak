@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.service.integration;
 
+import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.getProxyConfig;
 import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.getProxyRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -149,6 +150,7 @@ public class EnvironmentServiceIntegrationTest {
         credential.setDescription("description");
         credential.setGovCloud(false);
         credential.setArchived(false);
+        credential.setType(ENVIRONMENT);
         credentialRequest = new CredentialRequest();
 
         when(entitlementService.azureEnabled(any(), any())).thenReturn(true);
@@ -178,7 +180,7 @@ public class EnvironmentServiceIntegrationTest {
 
         CredentialResponse response = client.credentialV1Endpoint().post(credentialRequest);
         assertTrue(response.getName().equals(credentialRequest.getName()), " not saved, or response is different");
-        assertTrue(credentialRepository.findByNameAndAccountId(credentialRequest.getName(), TEST_ACCOUNT_ID, List.of("AWS")).isPresent());
+        assertTrue(credentialRepository.findByNameAndAccountId(credentialRequest.getName(), TEST_ACCOUNT_ID, List.of("AWS"), ENVIRONMENT).isPresent());
     }
 
     @Test

@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
+import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -66,7 +68,7 @@ public class EnvironmentResourceService {
         Credential credential;
         if (StringUtils.isNotEmpty(request.getCredentialName())) {
             try {
-                credential = credentialService.getByNameForAccountId(request.getCredentialName(), accountId);
+                credential = credentialService.getByNameForAccountId(request.getCredentialName(), accountId, ENVIRONMENT);
             } catch (NotFoundException e) {
                 throw new BadRequestException(String.format("No credential found with name [%s] in the workspace.",
                         request.getCredentialName()), e);

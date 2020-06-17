@@ -17,6 +17,7 @@ public class CredentialViewConverter {
         response.setCrn(credentialView.getResourceCrn());
         response.setDescription(credentialView.getDescription());
         response.setVerificationStatusText(credentialView.getVerificationStatusText());
+        response.setType(credentialView.getType());
         return response;
     }
 
@@ -31,6 +32,7 @@ public class CredentialViewConverter {
         credentialView.setName(credential.getName());
         credentialView.setResourceCrn(credential.getResourceCrn());
         credentialView.setVerificationStatusText(credential.getVerificationStatusText());
+        credentialView.setType(credential.getType());
         return credentialView;
     }
 }

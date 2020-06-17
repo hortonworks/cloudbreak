@@ -1,0 +1,22 @@
+{
+  "Name": "Cloudera Management Console Azure Audit Operator",
+  "IsCustom": true,
+  "Description": "Can use Cloudera Management Console to archive Audit data.",
+  "Actions": [
+    "Microsoft.Storage/*/read",
+    "Microsoft.Storage/storageAccounts/write",
+    "Microsoft.Storage/storageAccounts/blobServices/write",
+    "Microsoft.Storage/storageAccounts/blobServices/containers/*",
+    "Microsoft.Storage/storageAccounts/listkeys/action",
+    "Microsoft.Storage/storageAccounts/regeneratekey/action",
+    "Microsoft.Storage/storageAccounts/delete"
+  ],
+  "NotActions": [],
+  "DataActions": [
+    "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
+  ],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/{subscriptionId}"
+  ]
+}

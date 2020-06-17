@@ -3,6 +3,7 @@ package com.sequenceiq.environment.client;
 import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.client.AbstractKeyBasedServiceEndpoint;
+import com.sequenceiq.environment.api.v1.credential.endpoint.AuditCredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
@@ -17,6 +18,11 @@ public class EnvironmentServiceApiKeyEndpoints extends AbstractKeyBasedServiceEn
     @Override
     public CredentialEndpoint credentialV1Endpoint() {
         return getEndpoint(CredentialEndpoint.class);
+    }
+
+    @Override
+    public AuditCredentialEndpoint auditCredentialV1Endpoint() {
+        return getEndpoint(AuditCredentialEndpoint.class);
     }
 
     @Override

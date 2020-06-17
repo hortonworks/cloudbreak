@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.common.model.CredentialType;
 
 @Service
 public class AzureCredentialConnector implements CredentialConnector {
@@ -98,10 +99,22 @@ public class AzureCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress, CredentialType type) {
         String creationCommand = appCreationCommand.generate(deploymentAddress);
         String encodedCommand = Base64.encodeBase64String(creationCommand.getBytes());
-        AzureCredentialPrerequisites azurePrerequisites = new AzureCredentialPrerequisites(encodedCommand, azurePlatformParameters.getRoleDefJson());
+        String roleDefJson;
+        switch (type) {
+            case ENVIRONMENT:
+                roleDefJson = azurePlatformParameters.getRoleDefJson();
+                break;
+            case AUDIT:
+                roleDefJson = azurePlatformParameters.getAuditRoleDefJson();
+                break;
+            default:
+                roleDefJson = null;
+                break;
+        }
+        AzureCredentialPrerequisites azurePrerequisites = new AzureCredentialPrerequisites(encodedCommand, roleDefJson);
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), azurePrerequisites);
     }
 

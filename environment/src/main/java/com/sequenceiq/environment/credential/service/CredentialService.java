@@ -2,6 +2,7 @@ package com.sequenceiq.environment.credential.service;
 
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
@@ -92,8 +94,8 @@ public class CredentialService extends AbstractCredentialService implements Reso
         super(notificationSender, messagesService, enabledPlatforms);
     }
 
-    public Set<Credential> listAvailablesByAccountId(String accountId) {
-        return repository.findAllByAccountId(accountId, getValidPlatformsForAccountId(accountId));
+    public Set<Credential> listAvailablesByAccountId(String accountId, CredentialType type) {
+        return repository.findAllByAccountId(accountId, getValidPlatformsForAccountId(accountId), type);
     }
 
     @Cacheable(cacheNames = "credentialCloudPlatformCache")
@@ -104,21 +106,21 @@ public class CredentialService extends AbstractCredentialService implements Reso
                 .collect(Collectors.toSet());
     }
 
-    public Credential getByNameForAccountId(String name, String accountId) {
-        return repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESSAGE, name));
+    public Credential getByNameForAccountId(String name, String accountId, CredentialType type) {
+        return repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms(), type).orElseThrow(notFound(NOT_FOUND_FORMAT_MESSAGE, name));
     }
 
-    public Credential getByCrnForAccountId(String crn, String accountId) {
-        return repository.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
+    public Credential getByCrnForAccountId(String crn, String accountId, CredentialType type) {
+        return repository.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms(), type).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
     }
 
-    public Credential getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
-        return repository.findByEnvironmentCrnAndAccountId(environmentCrn, accountId, getEnabledPlatforms())
+    public Credential getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId, CredentialType type) {
+        return repository.findByEnvironmentCrnAndAccountId(environmentCrn, accountId, getEnabledPlatforms(), type)
                 .orElseThrow(notFound("Credential with environmentCrn:", environmentCrn));
     }
 
-    public Credential getByEnvironmentNameAndAccountId(String environmentName, String accountId) {
-        return repository.findByEnvironmentNameAndAccountId(environmentName, accountId, getEnabledPlatforms())
+    public Credential getByEnvironmentNameAndAccountId(String environmentName, String accountId, CredentialType type) {
+        return repository.findByEnvironmentNameAndAccountId(environmentName, accountId, getEnabledPlatforms(), type)
                 .orElseThrow(notFound("Credential with environmentName:", environmentName));
     }
 
@@ -135,8 +137,8 @@ public class CredentialService extends AbstractCredentialService implements Reso
         return verification.getCredential();
     }
 
-    public Credential updateByAccountId(Credential credential, String accountId) {
-        Credential original = getCredentialAndValidateUpdate(credential, accountId);
+    public Credential updateByAccountId(Credential credential, String accountId, CredentialType type) {
+        Credential original = getCredentialAndValidateUpdate(credential, accountId, type);
         credential.setId(original.getId());
         credential.setAccountId(accountId);
         credential.setResourceCrn(original.getResourceCrn());
@@ -147,10 +149,11 @@ public class CredentialService extends AbstractCredentialService implements Reso
         return updated;
     }
 
-    private Credential getCredentialAndValidateUpdate(Credential credential, String accountId) {
-        Credential original = repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
+    private Credential getCredentialAndValidateUpdate(Credential credential, String accountId, CredentialType type) {
+        Credential original = repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms(), type)
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESSAGE, credential.getName()));
-        ValidationResult validationResult = credentialValidator.validateCredentialUpdate(original, credential);
+        ValidationResult validationResult = credentialValidator.validateCredentialUpdate(original, credential,
+                type);
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
@@ -159,11 +162,11 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     @Retryable(value = BadRequestException.class, maxAttempts = 30, backoff = @Backoff(delay = 2000))
     public void createWithRetry(Credential credential, String accountId, String creatorUserCrn) {
-        create(credential, accountId, creatorUserCrn);
+        create(credential, accountId, creatorUserCrn, ENVIRONMENT);
     }
 
-    public Credential create(Credential credential, @Nonnull String accountId, @Nonnull String creatorUserCrn) {
-        repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
+    public Credential create(Credential credential, @Nonnull String accountId, @Nonnull String creatorUserCrn, CredentialType type) {
+        repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms(), type)
                 .map(Credential::getName)
                 .ifPresent(name -> {
                     throw new BadRequestException("Credential already exists with name: " + name);
@@ -193,14 +196,14 @@ public class CredentialService extends AbstractCredentialService implements Reso
         }
     }
 
-    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress, String userCrn) {
+    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress, String userCrn, CredentialType type) {
         String cloudPlatformUppercased = cloudPlatform.toUpperCase();
         credentialValidator.validateCredentialCloudPlatform(cloudPlatformUppercased, userCrn);
-        return credentialPrerequisiteService.getPrerequisites(cloudPlatformUppercased, deploymentAddress);
+        return credentialPrerequisiteService.getPrerequisites(cloudPlatformUppercased, deploymentAddress, type);
     }
 
     public String initCodeGrantFlow(String accountId, @Nonnull Credential credential, String creatorUserCrn) {
-        repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
+        repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms(), ENVIRONMENT)
                 .map(Credential::getName)
                 .ifPresent(name -> {
                     throw new BadRequestException("Credential already exists with name: " + name);
@@ -217,7 +220,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
     }
 
     public String initCodeGrantFlow(String accountId, String name, String userId) {
-        Credential original = repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms())
+        Credential original = repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms(), ENVIRONMENT)
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESSAGE, name));
         String originalAttributes = original.getAttributes();
         if (getAzureCodeGrantFlowAttributes(original) == null) {
@@ -231,7 +234,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     public Credential authorizeCodeGrantFlow(String code, @Nonnull String state, String accountId, @Nonnull String platform) {
         String cloudPlatformUpperCased = platform.toUpperCase();
-        Set<Credential> credentials = repository.findAllByAccountId(accountId, List.of(cloudPlatformUpperCased));
+        Set<Credential> credentials = repository.findAllByAccountId(accountId, List.of(cloudPlatformUpperCased), ENVIRONMENT);
         Credential original = getCredentialByCodeGrantFlowState(state, credentials);
         LOGGER.info("Authorizing credential('{}') with Authorization Code Grant flow.", original.getName());
         String attributesSecret = original.getAttributesSecret();
@@ -241,10 +244,10 @@ public class CredentialService extends AbstractCredentialService implements Reso
         return updated;
     }
 
-    public String getCloudPlatformByCredential(String credentialName, String accountId) {
+    public String getCloudPlatformByCredential(String credentialName, String accountId, CredentialType type) {
         if (!Strings.isNullOrEmpty(credentialName)) {
             try {
-                Credential credential = getByNameForAccountId(credentialName, accountId);
+                Credential credential = getByNameForAccountId(credentialName, accountId, type);
                 return credential.getCloudPlatform();
             } catch (NotFoundException e) {
                 throw new BadRequestException(String.format("No credential found with name [%s] in the workspace.",
@@ -263,12 +266,12 @@ public class CredentialService extends AbstractCredentialService implements Reso
         return credentialRequestToCreateAWSCredentialRequestConverter.convert(credentialRequest);
     }
 
-    Optional<Credential> findByNameAndAccountId(String name, String accountId, Collection<String> cloudPlatforms) {
-        return repository.findByNameAndAccountId(name, accountId, cloudPlatforms);
+    Optional<Credential> findByNameAndAccountId(String name, String accountId, Collection<String> cloudPlatforms, CredentialType type) {
+        return repository.findByNameAndAccountId(name, accountId, cloudPlatforms, type);
     }
 
-    Optional<Credential> findByCrnAndAccountId(String crn, String accountId, Collection<String> cloudPlatforms) {
-        return repository.findByCrnAndAccountId(crn, accountId, cloudPlatforms);
+    Optional<Credential> findByCrnAndAccountId(String crn, String accountId, Collection<String> cloudPlatforms, CredentialType type) {
+        return repository.findByCrnAndAccountId(crn, accountId, cloudPlatforms, type);
     }
 
     Credential save(Credential credential) {
@@ -336,30 +339,34 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
-        return getByNameForAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getResourceCrn();
+        return getByNameForAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId(),
+                ENVIRONMENT).getResourceCrn();
     }
 
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
         return resourceNames.stream()
-                .map(resourceName -> getByNameForAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getResourceCrn())
+                .map(resourceName -> getByNameForAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId(),
+                        ENVIRONMENT).getResourceCrn())
                 .collect(Collectors.toList());
     }
 
     @Override
     public String getResourceCrnByEnvironmentName(String environmentName) {
-        return getByEnvironmentNameAndAccountId(environmentName, ThreadBasedUserCrnProvider.getAccountId()).getResourceCrn();
+        return getByEnvironmentNameAndAccountId(environmentName, ThreadBasedUserCrnProvider.getAccountId(),
+                ENVIRONMENT).getResourceCrn();
     }
 
     @Override
     public String getResourceCrnByEnvironmentCrn(String environmentCrn) {
-        return getByEnvironmentCrnAndAccountId(environmentCrn, ThreadBasedUserCrnProvider.getAccountId()).getResourceCrn();
+        return getByEnvironmentCrnAndAccountId(environmentCrn, ThreadBasedUserCrnProvider.getAccountId(),
+            ENVIRONMENT).getResourceCrn();
     }
 
     @Override
     public List<String> getResourceCrnsInAccount() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        return repository.findAllResourceCrnsByAccountId(accountId);
+        return repository.findAllResourceCrnsByAccountId(accountId, ENVIRONMENT);
     }
 
     @Override

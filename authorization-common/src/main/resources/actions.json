@@ -338,5 +338,20 @@
     "right": "environments/deleteRecipe",
     "resourceType": "RECIPE",
     "legacyRight": "datahub/read"
+  },
+  "CREATE_AUDIT_CREDENTIAL": {
+    "right": "environments/createAuditCredential",
+    "resourceType": "AUDIT_CREDENTIAL",
+    "legacyRight": "environments/write"
+  },
+  "DESCRIBE_AUDIT_CREDENTIAL": {
+    "right": "environments/describeAuditCredential",
+    "resourceType": "AUDIT_CREDENTIAL",
+    "legacyRight": "environments/read"
+  },
+  "MODIFY_AUDIT_CREDENTIAL": {
+    "right": "environments/modifyAuditCredential",
+    "resourceType": "AUDIT_CREDENTIAL",
+    "legacyRight": "environments/write"
   }
 }

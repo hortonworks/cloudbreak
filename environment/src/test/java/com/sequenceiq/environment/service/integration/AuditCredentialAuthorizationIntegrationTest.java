@@ -4,14 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -26,8 +23,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -38,7 +33,6 @@ import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
-import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -49,7 +43,7 @@ import com.sequenceiq.environment.service.integration.testconfiguration.TestConf
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         classes = TestConfigurationForServiceIntegration.class)
 @ActiveProfiles("test")
-public class CredentialAuthorizationIntegrationTest {
+public class AuditCredentialAuthorizationIntegrationTest {
 
     private static final String DEFINITION_AWS = FileReaderUtils.readFileFromClasspathQuietly("testCredentialDefinitionAws.json");
 
@@ -104,61 +98,42 @@ public class CredentialAuthorizationIntegrationTest {
     }
 
     @Test
-    public void testCredentialCreateAws() throws InterruptedException {
+    public void testAuditCredentialCreateAws() throws InterruptedException {
         when(requestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
         when(requestProvider.getCredentialVerificationRequest(any(), any())).thenAnswer(
                 invocation -> new EnvironmentServiceIntegrationTest.CredentialVerificationMockRequest(invocation.getArgument(0), invocation.getArgument(1))
         );
         when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AWS));
 
-        when(grpcUmsClient.checkRight(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), anyString(), any())).thenReturn(Boolean.TRUE);
-        when(grpcUmsClient.checkRight(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), anyString(), any())).thenReturn(Boolean.FALSE);
-
-        assertNotNull(firstUserClient.credentialV1Endpoint().post(getAwsCredentialRequest(FIRST_CRED_NAME)));
+        assertNotNull(firstUserClient.auditCredentialV1Endpoint().post(getAwsCredentialRequest(FIRST_CRED_NAME)));
         assertThrows(ForbiddenException.class, () ->
-                secondUserClient.credentialV1Endpoint().post(getAwsCredentialRequest(SECOND_CRED_NAME)));
+                secondUserClient.auditCredentialV1Endpoint().post(getAwsCredentialRequest(SECOND_CRED_NAME)));
     }
 
     @Test
-    public void testCredentialPermissions() {
+    public void testAuditCredentialPermissions() {
         credentialRepository.save(getAwsCredential(FIRST_CRED_NAME, ACCOUNT_ID, FIRST_USER_CRN));
-        credentialRepository.save(getAwsCredential(SECOND_CRED_NAME, ACCOUNT_ID, SECOND_USER_CRN));
-
-        testListFiltering(firstUserClient, FIRST_CRED_NAME);
-        testListFiltering(secondUserClient, SECOND_CRED_NAME);
-
-        testUnhappyPaths(firstUserClient, SECOND_CRED_NAME);
-        testUnhappyPaths(secondUserClient, FIRST_CRED_NAME);
 
         testHappyPaths(firstUserClient, FIRST_CRED_NAME);
-        testHappyPaths(secondUserClient, SECOND_CRED_NAME);
 
-        assertEquals(0, credentialRepository.findAll().stream()
+        testUnhappyPaths(secondUserClient, FIRST_CRED_NAME);
+
+        assertEquals(1, credentialRepository.findAll().stream()
                 .filter(cred -> !cred.isArchived()).collect(Collectors.toList()).size());
     }
 
-    private void testListFiltering(EnvironmentServiceCrnEndpoints client, String credentialName) {
-        Collection<CredentialResponse> listResponse = client.credentialV1Endpoint().list().getResponses();
-        assertEquals(1, listResponse.size());
-        assertEquals(credentialName, listResponse.iterator().next().getName());
-    }
-
     private void testHappyPaths(EnvironmentServiceCrnEndpoints client, String credentialName) {
-        client.credentialV1Endpoint().getByName(credentialName);
-        client.credentialV1Endpoint().deleteByName(credentialName);
+        String resourceCrn = getResourceCrn(credentialName, ACCOUNT_ID);
+
+        client.auditCredentialV1Endpoint().list();
+        client.auditCredentialV1Endpoint().getByResourceCrn(resourceCrn);
     }
 
     private void testUnhappyPaths(EnvironmentServiceCrnEndpoints client, String wrongCredentialName) {
         String wrongCredentialCrn = getResourceCrn(wrongCredentialName, ACCOUNT_ID);
 
-        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().getByName(wrongCredentialName));
-        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().getByResourceCrn(wrongCredentialCrn));
-        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().put(getAwsCredentialRequest(wrongCredentialName)));
-        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().deleteMultiple(Sets.newHashSet(wrongCredentialName)));
-        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().deleteByName(wrongCredentialName));
-        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().deleteByResourceCrn(wrongCredentialCrn));
-        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().verifyByName(wrongCredentialName));
-        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().verifyByCrn(wrongCredentialCrn));
+        assertThrows(ForbiddenException.class, () -> client.auditCredentialV1Endpoint().list());
+        assertThrows(ForbiddenException.class, () -> client.auditCredentialV1Endpoint().getByResourceCrn(wrongCredentialCrn));
     }
 
     private static String getUserCrn(String userId, String accountId) {
@@ -184,22 +159,8 @@ public class CredentialAuthorizationIntegrationTest {
     }
 
     private void mockPermissions() {
-        String firstCredentialCrn = getResourceCrn(FIRST_CRED_NAME, ACCOUNT_ID);
-        String secondCredentialCrn = getResourceCrn(SECOND_CRED_NAME, ACCOUNT_ID);
-
-        Map<String, Boolean> firstUserMap = Maps.newHashMap();
-        firstUserMap.put(firstCredentialCrn, Boolean.TRUE);
-        firstUserMap.put(secondCredentialCrn, Boolean.FALSE);
-        when(grpcUmsClient.hasRights(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), anyList(), any(), any())).thenReturn(firstUserMap);
-        Map<String, Boolean> seondUserMap = Maps.newHashMap();
-        seondUserMap.put(firstCredentialCrn, Boolean.FALSE);
-        seondUserMap.put(secondCredentialCrn, Boolean.TRUE);
-        when(grpcUmsClient.hasRights(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), anyList(), any(), any())).thenReturn(seondUserMap);
-
-        when(grpcUmsClient.checkRight(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), anyString(), eq(firstCredentialCrn), any())).thenReturn(Boolean.TRUE);
-        when(grpcUmsClient.checkRight(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), anyString(), eq(secondCredentialCrn), any())).thenReturn(Boolean.FALSE);
-        when(grpcUmsClient.checkRight(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), anyString(), eq(firstCredentialCrn), any())).thenReturn(Boolean.FALSE);
-        when(grpcUmsClient.checkRight(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), anyString(), eq(secondCredentialCrn), any())).thenReturn(Boolean.TRUE);
+        when(grpcUmsClient.checkRight(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), anyString(), any())).thenReturn(Boolean.TRUE);
+        when(grpcUmsClient.checkRight(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), anyString(), any())).thenReturn(Boolean.FALSE);
     }
 
     private CredentialRequest getAwsCredentialRequest(String name) {
@@ -228,7 +189,7 @@ public class CredentialAuthorizationIntegrationTest {
         credential.setCloudPlatform("AWS");
         credential.setCreator(userCrn);
         credential.setDescription("description");
-        credential.setType(CredentialType.ENVIRONMENT);
+        credential.setType(CredentialType.AUDIT);
         credential.setGovCloud(false);
         credential.setArchived(false);
         return credential;
