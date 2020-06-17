@@ -22,7 +22,8 @@ public class DeletionDatalakeFlowOperationAuditEventNameConverter implements Dat
 
     @Override
     public boolean isFailed(StructuredFlowEvent structuredEvent) {
-        return false;
+        String flowEvent = structuredEvent.getFlow().getFlowEvent();
+        return "TERMINATION_FAILED_STATE".equals(flowEvent) || "CLUSTER_TERMINATION_FAILED_STATE".equals(flowEvent);
     }
 
     @Override
