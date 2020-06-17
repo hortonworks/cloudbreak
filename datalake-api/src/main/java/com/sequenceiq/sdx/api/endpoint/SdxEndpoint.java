@@ -26,6 +26,10 @@ import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 import io.swagger.annotations.Api;
@@ -165,4 +169,31 @@ public interface SdxEndpoint {
     @ApiOperation(value = "list advertised datalake versions", produces = MediaType.APPLICATION_JSON, nickname = "advertisedruntimes")
     List<AdvertisedRuntime> advertisedRuntimes();
 
+    @POST
+    @Path("{name}/backupDatabase")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "backup the database backing datalake ", produces = MediaType.APPLICATION_JSON, nickname = "backupDatabase")
+    SdxDatabaseBackupResponse backupDatabaseByName(@PathParam("name") String name,
+            @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation);
+
+    @POST
+    @Path("{name}/restoreDatabase")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "restore the database backing datalake ", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatabase")
+    SdxDatabaseRestoreResponse restoreDatabaseByName(@PathParam("name") String name,
+            @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation);
+
+    @GET
+    @Path("{name}/backupDatabaseStatus")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Get the status of datalake database backup operation", produces = MediaType.APPLICATION_JSON, nickname = "backupDatabaseStatus")
+    SdxDatabaseBackupStatusResponse backupDatabaseStatusByName(@PathParam("name") String name,
+            @QueryParam("operationId") String operationId);
+
+    @GET
+    @Path("{name}/restoreDatabaseStatus")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Get the status of datalake database restore operation", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatabaseStatus")
+    SdxDatabaseRestoreStatusResponse restoreDatabaseStatusByName(@PathParam("name") String name,
+            @QueryParam("operationId") String operationId);
 }
