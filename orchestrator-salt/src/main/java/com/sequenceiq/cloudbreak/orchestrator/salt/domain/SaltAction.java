@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 
 public class SaltAction {
 
-    private final SaltActionType action;
+    private SaltActionType action;
 
     /**
      * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.2.2, please use master.address
@@ -31,6 +31,9 @@ public class SaltAction {
 
     public SaltAction(SaltActionType action) {
         this.action = action;
+    }
+
+    public SaltAction() {
     }
 
     /**
