@@ -96,27 +96,27 @@ class UserSyncServiceTest {
 
     @Test
     void testValidateParameters() {
-        underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(ENV_CRN), Set.of(USER_CRN), Set.of(MACHINE_USER_CRN));
+        underTest.validateParameters(ACCOUNT_ID, Set.of(ENV_CRN), Set.of(USER_CRN), Set.of(MACHINE_USER_CRN));
     }
 
     @Test
     void testValidateParametersBadEnv() {
         Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(OTHER_CRN), Set.of(), Set.of());
+            underTest.validateParameters(ACCOUNT_ID, Set.of(OTHER_CRN), Set.of(), Set.of());
         });
     }
 
     @Test
     void testValidateParametersBadUser() {
         Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(), Set.of(OTHER_CRN), Set.of());
+            underTest.validateParameters(ACCOUNT_ID, Set.of(), Set.of(OTHER_CRN), Set.of());
         });
     }
 
     @Test
     void testValidateParametersBadMachineUser() {
         Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(), Set.of(), Set.of(OTHER_CRN));
+            underTest.validateParameters(ACCOUNT_ID, Set.of(), Set.of(), Set.of(OTHER_CRN));
         });
     }
 
@@ -124,7 +124,7 @@ class UserSyncServiceTest {
     void testValidateParametersWrongAccount() {
         String differentAccount = UUID.randomUUID().toString();
         Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(differentAccount, USER_CRN, Set.of(ENV_CRN), Set.of(), Set.of());
+            underTest.validateParameters(differentAccount, Set.of(ENV_CRN), Set.of(), Set.of());
         });
     }
 
@@ -231,12 +231,11 @@ class UserSyncServiceTest {
             assertEquals(INTERNAL_ACTOR_CRN, ThreadBasedUserCrnProvider.getUserCrn());
             return null;
         })
-                .when(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), anySet(), anySet(), anyBoolean());
+                .when(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyList(), anySet(), anySet(), anyBoolean());
 
-        spyService.synchronizeUsers("accountId", "actorCrn",
-                Set.of(), Set.of(), Set.of());
+        spyService.synchronizeUsers("accountId", Set.of(), Set.of(), Set.of());
 
-        verify(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), anySet(), anySet(), anyBoolean());
+        verify(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyList(), anySet(), anySet(), anyBoolean());
     }
 
     @Test

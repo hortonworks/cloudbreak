@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static java.util.Objects.requireNonNull;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -102,10 +101,10 @@ public class UserSyncService {
     @Inject
     private WorkloadCredentialService workloadCredentialService;
 
-    public Operation synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
+    public Operation synchronizeUsers(String accountId, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
 
-        validateParameters(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
+        validateParameters(accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
         LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
                 accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
 
@@ -129,14 +128,13 @@ public class UserSyncService {
                     ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> {
                         boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
                         if (fullSync) {
-                            long currentTime = Instant.now().toEpochMilli();
                             stacks.forEach(stack -> {
                                 UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
                                 userSyncStatus.setLastStartedFullSync(operation);
                                 userSyncStatusService.save(userSyncStatus);
                             });
                         }
-                        asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync);
+                        asyncSynchronizeUsers(operation.getOperationId(), accountId, stacks, userCrnFilter, machineUserCrnFilter, fullSync);
                     }));
         }
 
@@ -144,12 +142,12 @@ public class UserSyncService {
     }
 
     @VisibleForTesting
-    void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
+    void asyncSynchronizeUsers(String operationId, String accountId, List<Stack> stacks,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter, boolean fullSync) {
 
         MDCBuilder.addFlowId(operationId);
         asyncTaskExecutor.submit(() -> internalSynchronizeUsers(
-                operationId, accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync));
+                operationId, accountId, stacks, userCrnFilter, machineUserCrnFilter, fullSync));
 
     }
 
@@ -170,7 +168,7 @@ public class UserSyncService {
         }
     }
 
-    private void internalSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
+    private void internalSynchronizeUsers(String operationId, String accountId, List<Stack> stacks,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter, boolean fullSync) {
         tryWithOperationCleanup(operationId, accountId, () -> {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
@@ -182,7 +180,7 @@ public class UserSyncService {
                     null;
 
             Map<String, UmsUsersState> envToUmsStateMap = umsUsersStateProvider
-                    .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter, requestId);
+                    .getEnvToUmsUsersStateMap(accountId, environmentCrns, userCrnFilter, machineUserCrnFilter, requestId);
 
             List<SuccessDetails> success = new ArrayList<>();
             List<FailureDetails> failure = new ArrayList<>();
@@ -429,10 +427,9 @@ public class UserSyncService {
     }
 
     @VisibleForTesting
-    void validateParameters(String accountId, String actorCrn, Set<String> environmentCrnFilter,
+    void validateParameters(String accountId, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
         requireNonNull(accountId, "accountId must not be null");
-        requireNonNull(actorCrn, "actorCrn must not be null");
         requireNonNull(environmentCrnFilter, "environmentCrnFilter must not be null");
         requireNonNull(userCrnFilter, "userCrnFilter must not be null");
         requireNonNull(machineUserCrnFilter, "machineUserCrnFilter must not be null");

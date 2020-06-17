@@ -8,7 +8,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
 import io.swagger.annotations.ApiModelProperty;
 
 public class SynchronizeOperationRequestBase {
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ENVIRONMENT_CRNS)
+    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_OPTIONAL_ENVIRONMENT_CRNS)
     private Set<String> environments = new HashSet<>();
 
     public SynchronizeOperationRequestBase() {

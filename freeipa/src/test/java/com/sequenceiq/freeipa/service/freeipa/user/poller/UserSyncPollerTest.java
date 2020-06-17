@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user.poller;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,9 +23,9 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.EventGenerationIdsChecker;
 import com.sequenceiq.freeipa.service.freeipa.user.UmsEventGenerationIdsProvider;
-import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncStatusService;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,7 +70,7 @@ class UserSyncPollerTest {
 
         underTest.syncAllFreeIpaStacks();
 
-        verify(userSyncService).synchronizeUsers(UserSyncTestUtils.ACCOUNT_ID, INTERNAL_ACTOR_CRN,
+        verify(userSyncService).synchronizeUsers(UserSyncTestUtils.ACCOUNT_ID,
                 Set.of(UserSyncTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of());
     }
 
@@ -84,7 +83,7 @@ class UserSyncPollerTest {
         underTest.syncAllFreeIpaStacks();
 
         verify(userSyncService, times(0))
-                .synchronizeUsers(any(), any(), any(), any(), any());
+                .synchronizeUsers(any(), any(), any(), any());
     }
 
     @Test
@@ -96,7 +95,7 @@ class UserSyncPollerTest {
 
         underTest.syncAllFreeIpaStacks();
 
-        verify(userSyncService).synchronizeUsers(UserSyncTestUtils.ACCOUNT_ID, INTERNAL_ACTOR_CRN,
+        verify(userSyncService).synchronizeUsers(UserSyncTestUtils.ACCOUNT_ID,
                 Set.of(UserSyncTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of());
     }
 
@@ -110,7 +109,7 @@ class UserSyncPollerTest {
         underTest.syncAllFreeIpaStacks();
 
         verify(userSyncService, times(0))
-                .synchronizeUsers(any(), any(), any(), any(), any());
+                .synchronizeUsers(any(), any(), any(), any());
     }
 
     @Test
@@ -121,7 +120,7 @@ class UserSyncPollerTest {
         underTest.syncAllFreeIpaStacks();
 
         verify(userSyncService, times(0))
-                .synchronizeUsers(any(), any(), any(), any(), any());
+                .synchronizeUsers(any(), any(), any(), any());
     }
 
     private Stack setupMockStackService(Stack stack) {

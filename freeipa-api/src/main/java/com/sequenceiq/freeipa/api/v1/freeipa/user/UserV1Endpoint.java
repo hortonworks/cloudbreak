@@ -61,4 +61,18 @@ public interface UserV1Endpoint {
     @ApiOperation(value = UserOperationDescriptions.ENVIRONMENT_USERSYNC_STATE, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
             nickname = "getEnvironmentUserSyncStateV1")
     EnvironmentUserSyncState getUserSyncState(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
+
+    @POST
+    @Path("syncEnvironment")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UserOperationDescriptions.SYNC_ENVIRONMENT, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
+            nickname = "synchronizeEnvironmentV1")
+    SyncOperationStatus synchronizeEnvironment(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
+
+    @POST
+    @Path("syncActor")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UserOperationDescriptions.SYNC_ACTOR, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
+            nickname = "synchronizeActorV1")
+    SyncOperationStatus synchronizeActor(@QueryParam("actorCrn") @NotEmpty String actorCrn);
 }

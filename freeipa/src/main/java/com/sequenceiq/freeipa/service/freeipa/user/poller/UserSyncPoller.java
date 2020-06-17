@@ -120,7 +120,7 @@ public class UserSyncPoller {
                     cooldownChecker.isCooldownExpired(userSyncStatus, cooldownThresholdTime)) {
                 LOGGER.debug("Environment {} in Account {} is not in sync.",
                         stack.getEnvironmentCrn(), stack.getAccountId());
-                Operation operation = userSyncService.synchronizeUsers(stack.getAccountId(), INTERNAL_ACTOR_CRN,
+                Operation operation = userSyncService.synchronizeUsers(stack.getAccountId(),
                         Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
                 LOGGER.debug("User Sync request resulted in operation {}", operation);
             } else {

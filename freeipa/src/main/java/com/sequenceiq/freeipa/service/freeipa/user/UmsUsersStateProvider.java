@@ -52,7 +52,7 @@ public class UmsUsersStateProvider {
     @Inject
     private UmsRightProvider umsRightProvider;
 
-    public Map<String, UmsUsersState> getEnvToUmsUsersStateMap(String accountId, String actorCrn, Set<String> environmentCrns,
+    public Map<String, UmsUsersState> getEnvToUmsUsersStateMap(String accountId, Set<String> environmentCrns,
         Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
         try {
             LOGGER.debug("Getting UMS state for environments {} with requestId {}", environmentCrns, requestIdOptional);
@@ -61,11 +61,11 @@ public class UmsUsersStateProvider {
 
             boolean fullSync = userCrns.isEmpty() && machineUserCrns.isEmpty();
 
-            List<User> users = getUsers(actorCrn, accountId, requestIdOptional, fullSync, userCrns);
+            List<User> users = getUsers(accountId, requestIdOptional, fullSync, userCrns);
 
-            List<MachineUser> machineUsers = getMachineUsers(actorCrn, accountId, requestIdOptional, fullSync, machineUserCrns);
+            List<MachineUser> machineUsers = getMachineUsers(accountId, requestIdOptional, fullSync, machineUserCrns);
 
-            Map<String, FmsGroup> crnToFmsGroup = grpcUmsClient.listGroups(actorCrn, accountId, List.of(), requestIdOptional).stream()
+            Map<String, FmsGroup> crnToFmsGroup = grpcUmsClient.listGroups(INTERNAL_ACTOR_CRN, accountId, List.of(), requestIdOptional).stream()
                     .collect(Collectors.toMap(Group::getCrn, this::umsGroupToGroup));
 
             Map<WorkloadAdministrationGroup, FmsGroup> wags = grpcUmsClient.listWorkloadAdministrationGroups(INTERNAL_ACTOR_CRN, accountId, requestIdOptional)
@@ -133,22 +133,22 @@ public class UmsUsersStateProvider {
         }
     }
 
-    private List<User> getUsers(String actorCrn, String accountId, Optional<String> requestIdOptional, boolean fullSync, Set<String> userCrns) {
+    private List<User> getUsers(String accountId, Optional<String> requestIdOptional, boolean fullSync, Set<String> userCrns) {
         if (fullSync) {
-            return grpcUmsClient.listAllUsers(actorCrn, accountId, requestIdOptional);
+            return grpcUmsClient.listAllUsers(INTERNAL_ACTOR_CRN, accountId, requestIdOptional);
         } else if (!userCrns.isEmpty()) {
-            return grpcUmsClient.listUsers(actorCrn, accountId, List.copyOf(userCrns), requestIdOptional);
+            return grpcUmsClient.listUsers(INTERNAL_ACTOR_CRN, accountId, List.copyOf(userCrns), requestIdOptional);
         } else {
             return List.of();
         }
     }
 
-    private List<MachineUser> getMachineUsers(String actorCrn, String accountId, Optional<String> requestIdOptional,
+    private List<MachineUser> getMachineUsers(String accountId, Optional<String> requestIdOptional,
         boolean fullSync, Set<String> machineUserCrns) {
         if (fullSync) {
-            return grpcUmsClient.listAllMachineUsers(actorCrn, accountId, requestIdOptional);
+            return grpcUmsClient.listAllMachineUsers(INTERNAL_ACTOR_CRN, accountId, requestIdOptional);
         } else if (!machineUserCrns.isEmpty()) {
-            return grpcUmsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns), requestIdOptional);
+            return grpcUmsClient.listMachineUsers(INTERNAL_ACTOR_CRN, accountId, List.copyOf(machineUserCrns), requestIdOptional);
         } else {
             return List.of();
         }

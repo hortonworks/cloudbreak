@@ -12,10 +12,10 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("SynchronizeAllUsersV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SynchronizeAllUsersRequest extends SynchronizeOperationRequestBase {
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_MACHINEUSER_CRNS)
+    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_OPTIONAL_MACHINEUSER_CRNS)
     private Set<String> machineUsers = new HashSet<>();
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_USER_CRNS)
+    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_OPTIONAL_USER_CRNS)
     private Set<String> users = new HashSet<>();
 
     @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ACCOUNT_ID)

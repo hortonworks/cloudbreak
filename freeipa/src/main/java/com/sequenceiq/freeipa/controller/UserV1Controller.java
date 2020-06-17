@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
@@ -78,12 +79,11 @@ public class UserV1Controller implements UserV1Endpoint {
                 machineUserCrnFilter = Set.of(userCrn);
                 break;
             default:
-                throw new BadRequestException(String.format("UserCrn %s is not of resoure type USER or MACHINE_USER", userCrn));
+                throw new BadRequestException(String.format("UserCrn %s is not of resource type USER or MACHINE_USER", userCrn));
         }
         return checkOperationRejected(
                 operationToSyncOperationStatus.convert(
-                        userSyncService.synchronizeUsers(accountId, userCrn, environmentCrnFilter,
-                userCrnFilter, machineUserCrnFilter)));
+                        userSyncService.synchronizeUsers(accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter)));
     }
 
     @Override
@@ -98,7 +98,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
         return checkOperationRejected(
                 operationToSyncOperationStatus.convert(
-                        userSyncService.synchronizeUsers(accountId, userCrn, nullToEmpty(request.getEnvironments()),
+                        userSyncService.synchronizeUsers(accountId, nullToEmpty(request.getEnvironments()),
                                 nullToEmpty(request.getUsers()), nullToEmpty(request.getMachineUsers()))));
     }
 
@@ -133,6 +133,40 @@ public class UserV1Controller implements UserV1Endpoint {
         Crn envCrn = Crn.safeFromString(environmentCrn);
 
         return environmentUserSyncStateCalculator.calculateEnvironmentUserSyncState(accountId, envCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    public SyncOperationStatus synchronizeEnvironment(@ResourceCrn @TenantAwareParam @NotEmpty String environmentCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+
+        return checkOperationRejected(
+                operationToSyncOperationStatus.convert(
+                        userSyncService.synchronizeUsers(accountId, Set.of(environmentCrn), Set.of(), Set.of())));
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+//    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    public SyncOperationStatus synchronizeActor(@ResourceCrn @TenantAwareParam @NotEmpty String actorCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+
+        Set<String> userCrnFilter = Sets.newHashSet();
+        Set<String> machineUserCrnFilter = Sets.newHashSet();
+        Crn crn = Crn.safeFromString(actorCrn);
+        switch (crn.getResourceType()) {
+            case USER:
+                userCrnFilter.add(actorCrn);
+                break;
+            case MACHINE_USER:
+                machineUserCrnFilter.add(actorCrn);
+                break;
+            default:
+                throw new BadRequestException(String.format("actorCrn %s is not of resource type USER or MACHINE_USER", actorCrn));
+        }
+        return checkOperationRejected(
+                operationToSyncOperationStatus.convert(
+                        userSyncService.synchronizeUsers(accountId, Set.of(), userCrnFilter, machineUserCrnFilter)));
     }
 
     private String determineAccountId(String callingActor, String requestedAccountId) {
