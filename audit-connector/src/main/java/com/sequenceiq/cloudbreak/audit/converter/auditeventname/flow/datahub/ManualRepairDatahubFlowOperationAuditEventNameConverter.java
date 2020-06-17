@@ -22,7 +22,8 @@ public class ManualRepairDatahubFlowOperationAuditEventNameConverter implements 
 
     @Override
     public boolean isFailed(StructuredFlowEvent structuredEvent) {
-        return false;
+        String flowState = structuredEvent.getFlow().getFlowState();
+        return "MANUAL_STACK_REPAIR_TRIGGER_FAILED_STATE".equals(flowState);
     }
 
     @Override

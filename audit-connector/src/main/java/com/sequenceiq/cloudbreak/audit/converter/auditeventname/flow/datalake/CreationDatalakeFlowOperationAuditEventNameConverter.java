@@ -22,7 +22,8 @@ public class CreationDatalakeFlowOperationAuditEventNameConverter implements Dat
 
     @Override
     public boolean isFailed(StructuredFlowEvent structuredEvent) {
-        return false;
+        String flowState = structuredEvent.getFlow().getFlowState();
+        return "STACK_CREATION_FAILED_STATE".equals(flowState) || "CLUSTER_CREATION_FAILED_STATE".equals(flowState);
     }
 
     @Override

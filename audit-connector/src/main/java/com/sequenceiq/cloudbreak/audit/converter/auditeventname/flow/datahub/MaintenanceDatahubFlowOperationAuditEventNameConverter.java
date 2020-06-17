@@ -22,7 +22,8 @@ public class MaintenanceDatahubFlowOperationAuditEventNameConverter implements D
 
     @Override
     public boolean isFailed(StructuredFlowEvent structuredEvent) {
-        return false;
+        String flowState = structuredEvent.getFlow().getFlowState();
+        return "VALIDATION_FAILED_STATE".equals(flowState);
     }
 
     @Override
