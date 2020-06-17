@@ -131,7 +131,7 @@ public class AuditClient {
      */
     private ManagedChannelWrapper makeWrapper() {
         return new ManagedChannelWrapper(
-                ManagedChannelBuilder.forAddress(auditConfig.getEndpoint(), auditConfig.getPort())
+                ManagedChannelBuilder.forAddress(auditConfig.getHost(), auditConfig.getPort())
                         .usePlaintext()
                         .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
                         .build());
