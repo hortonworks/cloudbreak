@@ -22,7 +22,8 @@ public class StopDatahubFlowOperationAuditEventNameConverter implements DatahubF
 
     @Override
     public boolean isFailed(StructuredFlowEvent structuredEvent) {
-        return false;
+        String flowState = structuredEvent.getFlow().getFlowState();
+        return "STOP_FAILED_STATE".equals(flowState) || "CLUSTER_STOP_FAILED_STATE".equals(flowState);
     }
 
     @Override

@@ -22,7 +22,8 @@ public class StartDatalakeFlowOperationAuditEventNameConverter implements Datala
 
     @Override
     public boolean isFailed(StructuredFlowEvent structuredEvent) {
-        return false;
+        String flowState = structuredEvent.getFlow().getFlowState();
+        return "CLUSTER_START_FAILED_STATE".equals(flowState) || "START_FAILED_STATE".equals(flowState);
     }
 
     @Override
