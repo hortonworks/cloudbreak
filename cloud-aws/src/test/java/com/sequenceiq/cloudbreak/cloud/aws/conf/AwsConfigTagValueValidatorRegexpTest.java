@@ -16,11 +16,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategyMultiplePreferPublic;
-import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetSelectorService;
+import com.sequenceiq.cloudbreak.cloud.aws.service.SubnetCollectorService;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { AwsConfig.class, SubnetFilterStrategyMultiplePreferPublic.class, SubnetSelectorService.class})
+@ContextConfiguration(classes = { AwsConfig.class, SubnetFilterStrategyMultiplePreferPublic.class, SubnetCollectorService.class})
 class AwsConfigTagValueValidatorRegexpTest {
 
     @Inject

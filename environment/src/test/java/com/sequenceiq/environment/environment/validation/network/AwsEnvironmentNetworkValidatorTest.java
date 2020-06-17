@@ -18,9 +18,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.aws.service.SubnetCollectorService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -44,10 +45,12 @@ class AwsEnvironmentNetworkValidatorTest {
     @Mock
     private CloudNetworkService cloudNetworkService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
-        underTest = new AwsEnvironmentNetworkValidator(cloudNetworkService);
+        underTest = new AwsEnvironmentNetworkValidator(cloudNetworkService, entitlementService, new SubnetCollectorService());
     }
 
     @Test
@@ -145,7 +148,30 @@ class AwsEnvironmentNetworkValidatorTest {
     }
 
     @Test
-    void testValidateDuringRequestWhenNetworkHasOneSubnet() {
+    void testValidateDuringRequestWhenNetworkHasOnePublicSubnet() {
+        AwsParams awsParams = getAwsParams();
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null,
+                2, RegistrationType.EXISTING);
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setNetwork(networkDto);
+
+        Map<String, CloudSubnet> subnetMetas = new HashMap<>();
+        subnetMetas.put("private", NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+        subnetMetas.put("public", NetworkTestUtils.getPublicCloudSubnet("eu-west-1-b"));
+
+        when(cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto)).thenReturn(subnetMetas);
+
+        underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
+
+        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of("There should be at least two public subnets in the network"));
+    }
+
+    @Test
+    void testValidateDuringRequestOnInternalTenantWhenNetworkHasOneSubnet() {
+        when(entitlementService.internalTenant(any(), any())).thenReturn(true);
+
         int amountOfSubnets = 1;
         AwsParams awsParams = getAwsParams();
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null,
@@ -164,8 +190,32 @@ class AwsEnvironmentNetworkValidatorTest {
 
         underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
 
-        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of("There should be at least two subnets in the network")
-        );
+        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of("There should be at least two subnets in the network"));
+    }
+
+    @Test
+    void testValidateDuringRequestOnInternalTenantWhenNetworkHasOnlyPrivateSubnet() {
+        when(entitlementService.internalTenant(any(), any())).thenReturn(true);
+
+        int amountOfSubnets = 3;
+        AwsParams awsParams = getAwsParams();
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, getAwsParams(), null, awsParams.getVpcId(), null,
+                amountOfSubnets, RegistrationType.EXISTING);
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setNetwork(networkDto);
+
+        Map<String, CloudSubnet> subnetMetas = new HashMap<>();
+        subnetMetas.put("key0", NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+        subnetMetas.put("key1", NetworkTestUtils.getCloudSubnet("eu-west-1-b"));
+        subnetMetas.put("key2", NetworkTestUtils.getCloudSubnet("eu-west-1-c"));
+
+        when(cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto)).thenReturn(subnetMetas);
+
+        underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
+
+        assertFalse(validationResultBuilder.build().hasError());
     }
 
     @Test
@@ -206,7 +256,7 @@ class AwsEnvironmentNetworkValidatorTest {
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, awsParams, null, awsParams.getVpcId(), null, 2, RegistrationType.EXISTING);
         Map<String, CloudSubnet> subnetMetas = new HashMap<>();
         for (int i = 0; i < 2; i++) {
-            subnetMetas.put("key" + i, NetworkTestUtils.getCloudSubnet("eu-west-1-a"));
+            subnetMetas.put("key" + i, NetworkTestUtils.getPublicCloudSubnet("eu-west-1-a"));
         }
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
@@ -218,7 +268,7 @@ class AwsEnvironmentNetworkValidatorTest {
         underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
-                "The subnets in the vpc should be present at least in two different availability zones"
+                "The public subnets in the vpc should be present at least in two different availability zones"
         ));
     }
 

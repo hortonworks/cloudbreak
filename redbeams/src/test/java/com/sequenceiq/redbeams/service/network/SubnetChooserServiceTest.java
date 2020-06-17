@@ -21,6 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -44,11 +46,16 @@ public class SubnetChooserServiceTest {
 
     private static final String SUBNET_3 = "subnet-3";
 
+    private static final Crn OWNER_CRN = Crn.safeFromString("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
+
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private  SubnetChooserService underTest;
@@ -57,11 +64,8 @@ public class SubnetChooserServiceTest {
     public void testChooseSubnetsThenCloudPlatformConnectorGetIsCalled() {
         List<CloudSubnet> subnets = List.of();
         setupConnector();
-        DBStack dbStack = new DBStack();
-        dbStack.setCloudPlatform("MyCloudPlatform");
-        dbStack.setPlatformVariant("MyPlatformVariant");
 
-        underTest.chooseSubnets(subnets, dbStack);
+        underTest.chooseSubnets(subnets, createDbStack());
 
         ArgumentCaptor<CloudPlatformVariant> cloudPlatformVariantArgumentCaptor = ArgumentCaptor.forClass(CloudPlatformVariant.class);
         verify(cloudPlatformConnectors).get(cloudPlatformVariantArgumentCaptor.capture());
@@ -78,7 +82,7 @@ public class SubnetChooserServiceTest {
         );
         NetworkConnector networkConnector = setupConnector();
 
-        underTest.chooseSubnets(subnets, new DBStack());
+        underTest.chooseSubnets(subnets, createDbStack());
 
         ArgumentCaptor<SubnetSelectionParameters> subnetSelectionParametersCaptor = ArgumentCaptor.forClass(SubnetSelectionParameters.class);
         verify(networkConnector).chooseSubnets(eq(subnets), subnetSelectionParametersCaptor.capture());
@@ -92,6 +96,7 @@ public class SubnetChooserServiceTest {
         NetworkConnector networkConnector = setupConnector();
         DBStack dbStack = mock(DBStack.class);
         when(dbStack.isHa()).thenReturn(false);
+        when(dbStack.getOwnerCrn()).thenReturn(OWNER_CRN);
 
         underTest.chooseSubnets(subnets, dbStack);
 
@@ -107,6 +112,7 @@ public class SubnetChooserServiceTest {
         NetworkConnector networkConnector = setupConnector();
         DBStack dbStack = mock(DBStack.class);
         when(dbStack.isHa()).thenReturn(true);
+        when(dbStack.getOwnerCrn()).thenReturn(OWNER_CRN);
 
         underTest.chooseSubnets(subnets, dbStack);
 
@@ -122,6 +128,7 @@ public class SubnetChooserServiceTest {
         setupConnector("my error message");
         DBStack dbStack = mock(DBStack.class);
         when(dbStack.isHa()).thenReturn(true);
+        when(dbStack.getOwnerCrn()).thenReturn(OWNER_CRN);
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("my error message");
 
@@ -142,5 +149,13 @@ public class SubnetChooserServiceTest {
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         return networkConnector;
+    }
+
+    private DBStack createDbStack() {
+        DBStack dbStack = new DBStack();
+        dbStack.setOwnerCrn(OWNER_CRN);
+        dbStack.setCloudPlatform("MyCloudPlatform");
+        dbStack.setPlatformVariant("MyPlatformVariant");
+        return dbStack;
     }
 }

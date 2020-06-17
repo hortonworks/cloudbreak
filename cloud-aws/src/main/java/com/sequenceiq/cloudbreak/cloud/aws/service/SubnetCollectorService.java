@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector;
+package com.sequenceiq.cloudbreak.cloud.aws.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 
 @Service
-public class SubnetSelectorService {
+public class SubnetCollectorService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SubnetSelectorService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubnetCollectorService.class);
 
-    List<CloudSubnet> collectPublicSubnets(Collection<CloudSubnet> subnetMetas) {
+    public List<CloudSubnet> collectPublicSubnets(Collection<CloudSubnet> subnetMetas) {
         List<CloudSubnet> result = new ArrayList<>();
         for (CloudSubnet subnetMeta : subnetMetas) {
             if (isUsablePublicSubnet(subnetMeta)) {
@@ -26,7 +26,7 @@ public class SubnetSelectorService {
         return result;
     }
 
-    List<CloudSubnet> collectPrivateSubnets(Collection<CloudSubnet> subnetMetas) {
+    public List<CloudSubnet> collectPrivateSubnets(Collection<CloudSubnet> subnetMetas) {
         List<CloudSubnet> result = new ArrayList<>();
         for (CloudSubnet subnetMeta : subnetMetas) {
             if (subnetMeta.isPrivateSubnet()) {

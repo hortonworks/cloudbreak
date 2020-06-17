@@ -36,6 +36,7 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.conf.AwsConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.service.SubnetCollectorService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -191,7 +192,8 @@ public class AwsValidatorsTest {
             AwsEnvironmentVariableChecker.class,
             RetryService.class,
             AwsStackValidator.class,
-            CloudFormationStackUtil.class
+            CloudFormationStackUtil.class,
+            SubnetCollectorService.class
     })
     static class Config {
 

@@ -13,6 +13,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -97,6 +98,10 @@ public class NetworkTestUtils {
 
     static CloudSubnet getCloudSubnet(String availabilityZone) {
         return new CloudSubnet("eu-west-1", "name", availabilityZone, "cidr");
+    }
+
+    static CloudSubnet getPublicCloudSubnet(String availabilityZone) {
+        return new CloudSubnet("eu-west-1", "name", availabilityZone, "cidr", false, true, true, SubnetType.PUBLIC);
     }
 
     public static AzureParams getAzureParams(boolean noPublicIp, boolean withNetworkId, boolean withResourceGroupName) {

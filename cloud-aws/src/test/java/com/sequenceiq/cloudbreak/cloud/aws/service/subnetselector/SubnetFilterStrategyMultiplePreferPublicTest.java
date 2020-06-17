@@ -22,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.cloud.aws.service.SubnetCollectorService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
@@ -29,15 +30,15 @@ import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 public class SubnetFilterStrategyMultiplePreferPublicTest {
 
     @Mock
-    private SubnetSelectorService subnetSelectorService;
+    private SubnetCollectorService subnetCollectorService;
 
     @InjectMocks
     private SubnetFilterStrategyMultiplePreferPublic underTest;
 
     @Before
     public void setup() {
-        when(subnetSelectorService.collectPublicSubnets(ArgumentMatchers.any())).thenCallRealMethod();
-        when(subnetSelectorService.collectPrivateSubnets(ArgumentMatchers.any())).thenCallRealMethod();
+        when(subnetCollectorService.collectPublicSubnets(ArgumentMatchers.any())).thenCallRealMethod();
+        when(subnetCollectorService.collectPrivateSubnets(ArgumentMatchers.any())).thenCallRealMethod();
     }
 
     @Test
@@ -50,7 +51,7 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
 
         SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, false);
 
-        verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
+        verify(subnetCollectorService, times(1)).collectPublicSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(3));
     }
 
@@ -66,8 +67,8 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
 
         SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, true);
 
-        verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
-        verify(subnetSelectorService, times(1)).collectPrivateSubnets(anyCollection());
+        verify(subnetCollectorService, times(1)).collectPublicSubnets(anyCollection());
+        verify(subnetCollectorService, times(1)).collectPrivateSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(3));
     }
 
@@ -83,8 +84,8 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
 
         SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, false);
 
-        verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
-        verify(subnetSelectorService, never()).collectPrivateSubnets(anyCollection());
+        verify(subnetCollectorService, times(1)).collectPublicSubnets(anyCollection());
+        verify(subnetCollectorService, never()).collectPrivateSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(2));
     }
 
@@ -101,8 +102,8 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
 
         SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, true);
 
-        verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
-        verify(subnetSelectorService, times(1)).collectPrivateSubnets(anyCollection());
+        verify(subnetCollectorService, times(1)).collectPublicSubnets(anyCollection());
+        verify(subnetCollectorService, times(1)).collectPrivateSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(4));
     }
 
@@ -119,8 +120,8 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
 
         SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 3, false);
 
-        verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
-        verify(subnetSelectorService, never()).collectPrivateSubnets(anyCollection());
+        verify(subnetCollectorService, times(1)).collectPublicSubnets(anyCollection());
+        verify(subnetCollectorService, never()).collectPrivateSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(3));
     }
 
@@ -135,7 +136,7 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
 
         SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 1, false);
 
-        verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
+        verify(subnetCollectorService, times(1)).collectPublicSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(3));
     }
 
@@ -151,7 +152,7 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
 
         SubnetSelectionResult chosenSubnets = underTest.filter(subnets, 1, false);
 
-        verify(subnetSelectorService, times(1)).collectPublicSubnets(anyCollection());
+        verify(subnetCollectorService, times(1)).collectPublicSubnets(anyCollection());
         assertThat(chosenSubnets.getResult(), hasSize(2));
     }
 }

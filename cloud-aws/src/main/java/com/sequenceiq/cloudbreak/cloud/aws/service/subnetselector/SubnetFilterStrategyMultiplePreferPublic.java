@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.aws.service.SubnetCollectorService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
@@ -20,16 +21,16 @@ public class SubnetFilterStrategyMultiplePreferPublic implements SubnetFilterStr
     private static final Logger LOGGER = LoggerFactory.getLogger(SubnetFilterStrategyMultiplePreferPublic.class);
 
     @Inject
-    private SubnetSelectorService subnetSelectorService;
+    private SubnetCollectorService subnetCollectorService;
 
     @Override
     public SubnetSelectionResult filter(Collection<CloudSubnet> subnets, int azCount, boolean internalTenant) {
-        List<CloudSubnet> result = subnetSelectorService.collectPublicSubnets(subnets);
+        List<CloudSubnet> result = subnetCollectorService.collectPublicSubnets(subnets);
         Set<String> uniqueAzs = result.stream().map(CloudSubnet::getAvailabilityZone).collect(Collectors.toSet());
         if (uniqueAzs.size() < azCount && internalTenant) {
             LOGGER.info("There is not enough different AZ in the public subnets which {}, on internal tenant falling back to private subnets: {}",
                     uniqueAzs.size(), subnets);
-            List<CloudSubnet> privateSubnets = subnetSelectorService.collectPrivateSubnets(subnets);
+            List<CloudSubnet> privateSubnets = subnetCollectorService.collectPrivateSubnets(subnets);
             for (CloudSubnet privateSubnet : privateSubnets) {
                 if (!uniqueAzs.contains(privateSubnet.getAvailabilityZone())) {
                     result.add(privateSubnet);
