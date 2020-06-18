@@ -31,7 +31,6 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.util.TagAdderUtil;
-import com.sequenceiq.it.util.TestNameExtractorUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxAwsRequest;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
@@ -54,9 +53,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     @Inject
     private SdxTestClient sdxTestClient;
-
-    @Inject
-    private TestNameExtractorUtil testNameExtractorUtil;
 
     @Inject
     private TagAdderUtil tagAdderUtil;
@@ -233,8 +229,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     private SdxTestDto withTestNameAsTag() {
-        String callingMethodName = testNameExtractorUtil.getExecutingTestName();
-        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags(), callingMethodName);
+        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags(), getTestContext().getTestMethodName());
         return this;
     }
 

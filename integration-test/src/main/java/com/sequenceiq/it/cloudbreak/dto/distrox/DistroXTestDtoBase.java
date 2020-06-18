@@ -25,13 +25,9 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTest
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.util.TagAdderUtil;
-import com.sequenceiq.it.util.TestNameExtractorUtil;
 import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
 
 public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCloudbreakTestDto<DistroXV1Request, StackV4Response, T> {
-
-    @Inject
-    private TestNameExtractorUtil testNameExtractorUtil;
 
     @Inject
     private TagAdderUtil tagAdderUtil;
@@ -181,8 +177,7 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
     }
 
     private DistroXTestDtoBase<T> withTestNameAsTag() {
-        String callingMethodName = testNameExtractorUtil.getExecutingTestName();
-        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags().getUserDefined(), callingMethodName);
+        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags().getUserDefined(), getTestContext().getTestMethodName());
         return this;
     }
 
