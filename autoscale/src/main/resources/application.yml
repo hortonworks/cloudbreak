@@ -1,9 +1,5 @@
 server.servlet.context-path: "/as"
 
-audit:
-  service:
-    enabled: false
-
 opentracing:
   jaeger:
     log-spans: false
@@ -102,3 +98,5 @@ vault:
 altus:
   ums:
     host: localhost
+  audit:
+    enabled: false

@@ -6,10 +6,6 @@ opentracing:
   jaeger:
     log-spans: false
 
-audit:
-  service:
-    enabled: false
-
 management:
   endpoints:
     web:
@@ -43,6 +39,8 @@ altus:
     host: localhost
   ums:
     host: localhost
+  audit:
+    enabled: false
 
 secret:
   application: env/shared

@@ -13,7 +13,7 @@ public class StructuredEventEnablementConfig {
     @Value("${cb.audit.filepath:}")
     private String auditFilePath;
 
-    @Value("${audit.service.enabled}")
+    @Value("${altus.audit.enabled}")
     private boolean auditServiceEnabled;
 
     @Value("${cb.kafka.structured.events.topic:StructuredEvents}")

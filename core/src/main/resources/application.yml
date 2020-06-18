@@ -83,7 +83,9 @@ distrox:
     instance:
       types: true
 
-audit.service.enabled: true
+altus:
+  audit:
+    enabled: true
 
 cb:
   enabledplatforms: AZURE,AWS,GCP,OPENSTACK
