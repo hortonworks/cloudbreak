@@ -90,4 +90,13 @@ class RemoveHostsHandlerTest {
         verify(eventBus, times(1)).notify(eq("DOWNSCALEFAILUREEVENT"), ArgumentMatchers.<Event>any());
     }
 
+    @Test
+    void testSendsSuccessMessageWhenNoHostnamesAreProvided() throws Exception {
+        CleanupEvent cleanupEvent =
+                new CleanupEvent(STACK_ID, USERS, Set.of(), ROLES, IPS, STATES_TO_SKIP, ACCOUNT_ID, OPERATION_ID, CLUSTER_NAME, ENVIRONMENT_CRN);
+        RemoveHostsFromOrchestrationRequest request = new RemoveHostsFromOrchestrationRequest(cleanupEvent);
+        underTest.accept(new Event<>(request));
+        verify(eventBus, times(1)).notify(eq("REMOVEHOSTSFROMORCHESTRATIONSUCCESS"), ArgumentMatchers.<Event>any());
+    }
+
 }
