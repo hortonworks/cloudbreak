@@ -7,6 +7,7 @@ base:
     - datalake.init
     - docker
     - metadata.init
+    - tags
     - proxy.proxy
     - databus
     - cloudera-manager.csd
