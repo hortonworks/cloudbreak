@@ -60,26 +60,17 @@ public class FlowChains {
         }
     }
 
-    public void removeLastTriggerEvent(String flowChainId, String flowTriggerUserCrn) {
-        Queue<Selectable> queue = flowChainMap.get(flowChainId);
-        if (queue != null) {
-            Selectable selectable = queue.poll();
-            if (selectable != null) {
-                flowLogService.saveChain(flowChainId, flowChainParentMap.get(flowChainId), queue, flowTriggerUserCrn);
-            }
-        }
-    }
-
     public void triggerNextFlow(String flowChainId, String flowTriggerUserCrn, Map<Object, Object> contextParams) {
         Queue<Selectable> queue = flowChainMap.get(flowChainId);
         if (queue != null) {
-            Selectable selectable = queue.peek();
+            Selectable selectable = queue.poll();
             if (selectable != null) {
                 sendEvent(flowChainId, flowTriggerUserCrn, selectable, contextParams);
             } else {
                 removeFlowChain(flowChainId);
                 triggerParentFlowChain(flowChainId, flowTriggerUserCrn, contextParams);
             }
+            flowLogService.saveChain(flowChainId, flowChainParentMap.get(flowChainId), queue, flowTriggerUserCrn);
         }
     }
 
