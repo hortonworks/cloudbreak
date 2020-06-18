@@ -1,21 +1,35 @@
 package com.sequenceiq.cloudbreak.audit.config;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-
-import io.netty.util.internal.StringUtil;
 
 @Configuration
 public class AuditConfig {
 
-    @Value("${altus.audit.host:}")
+    @Value("${altus.audit.endpoint:}")
     private String endpoint;
 
-    @Value("${altus.audit.port:8989}")
+    private String host;
+
     private int port;
 
-    public String getEndpoint() {
-        return endpoint;
+    @PostConstruct
+    public void init() {
+        if (isConfigured()) {
+            String[] parts = endpoint.split(":");
+            if (parts.length != 2) {
+                throw new IllegalArgumentException("altus.audit.endpoint must be in host:port format.");
+            }
+            host = parts[0];
+            port = Integer.parseInt(parts[1]);
+        }
+    }
+
+    public String getHost() {
+        return host;
     }
 
     public int getPort() {
@@ -23,6 +37,6 @@ public class AuditConfig {
     }
 
     public boolean isConfigured() {
-        return !StringUtil.isNullOrEmpty(endpoint);
+        return StringUtils.isNotBlank(endpoint);
     }
 }

@@ -1,5 +1,6 @@
 base:
   '*':
+    - tags
     - databus
     - fluent
     - discovery
