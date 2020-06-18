@@ -77,6 +77,8 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private static final String DESCRIPTION = "DESCRIPTION";
 
+    private static final String TEST_METHOD_NAME = "TEST_METHOD_NAME";
+
     private ApplicationContext applicationContext;
 
     private final Map<String, CloudbreakTestDto> resources = new LinkedHashMap<>();
@@ -369,6 +371,15 @@ public abstract class TestContext implements ApplicationContextAware {
             return Optional.empty();
         }
         return Optional.ofNullable(description);
+    }
+
+    public TestContext setTestMethodName(String testMethodName) {
+        this.contextParameters.put(TEST_METHOD_NAME, testMethodName);
+        return this;
+    }
+
+    public String getTestMethodName() {
+        return this.contextParameters.get(TEST_METHOD_NAME).toString();
     }
 
     protected String getActingUserAccessKey() {
