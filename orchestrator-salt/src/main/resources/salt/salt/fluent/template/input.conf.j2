@@ -550,6 +550,30 @@
   tag {{providerPrefix}}.nginx_error
   read_from_head true
 </source>
+<source>
+  @type tail
+  format none
+  path /var/log/find_device_and_format.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-find_device_and_format.log.pos
+  tag {{providerPrefix}}.find_device_and_format
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/get_uuid_list.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-get_uuid_list.log.pos
+  tag {{providerPrefix}}.get_uuid_list
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/mount-disks.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-mount-disks.log.pos
+  tag {{providerPrefix}}.mount-disks
+  read_from_head true
+</source>
 </worker>
 {% else %}
 # DATABUS inputs are disabled

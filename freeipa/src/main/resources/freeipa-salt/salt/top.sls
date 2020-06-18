@@ -1,6 +1,7 @@
 base:
            '*':
              - nginx
+             - tags
              - fluent
              - ntp
              - freeipa

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static java.util.Collections.singletonMap;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -312,6 +314,7 @@ public class ClusterHostServiceRunner {
             throws CloudbreakOrchestratorFailedException {
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
         telemetryDecorator.decoratePillar(servicePillar, stack, telemetry);
+        decoratePillarWithTags(stack, servicePillar);
         decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
         decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
         decoratePillarWithClouderaManagerRepo(stack.getId(), cluster.getId(), servicePillar);
@@ -437,6 +440,19 @@ public class ClusterHostServiceRunner {
                 singletonMap("cloudera-manager", singletonMap("settings", Map.of(
                         "heartbeat_interval", cmHeartbeatInterval,
                         "missed_heartbeat_interval", cmMissedHeartbeatInterval)))));
+    }
+
+    private void decoratePillarWithTags(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
+        if (stack.getTags() != null && isNotBlank(stack.getTags().getValue())) {
+            try {
+                StackTags stackTags = stack.getTags().get(StackTags.class);
+                Map<String, Object> tags = new HashMap<>(stackTags.getDefaultTags());
+                servicePillarConfig.put("tags", new SaltPillarProperties("/tags/init.sls",
+                        Collections.singletonMap("tags", tags)));
+            } catch (Exception e) {
+                LOGGER.debug("Exception during reading default tags.", e);
+            }
+        }
     }
 
     private void saveCustomNameservers(Stack stack, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {

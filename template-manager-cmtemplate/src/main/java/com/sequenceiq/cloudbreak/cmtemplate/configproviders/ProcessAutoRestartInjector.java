@@ -34,7 +34,8 @@ public class ProcessAutoRestartInjector implements CmTemplateConfigInjector {
             "SOLR",
             "SPARK_ON_YARN",
             YarnRoles.YARN,
-            "ZEPPELIN"
+            "ZEPPELIN",
+            "QUEUEMANAGER"
     );
 
     private static final Set<String> IGNORED_ROLES = Set.of(
