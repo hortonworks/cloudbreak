@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -27,10 +29,18 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.util.TagAdderUtil;
+import com.sequenceiq.it.util.TestNameExtractorUtil;
 
 @Prototype
 public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, ClusterTemplateV4Response,
         DistroXTemplateTestDto, ClusterTemplateV4Response> {
+
+    @Inject
+    private TestNameExtractorUtil testNameExtractorUtil;
+
+    @Inject
+    private TagAdderUtil tagAdderUtil;
 
     public DistroXTemplateTestDto(TestContext testContext) {
         super(new DistroXV1Request(), testContext);
@@ -42,9 +52,16 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
 
     public DistroXTemplateTestDto valid() {
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
+                .withTestNameAsTag()
                 .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getName())
                 .withCluster(getTestContext().init(ClusterTestDto.class).getRequest())
                 .withInstanceGroups(getTestContext().init(InstanceGroupTestDto.class).getRequest());
+    }
+
+    private DistroXTemplateTestDto withTestNameAsTag() {
+        String callingMethodName = testNameExtractorUtil.getExecutingTestName();
+        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags().getUserDefined(), callingMethodName);
+        return this;
     }
 
     private DistroXTemplateTestDto withInstanceGroups(InstanceGroupV4Request instanceGroupTestDto) {
