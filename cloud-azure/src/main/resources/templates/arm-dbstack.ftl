@@ -11,7 +11,7 @@
         },
         "skuTier": {
             "type": "string",
-            "defaultValue" : "${skuTier!"GeneralPurpose"}",
+            "defaultValue" : "${skuTier!"MemoryOptimized"}",
             "allowedValues": [
                 "Basic",
                 "GeneralPurpose",
