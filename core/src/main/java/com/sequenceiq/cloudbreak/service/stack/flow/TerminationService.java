@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
@@ -61,6 +63,9 @@ public class TerminationService {
 
     @Inject
     private Clock clock;
+
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
 
     public void finalizeTermination(Long stackId, boolean force) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -113,6 +118,9 @@ public class TerminationService {
         stack.setTerminated(clock.getCurrentTimeMillis());
         stackService.save(stack);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_COMPLETED, statusReason);
+        if (stack.getType().equals(StackType.WORKLOAD)) {
+            grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, stack.getResourceCrn(), MDCUtils.getRequestId());
+        }
     }
 
     private void terminateInstanceGroups(Stack stack) {
