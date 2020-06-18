@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
@@ -35,6 +37,9 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
 
     @Inject
     private SdxStatusService sdxStatusService;
+
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
 
     @Override
     public String selector() {
@@ -82,5 +87,6 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
 
     private void setDeletedStatus(SdxCluster cluster) {
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED, "Datalake External RDS deleted", cluster);
+        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, cluster.getCrn(), MDCUtils.getRequestId());
     }
 }

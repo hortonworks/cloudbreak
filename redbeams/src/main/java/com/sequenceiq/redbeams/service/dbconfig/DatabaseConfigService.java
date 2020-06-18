@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
@@ -232,7 +233,9 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
             }
         }
 
-        return super.delete(databaseConfig);
+        DatabaseConfig archived = super.delete(databaseConfig);
+        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, archived.getResourceCrn().toString(), MDCUtils.getRequestId());
+        return archived;
     }
 
     private void deleteServiceManagedDatabase(DatabaseConfig databaseConfig) {
