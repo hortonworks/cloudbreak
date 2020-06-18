@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_COMPLETE;
-import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,14 +16,14 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
+import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.RDSModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
-import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -36,7 +34,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -59,13 +56,7 @@ public class AwsRdsLaunchService {
     private AwsClient awsClient;
 
     @Inject
-    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
-
-    @Inject
     private CloudFormationTemplateBuilder cloudFormationTemplateBuilder;
-
-    @Inject
-    private AwsPollTaskFactory awsPollTaskFactory;
 
     @Inject
     private AwsStackRequestHelper awsStackRequestHelper;
@@ -77,8 +68,9 @@ public class AwsRdsLaunchService {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
         try {
-            cfRetryClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
+            cfRetryClient.describeStacks(describeStacksRequest);
             LOGGER.debug("Stack already exists: {}", cFStackName);
         } catch (AmazonServiceException ignored) {
             // all subnets desired for DB subnet group are in the stack
@@ -101,14 +93,10 @@ public class AwsRdsLaunchService {
         LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
 
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
-        // autoscaling client is unused by task!
-        PollTask<Boolean> task = awsPollTaskFactory.newAwsCreateStackStatusCheckerTask(ac, cfClient, null, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES,
-                cFStackName);
-        try {
-            awsBackoffSyncPollingScheduler.schedule(task);
-        } catch (RuntimeException e) {
-            throw new CloudConnectorException(e.getMessage(), e);
-        }
+        Waiter<DescribeStacksRequest> creationWaiter = cfClient.waiters().stackCreateComplete();
+        StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
+        run(creationWaiter, describeStacksRequest,
+                stackCancellationCheck);
 
         List<CloudResource> databaseResources = getCreatedOutputs(ac, stack, cFStackName, cfRetryClient, resourceNotifier);
         databaseResources.forEach(dbr -> resourceNotifier.notifyAllocation(dbr, ac.getCloudContext()));
@@ -121,7 +109,7 @@ public class AwsRdsLaunchService {
     }
 
     private List<CloudResource> getCreatedOutputs(AuthenticatedContext ac, DatabaseStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
-            PersistenceNotifier resourceNotifier) {
+        PersistenceNotifier resourceNotifier) {
         List<CloudResource> resources = new ArrayList<>();
 
         Map<String, String> outputs = getCfStackOutputs(cFStackName, client);

@@ -25,7 +25,6 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -63,9 +62,6 @@ public class AwsMetaDataCollectorTest {
 
     @Mock
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
-
-    @Mock
-    private AwsPollTaskFactory awsPollTaskFactory;
 
     @Mock
     private AmazonCloudFormationRetryClient amazonCFClient;

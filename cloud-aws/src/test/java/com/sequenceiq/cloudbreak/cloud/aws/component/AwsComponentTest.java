@@ -33,7 +33,16 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
+import com.amazonaws.services.autoscaling.waiters.AmazonAutoScalingWaiters;
+import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
+import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
+import com.amazonaws.services.cloudformation.waiters.AmazonCloudFormationWaiters;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
+import com.amazonaws.services.ec2.waiters.AmazonEC2Waiters;
+import com.amazonaws.waiters.Waiter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -45,7 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.component.AwsComponentTest.AwsTestContext;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -216,6 +225,9 @@ public abstract class AwsComponentTest {
         private AmazonCloudFormationRetryClient amazonCloudFormationRetryClient;
 
         @MockBean
+        private AmazonCloudFormationClient amazonCloudFormationClient;
+
+        @MockBean
         private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
         @MockBean
@@ -224,13 +236,52 @@ public abstract class AwsComponentTest {
         @MockBean
         private AmazonAutoScalingRetryClient amazonAutoScalingRetryClient;
 
+        @MockBean
+        private AmazonAutoScalingClient amazonAutoScalingClient;
+
+        @MockBean
+        private AmazonCloudFormationWaiters cfWaiters;
+
+        @MockBean
+        private AmazonAutoScalingWaiters asWaiters;
+
+        @MockBean
+        private AmazonEC2Waiters ecWaiters;
+
+        @MockBean
+        private Waiter<DescribeStacksRequest> cfStackWaiter;
+
+        @MockBean
+        private Waiter<DescribeInstancesRequest> instanceWaiter;
+
+        @MockBean
+        private Waiter<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequestWaiter;
+
+        @Bean
+        public CustomAmazonWaiterProvider customAmazonWaiterProvider() {
+            CustomAmazonWaiterProvider provider = mock(CustomAmazonWaiterProvider.class);
+            when(provider.getAutoscalingInstancesInServiceWaiter(any(), any())).thenReturn(describeAutoScalingGroupsRequestWaiter);
+
+            return provider;
+        }
+
         @Bean
         public AwsClient awsClient() {
             AwsClient awsClient = mock(AwsClient.class);
             when(awsClient.createAccess(any(), anyString())).thenReturn(amazonEC2Client);
             when(awsClient.createAccess(any())).thenReturn(amazonEC2Client);
             when(awsClient.createCloudFormationRetryClient(any(), anyString())).thenReturn(amazonCloudFormationRetryClient);
+            when(awsClient.createCloudFormationClient(any(), anyString())).thenReturn(amazonCloudFormationClient);
+            when(amazonCloudFormationClient.waiters()).thenReturn(cfWaiters);
+            when(cfWaiters.stackCreateComplete()).thenReturn(cfStackWaiter);
+            when(cfWaiters.stackDeleteComplete()).thenReturn(cfStackWaiter);
             when(awsClient.createAutoScalingRetryClient(any(), anyString())).thenReturn(amazonAutoScalingRetryClient);
+            when(awsClient.createAutoScalingClient(any(), anyString())).thenReturn(amazonAutoScalingClient);
+            when(amazonAutoScalingClient.waiters()).thenReturn(asWaiters);
+            when(asWaiters.groupInService()).thenReturn(describeAutoScalingGroupsRequestWaiter);
+            when(amazonEC2Client.waiters()).thenReturn(ecWaiters);
+            when(ecWaiters.instanceRunning()).thenReturn(instanceWaiter);
+            when(ecWaiters.instanceTerminated()).thenReturn(instanceWaiter);
             return awsClient;
         }
 
@@ -280,15 +331,6 @@ public abstract class AwsComponentTest {
         @Bean
         public CloudResourceHelper cloudResourceHelper() {
             return new CloudResourceHelper();
-        }
-
-        @Bean
-        public AwsBackoffSyncPollingScheduler<?> awsBackoffSyncPollingScheduler() throws Exception {
-            AwsBackoffSyncPollingScheduler<?> awsBackoffSyncPollingScheduler = mock(AwsBackoffSyncPollingScheduler.class);
-            when(awsBackoffSyncPollingScheduler.schedule(any())).thenAnswer(
-                    getAnswer()
-            );
-            return awsBackoffSyncPollingScheduler;
         }
 
         static Answer<?> getAnswer() {

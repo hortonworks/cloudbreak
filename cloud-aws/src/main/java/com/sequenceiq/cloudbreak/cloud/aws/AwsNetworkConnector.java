@@ -1,19 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.amazonaws.services.cloudformation.model.Capability.CAPABILITY_IAM;
-import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_COMPLETE;
-import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAILED;
-import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
-import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAILED;
-import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -36,12 +30,12 @@ import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
+import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.EnvironmentCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategy;
 import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategyType;
-import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -58,7 +52,6 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
-import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 @Service
 public class AwsNetworkConnector extends DefaultNetworkConnector {
@@ -83,12 +76,6 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
 
     @Inject
     private AwsClient awsClient;
-
-    @Inject
-    private AwsPollTaskFactory awsPollTaskFactory;
-
-    @Inject
-    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
     @Inject
     private AwsSubnetRequestProvider awsSubnetRequestProvider;
@@ -213,12 +200,15 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
 
     private CreatedCloudNetwork getCreatedNetworkWithPolling(NetworkCreationRequest networkRequest, AwsCredentialView credentialView,
             AmazonCloudFormationRetryClient cloudFormationRetryClient, List<SubnetRequest> subnetRequests) {
-        PollTask<Boolean> pollTask = getNewNetworkPollTask(credentialView, networkRequest);
-        try {
-            awsBackoffSyncPollingScheduler.schedule(pollTask);
-        } catch (RuntimeException | InterruptedException | ExecutionException | TimeoutException e) {
-            throw new CloudConnectorException(e.getMessage(), e);
-        }
+
+        AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, networkRequest.getRegion().value());
+        Waiter<DescribeStacksRequest> creationWaiter = cfClient.waiters().stackCreateComplete();
+        DescribeStacksRequest stackRequestWithStackId = new DescribeStacksRequest().withStackName(networkRequest.getStackName());
+        EnvironmentCancellationCheck environmentCancellationCheck = new EnvironmentCancellationCheck(networkRequest.getEnvId(), networkRequest.getEnvName());
+
+        run(creationWaiter, stackRequestWithStackId,
+                environmentCancellationCheck);
+
         return getCreatedCloudNetwork(cloudFormationRetryClient, networkRequest, subnetRequests);
     }
 
@@ -240,17 +230,6 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
                 .withCapabilities(CAPABILITY_IAM);
     }
 
-    private PollTask<Boolean> getNewNetworkPollTask(AwsCredentialView credentialView, NetworkCreationRequest networkRequest) {
-        AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, networkRequest.getRegion().value());
-        return awsPollTaskFactory
-                .newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkRequest);
-    }
-
-    private PollTask<Boolean> getDeleteNetworkPollTask(AwsCredentialView credentialView, String region, String stackName) {
-        AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, region);
-        return awsPollTaskFactory.newAwsTerminateNetworkStatusCheckerTask(cfClient, DELETE_COMPLETE, DELETE_FAILED, ERROR_STATUSES, stackName);
-    }
-
     private String getCreatedVpc(Map<String, String> output) {
         if (output.containsKey(CREATED_VPC)) {
             return output.get(CREATED_VPC);
@@ -268,14 +247,11 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest();
             deleteStackRequest.setStackName(networkDeletionRequest.getStackName());
             cloudFormationRetryClient.deleteStack(deleteStackRequest);
-
+            AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, networkDeletionRequest.getRegion());
+            Waiter<DescribeStacksRequest> deletionWaiter = cfClient.waiters().stackDeleteComplete();
             LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' ", networkDeletionRequest.getStackName());
-            PollTask<Boolean> pollTask = getDeleteNetworkPollTask(credentialView, networkDeletionRequest.getRegion(), networkDeletionRequest.getStackName());
-            try {
-                awsBackoffSyncPollingScheduler.schedule(pollTask);
-            } catch (RuntimeException | InterruptedException | ExecutionException | TimeoutException e) {
-                throw new CloudConnectorException(e.getMessage(), e);
-            }
+            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(networkDeletionRequest.getStackName());
+            run(deletionWaiter, describeStacksRequest, null);
         }
     }
 
