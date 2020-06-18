@@ -47,12 +47,8 @@ import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.util.TagAdderUtil;
-import com.sequenceiq.it.util.TestNameExtractorUtil;
 
 public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends AbstractCloudbreakTestDto<StackV4Request, StackV4Response, T> {
-
-    @Inject
-    private TestNameExtractorUtil testNameExtractorUtil;
 
     @Inject
     private TagAdderUtil tagAdderUtil;
@@ -389,8 +385,7 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
     }
 
     private StackTestDtoBase<T> withTestNameAsTag() {
-        String callingMethodName = testNameExtractorUtil.getExecutingTestName();
-        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags().getUserDefined(), callingMethodName);
+        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags().getUserDefined(), getTestContext().getTestMethodName());
         return this;
     }
 

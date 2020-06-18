@@ -60,8 +60,6 @@ import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
 import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
-import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeInternalAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeWaitObject;
@@ -69,6 +67,8 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentAwa
 import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsAwait;
+import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsWaitObject;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public abstract class TestContext implements ApplicationContextAware {
@@ -76,6 +76,8 @@ public abstract class TestContext implements ApplicationContextAware {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestContext.class);
 
     private static final String DESCRIPTION = "DESCRIPTION";
+
+    private static final String TEST_METHOD_NAME = "TEST_METHOD_NAME";
 
     private ApplicationContext applicationContext;
 
@@ -369,6 +371,15 @@ public abstract class TestContext implements ApplicationContextAware {
             return Optional.empty();
         }
         return Optional.ofNullable(description);
+    }
+
+    public TestContext setTestMethodName(String testMethodName) {
+        this.contextParameters.put(TEST_METHOD_NAME, testMethodName);
+        return this;
+    }
+
+    public String getTestMethodName() {
+        return this.contextParameters.get(TEST_METHOD_NAME).toString();
     }
 
     protected String getActingUserAccessKey() {

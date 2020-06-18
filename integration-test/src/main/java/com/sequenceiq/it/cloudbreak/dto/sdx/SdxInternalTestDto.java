@@ -44,7 +44,6 @@ import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.util.TagAdderUtil;
-import com.sequenceiq.it.util.TestNameExtractorUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -73,9 +72,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
-
-    @Inject
-    private TestNameExtractorUtil testNameExtractorUtil;
 
     @Inject
     private TagAdderUtil tagAdderUtil;
@@ -375,8 +371,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     private SdxInternalTestDto withTestNameAsTag() {
-        String callingMethodName = testNameExtractorUtil.getExecutingTestName();
-        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags(), callingMethodName);
+        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags(), getTestContext().getTestMethodName());
         return this;
     }
 }

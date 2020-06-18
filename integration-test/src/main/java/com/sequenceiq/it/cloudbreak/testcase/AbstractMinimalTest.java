@@ -105,10 +105,12 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
     @BeforeMethod
     public void beforeTest(Method method, Object[] params) {
         MDC.put("testlabel", method.getDeclaringClass().getSimpleName() + '.' + method.getName());
-        collectTestCaseDescription(method, params);
+        TestContext testContext = (TestContext) params[0];
+        testContext.setTestMethodName(method.getName());
+        collectTestCaseDescription(testContext, method, params);
     }
 
-    private TestCaseDescription collectTestCaseDescription(Method method, Object[] params) {
+    private TestCaseDescription collectTestCaseDescription(TestContext testContext, Method method, Object[] params) {
         Description declaredAnnotation = method.getDeclaredAnnotation(Description.class);
         TestCaseDescription testCaseDescription = null;
         if (declaredAnnotation != null) {
@@ -116,7 +118,7 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
                     .given(declaredAnnotation.given())
                     .when(declaredAnnotation.when())
                     .then(declaredAnnotation.then());
-            ((TestContext) params[0]).addDescription(testCaseDescription);
+            testContext.addDescription(testCaseDescription);
         } else if (method.getParameters().length == params.length) {
             Parameter[] parameters = method.getParameters();
             for (int i = 1; i < parameters.length; i++) {
@@ -127,7 +129,7 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
                                 + TestCaseDescription.class.getSimpleName());
                     }
                     testCaseDescription = (TestCaseDescription) param;
-                    ((TestContext) params[0]).addDescription(testCaseDescription);
+                    testContext.addDescription(testCaseDescription);
                     break;
                 }
             }
