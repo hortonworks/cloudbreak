@@ -617,7 +617,10 @@ public class GrpcUmsClient {
             LOGGER.debug("Notify UMS about resource ('{}') was deleted", resourceCrn);
             UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             client.notifyResourceDeleted(requestId.orElse(UUID.randomUUID().toString()), resourceCrn);
-            LOGGER.debug("Notify resource delete UMS call has been finished for resource crn: {} (by {})", resourceCrn, userCrn);
+            LOGGER.info("Notified UMS about deletion of resource {} (by {})", resourceCrn, userCrn);
+        } catch (Exception e) {
+            LOGGER.error(String.format("Notifying UMS about deletion of resource %s (by %s) has failed: ",
+                    resourceCrn, userCrn), e);
         }
     }
 

@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -138,10 +139,12 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public Blueprint deleteByWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
-        return nameOrCrn.hasName()
+        Blueprint deleted = nameOrCrn.hasName()
                 ? super.deleteByNameFromWorkspace(nameOrCrn.getName(), workspaceId)
                 : delete(blueprintRepository.findByResourceCrnAndWorkspaceId(nameOrCrn.getCrn(), workspaceId)
                 .orElseThrow(() -> notFound("blueprint", nameOrCrn.getCrn()).get()));
+        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, deleted.getResourceCrn(), MDCUtils.getRequestId());
+        return deleted;
     }
 
     public Blueprint getByWorkspace(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
