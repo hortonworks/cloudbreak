@@ -98,7 +98,7 @@ public class AzureCloudResourceService {
                 break;
             case "Microsoft.Compute/virtualMachines":
                 cloudResourceBuilder.type(ResourceType.AZURE_INSTANCE);
-                cloudResourceBuilder.instanceId(targetResource.id());
+                cloudResourceBuilder.instanceId(targetResource.resourceName());
                 break;
             case "Microsoft.Network/networkSecurityGroups":
                 cloudResourceBuilder.type(ResourceType.AZURE_SECURITY_GROUP);
