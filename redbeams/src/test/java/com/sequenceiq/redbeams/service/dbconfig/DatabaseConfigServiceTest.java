@@ -135,6 +135,7 @@ public class DatabaseConfigServiceTest {
         db.setName("mydb");
 
         doNothing().when(grpcUmsClient).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
+        doNothing().when(grpcUmsClient).notifyResourceDeleted(anyString(), anyString(), any());
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 
@@ -378,6 +379,7 @@ public class DatabaseConfigServiceTest {
         databaseConfig.setStatus(resourceStatus);
         databaseConfig.setName(DATABASE_NAME);
         databaseConfig.setConnectionUserName(DATABASE_USER_NAME);
+        databaseConfig.setResourceCrn(DB_CRN);
         return databaseConfig;
     }
 

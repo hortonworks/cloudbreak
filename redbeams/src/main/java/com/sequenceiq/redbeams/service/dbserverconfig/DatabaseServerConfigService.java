@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
@@ -187,7 +188,9 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         // Reload the entity so that we start without any referenced databases in it
         // Otherwise, JPA/Hibernate pitches a fit
         DatabaseServerConfig resourceToDelete = getByCrn(resource.getResourceCrn()).get();
-        return super.delete(resourceToDelete);
+        DatabaseServerConfig archived = super.delete(resourceToDelete);
+        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, archived.getResourceCrn().toString(), MDCUtils.getRequestId());
+        return archived;
     }
 
     public DatabaseServerConfig getByName(Long workspaceId, String environmentCrn, String name) {

@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -44,6 +45,7 @@ import org.powermock.reflect.Whitebox;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -111,6 +113,9 @@ public class BlueprintServiceTest {
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
 
+    @Mock
+    private GrpcUmsClient grpcUmsClient;
+
     @Spy
     private BlueprintListFilters blueprintListFilters;
 
@@ -127,6 +132,7 @@ public class BlueprintServiceTest {
         when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
         when(workspaceService.get(1L, user)).thenReturn(getWorkspace());
         when(cmTemplateProcessor.getHostGroupPropertyIdentifier()).thenReturn("template");
+        doNothing().when(grpcUmsClient).notifyResourceDeleted(anyString(), anyString(), any());
     }
 
     @Test
