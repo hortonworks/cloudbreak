@@ -31,10 +31,6 @@ management:
       percentiles:
         "[http.server.requests]": "0.5, 0.95"
 
-audit:
-  service:
-    enabled: true
-
 sdx:
   gateway:
     topology:
@@ -46,6 +42,8 @@ altus:
     host: localhost
   ums:
     host: localhost
+  audit:
+    enabled: true
 
 datalake:
   cert.dir: /certs/
