@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,23 +23,27 @@ import javax.inject.Inject;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.autoscaling.model.Instance;
 import com.amazonaws.services.autoscaling.model.LifecycleState;
+import com.amazonaws.services.autoscaling.waiters.AmazonAutoScalingWaiters;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
 import com.amazonaws.services.cloudformation.model.StackResourceDetail;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.VolumeState;
+import com.amazonaws.services.ec2.waiters.AmazonEC2Waiters;
+import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
-import com.sequenceiq.cloudbreak.cloud.aws.task.ASGroupStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -57,7 +62,6 @@ import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
-@MockBean(ASGroupStatusCheckerTask.class)
 public class AwsRepairTest extends AwsComponentTest {
 
     private static final String WORKER_GROUP = "worker";
@@ -90,6 +94,15 @@ public class AwsRepairTest extends AwsComponentTest {
 
     @Inject
     private AmazonEC2Client amazonEC2Client;
+
+    @Inject
+    private AmazonAutoScalingClient amazonAutoScalingClient;
+
+    @Inject
+    private AmazonAutoScalingWaiters asWaiters;
+
+    @Inject
+    private Waiter<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequestWaiter;
 
     @Inject
     private AmazonCloudFormationRetryClient amazonCloudFormationRetryClient;
@@ -157,6 +170,15 @@ public class AwsRepairTest extends AwsComponentTest {
                         new Reservation().withInstances(new com.amazonaws.services.ec2.model.Instance().withInstanceId("i-instance")))
         );
 
+
+        AmazonEC2Waiters waiters = mock(AmazonEC2Waiters.class);
+        when(amazonEC2Client.waiters()).thenReturn(waiters);
+        Waiter<DescribeInstancesRequest> instanceWaiter = mock(Waiter.class);
+        when(waiters.instanceRunning()).thenReturn(instanceWaiter);
+
+        when(amazonAutoScalingClient.waiters()).thenReturn(asWaiters);
+        when(asWaiters.groupInService()).thenReturn(describeAutoScalingGroupsRequestWaiter);
+
         underTest.upscale(authenticatedContext, stack, cloudResources);
 
         verify(amazonAutoScalingRetryClient).resumeProcesses(argThat(argument -> AUTOSCALING_GROUP_NAME.equals(argument.getAutoScalingGroupName())
@@ -214,6 +236,12 @@ public class AwsRepairTest extends AwsComponentTest {
 
         when(amazonEC2Client.describeInstances(any()))
                 .thenReturn(new DescribeInstancesResult().withReservations(new Reservation().withInstances(List.of())));
+
+        AmazonEC2Waiters mockWaiter = mock(AmazonEC2Waiters.class);
+        when(amazonEC2Client.waiters())
+                .thenReturn(mockWaiter);
+        when(mockWaiter.instanceTerminated())
+                .thenReturn(mock(Waiter.class));
 
         List<Volume> volumes = List.of();
         InstanceTemplate instanceTemplate = new InstanceTemplate("", WORKER_GROUP, 0L, volumes, InstanceStatus.STARTED, Map.of(), 0L, IMAGE_ID);

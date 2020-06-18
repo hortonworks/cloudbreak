@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.encryption;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -27,9 +28,9 @@ import com.amazonaws.services.ec2.model.DeleteSnapshotRequest;
 import com.amazonaws.services.ec2.model.DeregisterImageRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.Image;
+import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
-import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -40,7 +41,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -59,12 +59,6 @@ public class EncryptedImageCopyService {
     @Inject
     private AwsClient awsClient;
 
-    @Inject
-    private AwsPollTaskFactory awsPollTaskFactory;
-
-    @Inject
-    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
-
     public Map<String, String> createEncryptedImages(AuthenticatedContext ac, CloudStack cloudStack, PersistenceNotifier resourceNotifier) {
         String selectedAMIName = cloudStack.getImage().getImageName();
         AwsCredentialView awsCredentialView = new AwsCredentialView(ac.getCloudCredential());
@@ -78,9 +72,11 @@ public class EncryptedImageCopyService {
                 .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getImageId()));
         if (!imageIdByGroupName.isEmpty()) {
             Collection<String> imageIds = new HashSet<>(imageIdByGroupName.values());
-            LOGGER.debug("Start polling the availability of the created encrypted AMIs: '{}'", String.join(",", imageIds));
-            checkBooleanPollTask(awsPollTaskFactory.newAMICopyStatusCheckerTask(ac, imageIds, client));
-            LOGGER.info("All created encrypted AMIs are available: '{}'", String.join(",", imageIds));
+            LOGGER.debug("Start polling the availability of the created AMIs: '{}'", String.join(",", imageIds));
+            Waiter<DescribeImagesRequest> imageWaiter = client.waiters().imageAvailable();
+            DescribeImagesRequest describeImagesRequest = new DescribeImagesRequest().withImageIds(imageIds);
+            StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
+            run(imageWaiter, describeImagesRequest, stackCancellationCheck);
         }
         return imageIdByGroupName;
     }
@@ -147,17 +143,6 @@ public class EncryptedImageCopyService {
             copyImageRequest = copyImageRequest.withKmsKeyId(awsInstanceView.getKmsKey());
         }
         return copyImageRequest;
-    }
-
-    private void checkBooleanPollTask(PollTask<Boolean> booleanPollTask) {
-        try {
-            Boolean statePollerResult = booleanPollTask.call();
-            if (!booleanPollTask.completed(statePollerResult)) {
-                awsBackoffSyncPollingScheduler.schedule(booleanPollTask);
-            }
-        } catch (Exception e) {
-            throw new CloudConnectorException(e.getMessage(), e);
-        }
     }
 
     private void deleteImageAndItsSnapshotResources(AmazonEC2Client client, List<CloudResource> resources, String regionName) {

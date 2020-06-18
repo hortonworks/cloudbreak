@@ -30,13 +30,13 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.BlockDeviceMapping;
 import com.amazonaws.services.ec2.model.CopyImageResult;
+import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.EbsBlockDevice;
 import com.amazonaws.services.ec2.model.Image;
+import com.amazonaws.services.ec2.waiters.AmazonEC2Waiters;
+import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
-import com.sequenceiq.cloudbreak.cloud.aws.task.AMICopyStatusCheckerTask;
-import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -73,19 +73,16 @@ public class EncryptedImageCopyServiceTest {
     private AmazonEC2Client ec2Client;
 
     @Mock
-    private AwsPollTaskFactory awsPollTaskFactory;
+    private AmazonEC2Waiters ec2Waiters;
 
     @Mock
-    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
+    private Waiter<DescribeImagesRequest> waiter;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private CloudStack cloudStack;
 
     @Mock
     private PersistenceNotifier resourceNotifier;
-
-    @Mock
-    private AMICopyStatusCheckerTask amiCopyStatusCheckerTask;
 
     @InjectMocks
     private EncryptedImageCopyService underTest;
@@ -128,14 +125,14 @@ public class EncryptedImageCopyServiceTest {
         String encryptedImageId = "ami-87654321";
         when(ec2Client.copyImage(any())).thenReturn(new CopyImageResult().withImageId(encryptedImageId));
 
-        when(awsPollTaskFactory.newAMICopyStatusCheckerTask(any(), any(), any())).thenReturn(amiCopyStatusCheckerTask);
-        when(amiCopyStatusCheckerTask.call()).thenReturn(false);
+        when(ec2Client.waiters()).thenReturn(ec2Waiters);
+        when(ec2Waiters.imageAvailable()).thenReturn(waiter);
 
         Map<String, String> encryptedImages = underTest.createEncryptedImages(authenticatedContext(), cloudStack, resourceNotifier);
 
         verify(ec2Client, times(1)).copyImage(any());
         verify(resourceNotifier, times(1)).notifyAllocation(any(), any());
-        verify(awsBackoffSyncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
+        verify(waiter, times(1)).run(any());
         Assert.assertEquals(encryptedImages.size(), 2);
         Assert.assertTrue(encryptedImages.values().stream().allMatch(el -> el.equals(encryptedImageId)));
     }
@@ -154,14 +151,14 @@ public class EncryptedImageCopyServiceTest {
         String encryptedImageId = "ami-87654321";
         when(ec2Client.copyImage(any())).thenReturn(new CopyImageResult().withImageId(encryptedImageId));
 
-        when(awsPollTaskFactory.newAMICopyStatusCheckerTask(any(), any(), any())).thenReturn(amiCopyStatusCheckerTask);
-        when(amiCopyStatusCheckerTask.call()).thenReturn(false);
+        when(ec2Client.waiters()).thenReturn(ec2Waiters);
+        when(ec2Waiters.imageAvailable()).thenReturn(waiter);
 
         Map<String, String> encryptedImages = underTest.createEncryptedImages(authenticatedContext(), cloudStack, resourceNotifier);
 
         verify(ec2Client, times(1)).copyImage(any());
         verify(resourceNotifier, times(1)).notifyAllocation(any(), any());
-        verify(awsBackoffSyncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
+        verify(waiter, times(1)).run(any());
         Assert.assertEquals(encryptedImages.size(), 2);
         Assert.assertTrue(encryptedImages.values().stream().allMatch(el -> el.equals(encryptedImageId)));
     }
@@ -189,14 +186,14 @@ public class EncryptedImageCopyServiceTest {
                 .thenReturn(new CopyImageResult().withImageId(encryptedImageId))
                 .thenReturn(new CopyImageResult().withImageId(secondEncryptedImageId));
 
-        when(awsPollTaskFactory.newAMICopyStatusCheckerTask(any(), any(), any())).thenReturn(amiCopyStatusCheckerTask);
-        when(amiCopyStatusCheckerTask.call()).thenReturn(false);
+        when(ec2Client.waiters()).thenReturn(ec2Waiters);
+        when(ec2Waiters.imageAvailable()).thenReturn(waiter);
 
         Map<String, String> encryptedImages = underTest.createEncryptedImages(authenticatedContext(), cloudStack, resourceNotifier);
 
         verify(ec2Client, times(2)).copyImage(any());
         verify(resourceNotifier, times(2)).notifyAllocation(any(), any());
-        verify(awsBackoffSyncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
+        verify(waiter, times(1)).run(any());
         Assert.assertEquals(encryptedImages.size(), 2);
         Assert.assertTrue(encryptedImages.containsValue(encryptedImageId));
         Assert.assertTrue(encryptedImages.containsValue(secondEncryptedImageId));
@@ -230,14 +227,14 @@ public class EncryptedImageCopyServiceTest {
                 .thenReturn(new CopyImageResult().withImageId(encryptedImageId))
                 .thenReturn(new CopyImageResult().withImageId(secondEncryptedImageId));
 
-        when(awsPollTaskFactory.newAMICopyStatusCheckerTask(any(), any(), any())).thenReturn(amiCopyStatusCheckerTask);
-        when(amiCopyStatusCheckerTask.call()).thenReturn(false);
+        when(ec2Client.waiters()).thenReturn(ec2Waiters);
+        when(ec2Waiters.imageAvailable()).thenReturn(waiter);
 
         Map<String, String> encryptedImages = underTest.createEncryptedImages(authenticatedContext(), cloudStack, resourceNotifier);
 
         verify(ec2Client, times(2)).copyImage(any());
         verify(resourceNotifier, times(2)).notifyAllocation(any(), any());
-        verify(awsBackoffSyncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
+        verify(waiter, times(1)).run(any());
         Assert.assertEquals(encryptedImages.size(), 2);
         Assert.assertTrue(encryptedImages.containsValue(encryptedImageId));
         Assert.assertTrue(encryptedImages.containsValue(secondEncryptedImageId));
