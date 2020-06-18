@@ -98,6 +98,7 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
     public StackTestDtoBase<T> valid() {
         String name = getResourcePropertyProvider().getName(15, getCloudPlatform());
         withName(name)
+                .withTestNameAsTag()
                 .withImageSettings(getCloudProvider().imageSettings(getTestContext().init(ImageSettingsTestDto.class)))
                 .withPlacement(getTestContext().init(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()))
