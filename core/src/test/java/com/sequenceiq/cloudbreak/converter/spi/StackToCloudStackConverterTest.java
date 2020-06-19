@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
+import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
@@ -895,11 +896,11 @@ public class StackToCloudStackConverterTest {
     }
 
     @Test
-    public void testBuildInstanceTemplateWithEncryptionAttributes() throws Exception {
+    public void testBuildInstanceTemplateWithGcpEncryptionAttributes() throws Exception {
         Template template = new Template();
         template.setVolumeTemplates(Sets.newHashSet());
-        template.setAttributes(new Json(Map.of("keyEncryptionMethod", "RAW", "type", "CUSTOM")));
-        template.setSecretAttributes(new Json(Map.of("key", "myKey")).getValue());
+        template.setAttributes(new Json(Map.of("keyEncryptionMethod", "RAW", InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name())));
+        template.setSecretAttributes(new Json(Map.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "myKey")).getValue());
 
         InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(
                 template, "name", 0L, InstanceStatus.CREATE_REQUESTED, "instanceImageId");
@@ -907,7 +908,8 @@ public class StackToCloudStackConverterTest {
         Map<String, Object> parameters = instanceTemplate.getParameters();
         assertNotNull(parameters);
         assertEquals("RAW", parameters.get("keyEncryptionMethod"));
-        assertEquals("CUSTOM", parameters.get("type"));
-        assertEquals("myKey", parameters.get("key"));
+        assertEquals(EncryptionType.CUSTOM.name(), parameters.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE));
+        assertEquals("myKey", parameters.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID));
     }
+
 }

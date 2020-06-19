@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.common.api.type.EncryptionType;
 
 public class AwsInstanceView {
@@ -38,7 +39,7 @@ public class AwsInstanceView {
     }
 
     public boolean isEncryptedVolumes() {
-        Object ev = instanceTemplate.getParameter("encrypted", Object.class);
+        Object ev = instanceTemplate.getParameter(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Object.class);
         if (ev instanceof Boolean) {
             return (Boolean) ev;
         } else if (ev instanceof String) {
@@ -48,7 +49,7 @@ public class AwsInstanceView {
     }
 
     public boolean isKmsEnabled() {
-        String type = instanceTemplate.getStringParameter("type");
+        String type = instanceTemplate.getStringParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE);
         if (type != null) {
             EncryptionType ev = EncryptionType.valueOf(type);
             return ev != EncryptionType.NONE;
@@ -65,7 +66,7 @@ public class AwsInstanceView {
     }
 
     private boolean isTypeEqualsWith(EncryptionType encryptionType) {
-        String type = instanceTemplate.getStringParameter("type");
+        String type = instanceTemplate.getStringParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE);
         if (type != null) {
             EncryptionType ev = EncryptionType.valueOf(type);
             return ev == encryptionType;
@@ -74,11 +75,11 @@ public class AwsInstanceView {
     }
 
     public String getKmsKey() {
-        return instanceTemplate.getStringParameter("key");
+        return instanceTemplate.getStringParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID);
     }
 
     public Integer getSpotPercentage() {
-        return instanceTemplate.getParameter("spotPercentage", Integer.class);
+        return instanceTemplate.getParameter(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, Integer.class);
     }
 
     public int getOnDemandPercentage() {
