@@ -78,7 +78,7 @@ freeipa:
       initial-delay-millis: 60000
       fixed-delay-millis: 60000
   max:
-    instances: 4
+    instances: 3
     instance.groups: 1
   usersync:
     max-subjects-per-request: 10
