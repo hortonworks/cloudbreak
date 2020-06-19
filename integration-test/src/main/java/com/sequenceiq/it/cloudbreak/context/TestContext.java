@@ -50,6 +50,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestMethodNameMissingException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
@@ -379,7 +380,9 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public String getTestMethodName() {
-        return this.contextParameters.get(TEST_METHOD_NAME).toString();
+        return Optional.ofNullable(this.contextParameters.get(TEST_METHOD_NAME))
+                .map(Object::toString)
+                .orElseThrow(TestMethodNameMissingException::new);
     }
 
     protected String getActingUserAccessKey() {
