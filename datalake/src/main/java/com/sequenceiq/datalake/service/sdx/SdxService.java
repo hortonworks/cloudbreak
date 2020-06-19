@@ -265,6 +265,10 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
             stackRequest.getCluster().setRangerRazEnabled(sdxClusterRequest.isEnableRangerRaz());
             return stackRequest;
         } else {
+            // We have provided a --ranger-raz-enabled flag in the CLI, but it will
+            // get overwritten if you use a custom json (using --cli-json). To avoid
+            // this, we will set the raz enablement here as well. See CB-7474 for more details
+            internalStackV4Request.getCluster().setRangerRazEnabled(sdxClusterRequest.isEnableRangerRaz());
             return internalStackV4Request;
         }
     }
