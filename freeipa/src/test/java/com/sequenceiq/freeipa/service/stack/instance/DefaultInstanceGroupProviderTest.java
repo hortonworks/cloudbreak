@@ -1,8 +1,6 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
 import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
-import static com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider.ATTRIBUTE_VOLUME_ENCRYPTED;
-import static com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider.ATTRIBUTE_VOLUME_ENCRYPTION_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -13,6 +11,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -67,8 +67,8 @@ class DefaultInstanceGroupProviderTest {
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(ATTRIBUTE_VOLUME_ENCRYPTED)).isEqualTo(Boolean.TRUE);
-        assertThat(attributes.<Object>getValue(ATTRIBUTE_VOLUME_ENCRYPTION_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
+        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
     }
 
 }

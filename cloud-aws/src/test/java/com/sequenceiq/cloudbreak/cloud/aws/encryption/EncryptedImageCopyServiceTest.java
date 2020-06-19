@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -99,7 +100,7 @@ public class EncryptedImageCopyServiceTest {
     @Test
     public void testCreateEncryptedImagesWhenNoEncryptionIsRequired() {
         InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", false), 0L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         List<Group> groups = new ArrayList<>();
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30, identity));
@@ -115,7 +116,7 @@ public class EncryptedImageCopyServiceTest {
     public void testCreateEncryptedImagesWhenEveryGroupNeedToBeEncryptedWithTheDefaultKmsKey()
             throws InterruptedException, ExecutionException, TimeoutException {
         InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true), 0L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         List<Group> groups = new ArrayList<>();
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30, identity));
@@ -141,7 +142,8 @@ public class EncryptedImageCopyServiceTest {
     public void testCreateEncryptedImagesWhenEveryGroupNeedToBeEncryptedWithCustomKmsKey()
             throws InterruptedException, ExecutionException, TimeoutException {
         InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true,
+                        InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         List<Group> groups = new ArrayList<>();
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30, identity));
@@ -171,12 +173,14 @@ public class EncryptedImageCopyServiceTest {
         List<Group> groups = new ArrayList<>();
 
         InstanceTemplate temp = new InstanceTemplate("medium", "master", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true,
+                        InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30, identity));
 
         InstanceTemplate temp2 = new InstanceTemplate("medium", "worker", 1L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/almafa23-6ac8"), 1L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true,
+                        InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "arn:aws:kms:eu-west-1:980678888888:key/almafa23-6ac8"), 1L, "imageId");
         CloudInstance instance2 = new CloudInstance("SECOND_ID", temp2, null);
         groups.add(new Group("worker", InstanceGroupType.CORE, singletonList(instance2), null, null, null, null, null, null, 30, identity));
 
@@ -207,17 +211,19 @@ public class EncryptedImageCopyServiceTest {
         List<Group> groups = new ArrayList<>();
 
         InstanceTemplate temp = new InstanceTemplate("medium", "master", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true,
+                        InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30, identity));
 
         InstanceTemplate temp2 = new InstanceTemplate("medium", "worker", 1L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/almafa23-6ac8"), 1L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true,
+                        InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "arn:aws:kms:eu-west-1:980678888888:key/almafa23-6ac8"), 1L, "imageId");
         CloudInstance instance2 = new CloudInstance("SECOND_ID", temp2, null);
         groups.add(new Group("worker", InstanceGroupType.CORE, singletonList(instance2), null, null, null, null, null, null, 30, identity));
 
         InstanceTemplate unencryptedTemp = new InstanceTemplate("medium", "worker", 1L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", false), 1L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 1L, "imageId");
         CloudInstance unencryptedInstance = new CloudInstance("UNENCRYPTED_ID", unencryptedTemp, null);
         groups.add(new Group("compute", InstanceGroupType.CORE, singletonList(unencryptedInstance), null, null, null, null, null, null, 30, identity));
 

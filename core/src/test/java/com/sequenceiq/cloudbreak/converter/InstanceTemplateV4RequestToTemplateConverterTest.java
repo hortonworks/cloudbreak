@@ -18,6 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
@@ -174,10 +175,10 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         assertNotNull(result.getAttributes());
         Map<String, Object> map = result.getAttributes().getMap();
         assertEquals("RAW", map.get("keyEncryptionMethod"));
-        assertEquals("CUSTOM", map.get("type"));
+        assertEquals(EncryptionType.CUSTOM.name(), map.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE));
 
         assertNotNull(result.getSecretAttributes());
-        assertEquals("myKey", new Json(result.getSecretAttributes()).getMap().get("key"));
+        assertEquals("myKey", new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID));
     }
 
     @Test
@@ -207,10 +208,10 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
 
         assertNotNull(result.getAttributes());
         Map<String, Object> map = result.getAttributes().getMap();
-        assertEquals("CUSTOM", map.get("type"));
+        assertEquals(EncryptionType.CUSTOM.name(), map.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE));
 
         assertNotNull(result.getSecretAttributes());
-        assertEquals("myKey", new Json(result.getSecretAttributes()).getMap().get("key"));
+        assertEquals("myKey", new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID));
     }
 
     private RootVolumeV4Request getRootVolume(Integer size) {

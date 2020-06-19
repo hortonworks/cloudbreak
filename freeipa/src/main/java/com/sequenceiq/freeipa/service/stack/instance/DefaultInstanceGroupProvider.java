@@ -9,8 +9,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -22,12 +23,6 @@ import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 
 @Service
 public class DefaultInstanceGroupProvider {
-
-    @VisibleForTesting
-    static final String ATTRIBUTE_VOLUME_ENCRYPTED = "encrypted";
-
-    @VisibleForTesting
-    static final String ATTRIBUTE_VOLUME_ENCRYPTION_TYPE = "type";
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
@@ -53,8 +48,8 @@ public class DefaultInstanceGroupProvider {
         if (cloudPlatform == CloudPlatform.AWS && entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, accountId)) {
             // FIXME Enable EBS encryption with appropriate KMS key
             template.setAttributes(new Json(Map.<String, Object>ofEntries(
-                    entry(ATTRIBUTE_VOLUME_ENCRYPTED, Boolean.TRUE),
-                    entry(ATTRIBUTE_VOLUME_ENCRYPTION_TYPE, EncryptionType.DEFAULT.name()))));
+                    entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE),
+                    entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()))));
         }
         return template;
     }
