@@ -17,8 +17,13 @@ public class YarnEnvironmentNetworkValidator implements EnvironmentNetworkValida
     public void validateDuringFlow(EnvironmentDto environmentDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
         if (networkDto != null) {
             if (networkDto.getYarn() != null) {
+                String cloudPlatformName = getCloudPlatform().name();
                 if (StringUtils.isEmpty(networkDto.getYarn().getQueue())) {
-                    resultBuilder.error(missingParamErrorMessage("Queue(queue)", getCloudPlatform().name()));
+                    resultBuilder.error(missingParamErrorMessage("Queue(queue)", cloudPlatformName));
+                }
+                if (networkDto.getYarn().getLifetime() != null && networkDto.getYarn().getLifetime() < 0) {
+                    resultBuilder.error(String.format("The 'lifetime' parameter should be non negative for '%s' environment specific network!",
+                            cloudPlatformName));
                 }
             } else {
                 resultBuilder.error(missingParamsErrorMsg(YARN));

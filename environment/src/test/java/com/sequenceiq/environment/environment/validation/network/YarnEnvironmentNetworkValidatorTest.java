@@ -46,4 +46,23 @@ public class YarnEnvironmentNetworkValidatorTest {
         ));
     }
 
+    @Test
+    void testValidateDuringFlowWhenLifetimeLessThenZeroInYarnParams() {
+        YarnParams yarnParams = new YarnParams();
+        yarnParams.setQueue("queue");
+        yarnParams.setLifetime(-1);
+
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, yarnParams, null, null, 1);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setNetwork(networkDto);
+
+        underTest.validateDuringFlow(environmentDto, networkDto, resultBuilder);
+
+        NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
+                "The 'lifetime' parameter should be non negative for 'YARN' environment specific network!"
+        ));
+    }
+
 }

@@ -60,6 +60,7 @@ public class NetworkRequestToDtoConverterTest {
         NetworkDto actual = underTest.convert(network);
 
         assertEquals(network.getYarn().getQueue(), actual.getYarn().getQueue());
+        assertEquals(network.getYarn().getLifetime(), actual.getYarn().getLifetime());
         assertCommonFields(network, actual);
     }
 
@@ -109,6 +110,7 @@ public class NetworkRequestToDtoConverterTest {
     private EnvironmentNetworkYarnParams createYarnParams() {
         EnvironmentNetworkYarnParams yarnParams = new EnvironmentNetworkYarnParams();
         yarnParams.setQueue("yarn-queue");
+        yarnParams.setLifetime(1000);
         return yarnParams;
     }
 

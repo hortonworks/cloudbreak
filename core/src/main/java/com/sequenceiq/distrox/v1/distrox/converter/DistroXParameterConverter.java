@@ -38,18 +38,21 @@ public class DistroXParameterConverter {
     public YarnStackV4Parameters convert(YarnDistroXV1Parameters source) {
         YarnStackV4Parameters response = new YarnStackV4Parameters();
         response.setYarnQueue(source.getYarnQueue());
+        response.setLifetime(source.getLifetime());
         return response;
     }
 
     public YarnDistroXV1Parameters convert(YarnStackV4Parameters source) {
         YarnDistroXV1Parameters response = new YarnDistroXV1Parameters();
         response.setYarnQueue(source.getYarnQueue());
+        response.setLifetime(source.getLifetime());
         return response;
     }
 
     public YarnStackV4Parameters convert(EnvironmentNetworkYarnParams environmentNetworkYarnParams) {
         YarnStackV4Parameters response = new YarnStackV4Parameters();
         response.setYarnQueue(environmentNetworkYarnParams.getQueue());
+        response.setLifetime(environmentNetworkYarnParams.getLifetime());
         return response;
     }
 }
