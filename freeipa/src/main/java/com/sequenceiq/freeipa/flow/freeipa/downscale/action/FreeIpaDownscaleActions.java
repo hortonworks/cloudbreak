@@ -159,7 +159,7 @@ public class FreeIpaDownscaleActions {
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Decommissioning instances");
                 List<String> instanceIds = getInstanceIds(variables);
                 List<CloudResource> cloudResources = getCloudResources(stack);
-                List<CloudInstance> cloudInstances = getCloudInstances(stack, instanceIds);
+                List<CloudInstance> cloudInstances = getNonTerminatedCloudInstances(stack, instanceIds);
                 DownscaleStackRequest request = new DownscaleStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
                         cloudResources, cloudInstances, payload.getResourcesToScale());
                 sendEvent(context, request.selector(), request);

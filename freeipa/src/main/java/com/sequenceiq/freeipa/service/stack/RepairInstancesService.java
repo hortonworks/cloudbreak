@@ -136,6 +136,15 @@ public class RepairInstancesService {
                 .collect(Collectors.toMap(InstanceMetaData::getInstanceId, Function.identity()));
     }
 
+    private List<String> getAdditionalTerminatedInstanceIds(Collection<InstanceMetaData> instanceMetaDataCollection, List<String> requestedInstanceIds) {
+        return instanceMetaDataCollection.stream()
+                .filter(im -> im.isTerminated() || im.isDeletedOnProvider())
+                .map(InstanceMetaData::getInstanceId)
+                .filter(Objects::nonNull)
+                .filter(id -> !requestedInstanceIds.contains(id))
+                .collect(Collectors.toList());
+    }
+
     /**
      * If no instance passed in request, repair all bad instances (at least 1 instance must be good)
      * If instances passed in request, repair all valid passed bad instances (at least 1 instance must remain)
@@ -170,11 +179,13 @@ public class RepairInstancesService {
         validate(accountId, stack, remainingInstances, instancesToRepair.values());
         int nodeCount = stack.getInstanceGroups().stream().findFirst().get().getNodeCount();
 
+        List<String> additionalTerminatedInstanceIds = getAdditionalTerminatedInstanceIds(allInstancesByInstanceId.values(), request.getInstanceIds());
+
         Operation operation = operationService.startOperation(accountId, OperationType.REPAIR, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
         if (operation.getStatus() == OperationState.RUNNING) {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_REQUESTED, "Repair requested");
             flowManager.notify(FlowChainTriggers.REPAIR_TRIGGER_EVENT, new RepairEvent(FlowChainTriggers.REPAIR_TRIGGER_EVENT, stack.getId(),
-                    operation.getOperationId(), nodeCount, instancesToRepair.keySet().stream().collect(Collectors.toList())));
+                    operation.getOperationId(), nodeCount, instancesToRepair.keySet().stream().collect(Collectors.toList()), additionalTerminatedInstanceIds));
         }
         return operationToOperationStatusConverter.convert(operation);
     }
