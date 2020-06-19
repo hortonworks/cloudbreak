@@ -42,6 +42,10 @@ public class AccountTelemetryService {
 
     private static final String SSN_REPLACEMENT = "XXX-XX-XXXX";
 
+    private static final String FREEIPA_PWD_PATTERN = "FPW\\:\\s+[\\w|\\W].*";
+
+    private static final String FREEIPA_PWD_REPLACEMENT = "FPW: [REDACTED]";
+
     private final AccountTelemetryRepository accountTelemetryRepository;
 
     public AccountTelemetryService(AccountTelemetryRepository accountTelemetryRepository) {
@@ -129,9 +133,15 @@ public class AccountTelemetryService {
                 Base64.getEncoder().encodeToString(EMAIL_PATTERN.getBytes()));
         emailRule.setReplacement(EMAIL_REPLACEMENT);
 
+        AnonymizationRule freeIpaPwdRule = new AnonymizationRule();
+        freeIpaPwdRule.setValue(
+                Base64.getEncoder().encodeToString(FREEIPA_PWD_PATTERN.getBytes()));
+        freeIpaPwdRule.setReplacement(FREEIPA_PWD_REPLACEMENT);
+
         defaultRules.add(creditCardWithSepRule);
         defaultRules.add(ssnWithSepRule);
         defaultRules.add(emailRule);
+        defaultRules.add(freeIpaPwdRule);
 
         Features defaultFeatures = new Features();
         defaultFeatures.addClusterLogsCollection(false);
