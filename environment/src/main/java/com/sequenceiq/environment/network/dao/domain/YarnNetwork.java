@@ -10,12 +10,22 @@ import javax.persistence.Entity;
 public class YarnNetwork extends BaseNetwork {
     private String queue;
 
+    private Integer lifetime;
+
     public String getQueue() {
         return queue;
     }
 
     public void setQueue(String queue) {
         this.queue = queue;
+    }
+
+    public Integer getLifetime() {
+        return lifetime;
+    }
+
+    public void setLifetime(Integer lifetime) {
+        this.lifetime = lifetime;
     }
 
     @Override

@@ -51,6 +51,7 @@ public class NetworkDtoToResponseConverter {
                 .withYarn(getIfNotNull(network.getYarn(), p -> EnvironmentNetworkYarnParams.EnvironmentNetworkYarnParamsBuilder
                         .anEnvironmentNetworkYarnParams()
                         .withQueue(p.getQueue())
+                        .withLifetime(p.getLifetime())
                         .build()))
                 .withMock(getIfNotNull(network.getMock(), p -> EnvironmentNetworkMockParams.EnvironmentNetworkMockParamsBuilder
                         .anEnvironmentNetworkMockParams()

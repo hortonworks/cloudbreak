@@ -24,6 +24,8 @@ public class EnvironmentModelDescription {
     public static final String CREATE_FREEIPA = "Create freeipa in environment";
     public static final String FREEIPA = "The FreeIPA paramaters";
     public static final String FREEIPA_INSTANCE_COUNT_BY_GROUP = "The number of FreeIPA instances to create per group when creating freeipa in environment";
+    public static final String YARN_QUEUE = "Queue for Yarn deployments";
+    public static final String YARN_LIFETIME = "Lifetime for Yarn deployments in seconds";
 
     public static final String CREDENTIAL_NAME_REQUEST = "Name of the credential of the environment. If the name is given, "
             + "the detailed credential is ignored in the request.";
