@@ -100,6 +100,13 @@ public abstract class AbstractDownscaleAction<P extends Payload> extends Abstrac
                 .collect(Collectors.toList());
     }
 
+    protected List<CloudInstance> getNonTerminatedCloudInstances(Stack stack, List<String> instanceIds) {
+        return getInstanceMetadataFromStack(stack, instanceIds).stream()
+                .filter(im -> !im.isTerminated() && !im.isDeletedOnProvider())
+                .map(instanceMetaData -> instanceConverter.convert(instanceMetaData))
+                .collect(Collectors.toList());
+    }
+
     protected DetailedStackStatus getInProgressStatus(Map<Object, Object> variables) {
         DetailedStackStatus stackStatus;
         if (isRepair(variables)) {

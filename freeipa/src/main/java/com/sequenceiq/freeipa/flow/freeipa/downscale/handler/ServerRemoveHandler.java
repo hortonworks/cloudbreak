@@ -41,8 +41,10 @@ public class ServerRemoveHandler implements EventHandler<RemoveServersRequest> {
     public void accept(Event<RemoveServersRequest> event) {
         RemoveServersRequest request = event.getData();
         try {
+            Set<String> hosts = request.getHosts();
+            LOGGER.debug("Removing servers [{}]", hosts);
             Pair<Set<String>, Map<String, String>> removeServersResult =
-                    cleanupService.removeServers(request.getResourceId(), request.getHosts());
+                    cleanupService.removeServers(request.getResourceId(), hosts);
             RemoveServersResponse response = new RemoveServersResponse(request, removeServersResult.getFirst(), removeServersResult.getSecond());
             eventBus.notify(response.getServerCleanupFailed().isEmpty()
                             ? EventSelectorUtil.selector(RemoveServersResponse.class) : EventSelectorUtil.failureSelector(RemoveServersResponse.class),

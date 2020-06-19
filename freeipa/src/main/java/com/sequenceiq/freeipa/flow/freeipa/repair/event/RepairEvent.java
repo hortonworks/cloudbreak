@@ -11,11 +11,15 @@ public class RepairEvent extends StackEvent {
 
     private final List<String> instanceIds;
 
-    public RepairEvent(String selector, Long stackId, String operationId, int instanceCountByGroup, List<String> instanceIds) {
+    private final List<String> additionalTermiantedInstanceIds;
+
+    public RepairEvent(String selector, Long stackId, String operationId, int instanceCountByGroup, List<String> instanceIds,
+            List<String> additionalTerminatedInstanceIds) {
         super(selector, stackId);
         this.operationId = operationId;
         this.instanceCountByGroup = instanceCountByGroup;
         this.instanceIds = instanceIds;
+        this.additionalTermiantedInstanceIds = additionalTerminatedInstanceIds;
     }
 
     public String getOperationId() {
@@ -28,5 +32,9 @@ public class RepairEvent extends StackEvent {
 
     public List<String> getInstanceIds() {
         return instanceIds;
+    }
+
+    public List<String> getAdditionalTermiantedInstanceIds() {
+        return additionalTermiantedInstanceIds;
     }
 }

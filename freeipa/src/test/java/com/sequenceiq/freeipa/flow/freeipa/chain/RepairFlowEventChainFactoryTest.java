@@ -25,6 +25,8 @@ public class RepairFlowEventChainFactoryTest {
 
     private static final List<String> INSTANCE_IDS_TO_REPAIR = List.of("instance1");
 
+    private static final List<String> TERMINATED_INSTANCE_IDS = List.of("instance2");
+
     @InjectMocks
     private RepairFlowEventChainFactory underTest;
 
@@ -36,7 +38,7 @@ public class RepairFlowEventChainFactoryTest {
     @Test
     public void testRepair() {
         RepairEvent event = new RepairEvent(FlowChainTriggers.REPAIR_TRIGGER_EVENT, STACK_ID,
-                OPERATION_ID, INSTANCE_COUNT_BY_GROUP, INSTANCE_IDS_TO_REPAIR);
+                OPERATION_ID, INSTANCE_COUNT_BY_GROUP, INSTANCE_IDS_TO_REPAIR, TERMINATED_INSTANCE_IDS);
 
         Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(event);
 
