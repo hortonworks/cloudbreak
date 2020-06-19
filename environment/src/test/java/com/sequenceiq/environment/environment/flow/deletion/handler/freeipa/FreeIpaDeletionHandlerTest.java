@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaPollerObject;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
@@ -76,11 +77,17 @@ class FreeIpaDeletionHandlerTest {
     public void shouldDetachChildEnvironmentIfParentExists() throws Exception {
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setId(CHILD_ENVIRONMENT_ID);
+        EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto
+                .builder()
+                .withEnvironmentDto(environmentDto)
+                .withForceDelete(true)
+                .withId(CHILD_ENVIRONMENT_ID)
+                .build();
 
         when(environmentService.findEnvironmentById(CHILD_ENVIRONMENT_ID)).thenReturn(of(anEnvironmentWithParent(CHILD_ENVIRONMENT_ID)));
         when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(of(new DescribeFreeIpaResponse()));
 
-        victim.accept(new Event<>(environmentDto));
+        victim.accept(new Event<>(environmentDeletionDto));
 
         ArgumentCaptor<DetachChildEnvironmentRequest> detachChildEnvironmentRequestArgumentCaptor
                 = ArgumentCaptor.forClass(DetachChildEnvironmentRequest.class);
@@ -97,6 +104,12 @@ class FreeIpaDeletionHandlerTest {
     public void shouldNotDeleteDnsZoneWhenSiblingsExist() throws Exception {
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setId(CHILD_ENVIRONMENT_ID);
+        EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto
+                .builder()
+                .withEnvironmentDto(environmentDto)
+                .withForceDelete(true)
+                .withId(CHILD_ENVIRONMENT_ID)
+                .build();
 
         Environment environment = anEnvironmentWithParent(CHILD_ENVIRONMENT_ID);
         when(environmentService.findEnvironmentById(CHILD_ENVIRONMENT_ID)).thenReturn(of(environment));
@@ -104,7 +117,7 @@ class FreeIpaDeletionHandlerTest {
                 .thenReturn(List.of(environment, anEnvironmentWithParent(ANOTHER_CHILD_ENVIRONMENT_ID)));
         when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(of(new DescribeFreeIpaResponse()));
 
-        victim.accept(new Event<>(environmentDto));
+        victim.accept(new Event<>(environmentDeletionDto));
 
         verify(dnsV1Endpoint, never()).deleteDnsZoneBySubnet(eq(PARENT_ENVIRONMENT_CRN), any());
     }
@@ -113,6 +126,12 @@ class FreeIpaDeletionHandlerTest {
     public void shouldDeleteFreeIpaIfParentDoesNotExist() {
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setId(CHILD_ENVIRONMENT_ID);
+        EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto
+                .builder()
+                .withEnvironmentDto(environmentDto)
+                .withForceDelete(true)
+                .withId(CHILD_ENVIRONMENT_ID)
+                .build();
         Pair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.SUCCESS, null);
 
         when(environmentService.findEnvironmentById(CHILD_ENVIRONMENT_ID)).thenReturn(of(anEnvironmentWithoutParent(Boolean.TRUE)));
@@ -123,7 +142,7 @@ class FreeIpaDeletionHandlerTest {
                 Mockito.eq(FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT),
                 Mockito.eq(1))).thenReturn(pollingResult);
 
-        victim.accept(new Event<>(environmentDto));
+        victim.accept(new Event<>(environmentDeletionDto));
 
         verify(freeIpaService).delete(ENVIRONMENT_CRN);
         verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
@@ -134,10 +153,15 @@ class FreeIpaDeletionHandlerTest {
     public void shouldNotCallFreeIpaServiceIfFreeIpaCreationIsDisabled() {
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setId(CHILD_ENVIRONMENT_ID);
-
+        EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto
+                .builder()
+                .withEnvironmentDto(environmentDto)
+                .withForceDelete(true)
+                .withId(CHILD_ENVIRONMENT_ID)
+                .build();
         when(environmentService.findEnvironmentById(CHILD_ENVIRONMENT_ID)).thenReturn(of(anEnvironmentWithoutParent(Boolean.FALSE)));
 
-        victim.accept(new Event<>(environmentDto));
+        victim.accept(new Event<>(environmentDeletionDto));
 
         verify(freeIpaService, never()).delete(ENVIRONMENT_CRN);
         verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));

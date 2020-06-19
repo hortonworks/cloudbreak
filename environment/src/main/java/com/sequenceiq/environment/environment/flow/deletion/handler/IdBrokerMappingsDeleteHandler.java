@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationErrorStatus;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
@@ -24,7 +25,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
-public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> {
+public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IdBrokerMappingsDeleteHandler.class);
 
@@ -39,8 +40,18 @@ public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<Envir
     }
 
     @Override
-    public void accept(Event<EnvironmentDto> environmentDtoEvent) {
-        EnvironmentDto environmentDto = environmentDtoEvent.getData();
+    public void accept(Event<EnvironmentDeletionDto> environmentDtoEvent) {
+        EnvironmentDeletionDto environmentDeletionDto = environmentDtoEvent.getData();
+        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
+
+        EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
+                .withResourceId(environmentDto.getResourceId())
+                .withResourceName(environmentDto.getName())
+                .withResourceCrn(environmentDto.getResourceCrn())
+                .withForceDelete(environmentDeletionDto.isForceDelete())
+                .withSelector(START_S3GUARD_TABLE_DELETE_EVENT.selector())
+                .build();
+
         try {
             environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> {
                 String environmentCrn = environment.getResourceCrn();
@@ -51,22 +62,20 @@ public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<Envir
                     LOGGER.info("IDBMMS usage is disabled for environment {}. No need to delete IDBroker mappings.", environmentCrn);
                 }
             });
-
-            EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
-                    .withResourceId(environmentDto.getResourceId())
-                    .withResourceName(environmentDto.getName())
-                    .withResourceCrn(environmentDto.getResourceCrn())
-                    .withSelector(START_S3GUARD_TABLE_DELETE_EVENT.selector())
-                    .build();
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
-                    .withEnvironmentID(environmentDto.getId())
-                    .withException(e)
-                    .withResourceCrn(environmentDto.getResourceCrn())
-                    .withResourceName(environmentDto.getName())
-                    .build();
-            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
+            if (environmentDeletionDto.isForceDelete()) {
+                LOGGER.warn("The %s was not successful but the environment deletion was requested as force delete so continue the deletion flow", selector());
+                eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
+            } else {
+                EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
+                        .withEnvironmentID(environmentDto.getId())
+                        .withException(e)
+                        .withResourceCrn(environmentDto.getResourceCrn())
+                        .withResourceName(environmentDto.getName())
+                        .build();
+                eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
+            }
         }
     }
 

@@ -310,7 +310,7 @@ public class EnvironmentTestDto
     public void delete(TestContext testContext, SimpleEnvironmentResponse entity, EnvironmentClient client) {
         LOGGER.info("Delete resource with name: {}", entity.getName());
         EnvironmentEndpoint credentialEndpoint = client.getEnvironmentClient().environmentV1Endpoint();
-        credentialEndpoint.deleteByName(entity.getName(), false);
+        credentialEndpoint.deleteByName(entity.getName(), true, false);
         setName(entity.getName());
         await(this, ARCHIVED, emptyRunningParameter());
     }

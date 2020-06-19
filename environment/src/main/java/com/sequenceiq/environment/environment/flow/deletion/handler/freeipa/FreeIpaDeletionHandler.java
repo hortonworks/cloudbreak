@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaPollerObject;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
@@ -33,7 +34,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachCh
 import reactor.bus.Event;
 
 @Component
-public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentDto> {
+public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaDeletionHandler.class);
 
@@ -61,8 +62,9 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     @Override
-    public void accept(Event<EnvironmentDto> environmentDtoEvent) {
-        EnvironmentDto environmentDto = environmentDtoEvent.getData();
+    public void accept(Event<EnvironmentDeletionDto> environmentDtoEvent) {
+        EnvironmentDeletionDto environmentDeletionDto = environmentDtoEvent.getData();
+        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
         Environment environment = environmentService.findEnvironmentById(environmentDto.getId()).orElse(null);
         try {
             if (shouldRemoveFreeIpa(environment)) {
@@ -72,15 +74,21 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
                     deleteFreeIpa(environment);
                 }
             }
-            eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
+            eventSender().sendEvent(getNextStepObject(environmentDeletionDto), environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
-                    .withEnvironmentID(environmentDto.getId())
-                    .withException(e)
-                    .withResourceCrn(environmentDto.getResourceCrn())
-                    .withResourceName(environmentDto.getName())
-                    .build();
-            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
+            if (environmentDeletionDto.isForceDelete()) {
+                LOGGER.warn("The %s was not successful but the environment deletion was requested as force delete so " +
+                        "continue the deletion flow", selector());
+                eventSender().sendEvent(getNextStepObject(environmentDeletionDto), environmentDtoEvent.getHeaders());
+            } else {
+                EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
+                        .withEnvironmentID(environmentDto.getId())
+                        .withException(e)
+                        .withResourceCrn(environmentDto.getResourceCrn())
+                        .withResourceName(environmentDto.getName())
+                        .build();
+                eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
+            }
         }
     }
 
@@ -150,8 +158,10 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
         return DELETE_FREEIPA_EVENT.selector();
     }
 
-    private EnvDeleteEvent getNextStepObject(EnvironmentDto environmentDto) {
+    private EnvDeleteEvent getNextStepObject(EnvironmentDeletionDto environmentDeletionDto) {
+        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
         return EnvDeleteEvent.builder()
+                .withForceDelete(environmentDeletionDto.isForceDelete())
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())

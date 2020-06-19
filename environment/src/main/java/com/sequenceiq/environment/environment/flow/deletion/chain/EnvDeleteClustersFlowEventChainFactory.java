@@ -24,9 +24,19 @@ public class EnvDeleteClustersFlowEventChainFactory implements FlowEventChainFac
     public Queue<Selectable> createFlowTriggerEventQueue(EnvDeleteEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         //TODO builder
-        flowEventChain.add(new EnvDeleteEvent(START_DATAHUB_CLUSTERS_DELETE_EVENT.event(), event.getResourceId(), event.accepted(), event.getResourceName(),
-                event.getResourceCrn()));
-        flowEventChain.add(new EnvDeleteEvent(START_FREEIPA_DELETE_EVENT.event(), event.getResourceId(), event.getResourceName(), event.getResourceCrn()));
+        flowEventChain.add(new EnvDeleteEvent(
+                START_DATAHUB_CLUSTERS_DELETE_EVENT.event(),
+                event.getResourceId(),
+                event.accepted(),
+                event.getResourceName(),
+                event.getResourceCrn(),
+                event.isForceDelete()));
+        flowEventChain.add(new EnvDeleteEvent(
+                START_FREEIPA_DELETE_EVENT.event(),
+                event.getResourceId(),
+                event.getResourceName(),
+                event.getResourceCrn(),
+                event.isForceDelete()));
         return flowEventChain;
     }
 }
