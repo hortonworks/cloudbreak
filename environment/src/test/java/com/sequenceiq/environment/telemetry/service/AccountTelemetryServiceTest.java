@@ -144,6 +144,7 @@ public class AccountTelemetryServiceTest {
             testPatternWithOutput(rule, "str myemail@email.com", "email");
             testPatternWithOutput(rule, "333-44-2222", "XXX-");
             testPatternWithOutput(rule, "card number: 1111-2222-3333-4444", "XXXX-");
+            testPatternWithOutput(rule, "- FPW: secret", "FPW");
         }
         assertThat(result.getFeatures().getClusterLogsCollection().isEnabled()).isEqualTo(false);
     }

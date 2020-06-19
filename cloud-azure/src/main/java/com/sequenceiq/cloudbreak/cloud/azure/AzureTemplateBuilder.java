@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperati
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -40,6 +42,14 @@ import freemarker.template.TemplateException;
 public class AzureTemplateBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureTemplateBuilder.class);
+
+    private static final String GENERAL_PURPOSE = "GeneralPurpose";
+
+    private static final String MEMORY_OPTIMIZED = "MemoryOptimized";
+
+    private static final Set<String> GENERAL_PURPOSE_INSTANCE_TYPES = Set.of("GP_Gen5_2", "GP_Gen5_4", "GP_Gen5_8", "GP_Gen5_16", "GP_Gen5_32");
+
+    private static final Set<String> MEMORY_OPTIMIZED_INSTANCE_TYPES = Set.of("MO_Gen5_2", "MO_Gen5_4", "MO_Gen5_8", "MO_Gen5_16", "MO_Gen5_32");
 
     @Value("${cb.azure.database.template.batchSize}")
     private int defaultBatchSize;
@@ -137,7 +147,7 @@ public class AzureTemplateBuilder {
             model.put("skuFamily", azureDatabaseServerView.getSkuFamily());
             model.put("skuName", azureDatabaseServerView.getSkuName());
             model.put("skuSizeMB", azureDatabaseServerView.getAllocatedStorageInMb());
-            model.put("skuTier", azureDatabaseServerView.getSkuTier());
+            model.put("skuTier", getSkuTier(azureDatabaseServerView));
             // FUTURE: When CM scm_prepare_database.sh supports it, use TLS
             model.put("sslEnforcement", false);
             model.put("storageAutoGrow", azureDatabaseServerView.getStorageAutoGrow());
@@ -149,6 +159,30 @@ public class AzureTemplateBuilder {
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process the ARM TemplateBuilder", e);
+        }
+    }
+
+    private String getSkuTier(AzureDatabaseServerView azureDatabaseServerView) {
+        String skuTier = azureDatabaseServerView.getSkuTier();
+        String skuName = azureDatabaseServerView.getSkuName();
+        if (Objects.isNull(skuTier)) {
+            if (Objects.isNull(skuName)) {
+                return null;
+            } else {
+                return getSkuTierFromSkuName(skuName);
+            }
+        } else {
+            return azureDatabaseServerView.getSkuTier();
+        }
+    }
+
+    private String getSkuTierFromSkuName(String skuName) {
+        if (GENERAL_PURPOSE_INSTANCE_TYPES.contains(skuName)) {
+            return GENERAL_PURPOSE;
+        } else if (MEMORY_OPTIMIZED_INSTANCE_TYPES.contains(skuName)) {
+            return MEMORY_OPTIMIZED;
+        } else {
+            return null;
         }
     }
 
