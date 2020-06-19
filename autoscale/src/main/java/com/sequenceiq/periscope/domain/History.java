@@ -36,7 +36,7 @@ public class History {
 
     public static final String ALERT_STATE = "alertState";
 
-    public static final String ALERT_DESCRIPTION = "alertDescription";
+    public static final String ALERT_NAME = "alertName";
 
     public static final String TIME_ZONE = "timeZone";
 
@@ -90,17 +90,24 @@ public class History {
     public History() {
     }
 
-    public History(ScalingStatus status, String statusReason, int originalNodeCount) {
-        scalingStatus = status;
+    public History(ScalingStatus status, String statusReason, String stackCrn) {
+        this.scalingStatus = status;
+        this.statusReason = statusReason;
+        this.stackCrn = stackCrn;
+        this.timestamp = System.currentTimeMillis();
+    }
+
+    public History(ScalingStatus status, String statusReason, int originalNodeCount, int adjustment) {
+        this.scalingStatus = status;
         this.statusReason = statusReason;
         this.originalNodeCount = originalNodeCount;
-        timestamp = System.currentTimeMillis();
+        this.adjustment = adjustment;
+        this.timestamp = System.currentTimeMillis();
     }
 
     public History withScalingPolicy(ScalingPolicy policy) {
-        adjustment = policy.getScalingAdjustment();
-        adjustmentType = policy.getAdjustmentType();
-        hostGroup = policy.getHostGroup();
+        this.adjustmentType = policy.getAdjustmentType();
+        this.hostGroup = policy.getHostGroup();
         return this;
     }
 
@@ -122,8 +129,12 @@ public class History {
             properties.put(PERIOD, "" + pa.getPeriod());
             properties.put(ALERT_STATE, pa.getAlertState().name());
             properties.put(PARAMETERS, pa.getParameters().getValue());
+        } else if (alert instanceof  LoadAlert) {
+            LoadAlert la = (LoadAlert) alert;
+            properties.put(PARAMETERS, la.getLoadAlertConfiguration().toString());
+            alertType = AlertType.LOAD;
         }
-        properties.put(ALERT_DESCRIPTION, alert.getDescription());
+        properties.put(ALERT_NAME, alert.getName());
         return this;
     }
 

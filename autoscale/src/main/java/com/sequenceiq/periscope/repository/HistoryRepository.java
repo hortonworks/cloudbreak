@@ -11,8 +11,7 @@ import com.sequenceiq.periscope.domain.History;
 @EntityType(entityClass = History.class)
 public interface HistoryRepository extends CrudRepository<History, Long> {
 
-    List<History> findAllByCluster(@Param("id") Long id);
+    List<History> findFirst200ByClusterIdOrderByIdDesc(@Param("clusterId") Long clusterId);
 
     History findByCluster(@Param("clusterId") Long clusterId, @Param("historyId") Long historyId);
-
 }

@@ -5,13 +5,10 @@ import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 import static com.sequenceiq.periscope.api.model.ClusterState.SUSPENDED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -34,16 +31,12 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.api.model.ClusterState;
-import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
-import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
-import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.security.SecurityConfigService;
 import com.sequenceiq.periscope.service.security.TlsHttpClientConfigurationService;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
@@ -77,12 +70,6 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
     private SecurityConfigService securityConfigService;
 
     @Mock
-    private HistoryService historyService;
-
-    @Mock
-    private HttpNotificationSender notificationSender;
-
-    @Mock
     private RequestLogging requestLogging;
 
     @Mock
@@ -102,76 +89,62 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
     @Test
     public void shouldUpdateSuspendedHelthyCluster() {
         Cluster cluster = getCluster(SUSPENDED);
-        History history = new History();
         StackV4Response stack = new StackV4Response();
-        setUpMocks(cluster, true, stack, history);
+        setUpMocks(cluster, true, stack);
 
         underTest.execute();
 
         verify(clusterService).findOneByStackId(STACK_ID);
         verify(clusterService).update(eq(cluster.getId()), any(), eq(RUNNING), eq(true));
-        verify(historyService).createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
-        verify(notificationSender).send(cluster, history);
     }
 
     @Test
     public void shouldUpdatePendingHelthyCluster() {
         Cluster cluster = getCluster(PENDING);
-        History history = new History();
         StackV4Response stack = new StackV4Response();
 
-        setUpMocks(cluster, true, stack, history);
+        setUpMocks(cluster, true, stack);
 
         underTest.execute();
 
         verify(clusterService).findOneByStackId(STACK_ID);
         verify(clusterService).update(eq(cluster.getId()), any(), eq(RUNNING), eq(true));
-        verify(historyService).createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
-        verify(notificationSender).send(cluster, history);
     }
 
     @Test
     public void shouldNotUpdateRunningHelthyCluster() {
         Cluster cluster = getCluster(RUNNING);
-        History history = new History();
         StackV4Response stack = new StackV4Response();
 
-        setUpMocks(cluster, true, stack, history);
+        setUpMocks(cluster, true, stack);
 
         underTest.execute();
 
         verify(clusterService).findOneByStackId(STACK_ID);
         verifyNoMoreInteractions(clusterService);
-        verifyZeroInteractions(historyService);
-        verifyZeroInteractions(notificationSender);
     }
 
     @Test
     public void shouldNotUpdateSuspendedUnHelthyCluster() {
         Cluster cluster = getCluster(SUSPENDED);
-        History history = new History();
         StackV4Response stack = new StackV4Response();
 
-        setUpMocks(cluster, false, stack, history);
+        setUpMocks(cluster, false, stack);
 
         underTest.execute();
 
         verify(clusterService).findOneByStackId(STACK_ID);
         verifyNoMoreInteractions(clusterService);
-        verifyZeroInteractions(historyService);
-        verifyZeroInteractions(notificationSender);
     }
 
     @Test
     public void shouldValidateAndCreateNewCluster() {
-        History history = new History();
         StackV4Response stack = new StackV4Response();
 
-        setUpMocks(null, false, stack, history);
+        setUpMocks(null, false, stack);
 
         Cluster cluster = getCluster(null);
         when(clusterService.create(any())).thenReturn(cluster);
-        when(historyService.createEntry(any(), anyString(), anyInt(), eq(cluster))).thenReturn(history);
 
         underTest.execute();
 
@@ -180,22 +153,19 @@ public class ClouderaManagerClusterCreationEvaluatorTest {
         verify(clusterService).create(any(AutoscaleStackV4Response.class));
     }
 
-    private void setUpMocks(Cluster cluster, boolean healthy, StackV4Response stackV4Response, History history) {
+    private void setUpMocks(Cluster cluster, boolean healthy, StackV4Response stackV4Response) {
         InstanceMetaDataV4Response instanceMetaData = new InstanceMetaDataV4Response();
         instanceMetaData.setDiscoveryFQDN("master");
-        setUpMocks(cluster, healthy, stackV4Response, Optional.of(instanceMetaData), history);
+        setUpMocks(cluster, healthy, stackV4Response, Optional.of(instanceMetaData));
     }
 
-    private void setUpMocks(Cluster cluster, boolean healthy, StackV4Response stackV4Response, Optional<InstanceMetaDataV4Response> primaryGateways,
-            History history) {
+    private void setUpMocks(Cluster cluster, boolean healthy, StackV4Response stackV4Response, Optional<InstanceMetaDataV4Response> primaryGateways) {
         AutoscaleStackV4Response stack = getStackResponse();
         when(evaluatorContext.getData()).thenReturn(stack);
         when(securityConfigService.getSecurityConfig(anyLong())).thenReturn(new SecurityConfig());
         when(clusterService.findOneByStackId(anyLong())).thenReturn(cluster);
         when(requestLogging.logResponseTime(any(), any())).thenReturn(healthy);
-        if (cluster != null) {
-            when(historyService.createEntry(any(), anyString(), anyInt(), any(Cluster.class))).thenReturn(history);
-        }
+
         when(clusterService.update(anyLong(), any(), any(), anyBoolean())).thenReturn(cluster);
         // CHECKSTYLE:OFF
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(new ClouderaManagerResourceApi());
