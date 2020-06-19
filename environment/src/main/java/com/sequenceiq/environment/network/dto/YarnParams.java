@@ -4,6 +4,8 @@ public class YarnParams {
 
     private String queue;
 
+    private Integer lifetime;
+
     public String getQueue() {
         return queue;
     }
@@ -12,15 +14,27 @@ public class YarnParams {
         this.queue = queue;
     }
 
+    public Integer getLifetime() {
+        return lifetime;
+    }
+
+    public void setLifetime(Integer lifetime) {
+        this.lifetime = lifetime;
+    }
+
     @Override
     public String toString() {
         return "YarnParams{" +
-                "queue='" + queue + '\'' +
+                "queue='" + queue + "', " +
+                "lifetime='" + lifetime + '\'' +
                 '}';
     }
 
     public static final class YarnParamsBuilder {
+
         private String queue;
+
+        private Integer lifetime;
 
         private YarnParamsBuilder() {
         }
@@ -34,9 +48,15 @@ public class YarnParams {
             return this;
         }
 
+        public YarnParamsBuilder withLifetime(Integer lifetime) {
+            this.lifetime = lifetime;
+            return this;
+        }
+
         public YarnParams build() {
             YarnParams yarnParams = new YarnParams();
             yarnParams.setQueue(queue);
+            yarnParams.setLifetime(lifetime);
             return yarnParams;
         }
     }
