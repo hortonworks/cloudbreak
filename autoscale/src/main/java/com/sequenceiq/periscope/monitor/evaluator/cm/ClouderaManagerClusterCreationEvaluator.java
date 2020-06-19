@@ -22,18 +22,14 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
-import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
-import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.security.SecurityConfigService;
 import com.sequenceiq.periscope.service.security.TlsConfigurationException;
 import com.sequenceiq.periscope.service.security.TlsHttpClientConfigurationService;
@@ -63,12 +59,6 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
 
     @Inject
     private SecurityConfigService securityConfigService;
-
-    @Inject
-    private HistoryService historyService;
-
-    @Inject
-    private HttpNotificationSender notificationSender;
 
     @Inject
     private RequestLogging requestLogging;
@@ -128,9 +118,6 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
         LOGGER.debug("Creating cluster for Cloudera Manager host: {}", monitoredStack.getClusterManager().getHost());
         Cluster cluster = clusterService.create(stack);
         MDCBuilder.buildMdcContext(cluster);
-        History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
-
-        notificationSender.send(cluster, history);
     }
 
     private void updateCluster(AutoscaleStackV4Response cbStack, Cluster cluster, MonitoredStack monitoredStack) {
@@ -138,9 +125,7 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
             MDCBuilder.buildMdcContext(cluster);
             cmHealthCheck(monitoredStack);
             LOGGER.debug("Update cluster and set it's state to 'RUNNING' for Cloudera Manager host: {}", monitoredStack.getClusterManager().getHost());
-            cluster = clusterService.update(cluster.getId(), monitoredStack, RUNNING, cluster.isAutoscalingEnabled());
-            History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
-            notificationSender.send(cluster, history);
+            clusterService.update(cluster.getId(), monitoredStack, RUNNING, cluster.isAutoscalingEnabled());
         }
     }
 

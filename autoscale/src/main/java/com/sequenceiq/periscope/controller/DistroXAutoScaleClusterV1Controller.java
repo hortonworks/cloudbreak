@@ -117,7 +117,7 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
                 alertController.validateTimeAlertRequests(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
                 alertController.createLoadAlerts(clusterId, autoscaleClusterRequest.getLoadAlertRequests());
                 alertController.createTimeAlerts(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
-                clusterService.setAutoscaleState(clusterId, autoscaleClusterRequest.getEnableAutoscaling());
+                asClusterCommonService.setAutoscaleState(clusterId, autoscaleClusterRequest.getEnableAutoscaling());
             });
         } catch (TransactionService.TransactionExecutionException e) {
             throw e.getCause();
