@@ -16,10 +16,11 @@ public class TimeAlertRequest extends AbstractAlertJson {
 
     @ApiModelProperty(TimeAlertJsonProperties.TIMEZONE)
     @Size(max = 50)
+    @NotBlank
     private String timeZone;
 
     @ApiModelProperty(TimeAlertJsonProperties.CRON)
-    @NotEmpty
+    @NotBlank
     @Size(max = 100)
     private String cron;
 

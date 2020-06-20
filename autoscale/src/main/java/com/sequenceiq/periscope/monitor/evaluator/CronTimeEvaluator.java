@@ -104,7 +104,7 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     }
 
     private void publish(TimeAlert alert) {
-        LOGGER.debug("Time alert '{}' triggers the '{}' scaling policy", alert.getName(), alert.getScalingPolicy().getName());
         eventPublisher.publishEvent(new ScalingEvent(alert));
+        LOGGER.debug("Time alert '{}' triggered  for cluster '{}'", alert.getName(), alert.getCluster().getStackCrn());
     }
 }

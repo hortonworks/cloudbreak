@@ -50,7 +50,7 @@ public class ScalingPolicy implements Clustered {
     }
 
     public String getName() {
-        return name;
+        return name != null ? name : "";
     }
 
     public void setName(String name) {
