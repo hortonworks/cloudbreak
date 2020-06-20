@@ -1,7 +1,7 @@
 package com.sequenceiq.periscope.api.model;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -16,10 +16,11 @@ public class TimeAlertRequest extends AbstractAlertJson {
 
     @ApiModelProperty(TimeAlertJsonProperties.TIMEZONE)
     @Size(max = 50)
+    @NotBlank
     private String timeZone;
 
     @ApiModelProperty(TimeAlertJsonProperties.CRON)
-    @NotEmpty
+    @NotBlank
     @Size(max = 100)
     private String cron;
 

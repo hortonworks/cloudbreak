@@ -6,7 +6,8 @@ public enum AlertType {
     @Override
     public String toString() {
         switch (this) {
-            case TIME: return "SCHEDULE";
+            case TIME: return "SCHEDULE-BASED";
+            case LOAD: return "LOAD-BASED";
             default: return name();
         }
     }
