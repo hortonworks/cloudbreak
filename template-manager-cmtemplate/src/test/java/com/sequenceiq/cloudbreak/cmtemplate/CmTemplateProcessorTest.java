@@ -486,10 +486,10 @@ public class CmTemplateProcessorTest {
         assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()), underTest.recommendAutoscale());
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha.bp"));
-        assertEquals(new AutoscaleRecommendation(Set.of("gateway", "quorum"), Set.of("gateway", "quorum")), underTest.recommendAutoscale());
+        assertEquals(new AutoscaleRecommendation(Set.of("gateway"), Set.of("gateway")), underTest.recommendAutoscale());
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/kafka.bp"));
-        assertEquals(new AutoscaleRecommendation(Set.of("quorum"), Set.of("quorum")), underTest.recommendAutoscale());
+        assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()), underTest.recommendAutoscale());
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
         assertEquals(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")), underTest.recommendAutoscale());
