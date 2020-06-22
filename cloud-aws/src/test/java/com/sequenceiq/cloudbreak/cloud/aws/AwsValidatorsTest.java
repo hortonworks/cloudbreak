@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -45,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.RetryService;
+import com.sequenceiq.common.api.tag.model.Tags;
 
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = "cb.max.aws.resource.name.length=5")
@@ -155,24 +155,24 @@ public class AwsValidatorsTest {
     }
 
     private void testTagsWithExpectedException(String key, String value) {
-        Map<String, String> tags = new HashMap<>();
-        tags.put(key, value);
+        Tags tags = new Tags();
+        tags.addTag(key, value);
         Assertions.assertThrows(IllegalArgumentException.class, () -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(tags)));
     }
 
     private void testTagsWithExpectedTeBeFair(String key, String value) {
-        Map<String, String> tags = new HashMap<>();
-        tags.put(key, value);
+        Tags tags = new Tags();
+        tags.addTag(key, value);
         Assertions.assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(tags)));
     }
 
-    private Map<String, String> getManyTags(int numberOfTags) {
-        Map<String, String> tags = new HashMap<>();
-        IntStream.range(0, numberOfTags).forEach(i -> tags.put(Integer.toString(i), VALID));
+    private Tags getManyTags(int numberOfTags) {
+        Tags tags = new Tags();
+        IntStream.range(0, numberOfTags).forEach(i -> tags.addTag(Integer.toString(i), VALID));
         return tags;
     }
 
-    private CloudStack getTestCloudStackWithTags(Map<String, String> tags) {
+    private CloudStack getTestCloudStackWithTags(Tags tags) {
         return new CloudStack(List.of(), null, null, Map.of(), tags,
                 "", null, null, null, null);
     }

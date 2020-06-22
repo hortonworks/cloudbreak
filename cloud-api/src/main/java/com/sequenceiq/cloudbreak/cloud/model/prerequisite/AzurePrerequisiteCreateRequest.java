@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model.prerequisite;
 
-import java.util.Map;
+import com.sequenceiq.common.api.tag.model.Tags;
 
 public class AzurePrerequisiteCreateRequest {
 
@@ -8,7 +8,7 @@ public class AzurePrerequisiteCreateRequest {
 
     private final String locationName;
 
-    private final Map<String, String> tags;
+    private final Tags tags;
 
     private AzurePrerequisiteCreateRequest(Builder builder) {
         resourceGroupName = builder.resourceGroupName;
@@ -24,7 +24,7 @@ public class AzurePrerequisiteCreateRequest {
         return locationName;
     }
 
-    public Map<String, String> getTags() {
+    public Tags getTags() {
         return tags;
     }
 
@@ -37,7 +37,7 @@ public class AzurePrerequisiteCreateRequest {
 
         private String locationName;
 
-        private Map<String, String> tags;
+        private Tags tags;
 
         public Builder withResourceGroupName(String resourceGroupName) {
             this.resourceGroupName = resourceGroupName;
@@ -49,7 +49,7 @@ public class AzurePrerequisiteCreateRequest {
             return this;
         }
 
-        public Builder withTags(Map<String, String> tags) {
+        public Builder withTags(Tags tags) {
             this.tags = tags;
             return this;
         }

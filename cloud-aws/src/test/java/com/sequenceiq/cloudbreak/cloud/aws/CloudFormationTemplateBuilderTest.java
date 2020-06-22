@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.model.CloudIdentityType;
@@ -732,7 +733,7 @@ public class CloudFormationTemplateBuilderTest {
         Security security = new Security(emptyList(), singletonList("single-sg-id"));
         groups.add(new Group("master", InstanceGroupType.CORE, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE, Optional.empty()));
-        CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), emptyMap(), "template",
+        CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), new Tags(), "template",
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publicKey", null);
         //WHEN
         modelContext = new ModelContext()
@@ -761,7 +762,7 @@ public class CloudFormationTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE, Optional.empty()));
         groups.add(new Group("master", InstanceGroupType.CORE, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE, Optional.empty()));
-        CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), emptyMap(), "template",
+        CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), new Tags(), "template",
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publicKey", null);
         //WHEN
         modelContext = new ModelContext()
@@ -788,7 +789,7 @@ public class CloudFormationTemplateBuilderTest {
         Security security = new Security(emptyList(), List.of("multi-sg-id1", "multi-sg-id2"));
         groups.add(new Group("master", InstanceGroupType.CORE, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE, Optional.empty()));
-        CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), emptyMap(), "template",
+        CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), new Tags(), "template",
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publicKey", null);
         //WHEN
         modelContext = new ModelContext()
@@ -1001,7 +1002,7 @@ public class CloudFormationTemplateBuilderTest {
         return new AuthenticatedContext(cloudContext, credential);
     }
 
-    private CloudStack createDefaultCloudStack(Collection<Group> groups, Map<String, String> parameters, Map<String, String> tags) {
+    private CloudStack createDefaultCloudStack(Collection<Group> groups, Map<String, String> parameters, Tags tags) {
         Network network = new Network(new Subnet("testSubnet"));
         return new CloudStack(groups, network, image, parameters, tags, null, instanceAuthentication,
                 instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
@@ -1032,8 +1033,8 @@ public class CloudFormationTemplateBuilderTest {
         return Map.of("persistentStorage", "persistentStorageTest", "attachedStorageOption", "attachedStorageOptionTest");
     }
 
-    private Map<String, String> getDefaultCloudStackTags() {
-        return Map.of("testtagkey", "testtagvalue");
+    private Tags getDefaultCloudStackTags() {
+        return new Tags(Map.of("testtagkey", "testtagvalue"));
     }
 
     private Security getDefaultCloudStackSecurity() {

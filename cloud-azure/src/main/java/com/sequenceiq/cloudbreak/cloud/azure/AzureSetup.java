@@ -103,13 +103,13 @@ public class AzureSetup implements Setup {
         String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), stack);
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(ac.getCloudContext(), stack);
         if (!client.resourceGroupExists(resourceGroupName)) {
-            client.createResourceGroup(resourceGroupName, region, stack.getTags());
+            client.createResourceGroup(resourceGroupName, region, stack.getTags().getAll());
         }
         if (!client.resourceGroupExists(imageResourceGroupName)) {
-            client.createResourceGroup(imageResourceGroupName, region, stack.getTags());
+            client.createResourceGroup(imageResourceGroupName, region, stack.getTags().getAll());
         }
         armStorage.createStorage(client, imageStorageName, AzureDiskType.LOCALLY_REDUNDANT, imageResourceGroupName, region,
-                armStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags());
+                armStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags().getAll());
         client.createContainerInStorage(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER);
         if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
             client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
@@ -154,7 +154,7 @@ public class AzureSetup implements Setup {
             AzureClient client = ac.getParameter(AzureClient.class);
             persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
             if (!client.resourceGroupExists(resourceGroupName)) {
-                client.createResourceGroup(resourceGroupName, region, stack.getTags());
+                client.createResourceGroup(resourceGroupName, region, stack.getTags().getAll());
             }
         } catch (Exception ex) {
             throw new CloudConnectorException(ex);
@@ -168,7 +168,7 @@ public class AzureSetup implements Setup {
         azureClient.createResourceGroup(
                 environmentPrerequisitesCreateRequest.getAzure().getResourceGroupName(),
                 environmentPrerequisitesCreateRequest.getAzure().getLocationName(),
-                environmentPrerequisitesCreateRequest.getAzure().getTags());
+                environmentPrerequisitesCreateRequest.getAzure().getTags().getAll());
     }
 
     @Override

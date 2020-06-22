@@ -446,7 +446,7 @@ public class ClusterHostServiceRunner {
         if (stack.getTags() != null && isNotBlank(stack.getTags().getValue())) {
             try {
                 StackTags stackTags = stack.getTags().get(StackTags.class);
-                Map<String, Object> tags = new HashMap<>(stackTags.getDefaultTags());
+                Map<String, String> tags = stackTags.getDefaultTags().getAll();
                 servicePillarConfig.put("tags", new SaltPillarProperties("/tags/init.sls",
                         Collections.singletonMap("tags", tags)));
             } catch (Exception e) {

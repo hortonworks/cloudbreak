@@ -135,15 +135,14 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Tags tags = new Tags();
         List<String> tagList = new ArrayList<>();
-        Map<String, String> labels = new HashMap<>();
+        Map<String, String> labels = new HashMap<>(cloudStack.getTags().getAll());
         String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
         tagList.add(groupname);
 
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
-        cloudStack.getTags().forEach((key, value) -> tagList.add(key + '-' + value));
+        cloudStack.getTags().getAll().forEach((key, value) -> tagList.add(key + '-' + value));
 
-        labels.putAll(cloudStack.getTags());
         tags.setItems(tagList);
 
         instance.setTags(tags);

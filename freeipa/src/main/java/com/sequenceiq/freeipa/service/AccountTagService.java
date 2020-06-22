@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponses;
@@ -25,16 +26,17 @@ public class AccountTagService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    public Map<String, String> list() {
+    public Tags list() {
         try {
             AccountTagResponses list = accountTagEndpoint.list();
-            return list.getResponses()
+            Map<String, String> tagMap = list.getResponses()
                     .stream()
                     .collect(Collectors.toMap(AccountTagResponse::getKey, AccountTagResponse::getValue));
+            return new Tags(tagMap);
         } catch (ClientErrorException e) {
             try (Response response = e.getResponse()) {
                 if (Response.Status.NOT_FOUND.getStatusCode() == response.getStatus()) {
-                    throw new BadRequestException(String.format("Account tag not found"), e);
+                    throw new BadRequestException("Account tag not found", e);
                 }
                 String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
                 throw new CloudbreakServiceException(String.format("Failed to get account tag: %s", errorMessage), e);

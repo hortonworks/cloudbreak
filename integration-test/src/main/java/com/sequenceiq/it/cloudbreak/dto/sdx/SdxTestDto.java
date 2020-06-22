@@ -153,7 +153,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     public SdxTestDto withTags(Map<String, String> tags) {
-        getRequest().addTags(tags);
+        getRequest().getTags().addTags(tags);
         return this;
     }
 
@@ -229,7 +229,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     private SdxTestDto withTestNameAsTag() {
-        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags(), getTestContext().getTestMethodName());
+        tagAdderUtil.addTestNameTag(getRequest().getTags(), getTestContext().getTestMethodName());
         return this;
     }
 

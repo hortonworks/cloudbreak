@@ -500,7 +500,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
             if (sdxClusterRequest.getTags() == null) {
                 sdxCluster.setTags(new Json(new HashMap<>()));
             } else {
-                sdxCluster.setTags(new Json(sdxClusterRequest.getTags()));
+                sdxCluster.setTags(new Json(sdxClusterRequest.getTags().getAll()));
             }
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Can not convert tags", e);

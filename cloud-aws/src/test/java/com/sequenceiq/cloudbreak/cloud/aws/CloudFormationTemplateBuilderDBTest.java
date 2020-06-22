@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.api.tag.model.Tags;
 
 import freemarker.template.Configuration;
 
@@ -141,7 +142,7 @@ public class CloudFormationTemplateBuilderDBTest {
         return new AuthenticatedContext(cloudContext, credential);
     }
 
-    private DatabaseStack createDefaultDatabaseStack(Map<String, String> tags) {
+    private DatabaseStack createDefaultDatabaseStack(Tags tags) {
         Network network = createDefaultNetwork();
         DatabaseServer server = createDefaultDatabaseServer();
         return new DatabaseStack(network, server, tags, null);
@@ -166,8 +167,8 @@ public class CloudFormationTemplateBuilderDBTest {
             .build();
     }
 
-    private Map<String, String> getDefaultDatabaseStackTags() {
-        return Map.of("testtagkey", "testtagvalue");
+    private Tags getDefaultDatabaseStackTags() {
+        return new Tags(Map.of("testtagkey", "testtagvalue"));
     }
 
     private Security createDefaultSecurity() {

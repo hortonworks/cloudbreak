@@ -2,7 +2,6 @@ package com.sequenceiq.environment.environment.dto;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +21,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -180,7 +180,7 @@ public class EnvironmentDtoConverter {
 
     private Json getTags(EnvironmentCreationDto creationDto) {
         boolean internalTenant = entitlementService.internalTenant(creationDto.getCreator(), creationDto.getAccountId());
-        Map<String, String> userDefinedTags = creationDto.getTags();
+        Tags userDefinedTags = creationDto.getTags();
         Set<AccountTag> accountTags = accountTagService.get(creationDto.getAccountId());
         List<AccountTagResponse> accountTagResponses = accountTagToAccountTagResponsesConverter.convert(accountTags);
         defaultInternalAccountTagService.merge(accountTagResponses);
@@ -195,13 +195,13 @@ public class EnvironmentDtoConverter {
                 .withResourceCrn(creationDto.getCrn())
                 .withIsInternalTenant(internalTenant)
                 .withUserName(getUserFromCrn(creationDto.getCreator()))
-                .withAccountTags(accountTagsMap)
+                .withAccountTags(new Tags(accountTagsMap))
                 .withUserDefinedTags(userDefinedTags)
                 .build();
 
         try {
-            Map<String, String> defaultTags = costTagging.prepareDefaultTags(request);
-            return new Json(new EnvironmentTags(Objects.requireNonNullElseGet(userDefinedTags, HashMap::new), defaultTags));
+            Tags defaultTags = costTagging.prepareDefaultTags(request);
+            return new Json(new EnvironmentTags(Objects.requireNonNullElseGet(userDefinedTags, Tags::new), defaultTags));
         } catch (AccountTagValidationFailed aTVF) {
             throw new BadRequestException(aTVF.getMessage());
         } catch (Exception ignored) {

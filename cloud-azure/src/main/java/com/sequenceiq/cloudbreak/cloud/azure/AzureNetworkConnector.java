@@ -134,7 +134,7 @@ public class AzureNetworkConnector implements NetworkConnector {
 
     private ResourceGroup getOrCreateResourceGroup(AzureClient azureClient, NetworkCreationRequest networkRequest) {
         String region = networkRequest.getRegion().value();
-        Map<String, String> tags = Collections.unmodifiableMap(networkRequest.getTags());
+        Map<String, String> tags = Collections.unmodifiableMap(networkRequest.getTags().getAll());
         String resourceGroupName = networkRequest.getResourceGroup();
         ResourceGroup resourceGroup;
         if (StringUtils.isNotEmpty(resourceGroupName)) {

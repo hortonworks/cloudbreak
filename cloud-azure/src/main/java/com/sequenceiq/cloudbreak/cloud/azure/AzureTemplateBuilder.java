@@ -114,7 +114,7 @@ public class AzureTemplateBuilder {
             model.put("existingVNETName", azureUtils.getCustomNetworkId(network));
             model.put("noPublicIp", azureUtils.isPrivateIp(network));
             model.put("noFirewallRules", false);
-            model.put("userDefinedTags", cloudStack.getTags());
+            model.put("userDefinedTags", cloudStack.getTags().getAll());
             model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator.validate(armStack));
             model.put("isUpscale", UPSCALE.equals(azureInstanceTemplateOperation));
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(cloudStack), model);

@@ -1,12 +1,12 @@
 package com.sequenceiq.environment.environment.dto;
 
-import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.domain.CredentialView;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -319,7 +319,7 @@ public class EnvironmentDto implements Payload {
         this.proxyConfig = proxyConfig;
     }
 
-    public Map<String, String> mergeTags(CostTagging costTagging) {
+    public Tags mergeTags(CostTagging costTagging) {
         CDPTagMergeRequest mergeRequest = CDPTagMergeRequest.Builder
                 .builder()
                 .withEnvironmentTags(tags.getUserDefinedTags())

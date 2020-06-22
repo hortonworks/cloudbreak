@@ -4,19 +4,26 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.common.api.tag.request.TagsRequest;
+
 @Component
 public class TagAdderUtil {
 
     private static final int GCP_TAG_MAX_LENGTH = 63;
 
-    public void addTags(Map<String, String> tagCollection, String tagKey, String tagValue) {
+    public void addTags(TagsRequest tags, String tagKey, String tagValue) {
         tagKey = applyLengthRestrictions(tagKey);
         tagValue = applyLengthRestrictions(tagValue);
-        tagCollection.put(tagKey, tagValue);
+        tags.addTag(tagKey, tagValue);
     }
 
-    public void addTestNameTag(Map<String, String> tagCollection, String testName) {
-        addTags(tagCollection, "test-name", testName);
+    public void addTestNameTag(TagsRequest tags, String testName) {
+        addTags(tags, "test-name", testName);
+    }
+
+    // TODO remove
+    public void addTestNameTag(Map<String, String> tags, String testName) {
+//        addTags(tags, "test-name", testName);
     }
 
     private String applyLengthRestrictions(String tag) {

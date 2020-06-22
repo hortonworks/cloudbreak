@@ -1,10 +1,9 @@
 package com.sequenceiq.sdx.api.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+
+import com.sequenceiq.common.api.tag.request.TagsRequest;
 
 public class SdxClusterRequest {
 
@@ -23,7 +22,7 @@ public class SdxClusterRequest {
     @Valid
     private SdxAwsRequest aws;
 
-    private Map<String, String> tags;
+    private TagsRequest tags = new TagsRequest();
 
     private boolean enableRangerRaz;
 
@@ -51,23 +50,12 @@ public class SdxClusterRequest {
         this.runtime = runtime;
     }
 
-    public void setTags(Map<String, String> tags) {
+    public void setTags(TagsRequest tags) {
         this.tags = tags;
     }
 
-    public Map<String, String> getTags() {
+    public TagsRequest getTags() {
         return tags;
-    }
-
-    public Map<String, String> initAndGetTags() {
-        if (tags == null) {
-            tags = new HashMap<>();
-        }
-        return tags;
-    }
-
-    public void addTags(Map<String, String> tags) {
-        initAndGetTags().putAll(tags);
     }
 
     public SdxCloudStorageRequest getCloudStorage() {

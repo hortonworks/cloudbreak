@@ -1,11 +1,12 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e;
 
+import static org.assertj.core.api.Fail.fail;
+
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.testng.annotations.Test;
@@ -30,7 +31,7 @@ public class UniqueTestMethodNameTest {
                 .collect(Collectors.joining(System.lineSeparator()));
 
         if (!errorMessage.isEmpty()) {
-            Assert.fail(errorMessage);
+            fail(errorMessage);
         }
     }
 

@@ -59,7 +59,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
             NovaInstanceView novaInstanceView = new NovaInstanceView(context.getName(), template, group.getType(), group.getLoginUserName());
             String imageId = osClient.imagesV2().list(Collections.singletonMap("name", cloudStack.getImage().getImageName())).get(0).getId();
             LOGGER.debug("Selected image id: {}", imageId);
-            Map<String, String> metadata = mergeMetadata(novaInstanceView.getMetadataMap(), cloudStack.getTags());
+            Map<String, String> metadata = mergeMetadata(novaInstanceView.getMetadataMap(), cloudStack.getTags().getAll());
             ServerCreateBuilder serverCreateBuilder = Builders.server()
                     .name(resource.getName())
                     .image(imageId)

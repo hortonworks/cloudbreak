@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -169,24 +170,24 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields, template.getId(), instanceImageId);
     }
 
-    private Map<String, String> getUserDefinedTags(Stack stack) {
+    private Tags getUserDefinedTags(Stack stack) {
         Map<String, String> result = Maps.newHashMap();
         try {
             if (stack.getTags() != null && isNotBlank(stack.getTags().getValue())) {
                 StackTags stackTag = stack.getTags().get(StackTags.class);
-                Map<String, String> userDefined = stackTag.getUserDefinedTags();
-                Map<String, String> defaultTags = stackTag.getDefaultTags();
+                Tags userDefined = stackTag.getUserDefinedTags();
+                Tags defaultTags = stackTag.getDefaultTags();
                 if (userDefined != null) {
-                    result.putAll(userDefined);
+                    result.putAll(userDefined.getAll());
                 }
                 if (defaultTags != null) {
-                    result.putAll(defaultTags);
+                    result.putAll(defaultTags.getAll());
                 }
             }
         } catch (IOException e) {
             LOGGER.info("Exception during converting user defined tags.", e);
         }
-        return result;
+        return new Tags(result);
     }
 
     private List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication, Collection<String> deleteRequests,

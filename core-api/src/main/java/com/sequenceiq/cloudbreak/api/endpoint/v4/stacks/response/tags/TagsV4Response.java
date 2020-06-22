@@ -1,45 +1,43 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.common.api.tag.response.TagsResponse;
+import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public class TagsV4Response implements JsonEntity {
 
     @ApiModelProperty(StackModelDescription.APPLICATION_TAGS)
-    private Map<String, String> application = new HashMap<>();
+    private TagsResponse application = new TagsResponse();
 
     @ApiModelProperty(StackModelDescription.USERDEFINED_TAGS)
-    private Map<String, String> userDefined = new HashMap<>();
+    private TagsResponse userDefined = new TagsResponse();
 
     @ApiModelProperty(StackModelDescription.DEFAULT_TAGS)
-    private Map<String, String> defaults = new HashMap<>();
+    private TagsResponse defaults = new TagsResponse();
 
-    public Map<String, String> getApplication() {
+    public TagsResponse getApplication() {
         return application;
     }
 
-    public void setApplication(Map<String, String> application) {
+    public void setApplication(TagsResponse application) {
         this.application = application;
     }
 
-    public Map<String, String> getUserDefined() {
+    public TagsResponse getUserDefined() {
         return userDefined;
     }
 
-    public void setUserDefined(Map<String, String> userDefined) {
+    public void setUserDefined(TagsResponse userDefined) {
         this.userDefined = userDefined;
     }
 
-    public Map<String, String> getDefaults() {
+    public TagsResponse getDefaults() {
         return defaults;
     }
 
-    public void setDefaults(Map<String, String> defaults) {
+    public void setDefaults(TagsResponse defaults) {
         this.defaults = defaults;
     }
 }

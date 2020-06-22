@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.domain;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,6 +21,7 @@ import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
@@ -137,7 +137,7 @@ public class Environment implements AuthResource {
 
     public Environment() {
         regions = new Json(new HashSet<Region>());
-        tags = new Json(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
+        tags = new Json(new EnvironmentTags(new Tags(), new Tags()));
         experimentalFeaturesJson = new Json(new ExperimentalFeatures());
     }
 
@@ -418,9 +418,9 @@ public class Environment implements AuthResource {
     public EnvironmentTags getEnvironmentTags() {
         if (tags != null && tags.getValue() != null) {
             return JsonUtil.readValueOpt(tags.getValue(), EnvironmentTags.class)
-                    .orElse(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
+                    .orElse(new EnvironmentTags(new Tags(), new Tags()));
         }
-        return new EnvironmentTags(new HashMap<>(), new HashMap<>());
+        return new EnvironmentTags(new Tags(), new Tags());
     }
 
     public Environment getParentEnvironment() {

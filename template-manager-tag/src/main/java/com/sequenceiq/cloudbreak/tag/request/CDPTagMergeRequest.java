@@ -1,18 +1,17 @@
 package com.sequenceiq.cloudbreak.tag.request;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.common.api.tag.model.Tags;
 
 public class CDPTagMergeRequest {
 
     private final String platform;
 
-    private final Map<String, String> environmentTags;
+    private final Tags environmentTags;
 
-    private final Map<String, String> requestTags;
+    private final Tags requestTags;
 
     private CDPTagMergeRequest(CDPTagMergeRequest.Builder builder) {
         this.platform = builder.platform;
@@ -24,25 +23,25 @@ public class CDPTagMergeRequest {
         return platform;
     }
 
-    public Map<String, String> getEnvironmentTags() {
+    public Tags getEnvironmentTags() {
         return environmentTags;
     }
 
-    public Map<String, String> getRequestTags() {
+    public Tags getRequestTags() {
         return requestTags;
     }
 
     public boolean isKeyNotPresented(String key) {
-        return getRequestTags() == null || Strings.isNullOrEmpty(getRequestTags().get(key));
+        return getRequestTags() == null || Strings.isNullOrEmpty(getRequestTags().getTagValue(key));
     }
 
     public static class Builder {
 
         private String platform;
 
-        private Map<String, String> environmentTags = new HashMap<>();
+        private Tags environmentTags = new Tags();
 
-        private Map<String, String> requestTags = new HashMap<>();
+        private Tags requestTags = new Tags();
 
         public static Builder builder() {
             return new Builder();
@@ -53,12 +52,12 @@ public class CDPTagMergeRequest {
             return this;
         }
 
-        public Builder withEnvironmentTags(Map<String, String> environmentTags) {
+        public Builder withEnvironmentTags(Tags environmentTags) {
             this.environmentTags = environmentTags;
             return this;
         }
 
-        public Builder withRequestTags(Map<String, String> requestTags) {
+        public Builder withRequestTags(Tags requestTags) {
             this.requestTags = requestTags;
             return this;
         }

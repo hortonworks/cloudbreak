@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
+import com.sequenceiq.common.api.tag.model.Tags;
 
 public class TemplateModelContextBuilder {
 
@@ -54,7 +55,7 @@ public class TemplateModelContextBuilder {
 
     private Map<String, Object> fixInputs = new HashMap<>();
 
-    private Map<String, String> defaultTags = new HashMap<>();
+    private Tags defaultTags = new Tags();
 
     private Map<String, SortedSet<String>> hostGroups = Collections.emptyMap();
 
@@ -134,7 +135,7 @@ public class TemplateModelContextBuilder {
         return this;
     }
 
-    public TemplateModelContextBuilder withDefaultTags(Map<String, String> defaultTags) {
+    public TemplateModelContextBuilder withDefaultTags(Tags defaultTags) {
         if (defaultTags != null) {
             this.defaultTags = defaultTags;
         }
@@ -171,7 +172,7 @@ public class TemplateModelContextBuilder {
         templateModelContext.put(HandleBarModelKey.BLUEPRINT.modelKey(), blueprintView);
         templateModelContext.put(HandleBarModelKey.GENERAL.modelKey(), generalClusterConfigsView);
         templateModelContext.put(HandleBarModelKey.HOST_GROUPS.modelKey(), hostGroups);
-        templateModelContext.put(HandleBarModelKey.DEFAULT_TAGS.modelKey(), defaultTags);
+        templateModelContext.put(HandleBarModelKey.DEFAULT_TAGS.modelKey(), defaultTags.getAll());
         templateModelContext.put(HandleBarModelKey.EXPOSED_SERVICES.modelKey(), exposedServices);
         ModelConverterUtils.deepMerge(templateModelContext, ModelConverterUtils.convert(customInputs));
         ModelConverterUtils.deepMerge(templateModelContext, ModelConverterUtils.convert(fixInputs));

@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -150,7 +151,7 @@ class GcpDiskResourceBuilderTest {
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default",
                 "default-id", new HashMap<>());
-        cloudStack = new CloudStack(Collections.emptyList(), null, image, emptyMap(), emptyMap(), null,
+        cloudStack = new CloudStack(Collections.emptyList(), null, image, emptyMap(), new Tags(), null,
                 null, null, null, null);
 
         Operation operation = new Operation();
