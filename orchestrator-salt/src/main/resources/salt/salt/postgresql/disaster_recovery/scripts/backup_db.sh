@@ -61,7 +61,7 @@ dump_to_azure() {
 
   doLog "INFO ${SERVICE} dumped to "
 }
-run_azure_backup () {
+run_azure_backup() {
   BACKUPS_DIR="/var/tmp/"
   DATE_DIR=${BACKUPS_DIR}/$(date '+%Y-%m-%dT%H:%M:%SZ')
   mkdir -p "$DATE_DIR" || error_exit "Could not create local directory for backups."
@@ -77,19 +77,31 @@ dump_to_s3() {
   SERVICE=$1
   S3_LOCATION="${BACKUP_LOCATION}/${SERVICE}_backup"
   doLog "INFO Dumping ${SERVICE} to ${S3_LOCATION}"
-  pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2>>$LOGFILE | /usr/bin/aws s3 cp --sse AES256 --no-progress - "${S3_LOCATION}" 2>>$LOGFILE || errorExit "Unable to dump ${SERVICE}."
-  doLog "INFO ${SERVICE} dumped to ${S3_LOCATION}"
+
+  doLog "INFO Try to upload with AES256 encryption"
+  ret_code=$(pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2>>$LOGFILE | /usr/bin/aws s3 cp --sse AES256 --no-progress - "${S3_LOCATION}" 2>>$LOGFILE || echo $?)
+
+  if [[ -n "$ret_code" ]] && [[ "$ret_code" == 1 ]]; then
+    doLog "INFO Try to upload with aws:kms encryption"
+    ret_code=$(pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2>>$LOGFILE | /usr/bin/aws s3 cp --sse aws:kms --no-progress - "${S3_LOCATION}" 2>>$LOGFILE || echo $?)
+  fi
+
+  if [[ -n "$ret_code" ]] && [[ "$ret_code" == 1 ]]; then
+    errorExit "Unable to dump ${SERVICE}."
+  else
+    doLog "INFO ${SERVICE} dumped to ${S3_LOCATION}"
+  fi
 }
-run_aws_backup () {
+run_aws_backup() {
   dump_to_s3 "hive"
   dump_to_s3 "ranger"
 }
 
 doLog "INFO Starting backup to ${BACKUP_LOCATION}"
 
-if [[ "$CLOUD_PROVIDER" = "azure" ]]; then
+if [[ "$CLOUD_PROVIDER" == "azure" ]]; then
   run_azure_backup
-elif [[ "$CLOUD_PROVIDER" = "aws" ]]; then
+elif [[ "$CLOUD_PROVIDER" == "aws" ]]; then
   run_aws_backup
 else
   errorExit "Unknown cloud provider: ${CLOUD_PROVIDER}"
