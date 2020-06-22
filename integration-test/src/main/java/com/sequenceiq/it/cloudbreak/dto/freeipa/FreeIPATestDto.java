@@ -54,10 +54,18 @@ import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
+import com.sequenceiq.it.util.TagAdderUtil;
+import com.sequenceiq.it.util.TestNameExtractorUtil;
 
 @Prototype
 public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIPATestDto>
         implements Purgable<ListFreeIpaResponse, FreeIPAClient>, Searchable {
+
+    @Inject
+    private TestNameExtractorUtil testNameExtractorUtil;
+
+    @Inject
+    private TagAdderUtil tagAdderUtil;
 
     @Inject
     private FreeIPATestClient freeIPATestClient;
@@ -74,9 +82,15 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()), OptionalInt.empty(), OptionalInt.empty())
                 .withNetwork(getTestContext().given(NetworkV4TestDto.class))
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
-
+                .withTestNameAsTag()
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
                 .withFreeIPA("ipatest.local", "ipaserver", "admin1234", "admins");
+    }
+
+    private FreeIPATestDto withTestNameAsTag() {
+        String callingMethodName = testNameExtractorUtil.getExecutingTestName();
+        tagAdderUtil.addTestNameTag(getRequest().getTags(), callingMethodName);
+        return this;
     }
 
     public FreeIPATestDto withFreeIpaHa(int instanceGroupCount, int instanceCountByGroup) {
