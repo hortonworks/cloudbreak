@@ -19,7 +19,7 @@ public class EnvironmentForceDeleteAction implements Action<EnvironmentTestDto, 
         Log.when(LOGGER, "Environment forced delete request, crn: " +  testDto.getResponse().getCrn());
         SimpleEnvironmentResponse delete = environmentClient.getEnvironmentClient()
                 .environmentV1Endpoint()
-                .deleteByCrn(testDto.getResponse().getCrn(), true);
+                .deleteByCrn(testDto.getResponse().getCrn(), true, false);
         Log.whenJson(LOGGER, " Environment forced delete response: ", delete);
         return testDto;
     }

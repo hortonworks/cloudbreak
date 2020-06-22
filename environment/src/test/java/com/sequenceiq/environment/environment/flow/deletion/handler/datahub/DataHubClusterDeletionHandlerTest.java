@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
@@ -51,7 +52,7 @@ class DataHubClusterDeletionHandlerTest {
     private DatahubDeletionService datahubDeletionService;
 
     @Mock
-    private Event<EnvironmentDto> environmentDtoEvent;
+    private Event<EnvironmentDeletionDto> environmentDtoEvent;
 
     @Mock
     private Event.Headers headers;
@@ -69,7 +70,14 @@ class DataHubClusterDeletionHandlerTest {
                 .withResourceCrn(RESOURCE_CRN)
                 .withName(ENV_NAME)
                 .build();
-        when(environmentDtoEvent.getData()).thenReturn(eventDto);
+        EnvironmentDeletionDto build = EnvironmentDeletionDto
+                .builder()
+                .withId(ENV_ID)
+                .withForceDelete(false)
+                .withEnvironmentDto(eventDto)
+                .build();
+
+        when(environmentDtoEvent.getData()).thenReturn(build);
         when(environmentDtoEvent.getHeaders()).thenReturn(headers);
         doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Event.Headers.class));
     }

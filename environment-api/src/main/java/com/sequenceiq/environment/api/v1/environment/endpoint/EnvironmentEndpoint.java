@@ -63,14 +63,18 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1ByName")
-    SimpleEnvironmentResponse deleteByName(@PathParam("name") String environmentName, @QueryParam("forced") @DefaultValue("false") boolean forced);
+    SimpleEnvironmentResponse deleteByName(@PathParam("name") String environmentName,
+        @QueryParam("cascading") @DefaultValue("true") boolean cascading,
+        @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @DELETE
     @Path("/name")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentsByName", httpMethod = "DELETE")
-    SimpleEnvironmentResponses deleteMultipleByNames(Set<String> names, @QueryParam("forced") @DefaultValue("false") boolean forced);
+    SimpleEnvironmentResponses deleteMultipleByNames(Set<String> names,
+        @QueryParam("cascading") @DefaultValue("true") boolean cascading,
+        @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @PUT
     @Path("/name/{name}")
@@ -118,14 +122,18 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1ByCrn")
-    SimpleEnvironmentResponse deleteByCrn(@PathParam("crn") String crn, @QueryParam("forced") @DefaultValue("false") boolean forced);
+    SimpleEnvironmentResponse deleteByCrn(@PathParam("crn") String crn,
+        @QueryParam("cascading") @DefaultValue("true") boolean cascading,
+        @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @DELETE
     @Path("/crn")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_CRN, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentsByCrn", httpMethod = "DELETE")
-    SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns, @QueryParam("forced") @DefaultValue("false") boolean forced);
+    SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns,
+        @QueryParam("cascading") @DefaultValue("true") boolean cascading,
+        @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @PUT
     @Path("/crn/{crn}")

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
@@ -24,7 +25,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
-public class EnvironmentUMSResourceDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> {
+public class EnvironmentUMSResourceDeleteHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentUMSResourceDeleteHandler.class);
 
@@ -48,8 +49,9 @@ public class EnvironmentUMSResourceDeleteHandler extends EventSenderAwareHandler
     }
 
     @Override
-    public void accept(Event<EnvironmentDto> environmentDtoEvent) {
-        EnvironmentDto environmentDto = environmentDtoEvent.getData();
+    public void accept(Event<EnvironmentDeletionDto> environmentDtoEvent) {
+        EnvironmentDeletionDto environmentDeletionDto = environmentDtoEvent.getData();
+        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
         String environmentCrn = null;
         try {
             environmentCrn = environmentDto.getResourceCrn();
@@ -70,6 +72,7 @@ public class EnvironmentUMSResourceDeleteHandler extends EventSenderAwareHandler
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentCrn)
+                .withForceDelete(environmentDeletionDto.isForceDelete())
                 .withSelector(START_PREREQUISITES_DELETE_EVENT.selector())
                 .build();
         eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
