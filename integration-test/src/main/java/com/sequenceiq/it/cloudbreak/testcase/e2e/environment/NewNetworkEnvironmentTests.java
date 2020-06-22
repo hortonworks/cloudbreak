@@ -36,7 +36,7 @@ public class NewNetworkEnvironmentTests extends AbstractE2ETest {
             given = "there is a running cloudbreak",
             when = "create an Environment with new network which CIDR is 10.0.0.0/16 without FreeIPA",
             then = "should create new Subnets and the number depends on the provider")
-    public void testCreateNewEnvironment(TestContext testContext) {
+    public void testCreateNewEnvironmentWithNewNetwork(TestContext testContext) {
         String networkKey = "someOtherNetwork";
 
         testContext
