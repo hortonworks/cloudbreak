@@ -77,9 +77,11 @@ public class EnvironmentUserSyncStateCalculator {
                 throw createExceptionForUnexpectedOperationStatus(envCrnString, userSyncStatus);
             case TIMEDOUT:
                 LOGGER.warn("UserSyncStatus.lastStartedFullSync '{}' is timed out for environment '{}'", lastSync.getOperationId(), envCrnString);
-                state  = UserSyncState.STALE;
+                state  = UserSyncState.SYNC_FAILED;
                 break;
             case FAILED:
+                state  = UserSyncState.SYNC_FAILED;
+                break;
             default:
                 state  = UserSyncState.STALE;
                 break;
@@ -93,9 +95,11 @@ public class EnvironmentUserSyncStateCalculator {
             UmsEventGenerationIds currentEventGenerationIds = umsEventGenerationIdsProvider.getEventGenerationIds(accountId, MDCUtils.getRequestId());
             if (eventGenerationIdsChecker.isInSync(userSyncStatus, currentEventGenerationIds)) {
                 return UserSyncState.UP_TO_DATE;
+            } else {
+                return UserSyncState.STALE;
             }
         }
-        return UserSyncState.STALE;
+        return UserSyncState.SYNC_FAILED;
     }
 
     private IllegalStateException createExceptionForUnexpectedOperationStatus(String envCrnString, UserSyncStatus userSyncStatus) {
