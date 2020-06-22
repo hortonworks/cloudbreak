@@ -25,6 +25,9 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.gs.collections.impl.factory.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -49,6 +52,8 @@ import com.sequenceiq.statuschecker.service.JobService;
 
 @Component
 public class StackStatusCheckerJob extends StatusCheckerJob {
+
+    private static final String DATAHUB_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.DATAHUB).getInternalCrnForServiceAsString();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStatusCheckerJob.class);
 
@@ -94,7 +99,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             } else if (null == stack.getStatus() || ignoredStates().contains(stack.getStatus())) {
                 LOGGER.debug("Stack sync is skipped, stack state is {}", stack.getStatus());
             } else if (syncableStates().contains(stack.getStatus())) {
-                doSync(stack);
+                ThreadBasedUserCrnProvider.doAs(DATAHUB_INTERNAL_ACTOR_CRN, () -> doSync(stack));
             } else {
                 LOGGER.warn("Unhandled stack status, {}", stack.getStatus());
             }
