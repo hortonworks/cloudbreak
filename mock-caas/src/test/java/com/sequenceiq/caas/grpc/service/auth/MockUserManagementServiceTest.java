@@ -1,4 +1,4 @@
-package com.sequenceiq.caas.grpc.service;
+package com.sequenceiq.caas.grpc.service.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

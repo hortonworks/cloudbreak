@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.audit.converter;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.audit.model.ApiRequestData;
 import com.sequenceiq.cloudbreak.audit.model.AuditEventName;
 import com.sequenceiq.cloudbreak.audit.model.EventData;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
@@ -35,25 +37,31 @@ public class RestEventDataExtractor implements EventDataExtractor<StructuredRest
         RestRequestDetails restRequest = structuredEvent.getRestCall().getRestRequest();
         boolean mutating = Set.of("POST", "PUT", "DELETE").contains(restRequest.getMethod());
         String userAgent = restRequest.getHeaders().get("user-agent");
+
+        Map<String, Object> requestParameters = new HashMap<>();
+        requestParameters.put("uri", restRequest.getRequestUri());
+        String resourceType = structuredEvent.getOperation().getResourceType();
+        RestResourceAuditEventConverter restResourceAuditEventConverter = getConverter(resourceType);
+        if (restResourceAuditEventConverter != null) {
+            LOGGER.info("Determine request params with {}", restResourceAuditEventConverter);
+            Map<String, Object> params = restResourceAuditEventConverter.requestParameters(structuredEvent);
+            requestParameters.putAll(params);
+        }
         return ApiRequestData.builder()
                 .withApiVersion(cbVersion)
                 .withMutating(mutating)
-                .withRequestParameters(restRequest.getRequestUri())
+                .withRequestParameters(new Json(requestParameters).getValue())
                 .withUserAgent(userAgent)
                 .build();
     }
 
     @Override
     public AuditEventName eventName(StructuredRestCallEvent structuredEvent) {
-        String resourceType = structuredEvent.getOperation().getResourceType();
-        RestResourceAuditEventConverter restResourceAuditEventConverter = getConverter(resourceType);
-        if (restResourceAuditEventConverter != null) {
-            LOGGER.info("Determine eventName with {}", restResourceAuditEventConverter);
-            AuditEventName eventName = restResourceAuditEventConverter.auditEventName(structuredEvent);
-            if (eventName != null) {
-                return eventName;
-            }
+        AuditEventName auditEventName = determineEventName(structuredEvent);
+        if (auditEventName != null) {
+            return auditEventName;
         }
+        String resourceType = structuredEvent.getOperation().getResourceType();
         String method = structuredEvent.getRestCall().getRestRequest().getMethod();
         throw new UnsupportedOperationException(String.format("The `%s` with `%s` does not support for auditing", resourceType, method));
     }
@@ -84,6 +92,16 @@ public class RestEventDataExtractor implements EventDataExtractor<StructuredRest
             return restResourceAuditEventConverter != null && restResourceAuditEventConverter.shouldAudit(event);
         }
         return false;
+    }
+
+    private AuditEventName determineEventName(StructuredRestCallEvent structuredEvent) {
+        String resourceType = structuredEvent.getOperation().getResourceType();
+        RestResourceAuditEventConverter restResourceAuditEventConverter = getConverter(resourceType);
+        if (restResourceAuditEventConverter != null) {
+            LOGGER.info("Determine eventName with {}", restResourceAuditEventConverter);
+            return restResourceAuditEventConverter.auditEventName(structuredEvent);
+        }
+        return null;
     }
 
     private RestResourceAuditEventConverter getConverter(String resourceType) {

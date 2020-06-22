@@ -31,12 +31,12 @@ public class FlowEventDataExtractor implements EventDataExtractor<StructuredFlow
     @Override
     public EventData eventData(StructuredFlowEvent structuredEvent) {
         Map<String, Object> eventDetails = new HashMap<>();
-        eventDetails.put("userCrn", structuredEvent.getOperation().getUserCrn());
-        eventDetails.put("clusterCrn", structuredEvent.getOperation().getResourceCrn());
-        eventDetails.put("timestamp", System.currentTimeMillis());
-        eventDetails.put("environmentCrn", structuredEvent.getOperation().getEnvironmentCrn());
-        eventDetails.put("flowState", getFlowState(structuredEvent));
-        eventDetails.put("flowId", structuredEvent.getFlow().getFlowId());
+        eventDetails.put(USER_CRN, structuredEvent.getOperation().getUserCrn());
+        eventDetails.put(CLUSTER_CRN, structuredEvent.getOperation().getResourceCrn());
+        eventDetails.put(TIMESTAMP, System.currentTimeMillis());
+        eventDetails.put(ENVIRONMENT_CRN, structuredEvent.getOperation().getEnvironmentCrn());
+        eventDetails.put(FLOW_STATE, getFlowState(structuredEvent));
+        eventDetails.put(FLOW_ID, structuredEvent.getFlow().getFlowId());
         return ServiceEventData.builder()
                 .withEventDetails(new Json(eventDetails).getValue())
                 .withVersion(cbVersion)

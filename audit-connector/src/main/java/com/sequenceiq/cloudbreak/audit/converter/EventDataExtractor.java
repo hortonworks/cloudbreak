@@ -7,6 +7,20 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
 public interface EventDataExtractor<T extends StructuredEvent> {
 
+    String USER_CRN = "userCrn";
+
+    String CLUSTER_CRN = "clusterCrn";
+
+    String CLUSTER_NAME = "clusterName";
+
+    String TIMESTAMP = "timestamp";
+
+    String ENVIRONMENT_CRN = "environmentCrn";
+
+    String FLOW_STATE = "flowState";
+
+    String FLOW_ID = "flowId";
+
     EventData eventData(T structuredEvent);
 
     AuditEventName eventName(T structuredEvent);

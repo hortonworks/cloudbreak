@@ -1,4 +1,4 @@
-package com.sequenceiq.caas.grpc.service;
+package com.sequenceiq.caas.grpc.service.auth;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
