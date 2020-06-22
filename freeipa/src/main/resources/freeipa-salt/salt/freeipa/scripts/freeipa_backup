@@ -37,6 +37,25 @@ config=( # set default values in config array
     [aws_region]=""
 )
 
+
+function get_hostname_from_url()
+{
+  proto="$(echo $1 | grep :// | sed -e's,^\(.*://\).*,\1,g')"
+  # remove the protocol
+  url="$(echo ${1/$proto/})"
+  # extract the user (if any)
+  userpass="$(echo $url | grep @ | cut -d@ -f1)"
+  pass="$(echo $userpass | grep : | cut -d: -f2)"
+  if [[ -n "$pass" ]]; then
+    user="$(echo $userpass | grep : | cut -d: -f1)"
+  else
+      user=$userpass
+  fi
+  # extract the host
+  host="$(echo ${url/$user:$pass@/} | cut -d/ -f1)"
+  echo $host
+}
+
 set +x
 # Override defaults with config file
 if [[ -f $CONFIG_FILE ]]; then
@@ -175,6 +194,9 @@ if [[ "${config[backup_platform]}" = "AWS" ]]; then
     remove_local_backups
 elif [[ "${config[backup_platform]}" = "AZURE" ]]; then
     doLog "INFO Syncing backups to Azure Blog Storage"
+    doLog "INFO Checking for valid backup location"
+    backup_host=$(get_hostname_from_url ${BACKUP_LOCATION})
+    host ${backup_host} > /dev/null || error_exit "Unable to resolve host for backup location ${BACKUP_LOCATION}"
     /bin/keyctl new_session >> $LOGFILE 2>&1 || error_exit "Unable to setup keyring session"
     /usr/local/bin/azcopy login --identity --identity-resource-id "${config[azure_instance_msi]}" >> $LOGFILE 2>&1 || error_exit "Unable to login to Azure!"
     /usr/local/bin/azcopy copy ${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION} --recursive=true --check-length=false >> $LOGFILE 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
