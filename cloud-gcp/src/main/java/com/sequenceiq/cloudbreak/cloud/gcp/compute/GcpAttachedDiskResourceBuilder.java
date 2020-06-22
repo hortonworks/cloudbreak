@@ -125,7 +125,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
             for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
-                Disk disk = createDisk(projectId, volume, cloudStack.getTags(), volumeSetAttributes);
+                Disk disk = createDisk(projectId, volume, cloudStack.getTags().getAll(), volumeSetAttributes);
 
                 gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
                 Future<Void> submit = intermediateBuilderExecutor.submit(() -> {

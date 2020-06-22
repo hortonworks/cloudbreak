@@ -159,7 +159,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                         if (result == null) {
                             result = client.createManagedDisk(
                                     volume.getId(), volume.getSize(), AzureDiskType.getByValue(
-                                            volume.getType()), region, resourceGroupName, cloudStack.getTags());
+                                            volume.getType()), region, resourceGroupName, cloudStack.getTags().getAll());
                         } else {
                             LOGGER.debug("Managed disk for resourcegroup: {}, name: {} already exists: {}", resourceGroupName, volume.getId(), result);
                         }

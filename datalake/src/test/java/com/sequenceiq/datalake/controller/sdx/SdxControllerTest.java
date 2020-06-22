@@ -9,9 +9,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,9 +71,7 @@ class SdxControllerTest {
         SdxClusterRequest createSdxClusterRequest = new SdxClusterRequest();
         createSdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         createSdxClusterRequest.setEnvironment("test-env");
-        Map<String, String> tags = new HashMap<>();
-        tags.put("tag1", "value1");
-        createSdxClusterRequest.addTags(tags);
+        createSdxClusterRequest.getTags().addTag("tag1", "value1");
         SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
         sdxStatusEntity.setStatus(DatalakeStatusEnum.REQUESTED);
         sdxStatusEntity.setStatusReason("statusreason");

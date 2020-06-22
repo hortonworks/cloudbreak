@@ -74,7 +74,7 @@ public class AzureDatabaseResourceService {
             } else {
                 LOGGER.debug("Resource group with {} does not exist, creating it now..", resourceGroupName);
                 String region = ac.getCloudContext().getLocation().getRegion().value();
-                client.createResourceGroup(resourceGroupName, region, stack.getTags());
+                client.createResourceGroup(resourceGroupName, region, stack.getTags().getAll());
             }
         }
         try {

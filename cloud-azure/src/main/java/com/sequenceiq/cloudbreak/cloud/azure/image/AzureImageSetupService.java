@@ -111,7 +111,7 @@ public class AzureImageSetupService {
     private void createResourceGroupIfNotExists(AzureClient client, String resourceGroupName, String region, CloudStack stack) {
         if (!client.resourceGroupExists(resourceGroupName)) {
             LOGGER.info("Creating resource group: {}", resourceGroupName);
-            client.createResourceGroup(resourceGroupName, region, stack.getTags());
+            client.createResourceGroup(resourceGroupName, region, stack.getTags().getAll());
         }
     }
 

@@ -1,8 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -15,6 +13,7 @@ import com.sequenceiq.authorization.annotation.ResourceObjectField;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
+import com.sequenceiq.common.api.tag.request.TagsRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
@@ -76,7 +75,7 @@ public class CreateFreeIpaRequest implements TaggableRequest {
     private TelemetryRequest telemetry;
 
     @ApiModelProperty(FreeIpaModelDescriptions.TAGS)
-    private Map<String, String> tags = new HashMap<>();
+    private TagsRequest tags = new TagsRequest();
 
     /**
      * @deprecated use {@link #tunnel} instead
@@ -184,17 +183,17 @@ public class CreateFreeIpaRequest implements TaggableRequest {
         this.tunnel = tunnel;
     }
 
-    public Map<String, String> getTags() {
+    public TagsRequest getTags() {
         return tags;
     }
 
-    public void setTags(Map<String, String> tags) {
+    public void setTags(TagsRequest tags) {
         this.tags = tags;
     }
 
     @Override
     public void addTag(String key, String value) {
-        tags.put(key, value);
+        tags.addTag(key, value);
     }
 
     @Override

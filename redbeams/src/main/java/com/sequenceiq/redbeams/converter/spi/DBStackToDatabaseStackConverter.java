@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -27,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
@@ -101,19 +101,13 @@ public class DBStackToDatabaseStackConverter {
         return builder.build();
     }
 
-    private Map<String, String> getUserDefinedTags(DBStack dbStack) {
-        Map<String, String> result = Maps.newHashMap();
+    private Tags getUserDefinedTags(DBStack dbStack) {
+        Tags result = new Tags();
         try {
             if (dbStack.getTags() != null && dbStack.getTags().getValue() != null) {
                 StackTags stackTag = dbStack.getTags().get(StackTags.class);
-                Map<String, String> userDefined = stackTag.getUserDefinedTags();
-                Map<String, String> defaultTags = stackTag.getDefaultTags();
-                if (defaultTags != null) {
-                    result.putAll(defaultTags);
-                }
-                if (userDefined != null) {
-                    result.putAll(userDefined);
-                }
+                result.addTags(stackTag.getUserDefinedTags());
+                result.addTags(stackTag.getDefaultTags());
             }
         } catch (IOException e) {
             LOGGER.warn("Failed to read JSON tags, skipping", e);

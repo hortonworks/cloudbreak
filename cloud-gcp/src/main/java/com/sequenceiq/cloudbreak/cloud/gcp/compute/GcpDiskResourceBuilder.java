@@ -55,8 +55,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         InstanceTemplate template = group.getReferenceInstanceTemplate();
         gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
 
-        Map<String, String> customTags = new HashMap<>();
-        customTags.putAll(cloudStack.getTags());
+        Map<String, String> customTags = new HashMap<>(cloudStack.getTags().getAll());
         disk.setLabels(customTags);
 
         Insert insDisk = context.getCompute().disks().insert(projectId, location.getAvailabilityZone().value(), disk);

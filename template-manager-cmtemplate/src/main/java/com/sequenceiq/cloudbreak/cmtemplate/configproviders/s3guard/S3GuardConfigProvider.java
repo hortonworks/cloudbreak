@@ -69,7 +69,7 @@ public class S3GuardConfigProvider {
     }
 
     private void addTags(TemplatePreparationObject source, StringBuilder hdfsCoreSiteSafetyValveValue) {
-        for (Map.Entry<String, String> entry : source.getDefaultTags().entrySet()) {
+        for (Map.Entry<String, String> entry : source.getDefaultTags().getAll().entrySet()) {
             hdfsCoreSiteSafetyValveValue.append(ConfigUtils
                     .getSafetyValveProperty(S3GUARD_TABLE_TAG_PARAM + entry.getKey(), entry.getValue()));
         }

@@ -45,7 +45,7 @@ public class AzureStorageAccountService {
         if (storageAccount == null) {
             try {
                 LOGGER.info("Creating storage account: {}", storageName);
-                armStorage.createStorage(client, storageName, LOCALLY_REDUNDANT, resourceGroup, region, isEncryptionNeeded(stack), stack.getTags());
+                armStorage.createStorage(client, storageName, LOCALLY_REDUNDANT, resourceGroup, region, isEncryptionNeeded(stack), stack.getTags().getAll());
                 pollStorageAccountCreation(ac, new StorageAccountCheckerContext(client, resourceGroup, storageName));
             } catch (CloudException e) {
                 LOGGER.error("Error during storage account creation: {}.", storageName, e);

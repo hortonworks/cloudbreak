@@ -104,7 +104,7 @@ public class AzureSetup implements Setup {
             AzureClient client = ac.getParameter(AzureClient.class);
             persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
             if (!client.resourceGroupExists(resourceGroupName)) {
-                client.createResourceGroup(resourceGroupName, region, stack.getTags());
+                client.createResourceGroup(resourceGroupName, region, stack.getTags().getAll());
             }
         } catch (Exception ex) {
             throw new CloudConnectorException(ex);
@@ -118,7 +118,7 @@ public class AzureSetup implements Setup {
         azureClient.createResourceGroup(
                 environmentPrerequisitesCreateRequest.getAzure().getResourceGroupName(),
                 environmentPrerequisitesCreateRequest.getAzure().getLocationName(),
-                environmentPrerequisitesCreateRequest.getAzure().getTags());
+                environmentPrerequisitesCreateRequest.getAzure().getTags().getAll());
     }
 
     @Override

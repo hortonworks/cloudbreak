@@ -142,7 +142,7 @@ public class ClusterTemplateTestAssertion {
                 throw new IllegalArgumentException("RDS is mismatch!");
             }
 
-            if (!"custom-tag".equals(stackTemplate.getTags().getUserDefined().get("some-tag"))) {
+            if (!"custom-tag".equals(stackTemplate.getTags().getUserDefined().getTagValue("some-tag"))) {
                 throw new IllegalArgumentException("User defined tag is mismatch!");
             }
 

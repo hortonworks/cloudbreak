@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.tag.request.TagsRequest;
 import com.sequenceiq.it.cloudbreak.SecurityRulesEntity;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
@@ -295,7 +296,7 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         if (getRequest().getTags() == null) {
             getRequest().setTags(new TagsV4Request());
         }
-        getRequest().getTags().setUserDefined(tags);
+        getRequest().getTags().setUserDefined(new TagsRequest(tags));
         return this;
     }
 

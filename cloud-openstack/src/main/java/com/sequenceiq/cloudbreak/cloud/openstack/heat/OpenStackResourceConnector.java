@@ -89,7 +89,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         modelContext.withStackName(stackName);
         modelContext.withNeutronNetworkView(neutronNetworkView);
         modelContext.withTemplateString(stack.getTemplate());
-        modelContext.withTags(stack.getTags());
+        modelContext.withTags(stack.getTags().getAll());
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
@@ -322,7 +322,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         modelContext.withStackName(stackName);
         modelContext.withNeutronNetworkView(neutronNetworkView);
         modelContext.withTemplateString(stack.getTemplate());
-        modelContext.withTags(stack.getTags());
+        modelContext.withTags(stack.getTags().getAll());
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
@@ -354,7 +354,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         modelContext.withStackName(stackName);
         modelContext.withNeutronNetworkView(neutronNetworkView);
         modelContext.withTemplateString(stack.getTemplate());
-        modelContext.withTags(stack.getTags());
+        modelContext.withTags(stack.getTags().getAll());
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
@@ -393,7 +393,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         modelContext.withStackName(stackName);
         modelContext.withNeutronNetworkView(neutronNetworkView);
         modelContext.withTemplateString(stack.getTemplate());
-        modelContext.withTags(stack.getTags());
+        modelContext.withTags(stack.getTags().getAll());
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
