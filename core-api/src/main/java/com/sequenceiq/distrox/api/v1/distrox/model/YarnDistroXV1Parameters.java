@@ -17,11 +17,22 @@ public class YarnDistroXV1Parameters implements Serializable {
     @ApiModelProperty
     private String yarnQueue;
 
+    @ApiModelProperty
+    private Integer lifetime;
+
     public String getYarnQueue() {
         return yarnQueue;
     }
 
     public void setYarnQueue(String yarnQueue) {
         this.yarnQueue = yarnQueue;
+    }
+
+    public Integer getLifetime() {
+        return lifetime;
+    }
+
+    public void setLifetime(Integer lifetime) {
+        this.lifetime = lifetime;
     }
 }

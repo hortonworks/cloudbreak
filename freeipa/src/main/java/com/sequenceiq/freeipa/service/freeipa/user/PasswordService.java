@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
@@ -70,25 +73,42 @@ public class PasswordService {
     @Inject
     private FreeIpaPasswordValidator freeIpaPasswordValidator;
 
+    @Inject
+    private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
+
     public Operation setPassword(String accountId, String actorCrn, String userCrn, String password, Set<String> environmentCrnFilter) {
-        LOGGER.debug("setting password for user {} in account {}", userCrn, accountId);
-        freeIpaPasswordValidator.validate(password);
+        List<Stack> stacks = getStacksForSetPassword(accountId, userCrn, password, environmentCrnFilter);
+        return setPasswordForStacks(accountId, actorCrn, userCrn, password, environmentCrnFilter, stacks);
+    }
 
-        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(environmentCrnFilter, accountId);
+    public Operation setPasswordWithCustomPermissionCheck(String accountId, String actorCrn, String userCrn,
+            String password, Set<String> environmentCrnFilter, AuthorizationResourceAction action) {
+        List<Stack> stacks = getStacksForSetPassword(accountId, userCrn, password, environmentCrnFilter);
+        List<String> relatedEnvironmentCrns = stacks.stream().map(stack -> stack.getEnvironmentCrn()).collect(Collectors.toList());
+        commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, actorCrn, relatedEnvironmentCrns);
+        return setPasswordForStacks(accountId, actorCrn, userCrn, password, environmentCrnFilter, stacks);
+    }
 
-        if (stacks.isEmpty()) {
-            LOGGER.warn("No stacks found for accountId {}", accountId);
-            throw new NotFoundException("No matching FreeIPA stacks found for accountId " + accountId);
-        }
-        LOGGER.debug("Found {} matching stacks for accountId {}", stacks.size(), accountId);
-
+    private Operation setPasswordForStacks(String accountId, String actorCrn, String userCrn, String password,
+            Set<String> environmentCrnFilter, List<Stack> stacks) {
         Operation operation = operationService.startOperation(accountId, OperationType.SET_PASSWORD,
                 environmentCrnFilter, List.of(userCrn));
         if (operation.getStatus() == OperationState.RUNNING) {
             asyncSetPasswords(operation.getOperationId(), accountId, actorCrn, userCrn, password, stacks);
         }
-
         return operation;
+    }
+
+    private List<Stack> getStacksForSetPassword(String accountId, String userCrn, String password, Set<String> environmentCrnFilter) {
+        LOGGER.debug("setting password for user {} in account {}", userCrn, accountId);
+        freeIpaPasswordValidator.validate(password);
+        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(environmentCrnFilter, accountId);
+        if (stacks.isEmpty()) {
+            LOGGER.warn("No stacks found for accountId {}", accountId);
+            throw new NotFoundException("No matching FreeIPA stacks found for accountId " + accountId);
+        }
+        LOGGER.debug("Found {} matching stacks for accountId {}", stacks.size(), accountId);
+        return stacks;
     }
 
     private void asyncSetPasswords(String operationId, String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {

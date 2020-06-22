@@ -16,8 +16,15 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class YarnStackV4Parameters extends StackV4ParameterBase {
 
+    private static final String YARN_QUEUE = "yarnQueue";
+
+    private static final String LIFETIME = "lifeTime";
+
     @ApiModelProperty
     private String yarnQueue;
+
+    @ApiModelProperty
+    private Integer lifetime;
 
     public String getYarnQueue() {
         return yarnQueue;
@@ -27,10 +34,19 @@ public class YarnStackV4Parameters extends StackV4ParameterBase {
         this.yarnQueue = yarnQueue;
     }
 
+    public Integer getLifetime() {
+        return lifetime;
+    }
+
+    public void setLifetime(Integer lifetime) {
+        this.lifetime = lifetime;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map, "yarnQueue", yarnQueue);
+        putIfValueNotNull(map, YARN_QUEUE, yarnQueue);
+        putIfValueNotNull(map, LIFETIME, lifetime);
         return map;
     }
 
@@ -44,6 +60,7 @@ public class YarnStackV4Parameters extends StackV4ParameterBase {
     @Override
     public void parse(Map<String, Object> parameters) {
         super.parse(parameters);
-        yarnQueue = getParameterOrNull(parameters, "yarnQueue");
+        yarnQueue = getParameterOrNull(parameters, YARN_QUEUE);
+        lifetime = getInt(parameters, LIFETIME);
     }
 }

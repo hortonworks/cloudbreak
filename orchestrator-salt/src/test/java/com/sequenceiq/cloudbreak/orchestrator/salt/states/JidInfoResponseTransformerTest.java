@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.states;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasValue;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -58,6 +64,16 @@ public class JidInfoResponseTransformerTest {
         assertEquals("No changes needed to be made", noExtraInfo.getComment());
         assertEquals("null", noExtraInfo.getStderr());
         assertEquals("\nName: /etc/hosts\nComment: No changes needed to be made", noExtraInfo.getErrorResultSummary());
+    }
+
+    @Test
+    public void testFailedStateResponse() throws IOException {
+        try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_failed_response.json")) {
+            saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), HashMap.class);
+        }
+        Map<String, List<RunnerInfo>> result = JidInfoResponseTransformer.getSimpleStates(saltResponseData);
+        assertThat(result, hasValue(allOf(hasItem(allOf(hasProperty("result", is(true)), hasProperty("runNum", is(3)))))));
+        assertThat(result, hasValue(allOf(hasItem(allOf(hasProperty("result", is(false)), hasProperty("runNum", is(4)))))));
     }
 }
 

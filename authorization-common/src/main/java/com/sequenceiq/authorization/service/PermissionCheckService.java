@@ -54,7 +54,7 @@ public class PermissionCheckService {
 
         if (commonPermissionCheckingUtils.isAuthorizationDisabled(proceedingJoinPoint) ||
                 InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
-            commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
+            return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
         }
 
         Optional<Class<?>> authorizationClass = commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint);

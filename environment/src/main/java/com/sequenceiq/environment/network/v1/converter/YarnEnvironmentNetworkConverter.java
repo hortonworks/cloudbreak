@@ -42,6 +42,7 @@ public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
         yarnNetwork.setNetworkCidrs(yarnNetworkCidr);
         if (network.getYarn() != null) {
             yarnNetwork.setQueue(network.getYarn().getQueue());
+            yarnNetwork.setLifetime(network.getYarn().getLifetime());
         }
         return yarnNetwork;
     }
@@ -51,6 +52,7 @@ public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
         YarnNetwork yarnNetwork = (YarnNetwork) baseNetwork;
         Map<String, Object> properties = createdCloudNetwork.getProperties();
         yarnNetwork.setQueue((String) properties.getOrDefault("queue", null));
+        yarnNetwork.setLifetime((Integer) properties.getOrDefault("lifetime", null));
         return yarnNetwork;
     }
 
@@ -61,6 +63,7 @@ public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
                 YarnParams.YarnParamsBuilder
                     .anYarnParams()
                     .withQueue(yarnNetwork.getQueue())
+                    .withLifetime(yarnNetwork.getLifetime())
                     .build())
                 .build();
     }
