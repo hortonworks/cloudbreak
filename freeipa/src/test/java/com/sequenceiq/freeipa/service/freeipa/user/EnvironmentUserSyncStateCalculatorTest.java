@@ -83,7 +83,7 @@ class EnvironmentUserSyncStateCalculatorTest {
 
         EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus);
 
-        assertEquals(UserSyncState.STALE, result.getState());
+        assertEquals(UserSyncState.SYNC_FAILED, result.getState());
         assertEquals(lastSync.getOperationId(), result.getLastUserSyncOperationId());
     }
 
@@ -97,7 +97,7 @@ class EnvironmentUserSyncStateCalculatorTest {
 
         EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus);
 
-        assertEquals(UserSyncState.STALE, result.getState());
+        assertEquals(UserSyncState.SYNC_FAILED, result.getState());
         assertEquals(lastSync.getOperationId(), result.getLastUserSyncOperationId());
     }
 
@@ -134,7 +134,7 @@ class EnvironmentUserSyncStateCalculatorTest {
 
         EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus);
 
-        assertEquals(UserSyncState.STALE, result.getState());
+        assertEquals(UserSyncState.SYNC_FAILED, result.getState());
         assertEquals(lastSync.getOperationId(), result.getLastUserSyncOperationId());
     }
 
