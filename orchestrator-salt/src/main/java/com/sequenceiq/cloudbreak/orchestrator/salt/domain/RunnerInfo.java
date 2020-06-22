@@ -111,13 +111,26 @@ public class RunnerInfo {
         this.changes = changes;
     }
 
+    @Override
+    public String toString() {
+        return "RunnerInfo{" +
+                "stateId='" + stateId + '\'' +
+                ", comment='" + comment + '\'' +
+                ", name='" + name + '\'' +
+                ", startTime='" + startTime + '\'' +
+                ", result=" + result +
+                ", duration=" + duration +
+                ", runNum=" + runNum +
+                ", changes=" + changes +
+                '}';
+    }
+
     public static class RunNumComparator implements Comparator<RunnerInfo>, Serializable {
 
         @Override
         public int compare(RunnerInfo o1, RunnerInfo o2) {
             return Integer.compare(o1.getRunNum(), o2.getRunNum());
         }
-
     }
 
     public static class DurationComparator implements Comparator<RunnerInfo>, Serializable {
@@ -126,6 +139,5 @@ public class RunnerInfo {
         public int compare(RunnerInfo o1, RunnerInfo o2) {
             return Double.compare(o1.getDuration(), o2.getDuration());
         }
-
     }
 }

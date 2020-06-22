@@ -1,0 +1,40 @@
+{
+  "return": [
+    {
+      "outputter": "highstate",
+      "data": {
+        "hreeve-cloudbreak10-master0.hreeve-c.xcu2-8y8x.wl.cloudera.site": {
+          "environ_|-set_pgpass_file_|-PGPASSFILE_|-setenv": {
+            "name": "PGPASSFILE",
+            "changes": {
+              "PGPASSFILE": "/opt/salt/postgresql/.pgpass"
+            },
+            "result": true,
+            "comment": "Environ values were set",
+            "__sls__": "postgresql.disaster_recovery",
+            "__run_num__": 3,
+            "start_time": "19:11:51.305342",
+            "duration": 1.396,
+            "__id__": "set_pgpass_file"
+          },
+          "cmd_|-backup_postgresql_db_|-/opt/salt/scripts/backup_db.sh AWS s3://hreeve-test/20200610/cloudbreak10-4_database_backup dbsvr-21ca19c9-a5bd-4d8b-8b9e-89d0351ac0c7.czhkrnzwtcwb.us-west-2.rds.amazonaws.com 5432 xiyvqefroz_|-run": {
+            "name": "/opt/salt/scripts/backup_db.sh AWS s3://hreeve-test/20200610/cloudbreak10-4_database_backup dbsvr-21ca19c9-a5bd-4d8b-8b9e-89d0351ac0c7.czhkrnzwtcwb.us-west-2.rds.amazonaws.com 5432 xiyvqefroz",
+            "changes": {
+              "pid": 12624,
+              "retcode": 1,
+              "stdout": "Logs at /var/log/dl_postgres_backup.log",
+              "stderr": ""
+            },
+            "result": false,
+            "comment": "Command /opt/salt/scripts/backup_db.sh AWS s3://hreeve-test/20200610/cloudbreak10-4_database_backup dbsvr-21ca19c9-a5bd-4d8b-8b9e-89d0351ac0c7.czhkrnzwtcwb.us-west-2.rds.amazonaws.com 5432 xiyvqefroz run",
+            "__sls__": "postgresql.disaster_recovery.backup",
+            "__run_num__": 4,
+            "start_time": "19:11:51.307693",
+            "duration": 91792.167,
+            "__id__": "backup_postgresql_db"
+          }
+        }
+      }
+    }
+  ]
+}
