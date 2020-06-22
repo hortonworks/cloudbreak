@@ -47,12 +47,18 @@ public class JidInfoResponseTransformer {
     }
 
     public static Map<String, List<RunnerInfo>> getSimpleStates(Map<?, ?> map) {
-        Map<String, Map<String, Map<String, Object>>> stringMapMap =
-                ((Map<String, List<Map<String, Map<String, Map<String, Object>>>>>) map).get("return").get(0);
+        boolean oldSalt = isOldSalt((Map<String, List<Map<String, Object>>>) map);
+        Map<String, Map<String, Map<String, Object>>> stringMapMap = oldSalt
+                ? ((Map<String, List<Map<String, Map<String, Map<String, Map<String, Object>>>>>>) map).get("return").get(0).get("data")
+                : ((Map<String, List<Map<String, Map<String, Map<String, Object>>>>>) map).get("return").get(0);
+
         Map<String, List<RunnerInfo>> result = new HashMap<>();
         for (Entry<String, Map<String, Map<String, Object>>> stringMapEntry : stringMapMap.entrySet()) {
             try {
-                result.put(stringMapEntry.getKey(), runnerInfoObjects(stringMapEntry.getValue()));
+                LOGGER.debug("Convert from {}", stringMapEntry);
+                List<RunnerInfo> runnerInfos = runnerInfoObjects(stringMapEntry.getValue());
+                LOGGER.debug("Converted to {}", runnerInfos);
+                result.put(stringMapEntry.getKey(), runnerInfos);
             } catch (RuntimeException e) {
                 LOGGER.info("Can't create runner info", e);
                 if (stringMapEntry.getKey() != null) {
