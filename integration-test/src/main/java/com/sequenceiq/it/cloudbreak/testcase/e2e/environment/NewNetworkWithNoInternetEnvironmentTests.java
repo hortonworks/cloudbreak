@@ -60,7 +60,7 @@ public class NewNetworkWithNoInternetEnvironmentTests extends AbstractE2ETest {
             given = "there is a running cloudbreak",
             when = "create an Environment with new network which CIDR is 10.0.0.0/16, outbound internet traffic is disabled with FreeIPA and SDX",
             then = "should create new Subnets and the number depends on the provider and should create instances without internet access.")
-    public void testCreateNewEnvironment(TestContext testContext) {
+    public void testCreateNewEnvironmentWithNewNetworkAndNoInternet(TestContext testContext) {
         String networkKey = "someOtherNetwork";
         String sdx = resourcePropertyProvider().getName();
         SdxDatabaseRequest database = new SdxDatabaseRequest();
