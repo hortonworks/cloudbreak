@@ -376,5 +376,23 @@
     "resourceType": "DATABASE_SERVER",
     "actionType": "RESOURCE_DEPENDENT",
     "legacyRight": "datalake/write"
+  },
+  "CREATE_RECIPE": {
+    "right": "environments/createRecipe",
+    "resourceType": "RECIPE",
+    "actionType": "RESOURCE_INDEPENDENT",
+    "legacyRight": "datahub/read"
+  },
+  "DESCRIBE_RECIPE": {
+    "right": "environments/describeRecipe",
+    "resourceType": "RECIPE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/read"
+  },
+  "DELETE_RECIPE": {
+    "right": "environments/deleteRecipe",
+    "resourceType": "RECIPE",
+    "actionType": "RESOURCE_DEPENDENT",
+    "legacyRight": "datahub/read"
   }
 }

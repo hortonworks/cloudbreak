@@ -135,7 +135,7 @@ public class DatabaseConfigServiceTest {
         db.setName("mydb");
 
         doNothing().when(grpcUmsClient).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
-        doNothing().when(grpcUmsClient).notifyResourceDeleted(anyString(), anyString(), any());
+        doNothing().when(grpcUmsClient).notifyResourceDeleted(anyString(), any());
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 

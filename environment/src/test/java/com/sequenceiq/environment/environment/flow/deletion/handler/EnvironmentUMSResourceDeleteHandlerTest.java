@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -68,13 +67,13 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
         given(environmentDtoEvent.getData()).willReturn(environmentDto);
         given(environmentDto.getResourceCrn()).willReturn(TEST_CRN);
         given(environmentService.findEnvironmentById(any())).willReturn(Optional.of(new Environment()));
-        doNothing().when(umsClient).notifyResourceDeleted(INTERNAL_ACTOR_CRN, TEST_CRN, Optional.empty());
+        doNothing().when(umsClient).notifyResourceDeleted(TEST_CRN, Optional.empty());
         doNothing().when(eventSender).sendEvent(any(EnvDeleteEvent.class), any());
         // WHEN
         underTest.accept(environmentDtoEvent);
         // THEN
         verify(environmentService, times(1)).findEnvironmentById(any());
-        verify(umsClient, times(1)).notifyResourceDeleted(INTERNAL_ACTOR_CRN, TEST_CRN, Optional.empty());
+        verify(umsClient, times(1)).notifyResourceDeleted(TEST_CRN, Optional.empty());
         verify(eventSender, times(1)).sendEvent(any(EnvDeleteEvent.class), any());
     }
 
@@ -87,13 +86,13 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
         given(environmentDtoEvent.getData()).willReturn(environmentDto);
         given(environmentDto.getResourceCrn()).willReturn(null);
         given(environmentService.findEnvironmentById(any())).willReturn(Optional.of(env));
-        doNothing().when(umsClient).notifyResourceDeleted(INTERNAL_ACTOR_CRN, crnFromQuery, Optional.empty());
+        doNothing().when(umsClient).notifyResourceDeleted(crnFromQuery, Optional.empty());
         doNothing().when(eventSender).sendEvent(any(EnvDeleteEvent.class), any());
         // WHEN
         underTest.accept(environmentDtoEvent);
         // THEN
         verify(environmentService, times(1)).findEnvironmentById(any());
-        verify(umsClient, times(1)).notifyResourceDeleted(INTERNAL_ACTOR_CRN, crnFromQuery, Optional.empty());
+        verify(umsClient, times(1)).notifyResourceDeleted(crnFromQuery, Optional.empty());
         verify(eventSender, times(1)).sendEvent(any(EnvDeleteEvent.class), any());
     }
 
@@ -103,13 +102,13 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
         given(environmentDtoEvent.getData()).willReturn(environmentDto);
         given(environmentDto.getResourceCrn()).willReturn(TEST_CRN);
         given(environmentService.findEnvironmentById(any())).willReturn(Optional.of(new Environment()));
-        doThrow(new UmsOperationException("ums exception")).when(umsClient).notifyResourceDeleted(INTERNAL_ACTOR_CRN, TEST_CRN, Optional.empty());
+        doThrow(new UmsOperationException("ums exception")).when(umsClient).notifyResourceDeleted(TEST_CRN, Optional.empty());
         doNothing().when(eventSender).sendEvent(any(EnvDeleteEvent.class), any());
         // WHEN
         underTest.accept(environmentDtoEvent);
         // THEN
         verify(environmentService, times(1)).findEnvironmentById(any());
-        verify(umsClient, times(1)).notifyResourceDeleted(INTERNAL_ACTOR_CRN, TEST_CRN, Optional.empty());
+        verify(umsClient, times(1)).notifyResourceDeleted(TEST_CRN, Optional.empty());
         verify(eventSender, times(1)).sendEvent(any(EnvDeleteEvent.class), any());
     }
 }

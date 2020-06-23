@@ -9,7 +9,7 @@ public class EnvironmentOpDescription {
     public static final String LIST = "List all environments.";
     public static final String DELETE_BY_NAME = "Delete an environment by name. Only possible if no cluster is running in the environment.";
     public static final String DELETE_BY_CRN = "Delete an environment by CRN. Only possible if no cluster is running in the environment.";
-    public static final String DELETE_MULTIPLE_BY_NAME = "Delete multiple environment by namns. Only possible if no cluster is running in the environments.";
+    public static final String DELETE_MULTIPLE_BY_NAME = "Delete multiple environment by names. Only possible if no cluster is running in the environments.";
     public static final String DELETE_MULTIPLE_BY_CRN = "Delete multiple environment by CRNs. Only possible if no cluster is running in the environments.";
     public static final String CHANGE_CREDENTIAL_BY_NAME = "Changes the credential of the environment and the clusters in the environment of a given name.";
     public static final String CHANGE_CREDENTIAL_BY_CRN = "Changes the credential of the environment and the clusters in the environment of a given CRN.";
