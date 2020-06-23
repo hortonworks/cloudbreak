@@ -39,7 +39,7 @@ public class RangerRazConfigProvider extends AbstractRoleConfigProvider {
             ApiClusterTemplateService coreSettings = createTemplate();
             Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
             return hostgroupViews.stream()
-                    .filter(hg -> InstanceGroupType.CORE.equals(hg.getInstanceGroupType()))
+                    .filter(hg -> InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType()))
                     .collect(Collectors.toMap(HostgroupView::getName, v -> coreSettings));
         }
         return Map.of();
