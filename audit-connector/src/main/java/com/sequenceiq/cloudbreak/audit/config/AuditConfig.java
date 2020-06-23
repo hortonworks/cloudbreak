@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AuditConfig {
 
+    private static final int DEFAULT_AUDIT_PORT = 80;
+
     @Value("${altus.audit.endpoint:}")
     private String endpoint;
 
@@ -20,11 +22,13 @@ public class AuditConfig {
     public void init() {
         if (isConfigured()) {
             String[] parts = endpoint.split(":");
-            if (parts.length != 2) {
-                throw new IllegalArgumentException("altus.audit.endpoint must be in host:port format.");
+            if (parts.length < 1 || parts.length > 2) {
+                throw new IllegalArgumentException("altus.audit.endpoint must be in host or host:port format.");
             }
             host = parts[0];
-            port = Integer.parseInt(parts[1]);
+            port = parts.length == 2
+                    ? Integer.parseInt(parts[1])
+                    : DEFAULT_AUDIT_PORT;
         }
     }
 
