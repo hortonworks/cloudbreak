@@ -554,11 +554,11 @@ public class ServiceEndpointCollector {
         Gateway gateway = gt.getGateway();
         ExposedService hbaseJars = exposedServiceCollector.getHBaseJarsService();
         if (gatewayListeningOnHttpsPort(gateway)) {
-            return String.format("https://%s/%s/%s%s", managerIp, gateway.getPath(), gt.getTopologyName(),
-                    hbaseJars.getKnoxUrl());
+            return String.format("https://%s/%s/%s%s%s", managerIp, gateway.getPath(), gt.getTopologyName(),
+                    API_TOPOLOGY_POSTFIX, hbaseJars.getKnoxUrl());
         } else {
-            return String.format("https://%s:%s/%s/%s%s", managerIp, gateway.getGatewayPort(), gateway.getPath(), gt.getTopologyName(),
-                    hbaseJars.getKnoxUrl());
+            return String.format("https://%s:%s/%s/%s%s%s", managerIp, gateway.getGatewayPort(), gateway.getPath(), gt.getTopologyName(),
+                    API_TOPOLOGY_POSTFIX, hbaseJars.getKnoxUrl());
         }
     }
 
