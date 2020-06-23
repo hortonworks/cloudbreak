@@ -29,7 +29,7 @@ public abstract class AbstractEnvironmentAction implements Action<EnvironmentTes
                 }
             }
         }
-        throw new Exception("Exception during executing Environment action: exceeding maxrety during waiting for flow");
+        throw new Exception("Exception during executing Environment action: exceeding maxretry during waiting for flow");
     }
 
     protected abstract EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception;

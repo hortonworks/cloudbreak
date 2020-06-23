@@ -32,7 +32,7 @@ public abstract class AbstractFreeIPAAction<U extends AbstractFreeIPATestDto> im
                 }
             }
         }
-        throw new Exception("Exception during executing FreeIPA action: exceeding maxrety during waiting for flow");
+        throw new Exception("Exception during executing FreeIPA action: exceeding maxretry during waiting for flow");
     }
 
     protected abstract U freeIPAAction(TestContext testContext, U testDto, FreeIPAClient client) throws Exception;

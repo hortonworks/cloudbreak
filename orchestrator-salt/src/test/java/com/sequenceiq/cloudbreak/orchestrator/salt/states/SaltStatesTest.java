@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -56,6 +58,8 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
+import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.RetryService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SaltStatesTest {
@@ -343,7 +347,7 @@ public class SaltStatesTest {
         resp.setResult(commandOutputsList);
         when(saltConnector.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, "command")).thenReturn(resp);
         // WHEN
-        Map<String, String> actualResult = SaltStates.runCommand(saltConnector, "command");
+        Map<String, String> actualResult = SaltStates.runCommand(spy(RetryService.class), saltConnector, "command");
         // THEN
         assertEquals(commandOutputs, actualResult);
     }
@@ -380,7 +384,7 @@ public class SaltStatesTest {
         resp.setResult(commandOutputsList);
         when(saltConnector.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, "command")).thenReturn(resp);
         // WHEN
-        Map<String, String> actualResult = SaltStates.runCommand(saltConnector, "command");
+        Map<String, String> actualResult = SaltStates.runCommand(spy(RetryService.class), saltConnector, "command");
         // THEN
         assertTrue(actualResult.size() == 0);
     }
@@ -391,11 +395,9 @@ public class SaltStatesTest {
         RuntimeException exception = new RuntimeException();
         when(saltConnector.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, "command")).thenThrow(exception);
         // WHEN
-        try {
-            SaltStates.runCommand(saltConnector, "command");
-        } catch (RuntimeException ex) {
-            // THEN
-            assertEquals(exception, ex);
-        }
+        Retry.ActionFailedException actionFailedException = Assertions.assertThrows(Retry.ActionFailedException.class,
+                () -> SaltStates.runCommand(spy(RetryService.class), saltConnector, "command"));
+        assertEquals("Salt run command failed", actionFailedException.getMessage());
     }
+
 }

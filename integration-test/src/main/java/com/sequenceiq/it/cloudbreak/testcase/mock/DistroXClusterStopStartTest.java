@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import javax.inject.Inject;
 
 import org.testng.ITestContext;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
@@ -47,6 +48,8 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
     @Inject
     private SdxTestClient sdxTestClient;
 
+    //CB-7294
+    @Ignore
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running DistroX cluster",

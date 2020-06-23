@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.salt.utils.GrainsJsonPropertyUtil;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -145,6 +146,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Inject
     private SaltErrorResolver saltErrorResolver;
 
+    @Inject
+    private Retry retry;
+
     private ExitCriteria exitCriteria;
 
     @Override
@@ -209,7 +213,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Map<String, String> uuidResponse = SaltStates.getUuidList(sc);
 
             saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(hostnameDiskMountMap.keySet(), allNodes, "mount_disks"), exitModel, exitCriteria);
-            Map<String, String> fstabResponse = SaltStates.runCommandOnHosts(sc, allHosts, "cat /etc/fstab");
+            Map<String, String> fstabResponse = SaltStates.runCommandOnHosts(retry, sc, allHosts, "cat /etc/fstab");
             return nodes.stream()
                     .map(node -> {
                         String fstab = fstabResponse.getOrDefault(node.getHostname(), "");
@@ -280,8 +284,8 @@ public class SaltOrchestrator implements HostOrchestrator {
         if (!StringUtils.isEmpty(fstab)) {
             mountCommandParams += "PREVIOUS_FSTAB='" + fstab + "' ";
         }
-        SaltStates.runCommandOnHosts(sc, hostname, "(cd " + SRV_SALT_DISK + ';' + mountCommandParams + " ./" + DISK_MOUNT + ')');
-        return StringUtils.isEmpty(uuidList) ? Map.of() : SaltStates.runCommandOnHosts(sc, hostname, "cat /etc/fstab");
+        SaltStates.runCommandOnHosts(retry, sc, hostname, "(cd " + SRV_SALT_DISK + ';' + mountCommandParams + " ./" + DISK_MOUNT + ')');
+        return StringUtils.isEmpty(uuidList) ? Map.of() : SaltStates.runCommandOnHosts(retry, sc, hostname, "cat /etc/fstab");
     }
 
     private String formatDisks(String platformVariant, SaltConnector sc, Node node, Glob hostname) {
@@ -295,7 +299,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 + "' ATTACHED_VOLUME_NAME_LIST='" + dataVolumes
                 + "' ATTACHED_VOLUME_SERIAL_LIST='" + serialIds + "' ";
         String command = "(cd " + SRV_SALT_DISK + ';' + formatCommandParams + "./" + DISK_FORMAT + ')';
-        Map<String, String> formatResponse = SaltStates.runCommandOnHosts(sc, hostname, command);
+        Map<String, String> formatResponse = SaltStates.runCommandOnHosts(retry, sc, hostname, command);
         return formatResponse.get(node.getHostname());
     }
 
@@ -321,7 +325,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 })
                 .forEach(path -> {
                     LOGGER.debug("Making script {} executable on targets {}", path, nodes);
-                    SaltStates.runCommandOnHosts(sc, allHosts, "chmod 755 " + path);
+                    SaltStates.runCommandOnHosts(retry, sc, allHosts, "chmod 755 " + path);
                 });
     }
 
@@ -684,7 +688,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     public Map<String, String> runCommandOnAllHosts(GatewayConfig gateway, String command) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector saltConnector = createSaltConnector(gateway)) {
-            return SaltStates.runCommand(saltConnector, command);
+            return SaltStates.runCommand(retry, saltConnector, command);
         } catch (RuntimeException e) {
             LOGGER.info("Error occurred during command execution: " + command, e);
             throw new CloudbreakOrchestratorFailedException(e);
@@ -768,7 +772,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = createSaltConnector(primaryGateway)) {
             uploadMountScriptsAndMakeThemExecutable(nodes, exitCriteriaModel, allTargets, allHosts, sc);
 
-            SaltStates.runCommandOnHosts(sc, allHosts, "(cd " + SRV_SALT_DISK + ";./" + DISK_INITIALIZE + ')');
+            SaltStates.runCommandOnHosts(retry, sc, allHosts, "(cd " + SRV_SALT_DISK + ";./" + DISK_INITIALIZE + ')');
             return nodes.stream()
                     .map(node -> {
                         Glob hostname = new Glob(node.getHostname());
