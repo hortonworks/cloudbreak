@@ -29,7 +29,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
@@ -88,6 +90,7 @@ import freemarker.template.TemplateException;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AwsTestContext.class,
         properties = "spring.main.allow-bean-definition-overriding=true")
+@ActiveProfiles("Component")
 public abstract class AwsComponentTest {
 
     protected static final String AVAILABILITY_ZONE = "eu-west-1c";
@@ -195,6 +198,7 @@ public abstract class AwsComponentTest {
 
     @Configuration
     @ComponentScan(basePackages = {"com.sequenceiq.cloudbreak.cloud.aws", "com.sequenceiq.cloudbreak.cloud.template"})
+    @Profile("Component")
     public static class AwsTestContext {
 
         @MockBean(name = "DefaultRetryService")
