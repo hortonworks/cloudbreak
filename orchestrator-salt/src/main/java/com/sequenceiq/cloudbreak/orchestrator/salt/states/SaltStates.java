@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo.DurationCom
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
+import com.sequenceiq.cloudbreak.service.Retry;
 
 public class SaltStates {
 
@@ -216,16 +217,30 @@ public class SaltStates {
         return result;
     }
 
-    public static Map<String, String> runCommand(SaltConnector sc, String command) {
-        CommandExecutionResponse resp = sc.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, command);
-        List<Map<String, String>> result = resp.getResult();
-        return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
+    public static Map<String, String> runCommand(Retry retry, SaltConnector sc, String command) {
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                CommandExecutionResponse resp = sc.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, command);
+                List<Map<String, String>> result = resp.getResult();
+                return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
+            } catch (RuntimeException e) {
+                LOGGER.error("Salt run command failed", e);
+                throw new Retry.ActionFailedException("Salt run command failed");
+            }
+        });
     }
 
-    public static Map<String, String> runCommandOnHosts(SaltConnector sc, Target<String> target, String command) {
-        CommandExecutionResponse resp = sc.run(target, "cmd.run", LOCAL, CommandExecutionResponse.class, command);
-        List<Map<String, String>> result = resp.getResult();
-        return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
+    public static Map<String, String> runCommandOnHosts(Retry retry, SaltConnector sc, Target<String> target, String command) {
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                CommandExecutionResponse resp = sc.run(target, "cmd.run", LOCAL, CommandExecutionResponse.class, command);
+                List<Map<String, String>> result = resp.getResult();
+                return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
+            } catch (RuntimeException e) {
+                LOGGER.error("Salt run command on hosts failed", e);
+                throw new Retry.ActionFailedException("Salt run command on hosts failed");
+            }
+        });
     }
 
     public static Map<String, JsonNode> getGrains(SaltConnector sc, String grain) {
