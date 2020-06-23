@@ -58,6 +58,9 @@ public enum AuthorizationResourceAction {
     CREATE_DATABASE,
     START_DATABASE_SERVER,
     STOP_DATABASE_SERVER,
+    DESCRIBE_RECIPE,
+    CREATE_RECIPE,
+    DELETE_RECIPE,
     // deprecated actions, please do not use them
     ENVIRONMENT_READ,
     ENVIRONMENT_WRITE,

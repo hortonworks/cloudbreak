@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.recipe;
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.Collections.emptySet;
 
@@ -17,13 +18,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
@@ -32,7 +39,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @Service
-public class RecipeService extends AbstractArchivistService<Recipe> {
+public class RecipeService extends AbstractArchivistService<Recipe> implements ResourceBasedCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeService.class);
 
@@ -45,9 +52,24 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
     @Inject
     private HostGroupService hostGroupService;
 
+    @Inject
+    private TransactionService transactionService;
+
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
+
     public Recipe delete(NameOrCrn recipeNameOrCrn, Long workspaceId) {
         Recipe toDelete = get(recipeNameOrCrn, workspaceId);
-        return super.delete(toDelete);
+        Recipe deleted = super.delete(toDelete);
+        grpcUmsClient.notifyResourceDeleted(deleted.getResourceCrn(), MDCUtils.getRequestId());
+        return deleted;
+    }
+
+    @Override
+    public Set<Recipe> deleteMultipleByNameFromWorkspace(Set<String> names, Long workspaceId) {
+        Set<Recipe> deletedRecipes = super.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        deletedRecipes.stream().forEach(deleted -> grpcUmsClient.notifyResourceDeleted(deleted.getResourceCrn(), MDCUtils.getRequestId()));
+        return deletedRecipes;
     }
 
     public Recipe get(NameOrCrn recipeNameOrCrn, Long workspaceId) {
@@ -69,9 +91,22 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
     }
 
     public Recipe createForLoggedInUser(Recipe recipe, @Nonnull Long workspaceId, String accountId, String creator) {
+        if (recipeViewRepository.findByNameAndWorkspaceId(recipe.getName(), workspaceId).isPresent()) {
+            String message = String.format("%s already exists with name '%s'", recipe.getResourceName(), recipe.getName());
+            throw new BadRequestException(message);
+        }
         recipe.setResourceCrn(createCRN(accountId));
         recipe.setCreator(creator);
-        return super.createForLoggedInUser(recipe, workspaceId);
+        try {
+            return transactionService.required(() -> {
+                Recipe created = super.createForLoggedInUser(recipe, workspaceId);
+                grpcUmsClient.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), created.getResourceCrn(),
+                        ThreadBasedUserCrnProvider.getAccountId());
+                return created;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
     }
 
     private String collectMissingRecipeNames(Set<Recipe> recipes, Collection<String> recipeNames) {
@@ -126,4 +161,24 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
                 .toString();
     }
 
+    @Override
+    public String getResourceCrnByResourceName(String resourceName) {
+        return recipeViewRepository.findResourceCrnByNameAndTenantId(resourceName, ThreadBasedUserCrnProvider.getAccountId())
+                .orElseThrow(notFound("recipe", resourceName));
+    }
+
+    @Override
+    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+        return recipeViewRepository.findAllResourceCrnsByNamesAndTenantId(resourceNames, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    public List<String> getResourceCrnsInAccount() {
+        return recipeViewRepository.findAllResourceCrnsByTenantId(ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    public AuthorizationResourceType getResourceType() {
+        return AuthorizationResourceType.RECIPE;
+    }
 }

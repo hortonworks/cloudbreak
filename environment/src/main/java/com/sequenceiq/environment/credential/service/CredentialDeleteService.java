@@ -58,7 +58,7 @@ public class CredentialDeleteService extends AbstractCredentialService {
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", name);
         Credential archived = archiveCredential(credential);
-        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, archived.getResourceCrn(), MDCUtils.getRequestId());
+        grpcUmsClient.notifyResourceDeleted(archived.getResourceCrn(), MDCUtils.getRequestId());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
         return archived;
     }
@@ -69,7 +69,7 @@ public class CredentialDeleteService extends AbstractCredentialService {
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", crn);
         Credential archived = archiveCredential(credential);
-        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, archived.getResourceCrn(), MDCUtils.getRequestId());
+        grpcUmsClient.notifyResourceDeleted(archived.getResourceCrn(), MDCUtils.getRequestId());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
         return archived;
     }

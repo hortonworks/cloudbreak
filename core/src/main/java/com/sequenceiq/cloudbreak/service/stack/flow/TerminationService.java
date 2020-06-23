@@ -119,7 +119,7 @@ public class TerminationService {
         stackService.save(stack);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_COMPLETED, statusReason);
         if (stack.getType().equals(StackType.WORKLOAD)) {
-            grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, stack.getResourceCrn(), MDCUtils.getRequestId());
+            grpcUmsClient.notifyResourceDeleted(stack.getResourceCrn(), MDCUtils.getRequestId());
         }
     }
 

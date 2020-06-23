@@ -355,7 +355,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         setImageCatalogAsDefault(null, user);
         imageCatalog.setName(generateArchiveName(name));
         imageCatalogRepository.save(imageCatalog);
-        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, imageCatalog.getResourceCrn(), MDCUtils.getRequestId());
+        grpcUmsClient.notifyResourceDeleted(imageCatalog.getResourceCrn(), MDCUtils.getRequestId());
         userProfileHandler.destroyProfileImageCatalogPreparation(imageCatalog);
         LOGGER.debug("Image catalog has been archived: {}", imageCatalog);
         return imageCatalog;
