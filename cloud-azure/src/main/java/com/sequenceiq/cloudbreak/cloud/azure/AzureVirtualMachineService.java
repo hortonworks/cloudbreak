@@ -60,7 +60,7 @@ public class AzureVirtualMachineService {
         Map<String, VirtualMachine> virtualMachines = getVmsFromAzureAndFillStatusesIfResourceGroupRemoved(ac, cloudInstances, statuses);
         LOGGER.info("VirtualMachines from Azure: {}", virtualMachines.keySet());
         refreshInstanceViews(virtualMachines);
-        fillVmStatues(cloudInstances, statuses, virtualMachines);
+        fillVmStatuses(cloudInstances, statuses, virtualMachines);
         return virtualMachines;
     }
 
@@ -109,12 +109,14 @@ public class AzureVirtualMachineService {
                 virtualMachines.putAll(getVirtualMachinesByName(azureClient,
                         resourceGroupInstanceIdsMap.getKey(), resourceGroupInstanceIdsMap.getValue()));
             } catch (CloudException e) {
+                LOGGER.debug("Exception occurred during the list of Virtual Machines by resource group", e);
                 for (String instance : resourceGroupInstanceIdsMap.getValue()) {
                     cloudInstances.stream().filter(cloudInstance -> instance.equals(cloudInstance.getInstanceId())).findFirst().ifPresent(cloudInstance -> {
                         if (e.body() != null && "ResourceNotFound".equals(e.body().code())) {
                             statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED));
                         } else {
-                            statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.UNKNOWN));
+                            String msg = String.format("Failed to get VM's state from Azure: %s", e.toString());
+                            statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.UNKNOWN, msg));
                         }
                     });
                 }
@@ -123,7 +125,7 @@ public class AzureVirtualMachineService {
         return virtualMachines;
     }
 
-    private void fillVmStatues(List<CloudInstance> cloudInstances, List<CloudVmInstanceStatus> statuses, Map<String, VirtualMachine> virtualMachines) {
+    private void fillVmStatuses(List<CloudInstance> cloudInstances, List<CloudVmInstanceStatus> statuses, Map<String, VirtualMachine> virtualMachines) {
         LOGGER.info("Fill vm statuses from returned virtualmachines from azure: {}", virtualMachines.keySet());
         for (CloudInstance cloudInstance : cloudInstances) {
             virtualMachines.values().stream()
@@ -134,7 +136,16 @@ public class AzureVirtualMachineService {
                         String computerName = virtualMachine.computerName();
                         cloudInstance.putParameter(INSTANCE_NAME, computerName);
                         statuses.add(new CloudVmInstanceStatus(cloudInstance, AzureInstanceStatus.get(virtualMachinePowerState)));
-                    }, () -> statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED)));
+                    }, () -> statuses.stream()
+                            .filter(cvis -> cvis.getCloudInstance().getInstanceId().equals(cloudInstance.getInstanceId()))
+                            .findAny()
+                            .ifPresentOrElse(cloudInstanceWithStatus -> logTheStatusOfTheCloudInstance(cloudInstanceWithStatus),
+                                    () -> statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED))));
         }
+    }
+
+    private void logTheStatusOfTheCloudInstance(CloudVmInstanceStatus cloudInstanceWithStatus) {
+        LOGGER.info("Cloud instance '{}' could not be found in the response from Azure, but it's status already requested to be updated to '{}'",
+                cloudInstanceWithStatus.getCloudInstance().getInstanceId(), cloudInstanceWithStatus.getStatus().name());
     }
 }
