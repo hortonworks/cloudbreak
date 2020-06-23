@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -138,6 +140,13 @@ public class OpdbServiceEndpointCollectorTest {
         when(exposedServiceCollector.getImpalaService()).thenReturn(getExposedServiceOrFail("IMPALA"));
         when(exposedServiceCollector.getHBaseUIService()).thenReturn(getExposedServiceOrFail("HBASE_UI"));
         when(exposedServiceCollector.getHBaseJarsService()).thenReturn(getExposedServiceOrFail("HBASEJARS"));
+        Set<String> services = new HashSet<>();
+        services.add("HBASEUI");
+        services.add("HBASEJARS");
+        services.add("AVATICA");
+        services.add("CM-UI");
+        services.add("CM-API");
+        when(exposedServiceCollector.getFullServiceListBasedOnList(any())).thenReturn(services);
         // Skip exposed service validation
         when(exposedServiceListValidator.validate(any())).thenReturn(ValidationResult.builder().build());
         // Couldn't get all mocks wired up with the Spring autowiring working. So, this is a pared down
@@ -210,6 +219,14 @@ public class OpdbServiceEndpointCollectorTest {
         assertEquals(proxyApiServiceNames.toString(), 3, proxyApiServiceNames.size());
         assertEquals(new HashSet<>(Arrays.asList("CM-UI", "HBASEUI")), proxyServiceNames);
         assertEquals(new HashSet<>(Arrays.asList("CM-API", "HBASEJARS", "AVATICA")), proxyApiServiceNames);
+        Optional<ClusterExposedServiceV4Response> hbasejars = proxyApiServices.stream().filter(
+                service -> service.getKnoxService().equals("HBASEJARS")).findFirst();
+        Optional<ClusterExposedServiceV4Response> avatica = proxyApiServices.stream().filter(
+                service -> service.getKnoxService().equals("AVATICA")).findFirst();
+        assertTrue(hbasejars.isPresent());
+        assertTrue(avatica.isPresent());
+        assertEquals("https://10.0.0.1/gateway-path/proxy-api/hbase/jars", hbasejars.get().getServiceUrl());
+        assertEquals("https://10.0.0.1/gateway-path/proxy-api/avatica/", avatica.get().getServiceUrl());
     }
 
     private GatewayTopology gatewayTopology(String name) {
