@@ -90,7 +90,7 @@ class RangerRazConfigProviderTest {
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
-        ApiClusterTemplateService service = additionalServices.get("idbroker");
+        ApiClusterTemplateService service = additionalServices.get("master");
         List<ApiClusterTemplateRoleConfigGroup> roleConfigGroups = service.getRoleConfigGroups();
         Assertions.assertAll(
                 () -> assertEquals(1, additionalServices.size()),
