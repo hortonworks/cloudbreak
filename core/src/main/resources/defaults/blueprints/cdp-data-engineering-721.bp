@@ -370,6 +370,12 @@
           {
             "refName": "oozie-OOZIE_SERVER-BASE",
             "roleType": "OOZIE_SERVER",
+            "configs": [
+              {
+                "name": "oozie_config_safety_valve",
+                "value": "<property><name>oozie.service.HadoopAccessorService.nameNode.whitelist</name><value></value></property>"
+              }
+            ],
             "base": true
           }
         ]
