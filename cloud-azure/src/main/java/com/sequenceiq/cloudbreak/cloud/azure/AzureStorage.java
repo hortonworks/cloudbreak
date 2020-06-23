@@ -144,7 +144,9 @@ public class AzureStorage {
     }
 
     private String getPersistentStorageName(String prefix, AzureCredentialView acv, String region, String resourceGroup) {
-        String subscriptionIdPart = encodeString(acv.getSubscriptionId().replaceAll("-", "").toLowerCase());
+        String subscriptionIdPart = StringUtils.isBlank(resourceGroup)
+                ? acv.getSubscriptionId().replaceAll("-", "").toLowerCase()
+                : encodeString(acv.getSubscriptionId().replaceAll("-", "").toLowerCase());
         String regionInitials = WordUtils.initials(Region.findByLabelOrName(region).label(), ' ').toLowerCase();
         String resourceGroupPart = encodeString(resourceGroup);
         String result = String.format("%s%s%s%s", prefix, regionInitials, subscriptionIdPart, resourceGroupPart);
