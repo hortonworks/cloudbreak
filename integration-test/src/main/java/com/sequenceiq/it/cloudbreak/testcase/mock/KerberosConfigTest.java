@@ -17,7 +17,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.ActiveDirectoryKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
-import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIPAKerberosDescriptor;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIpaKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.MITKerberosDescriptor;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -208,7 +208,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             @Override
             public CreateKerberosConfigRequest getRequest() {
                 CreateKerberosConfigRequest request = new CreateKerberosConfigRequest();
-                FreeIPAKerberosDescriptor freeIpaRequest = new FreeIPAKerberosDescriptor();
+                FreeIpaKerberosDescriptor freeIpaRequest = new FreeIpaKerberosDescriptor();
                 freeIpaRequest.setAdminUrl("http://someurl.com");
                 freeIpaRequest.setRealm("someRealm");
                 freeIpaRequest.setUrl("http://someadminurl.com");

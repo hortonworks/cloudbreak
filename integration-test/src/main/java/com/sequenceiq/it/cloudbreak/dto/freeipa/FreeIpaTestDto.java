@@ -39,13 +39,13 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.FreeIPAClient;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
@@ -57,21 +57,21 @@ import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.util.TagAdderUtil;
 
 @Prototype
-public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIPATestDto>
-        implements Purgable<ListFreeIpaResponse, FreeIPAClient>, Searchable {
+public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIpaTestDto>
+        implements Purgable<ListFreeIpaResponse, FreeIpaClient>, Searchable {
 
     @Inject
     private TagAdderUtil tagAdderUtil;
 
     @Inject
-    private FreeIPATestClient freeIPATestClient;
+    private FreeIpaTestClient freeIpaTestClient;
 
-    public FreeIPATestDto(TestContext testContext) {
+    public FreeIpaTestDto(TestContext testContext) {
         super(new CreateFreeIpaRequest(), testContext);
     }
 
     @Override
-    public FreeIPATestDto valid() {
+    public FreeIpaTestDto valid() {
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withEnvironment(getTestContext().given(EnvironmentTestDto.class))
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
@@ -80,22 +80,22 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
                 .withTestNameAsTag()
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
-                .withFreeIPA("ipatest.local", "ipaserver", "admin1234", "admins");
+                .withFreeIpa("ipatest.local", "ipaserver", "admin1234", "admins");
     }
 
-    private FreeIPATestDto withTestNameAsTag() {
+    private FreeIpaTestDto withTestNameAsTag() {
         tagAdderUtil.addTestNameTag(getRequest().getTags(), getTestContext().getTestMethodName());
         return this;
     }
 
-    public FreeIPATestDto withFreeIpaHa(int instanceGroupCount, int instanceCountByGroup) {
+    public FreeIpaTestDto withFreeIpaHa(int instanceGroupCount, int instanceCountByGroup) {
         withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()),
                 OptionalInt.of(instanceGroupCount),
                 OptionalInt.of(instanceCountByGroup));
         return this;
     }
 
-    private FreeIPATestDto withFreeIPA(String domain, String hostname, String adminPassword, String adminGroupName) {
+    private FreeIpaTestDto withFreeIpa(String domain, String hostname, String adminPassword, String adminGroupName) {
         FreeIpaServerRequest request = new FreeIpaServerRequest();
         request.setDomain(domain);
         request.setHostname(hostname);
@@ -105,19 +105,19 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    private FreeIPATestDto withName(String name) {
+    private FreeIpaTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
         return this;
     }
 
-    public FreeIPATestDto withTelemetry(String telemetry) {
+    public FreeIpaTestDto withTelemetry(String telemetry) {
         TelemetryTestDto telemetryTestDto = getTestContext().get(telemetry);
         getRequest().setTelemetry(telemetryTestDto.getRequest());
         return this;
     }
 
-    public FreeIPATestDto withSpotPercentage(int spotPercentage) {
+    public FreeIpaTestDto withSpotPercentage(int spotPercentage) {
         getRequest().getInstanceGroups().forEach(instanceGroupRequest -> {
             AwsInstanceTemplateParameters aws = instanceGroupRequest.getInstanceTemplate().getAws();
             if (Objects.isNull(aws)) {
@@ -131,7 +131,7 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    private FreeIPATestDto withPlacement(PlacementSettingsTestDto placementSettings) {
+    private FreeIpaTestDto withPlacement(PlacementSettingsTestDto placementSettings) {
         PlacementSettingsV4Request request = placementSettings.getRequest();
         getRequest().setPlacement(new PlacementRequest()
                 .withAvailabilityZone(request.getAvailabilityZone())
@@ -139,7 +139,7 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    private FreeIPATestDto withInstanceGroupsEntity(Collection<InstanceGroupTestDto> instanceGroups,
+    private FreeIpaTestDto withInstanceGroupsEntity(Collection<InstanceGroupTestDto> instanceGroups,
             OptionalInt instanceGroupCount, OptionalInt instanceCountByGroup) {
         List<InstanceGroupRequest> instanceGroupRequests = instanceGroups.stream()
                 .filter(instanceGroupTestDto -> "master".equals(instanceGroupTestDto.getRequest().getName()))
@@ -219,7 +219,7 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         return template;
     }
 
-    private FreeIPATestDto withNetwork(NetworkV4TestDto network) {
+    private FreeIpaTestDto withNetwork(NetworkV4TestDto network) {
         NetworkV4Request request = network.getRequest();
         NetworkRequest networkRequest = new NetworkRequest();
         if (request.getAws() != null) {
@@ -238,7 +238,7 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    private FreeIPATestDto withAuthentication(StackAuthenticationTestDto stackAuthentication) {
+    private FreeIpaTestDto withAuthentication(StackAuthenticationTestDto stackAuthentication) {
         StackAuthenticationV4Request request = stackAuthentication.getRequest();
         StackAuthenticationRequest authReq = new StackAuthenticationRequest();
         authReq.setLoginUserName(request.getLoginUserName());
@@ -248,38 +248,38 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    private FreeIPATestDto withEnvironment(EnvironmentTestDto environment) {
+    private FreeIpaTestDto withEnvironment(EnvironmentTestDto environment) {
         getRequest().setEnvironmentCrn(environment.getResponse().getCrn());
         return this;
     }
 
-    public FreeIPATestDto withCatalog(String catalog) {
+    public FreeIpaTestDto withCatalog(String catalog) {
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
         imageSettingsRequest.setCatalog(catalog);
         getRequest().setImage(imageSettingsRequest);
         return this;
     }
 
-    public FreeIPATestDto await(Status status) {
+    public FreeIpaTestDto await(Status status) {
         return await(status, emptyRunningParameter());
     }
 
-    public FreeIPATestDto await(Status status, RunningParameter runningParameter) {
+    public FreeIpaTestDto await(Status status, RunningParameter runningParameter) {
         return getTestContext().await(this, status, runningParameter);
     }
 
-    public FreeIPATestDto withGatewayPort(Integer port) {
+    public FreeIpaTestDto withGatewayPort(Integer port) {
         getRequest().setGatewayPort(port);
         return this;
     }
 
     @Override
     public CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
-        return when(freeIPATestClient.describe(), key("refresh-freeipa-" + getName()));
+        return when(freeIpaTestClient.describe(), key("refresh-freeipa-" + getName()));
     }
 
     @Override
-    public Collection<ListFreeIpaResponse> getAll(FreeIPAClient client) {
+    public Collection<ListFreeIpaResponse> getAll(FreeIpaClient client) {
         return client.getFreeIpaClient().getFreeIpaV1Endpoint().list();
     }
 
@@ -289,13 +289,13 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
     }
 
     @Override
-    public void delete(TestContext testContext, ListFreeIpaResponse entity, FreeIPAClient client) {
+    public void delete(TestContext testContext, ListFreeIpaResponse entity, FreeIpaClient client) {
         client.getFreeIpaClient().getFreeIpaV1Endpoint().delete(entity.getEnvironmentCrn());
     }
 
     @Override
-    public Class<FreeIPAClient> client() {
-        return FreeIPAClient.class;
+    public Class<FreeIpaClient> client() {
+        return FreeIpaClient.class;
     }
 
     @Override
@@ -306,6 +306,6 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(freeIPATestClient.delete(), key("delete-freeipa-" + getName()).withSkipOnFail(false));
+        when(freeIpaTestClient.delete(), key("delete-freeipa-" + getName()).withSkipOnFail(false));
     }
 }

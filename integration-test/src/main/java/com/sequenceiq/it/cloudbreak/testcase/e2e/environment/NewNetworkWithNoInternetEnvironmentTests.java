@@ -10,7 +10,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 import com.sequenceiq.it.cloudbreak.assertion.environment.EnvironmentNetworkTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -19,7 +19,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
@@ -41,7 +41,7 @@ public class NewNetworkWithNoInternetEnvironmentTests extends AbstractE2ETest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private FreeIPATestClient freeIPATestClient;
+    private FreeIpaTestClient freeIpaTestClient;
 
     @Inject
     private WaitUtil waitUtil;
@@ -89,8 +89,8 @@ public class NewNetworkWithNoInternetEnvironmentTests extends AbstractE2ETest {
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))
                 .then(EnvironmentNetworkTestAssertion.environmentContainsNeccessaryConfigs())
 
-                .init(FreeIPATestDto.class)
-                .when(freeIPATestClient.describe())
+                .init(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
                 .then((tc, testDto, client) -> sshJClientActions.checkNoOutboundInternetTraffic(testDto, client))
 
                 .given(sdx, SdxTestDto.class)

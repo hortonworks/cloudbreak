@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("FreeIPAKerberosV1Descriptor")
-public class FreeIPAKerberosDescriptor extends KerberosDescriptorBase {
+public class FreeIpaKerberosDescriptor extends KerberosDescriptorBase {
     @ApiModelProperty(value = KerberosConfigModelDescription.KERBEROS_URL, required = true)
     @NotNull
     @NotEmpty

@@ -21,7 +21,7 @@ import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
@@ -33,7 +33,7 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
@@ -73,7 +73,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     private DatabaseTestClient databaseTestClient;
 
     @Inject
-    private FreeIPATestClient freeIPATestClient;
+    private FreeIpaTestClient freeIpaTestClient;
 
     @Inject
     private FreeIpaRouteHandler freeIpaRouteHandler;
@@ -95,7 +95,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironmentWithNetwork(testContext);
-        createDefaultFreeIPA(testContext);
+        createDefaultFreeIpa(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }
@@ -104,14 +104,14 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         return environmentTestClient;
     }
 
-    protected void createDefaultFreeIPA(TestContext testContext) {
+    protected void createDefaultFreeIpa(TestContext testContext) {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
         setUpFreeIpaRouteStubbing(mockedTestContext);
         testContext
-                .given(FreeIPATestDto.class).withCatalog(mockedTestContext
+                .given(FreeIpaTestDto.class).withCatalog(mockedTestContext
                     .getImageCatalogMockServerSetup()
                     .getFreeIpaImageCatalogUrl())
-                .when(freeIPATestClient.create())
+                .when(freeIpaTestClient.create())
                 .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .validate();
     }
@@ -212,7 +212,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         return validRds;
     }
 
-    protected void createEnvironmentWithNetworkAndFreeIPA(TestContext testContext) {
+    protected void createEnvironmentWithNetworkAndFreeIpa(TestContext testContext) {
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()

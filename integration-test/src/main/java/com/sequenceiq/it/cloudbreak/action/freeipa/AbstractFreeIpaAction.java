@@ -5,22 +5,22 @@ import javax.ws.rs.InternalServerErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.FreeIPAClient;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 
-public abstract class AbstractFreeIPAAction<U extends AbstractFreeIPATestDto> implements Action<U, FreeIPAClient> {
+public abstract class AbstractFreeIpaAction<U extends AbstractFreeIpaTestDto> implements Action<U, FreeIpaClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFreeIPAAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFreeIpaAction.class);
 
     @Override
-    public U action(TestContext testContext, U testDto, FreeIPAClient client) throws Exception {
+    public U action(TestContext testContext, U testDto, FreeIpaClient client) throws Exception {
         int retries = 0;
         while (retries <= testDto.getWaitUtil().getMaxRetry()) {
             try {
-                return freeIPAAction(testContext, testDto, client);
+                return freeIpaAction(testContext, testDto, client);
             } catch (InternalServerErrorException e) {
                 String message = e.getResponse().readEntity(String.class);
                 LOGGER.info("Exception during executing FreeIPA action: ", e);
@@ -35,7 +35,7 @@ public abstract class AbstractFreeIPAAction<U extends AbstractFreeIPATestDto> im
         throw new Exception("Exception during executing FreeIPA action: exceeding maxretry during waiting for flow");
     }
 
-    protected abstract U freeIPAAction(TestContext testContext, U testDto, FreeIPAClient client) throws Exception;
+    protected abstract U freeIpaAction(TestContext testContext, U testDto, FreeIpaClient client) throws Exception;
 
     private void waitTillFlowInOperation(WaitUtil waitUtil) {
         try {

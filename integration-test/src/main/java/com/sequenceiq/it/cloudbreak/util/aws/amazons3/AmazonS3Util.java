@@ -22,7 +22,7 @@ public class AmazonS3Util {
         s3ClientActions.listBucketSelectedObject(baseLocation, "ranger", true);
     }
 
-    public void listFreeIPAObject(String baseLocation) {
+    public void listFreeIpaObject(String baseLocation) {
         s3ClientActions.listBucketSelectedObject(baseLocation, "freeipa", false);
     }
 

@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.FreeIPATest;
+import com.sequenceiq.it.cloudbreak.FreeIpaTest;
 
 @Component
-public class FreeIPAServer {
+public class FreeIpaServer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIPAServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaServer.class);
 
     private static final String WARNING_TEXT_FORMAT = "Following variable must be set whether as environment variables or (test) application.yaml: %s";
 
@@ -52,9 +52,9 @@ public class FreeIPAServer {
         checkNonEmpty("integrationtest.user.accesskey", accessKey);
         checkNonEmpty("integrationtest.user.privatekey", secretKey);
 
-        testParameter.put(FreeIPATest.FREEIPA_SERVER_ROOT, server + freeIpaRootContextPath);
-        testParameter.put(FreeIPATest.ACCESS_KEY, accessKey);
-        testParameter.put(FreeIPATest.SECRET_KEY, secretKey);
+        testParameter.put(FreeIpaTest.FREEIPA_SERVER_ROOT, server + freeIpaRootContextPath);
+        testParameter.put(FreeIpaTest.ACCESS_KEY, accessKey);
+        testParameter.put(FreeIpaTest.SECRET_KEY, secretKey);
     }
 
     private void configureFromCliProfile() throws IOException {

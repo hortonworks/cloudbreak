@@ -163,7 +163,7 @@ class UserSyncServiceTest {
         ImmutableSet<FmsUser> workloadUsers = mock(ImmutableSet.class);
         when(umsUsersState.getRequestedWorkloadUsers()).thenReturn(workloadUsers);
         underTest.getIpaUserState(freeIpaClient, umsUsersState, false);
-        verify(freeIpaUsersStateProvider).getFilteredFreeIPAState(any(), eq(workloadUsers));
+        verify(freeIpaUsersStateProvider).getFilteredFreeIpaState(any(), eq(workloadUsers));
     }
 
     @Test

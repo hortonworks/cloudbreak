@@ -338,7 +338,7 @@ class ClusterCreationEnvironmentValidatorTest {
     }
 
     @Test
-    void testAutoTlsWithFreeIPA() {
+    void testAutoTlsWithFreeIpa() {
         // GIVEN
         Stack stack = getStack();
         ClusterV4Request clusterRequest = new ClusterV4Request();

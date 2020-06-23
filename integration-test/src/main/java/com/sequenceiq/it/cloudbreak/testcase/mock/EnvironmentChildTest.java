@@ -40,7 +40,7 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironmentWithNetwork(testContext);
-        createDefaultFreeIPA(testContext);
+        createDefaultFreeIpa(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

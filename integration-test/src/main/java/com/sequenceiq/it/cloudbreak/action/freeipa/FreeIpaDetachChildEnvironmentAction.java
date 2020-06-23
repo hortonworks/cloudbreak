@@ -7,18 +7,18 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
-import com.sequenceiq.it.cloudbreak.FreeIPAClient;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPAChildEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class FreeIPADetachChildEnvironmentAction implements Action<FreeIPAChildEnvironmentTestDto, FreeIPAClient> {
+public class FreeIpaDetachChildEnvironmentAction implements Action<FreeIpaChildEnvironmentTestDto, FreeIpaClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIPADetachChildEnvironmentAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaDetachChildEnvironmentAction.class);
 
     @Override
-    public FreeIPAChildEnvironmentTestDto action(TestContext testContext, FreeIPAChildEnvironmentTestDto testDto, FreeIPAClient client) throws Exception {
+    public FreeIpaChildEnvironmentTestDto action(TestContext testContext, FreeIpaChildEnvironmentTestDto testDto, FreeIpaClient client) throws Exception {
         DetachChildEnvironmentRequest request = convertRequest(testDto.getRequest());
         Log.whenJson(LOGGER, format(" FreeIPA detach child environment:%n"), request);
         client.getFreeIpaClient()

@@ -2,18 +2,18 @@ package com.sequenceiq.it.cloudbreak.util.wait.service.freeipa;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.it.cloudbreak.FreeIPAClient;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 
 public class FreeIpaWaitObject {
 
-    private final FreeIPAClient client;
+    private final FreeIpaClient client;
 
     private final String environmentCrn;
 
     private final Status desiredStatus;
 
-    public FreeIpaWaitObject(FreeIPAClient freeIPAClient, String environmentCrn, Status desiredStatus) {
-        this.client = freeIPAClient;
+    public FreeIpaWaitObject(FreeIpaClient freeIpaClient, String environmentCrn, Status desiredStatus) {
+        this.client = freeIpaClient;
         this.environmentCrn = environmentCrn;
         this.desiredStatus = desiredStatus;
     }

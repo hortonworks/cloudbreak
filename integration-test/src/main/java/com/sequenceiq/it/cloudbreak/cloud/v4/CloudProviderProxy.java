@@ -34,7 +34,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTes
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -265,7 +265,7 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public Integer gatewayPort(FreeIPATestDto stackEntity) {
+    public Integer gatewayPort(FreeIpaTestDto stackEntity) {
         return getDelegate(stackEntity).gatewayPort(stackEntity);
     }
 
