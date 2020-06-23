@@ -4,25 +4,25 @@ import javax.inject.Inject;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Prototype
-public class FreeIPAChildEnvironmentTestDto extends AbstractFreeIPATestDto<AttachChildEnvironmentRequest, Void, FreeIPAChildEnvironmentTestDto> {
+public class FreeIpaChildEnvironmentTestDto extends AbstractFreeIpaTestDto<AttachChildEnvironmentRequest, Void, FreeIpaChildEnvironmentTestDto> {
 
     public static final String CHILD_ENVIRONMENT_KEY = "childEnv";
 
     @Inject
-    private FreeIPATestClient freeIPATestClient;
+    private FreeIpaTestClient freeIpaTestClient;
 
-    public FreeIPAChildEnvironmentTestDto(TestContext testContext) {
+    public FreeIpaChildEnvironmentTestDto(TestContext testContext) {
         super(new AttachChildEnvironmentRequest(), testContext);
     }
 
     @Override
-    public FreeIPAChildEnvironmentTestDto valid() {
+    public FreeIpaChildEnvironmentTestDto valid() {
         getRequest().setParentEnvironmentCrn(getParentEnvironmentCrn());
         getRequest().setChildEnvironmentCrn(getChildEnvironmentCrn());
         return this;

@@ -10,11 +10,11 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Prototype
-public class LdapTestDto extends AbstractFreeIPATestDto<CreateLdapConfigRequest, DescribeLdapConfigResponse, LdapTestDto> {
+public class LdapTestDto extends AbstractFreeIpaTestDto<CreateLdapConfigRequest, DescribeLdapConfigResponse, LdapTestDto> {
 
     @Inject
     private LdapTestClient ldapTestClient;

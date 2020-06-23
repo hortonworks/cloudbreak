@@ -5,9 +5,9 @@ import javax.ws.rs.NotFoundException;
 import org.assertj.core.api.Assertions;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.it.cloudbreak.FreeIPAClient;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPAChildEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
 
 public class FreeIpaChildEnvironmentAssertion {
 
@@ -18,7 +18,7 @@ public class FreeIpaChildEnvironmentAssertion {
     /**
      * Validate that when fetching FreeIpa for the child environment it returns the parent environment's FreeIpa
      */
-    public static Assertion<FreeIPAChildEnvironmentTestDto, FreeIPAClient> validateChildFreeipa() {
+    public static Assertion<FreeIpaChildEnvironmentTestDto, FreeIpaClient> validateChildFreeipa() {
         return (testContext, entity, client) -> {
             DescribeFreeIpaResponse freeIpaResponse = describeChildFreeipa(entity, client);
             Assertions.assertThat(freeIpaResponse.getEnvironmentCrn())
@@ -30,7 +30,7 @@ public class FreeIpaChildEnvironmentAssertion {
     /**
      * Validate that when fetching FreeIpa for the child environment it is not found
      */
-    public static Assertion<FreeIPAChildEnvironmentTestDto, FreeIPAClient> validateNoFreeipa() {
+    public static Assertion<FreeIpaChildEnvironmentTestDto, FreeIpaClient> validateNoFreeipa() {
         return (testContext, entity, client) -> {
             Assertions.assertThatThrownBy(() -> describeChildFreeipa(entity, client))
                     .isInstanceOf(NotFoundException.class);
@@ -38,7 +38,7 @@ public class FreeIpaChildEnvironmentAssertion {
         };
     }
 
-    private static DescribeFreeIpaResponse describeChildFreeipa(FreeIPAChildEnvironmentTestDto entity, FreeIPAClient client) {
+    private static DescribeFreeIpaResponse describeChildFreeipa(FreeIpaChildEnvironmentTestDto entity, FreeIpaClient client) {
         return client.getFreeIpaClient().getFreeIpaV1Endpoint()
                 .describe(entity.getRequest().getChildEnvironmentCrn());
     }

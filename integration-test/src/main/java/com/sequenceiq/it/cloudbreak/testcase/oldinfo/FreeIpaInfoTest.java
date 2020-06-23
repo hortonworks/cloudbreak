@@ -10,16 +10,16 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.FreeIPATest;
+import com.sequenceiq.it.cloudbreak.FreeIpaTest;
 import com.sequenceiq.it.cloudbreak.mock.CBVersion;
 
-public class FreeIPAInfoTest extends CloudbreakTest {
+public class FreeIpaInfoTest extends CloudbreakTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIPAInfoTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaInfoTest.class);
 
     @Test
     private void testInfo() {
-        String infoUrl = getItContext().getContextParam(FreeIPATest.FREEIPA_SERVER_ROOT);
+        String infoUrl = getItContext().getContextParam(FreeIpaTest.FREEIPA_SERVER_ROOT);
         Client client = ClientBuilder.newBuilder().build();
         WebTarget target = client.target(infoUrl).path("info");
         CBVersion cbVersion = target.request().get().readEntity(CBVersion.class);

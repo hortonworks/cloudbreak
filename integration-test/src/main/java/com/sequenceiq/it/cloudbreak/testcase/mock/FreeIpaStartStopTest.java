@@ -9,11 +9,11 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.ServerConnCheckFreeipaRpcResponse;
@@ -25,7 +25,7 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
     private static final Duration POLLING_INTERVAL = Duration.of(3000, ChronoUnit.MILLIS);
 
     @Inject
-    private FreeIPATestClient freeIPATestClient;
+    private FreeIpaTestClient freeIpaTestClient;
 
     @Inject
     private FreeIpaRouteHandler freeIpaRouteHandler;
@@ -53,16 +53,16 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
         dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
         getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
         testContext
-                .given(FreeIPATestDto.class).withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
-                .when(freeIPATestClient.create())
+                .given(FreeIpaTestDto.class).withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE);
         getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse(false, Collections.emptyList()));
-        testContext.given(FreeIPATestDto.class)
-                .when(freeIPATestClient.stop())
+        testContext.given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.stop())
                 .await(Status.STOPPED);
         getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
-        testContext.given(FreeIPATestDto.class)
-                .when(freeIPATestClient.start())
+        testContext.given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.start())
                 .await(Status.AVAILABLE)
                 .validate();
     }

@@ -8,34 +8,34 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 
-public class FreeIPAClient extends MicroserviceClient {
+public class FreeIpaClient extends MicroserviceClient {
     public static final String FREEIPA_CLIENT = "FREEIPA_CLIENT";
 
     private static String crn;
 
     private com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient;
 
-    FreeIPAClient(String newId) {
+    FreeIpaClient(String newId) {
         super(newId);
     }
 
-    FreeIPAClient() {
+    FreeIpaClient() {
         this(FREEIPA_CLIENT);
     }
 
-    public static Function<IntegrationTestContext, FreeIPAClient> getTestContextFreeIPAClient(String key) {
-        return testContext -> testContext.getContextParam(key, FreeIPAClient.class);
+    public static Function<IntegrationTestContext, FreeIpaClient> getTestContextFreeIpaClient(String key) {
+        return testContext -> testContext.getContextParam(key, FreeIpaClient.class);
     }
 
-    public static Function<IntegrationTestContext, FreeIPAClient> getTestContextFreeIPAClient() {
-        return getTestContextFreeIPAClient(FREEIPA_CLIENT);
+    public static Function<IntegrationTestContext, FreeIpaClient> getTestContextFreeIpaClient() {
+        return getTestContextFreeIpaClient(FREEIPA_CLIENT);
     }
 
-    public static synchronized FreeIPAClient createProxyFreeIPAClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
-        FreeIPAClient clientEntity = new FreeIPAClient();
+    public static synchronized FreeIpaClient createProxyFreeIpaClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
+        FreeIpaClient clientEntity = new FreeIpaClient();
         clientEntity.setActing(cloudbreakUser);
         clientEntity.freeIpaClient = new FreeIpaApiKeyClient(
-                testParameter.get(FreeIPATest.FREEIPA_SERVER_ROOT),
+                testParameter.get(FreeIpaTest.FREEIPA_SERVER_ROOT),
                 new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
         return clientEntity;

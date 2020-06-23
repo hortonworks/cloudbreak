@@ -11,12 +11,12 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceLifeCycle;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.it.cloudbreak.FreeIPAClient;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
-import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
 public class AwsFreeIpaSpotInstanceTest extends AbstractE2ETest {
@@ -24,7 +24,7 @@ public class AwsFreeIpaSpotInstanceTest extends AbstractE2ETest {
     private static final SpotTestResultProvider RESULT_PROVIDER = new SpotTestResultProvider("FreeIpa");
 
     @Inject
-    private FreeIPATestClient freeIPATestClient;
+    private FreeIpaTestClient freeIpaTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -40,16 +40,16 @@ public class AwsFreeIpaSpotInstanceTest extends AbstractE2ETest {
     )
     public void testFreeIpaOnSpotInstances(TestContext testContext) {
         testContext
-                .given(FreeIPATestDto.class)
+                .given(FreeIpaTestDto.class)
                     .withSpotPercentage(100)
-                .when(freeIPATestClient.create())
+                .when(freeIpaTestClient.create())
                 .await(Status.UPDATE_IN_PROGRESS)
-                .when(freeIPATestClient.describe())
+                .when(freeIpaTestClient.describe())
                 .then(assertSpotInstances())
                 .validate();
     }
 
-    private Assertion<FreeIPATestDto, FreeIPAClient> assertSpotInstances() {
+    private Assertion<FreeIpaTestDto, FreeIpaClient> assertSpotInstances() {
         return (tc, testDto, client) -> {
             DescribeFreeIpaResponse freeIpa = testDto.getResponse();
             if (createFailedWithInsufficientInstanceCapacity(freeIpa)) {

@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
-import com.sequenceiq.it.cloudbreak.FreeIPAClient;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 
 public class FreeIpaKerberosTestAssertion {
 
@@ -14,10 +14,10 @@ public class FreeIpaKerberosTestAssertion {
 
     }
 
-    public static Assertion<FreeIPATestDto, FreeIPAClient> validate() {
-        return (testContext, entity, freeIPAClient) -> {
+    public static Assertion<FreeIpaTestDto, FreeIpaClient> validate() {
+        return (testContext, entity, freeIpaClient) -> {
             DescribeKerberosConfigResponse kerberosConfigResponse =
-                    freeIPAClient.getFreeIpaClient().getKerberosConfigV1Endpoint().describe(entity.getResponse().getEnvironmentCrn());
+                    freeIpaClient.getFreeIpaClient().getKerberosConfigV1Endpoint().describe(entity.getResponse().getEnvironmentCrn());
             assertNotNull(kerberosConfigResponse);
             assertEquals(entity.getRequest().getFreeIpa().getDomain().toUpperCase(), kerberosConfigResponse.getDomain().toUpperCase());
             assertEquals(entity.getRequest().getFreeIpa().getDomain().toUpperCase(), kerberosConfigResponse.getRealm().toUpperCase());

@@ -10,14 +10,14 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
@@ -32,7 +32,7 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
     private CredentialTestClient credentialTestClient;
 
     @Inject
-    private FreeIPATestClient freeIPATestClient;
+    private FreeIpaTestClient freeIpaTestClient;
 
     @Inject
     private FreeIpaRouteHandler freeIpaRouteHandler;
@@ -82,26 +82,26 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
         useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
         testContext
                 //testing authorized freeipa calls for the environment
-                .given(FreeIPATestDto.class)
+                .given(FreeIpaTestDto.class)
                 .withCatalog(mockedTestContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
-                .when(freeIPATestClient.create())
+                .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
-                .when(freeIPATestClient.describe())
-                .when(freeIPATestClient.stop())
+                .when(freeIpaTestClient.describe())
+                .when(freeIpaTestClient.stop())
                 .await(Status.STOPPED)
-                .when(freeIPATestClient.start())
+                .when(freeIpaTestClient.start())
                 .await(Status.AVAILABLE)
 
                 //testing unathorized freeipa calls for the environment
-                .when(freeIPATestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
+                .when(freeIpaTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("You have no right to perform environments/describeEnvironment on resource crn:cdp.*")
                                 .withKey("FreeIPADescribeAction"))
-                .when(freeIPATestClient.stop(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
+                .when(freeIpaTestClient.stop(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("You have no right to perform environments/stopEnvironment on resource crn:cdp.*")
                                 .withKey("FreeIPAStopAction"))
-                .when(freeIPATestClient.start(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
+                .when(freeIpaTestClient.start(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("You have no right to perform environments/startEnvironment on resource crn:cdp.*")
                                 .withKey("FreeIPAStartAction"));

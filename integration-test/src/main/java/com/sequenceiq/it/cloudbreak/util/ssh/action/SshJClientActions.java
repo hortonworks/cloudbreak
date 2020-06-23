@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
-import com.sequenceiq.it.cloudbreak.FreeIPAClient;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -73,7 +73,7 @@ public class SshJClientActions extends SshJClient {
         return instanceIPs;
     }
 
-    private List<String> getFreeIpaInstanceGroupIps(String environmentCrn, FreeIPAClient freeipaClient, boolean publicIp) {
+    private List<String> getFreeIpaInstanceGroupIps(String environmentCrn, FreeIpaClient freeipaClient, boolean publicIp) {
         List<String> instanceIPs = new ArrayList<>();
 
         freeipaClient.getFreeIpaClient().getFreeIpaV1Endpoint()
@@ -133,7 +133,7 @@ public class SshJClientActions extends SshJClient {
         return testDto;
     }
 
-    public FreeIPATestDto checkNoOutboundInternetTraffic(FreeIPATestDto testDto, FreeIPAClient freeIpaClient) {
+    public FreeIpaTestDto checkNoOutboundInternetTraffic(FreeIpaTestDto testDto, FreeIpaClient freeIpaClient) {
         getFreeIpaInstanceGroupIps(testDto.getResponse().getEnvironmentCrn(), freeIpaClient, true)
                 .forEach(instanceIP -> checkNoOutboundInternetTraffic(instanceIP));
         return testDto;

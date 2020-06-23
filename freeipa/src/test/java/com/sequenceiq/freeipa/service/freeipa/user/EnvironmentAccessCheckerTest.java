@@ -84,7 +84,7 @@ class EnvironmentAccessCheckerTest {
                 EnvironmentAccessRights environmentAccessRights = underTest.hasAccess(MEMBER_CRN, Optional.empty());
 
                 assertEquals(hasAccess, environmentAccessRights.hasEnvironmentAccessRight());
-                assertEquals(ipaAdmin, environmentAccessRights.hasAdminFreeIPARight());
+                assertEquals(ipaAdmin, environmentAccessRights.hasAdminFreeIpaRight());
             }
         }
     }
@@ -99,7 +99,7 @@ class EnvironmentAccessCheckerTest {
         EnvironmentAccessRights environmentAccessRights = underTest.hasAccess(MEMBER_CRN, Optional.empty());
 
         assertFalse(environmentAccessRights.hasEnvironmentAccessRight());
-        assertFalse(environmentAccessRights.hasAdminFreeIPARight());
+        assertFalse(environmentAccessRights.hasAdminFreeIpaRight());
     }
 
     private EnvironmentAccessChecker createEnvironmentAccessChecker(String environmentCrn) {

@@ -5,17 +5,17 @@ import static java.lang.String.format;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.FreeIPAClient;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class FreeIPADescribeAction implements Action<FreeIPATestDto, FreeIPAClient> {
+public class FreeIpaDescribeAction implements Action<FreeIpaTestDto, FreeIpaClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIPADescribeAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaDescribeAction.class);
 
-    public FreeIPATestDto action(TestContext testContext, FreeIPATestDto testDto, FreeIPAClient client) throws Exception {
+    public FreeIpaTestDto action(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         Log.when(LOGGER, format(" FreeIPA crn: %s", testDto.getRequest().getEnvironmentCrn()));
         Log.whenJson(LOGGER, format(" FreeIPA get request:%n"), testDto.getRequest());
         testDto.setResponse(

@@ -5,18 +5,18 @@ import static java.lang.String.format;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.FreeIPAClient;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPAChildEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class FreeIPAAttachChildEnvironmentAction implements Action<FreeIPAChildEnvironmentTestDto, FreeIPAClient> {
+public class FreeIpaAttachChildEnvironmentAction implements Action<FreeIpaChildEnvironmentTestDto, FreeIpaClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIPAAttachChildEnvironmentAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaAttachChildEnvironmentAction.class);
 
     @Override
-    public FreeIPAChildEnvironmentTestDto action(TestContext testContext, FreeIPAChildEnvironmentTestDto testDto, FreeIPAClient client) throws Exception {
+    public FreeIpaChildEnvironmentTestDto action(TestContext testContext, FreeIpaChildEnvironmentTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" FreeIPA attach child environment:%n"), testDto.getRequest());
         client.getFreeIpaClient()
                 .getFreeIpaV1Endpoint()
