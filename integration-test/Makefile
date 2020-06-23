@@ -15,9 +15,13 @@ all: download-cbd buildcb runtest
 
 runtest: create-image create-cloudbreak-context docker-compose stop-containers check-results
 
+runtest-ums: create-image create-cloudbreak-context config-ums docker-compose stop-containers check-results
+
 delete-and-run: download-cbd cbd-delete buildcb runtest
 
 without-build: download-cbd runtest
+
+without-build-with-ums: download-cbd runtest-ums
 
 build-with-docker: download-cbd docker-build runtest
 
@@ -46,6 +50,7 @@ fetch-secrets-docker:
 	-e AZURE_CLIENT_ID=${AZURE_CLIENT_ID} \
 	-e AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET} \
 	-e AZURE_TENANT_ID=${AZURE_TENANT_ID} \
+	-e AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID} \
 	mcr.microsoft.com/azure-cli /bin/bash -c 'cd /tmp/ && ./scripts/fetch-secrets.sh'
 
 docker-compose:
@@ -69,6 +74,9 @@ revert-db:
 cbd-delete:
 	./scripts/cbd-delete.sh
 
+config-ums:
+	./scripts/config-ums.sh
+
 schema-migration:
 	./scripts/schema-migration.sh
 
@@ -79,7 +87,3 @@ upload-s3:
 	aws s3 cp ./apidefinitions/redbeams.json s3://redbeams-swagger/swagger-$(VERSION).json --acl public-read
 	aws s3 cp ./apidefinitions/datalake.json s3://datalake-swagger/swagger-$(VERSION).json --acl public-read
 	aws s3 cp ./apidefinitions/autoscale.json s3://autoscale-swagger/swagger-$(VERSION).json --acl public-read
-
-
-
-

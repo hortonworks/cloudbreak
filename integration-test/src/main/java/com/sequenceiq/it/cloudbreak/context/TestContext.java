@@ -770,15 +770,15 @@ public abstract class TestContext implements ApplicationContextAware {
         checkShutdown();
         Map<String, Exception> exceptionsDuringTest = getErrors();
         if (!exceptionsDuringTest.isEmpty()) {
-            StringBuilder builder = new StringBuilder("All Exceptions that occurred during the test are logged before this message")
+            StringBuilder builder = new StringBuilder("All Exceptions that occurred during the test are logged after this message")
                     .append(System.lineSeparator());
             exceptionsDuringTest.forEach((msg, ex) -> {
-                LOGGER.error(msg, ex);
+                LOGGER.error("Exception during test: " + msg, ex);
                 builder.append(msg).append(": ").append(ResponseUtil.getErrorMessage(ex)).append(System.lineSeparator());
             });
             collectStructuredEvents(builder);
             exceptionsDuringTest.clear();
-            testErrorLog.report(LOGGER, builder.toString());
+            testErrorLog.report(LOGGER, builder.toString().replace("%", "%%"));
         }
     }
 

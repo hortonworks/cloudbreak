@@ -2,4 +2,4 @@ name: "authorization-mock-tests"
 tests:
   - name: "authorization-mock-tests"
     packages:
-      - com.sequenceiq.it.cloudbreak.testcase.*
+      - com.sequenceiq.it.cloudbreak.testcase.authorization.*
