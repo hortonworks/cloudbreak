@@ -95,6 +95,7 @@ public class NetworkDtoToResponseConverterTest {
 
         assertCommonFields(network, actual);
         assertEquals(network.getYarn().getQueue(), actual.getYarn().getQueue());
+        assertEquals(network.getYarn().getLifetime(), actual.getYarn().getLifetime());
         assertNull(actual.getAws());
         assertNull(actual.getMock());
         assertNull(actual.getAzure());
@@ -139,6 +140,7 @@ public class NetworkDtoToResponseConverterTest {
     private YarnParams createYarnParams() {
         return YarnParams.YarnParamsBuilder.anYarnParams()
                 .withQueue("yarn-queue")
+                .withLifetime(1000)
                 .build();
     }
 

@@ -50,6 +50,7 @@ public class NetworkRequestToDtoConverter {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Yarn");
             YarnParams yarnParams = new YarnParams();
             yarnParams.setQueue(network.getYarn().getQueue());
+            yarnParams.setLifetime(network.getYarn().getLifetime());
             builder.withYarn(yarnParams);
         }
         if (network.getMock() != null) {

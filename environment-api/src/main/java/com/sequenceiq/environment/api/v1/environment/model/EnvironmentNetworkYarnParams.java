@@ -9,8 +9,11 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "EnvironmentNetworkYarnV1Params")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentNetworkYarnParams {
-    @ApiModelProperty(value = EnvironmentModelDescription.AWS_VPC_ID, required = true)
+    @ApiModelProperty(value = EnvironmentModelDescription.YARN_QUEUE, required = true)
     private String queue;
+
+    @ApiModelProperty(value = EnvironmentModelDescription.YARN_LIFETIME)
+    private Integer lifetime;
 
     public String getQueue() {
         return queue;
@@ -20,8 +23,19 @@ public class EnvironmentNetworkYarnParams {
         this.queue = queue;
     }
 
+    public Integer getLifetime() {
+        return lifetime;
+    }
+
+    public void setLifetime(Integer lifetime) {
+        this.lifetime = lifetime;
+    }
+
     public static final class EnvironmentNetworkYarnParamsBuilder {
+
         private String queue;
+
+        private Integer lifetime;
 
         private EnvironmentNetworkYarnParamsBuilder() {
         }
@@ -35,9 +49,15 @@ public class EnvironmentNetworkYarnParams {
             return this;
         }
 
+        public EnvironmentNetworkYarnParamsBuilder withLifetime(Integer lifetime) {
+            this.lifetime = lifetime;
+            return this;
+        }
+
         public EnvironmentNetworkYarnParams build() {
             EnvironmentNetworkYarnParams environmentNetworkYarnParams = new EnvironmentNetworkYarnParams();
             environmentNetworkYarnParams.setQueue(queue);
+            environmentNetworkYarnParams.setLifetime(lifetime);
             return environmentNetworkYarnParams;
         }
     }

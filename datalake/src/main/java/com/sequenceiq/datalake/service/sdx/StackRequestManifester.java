@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -143,8 +144,10 @@ public class StackRequestManifester {
                     || environment.getNetwork().getYarn().getQueue() == null) {
                 throw new BadRequestException("There is no queue defined in your environment, please create a new yarn environment with queue");
             } else {
+                EnvironmentNetworkYarnParams yarnParams = environment.getNetwork().getYarn();
                 YarnStackV4Parameters yarnStackV4Parameters = new YarnStackV4Parameters();
-                yarnStackV4Parameters.setYarnQueue(environment.getNetwork().getYarn().getQueue());
+                yarnStackV4Parameters.setYarnQueue(yarnParams.getQueue());
+                yarnStackV4Parameters.setLifetime(yarnParams.getLifetime());
                 stackRequest.setYarn(yarnStackV4Parameters);
             }
         }

@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static java.util.Objects.requireNonNull;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,6 +29,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
@@ -102,20 +103,25 @@ public class UserSyncService {
     @Inject
     private WorkloadCredentialService workloadCredentialService;
 
+    @Inject
+    private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
+
     public Operation synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+        List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
+        return performSyncForStacks(accountId, actorCrn, userCrnFilter, machineUserCrnFilter, stacks);
+    }
 
-        validateParameters(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
-        LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
-                accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
+    public Operation synchronizeUsersWithCustomPermissionCheck(String accountId, String actorCrn, Set<String> environmentCrnFilter,
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter, AuthorizationResourceAction action) {
+        List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
+        List<String> relatedEnvironmentCrns = stacks.stream().map(stack -> stack.getEnvironmentCrn()).collect(Collectors.toList());
+        commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, actorCrn, relatedEnvironmentCrns);
+        return performSyncForStacks(accountId, actorCrn, userCrnFilter, machineUserCrnFilter, stacks);
+    }
 
-        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(environmentCrnFilter, accountId);
-        LOGGER.debug("Found {} stacks", stacks.size());
-        if (stacks.isEmpty()) {
-            throw new NotFoundException(String.format("No matching FreeIPA stacks found for account %s with environment crn filter %s",
-                    accountId, environmentCrnFilter));
-        }
-
+    private Operation performSyncForStacks(String accountId, String actorCrn, Set<String> userCrnFilter,
+            Set<String> machineUserCrnFilter, List<Stack> stacks) {
         Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
         Operation operation = operationService
                 .startOperation(accountId, OperationType.USER_SYNC, environmentCrns, union(userCrnFilter, machineUserCrnFilter));
@@ -129,7 +135,6 @@ public class UserSyncService {
                     ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> {
                         boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
                         if (fullSync) {
-                            long currentTime = Instant.now().toEpochMilli();
                             stacks.forEach(stack -> {
                                 UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
                                 userSyncStatus.setLastStartedFullSync(operation);
@@ -141,6 +146,21 @@ public class UserSyncService {
         }
 
         return operation;
+    }
+
+    private List<Stack> getStacksForSync(String accountId, String actorCrn, Set<String> environmentCrnFilter,
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+        validateParameters(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
+        LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
+                accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
+
+        List<Stack> stacks = stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(environmentCrnFilter, accountId);
+        if (stacks.isEmpty()) {
+            throw new NotFoundException(String.format("No matching FreeIPA stacks found for account %s with environment crn filter %s",
+                    accountId, environmentCrnFilter));
+        }
+        LOGGER.debug("Found {} stacks", stacks.size());
+        return stacks;
     }
 
     @VisibleForTesting
