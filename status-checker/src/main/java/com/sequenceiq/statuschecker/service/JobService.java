@@ -55,41 +55,49 @@ public class JobService {
     private ApplicationContext applicationContext;
 
     public <T> void schedule(JobResourceAdapter<T> resource) {
-        JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
-        Trigger trigger = buildJobTrigger(jobDetail);
-        try {
-            if (scheduler.getJobDetail(JobKey.jobKey(resource.getLocalId(), JOB_GROUP)) != null) {
-                unschedule(resource.getLocalId());
+        if (properties.isAutoSyncEnabled()) {
+            JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
+            Trigger trigger = buildJobTrigger(jobDetail);
+            try {
+                if (scheduler.getJobDetail(JobKey.jobKey(resource.getLocalId(), JOB_GROUP)) != null) {
+                    unschedule(resource.getLocalId());
+                }
+                scheduler.scheduleJob(jobDetail, trigger);
+            } catch (SchedulerException e) {
+                LOGGER.error(String.format("Error during scheduling quartz job: %s", resource.getLocalId()), e);
             }
-            scheduler.scheduleJob(jobDetail, trigger);
-        } catch (SchedulerException e) {
-            LOGGER.error(String.format("Error during scheduling quartz job: %s", resource.getLocalId()), e);
         }
     }
 
     public void schedule(Long id, Class<? extends JobResourceAdapter> resource) {
-        try {
-            Constructor<? extends JobResourceAdapter> c = resource.getConstructor(Long.class, ApplicationContext.class);
-            JobResourceAdapter resourceAdapter = c.newInstance(id, applicationContext);
-            schedule(resourceAdapter);
-        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
+        if (properties.isAutoSyncEnabled()) {
+            try {
+                Constructor<? extends JobResourceAdapter> c = resource.getConstructor(Long.class, ApplicationContext.class);
+                JobResourceAdapter resourceAdapter = c.newInstance(id, applicationContext);
+                schedule(resourceAdapter);
+            } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+                LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
+            }
         }
     }
 
     public void unschedule(String id) {
-        try {
-            scheduler.deleteJob(JobKey.jobKey(id, JOB_GROUP));
-        } catch (SchedulerException e) {
-            LOGGER.error(String.format("Error during unscheduling quartz job: %s", id), e);
+        if (properties.isAutoSyncEnabled()) {
+            try {
+                scheduler.deleteJob(JobKey.jobKey(id, JOB_GROUP));
+            } catch (SchedulerException e) {
+                LOGGER.error(String.format("Error during unscheduling quartz job: %s", id), e);
+            }
         }
     }
 
     public void deleteAll() {
-        try {
-            scheduler.clear();
-        } catch (SchedulerException e) {
-            LOGGER.error("Error during clearing quartz jobs", e);
+        if (properties.isAutoSyncEnabled()) {
+            try {
+                scheduler.clear();
+            } catch (SchedulerException e) {
+                LOGGER.error("Error during clearing quartz jobs", e);
+            }
         }
     }
 

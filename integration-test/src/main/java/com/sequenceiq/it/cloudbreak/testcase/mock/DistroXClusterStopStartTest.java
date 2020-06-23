@@ -52,7 +52,6 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
     @Inject
     private AuditGrpcServiceAssertion auditGrpcServiceAssertion;
 
-    //CB-7294
     @Ignore
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
