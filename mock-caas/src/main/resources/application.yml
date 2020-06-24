@@ -20,5 +20,6 @@ auth:
     runtime.upgrade.enable: true
     sshpublickey.file: key.pub
     raz.enable: true
-    freeipadlebsencryption.enable: false
+    freeipadlebsencryption.enable: true
     azure.single.resourcegroup.enable: false
+    fastebsencryption.enable: true

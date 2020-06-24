@@ -32,6 +32,7 @@ import freemarker.template.TemplateException;
 
 @Service("CloudFormationTemplateBuilder")
 public class CloudFormationTemplateBuilder {
+
     @Inject
     private Configuration freemarkerConfiguration;
 
@@ -58,12 +59,13 @@ public class CloudFormationTemplateBuilder {
                     group.getSecurity().getRules(),
                     group.getSecurity().getCloudSecurityIds(),
                     getSubnetIds(context.existingSubnetIds, subnetCounter, group, multigw),
-                    awsInstanceView.isKmsEnabled(),
+                    awsInstanceView.isKmsCustom(),
                     awsInstanceView.getKmsKey(),
                     encryptedAMI,
                     group.getSecurity().isUseNetworkCidrAsSourceForDefaultRules(),
                     getInstanceProfile(group),
-                    awsInstanceView.getOnDemandPercentage());
+                    awsInstanceView.getOnDemandPercentage(),
+                    awsInstanceView.isFastEbsEncryptionEnabled());
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);
@@ -139,6 +141,7 @@ public class CloudFormationTemplateBuilder {
     }
 
     public static class ModelContext {
+
         private AuthenticatedContext ac;
 
         private CloudStack stack;
@@ -250,9 +253,11 @@ public class CloudFormationTemplateBuilder {
             this.encryptedAMIByGroupName.putAll(encryptedAMIByGroupName);
             return this;
         }
+
     }
 
     public static class RDSModelContext {
+
         private String template;
 
         private boolean hasPort;
@@ -282,4 +287,5 @@ public class CloudFormationTemplateBuilder {
         }
 
     }
+
 }

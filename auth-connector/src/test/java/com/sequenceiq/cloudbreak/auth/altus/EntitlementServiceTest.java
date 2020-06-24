@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AUTOMA
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE_SINGLE_RESOURCE_GROUP;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_BASE_IMAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_CB_FAST_EBS_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_CLOUD_STORAGE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FMS_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_DL_EBS_ENCRYPTION;
@@ -12,6 +13,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIP
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CLOUDERA_INTERNAL_ACCOUNT;
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.LOCAL_DEV;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -95,10 +97,18 @@ class EntitlementServiceTest {
                 {"CDP_FREEIPA_DL_EBS_ENCRYPTION == true", CDP_FREEIPA_DL_EBS_ENCRYPTION,
                         (EntitlementCheckFunction) EntitlementService::freeIpaDlEbsEncryptionEnabled, true},
 
+                {"LOCAL_DEV == false", LOCAL_DEV, (EntitlementCheckFunction) EntitlementService::localDevelopment, false},
+                {"LOCAL_DEV == true", LOCAL_DEV, (EntitlementCheckFunction) EntitlementService::localDevelopment, true},
+
                 {"CDP_AZURE_SINGLE_RESOURCE_GROUP == false", CDP_AZURE_SINGLE_RESOURCE_GROUP,
                         (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, false},
                 {"CDP_AZURE_SINGLE_RESOURCE_GROUP == true", CDP_AZURE_SINGLE_RESOURCE_GROUP,
                         (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, true},
+
+                {"CDP_CB_FAST_EBS_ENCRYPTION == false", CDP_CB_FAST_EBS_ENCRYPTION,
+                        (EntitlementCheckFunction) EntitlementService::fastEbsEncryptionEnabled, false},
+                {"CDP_CB_FAST_EBS_ENCRYPTION == true", CDP_CB_FAST_EBS_ENCRYPTION,
+                        (EntitlementCheckFunction) EntitlementService::fastEbsEncryptionEnabled, true},
         };
     }
 

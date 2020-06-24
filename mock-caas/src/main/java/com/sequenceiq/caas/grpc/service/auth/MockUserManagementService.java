@@ -196,6 +196,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_AZURE_SINGLE_RESOURCE_GROUP = "CDP_AZURE_SINGLE_RESOURCE_GROUP";
 
+    private static final String CDP_CB_FAST_EBS_ENCRYPTION = "CDP_CB_FAST_EBS_ENCRYPTION";
+
     private static final String MOCK_RESOURCE = "mock_resource";
 
     private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
@@ -253,6 +255,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.azure.single.resourcegroup.enable}")
     private boolean enableAzureSingleResourceGroupDeployment;
+
+    @Value("${auth.mock.fastebsencryption.enable}")
+    private boolean enableFastEbsEncryption;
 
     private String cbLicense;
 
@@ -515,6 +520,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableAzureSingleResourceGroupDeployment) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP));
+        }
+        if (enableFastEbsEncryption) {
+            builder.addEntitlements(createEntitlement(CDP_CB_FAST_EBS_ENCRYPTION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

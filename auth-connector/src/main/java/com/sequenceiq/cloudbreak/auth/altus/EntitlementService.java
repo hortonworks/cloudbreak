@@ -53,6 +53,9 @@ public class EntitlementService {
     @VisibleForTesting
     static final String CDP_AZURE_SINGLE_RESOURCE_GROUP = "CDP_AZURE_SINGLE_RESOURCE_GROUP";
 
+    @VisibleForTesting
+    static final String CDP_CB_FAST_EBS_ENCRYPTION = "CDP_CB_FAST_EBS_ENCRYPTION";
+
     @Inject
     private GrpcUmsClient umsClient;
 
@@ -106,6 +109,10 @@ public class EntitlementService {
 
     public boolean azureSingleResourceGroupDeploymentEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP);
+    }
+
+    public boolean fastEbsEncryptionEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_CB_FAST_EBS_ENCRYPTION);
     }
 
     public List<String> getEntitlements(String actorCrn, String accountId) {

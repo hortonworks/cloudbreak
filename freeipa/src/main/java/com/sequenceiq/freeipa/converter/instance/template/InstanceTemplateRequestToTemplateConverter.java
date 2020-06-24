@@ -7,12 +7,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -29,15 +26,12 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceTypeProvider;
 
 @Component
 public class InstanceTemplateRequestToTemplateConverter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTemplateRequestToTemplateConverter.class);
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
@@ -61,6 +55,7 @@ public class InstanceTemplateRequestToTemplateConverter {
         if (cloudPlatform == CloudPlatform.AWS && entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, accountId)) {
             // FIXME Enable EBS encryption with appropriate KMS key
             attributes.put(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE);
+            attributes.put(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, entitlementService.fastEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, accountId));
             attributes.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
         }
         Optional.ofNullable(source.getAws())
@@ -69,17 +64,6 @@ public class InstanceTemplateRequestToTemplateConverter {
                 .ifPresent(spotPercentage -> attributes.put(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, spotPercentage));
         template.setAttributes(new Json(attributes));
         return template;
-    }
-
-    private Function<Map<String, Object>, Json> toJson() {
-        return value -> {
-            try {
-                return new Json(value);
-            } catch (IllegalArgumentException e) {
-                LOGGER.info("Failed to parse template parameters as JSON.", e);
-                throw new BadRequestException("Invalid template parameter format, valid JSON expected.");
-            }
-        };
     }
 
     private void setVolumesProperty(Set<VolumeRequest> attachedVolumes, Template template, CloudPlatform cloudPlatform) {
@@ -98,4 +82,5 @@ public class InstanceTemplateRequestToTemplateConverter {
         }
         template.setRootVolumeSize(defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform.name()));
     }
+
 }

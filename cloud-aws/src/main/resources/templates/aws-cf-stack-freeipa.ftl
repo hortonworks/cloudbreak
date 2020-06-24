@@ -144,12 +144,18 @@
             {
               "DeviceName" : { "Ref" : "RootDeviceName" },
               "Ebs" : {
+                <#if group.ebsEncrypted && group.fastEbsEncryptionEnabled>
+                "Encrypted" : "true",
+                  <#if group.kmsKeyDefined>
+                  "KmsKeyId" : "${group.kmsKey}",
+                  </#if>
+                </#if>
                 "VolumeSize" : "${group.rootVolumeSize}",
                 "VolumeType" : "gp2"
               }
             }
           ],
-          <#if group.ebsEncrypted == true>
+          <#if group.ebsEncrypted && !group.fastEbsEncryptionEnabled>
           "ImageId"        : "${group.encryptedAMI}",
           <#else>
           "ImageId"        : { "Ref" : "AMI" },

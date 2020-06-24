@@ -4,11 +4,11 @@ import static com.sequenceiq.cloudbreak.cloud.aws.TestConstants.LATEST_AWS_CLOUD
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static java.util.Map.entry;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -22,13 +22,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
@@ -60,13 +59,14 @@ import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 import freemarker.template.Configuration;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CloudFormationTemplateBuilderTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
@@ -106,7 +106,7 @@ public class CloudFormationTemplateBuilderTest {
 
     private CloudInstance instance;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
         factoryBean.setPreferFileSystemAccess(false);
@@ -136,7 +136,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestInstanceGroupsAndRootVolumeSize() throws IOException {
+    public void buildTestInstanceGroupsAndRootVolumeSize() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -167,7 +167,7 @@ public class CloudFormationTemplateBuilderTest {
     @Test
     public void buildTestInstanceGroupsWhenRootVolumeSizeIsSuperLarge() throws IOException {
         //GIVEN
-        Integer rootVolumeSize = Integer.MAX_VALUE;
+        int rootVolumeSize = Integer.MAX_VALUE;
         Security security = getDefaultCloudStackSecurity();
         List<Group> groups = List.of(createDefaultGroup("master", InstanceGroupType.CORE, rootVolumeSize, security, Optional.empty()),
                 createDefaultGroup("gateway", InstanceGroupType.GATEWAY, rootVolumeSize, security, Optional.empty()));
@@ -187,17 +187,17 @@ public class CloudFormationTemplateBuilderTest {
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString(Integer.toString(rootVolumeSize)));
         JsonNode firstBlockDeviceMapping = getJsonNode(JsonUtil.readTree(templateString), "BlockDeviceMappings").get(0);
         String volumeSize = getJsonNode(firstBlockDeviceMapping, "VolumeSize").textValue();
-        assertEquals(Integer.valueOf(volumeSize), rootVolumeSize);
+        Assertions.assertThat(Integer.valueOf(volumeSize)).isEqualTo(rootVolumeSize);
     }
 
     @Test
     public void buildTestInstanceGroupsWhenRootVolumeSizeIsSuperSmall() throws IOException {
         //GIVEN
-        Integer rootVolumeSize = Integer.MIN_VALUE;
+        int rootVolumeSize = Integer.MIN_VALUE;
         Security security = getDefaultCloudStackSecurity();
         List<Group> groups = List.of(createDefaultGroup("master", InstanceGroupType.CORE, rootVolumeSize, security, Optional.empty()),
                 createDefaultGroup("gateway", InstanceGroupType.GATEWAY, rootVolumeSize, security, Optional.empty()));
@@ -217,12 +217,11 @@ public class CloudFormationTemplateBuilderTest {
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString(Integer.toString(rootVolumeSize)));
         JsonNode firstBlockDeviceMapping = getJsonNode(JsonUtil.readTree(templateString), "BlockDeviceMappings").get(0);
         String volumeSize = getJsonNode(firstBlockDeviceMapping, "VolumeSize").textValue();
-        assertEquals(Integer.valueOf(volumeSize), rootVolumeSize);
-
+        Assertions.assertThat(Integer.valueOf(volumeSize)).isEqualTo(rootVolumeSize);
     }
 
     @Test
@@ -242,7 +241,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -271,7 +270,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -300,7 +299,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -328,7 +327,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -357,7 +356,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -393,7 +392,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -425,7 +424,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -454,7 +453,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -482,7 +481,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -511,7 +510,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -540,7 +539,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -569,7 +568,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -597,7 +596,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -626,7 +625,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -655,7 +654,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -684,7 +683,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -713,7 +712,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -747,7 +746,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, containsString("\"single-sg-id\""));
     }
@@ -776,7 +775,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, containsString("\"single-sg-id\""));
     }
@@ -803,7 +802,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("\"multi-sg-id1\",\"multi-sg-id2\""));
         assertThat(templateString, containsString("VPCId"));
     }
@@ -837,7 +836,7 @@ public class CloudFormationTemplateBuilderTest {
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, stringContainsInOrder("OnDemandPercentageAboveBaseCapacity", "40"));
     }
 
@@ -861,7 +860,7 @@ public class CloudFormationTemplateBuilderTest {
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, not(containsString("SecurityGroupEgress")));
     }
 
@@ -885,7 +884,7 @@ public class CloudFormationTemplateBuilderTest {
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, not(containsString("SecurityGroupEgress")));
     }
 
@@ -909,7 +908,7 @@ public class CloudFormationTemplateBuilderTest {
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, stringContainsInOrder("SecurityGroupEgress", "vpccidr1", "vpccidr2"));
     }
 
@@ -933,7 +932,7 @@ public class CloudFormationTemplateBuilderTest {
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, stringContainsInOrder("SecurityGroupEgress", "prefix1", "prefix2"));
     }
 
@@ -957,7 +956,7 @@ public class CloudFormationTemplateBuilderTest {
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, stringContainsInOrder("SecurityGroupEgress", "vpccidr1", "vpccidr2", "prefix1", "prefix2"));
     }
 
@@ -981,8 +980,147 @@ public class CloudFormationTemplateBuilderTest {
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, not(containsString("SecurityGroupEgress")));
+    }
+
+    @Test
+    public void buildTestNoEbsEncryption() {
+        //GIVEN
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        Assertions.assertThat(templateString)
+                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+                .doesNotContain("\"Encrypted\"")
+                .contains("{ \"Ref\" : \"AMI\" }");
+    }
+
+    @Test
+    public void buildTestEbsEncryptionWithDefaultKey() {
+        //GIVEN
+        instance.getTemplate().putParameter(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true);
+        instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
+
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate)
+                .withEncryptedAMIByGroupName(Map.ofEntries(entry("master", "masterAMI"), entry("gateway", "gatewayAMI")));
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        Assertions.assertThat(templateString)
+                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+                .doesNotContain("\"Encrypted\"")
+                .contains("\"masterAMI\"")
+                .contains("\"gatewayAMI\"")
+                .doesNotContain("{ \"Ref\" : \"AMI\" }");
+    }
+
+    @Test
+    public void buildTestEbsEncryptionWithCustomKey() {
+        //GIVEN
+        instance.getTemplate().putParameter(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true);
+        instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name());
+        instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "customEncryptionKeyArn");
+
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate)
+                .withEncryptedAMIByGroupName(Map.ofEntries(entry("master", "masterAMI"), entry("gateway", "gatewayAMI")));
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        Assertions.assertThat(templateString)
+                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+                .doesNotContain("\"Encrypted\"")
+                .contains("\"masterAMI\"")
+                .contains("\"gatewayAMI\"")
+                .doesNotContain("{ \"Ref\" : \"AMI\" }");
+    }
+
+    @Test
+    public void buildTestEbsEncryptionWithDefaultKeyAndFastEncryption() {
+        //GIVEN
+        instance.getTemplate().putParameter(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true);
+        instance.getTemplate().putParameter(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, true);
+        instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
+
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        Assertions.assertThat(templateString)
+                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+                .contains("\"Encrypted\"")
+                .contains("{ \"Ref\" : \"AMI\" }")
+                .doesNotContain("\"KmsKeyId\"");
+    }
+
+    @Test
+    public void buildTestEbsEncryptionWithCustomKeyAndFastEncryption() {
+        //GIVEN
+        instance.getTemplate().putParameter(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true);
+        instance.getTemplate().putParameter(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, true);
+        instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name());
+        instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "customEncryptionKeyArn");
+
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        Assertions.assertThat(templateString)
+                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+                .contains("\"Encrypted\"")
+                .contains("{ \"Ref\" : \"AMI\" }")
+                .contains("\"KmsKeyId\" : \"customEncryptionKeyArn\"");
     }
 
     private CloudStack initCloudStackWithInstanceProfile() {

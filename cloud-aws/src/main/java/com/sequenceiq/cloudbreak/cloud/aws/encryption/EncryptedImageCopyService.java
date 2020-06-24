@@ -72,11 +72,12 @@ public class EncryptedImageCopyService {
                 .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getImageId()));
         if (!imageIdByGroupName.isEmpty()) {
             Collection<String> imageIds = new HashSet<>(imageIdByGroupName.values());
-            LOGGER.debug("Start polling the availability of the created AMIs: '{}'", String.join(",", imageIds));
+            LOGGER.debug("Start polling the availability of the created encrypted AMIs: '{}'", String.join(",", imageIds));
             Waiter<DescribeImagesRequest> imageWaiter = client.waiters().imageAvailable();
             DescribeImagesRequest describeImagesRequest = new DescribeImagesRequest().withImageIds(imageIds);
             StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
             run(imageWaiter, describeImagesRequest, stackCancellationCheck);
+            LOGGER.info("All created encrypted AMIs are available: '{}'", String.join(",", imageIds));
         }
         return imageIdByGroupName;
     }
@@ -89,10 +90,9 @@ public class EncryptedImageCopyService {
 
     private Map<String, EncryptedImageConfig> getEncryptedImageConfigByGroup(CloudStack cloudStack, String selectedAMIName, AuthenticatedContext ac,
             AmazonEC2Client client, PersistenceNotifier resourceNotifier) {
-
         Map<String, EncryptedImageConfig> configByGroupName = new HashMap<>();
         for (Group group : cloudStack.getGroups()) {
-            if (isEncryptedVolumeRequested(group)) {
+            if (isEncryptedVolumeRequested(group) && !isFastEbsEncryptionEnabled(group)) {
                 InstanceTemplate instanceTemplate = group.getReferenceInstanceConfiguration().getTemplate();
                 AwsInstanceView awsInstanceView = new AwsInstanceView(instanceTemplate);
                 Optional<String> actualKmsKey = Optional.ofNullable(awsInstanceView.getKmsKey());
@@ -112,6 +112,10 @@ public class EncryptedImageCopyService {
 
     private boolean isEncryptedVolumeRequested(Group group) {
         return new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).isEncryptedVolumes();
+    }
+
+    private boolean isFastEbsEncryptionEnabled(Group group) {
+        return new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).isFastEbsEncryptionEnabled();
     }
 
     private EncryptedImageConfig createEncryptedImageFromAMI(AmazonEC2Client client, AwsInstanceView awsInstanceView, String selectedAMIName,

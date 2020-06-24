@@ -89,7 +89,7 @@
     "VPCSecurityGroupsParameter": {
         "Type": "List<AWS::EC2::SecurityGroup::Id>",
         "Description": "VPC security groups"
-    },
+    }
     <#else>
     "DBSecurityGroupNameParameter": {
         "Type": "String",
