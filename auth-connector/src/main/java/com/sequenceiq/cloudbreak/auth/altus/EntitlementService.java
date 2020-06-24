@@ -47,6 +47,9 @@ public class EntitlementService {
     @VisibleForTesting
     static final String LOCAL_DEV = "LOCAL_DEV";
 
+    @VisibleForTesting
+    static final String CDP_AZURE_SINGLE_RESOURCE_GROUP = "CDP_AZURE_SINGLE_RESOURCE_GROUP";
+
     @Inject
     private GrpcUmsClient umsClient;
 
@@ -92,6 +95,10 @@ public class EntitlementService {
 
     public boolean freeIpaDlEbsEncryptionEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_FREEIPA_DL_EBS_ENCRYPTION);
+    }
+
+    public boolean azureSingleResourceGroupDeploymentEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP);
     }
 
     public List<String> getEntitlements(String actorCrn, String accountId) {

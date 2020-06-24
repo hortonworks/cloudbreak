@@ -157,10 +157,6 @@ cb:
   azure:
     host.name.prefix.length: 255
     database.template.batchSize: 1
-  featureswitch:
-    azure:
-      single:
-        resourcegroup: false
 
 spring:
   application:
