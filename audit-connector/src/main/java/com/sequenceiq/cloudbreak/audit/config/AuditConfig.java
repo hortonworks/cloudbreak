@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AuditConfig {
 
-    private static final int DEFAULT_AUDIT_PORT = 80;
+    private static final int DEFAULT_AUDIT_PORT = 8982;
 
     @Value("${altus.audit.endpoint:}")
     private String endpoint;
