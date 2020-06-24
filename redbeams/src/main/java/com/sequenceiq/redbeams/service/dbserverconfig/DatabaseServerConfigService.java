@@ -189,7 +189,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         // Otherwise, JPA/Hibernate pitches a fit
         DatabaseServerConfig resourceToDelete = getByCrn(resource.getResourceCrn()).get();
         DatabaseServerConfig archived = super.delete(resourceToDelete);
-        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, archived.getResourceCrn().toString(), MDCUtils.getRequestId());
+        grpcUmsClient.notifyResourceDeleted(archived.getResourceCrn().toString(), MDCUtils.getRequestId());
         return archived;
     }
 

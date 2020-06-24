@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
@@ -10,7 +12,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class RecipeViewV4Response extends CompactViewV4Response {
+public class RecipeViewV4Response extends CompactViewV4Response implements ResourceCrnAwareApiModel {
     @NotNull
     @ApiModelProperty(RecipeModelDescription.TYPE)
     private RecipeV4Type type;
@@ -31,5 +33,11 @@ public class RecipeViewV4Response extends CompactViewV4Response {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    @JsonIgnore
+    @Override
+    public String getResourceCrn() {
+        return getCrn();
     }
 }

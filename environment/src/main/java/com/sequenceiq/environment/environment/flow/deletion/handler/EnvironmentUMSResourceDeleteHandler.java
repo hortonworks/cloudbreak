@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_UMS_RESOURCE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_PREREQUISITES_DELETE_EVENT;
 
@@ -64,7 +63,7 @@ public class EnvironmentUMSResourceDeleteHandler extends EventSenderAwareHandler
                 environmentCrn = resourceCrn.get();
             }
             virtualGroupService.cleanupVirtualGroups(Crn.fromString(environmentCrn).getAccountId(), environmentCrn);
-            umsClient.notifyResourceDeleted(INTERNAL_ACTOR_CRN, environmentCrn, MDCUtils.getRequestId());
+            umsClient.notifyResourceDeleted(environmentCrn, MDCUtils.getRequestId());
         } catch (Exception e) {
             LOGGER.warn("UMS delete event failed (this event is not critical)", e);
         }

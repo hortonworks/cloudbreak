@@ -60,6 +60,9 @@ public enum AuthorizationResourceAction {
     STOP_DATABASE_SERVER,
     BACKUP_DATALAKE,
     RESTORE_DATALAKE,
+    DESCRIBE_RECIPE,
+    CREATE_RECIPE,
+    DELETE_RECIPE,
     // deprecated actions, please do not use them
     ENVIRONMENT_READ,
     ENVIRONMENT_WRITE,

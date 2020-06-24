@@ -234,7 +234,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         }
 
         DatabaseConfig archived = super.delete(databaseConfig);
-        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, archived.getResourceCrn().toString(), MDCUtils.getRequestId());
+        grpcUmsClient.notifyResourceDeleted(archived.getResourceCrn().toString(), MDCUtils.getRequestId());
         return archived;
     }
 

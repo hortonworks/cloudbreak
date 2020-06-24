@@ -9,5 +9,6 @@ public enum AuthorizationResourceType {
     CLUSTER_DEFINITION,
     CLUSTER_TEMPLATE,
     DATABASE,
-    DATABASE_SERVER;
+    DATABASE_SERVER,
+    RECIPE;
 }

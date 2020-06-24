@@ -623,15 +623,14 @@ public class GrpcUmsClient {
 
     // Cache evict does not work with this key, we need to wait 60s
     // @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
-    public void notifyResourceDeleted(String userCrn, String resourceCrn, Optional<String> requestId) {
+    public void notifyResourceDeleted(String resourceCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             LOGGER.debug("Notify UMS about resource ('{}') was deleted", resourceCrn);
-            UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel(), INTERNAL_ACTOR_CRN);
             client.notifyResourceDeleted(requestId.orElse(UUID.randomUUID().toString()), resourceCrn);
-            LOGGER.info("Notified UMS about deletion of resource {} (by {})", resourceCrn, userCrn);
+            LOGGER.info("Notified UMS about deletion of resource {}", resourceCrn);
         } catch (Exception e) {
-            LOGGER.error(String.format("Notifying UMS about deletion of resource %s (by %s) has failed: ",
-                    resourceCrn, userCrn), e);
+            LOGGER.error(String.format("Notifying UMS about deletion of resource %s has failed: ", resourceCrn), e);
         }
     }
 

@@ -143,7 +143,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 ? super.deleteByNameFromWorkspace(nameOrCrn.getName(), workspaceId)
                 : delete(blueprintRepository.findByResourceCrnAndWorkspaceId(nameOrCrn.getCrn(), workspaceId)
                 .orElseThrow(() -> notFound("blueprint", nameOrCrn.getCrn()).get()));
-        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, deleted.getResourceCrn(), MDCUtils.getRequestId());
+        grpcUmsClient.notifyResourceDeleted(deleted.getResourceCrn(), MDCUtils.getRequestId());
         return deleted;
     }
 
