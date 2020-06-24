@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.azure.azurevm.action;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -15,8 +16,9 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.PowerState;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
-import com.sequenceiq.it.cloudbreak.util.SdxUtil;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureInstanceActionExecutor;
+import com.sequenceiq.it.cloudbreak.util.azure.AzureInstanceActionResult;
 
 import rx.schedulers.Schedulers;
 
@@ -27,14 +29,11 @@ public class AzureClientActions {
     @Inject
     private Azure azure;
 
-    @Inject
-    private SdxUtil sdxUtil;
-
     public List<String> listInstanceVolumeIds(List<String> instanceIds) {
         List<String> diskIds = new ArrayList<>();
-        instanceIds.forEach(i -> {
-            String resourceGroup = i.replaceFirst("..$", "");
-            VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, i);
+        instanceIds.forEach(id -> {
+            String resourceGroup = getResourceGroupName(id);
+            VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
             diskIds.addAll(vm.dataDisks().values().stream().map(HasId::id).collect(Collectors.toList()));
         });
         return diskIds;
@@ -44,36 +43,60 @@ public class AzureClientActions {
         AzureInstanceActionExecutor.builder()
                 .onInstances(instanceIds)
                 .withInstanceAction(id -> {
-                    String resourceGroup = id.replaceFirst("..$", "");
-                    LOGGER.debug("Deleting vm {}", id);
+                    String resourceGroup = getResourceGroupName(id);
+                    VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
+                    LOGGER.info("Before deleting, vm {} power state is {}", id, vm.powerState());
                     return azure.virtualMachines().deleteByResourceGroupAsync(resourceGroup, id)
-                            .doOnError(throwable -> LOGGER.debug("Error when stopping instance {}: {}", id, throwable))
+                            .doOnError(throwable -> Log.error(LOGGER, "Error when deleting instance {}: {}", id, throwable))
                             .subscribeOn(Schedulers.io());
-                }).withInstanceStatusCheck(id -> {
-            String resourceGroup = id.replaceFirst("..$", "");
-            VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
-            LOGGER.debug("After stop: vm {} is {} (expected null)", id, vm);
-            return vm == null;
-        }).withTimeout(10, TimeUnit.MINUTES).build().execute();
-        LOGGER.debug("Deleting instances finished succesfully");
+                })
+                .withInstanceStatusCheck(id -> {
+                    String resourceGroup = getResourceGroupName(id);
+                    VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
+                    String powerState = getVmPowerState(vm);
+                    Log.log("Delete action is successful={}, vm {} power state is {} (expected null)", vm == null, id, powerState);
+                    return new AzureInstanceActionResult(vm == null, powerState, id);
+                })
+                .withTimeout(10, TimeUnit.MINUTES)
+                .build()
+                .execute();
+        LOGGER.info("Deleting instances finished succesfully");
     }
 
     public void stopInstances(List<String> instanceIds) {
         AzureInstanceActionExecutor.builder()
                 .onInstances(instanceIds)
                 .withInstanceAction(id -> {
-                    String resourceGroup = id.replaceFirst("..$", "");
+                    String resourceGroup = getResourceGroupName(id);
                     VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
-                    LOGGER.debug("Before stop: vm {} power state is {}", id, vm.powerState());
+                    LOGGER.info("Before stopping, vm {} power state is {}", id, vm.powerState());
                     return azure.virtualMachines().deallocateAsync(vm.resourceGroupName(), vm.name())
-                            .doOnError(throwable -> LOGGER.debug("Error when stopping instance {}: {}", id, throwable))
+                            .doOnError(throwable -> Log.error(LOGGER, "Error when stopping instance {}: {}", id, throwable))
                             .subscribeOn(Schedulers.io());
-                }).withInstanceStatusCheck(id -> {
-            String resourceGroup = id.replaceFirst("..$", "");
-            VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
-            LOGGER.debug("After stop: vm {} power state is {}", id, vm.powerState());
-            return PowerState.DEALLOCATED.equals(vm.powerState());
-        }).withTimeout(10, TimeUnit.MINUTES).build().execute();
-        LOGGER.debug("Stopping of instances finished succesfully");
+                })
+                .withInstanceStatusCheck(id -> {
+                    String resourceGroup = getResourceGroupName(id);
+                    VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
+                    String powerState = getVmPowerState(vm);
+                    boolean success = PowerState.DEALLOCATED.toString().equals(powerState);
+                    Log.log("Stop action isSuccessful={}, vm {} power state is {}", success, id, powerState);
+                    return new AzureInstanceActionResult(success, powerState, id);
+                })
+                .withTimeout(10, TimeUnit.MINUTES)
+                .build()
+                .execute();
+        LOGGER.info("Stopping of instances finished succesfully");
+    }
+
+    private String getVmPowerState(VirtualMachine vm) {
+        return Optional.ofNullable(vm).map(v -> v.powerState().toString()).orElse("vm not found");
+    }
+
+    private String getResourceGroupName(String id) {
+        return id.replaceFirst("..$", "");
+    }
+
+    public void setAzure(Azure azure) {
+        this.azure = azure;
     }
 }
