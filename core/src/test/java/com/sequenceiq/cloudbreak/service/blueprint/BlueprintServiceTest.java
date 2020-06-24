@@ -132,7 +132,7 @@ public class BlueprintServiceTest {
         when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
         when(workspaceService.get(1L, user)).thenReturn(getWorkspace());
         when(cmTemplateProcessor.getHostGroupPropertyIdentifier()).thenReturn("template");
-        doNothing().when(grpcUmsClient).notifyResourceDeleted(anyString(), anyString(), any());
+        doNothing().when(grpcUmsClient).notifyResourceDeleted(anyString(), any());
     }
 
     @Test

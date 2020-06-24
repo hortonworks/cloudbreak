@@ -345,7 +345,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     public ClusterTemplate deleteByName(String name, Long workspaceId) {
         ClusterTemplate clusterTemplate = getByNameForWorkspaceId(name, workspaceId);
         clusterTemplate = delete(clusterTemplate);
-        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, clusterTemplate.getResourceCrn(), MDCUtils.getRequestId());
+        grpcUmsClient.notifyResourceDeleted(clusterTemplate.getResourceCrn(), MDCUtils.getRequestId());
         stackTemplateService.delete(clusterTemplate.getStackTemplate());
         return clusterTemplate;
     }

@@ -87,6 +87,6 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
 
     private void setDeletedStatus(SdxCluster cluster) {
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED, "Datalake External RDS deleted", cluster);
-        grpcUmsClient.notifyResourceDeleted(GrpcUmsClient.INTERNAL_ACTOR_CRN, cluster.getCrn(), MDCUtils.getRequestId());
+        grpcUmsClient.notifyResourceDeleted(cluster.getCrn(), MDCUtils.getRequestId());
     }
 }

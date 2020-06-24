@@ -74,7 +74,7 @@ class CredentialDeleteServiceTest {
         when(credentialService.findByNameAndAccountId(eq(secondCredentialName), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(secondCred));
         when(credentialService.save(firstCred)).thenReturn(firstCred);
         when(credentialService.save(secondCred)).thenReturn(secondCred);
-        doNothing().when(grpcUmsClient).notifyResourceDeleted(any(), any(), any());
+        doNothing().when(grpcUmsClient).notifyResourceDeleted(any(), any());
 
         Set<Credential> result = underTest.deleteMultiple(names, ACCOUNT_ID);
 
@@ -89,7 +89,7 @@ class CredentialDeleteServiceTest {
         verify(credentialService, times(2)).save(any());
         verify(credentialService, times(1)).save(firstCred);
         verify(credentialService, times(1)).save(secondCred);
-        verify(grpcUmsClient, times(2)).notifyResourceDeleted(any(), any(), any());
+        verify(grpcUmsClient, times(2)).notifyResourceDeleted(any(), any());
     }
 
     @Test
@@ -123,13 +123,13 @@ class CredentialDeleteServiceTest {
         Credential cred = createCredentialWithName("first");
         when(credentialService.findByNameAndAccountId(eq(cred.getName()), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(cred));
         when(credentialService.save(cred)).thenReturn(cred);
-        doNothing().when(grpcUmsClient).notifyResourceDeleted(any(), any(), any());
+        doNothing().when(grpcUmsClient).notifyResourceDeleted(any(), any());
 
         underTest.deleteMultiple(Set.of(cred.getName()), ACCOUNT_ID);
 
         notificationSender.send(any(Notification.class), any(List.class), any(Client.class));
 
-        verify(grpcUmsClient, times(1)).notifyResourceDeleted(any(), any(), any());
+        verify(grpcUmsClient, times(1)).notifyResourceDeleted(any(), any());
     }
 
     private Credential createCredentialWithName(String name) {
