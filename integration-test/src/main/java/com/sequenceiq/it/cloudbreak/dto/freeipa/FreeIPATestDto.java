@@ -55,14 +55,10 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.util.TagAdderUtil;
-import com.sequenceiq.it.util.TestNameExtractorUtil;
 
 @Prototype
 public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIPATestDto>
         implements Purgable<ListFreeIpaResponse, FreeIPAClient>, Searchable {
-
-    @Inject
-    private TestNameExtractorUtil testNameExtractorUtil;
 
     @Inject
     private TagAdderUtil tagAdderUtil;
@@ -88,8 +84,7 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
     }
 
     private FreeIPATestDto withTestNameAsTag() {
-        String callingMethodName = testNameExtractorUtil.getExecutingTestName();
-        tagAdderUtil.addTestNameTag(getRequest().getTags(), callingMethodName);
+        tagAdderUtil.addTestNameTag(getRequest().getTags(), getTestContext().getTestMethodName());
         return this;
     }
 

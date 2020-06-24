@@ -43,7 +43,6 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.util.TagAdderUtil;
-import com.sequenceiq.it.util.TestNameExtractorUtil;
 
 @Prototype
 public class EnvironmentTestDto
@@ -59,9 +58,6 @@ public class EnvironmentTestDto
 
     @Inject
     private AwsProperties awsProperties;
-
-    @Inject
-    private TestNameExtractorUtil testNameExtractorUtil;
 
     @Inject
     private TagAdderUtil tagAdderUtil;
@@ -109,8 +105,7 @@ public class EnvironmentTestDto
     }
 
     private EnvironmentTestDto withTestNameAsTag() {
-        String callingMethodName = testNameExtractorUtil.getExecutingTestName();
-        tagAdderUtil.addTestNameTag(getRequest().getTags(), callingMethodName);
+        tagAdderUtil.addTestNameTag(getRequest().getTags(), getTestContext().getTestMethodName());
         return this;
     }
 

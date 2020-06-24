@@ -30,14 +30,10 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGro
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.util.TagAdderUtil;
-import com.sequenceiq.it.util.TestNameExtractorUtil;
 
 @Prototype
 public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, ClusterTemplateV4Response,
         DistroXTemplateTestDto, ClusterTemplateV4Response> {
-
-    @Inject
-    private TestNameExtractorUtil testNameExtractorUtil;
 
     @Inject
     private TagAdderUtil tagAdderUtil;
@@ -59,8 +55,7 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
     }
 
     private DistroXTemplateTestDto withTestNameAsTag() {
-        String callingMethodName = testNameExtractorUtil.getExecutingTestName();
-        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags().getUserDefined(), callingMethodName);
+        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags().getUserDefined(), getTestContext().getTestMethodName());
         return this;
     }
 
