@@ -6,13 +6,14 @@ set -x
 
 CONFIG_FILE=/etc/freeipa_backup.conf
 
-LOCKFILE="/var/lock/`basename $0`"
+LOCKFILE="/var/lock/$(basename "$0")"
 LOCKFD=99
+PRINT_DEBUG_MSGS=1
 
 # PRIVATE
-_lock()             { flock -$1 $LOCKFD; }
-_no_more_locking()  { _lock u; _lock xn && rm -f $LOCKFILE; }
-_prepare_locking()  { eval "exec $LOCKFD>\"$LOCKFILE\""; trap _no_more_locking EXIT; }
+_lock()             { flock -"$1" ${LOCKFD}; }
+_no_more_locking()  { _lock u; _lock xn && rm -f "${LOCKFILE}"; }
+_prepare_locking()  { eval "exec ${LOCKFD}>\"${LOCKFILE}\""; trap _no_more_locking EXIT; }
 
 # ON START
 _prepare_locking
@@ -37,15 +38,33 @@ config=( # set default values in config array
     [aws_region]=""
 )
 
+function get_hostname_from_url()
+{
+  proto=$(echo "$1" | grep :// | sed -e's,^\(.*://\).*,\1,g')
+  # remove the protocol
+  url="${1/$proto/}"
+  # extract the user (if any)
+  userpass="$(echo "${url}" | grep @ | cut -d@ -f1)"
+  pass="$(echo "${userpass}" | grep : | cut -d: -f2)"
+  if [[ -n "${pass}" ]]; then
+    user="$(echo "${userpass}" | grep : | cut -d: -f1)"
+  else
+      user="${userpass}"
+  fi
+  # extract the host
+  host="$(echo "${url/${user}:${pass}@/}" | cut -d/ -f1)"
+  echo "${host}"
+}
+
 set +x
 # Override defaults with config file
 if [[ -f $CONFIG_FILE ]]; then
-    while read line
+    while read -r line
     do
-        if echo $line | grep -F = &>/dev/null
+        if echo "${line}" | grep -F = &>/dev/null
         then
-            varname=$(echo "$line" | cut -d '=' -f 1)
-            config[$varname]=$(echo "$line" | cut -d '=' -f 2-)
+            varname=$(echo "${line}" | cut -d '=' -f 1)
+            config[${varname}]=$(echo "${line}" | cut -d '=' -f 2-)
         fi
     done < $CONFIG_FILE
 fi
@@ -82,7 +101,6 @@ fi
 
 LOGFILE="${config[logfile]}"
 STATUSFILEPREFIX="${config[statusfileprefix]}"
-DATE_FOLDER="$(date -I)"
 BACKUP_PATH_POSTFIX="${FOLDER}"
 
 BACKUP_OPTIONS=""
@@ -93,25 +111,25 @@ elif [[ "$TYPE" = "DATA" ]]; then
 fi
 
 doLog(){
-    type_of_msg=$(echo $*|cut -d" " -f1)
+    type_of_msg=$(echo "$*"|cut -d" " -f1)
     msg=$(echo "$*"|cut -d" " -f2-)
-    [[ $type_of_msg == DEBUG ]] && [[ $do_print_debug_msgs -ne 1 ]] && return
+    [[ $type_of_msg == DEBUG ]] && [[ ${PRINT_DEBUG_MSGS} -ne 1 ]] && return
     [[ $type_of_msg == INFO ]] && type_of_msg="INFO " # one space for aligning
     [[ $type_of_msg == WARN ]] && type_of_msg="WARN " # as well
 
     # print to the terminal if we have one
-    test -t 1 && echo "`date "+%Y-%m-%dT%H:%M:%SZ"` $type_of_msg ""$msg"
-    echo "`date "+%Y-%m-%dT%H:%M:%SZ"` $type_of_msg ""$msg" >> $LOGFILE
+    test -t 1 && echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg $msg"
+    echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg $msg" >> "${LOGFILE}"
 }
 
 doStatus(){
     if [[ -n "$BACKUP_SCHEDULE" ]]
     then
-        type_of_msg=$(echo $*|cut -d" " -f1)
+        type_of_msg=$(echo "$*"|cut -d" " -f1)
         msg=$(echo "$*"|cut -d" " -f2-)
         [[ $type_of_msg == INFO ]] && type_of_msg="INFO " # one space for aligning
 
-        echo "`date "+%Y-%m-%dT%H:%M:%SZ"` $type_of_msg $msg" > $STATUSFILEPREFIX$BACKUP_SCHEDULE.log
+        echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg $msg" > "${STATUSFILEPREFIX}${BACKUP_SCHEDULE}".log
     fi
 }
 
@@ -124,17 +142,17 @@ error_exit()
 
 remove_local_backups() {
     doLog "INFO Removing local backup copies"
-    find ${config[backup_path]}/ -name ipa-* -type d  -print0 | xargs -0 /usr/bin/rm -vrf >> $LOGFILE 2>&1 || error_exit "Unable to remove local backup copies"
+    find "${config[backup_path]}"/ -name "ipa-*" -type d  -print0 | xargs -0 /usr/bin/rm -vrf >> "$LOGFILE" 2>&1 || error_exit "Unable to remove local backup copies"
 }
 
 upload_aws_backup() {
     echo "try to upload with AES256 encryption"
-    ret_code=$(/usr/bin/aws ${REGION_OPTION} s3 cp --recursive --sse AES256 --no-progress ${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR} >> $LOGFILE 2>&1 || echo $?)
+    ret_code=$(/usr/bin/aws "${REGION_OPTION}" s3 cp --recursive --sse AES256 --no-progress "${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR}" >> "${LOGFILE}" 2>&1 || echo $?)
 
     if [[ -n "$ret_code" ]] && [[ "$ret_code" == 1 ]]
     then
         echo "try to upload with aws:kms encryption"
-        ret_code=$(/usr/bin/aws ${REGION_OPTION} s3 cp --recursive --sse aws:kms --no-progress ${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR} >> $LOGFILE 2>&1 || echo $?)
+        ret_code=$(/usr/bin/aws "${REGION_OPTION}" s3 cp --recursive --sse aws:kms --no-progress "${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR}" >> "${LOGFILE}" 2>&1 || echo $?)
     fi
 
     if [[ -n "$ret_code" ]] && [[ "$ret_code" == 1 ]]
@@ -158,8 +176,12 @@ exlock_now || error_exit "A backup seems to be currently running. Lock file is a
 #set -x
 
 # Perform a backup
-/sbin/ipa-backup $BACKUP_OPTIONS >> $LOGFILE 2>&1 || error_exit "ipa-backup failed! Aborting!"
-BACKUPDIR=$(basename $(ls -td ${config[backup_path]}/ipa-* | head -1))
+
+# shellcheck disable=SC2086
+/sbin/ipa-backup ${BACKUP_OPTIONS} >> "${LOGFILE}" 2>&1 || error_exit "ipa-backup failed! Aborting!"
+
+# shellcheck disable=SC2012
+BACKUPDIR=$(basename "$(ls -td "${config[backup_path]}/ipa-*" | head -1)")
 
 BACKUP_LOCATION="${config[backup_location]}/${BACKUP_PATH_POSTFIX}"
 doLog "DEBUG Uploading backup to ${BACKUP_LOCATION} on ${config[backup_platform]}"
@@ -175,9 +197,12 @@ if [[ "${config[backup_platform]}" = "AWS" ]]; then
     remove_local_backups
 elif [[ "${config[backup_platform]}" = "AZURE" ]]; then
     doLog "INFO Syncing backups to Azure Blog Storage"
-    /bin/keyctl new_session >> $LOGFILE 2>&1 || error_exit "Unable to setup keyring session"
-    /usr/local/bin/azcopy login --identity --identity-resource-id "${config[azure_instance_msi]}" >> $LOGFILE 2>&1 || error_exit "Unable to login to Azure!"
-    /usr/local/bin/azcopy copy ${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION} --recursive=true --check-length=false >> $LOGFILE 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
+    doLog "INFO Checking for valid backup location"
+    backup_host=$(get_hostname_from_url "${BACKUP_LOCATION}")
+    host "${backup_host}" > /dev/null || error_exit "Unable to resolve host for backup location ${BACKUP_LOCATION}"
+    /bin/keyctl new_session >> "${LOGFILE}" 2>&1 || error_exit "Unable to setup keyring session"
+    /usr/local/bin/azcopy login --identity --identity-resource-id "${config[azure_instance_msi]}" >> "${LOGFILE}" 2>&1 || error_exit "Unable to login to Azure!"
+    /usr/local/bin/azcopy copy "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}" --recursive=true --check-length=false >> "${LOGFILE}" 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
     remove_local_backups
 fi
 
