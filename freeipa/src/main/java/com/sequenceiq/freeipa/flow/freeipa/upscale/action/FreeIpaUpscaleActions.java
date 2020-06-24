@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
@@ -43,6 +44,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.common.api.type.CommonResourceType;
+import com.sequenceiq.flow.core.Flow;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
@@ -63,6 +66,7 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInsta
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.BootstrapMachinesFailedToUpscaleFailureEventConverter;
@@ -454,6 +458,14 @@ public class FreeIpaUpscaleActions {
 
             @Inject
             private OperationService operationService;
+
+            @Override
+            protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<UpscaleState, UpscaleFlowEvent> stateContext,
+                    UpscaleFailureEvent payload) {
+                Flow flow = getFlow(flowParameters.getFlowId());
+                flow.setFlowFailed(payload.getException());
+                return super.createFlowContext(flowParameters, stateContext, payload);
+            }
 
             @Override
             protected Object getFailurePayload(UpscaleFailureEvent payload, Optional<StackContext> flowContext, Exception ex) {
