@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.audit.event;
+package com.sequenceiq.cloudbreak.reactor.audit;
 
 import java.util.Map;
 

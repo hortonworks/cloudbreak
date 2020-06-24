@@ -88,6 +88,8 @@ dependencies {
   compile (project(':redbeams-api')) {
     transitive = false;
   }
+  compile project(':audit-connector')
+
   compile group: 'xerces',              name: 'xercesImpl',            version: xerces
 
   compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion) {

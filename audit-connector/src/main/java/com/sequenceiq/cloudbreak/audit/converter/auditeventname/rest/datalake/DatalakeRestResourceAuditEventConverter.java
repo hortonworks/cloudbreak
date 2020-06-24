@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.audit.converter.auditeventname.rest.datalake;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -74,8 +73,6 @@ public class DatalakeRestResourceAuditEventConverter implements RestResourceAudi
 
     @Override
     public Map<String, Object> requestParameters(StructuredRestCallEvent structuredEvent) {
-        Map<String, Object> params = new HashMap<>();
-        restCommonService.addClusterCrnAndNameIfPresent(structuredEvent, params);
-        return params;
+        return restCommonService.addClusterCrnAndNameIfPresent(structuredEvent);
     }
 }

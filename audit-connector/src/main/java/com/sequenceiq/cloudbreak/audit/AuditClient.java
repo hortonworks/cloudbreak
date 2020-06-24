@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.cloudbreak.util.UuidUtil.uuidSupplier;
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -155,7 +156,7 @@ public class AuditClient {
                 .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
     }
 
-    public void listEvents(ListAuditEvent listAuditEvent) {
+    public List<AuditProto.CdpAuditEvent> listEvents(ListAuditEvent listAuditEvent) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             String actorCrn = actorUtil.getActorCrn(listAuditEvent.getActor());
             AuditProto.ListEventsRequest.Builder builder = AuditProto.ListEventsRequest.newBuilder();
@@ -166,7 +167,9 @@ public class AuditClient {
             doIfNotNull(listAuditEvent.getToTimestamp(), builder::setToTimestamp);
             doIfNotNull(listAuditEvent.getPageSize(), builder::setPageSize);
             doIfNotNull(listAuditEvent.getPageToken(), builder::setPageToken);
-            newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn).listEvents(builder.build());
+            AuditProto.ListEventsResponse listEventsResponse = newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                    .listEvents(builder.build());
+            return listEventsResponse.getAuditEventList();
         }
     }
 }
