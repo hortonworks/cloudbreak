@@ -44,6 +44,9 @@ public class EntitlementService {
     @VisibleForTesting
     static final String CDP_FREEIPA_DL_EBS_ENCRYPTION = "CDP_FREEIPA_DL_EBS_ENCRYPTION";
 
+    @VisibleForTesting
+    static final String LOCAL_DEV = "LOCAL_DEV";
+
     @Inject
     private GrpcUmsClient umsClient;
 
@@ -65,6 +68,10 @@ public class EntitlementService {
 
     public boolean internalTenant(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CLOUDERA_INTERNAL_ACCOUNT);
+    }
+
+    public boolean localDevelopment(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, LOCAL_DEV);
     }
 
     public boolean fmsClusterProxyEnabled(String actorCrn, String accountId) {
