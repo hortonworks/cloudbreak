@@ -502,7 +502,7 @@ class SdxServiceTest {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime("7.2.0");
+        sdxClusterRequest.setRuntime("7.2.1");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
@@ -531,7 +531,7 @@ class SdxServiceTest {
     @Test
     void testSdxCreateRazEnabledNoEntitlement() throws IOException {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime("7.2.0");
+        sdxClusterRequest.setRuntime("7.2.1");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
@@ -550,7 +550,7 @@ class SdxServiceTest {
     @Test
     void testSdxCreateRazEnabledNotAzure() throws IOException {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime("7.2.0");
+        sdxClusterRequest.setRuntime("7.2.1");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
@@ -563,13 +563,13 @@ class SdxServiceTest {
         when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        assertEquals("1. Provisioning Ranger Raz is only valid for Microsft Azure.", badRequestException.getMessage());
+        assertEquals("1. Provisioning Ranger Raz is only valid for Microsoft Azure.", badRequestException.getMessage());
     }
 
     @Test
     void testSdxCreateRazEnabledNoEntitlmentAndNotAzure() throws IOException {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime("7.2.0");
+        sdxClusterRequest.setRuntime("7.2.1");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
@@ -583,7 +583,7 @@ class SdxServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         assertEquals("1. Provisioning Ranger Raz is not enabled for this account.\n" +
-                "2. Provisioning Ranger Raz is only valid for Microsft Azure.", badRequestException.getMessage());
+                "2. Provisioning Ranger Raz is only valid for Microsoft Azure.", badRequestException.getMessage());
     }
 
     @Test
@@ -602,7 +602,26 @@ class SdxServiceTest {
         when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        assertEquals("1. Provisioning Ranger Raz is only valid for CM version > 7.2.0 and not 7.1.0", badRequestException.getMessage());
+        assertEquals("1. Provisioning Ranger Raz is only valid for CM version > 7.2.1 and not 7.1.0", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxCreateRazEnabled720Runtime() {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setRuntime("7.2.0");
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        Map<String, String> tags = new HashMap<>();
+        tags.put("mytag", "tagecske");
+        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.setEnvironment("envir");
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        long id = 10L;
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
+        sdxClusterRequest.setEnableRangerRaz(true);
+        when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(true);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        assertEquals("1. Provisioning Ranger Raz is only valid for CM version > 7.2.1 and not 7.2.0", badRequestException.getMessage());
     }
 
     private void setSpot(SdxClusterRequest sdxClusterRequest) {
