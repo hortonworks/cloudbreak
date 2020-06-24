@@ -73,10 +73,31 @@ class RangerRazConfigProviderTest {
     }
 
     @Test
-    @DisplayName("CM 7.2.0 is used and Raz is requested, Raz service needs to be added to the template")
+    @DisplayName("CM 7.2.0 is used and Raz is requested, no additional service needs to be added to the template")
     void getAdditionalServicesWhenRazIsEnabledWithCm720() {
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
         cmRepo.setVersion("7.2.0");
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setEnableRangerRaz(true);
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
+        HostgroupView idbroker = new HostgroupView("idbroker", 0, InstanceGroupType.CORE, List.of());
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withStackType(StackType.DATALAKE)
+                .withCloudPlatform(CloudPlatform.AZURE)
+                .withProductDetails(cmRepo, List.of())
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withHostgroupViews(Set.of(master, idbroker))
+                .build();
+        Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
+
+        assertEquals(0, additionalServices.size());
+    }
+
+    @Test
+    @DisplayName("CM 7.2.1 is used and Raz is requested, Raz service needs to be added to the template")
+    void getAdditionalServicesWhenRazIsEnabledWithCm721() {
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
+        cmRepo.setVersion("7.2.1");
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setEnableRangerRaz(true);
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
