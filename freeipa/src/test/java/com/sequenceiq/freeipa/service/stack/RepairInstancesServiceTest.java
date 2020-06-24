@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -119,7 +120,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairInstancesWithBadHealthInstance() {
-        Stack stack = createStack(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE);
+        Stack stack = createStack(List.of(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
 
@@ -147,7 +148,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairInstancesWithGoodInstancesShouldThrowException() {
-        Stack stack = createStack(InstanceStatus.CREATED, InstanceStatus.CREATED);
+        Stack stack = createStack(List.of(InstanceStatus.CREATED, InstanceStatus.CREATED));
         List<String> instanceIds = List.of("i-2");
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
@@ -164,7 +165,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairInstancesWithForce() {
-        Stack stack = createStack(InstanceStatus.CREATED, InstanceStatus.CREATED);
+        Stack stack = createStack(List.of(InstanceStatus.CREATED, InstanceStatus.CREATED));
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
 
@@ -190,7 +191,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairInstancesWithNoneSpecified() {
-        Stack stack = createStack(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE);
+        Stack stack = createStack(List.of(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
 
@@ -216,7 +217,22 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairThrowsWhenOnlyBadInstancesRemain() {
-        Stack stack = createStack(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE);
+        Stack stack = createStack(List.of(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE, InstanceStatus.CREATED));
+
+        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+
+        RepairInstancesRequest request = new RepairInstancesRequest();
+        request.setForceRepair(true);
+        request.setEnvironmentCrn(ENVIRONMENT_ID1);
+        request.setInstanceIds(List.of("i-1"));
+        assertThrows(BadRequestException.class, () -> {
+            underTest.repairInstances(ACCOUNT_ID, request);
+        });
+    }
+
+    @Test
+    void testRepairThrowsWhenOneBadInstancesRemain() {
+        Stack stack = createStack(List.of(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE));
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
@@ -231,7 +247,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairWithForceThrowsWhenNoInstanceIdsAreProvided() {
-        Stack stack = createStack(InstanceStatus.CREATED, InstanceStatus.CREATED);
+        Stack stack = createStack(List.of(InstanceStatus.CREATED, InstanceStatus.CREATED));
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
 
@@ -245,7 +261,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairForceWhenOnlyBadInstarncesRemain() {
-        Stack stack = createStack(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE);
+        Stack stack = createStack(List.of(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE));
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
 
@@ -271,7 +287,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairThrowsWhenOnlyDeletedInstancesAndForceIsCalledRemain() {
-        Stack stack = createStack(InstanceStatus.DELETED_BY_PROVIDER, InstanceStatus.DELETED_BY_PROVIDER);
+        Stack stack = createStack(List.of(InstanceStatus.DELETED_BY_PROVIDER, InstanceStatus.DELETED_BY_PROVIDER));
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
@@ -400,19 +416,22 @@ class RepairInstancesServiceTest {
         return healthDetailsFreeIpaResponse;
     }
 
-    private Stack createStack(InstanceStatus instanceStatus1, InstanceStatus instanceStatus2) {
+    private Stack createStack(List<InstanceStatus> instanceStatuses) {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setEnvironmentCrn(ENVIRONMENT_ID1);
-        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
-        instanceMetaData1.setInstanceId("i-1");
-        instanceMetaData1.setInstanceStatus(instanceStatus1);
-        InstanceMetaData instanceMetaData2 = new InstanceMetaData();
-        instanceMetaData2.setInstanceId("i-2");
-        instanceMetaData2.setInstanceStatus(instanceStatus2);
+        int i = 1;
+        Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
+        for (InstanceStatus instanceStatus : instanceStatuses) {
+            InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setInstanceId("i-" + i);
+            instanceMetaData.setInstanceStatus(instanceStatus);
+            instanceMetaDataSet.add(instanceMetaData);
+            i++;
+        }
         InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData1, instanceMetaData2));
-        instanceGroup.setNodeCount(2);
+        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
+        instanceGroup.setNodeCount(instanceMetaDataSet.size());
         stack.setInstanceGroups(Set.of(instanceGroup));
         return stack;
     }

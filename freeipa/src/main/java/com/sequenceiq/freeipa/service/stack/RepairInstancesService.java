@@ -76,15 +76,23 @@ public class RepairInstancesService {
     @Inject
     private StackUpdater stackUpdater;
 
-    private void validate(String accountId, Stack stack, Set<InstanceMetaData> remainingInstances, Collection<InstanceMetaData> instancesToRepair) {
+    private void validate(String accountId, Stack stack, Set<InstanceMetaData> remainingGoodInstances, Set<InstanceMetaData> remainingBadInstances,
+            Collection<InstanceMetaData> instancesToRepair) {
+        LOGGER.debug("Validating repair for account {} and stack ID {}. Remaining good instances [{}]. Remaining bad instances [{}]. Instances to repair [{}].",
+                accountId, stack.getId(), remainingGoodInstances, remainingBadInstances, instancesToRepair);
         if (!entitlementService.freeIpaHaEnabled(INTERNAL_ACTOR_CRN, accountId)) {
             throw new BadRequestException("The FreeIPA HA capability is disabled.");
         }
         if (instancesToRepair.isEmpty()) {
             throw new NotFoundException("No unhealthy instances to repair.  Maybe use the force option.");
         }
-        if (remainingInstances.isEmpty()) {
-            throw new BadRequestException("At least one instance must remain running during a repair.");
+        if (remainingGoodInstances.isEmpty()) {
+            throw new BadRequestException("At least one instance must remain running with a good status during a repair.");
+        }
+        if (!remainingBadInstances.isEmpty()) {
+            String errorMsg = "At least one remaining non-repaired instance has a bad status. All remaining instances must have a good status during a repair.";
+            LOGGER.error("{}. The following instances have a bad status: [{}]", errorMsg, remainingBadInstances);
+            throw new BadRequestException(errorMsg);
         }
         if (stack.getInstanceGroups().isEmpty()) {
             throw new BadRequestException("At least one instace group must be present for a repair.");
@@ -166,17 +174,10 @@ public class RepairInstancesService {
         Map<String, InstanceMetaData> instancesToRepair =
                 getInstancesToRepair(healthMap, allInstancesByInstanceId, request.getInstanceIds(), request.isForceRepair(), false);
 
-        Set<InstanceMetaData> remainingInstances = allInstancesByInstanceId.values().stream()
-                .filter(instanceMetaData -> !instancesToRepair.containsKey(instanceMetaData.getInstanceId()))
-                .filter(instanceMetaData -> {
-                    if (request.isForceRepair()) {
-                        return !INVALID_REPAIR_STATUSES.contains(instanceMetaData.getInstanceStatus());
-                    } else {
-                        return healthMap.containsKey(instanceMetaData.getInstanceId()) && healthMap.get(instanceMetaData.getInstanceId()).isAvailable();
-                    }
-                })
-                .collect(Collectors.toSet());
-        validate(accountId, stack, remainingInstances, instancesToRepair.values());
+        Set<InstanceMetaData> remainingGoodInstances =
+                getRemainingGoodInstances(allInstancesByInstanceId, instancesToRepair, healthMap, request.isForceRepair());
+        Set<InstanceMetaData> remainingBadInstances = getRemainingBadInstances(allInstancesByInstanceId, instancesToRepair, healthMap, request.isForceRepair());
+        validate(accountId, stack, remainingGoodInstances, remainingBadInstances, instancesToRepair.values());
         int nodeCount = stack.getInstanceGroups().stream().findFirst().get().getNodeCount();
 
         List<String> additionalTerminatedInstanceIds = getAdditionalTerminatedInstanceIds(allInstancesByInstanceId.values(), request.getInstanceIds());
@@ -188,6 +189,39 @@ public class RepairInstancesService {
                     operation.getOperationId(), nodeCount, instancesToRepair.keySet().stream().collect(Collectors.toList()), additionalTerminatedInstanceIds));
         }
         return operationToOperationStatusConverter.convert(operation);
+    }
+
+    private Set<InstanceMetaData> getRemainingGoodInstances(Map<String, InstanceMetaData> allInstancesByInstanceId,
+            Map<String, InstanceMetaData> instancesToRepair, Map<String, InstanceStatus> healthMap, boolean forceRepair) {
+        Set<InstanceMetaData> remainingGoodInstances = allInstancesByInstanceId.values().stream()
+                .filter(instanceMetaData -> !instancesToRepair.containsKey(instanceMetaData.getInstanceId()))
+                .filter(instanceMetaData -> {
+                    if (forceRepair) {
+                        return !INVALID_REPAIR_STATUSES.contains(instanceMetaData.getInstanceStatus());
+                    } else {
+                        return healthMap.containsKey(instanceMetaData.getInstanceId()) && healthMap.get(instanceMetaData.getInstanceId()).isAvailable();
+                    }
+                })
+                .collect(Collectors.toSet());
+        LOGGER.debug("Remaining good instances [{}]", remainingGoodInstances);
+        return remainingGoodInstances;
+    }
+
+    private Set<InstanceMetaData> getRemainingBadInstances(Map<String, InstanceMetaData> allInstancesByInstanceId,
+            Map<String, InstanceMetaData> instancesToRepair, Map<String, InstanceStatus> healthMap, boolean forceRepair) {
+        Set<InstanceMetaData> remainingBadInstances = allInstancesByInstanceId.values().stream()
+                .filter(instanceMetaData -> !instancesToRepair.containsKey(instanceMetaData.getInstanceId()))
+                .filter(instanceMetaData -> !instanceMetaData.isTerminated())
+                .filter(instanceMetaData -> {
+                    if (forceRepair) {
+                        return INVALID_REPAIR_STATUSES.contains(instanceMetaData.getInstanceStatus());
+                    } else {
+                        return !healthMap.containsKey(instanceMetaData.getInstanceId()) || !healthMap.get(instanceMetaData.getInstanceId()).isAvailable();
+                    }
+                })
+                .collect(Collectors.toSet());
+        LOGGER.debug("Remaining bad instances [{}]", remainingBadInstances);
+        return remainingBadInstances;
     }
 
     /**
