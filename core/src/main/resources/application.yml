@@ -83,6 +83,9 @@ distrox:
     instance:
       types: true
 
+datalake:
+  validateAvailability: true
+
 altus:
   audit:
     enabled: true
