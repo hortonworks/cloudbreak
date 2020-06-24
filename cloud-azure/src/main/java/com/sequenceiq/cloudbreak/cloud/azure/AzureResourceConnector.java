@@ -201,8 +201,6 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         Boolean singleResourceGroup = azureResourceGroupMetadataProvider.useSingleResourceGroup(stack);
 
         if (singleResourceGroup) {
-            List<CloudResource> cloudResourceList = collectResourcesToRemove(ac, stack, resources, azureUtils.getInstanceList(stack));
-            resources.addAll(cloudResourceList);
             azureTerminationHelperService.terminate(ac, stack, resources);
             return check(ac, Collections.emptyList());
         } else {
@@ -253,10 +251,8 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             List<CloudResource> resources, List<CloudInstance> vms) {
 
         List<CloudResource> result = Lists.newArrayList();
-        // This filters out resources like Availablity Sets, so needed only for downscales
-        if (azureUtils.getInstanceList(stack).size() != vms.size()) {
-            result.addAll(getDeletableResources(resources, vms));
-        }
+
+        result.addAll(getDeletableResources(resources, vms));
         result.addAll(collectProviderSpecificResources(resources, vms));
         return result;
     }
@@ -272,6 +268,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                 }
             }
         }
+        LOGGER.debug("Collected deletable resources for downscale are: {}", result.toString());
         return result;
     }
 
