@@ -192,6 +192,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String DATAHUB_AZURE_AUTOSCALING = "DATAHUB_AZURE_AUTOSCALING";
 
+    private static final String CDP_AZURE_SINGLE_RESOURCE_GROUP = "CDP_AZURE_SINGLE_RESOURCE_GROUP";
+
     private static final String MOCK_RESOURCE = "mock_resource";
 
     private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
@@ -243,6 +245,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.freeipadlebsencryption.enable}")
     private boolean enableFreeIpaDlEbsEncryption;
+
+    @Value("${auth.mock.azure.single.resourcegroup.enable}")
+    private boolean enableAzureSingleResourceGroupDeployment;
 
     private String cbLicense;
 
@@ -499,6 +504,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableFreeIpaDlEbsEncryption) {
             builder.addEntitlements(createEntitlement(CDP_FREEIPA_DL_EBS_ENCRYPTION));
+        }
+        if (enableAzureSingleResourceGroupDeployment) {
+            builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

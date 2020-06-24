@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AUTOMATIC_USERSYNC_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE;
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE_SINGLE_RESOURCE_GROUP;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_BASE_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_CLOUD_STORAGE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FMS_CLUSTER_PROXY;
@@ -89,6 +90,11 @@ class EntitlementServiceTest {
                         (EntitlementCheckFunction) EntitlementService::freeIpaDlEbsEncryptionEnabled, false},
                 {"CDP_FREEIPA_DL_EBS_ENCRYPTION == true", CDP_FREEIPA_DL_EBS_ENCRYPTION,
                         (EntitlementCheckFunction) EntitlementService::freeIpaDlEbsEncryptionEnabled, true},
+
+                {"CDP_AZURE_SINGLE_RESOURCE_GROUP == false", CDP_AZURE_SINGLE_RESOURCE_GROUP,
+                        (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, false},
+                {"CDP_AZURE_SINGLE_RESOURCE_GROUP == true", CDP_AZURE_SINGLE_RESOURCE_GROUP,
+                        (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, true},
         };
     }
 
