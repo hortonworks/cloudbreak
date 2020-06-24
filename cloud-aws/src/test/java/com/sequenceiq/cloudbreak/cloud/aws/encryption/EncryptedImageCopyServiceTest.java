@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyS
 import static com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService.SNAPSHOT_NOT_FOUND_MSG_CODE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,15 +17,18 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.migrationsupport.rules.ExpectedExceptionSupport;
 import org.junit.rules.ExpectedException;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -56,6 +60,9 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
+@ExtendWith(ExpectedExceptionSupport.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class EncryptedImageCopyServiceTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
@@ -90,9 +97,8 @@ public class EncryptedImageCopyServiceTest {
 
     private Optional<CloudFileSystemView> identity = Optional.empty();
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         when(cloudStack.getImage().getImageName()).thenReturn("ami-12345678");
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
     }
@@ -101,6 +107,10 @@ public class EncryptedImageCopyServiceTest {
     public void testCreateEncryptedImagesWhenNoEncryptionIsRequired() {
         InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
                 Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 0L, "imageId");
+        testCreateEncryptedImagesWhenNoImagesAreExpected(temp);
+    }
+
+    private void testCreateEncryptedImagesWhenNoImagesAreExpected(InstanceTemplate temp) {
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         List<Group> groups = new ArrayList<>();
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30, identity));
@@ -109,7 +119,14 @@ public class EncryptedImageCopyServiceTest {
 
         Map<String, String> encryptedImages = underTest.createEncryptedImages(authenticatedContext(), cloudStack, resourceNotifier);
 
-        Assert.assertTrue(encryptedImages.isEmpty());
+        assertThat(encryptedImages).isEmpty();
+    }
+
+    @Test
+    public void testCreateEncryptedImagesWhenFastEncryptionIsRequired() {
+        InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true, AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, true), 0L, "imageId");
+        testCreateEncryptedImagesWhenNoImagesAreExpected(temp);
     }
 
     @Test
@@ -134,8 +151,8 @@ public class EncryptedImageCopyServiceTest {
         verify(ec2Client, times(1)).copyImage(any());
         verify(resourceNotifier, times(1)).notifyAllocation(any(), any());
         verify(waiter, times(1)).run(any());
-        Assert.assertEquals(encryptedImages.size(), 2);
-        Assert.assertTrue(encryptedImages.values().stream().allMatch(el -> el.equals(encryptedImageId)));
+        assertThat(encryptedImages.size()).isEqualTo(2);
+        assertThat(encryptedImages.values().stream().allMatch(el -> el.equals(encryptedImageId))).isTrue();
     }
 
     @Test
@@ -161,12 +178,12 @@ public class EncryptedImageCopyServiceTest {
         verify(ec2Client, times(1)).copyImage(any());
         verify(resourceNotifier, times(1)).notifyAllocation(any(), any());
         verify(waiter, times(1)).run(any());
-        Assert.assertEquals(encryptedImages.size(), 2);
-        Assert.assertTrue(encryptedImages.values().stream().allMatch(el -> el.equals(encryptedImageId)));
+        assertThat(encryptedImages.size()).isEqualTo(2);
+        assertThat(encryptedImages.values().stream().allMatch(el -> el.equals(encryptedImageId))).isTrue();
     }
 
     @Test
-    public void testCreateEncryptedImagesWhenEveryGroupNeedToBeEnryptedWithDifferentKmsKeys()
+    public void testCreateEncryptedImagesWhenEveryGroupNeedToBeEncryptedWithDifferentKmsKeys()
             throws InterruptedException, ExecutionException, TimeoutException {
         String encryptedImageId = "ami-87654321";
         String secondEncryptedImageId = "ami-87652222";
@@ -198,9 +215,9 @@ public class EncryptedImageCopyServiceTest {
         verify(ec2Client, times(2)).copyImage(any());
         verify(resourceNotifier, times(2)).notifyAllocation(any(), any());
         verify(waiter, times(1)).run(any());
-        Assert.assertEquals(encryptedImages.size(), 2);
-        Assert.assertTrue(encryptedImages.containsValue(encryptedImageId));
-        Assert.assertTrue(encryptedImages.containsValue(secondEncryptedImageId));
+        assertThat(encryptedImages.size()).isEqualTo(2);
+        assertThat(encryptedImages).containsValue(encryptedImageId);
+        assertThat(encryptedImages).containsValue(secondEncryptedImageId);
     }
 
     @Test
@@ -241,9 +258,9 @@ public class EncryptedImageCopyServiceTest {
         verify(ec2Client, times(2)).copyImage(any());
         verify(resourceNotifier, times(2)).notifyAllocation(any(), any());
         verify(waiter, times(1)).run(any());
-        Assert.assertEquals(encryptedImages.size(), 2);
-        Assert.assertTrue(encryptedImages.containsValue(encryptedImageId));
-        Assert.assertTrue(encryptedImages.containsValue(secondEncryptedImageId));
+        assertThat(encryptedImages.size()).isEqualTo(2);
+        assertThat(encryptedImages).containsValue(encryptedImageId);
+        assertThat(encryptedImages).containsValue(secondEncryptedImageId);
     }
 
     @Test

@@ -19,12 +19,14 @@ dependencies {
   compile project(':template-manager-tag')
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.9.12'
+  compile group: 'net.bytebuddy',                 name: 'byte-buddy',                     version: '1.9.12'
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   compile group: 'commons-io',                    name: 'commons-io',                     version: '2.4'
   compile group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
-  compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion)      { exclude group: 'commons-logging' }
+  compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion) {
+      exclude group: 'commons-logging'
+  }
   compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
   compile group: 'commons-net',                   name: 'commons-net',                    version: '3.6'
 
@@ -32,9 +34,10 @@ dependencies {
 
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testCompile group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version: springBootVersion
-  testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
+  testCompile (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {
       exclude group: 'org.hamcrest'
   }
-  testCompile (group: 'org.hamcrest', name: 'java-hamcrest', version: hamcrestVersion)
+  testCompile (group: 'org.hamcrest',             name: 'java-hamcrest',                  version: hamcrestVersion)
   testCompile group: 'org.assertj',               name: 'assertj-core',                   version: assertjVersion
+  testImplementation group: 'org.junit.jupiter',  name: 'junit-jupiter-migrationsupport', version: junitJupiterVersion
 }

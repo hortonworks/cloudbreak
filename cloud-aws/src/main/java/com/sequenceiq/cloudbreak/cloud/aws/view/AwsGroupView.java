@@ -50,9 +50,12 @@ public class AwsGroupView {
 
     private final int onDemandPercentage;
 
-    public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Boolean ebsEncrypted, Integer rootVolumeSize,
-            Map<String, Long> volumeCounts, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId, Boolean kmsKeyDefined,
-            String kmsKey, String encryptedAMI, boolean useNetworkCidrAsSourceForDefaultRules, String instanceProfile, int onDemandPercentage) {
+    private final Boolean fastEbsEncryptionEnabled;
+
+    public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, boolean ebsEncrypted, Integer rootVolumeSize,
+            Map<String, Long> volumeCounts, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId, boolean kmsKeyDefined,
+            String kmsKey, String encryptedAMI, boolean useNetworkCidrAsSourceForDefaultRules, String instanceProfile, int onDemandPercentage,
+            boolean fastEbsEncryptionEnabled) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
@@ -72,6 +75,7 @@ public class AwsGroupView {
         this.instanceProfile = instanceProfile;
         hasInstanceProfile = instanceProfile != null;
         this.onDemandPercentage = onDemandPercentage;
+        this.fastEbsEncryptionEnabled = fastEbsEncryptionEnabled;
     }
 
     public static String getAutoScalingGroupName(String groupName) {
@@ -173,4 +177,9 @@ public class AwsGroupView {
     public int getOnDemandPercentage() {
         return onDemandPercentage;
     }
+
+    public Boolean getFastEbsEncryptionEnabled() {
+        return fastEbsEncryptionEnabled;
+    }
+
 }

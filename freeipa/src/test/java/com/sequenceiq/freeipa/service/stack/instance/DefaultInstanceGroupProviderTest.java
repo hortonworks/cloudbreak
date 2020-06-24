@@ -68,6 +68,22 @@ class DefaultInstanceGroupProviderTest {
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
         assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.FALSE);
+        assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
+    }
+
+    @Test
+    void createDefaultTemplateTestVolumeEncryptionAddedWhenAwsAndEntitledAndFastEncryption() {
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.fastEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID);
+
+        assertThat(result).isNotNull();
+        Json attributes = result.getAttributes();
+        assertThat(attributes).isNotNull();
+        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
         assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
     }
 

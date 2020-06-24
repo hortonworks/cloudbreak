@@ -165,7 +165,8 @@ public class MockUserManagementServiceTest {
         assertThat(res.hasAccount()).isTrue();
         Account account = res.getAccount();
         List<String> entitlements = account.getEntitlementsList().stream().map(Entitlement::getEntitlementName).collect(Collectors.toList());
-        assertThat(entitlements).contains("CDP_AZURE", "CDP_AUTOMATIC_USERSYNC_POLLER", "CLOUDERA_INTERNAL_ACCOUNT", "LOCAL_DEV");
+        assertThat(entitlements).contains("CDP_AZURE", "CDP_AUTOMATIC_USERSYNC_POLLER", "CLOUDERA_INTERNAL_ACCOUNT", "DATAHUB_AZURE_AUTOSCALING",
+                "DATAHUB_AWS_AUTOSCALING", "LOCAL_DEV");
     }
 
     static Object[][] conditionalEntitlementDataProvider() {
@@ -176,6 +177,9 @@ public class MockUserManagementServiceTest {
 
                 {"enableFreeIpaHa false", "enableFreeIpaHa", false, "CDP_FREEIPA_HA", false},
                 {"enableFreeIpaHa true", "enableFreeIpaHa", true, "CDP_FREEIPA_HA", true},
+
+                {"enableFreeIpaHaRepair false", "enableFreeIpaHaRepair", false, "CDP_FREEIPA_HA_REPAIR", false},
+                {"enableFreeIpaHaRepair true", "enableFreeIpaHaRepair", true, "CDP_FREEIPA_HA_REPAIR", true},
 
                 {"enableCloudStorageValidation false", "enableCloudStorageValidation", false, "CDP_CLOUD_STORAGE_VALIDATION", false},
                 {"enableCloudStorageValidation true", "enableCloudStorageValidation", true, "CDP_CLOUD_STORAGE_VALIDATION", true},
@@ -188,6 +192,12 @@ public class MockUserManagementServiceTest {
 
                 {"enableFreeIpaDlEbsEncryption false", "enableFreeIpaDlEbsEncryption", false, "CDP_FREEIPA_DL_EBS_ENCRYPTION", false},
                 {"enableFreeIpaDlEbsEncryption true", "enableFreeIpaDlEbsEncryption", true, "CDP_FREEIPA_DL_EBS_ENCRYPTION", true},
+
+                {"enableAzureSingleResourceGroupDeployment false", "enableAzureSingleResourceGroupDeployment", false, "CDP_AZURE_SINGLE_RESOURCE_GROUP", false},
+                {"enableAzureSingleResourceGroupDeployment true", "enableAzureSingleResourceGroupDeployment", true, "CDP_AZURE_SINGLE_RESOURCE_GROUP", true},
+
+                {"enableFastEbsEncryption false", "enableFastEbsEncryption", false, "CDP_CB_FAST_EBS_ENCRYPTION", false},
+                {"enableFastEbsEncryption true", "enableFastEbsEncryption", true, "CDP_CB_FAST_EBS_ENCRYPTION", true},
         };
     }
 

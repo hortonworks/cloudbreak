@@ -43,6 +43,24 @@ public class AwsInstanceTemplate extends InstanceTemplate {
      */
     public static final String EC2_SPOT_PERCENTAGE = "spotPercentage";
 
+    /**
+     * Key of the optional dynamic parameter denoting whether speed optimizations for the EBS encryption setup logic are enabled or not. This applies to both
+     * root & attached (data) volumes.
+     *
+     * <p>
+     *     Permitted values:
+     *     <ul>
+     *         <li>{@code Boolean.TRUE} instance, {@code "true"} (ignoring case): EBS encryption will be set up using the new fast logic.</li>
+     *         <li>{@code Boolean.FALSE} instance, {@code "false"} (or any other {@code String} not equal to {@code "true"} ignoring case), {@code null}:
+     *         EBS encryption provisioning will utilize the legacy slow logic.</li>
+     *     </ul>
+     * </p>
+     *
+     * @see #putParameter(String, Object)
+     * @see Boolean#parseBoolean(String)
+     */
+    public static final String FAST_EBS_ENCRYPTION_ENABLED = "fastEbsEncryption";
+
     public AwsInstanceTemplate(String flavor, String groupName, Long privateId, Collection<Volume> volumes, InstanceStatus status,
             Map<String, Object> parameters, Long templateId, String imageId) {
         super(flavor, groupName, privateId, volumes, status, parameters, templateId, imageId);

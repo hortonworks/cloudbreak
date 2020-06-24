@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
 import com.sequenceiq.cloudbreak.cloud.aws.service.AwsResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -172,6 +173,8 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
         List<Future<?>> futures = new ArrayList<>();
         String snapshotId = getEbsSnapshotIdIfNeeded(auth, cloudStack, group);
+        boolean encryptedVolumeUsingFastApproach = isEncryptedVolumeUsingFastApproachRequested(group);
+        String volumeEncryptionKey = getVolumeEncryptionKey(group, encryptedVolumeUsingFastApproach);
         TagSpecification tagSpecification = new TagSpecification()
                 .withResourceType(com.amazonaws.services.ec2.model.ResourceType.Volume)
                 .withTags(awsTaggingService.prepareEc2Tags(auth, cloudStack.getTags()));
@@ -190,7 +193,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             VolumeSetAttributes volumeSet = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, ephemeralCount.intValue());
             futures.addAll(volumeSet.getVolumes().stream()
-                    .map(createVolumeRequest(snapshotId, tagSpecification, volumeSet))
+                    .map(createVolumeRequest(snapshotId, encryptedVolumeUsingFastApproach, volumeEncryptionKey, tagSpecification, volumeSet))
                     .map(request -> intermediateBuilderExecutor.submit(() -> {
                         CreateVolumeResult result = client.createVolume(request);
                         String volumeId = result.getVolume().getVolumeId();
@@ -226,18 +229,39 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .build();
     }
 
-    private Function<VolumeSetAttributes.Volume, CreateVolumeRequest> createVolumeRequest(String snapshotId, TagSpecification tagSpecification,
-            VolumeSetAttributes volumeSet) {
-        return volume -> new CreateVolumeRequest()
-                .withAvailabilityZone(volumeSet.getAvailabilityZone())
-                .withSize(volume.getSize())
-                .withSnapshotId(snapshotId)
-                .withTagSpecifications(tagSpecification)
-                .withVolumeType(volume.getType());
+    private boolean isFastEbsEncryptionEnabled(Group group) {
+        return new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).isFastEbsEncryptionEnabled();
+    }
+
+    private boolean isEncryptedVolumeUsingFastApproachRequested(Group group) {
+        return new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).isEncryptedVolumes() && isFastEbsEncryptionEnabled(group);
+    }
+
+    private String getVolumeEncryptionKey(Group group, boolean encryptedVolumeUsingFastApproach) {
+        AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate());
+        return encryptedVolumeUsingFastApproach && awsInstanceView.isKmsCustom() ? awsInstanceView.getKmsKey() : null;
+    }
+
+    private Function<VolumeSetAttributes.Volume, CreateVolumeRequest> createVolumeRequest(String snapshotId, boolean encryptedVolumeUsingFastApproach,
+            String volumeEncryptionKey, TagSpecification tagSpecification, VolumeSetAttributes volumeSet) {
+        return volume -> {
+            CreateVolumeRequest createVolumeRequest = new CreateVolumeRequest()
+                    .withAvailabilityZone(volumeSet.getAvailabilityZone())
+                    .withSize(volume.getSize())
+                    .withSnapshotId(snapshotId)
+                    .withTagSpecifications(tagSpecification)
+                    .withVolumeType(volume.getType());
+            if (snapshotId == null) {
+                createVolumeRequest
+                        .withEncrypted(encryptedVolumeUsingFastApproach)
+                        .withKmsKeyId(volumeEncryptionKey);
+            }
+            return createVolumeRequest;
+        };
     }
 
     private String getEbsSnapshotIdIfNeeded(AuthenticatedContext ac, CloudStack cloudStack, Group group) {
-        if (!encryptedSnapshotService.isEncryptedVolumeRequested(group)) {
+        if (!encryptedSnapshotService.isEncryptedVolumeRequested(group) || isFastEbsEncryptionEnabled(group)) {
             return null;
         }
 
@@ -382,11 +406,11 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         AwsCredentialView credentialView = new AwsCredentialView(auth.getCloudCredential());
         String regionName = auth.getCloudContext().getLocation().getRegion().value();
         return new AmazonEc2RetryClient(awsClient.createAccess(credentialView, regionName), retry);
-
     }
 
     @Override
     public int order() {
         return 1;
     }
+
 }

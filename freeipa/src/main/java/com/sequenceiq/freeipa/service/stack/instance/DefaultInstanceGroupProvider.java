@@ -49,6 +49,7 @@ public class DefaultInstanceGroupProvider {
             // FIXME Enable EBS encryption with appropriate KMS key
             template.setAttributes(new Json(Map.<String, Object>ofEntries(
                     entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE),
+                    entry(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, entitlementService.fastEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, accountId)),
                     entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()))));
         }
         return template;
