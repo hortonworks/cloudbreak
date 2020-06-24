@@ -4,7 +4,7 @@ public class ImageStatusResult {
 
     public static final int COMPLETED = 100;
 
-    public static final int HALF = 100;
+    public static final int HALF = 50;
 
     public static final int INIT = 0;
 
