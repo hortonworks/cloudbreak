@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.audit.converter.auditeventname.rest.datahub;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.audit.converter.auditeventname.rest.RestCommonService;
 import com.sequenceiq.cloudbreak.audit.converter.auditeventname.rest.RestResourceAuditEventConverter;
 import com.sequenceiq.cloudbreak.audit.model.AuditEventName;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 
 @Component
@@ -31,13 +32,15 @@ public class DatahubRestResourceAuditEventConverter implements RestResourceAudit
                 eventName = updateRest(resourceEvent);
             }
         } else if ("DELETE".equals(method)) {
-            eventName = deletionRest(resourceEvent);
+            eventName = deletionRest(resourceEvent, structuredEvent.getOperation());
         }
         return eventName;
     }
 
-    private AuditEventName deletionRest(String resourceEvent) {
-        if (resourceEvent == null) {
+    private AuditEventName deletionRest(String resourceEvent, OperationDetails operationDetails) {
+        if (StringUtils.isEmpty(resourceEvent)
+                || operationDetails.getResourceName().equals(resourceEvent)
+                || operationDetails.getResourceCrn().equals(resourceEvent)) {
             return AuditEventName.DELETE_DATAHUB_CLUSTER;
         } else if ("instance".equals(resourceEvent) || "instances".equals(resourceEvent)) {
             return AuditEventName.INSTANCE_DELETE_DATAHUB_CLUSTER;
@@ -74,8 +77,6 @@ public class DatahubRestResourceAuditEventConverter implements RestResourceAudit
 
     @Override
     public Map<String, Object> requestParameters(StructuredRestCallEvent structuredEvent) {
-        Map<String, Object> params = new HashMap<>();
-        restCommonService.addClusterCrnAndNameIfPresent(structuredEvent, params);
-        return params;
+        return restCommonService.addClusterCrnAndNameIfPresent(structuredEvent);
     }
 }

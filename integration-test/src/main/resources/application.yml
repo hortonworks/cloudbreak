@@ -236,3 +236,6 @@ integrationtest:
     url: https://logs-dev.sre.cloudera.com/app/kibana#/discover
     cluster:
     app:
+altus:
+  audit:
+    endpoint: localhost:8982

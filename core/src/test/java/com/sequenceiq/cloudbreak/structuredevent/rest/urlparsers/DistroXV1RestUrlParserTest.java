@@ -49,6 +49,7 @@ public class DistroXV1RestUrlParserTest {
             assertEquals(resourceName, underTest.getResourceName(matcher));
             assertEquals(resourceCrn, underTest.getResourceCrn(matcher));
             assertEquals(resourceType, underTest.getResourceType(matcher));
+            assertEquals(resourceEvent, underTest.getResourceEvent(matcher));
         } else {
             assertFalse(matcher.matches());
         }

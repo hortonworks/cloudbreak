@@ -11,6 +11,7 @@ import org.testng.ITestContext;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.assertion.audit.AuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -48,6 +49,9 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
     @Inject
     private SdxTestClient sdxTestClient;
 
+    @Inject
+    private AuditGrpcServiceAssertion auditGrpcServiceAssertion;
+
     //CB-7294
     @Ignore
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -83,9 +87,11 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
                     .when(distroXClient.stop(), key(stack))
                     .awaitForFlow(key(stack))
                     .await(STACK_STOPPED, key(stack))
+                    .then(auditGrpcServiceAssertion::distroxStop)
                     .when(distroXClient.start(), key(stack))
                     .awaitForFlow(key(stack))
                     .await(STACK_AVAILABLE, key(stack))
+                    .then(auditGrpcServiceAssertion::distroxStart)
                     .when(distroXClient.scale(params.getHostgroup(), current))
                     .awaitForFlow(key(stack))
                     .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
