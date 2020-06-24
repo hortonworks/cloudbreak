@@ -7,8 +7,6 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 
-import com.amazonaws.services.rds.AmazonRDS;
-import com.amazonaws.services.rds.AmazonRDSClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -32,6 +30,8 @@ import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
+import com.amazonaws.services.rds.AmazonRDS;
+import com.amazonaws.services.rds.AmazonRDSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
@@ -54,6 +54,8 @@ public class AwsClient {
 
     // Default retries is 3. This allows for more time for backoff during throttling
     private static final int MAX_CLIENT_RETRIES = 30;
+
+    private static final int MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING = 200;
 
     @Inject
     private AwsSessionCredentialClient credentialClient;
@@ -133,8 +135,8 @@ public class AwsClient {
 
     public AmazonCloudFormationClient createCloudFormationClient(AwsCredentialView awsCredential, String regionName) {
         AmazonCloudFormationClient client = isRoleAssumeRequired(awsCredential) ?
-                new AmazonCloudFormationClient(createAwsSessionCredentialProvider(awsCredential)) :
-                new AmazonCloudFormationClient(createAwsCredentials(awsCredential));
+                new AmazonCloudFormationClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
+                new AmazonCloudFormationClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
         client.setRegion(RegionUtils.getRegion(regionName));
         return client;
     }
@@ -184,6 +186,8 @@ public class AwsClient {
 
     private ClientConfiguration getDefaultClientConfiguration() {
         return new ClientConfiguration()
+                .withThrottledRetries(true)
+                .withMaxConsecutiveRetriesBeforeThrottling(MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING)
                 .withRetryPolicy(PredefinedRetryPolicies.getDefaultRetryPolicyWithCustomMaxRetries(MAX_CLIENT_RETRIES));
     }
 

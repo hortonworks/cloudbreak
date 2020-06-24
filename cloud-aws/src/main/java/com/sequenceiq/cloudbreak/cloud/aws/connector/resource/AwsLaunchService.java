@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,6 @@ import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.amazonaws.services.ec2.model.PrefixList;
 import com.amazonaws.waiters.Waiter;
-import com.amazonaws.waiters.WaiterParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNetworkCfTemplateProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelCo
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
@@ -109,8 +111,9 @@ public class AwsLaunchService {
         Network network = stack.getNetwork();
         AwsNetworkView awsNetworkView = new AwsNetworkView(network);
         boolean mapPublicIpOnLaunch = awsNetworkService.isMapPublicOnLaunch(awsNetworkView, amazonEC2Client);
+        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
         try {
-            cfRetryClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
+            cfRetryClient.describeStacks(describeStacksRequest);
             LOGGER.debug("Stack already exists: {}", cFStackName);
         } catch (AmazonServiceException ignored) {
             boolean existingVPC = awsNetworkView.isExistingVPC();
@@ -146,11 +149,8 @@ public class AwsLaunchService {
 
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
         Waiter<DescribeStacksRequest> creationWaiter = cfClient.waiters().stackCreateComplete();
-        try {
-            creationWaiter.run(new WaiterParameters<>(new DescribeStacksRequest().withStackName(cFStackName)));
-        } catch (Exception e) {
-            throw new CloudConnectorException(e.getMessage(), e);
-        }
+        StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
+        run(creationWaiter, describeStacksRequest, stackCancellationCheck);
 
         List<CloudResource> networkResources = saveGeneratedSubnet(ac, stack, cFStackName, cfRetryClient, resourceNotifier);
         suspendAutoscalingGoupsWhenNewInstancesAreReady(ac, stack);
