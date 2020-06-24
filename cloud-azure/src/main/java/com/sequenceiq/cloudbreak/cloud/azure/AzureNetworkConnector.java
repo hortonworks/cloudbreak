@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
+import com.sequenceiq.cloudbreak.common.json.Json;
 
 @Service
 public class AzureNetworkConnector implements NetworkConnector {
@@ -84,7 +85,8 @@ public class AzureNetworkConnector implements NetworkConnector {
         try {
             resourceGroup = getOrCreateResourceGroup(azureClient, networkRequest);
             String template = azureNetworkTemplateBuilder.build(networkRequest, subnetRequests, resourceGroup.name());
-            templateDeployment = azureClient.createTemplateDeployment(resourceGroup.name(), networkRequest.getStackName(), template, "");
+            String parametersMapAsString = new Json(Map.of()).getValue();
+            templateDeployment = azureClient.createTemplateDeployment(resourceGroup.name(), networkRequest.getStackName(), template, parametersMapAsString);
         } catch (CloudException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);
             if (e.body() != null && e.body().details() != null) {

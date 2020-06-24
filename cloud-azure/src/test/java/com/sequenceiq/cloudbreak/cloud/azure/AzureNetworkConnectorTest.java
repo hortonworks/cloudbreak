@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
+import com.sequenceiq.cloudbreak.common.json.Json;
 
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
@@ -76,7 +77,7 @@ public class AzureNetworkConnectorTest {
 
     private static final String STACK = "testEnv-network-stack";
 
-    private static final String PARAMETER = "";
+    private static final String PARAMETER = new Json(Map.of()).getValue();
 
     private static final Region REGION = Region.region("US_WEST_2");
 
