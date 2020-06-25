@@ -80,8 +80,8 @@ public class RepairInstancesService {
             Collection<InstanceMetaData> instancesToRepair) {
         LOGGER.debug("Validating repair for account {} and stack ID {}. Remaining good instances [{}]. Remaining bad instances [{}]. Instances to repair [{}].",
                 accountId, stack.getId(), remainingGoodInstances, remainingBadInstances, instancesToRepair);
-        if (!entitlementService.freeIpaHaEnabled(INTERNAL_ACTOR_CRN, accountId)) {
-            throw new BadRequestException("The FreeIPA HA capability is disabled.");
+        if (!entitlementService.freeIpaHaRepairEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+            throw new BadRequestException("The FreeIPA HA Repair capability is disabled.");
         }
         if (instancesToRepair.isEmpty()) {
             throw new NotFoundException("No unhealthy instances to repair.  Maybe use the force option.");
