@@ -19,4 +19,4 @@ auth:
     sshpublickey.file: key.pub
     raz.enable: true
     freeipadlebsencryption.enable: false
-    azure.single.resourcegroup.enable: true
+    azure.single.resourcegroup.enable: false
