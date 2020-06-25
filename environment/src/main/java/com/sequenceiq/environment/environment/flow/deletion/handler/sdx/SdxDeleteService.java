@@ -35,7 +35,7 @@ public class SdxDeleteService {
         this.environmentResourceDeletionService = environmentResourceDeletionService;
     }
 
-    public void deleteSdxClustersForEnvironment(PollingConfig pollingConfig, Environment environment) {
+    public void deleteSdxClustersForEnvironment(PollingConfig pollingConfig, Environment environment, boolean force) {
         Set<String> sdxCrnsOrDatalakeName = environmentResourceDeletionService.getAttachedSdxClusterCrns(environment);
         boolean legacySdxEndpoint = false;
         // if someone use create the clusters via internal cluster API, in this case the SDX service does not know about these clusters,
@@ -49,18 +49,19 @@ public class SdxDeleteService {
         if (sdxCrnsOrDatalakeName.isEmpty()) {
             LOGGER.info("No Data Lake clusters found for environment.");
         } else {
-            waitSdxClustersDeletion(pollingConfig, environment, sdxCrnsOrDatalakeName, legacySdxEndpoint);
+            waitSdxClustersDeletion(pollingConfig, environment, sdxCrnsOrDatalakeName, legacySdxEndpoint, force);
             LOGGER.info("Data Lake deletion finished.");
         }
     }
 
-    private void waitSdxClustersDeletion(PollingConfig pollingConfig, Environment environment, Set<String> sdxCrnsOrDatalakeName, boolean legacySdxEndpoint) {
+    private void waitSdxClustersDeletion(PollingConfig pollingConfig, Environment environment, Set<String> sdxCrnsOrDatalakeName,
+        boolean legacySdxEndpoint, boolean force) {
         LOGGER.debug("Calling sdxEndpoint.deleteByCrn for all data lakes [{}]", String.join(", ", sdxCrnsOrDatalakeName));
 
         if (legacySdxEndpoint) {
-            sdxCrnsOrDatalakeName.forEach(name -> stackV4Endpoint.delete(0L, name, true));
+            sdxCrnsOrDatalakeName.forEach(name -> stackV4Endpoint.delete(0L, name, force));
         } else {
-            sdxCrnsOrDatalakeName.forEach(crn -> sdxEndpoint.deleteByCrn(crn, true));
+            sdxCrnsOrDatalakeName.forEach(crn -> sdxEndpoint.deleteByCrn(crn, force));
         }
 
         LOGGER.debug("Starting poller to check all Data Lake stacks for environment {} is deleted", environment.getName());

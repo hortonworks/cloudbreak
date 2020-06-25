@@ -49,7 +49,10 @@ public class DataLakeClustersDeleteHandler extends EventSenderAwareHandler<Envir
         try {
             PollingConfig pollingConfig = getPollingConfig();
             environmentService.findEnvironmentById(environmentDto.getId())
-                    .ifPresent(environment -> sdxDeleteService.deleteSdxClustersForEnvironment(pollingConfig, environment));
+                    .ifPresent(environment -> sdxDeleteService.deleteSdxClustersForEnvironment(
+                            pollingConfig,
+                            environment,
+                            environmentDeletionDto.isForceDelete()));
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
             if (environmentDeletionDto.isForceDelete()) {

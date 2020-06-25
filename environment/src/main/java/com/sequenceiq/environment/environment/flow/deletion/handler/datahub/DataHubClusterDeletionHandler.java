@@ -48,7 +48,10 @@ public class DataHubClusterDeletionHandler extends EventSenderAwareHandler<Envir
         try {
             PollingConfig pollingConfig = getPollingConfig();
             environmentService.findEnvironmentById(environmentDto.getId())
-                    .ifPresent(environment -> datahubDeletionService.deleteDatahubClustersForEnvironment(pollingConfig, environment));
+                    .ifPresent(environment -> datahubDeletionService.deleteDatahubClustersForEnvironment(
+                            pollingConfig,
+                            environment,
+                            environmentDeletionDto.isForceDelete()));
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
             if (environmentDeletionDto.isForceDelete()) {
