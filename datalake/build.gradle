@@ -31,6 +31,7 @@ dependencies {
   compile project(':status-checker')
 
   implementation     project(":freeipa-api")
+  implementation     project(':client-cm')
 
   implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                          version: okhttpVersion
   implementation     group: 'com.google.code.gson',      name: 'gson',                            version: '2.6.2'
@@ -60,6 +61,8 @@ dependencies {
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                       version: opentracingJaxrs2Version
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                         version: opentracingJdbcVersion
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',               version: springBootVersion
+
+  implementation     group: 'com.cloudera.api.swagger',    name: 'cloudera-manager-api-swagger',       version: cmClientVersion
 
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
   testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion

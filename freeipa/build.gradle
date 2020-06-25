@@ -50,7 +50,6 @@ dependencies {
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                   version: opentracingJaxrs2Version
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                     version: opentracingJdbcVersion
 
-
   implementation     group: 'org.apache.kerby',          name: 'kerb-util',                            version: '2.0.0'
   
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                     version: '1.5.3'
@@ -98,6 +97,7 @@ dependencies {
   implementation project(':notification-sender')
   implementation project(':environment-api')
   implementation project(':environment-common')
+  implementation project(':datalake-api')
   implementation project(':cluster-proxy')
   implementation project(':status-checker')
   implementation project(':template-manager-tag')

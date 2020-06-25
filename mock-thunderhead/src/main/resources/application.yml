@@ -23,3 +23,4 @@ auth:
     freeipadlebsencryption.enable: true
     azure.single.resourcegroup.enable: false
     fastebsencryption.enable: true
+    cloudidentitymappinng.enable: true

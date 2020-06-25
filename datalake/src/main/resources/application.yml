@@ -99,3 +99,6 @@ cb:
 
 notification:
   urls: http://localhost:3000/notifications
+
+clusterProxy:
+  url: http://localhost:10180/cluster-proxy
