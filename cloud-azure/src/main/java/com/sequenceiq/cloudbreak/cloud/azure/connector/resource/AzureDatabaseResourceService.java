@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -77,7 +78,8 @@ public class AzureDatabaseResourceService {
             }
         }
         try {
-            client.createTemplateDeployment(resourceGroupName, stackName, template, "");
+            String parametersMapAsString = new Json(Map.of()).getValue();
+            client.createTemplateDeployment(resourceGroupName, stackName, template, parametersMapAsString);
         } catch (CloudException e) {
             if (e.body() != null && e.body().details() != null) {
                 String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
