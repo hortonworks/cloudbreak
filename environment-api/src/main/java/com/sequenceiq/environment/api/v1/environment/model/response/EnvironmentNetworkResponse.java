@@ -40,6 +40,9 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
     @ApiModelProperty(value = EnvironmentModelDescription.MLX_SUBNETS)
     private Map<String, CloudSubnet> mlxSubnets;
 
+    @ApiModelProperty(value = EnvironmentModelDescription.CB_SUBNETS)
+    private Map<String, CloudSubnet> liftieSubnets;
+
     @ApiModelProperty(value = EnvironmentModelDescription.EXISTING_NETWORK)
     private boolean existingNetwork;
 
@@ -97,6 +100,14 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         this.mlxSubnets = mlxSubnets;
     }
 
+    public Map<String, CloudSubnet> getLiftieSubnets() {
+        return liftieSubnets;
+    }
+
+    public void setLiftieSubnets(Map<String, CloudSubnet> liftieSubnets) {
+        this.liftieSubnets = liftieSubnets;
+    }
+
     public boolean isExistingNetwork() {
         return existingNetwork;
     }
@@ -137,6 +148,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         private Map<String, CloudSubnet> dwxSubnets;
 
         private Map<String, CloudSubnet> mlxSubnets;
+
+        private Map<String, CloudSubnet> liftieSubnets;
 
         private boolean existingNetwork;
 
@@ -197,6 +210,11 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         public EnvironmentNetworkResponseBuilder withMlxSubnets(Map<String, CloudSubnet> mlxSubnets) {
             this.mlxSubnets = mlxSubnets;
+            return this;
+        }
+
+        public EnvironmentNetworkResponseBuilder withLiftieSubnets(Map<String, CloudSubnet> liftieSubnets) {
+            this.liftieSubnets = liftieSubnets;
             return this;
         }
 
@@ -275,6 +293,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setCbSubnets(cbSubnets);
             environmentNetworkResponse.setMlxSubnets(mlxSubnets);
             environmentNetworkResponse.setDwxSubnets(dwxSubnets);
+            environmentNetworkResponse.setLiftieSubnets(liftieSubnets);
             return environmentNetworkResponse;
         }
     }

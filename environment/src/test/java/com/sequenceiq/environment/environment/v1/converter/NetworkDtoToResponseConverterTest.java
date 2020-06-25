@@ -110,6 +110,7 @@ public class NetworkDtoToResponseConverterTest {
         assertEquals(network.getCbSubnets(), actual.getCbSubnets());
         assertEquals(network.getDwxSubnets(), actual.getDwxSubnets());
         assertEquals(network.getMlxSubnets(), actual.getMlxSubnets());
+        assertEquals(network.getMlxSubnets(), actual.getLiftieSubnets());
         assertEquals(PREFERRED_SUBNET_ID, actual.getPreferedSubnetId());
         assertEquals(network.getPrivateSubnetCreation(), actual.getPrivateSubnetCreation());
         assertFalse(actual.isExistingNetwork());
@@ -123,6 +124,7 @@ public class NetworkDtoToResponseConverterTest {
                 .withCbSubnets(Map.of("cb-subnetId", new CloudSubnet()))
                 .withDwxSubnets(Map.of("dvx-subnetId", new CloudSubnet()))
                 .withMlxSubnets(Map.of("mlx-subnetId", new CloudSubnet()))
+                .withLiftieSubnets(Map.of("mlx-subnetId", new CloudSubnet()))
                 .withPrivateSubnetCreation(PrivateSubnetCreation.ENABLED)
                 .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
                 .withRegistrationType(RegistrationType.CREATE_NEW);

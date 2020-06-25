@@ -46,6 +46,9 @@ public class EnvironmentNetworkTestAssertion {
         if (environment.getNetwork().getMlxSubnets().size() != 6) {
             throw new IllegalArgumentException("Mlx Subnets count must be 6!");
         }
+        if (environment.getNetwork().getLiftieSubnets().size() != 6) {
+            throw new IllegalArgumentException("Liftie Subnets count must be 6!");
+        }
         if (getSubnetsCountByType(environment, SubnetType.PUBLIC) != 3) {
             throw new IllegalArgumentException("Public Subnets count must be 6!");
         }
@@ -69,6 +72,9 @@ public class EnvironmentNetworkTestAssertion {
         }
         if (environment.getNetwork().getMlxSubnets().size() != 32) {
             throw new IllegalArgumentException("Mlx Subnets count must be 6!");
+        }
+        if (environment.getNetwork().getLiftieSubnets().size() != 6) {
+            throw new IllegalArgumentException("Liftie Subnets count must be 6!");
         }
         if (environment.getNetwork().getSubnetMetas().size() != 41) {
             throw new IllegalArgumentException("Identities should not be null in response!");
