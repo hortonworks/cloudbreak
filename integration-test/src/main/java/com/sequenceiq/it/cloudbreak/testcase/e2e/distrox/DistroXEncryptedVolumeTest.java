@@ -35,6 +35,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
         createDefaultCredential(testContext);
         createEnvironmentWithNetworkAndFreeIPA(testContext);
         initializeDefaultBlueprints(testContext);
+        createDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
