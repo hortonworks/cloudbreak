@@ -8,6 +8,7 @@ import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -101,6 +103,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return this;
     }
 
+    public SdxInternalTestDto withCustomDomain(CustomDomainSettingsV4Request customDomain) {
+        getRequest().getStackV4Request().setCustomDomain(customDomain);
+        return this;
+    }
+
     public SdxInternalTestDto withRuntimeVersion(String runtimeVersion) {
         getRequest().setRuntime(runtimeVersion);
         return this;
@@ -148,6 +155,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     public SdxInternalTestDto withDefaultSDXSettings() {
+        return withDefaultSDXSettings(Optional.empty());
+    }
+
+    public SdxInternalTestDto withDefaultSDXSettings(Optional<Integer> gatewayPort) {
         StackTestDto stack = getTestContext().given(StackTestDto.class);
         ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
 
@@ -161,6 +172,9 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withInstanceGroupsEntity(InstanceGroupTestDto.sdxHostGroup(getTestContext()))
                 .withInstanceGroups(MASTER.getName(), IDBROKER.getName())
                 .withCluster(cluster);
+        if (gatewayPort.isPresent()) {
+            stack.withGatewayPort(gatewayPort.get());
+        }
         SdxInternalTestDto sdxInternalTestDto = withStackRequest(stack.getRequest());
         sdxInternalTestDto.withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
         return sdxInternalTestDto;

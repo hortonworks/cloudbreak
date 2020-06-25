@@ -80,15 +80,20 @@ public class WaitUtil {
         int retryCount = 0;
         while (flowRunning && retryCount < maxRetry) {
             sleep(pollingInterval);
-            if (StringUtils.isNotBlank(flowChainId)) {
-                LOGGER.info("Waiting for flow chain {}, retry count {}", flowChainId, retryCount);
-                flowRunning = flowEndpoint.hasFlowRunningByChainId(flowChainId).getHasActiveFlow();
-            } else if (StringUtils.isNoneBlank(flowId)) {
-                LOGGER.info("Waiting for flow {}, retry count {}", flowId, retryCount);
-                flowRunning = flowEndpoint.hasFlowRunningByFlowId(flowId).getHasActiveFlow();
-            } else {
-                LOGGER.info("Flow id and flow chain id are empty so flow is not running");
-                flowRunning = false;
+            try {
+                if (StringUtils.isNotBlank(flowChainId)) {
+                    LOGGER.info("Waiting for flow chain {}, retry count {}", flowChainId, retryCount);
+                    flowRunning = flowEndpoint.hasFlowRunningByChainId(flowChainId).getHasActiveFlow();
+                } else if (StringUtils.isNoneBlank(flowId)) {
+                    LOGGER.info("Waiting for flow {}, retry count {}", flowId, retryCount);
+                    flowRunning = flowEndpoint.hasFlowRunningByFlowId(flowId).getHasActiveFlow();
+                } else {
+                    LOGGER.info("Flow id and flow chain id are empty so flow is not running");
+                    flowRunning = false;
+                }
+            } catch (Exception ex) {
+                LOGGER.warn("Error during polling flow. FlowId=" + flowId + ", FlowChainId=" + flowChainId + ", Message=" + ex.getMessage());
+                return waitResult;
             }
             retryCount++;
         }

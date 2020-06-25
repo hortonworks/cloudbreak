@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.context.TestErrorLog;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -119,6 +120,7 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     public void setLastKnownFlowChainId(String lastKnownFlowChainId) {
         this.lastKnownFlowChainId = lastKnownFlowChainId;
+        this.lastKnownFlowId = null;
     }
 
     @Override
@@ -128,6 +130,7 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     public void setLastKnownFlowId(String lastKnownFlowId) {
         this.lastKnownFlowId = lastKnownFlowId;
+        this.lastKnownFlowChainId = null;
     }
 
     @Override
@@ -275,7 +278,7 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[name: " + getName() + "]";
+        return getClass().getSimpleName() + "[name: " + getName() + ']';
     }
 
     @Override
@@ -300,7 +303,11 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
                     setLastKnownFlowChainId(flowIdentifier.getPollableId());
                     break;
                 default:
+                    throw new TestFailException("Flow identifier's type must be FLOW or FLOW_CHAIN. Current value: " + flowIdentifier);
             }
+        } else {
+            throw new TestFailException("Flow identifier is not present. " +
+                    "Make sure you use an endpoint which triggers a flow/flow chain and gives back it's identifier.");
         }
     }
 }

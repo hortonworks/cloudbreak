@@ -43,7 +43,7 @@ public class SPIMock extends AbstractModelMock {
 
     public static final String UNREGISTER_PUBIC_KEY = "/unregister_public_key";
 
-    private DynamicRouteStack dynamicRouteStack;
+    private final DynamicRouteStack dynamicRouteStack;
 
     public SPIMock(Service sparkService, DefaultModel defaultModel) {
         super(sparkService, defaultModel);
