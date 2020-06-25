@@ -29,7 +29,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -171,23 +170,17 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     }
 
     private Tags getUserDefinedTags(Stack stack) {
-        Map<String, String> result = Maps.newHashMap();
+        Tags result = new Tags();
         try {
             if (stack.getTags() != null && isNotBlank(stack.getTags().getValue())) {
                 StackTags stackTag = stack.getTags().get(StackTags.class);
-                Tags userDefined = stackTag.getUserDefinedTags();
-                Tags defaultTags = stackTag.getDefaultTags();
-                if (userDefined != null) {
-                    result.putAll(userDefined.getAll());
-                }
-                if (defaultTags != null) {
-                    result.putAll(defaultTags.getAll());
-                }
+                result.addTags(stackTag.getUserDefinedTags());
+                result.addTags(stackTag.getDefaultTags());
             }
         } catch (IOException e) {
             LOGGER.info("Exception during converting user defined tags.", e);
         }
-        return new Tags(result);
+        return result;
     }
 
     private List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication, Collection<String> deleteRequests,

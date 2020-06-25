@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -74,7 +75,7 @@ public class AzureDatabaseResourceService {
             } else {
                 LOGGER.debug("Resource group with {} does not exist, creating it now..", resourceGroupName);
                 String region = ac.getCloudContext().getLocation().getRegion().value();
-                client.createResourceGroup(resourceGroupName, region, stack.getTags().getAll());
+                client.createResourceGroup(resourceGroupName, region, Tags.getAll(stack.getTags()));
             }
         }
         try {

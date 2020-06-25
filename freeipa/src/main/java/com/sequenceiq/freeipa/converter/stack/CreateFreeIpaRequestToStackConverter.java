@@ -234,7 +234,7 @@ public class CreateFreeIpaRequestToStackConverter {
                     .withAccountTags(accountTags)
                     .build();
 
-            result = costTagging.prepareDefaultTags(request);
+            result.addTags(costTagging.prepareDefaultTags(request));
         } catch (Exception e) {
             LOGGER.debug("Exception during reading default tags.", e);
         }

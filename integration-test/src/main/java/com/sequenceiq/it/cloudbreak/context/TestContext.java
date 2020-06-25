@@ -50,7 +50,6 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestMethodNameMissingException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
@@ -379,14 +378,13 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public TestContext setTestMethodName(String testMethodName) {
-        this.contextParameters.put(TEST_METHOD_NAME, testMethodName);
+        getTestContext().contextParameters.put(TEST_METHOD_NAME, testMethodName);
         return this;
     }
 
-    public String getTestMethodName() {
-        return Optional.ofNullable(this.contextParameters.get(TEST_METHOD_NAME))
-                .map(Object::toString)
-                .orElseThrow(TestMethodNameMissingException::new);
+    public Optional<String> getTestMethodName() {
+        return Optional.ofNullable(getTestContext().contextParameters.get(TEST_METHOD_NAME))
+                .map(Object::toString);
     }
 
     protected String getActingUserAccessKey() {
@@ -421,7 +419,7 @@ public abstract class TestContext implements ApplicationContextAware {
         initialized = true;
         try {
             bean.valid();
-            tagsUtil.addTestNameTag(bean, getTestMethodName());
+            tagsUtil.addTestNameTag(bean, getTestMethodName().orElse("missing"));
         } catch (Exception e) {
             LOGGER.error("init of [{}] bean is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), bean.getName(), e);
             Log.when(null, key + " initialization is failed: " + ResponseUtil.getErrorMessage(e));

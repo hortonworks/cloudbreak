@@ -113,7 +113,7 @@ public class EnvironmentApiConverter {
                 .withRegions(request.getRegions())
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
                 .withAdminGroupName(request.getAdminGroupName())
-                .withTags(new Tags(request.getTags().getAll()))
+                .withTags(new Tags(request.getTags()))
                 .withCrn(createCrn(ThreadBasedUserCrnProvider.getAccountId()))
                 .withExperimentalFeatures(ExperimentalFeatures.builder()
                         .withIdBrokerMappingSource(request.getIdBrokerMappingSource())

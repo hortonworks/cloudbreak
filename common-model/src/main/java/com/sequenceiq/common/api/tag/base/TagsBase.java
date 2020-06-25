@@ -2,9 +2,11 @@ package com.sequenceiq.common.api.tag.base;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -49,6 +51,16 @@ public abstract class TagsBase implements Serializable {
 
     public Map<String, String> getAll() {
         return new HashMap<>(tags);
+    }
+
+    /**
+     * Null-safe wrapper of TagsBase.getAll() that returns an unmodifiable map
+     */
+    public static Map<String, String> getAll(TagsBase tags) {
+        return Optional.ofNullable(tags)
+                .map(t -> t.getAll())
+                .map(Collections::unmodifiableMap)
+                .orElse(Map.of());
     }
 
     public Set<String> getKeys() {

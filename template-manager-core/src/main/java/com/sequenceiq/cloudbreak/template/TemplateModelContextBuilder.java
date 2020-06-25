@@ -172,7 +172,7 @@ public class TemplateModelContextBuilder {
         templateModelContext.put(HandleBarModelKey.BLUEPRINT.modelKey(), blueprintView);
         templateModelContext.put(HandleBarModelKey.GENERAL.modelKey(), generalClusterConfigsView);
         templateModelContext.put(HandleBarModelKey.HOST_GROUPS.modelKey(), hostGroups);
-        templateModelContext.put(HandleBarModelKey.DEFAULT_TAGS.modelKey(), defaultTags.getAll());
+        templateModelContext.put(HandleBarModelKey.DEFAULT_TAGS.modelKey(), Tags.getAll(defaultTags));
         templateModelContext.put(HandleBarModelKey.EXPOSED_SERVICES.modelKey(), exposedServices);
         ModelConverterUtils.deepMerge(templateModelContext, ModelConverterUtils.convert(customInputs));
         ModelConverterUtils.deepMerge(templateModelContext, ModelConverterUtils.convert(fixInputs));

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Component
@@ -69,7 +70,7 @@ public class S3GuardConfigProvider {
     }
 
     private void addTags(TemplatePreparationObject source, StringBuilder hdfsCoreSiteSafetyValveValue) {
-        for (Map.Entry<String, String> entry : source.getDefaultTags().getAll().entrySet()) {
+        for (Map.Entry<String, String> entry : Tags.getAll(source.getDefaultTags()).entrySet()) {
             hdfsCoreSiteSafetyValveValue.append(ConfigUtils
                     .getSafetyValveProperty(S3GUARD_TABLE_TAG_PARAM + entry.getKey(), entry.getValue()));
         }

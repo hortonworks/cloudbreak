@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.cloud.model.prerequisite.AzurePrerequisiteDelet
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisiteDeleteRequest;
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -103,13 +104,13 @@ public class AzureSetup implements Setup {
         String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), stack);
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(ac.getCloudContext(), stack);
         if (!client.resourceGroupExists(resourceGroupName)) {
-            client.createResourceGroup(resourceGroupName, region, stack.getTags().getAll());
+            client.createResourceGroup(resourceGroupName, region, Tags.getAll(stack.getTags()));
         }
         if (!client.resourceGroupExists(imageResourceGroupName)) {
-            client.createResourceGroup(imageResourceGroupName, region, stack.getTags().getAll());
+            client.createResourceGroup(imageResourceGroupName, region, Tags.getAll(stack.getTags()));
         }
         armStorage.createStorage(client, imageStorageName, AzureDiskType.LOCALLY_REDUNDANT, imageResourceGroupName, region,
-                armStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags().getAll());
+                armStorage.isEncrytionNeeded(stack.getParameters()), Tags.getAll(stack.getTags()));
         client.createContainerInStorage(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER);
         if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
             client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
@@ -168,7 +169,7 @@ public class AzureSetup implements Setup {
         azureClient.createResourceGroup(
                 environmentPrerequisitesCreateRequest.getAzure().getResourceGroupName(),
                 environmentPrerequisitesCreateRequest.getAzure().getLocationName(),
-                environmentPrerequisitesCreateRequest.getAzure().getTags().getAll());
+                Tags.getAll(environmentPrerequisitesCreateRequest.getAzure().getTags()));
     }
 
     @Override

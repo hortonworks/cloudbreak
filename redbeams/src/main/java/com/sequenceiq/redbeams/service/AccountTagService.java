@@ -1,17 +1,11 @@
 package com.sequenceiq.redbeams.service;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.common.api.tag.model.Tags;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
-import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponses;
 
 @Service
@@ -22,9 +16,8 @@ public class AccountTagService {
 
     public Tags list() {
         AccountTagResponses list = accountTagEndpoint.list();
-        Map<String, String> tagsMap = list.getResponses()
-                .stream()
-                .collect(Collectors.toMap(AccountTagResponse::getKey, AccountTagResponse::getValue));
-        return new Tags(tagsMap);
+        Tags tags = new Tags();
+        list.getResponses().forEach(tag -> tags.addTag(tag.getKey(), tag.getValue()));
+        return tags;
     }
 }

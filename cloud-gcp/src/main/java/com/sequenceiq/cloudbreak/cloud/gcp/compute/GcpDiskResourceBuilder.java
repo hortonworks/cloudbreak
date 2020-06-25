@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
@@ -55,7 +55,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         InstanceTemplate template = group.getReferenceInstanceConfiguration().getTemplate();
         gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
 
-        Map<String, String> customTags = new HashMap<>(cloudStack.getTags().getAll());
+        Map<String, String> customTags = Tags.getAll(cloudStack.getTags());
         disk.setLabels(customTags);
 
         Insert insDisk = context.getCompute().disks().insert(projectId, location.getAvailabilityZone().value(), disk);

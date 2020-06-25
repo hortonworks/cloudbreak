@@ -106,8 +106,8 @@ public class DBStackToDatabaseStackConverter {
         try {
             if (dbStack.getTags() != null && dbStack.getTags().getValue() != null) {
                 StackTags stackTag = dbStack.getTags().get(StackTags.class);
-                result.addTags(stackTag.getUserDefinedTags());
                 result.addTags(stackTag.getDefaultTags());
+                result.addTags(stackTag.getUserDefinedTags());
             }
         } catch (IOException e) {
             LOGGER.warn("Failed to read JSON tags, skipping", e);
