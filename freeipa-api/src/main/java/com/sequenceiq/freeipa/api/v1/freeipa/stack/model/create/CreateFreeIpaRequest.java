@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.authorization.annotation.ResourceObjectField;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
+import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
@@ -31,7 +32,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("CreateFreeIpaV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CreateFreeIpaRequest {
+public class CreateFreeIpaRequest implements TaggableRequest {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     @ResourceObjectField(action = AuthorizationResourceAction.EDIT_ENVIRONMENT, variableType = AuthorizationVariableType.CRN)
@@ -189,6 +190,11 @@ public class CreateFreeIpaRequest {
 
     public void setTags(Map<String, String> tags) {
         this.tags = tags;
+    }
+
+    @Override
+    public void addTag(String key, String value) {
+        tags.put(key, value);
     }
 
     @Override

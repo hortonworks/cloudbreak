@@ -6,7 +6,9 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-public class SdxClusterRequest {
+import com.sequenceiq.common.api.tag.request.TaggableRequest;
+
+public class SdxClusterRequest implements TaggableRequest {
 
     @NotNull
     private String environment;
@@ -57,6 +59,11 @@ public class SdxClusterRequest {
 
     public Map<String, String> getTags() {
         return tags;
+    }
+
+    @Override
+    public void addTag(String key, String value) {
+        initAndGetTags().put(key, value);
     }
 
     public Map<String, String> initAndGetTags() {

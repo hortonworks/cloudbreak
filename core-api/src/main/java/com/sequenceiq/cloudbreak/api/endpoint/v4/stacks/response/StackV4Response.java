@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescript
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -41,7 +43,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class StackV4Response extends StackV4Base {
+public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     private Long id;
 
@@ -280,6 +282,12 @@ public class StackV4Response extends StackV4Base {
 
     public void setTags(TagsV4Response tags) {
         this.tags = tags;
+    }
+
+    @Override
+    public Optional<TagsResponse> getTagsResponse() {
+        return Optional.ofNullable(tags)
+                .map(TagsV4Response::getUserDefined);
     }
 
     public TelemetryResponse getTelemetry() {

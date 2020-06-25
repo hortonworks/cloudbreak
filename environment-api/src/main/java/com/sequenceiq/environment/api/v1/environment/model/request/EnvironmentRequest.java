@@ -13,6 +13,7 @@ import javax.validation.constraints.Size;
 import com.sequenceiq.authorization.annotation.ResourceObjectField;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
+import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
@@ -26,7 +27,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "EnvironmentV1Request")
-public class EnvironmentRequest extends EnvironmentBaseRequest implements CredentialAwareEnvRequest {
+public class EnvironmentRequest extends EnvironmentBaseRequest implements CredentialAwareEnvRequest, TaggableRequest {
 
     static final String LENGHT_INVALID_MSG = "The length of the environments's name has to be in range of 5 to 28";
 
@@ -237,6 +238,11 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setTags(Map<String, String> tags) {
         this.tags = tags;
+    }
+
+    @Override
+    public void addTag(String key, String value) {
+        tags.put(key, value);
     }
 
     public String getParentEnvironmentName() {

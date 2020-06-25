@@ -1,8 +1,12 @@
 package com.sequenceiq.sdx.api.model;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import java.util.Optional;
 
-public class SdxClusterDetailResponse extends SdxClusterResponse {
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.common.api.tag.response.TaggedResponse;
+import com.sequenceiq.common.api.tag.response.TagsResponse;
+
+public class SdxClusterDetailResponse extends SdxClusterResponse implements TaggedResponse {
 
     private StackV4Response stackV4Response;
 
@@ -25,5 +29,10 @@ public class SdxClusterDetailResponse extends SdxClusterResponse {
 
     public void setStackV4Response(StackV4Response stackV4Response) {
         this.stackV4Response = stackV4Response;
+    }
+
+    @Override
+    public Optional<TagsResponse> getTagsResponse() {
+        return stackV4Response.getTagsResponse();
     }
 }

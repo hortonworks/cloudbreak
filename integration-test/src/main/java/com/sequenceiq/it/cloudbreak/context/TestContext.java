@@ -70,6 +70,7 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsWaitObject;
+import com.sequenceiq.it.util.TagsUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public abstract class TestContext implements ApplicationContextAware {
@@ -159,6 +160,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private WaitService<CloudbreakWaitObject> cloudbreakWaitService;
+
+    @Inject
+    private TagsUtil tagsUtil;
 
     private DefaultModel model;
 
@@ -411,18 +415,19 @@ public abstract class TestContext implements ApplicationContextAware {
     public <O extends CloudbreakTestDto> O init(Class<O> clss, CloudPlatform cloudPlatform) {
         checkShutdown();
         LOGGER.info("init " + clss.getSimpleName());
-        CloudbreakTestDto bean = applicationContext.getBean(clss, getTestContext());
+        O bean = applicationContext.getBean(clss, getTestContext());
         bean.setCloudPlatform(cloudPlatform);
         String key = bean.getClass().getSimpleName();
         initialized = true;
         try {
-            return (O) bean.valid();
+            bean.valid();
+            tagsUtil.addTestNameTag(bean, getTestMethodName());
         } catch (Exception e) {
             LOGGER.error("init of [{}] bean is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), bean.getName(), e);
             Log.when(null, key + " initialization is failed: " + ResponseUtil.getErrorMessage(e));
             getExceptionMap().put(key, e);
         }
-        return (O) bean;
+        return bean;
     }
 
     public <O extends CloudbreakTestDto> O given(Class<O> clss) {
@@ -858,6 +863,7 @@ public abstract class TestContext implements ApplicationContextAware {
             }
         }
         shutdown();
+        testDtos.forEach(tagsUtil::verifyTestNameTag);
     }
 
     public void shutdown() {
