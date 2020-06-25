@@ -55,7 +55,7 @@ public class DefaultCostTaggingService implements CostTagging {
                 .withUserCrn(request.getCreatorCrn())
                 .build();
 
-        for (Map.Entry<String, String> entry : request.getAccountTags().getAll().entrySet()) {
+        for (Map.Entry<String, String> entry : Tags.getAll(request.getAccountTags()).entrySet()) {
             LOGGER.debug("The tag template is: {}", entry.getValue());
             String generatedValue = centralTagUpdater.getTagText(preparationObject, entry.getValue());
             LOGGER.debug("The generated tag value is: {}", generatedValue);
@@ -68,12 +68,12 @@ public class DefaultCostTaggingService implements CostTagging {
     public Tags mergeTags(CDPTagMergeRequest request) {
         LOGGER.debug("About to merge tag(s)...");
         Map<String, String> result = new HashMap<>();
-        for (Map.Entry<String, String> entry : request.getRequestTags().getAll().entrySet()) {
+        for (Map.Entry<String, String> entry : Tags.getAll(request.getRequestTags()).entrySet()) {
             if (!keyOrValueIsEmpty(entry.getKey(), entry.getValue())) {
                 result.put(entry.getKey(), entry.getValue());
             }
         }
-        for (Map.Entry<String, String> entry : request.getEnvironmentTags().getAll().entrySet()) {
+        for (Map.Entry<String, String> entry : Tags.getAll(request.getEnvironmentTags()).entrySet()) {
             if (!keyOrValueIsEmpty(entry.getKey(), entry.getValue())) {
                 addTagIfNotPresented(result, request, entry.getKey());
             }

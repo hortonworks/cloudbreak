@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.environment.tag;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -15,7 +12,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
-import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponses;
 
 @Service
@@ -30,10 +26,9 @@ public class AccountTagClientService {
         try {
             String accountId = ThreadBasedUserCrnProvider.getAccountId();
             AccountTagResponses list = ThreadBasedUserCrnProvider.doAsInternalActor(() -> accountTagEndpoint.listInAccount(accountId));
-            Map<String, String> tagsMap = list.getResponses()
-                    .stream()
-                    .collect(Collectors.toMap(AccountTagResponse::getKey, AccountTagResponse::getValue));
-            return new Tags(tagsMap);
+            Tags tags = new Tags();
+            list.getResponses().forEach(tag -> tags.addTag(tag.getKey(), tag.getValue()));
+            return tags;
         } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
             String message = String.format("Failed to GET AccountTags with account id, due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);

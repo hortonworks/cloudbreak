@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.model.prerequisite.AzurePrerequisiteDelet
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisiteDeleteRequest;
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.FileSystemType;
@@ -118,7 +119,7 @@ public class AzureSetup implements Setup {
         azureClient.createResourceGroup(
                 environmentPrerequisitesCreateRequest.getAzure().getResourceGroupName(),
                 environmentPrerequisitesCreateRequest.getAzure().getLocationName(),
-                environmentPrerequisitesCreateRequest.getAzure().getTags().getAll());
+                Tags.getAll(environmentPrerequisitesCreateRequest.getAzure().getTags()));
     }
 
     @Override

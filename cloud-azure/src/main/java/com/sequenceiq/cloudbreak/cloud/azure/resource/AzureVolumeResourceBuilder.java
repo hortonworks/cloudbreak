@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -159,7 +160,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                         if (result == null) {
                             result = client.createManagedDisk(
                                     volume.getId(), volume.getSize(), AzureDiskType.getByValue(
-                                            volume.getType()), region, resourceGroupName, cloudStack.getTags().getAll());
+                                            volume.getType()), region, resourceGroupName, Tags.getAll(cloudStack.getTags()));
                         } else {
                             LOGGER.debug("Managed disk for resourcegroup: {}, name: {} already exists: {}", resourceGroupName, volume.getId(), result);
                         }
