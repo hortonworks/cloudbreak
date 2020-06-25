@@ -3,9 +3,10 @@ package com.sequenceiq.sdx.api.model;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.tag.request.TagsRequest;
 
-public class SdxClusterRequest {
+public class SdxClusterRequest implements TaggableRequest {
 
     @NotNull
     private String environment;
@@ -56,6 +57,11 @@ public class SdxClusterRequest {
 
     public TagsRequest getTags() {
         return tags;
+    }
+
+    @Override
+    public void addTag(String key, String value) {
+        tags.addTag(key, value);
     }
 
     public SdxCloudStorageRequest getCloudStorage() {

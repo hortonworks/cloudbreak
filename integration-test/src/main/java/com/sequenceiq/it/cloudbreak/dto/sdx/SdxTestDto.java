@@ -30,7 +30,6 @@ import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
-import com.sequenceiq.it.util.TagAdderUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxAwsRequest;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
@@ -55,9 +54,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private TagAdderUtil tagAdderUtil;
-
-    @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
     public SdxTestDto(TestContext testContex) {
@@ -69,7 +65,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withEnvironment(getTestContext().get(EnvironmentTestDto.class).getName())
                 .withClusterShape(getCloudProvider().getClusterShape())
-                .withTestNameAsTag()
                 .withTags(getCloudProvider().getTags())
                 .withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
         return getCloudProvider().sdx(this);
@@ -226,11 +221,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
             throw new IllegalArgumentException("SDX Repair does not exist!");
         }
         return repair.getRequest();
-    }
-
-    private SdxTestDto withTestNameAsTag() {
-        tagAdderUtil.addTestNameTag(getRequest().getTags(), getTestContext().getTestMethodName());
-        return this;
     }
 
     public SdxTestDto withRuntimeVersion(String runtimeVersion) {

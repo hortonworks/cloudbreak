@@ -13,4 +13,10 @@ public class SdxInternalClusterRequest extends SdxClusterRequest {
     public void setStackV4Request(StackV4Request stackV4Request) {
         this.stackV4Request = stackV4Request;
     }
+
+    @Override
+    public void addTag(String key, String value) {
+        super.addTag(key, value);
+        stackV4Request.addTag(key, value);
+    }
 }

@@ -1,8 +1,12 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
+import com.sequenceiq.common.api.tag.response.TaggedResponse;
+import com.sequenceiq.common.api.tag.response.TagsResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
@@ -17,7 +21,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
-public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiModel {
+public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiModel, TaggedResponse {
     @ApiModelProperty(ModelDescriptions.ID)
     private String crn;
 
@@ -282,6 +286,12 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
 
     public void setTags(TagResponse tags) {
         this.tags = tags;
+    }
+
+    @Override
+    public Optional<TagsResponse> getTagsResponse() {
+        return Optional.ofNullable(tags)
+                .map(TagResponse::getUserDefined);
     }
 
     public String getParentEnvironmentCrn() {

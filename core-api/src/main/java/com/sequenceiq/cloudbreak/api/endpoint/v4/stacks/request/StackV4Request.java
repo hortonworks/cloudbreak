@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Reque
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.validation.DatalakeCrn;
+import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 
 import io.swagger.annotations.ApiModel;
@@ -38,7 +39,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class StackV4Request extends StackV4Base {
+public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     @Valid
     @NotNull
@@ -129,6 +130,11 @@ public class StackV4Request extends StackV4Base {
 
     public void setTags(TagsV4Request tags) {
         this.tags = tags;
+    }
+
+    @Override
+    public void addTag(String key, String value) {
+        initAndGetTags().getUserDefined().addTag(key, value);
     }
 
     public List<InstanceGroupV4Request> getInstanceGroups() {

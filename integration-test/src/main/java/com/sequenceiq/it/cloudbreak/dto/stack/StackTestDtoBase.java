@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
@@ -47,12 +45,8 @@ import com.sequenceiq.it.cloudbreak.dto.SecurityGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.util.TagAdderUtil;
 
 public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends AbstractCloudbreakTestDto<StackV4Request, StackV4Response, T> {
-
-    @Inject
-    private TagAdderUtil tagAdderUtil;
 
     public StackTestDtoBase(TestContext testContext) {
         super(new StackV4Request(), testContext);
@@ -95,7 +89,6 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
     public StackTestDtoBase<T> valid() {
         String name = getResourcePropertyProvider().getName(15, getCloudPlatform());
         withName(name)
-                .withTestNameAsTag()
                 .withImageSettings(getCloudProvider().imageSettings(getTestContext().init(ImageSettingsTestDto.class)))
                 .withPlacement(getTestContext().init(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()))
@@ -382,11 +375,6 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         CustomDomainSettingsV4Request request = Optional.ofNullable(getRequest().getCustomDomain()).orElse(new CustomDomainSettingsV4Request());
         request.setHostgroupNameAsHostname(hostgroupNameAsHostname);
         getRequest().setCustomDomain(request);
-        return this;
-    }
-
-    private StackTestDtoBase<T> withTestNameAsTag() {
-        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags().getUserDefined(), getTestContext().getTestMethodName());
         return this;
     }
 

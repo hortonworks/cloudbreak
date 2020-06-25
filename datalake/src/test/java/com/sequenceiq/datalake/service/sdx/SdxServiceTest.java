@@ -589,9 +589,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setRuntime("7.2.0");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.getTags().addTag("mytag", "tagecske");
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
