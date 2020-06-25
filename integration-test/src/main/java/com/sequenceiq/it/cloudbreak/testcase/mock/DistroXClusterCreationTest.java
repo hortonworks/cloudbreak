@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.withoutLogError;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,8 +26,6 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
@@ -36,7 +36,6 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractClouderaManagerTest;
@@ -159,9 +158,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         String storageEnvKey = resourcePropertyProvider().getName();
 
         String sdxInternal = resourcePropertyProvider().getName();
-        String stack = resourcePropertyProvider().getName();
-        String clouderaManager = "cm";
-        String cluster = "cmcluster";
         String networkKey = "someNetwork";
 
         testContext
@@ -177,13 +173,11 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .when(getEnvironmentTestClient().create(), key(storageEnvKey))
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(getEnvironmentTestClient().describe(), key(storageEnvKey))
-                .given(clouderaManager, ClouderaManagerTestDto.class)
-                .given(cluster, ClusterTestDto.class).withClouderaManager(clouderaManager)
-                .given(stack, StackTestDto.class).withCluster(cluster).withGatewayPort(testContext.getSparkServer().getPort()).withEnvironmentKey(storageEnvKey)
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withStackRequest(key(cluster), key(stack))
+                .withDefaultSDXSettings(Optional.of(testContext.getSparkServer().getPort()))
                 .withDatabase(sdxDatabaseRequestWithCreateTrue())
-                .withCloudStorage(testStorage()).withEnvironmentKey(key(storageEnvKey))
+                .withCloudStorage(testStorage())
+                .withEnvironmentKey(key(storageEnvKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -222,9 +216,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         String envKey = "dbEnvKey";
 
         String sdxInternal = resourcePropertyProvider().getName();
-        String stack = resourcePropertyProvider().getName();
-        String clouderaManager = "cm";
-        String cluster = "cmcluster";
         String networkKey = "someNetwork";
 
         testContext
@@ -236,11 +227,8 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withName(envName)
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .given(clouderaManager, ClouderaManagerTestDto.class)
-                .given(cluster, ClusterTestDto.class).withClouderaManager(clouderaManager)
-                .given(stack, StackTestDto.class).withCluster(cluster).withGatewayPort(testContext.getSparkServer().getPort())
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withStackRequest(key(cluster), key(stack))
+                .withDefaultSDXSettings(Optional.of(testContext.getSparkServer().getPort()))
                 .withDatabase(sdxDatabaseRequestWithCreateTrue())
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))

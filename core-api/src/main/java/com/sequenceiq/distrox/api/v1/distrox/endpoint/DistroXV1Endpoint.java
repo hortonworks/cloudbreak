@@ -204,7 +204,7 @@ public interface DistroXV1Endpoint {
     @Path("name/{name}/scaling")
     @ApiOperation(value = SCALE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "putScalingDistroXV1ByName")
-    void putScalingByName(@PathParam("name") String name, @Valid DistroXScaleV1Request updateRequest);
+    FlowIdentifier putScalingByName(@PathParam("name") String name, @Valid DistroXScaleV1Request updateRequest);
 
     @PUT
     @Path("crn/{crn}/scaling")

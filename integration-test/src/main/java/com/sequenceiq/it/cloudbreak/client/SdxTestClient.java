@@ -14,14 +14,14 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxDescribeInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxListAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxOsUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairInternalAction;
-import com.sequenceiq.it.cloudbreak.action.sdx.SdxSetFlowChainIdAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncAction;
-import com.sequenceiq.it.cloudbreak.action.sdx.SdxOsUpgradeAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncInternalAction;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 
@@ -76,12 +76,12 @@ public class SdxTestClient {
         return new SdxRepairAction();
     }
 
-    public Action<SdxTestDto, SdxClient> setFlowChainId() {
-        return new SdxSetFlowChainIdAction();
-    }
-
     public Action<SdxInternalTestDto, SdxClient> repairInternal() {
         return new SdxRepairInternalAction();
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> syncInternal() {
+        return new SdxSyncInternalAction();
     }
 
     public Action<SdxInternalTestDto, SdxClient> startInternal() {
