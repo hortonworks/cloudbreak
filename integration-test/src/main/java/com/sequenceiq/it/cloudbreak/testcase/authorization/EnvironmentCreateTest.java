@@ -96,15 +96,15 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
                 .when(freeIpaTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("You have no right to perform environments/describeEnvironment on resource crn:cdp.*")
-                                .withKey("FreeIPADescribeAction"))
+                                .withKey("FreeIpaDescribeAction"))
                 .when(freeIpaTestClient.stop(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("You have no right to perform environments/stopEnvironment on resource crn:cdp.*")
-                                .withKey("FreeIPAStopAction"))
+                                .withKey("FreeIpaStopAction"))
                 .when(freeIpaTestClient.start(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("You have no right to perform environments/startEnvironment on resource crn:cdp.*")
-                                .withKey("FreeIPAStartAction"));
+                                .withKey("FreeIpaStartAction"));
     }
 
     private MockedTestContext mockCmForFreeipa(TestContext testContext) {
