@@ -56,6 +56,9 @@ public class EntitlementService {
     @VisibleForTesting
     static final String CDP_CB_FAST_EBS_ENCRYPTION = "CDP_CB_FAST_EBS_ENCRYPTION";
 
+    @VisibleForTesting
+    static final String CDP_CLOUD_IDENTITY_MAPPING = "CDP_CLOUD_IDENTITY_MAPPING";
+
     @Inject
     private GrpcUmsClient umsClient;
 
@@ -113,6 +116,10 @@ public class EntitlementService {
 
     public boolean fastEbsEncryptionEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_CB_FAST_EBS_ENCRYPTION);
+    }
+
+    public boolean cloudIdentityMappingEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_CLOUD_IDENTITY_MAPPING);
     }
 
     public List<String> getEntitlements(String actorCrn, String accountId) {

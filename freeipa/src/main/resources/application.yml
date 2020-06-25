@@ -60,6 +60,9 @@ freeipa:
   environment:
     url: http://localhost:8088
     contextPath: /environmentservice
+  sdx:
+    url: http://localhost:8086
+    contextPath: /dl
   intermediate.threadpool:
     core.size: 100
     capacity.size: 4000
@@ -244,4 +247,3 @@ clusterProxy:
   healthyStatusCode: 400
   maxAttempts: 10
   maxFailure: 1
-

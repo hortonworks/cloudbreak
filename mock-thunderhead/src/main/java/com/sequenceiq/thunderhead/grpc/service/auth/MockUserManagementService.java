@@ -198,6 +198,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_CB_FAST_EBS_ENCRYPTION = "CDP_CB_FAST_EBS_ENCRYPTION";
 
+    private static final String CDP_CLOUD_IDENTITY_MAPPING = "CDP_CLOUD_IDENTITY_MAPPING";
+
     private static final String MOCK_RESOURCE = "mock_resource";
 
     private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
@@ -258,6 +260,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.fastebsencryption.enable}")
     private boolean enableFastEbsEncryption;
+
+    @Value("${auth.mock.cloudidentitymappinng.enable}")
+    private boolean enableCloudIdentityMappinng;
 
     private String cbLicense;
 
@@ -523,6 +528,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableFastEbsEncryption) {
             builder.addEntitlements(createEntitlement(CDP_CB_FAST_EBS_ENCRYPTION));
+        }
+        if (enableCloudIdentityMappinng) {
+            builder.addEntitlements(createEntitlement(CDP_CLOUD_IDENTITY_MAPPING));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

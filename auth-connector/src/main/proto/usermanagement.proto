@@ -404,7 +404,23 @@ service UserManagement {
 
   // Sets the workload password policy for an account.
   rpc SetWorkloadPasswordPolicy (SetWorkloadPasswordPolicyRequest)
-  returns (SetWorkloadPasswordPolicyResponse) {}
+    returns (SetWorkloadPasswordPolicyResponse) {}
+
+  // Assign a cloud identity to an actor or group.
+  rpc AssignCloudIdentity (AssignCloudIdentityRequest)
+    returns (AssignCloudIdentityResponse) {}
+
+  // Unassign a cloud identity from an actor or group.
+  rpc UnassignCloudIdentity (UnassignCloudIdentityRequest)
+    returns (UnassignCloudIdentityResponse) {}
+
+  // Assign a cloud identity to a service principal or service principal category.
+  rpc AssignServicePrincipalCloudIdentity (AssignServicePrincipalCloudIdentityRequest)
+    returns (AssignServicePrincipalCloudIdentityResponse) {}
+
+  // Unassign a cloud identity from a service principal or service principal category.
+  rpc UnassignServicePrincipalCloudIdentity (UnassignServicePrincipalCloudIdentityRequest)
+    returns (UnassignServicePrincipalCloudIdentityResponse) {}
 }
 
 // The state of the actor.
@@ -459,6 +475,8 @@ message User {
   // In ms from the Java epoch of 1970-01-01T00:00:00Z.
   // The value is only meaningful when the 'state' is DELETING.
   uint64 safeDeleteDateMs = 16;
+  // A list of cloud identities for the user.
+  repeated CloudIdentity cloudIdentities = 17;
 }
 
 // A MachineUser is an internal Altus identity, used by applications to call
@@ -493,6 +511,8 @@ message MachineUser {
   // In ms from the Java epoch of 1970-01-01T00:00:00Z.
   // The value is only meaningful when the 'state' is DELETING.
   uint64 safeDeleteDateMs = 8;
+  // A list of cloud identities for the machine user.
+  repeated CloudIdentity cloudIdentities = 9;
 }
 
 // A Group is a Altus resource that contains a collection of Actors. Groups
@@ -512,6 +532,8 @@ message Group {
   // relevant for federated users as we don't get group membership through
   // cloudera-sso.
   bool syncMembershipOnUserLogin = 5;
+  // A list of cloud identities for the group.
+  repeated CloudIdentity cloudIdentities = 6;
 }
 
 message AccessKeyUsage {
@@ -2581,6 +2603,52 @@ message SshPublicKeyStorage {
   string description = 3;
 }
 
+// A namespace for cloud identities. All cloud identities exist within a cloud
+// identity domain. At most one cloud identity may be assigned to a given entity
+// within a given domain. The modeling of a cloud identity domain is cloud
+// provider-specific. The following object is used to represent a cloud identity
+// domain in dynamo.
+message CloudIdentityDomainStorage {
+  oneof domain {
+    AzureCloudIdentityDomainStorage azureCloudIdentityDomain = 1;
+  }
+}
+
+// Object used to represent an Azure cloud identity domain in dynamo.
+message AzureCloudIdentityDomainStorage {
+  // A unique identifier for an Azure AD instance.
+  string azureAdIdentifier = 1;
+}
+
+// An identifier for a cloud identity that is unique within the enclosing
+// domain. The modeling of a cloud identity name is cloud provider-specific.
+// The following object is used to represent a cloud identity name in dynamo.
+message CloudIdentityNameStorage {
+  oneof name {
+    AzureCloudIdentityNameStorage azureCloudIdentityName = 1;
+  }
+}
+
+// Object used to represent an Azure cloud identity name in dynamo.
+message AzureCloudIdentityNameStorage {
+  // The Azure object ID (OID).
+  string objectId = 1;
+}
+
+// Object used to represent a cloud identity in dynamo.
+message CloudIdentityStorage {
+  // The domain in which the cloud identity exists.
+  CloudIdentityDomainStorage cloudIdentityDomain = 1;
+  // The unique name of the cloud identity within the domain.
+  CloudIdentityNameStorage cloudIdentityName = 2;
+}
+
+// Object used to store a list of cloud identities in dynamo.
+message CloudIdentitiesStorage {
+  // A list of assigned cloud identities.
+  repeated CloudIdentityStorage cloudIdentities = 1;
+}
+
 // This is used to serialize all the Actor dynamoDB related information that is
 // not indexed.
 message ActorDetails {
@@ -2594,6 +2662,15 @@ message ActorDetails {
   repeated StoredKerberosKey kerberosKeys = 2;
   // A list of ssh public keys for the actor.
   repeated SshPublicKeyStorage sshPublicKeys = 3;
+  // Cloud identities assigned to the actor.
+  CloudIdentitiesStorage cloudIdentities = 5;
+}
+
+// This is used to serialize all the Group dynamoDB related information that is
+// not indexed.
+message GroupDetails {
+  // Cloud identities assigned to the group.
+  CloudIdentitiesStorage cloudIdentities = 1;
 }
 
 message SetActorWorkloadCredentialsRequest {
@@ -2747,4 +2824,99 @@ message SetWorkloadPasswordPolicyRequest {
 }
 
 message SetWorkloadPasswordPolicyResponse {
+}
+
+// A namespace for cloud identities. All cloud identities exist within a cloud
+// identity domain. At most one cloud identity may be assigned to a given entity
+// within a given domain. The modeling of a cloud identity domain is cloud
+// provider-specific. The following object is used to represent a cloud identity
+// domain in the wire protocol.
+message CloudIdentityDomain {
+  oneof domain {
+    AzureCloudIdentityDomain azureCloudIdentityDomain = 1;
+  }
+}
+
+// Object used to represent an Azure cloud identity domain in the wire protocol.
+message AzureCloudIdentityDomain {
+  // A unique identifier for an Azure AD instance.
+  string azureAdIdentifier = 1;
+}
+
+// An identifier for a cloud identity that is unique within the enclosing
+// domain. The modeling of a cloud identity name is cloud provider-specific.
+// The following object is used to represent a cloud identity name in the
+// wire protocol.
+message CloudIdentityName {
+  oneof name {
+    AzureCloudIdentityName azureCloudIdentityName = 1;
+  }
+}
+
+// Object used to represent an Azure cloud identity name in the wire protocol.
+message AzureCloudIdentityName {
+  // The Azure object ID (OID).
+  string objectId = 1;
+}
+
+// Object used to represent a cloud identity in the wire protocol.
+message CloudIdentity {
+  // The domain in which the cloud identity exists.
+  CloudIdentityDomain cloudIdentityDomain = 1;
+  // The unique name of the cloud identity within the domain.
+  CloudIdentityName cloudIdentityName = 2;
+}
+
+message AssignCloudIdentityRequest {
+  // The actor or group to which the cloud identity is to be assigned.
+  Assignee assignee = 1;
+  // The cloud identity to assign.
+  CloudIdentity cloudIdentity = 2;
+}
+
+message AssignCloudIdentityResponse {
+}
+
+message UnassignCloudIdentityRequest {
+  // The actor or group from which the cloud identity is to be unassigned.
+  Assignee assignee = 1;
+  // The domain in which the cloud identity to unassign exists. Since there
+  // can be at most one identity assigned to the actor or group within a given
+  // domain, this fully identifies the identity to unassign.
+  CloudIdentityDomain cloudIdentityDomain = 2;
+}
+
+message UnassignCloudIdentityResponse {
+}
+
+message AssignServicePrincipalCloudIdentityRequest {
+  // The account id in which the service principal or service principal category
+  // exists.
+  string accountId = 1;
+  // The service principal or service principal category to which the cloud
+  // identity is to be assigned. Note that the UMS guarantees that there are
+  // no name collisions between service principals and categories.
+  string servicePrincipalOrCategory = 2;
+  // The cloud identity to assign.
+  CloudIdentity cloudIdentity = 3;
+}
+
+message AssignServicePrincipalCloudIdentityResponse {
+}
+
+message UnassignServicePrincipalCloudIdentityRequest {
+  // The account id in which the service principal or service principal category
+  // exists.
+  string accountId = 1;
+  // The service principal or service principal category from which the cloud
+  // identity is to be unassigned. Note that the UMS guarantees that there are
+  // no name collisions between service principals and categories.
+  string servicePrincipalOrCategory = 2;
+  // The domain in which the cloud identity to unassign exists. Since there can
+  // be at most one identity assigned to the service principal within a given
+  // domain, this fully identifies the identity to unassign.
+  CloudIdentityDomain cloudIdentityDomain = 3;
+}
+
+message UnassignServicePrincipalCloudIdentityResponse {
 }

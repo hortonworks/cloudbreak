@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -105,6 +106,12 @@ public class UserSyncService {
 
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
+
+    @Inject
+    private CloudIdentitySyncService cloudIdentitySyncService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public Operation synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
@@ -281,6 +288,11 @@ public class UserSyncService {
             } else {
                 // Sync credentials for all users and not just diff. At present there is no way to identify that there is a change in password for a user
                 workloadCredentialService.setWorkloadCredentials(freeIpaClient, umsUsersState.getUsersWorkloadCredentialMap(), warnings::put);
+            }
+
+            // TODO For now we only sync cloud ids during full sync. We should eventually allow more granular syncs (actor level and group level sync).
+            if (fullSync && entitlementService.cloudIdentityMappingEnabled(INTERNAL_ACTOR_CRN, stack.getAccountId())) {
+                cloudIdentitySyncService.syncCloudIdentites(stack, umsUsersState, warnings::put);
             }
 
             if (warnings.isEmpty()) {

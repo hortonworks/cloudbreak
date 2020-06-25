@@ -3287,6 +3287,154 @@ public final class UserManagementGrpc {
      }
      return getSetWorkloadPasswordPolicyMethod;
   }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getAssignCloudIdentityMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> METHOD_ASSIGN_CLOUD_IDENTITY = getAssignCloudIdentityMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> getAssignCloudIdentityMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> getAssignCloudIdentityMethod() {
+    return getAssignCloudIdentityMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> getAssignCloudIdentityMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> getAssignCloudIdentityMethod;
+    if ((getAssignCloudIdentityMethod = UserManagementGrpc.getAssignCloudIdentityMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getAssignCloudIdentityMethod = UserManagementGrpc.getAssignCloudIdentityMethod) == null) {
+          UserManagementGrpc.getAssignCloudIdentityMethod = getAssignCloudIdentityMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "AssignCloudIdentity"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AssignCloudIdentity"))
+                  .build();
+          }
+        }
+     }
+     return getAssignCloudIdentityMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getUnassignCloudIdentityMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> METHOD_UNASSIGN_CLOUD_IDENTITY = getUnassignCloudIdentityMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> getUnassignCloudIdentityMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> getUnassignCloudIdentityMethod() {
+    return getUnassignCloudIdentityMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> getUnassignCloudIdentityMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> getUnassignCloudIdentityMethod;
+    if ((getUnassignCloudIdentityMethod = UserManagementGrpc.getUnassignCloudIdentityMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getUnassignCloudIdentityMethod = UserManagementGrpc.getUnassignCloudIdentityMethod) == null) {
+          UserManagementGrpc.getUnassignCloudIdentityMethod = getUnassignCloudIdentityMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "UnassignCloudIdentity"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnassignCloudIdentity"))
+                  .build();
+          }
+        }
+     }
+     return getUnassignCloudIdentityMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getAssignServicePrincipalCloudIdentityMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> METHOD_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = getAssignServicePrincipalCloudIdentityMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> getAssignServicePrincipalCloudIdentityMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> getAssignServicePrincipalCloudIdentityMethod() {
+    return getAssignServicePrincipalCloudIdentityMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> getAssignServicePrincipalCloudIdentityMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> getAssignServicePrincipalCloudIdentityMethod;
+    if ((getAssignServicePrincipalCloudIdentityMethod = UserManagementGrpc.getAssignServicePrincipalCloudIdentityMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getAssignServicePrincipalCloudIdentityMethod = UserManagementGrpc.getAssignServicePrincipalCloudIdentityMethod) == null) {
+          UserManagementGrpc.getAssignServicePrincipalCloudIdentityMethod = getAssignServicePrincipalCloudIdentityMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "AssignServicePrincipalCloudIdentity"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AssignServicePrincipalCloudIdentity"))
+                  .build();
+          }
+        }
+     }
+     return getAssignServicePrincipalCloudIdentityMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getUnassignServicePrincipalCloudIdentityMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> METHOD_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = getUnassignServicePrincipalCloudIdentityMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> getUnassignServicePrincipalCloudIdentityMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> getUnassignServicePrincipalCloudIdentityMethod() {
+    return getUnassignServicePrincipalCloudIdentityMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> getUnassignServicePrincipalCloudIdentityMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> getUnassignServicePrincipalCloudIdentityMethod;
+    if ((getUnassignServicePrincipalCloudIdentityMethod = UserManagementGrpc.getUnassignServicePrincipalCloudIdentityMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getUnassignServicePrincipalCloudIdentityMethod = UserManagementGrpc.getUnassignServicePrincipalCloudIdentityMethod) == null) {
+          UserManagementGrpc.getUnassignServicePrincipalCloudIdentityMethod = getUnassignServicePrincipalCloudIdentityMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "UnassignServicePrincipalCloudIdentity"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnassignServicePrincipalCloudIdentity"))
+                  .build();
+          }
+        }
+     }
+     return getUnassignServicePrincipalCloudIdentityMethod;
+  }
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -4235,6 +4383,46 @@ public final class UserManagementGrpc {
       asyncUnimplementedUnaryCall(getSetWorkloadPasswordPolicyMethodHelper(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * Assign a cloud identity to an actor or group.
+     * </pre>
+     */
+    public void assignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getAssignCloudIdentityMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Unassign a cloud identity from an actor or group.
+     * </pre>
+     */
+    public void unassignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getUnassignCloudIdentityMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Assign a cloud identity to a service principal or service principal category.
+     * </pre>
+     */
+    public void assignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getAssignServicePrincipalCloudIdentityMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Unassign a cloud identity from a service principal or service principal category.
+     * </pre>
+     */
+    public void unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getUnassignServicePrincipalCloudIdentityMethodHelper(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -4853,6 +5041,34 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse>(
                   this, METHODID_SET_WORKLOAD_PASSWORD_POLICY)))
+          .addMethod(
+            getAssignCloudIdentityMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse>(
+                  this, METHODID_ASSIGN_CLOUD_IDENTITY)))
+          .addMethod(
+            getUnassignCloudIdentityMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse>(
+                  this, METHODID_UNASSIGN_CLOUD_IDENTITY)))
+          .addMethod(
+            getAssignServicePrincipalCloudIdentityMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse>(
+                  this, METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY)))
+          .addMethod(
+            getUnassignServicePrincipalCloudIdentityMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse>(
+                  this, METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY)))
           .build();
     }
   }
@@ -5882,6 +6098,50 @@ public final class UserManagementGrpc {
       asyncUnaryCall(
           getChannel().newCall(getSetWorkloadPasswordPolicyMethodHelper(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Assign a cloud identity to an actor or group.
+     * </pre>
+     */
+    public void assignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getAssignCloudIdentityMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Unassign a cloud identity from an actor or group.
+     * </pre>
+     */
+    public void unassignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getUnassignCloudIdentityMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Assign a cloud identity to a service principal or service principal category.
+     * </pre>
+     */
+    public void assignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getAssignServicePrincipalCloudIdentityMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Unassign a cloud identity from a service principal or service principal category.
+     * </pre>
+     */
+    public void unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getUnassignServicePrincipalCloudIdentityMethodHelper(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -6820,6 +7080,46 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse setWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest request) {
       return blockingUnaryCall(
           getChannel(), getSetWorkloadPasswordPolicyMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Assign a cloud identity to an actor or group.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse assignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getAssignCloudIdentityMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Unassign a cloud identity from an actor or group.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse unassignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getUnassignCloudIdentityMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Assign a cloud identity to a service principal or service principal category.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse assignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getAssignServicePrincipalCloudIdentityMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Unassign a cloud identity from a service principal or service principal category.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getUnassignServicePrincipalCloudIdentityMethodHelper(), getCallOptions(), request);
     }
   }
 
@@ -7848,6 +8148,50 @@ public final class UserManagementGrpc {
       return futureUnaryCall(
           getChannel().newCall(getSetWorkloadPasswordPolicyMethodHelper(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Assign a cloud identity to an actor or group.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> assignCloudIdentity(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getAssignCloudIdentityMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Unassign a cloud identity from an actor or group.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> unassignCloudIdentity(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getUnassignCloudIdentityMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Assign a cloud identity to a service principal or service principal category.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> assignServicePrincipalCloudIdentity(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getAssignServicePrincipalCloudIdentityMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Unassign a cloud identity from a service principal or service principal category.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> unassignServicePrincipalCloudIdentity(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getUnassignServicePrincipalCloudIdentityMethodHelper(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_INTERACTIVE_LOGIN = 0;
@@ -7938,6 +8282,10 @@ public final class UserManagementGrpc {
   private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 85;
   private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 86;
   private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 87;
+  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 88;
+  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 89;
+  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 90;
+  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 91;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -8308,6 +8656,22 @@ public final class UserManagementGrpc {
           serviceImpl.setWorkloadPasswordPolicy((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse>) responseObserver);
           break;
+        case METHODID_ASSIGN_CLOUD_IDENTITY:
+          serviceImpl.assignCloudIdentity((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse>) responseObserver);
+          break;
+        case METHODID_UNASSIGN_CLOUD_IDENTITY:
+          serviceImpl.unassignCloudIdentity((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse>) responseObserver);
+          break;
+        case METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY:
+          serviceImpl.assignServicePrincipalCloudIdentity((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse>) responseObserver);
+          break;
+        case METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY:
+          serviceImpl.unassignServicePrincipalCloudIdentity((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -8457,6 +8821,10 @@ public final class UserManagementGrpc {
               .addMethod(getDescribeActorSshPublicKeyMethodHelper())
               .addMethod(getDeleteActorSshPublicKeyMethodHelper())
               .addMethod(getSetWorkloadPasswordPolicyMethodHelper())
+              .addMethod(getAssignCloudIdentityMethodHelper())
+              .addMethod(getUnassignCloudIdentityMethodHelper())
+              .addMethod(getAssignServicePrincipalCloudIdentityMethodHelper())
+              .addMethod(getUnassignServicePrincipalCloudIdentityMethodHelper())
               .build();
         }
       }
