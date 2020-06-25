@@ -76,4 +76,7 @@ public interface StackRepository extends JpaRepository<Stack, Long> {
     List<Stack> findMultipleByEnvironmentCrnAndAccountIdWithStatuses(
             @Param("environmentCrns") Collection<String> environmentCrns, @Param("accountId") String accountId,
             @Param("stackStatuses") Collection<Status> stackStatuses);
+
+    @Query("SELECT s.environmentCrn FROM Stack s WHERE s.accountId = :accountId AND s.terminated = -1")
+    List<String> findAllEnvironmentCrnsByTenantId(@Param("accountId") String accountId);
 }
