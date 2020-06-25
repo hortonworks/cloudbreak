@@ -45,7 +45,6 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
-import com.sequenceiq.it.util.TagAdderUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -75,9 +74,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
-    @Inject
-    private TagAdderUtil tagAdderUtil;
-
     public SdxInternalTestDto(TestContext testContext) {
         super(new SdxInternalClusterRequest(), testContext);
     }
@@ -85,7 +81,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public SdxInternalTestDto valid() {
         withName(getResourcePropertyProvider().getName(getCloudPlatform()))
-                .withTestNameAsTag()
                 .withDefaultSDXSettings()
                 .withEnvironment()
                 .withClusterShape(getCloudProvider().getInternalClusterShape())
@@ -382,10 +377,5 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public String getSearchId() {
         return getName();
-    }
-
-    private SdxInternalTestDto withTestNameAsTag() {
-        tagAdderUtil.addTestNameTag(getRequest().initAndGetTags(), getTestContext().getTestMethodName());
-        return this;
     }
 }
