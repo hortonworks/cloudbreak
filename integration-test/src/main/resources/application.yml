@@ -108,15 +108,15 @@ integrationtest:
   # azure parameters
   azure:
     availabilityZone:
-    region: West US
-    location: West US
+    region: West US 2
+    location: West US 2
     network:
-      networkId: CDP-Build-US-W
-      noPublicIp: false
-      resourceGroupName: CDP-Build
+      networkId: cloud-daily
+      noPublicIp: true
+      resourceGroupName: cloud-daily
       subnetIds:
-        - default
-        - GatewaySubnet
+        - cloud-daily.internal.1.westus2
+        - cloud-daily.internal.0.westus2
     credential:
       appId:
       appPassword:
