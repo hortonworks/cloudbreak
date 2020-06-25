@@ -70,7 +70,7 @@ public class CMRepositoryVersionUtil {
 
     public static boolean isRazConfigurationSupported(String version) {
         LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger support");
-        return isVersionNewerOrEqualThanLimited(version, CLOUDERAMANAGER_VERSION_7_2_0);
+        return isVersionNewerOrEqualThanLimited(version, CLOUDERAMANAGER_VERSION_7_2_1);
     }
 
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {

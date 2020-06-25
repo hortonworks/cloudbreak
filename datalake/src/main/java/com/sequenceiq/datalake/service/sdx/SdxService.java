@@ -438,10 +438,10 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
                 validationBuilder.error("Provisioning Ranger Raz is not enabled for this account.");
             }
             if (!AZURE.name().equalsIgnoreCase(environment.getCloudPlatform())) {
-                validationBuilder.error("Provisioning Ranger Raz is only valid for Microsft Azure.");
+                validationBuilder.error("Provisioning Ranger Raz is only valid for Microsoft Azure.");
             }
             if (!isRazSupported(sdxClusterRequest.getRuntime())) {
-                validationBuilder.error("Provisioning Ranger Raz is only valid for CM version > 7.2.0 and not " + sdxClusterRequest.getRuntime());
+                validationBuilder.error("Provisioning Ranger Raz is only valid for CM version > 7.2.1 and not " + sdxClusterRequest.getRuntime());
             }
         }
         ValidationResult validationResult = validationBuilder.build();
@@ -451,14 +451,14 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     /**
-     * Ranger Raz is only on 7.2.0 and later.  If runtime is empty, then sdx-internal call was used.
+     * Ranger Raz is only on 7.2.1 and later.  If runtime is empty, then sdx-internal call was used.
      */
     private boolean isRazSupported(String runtime) {
         if (StringUtils.isEmpty(runtime)) {
             return true;
         }
         Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> runtime, () -> "7.2.0") > -1;
+        return versionComparator.compare(() -> runtime, () -> "7.2.1") > -1;
     }
 
     private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
