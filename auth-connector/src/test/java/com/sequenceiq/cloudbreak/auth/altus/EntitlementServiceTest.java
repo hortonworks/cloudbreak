@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_CLOUD_
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FMS_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_DL_EBS_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_HA;
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CLOUDERA_INTERNAL_ACCOUNT;
@@ -68,6 +69,9 @@ class EntitlementServiceTest {
 
                 {"CDP_FREEIPA_HA == false", CDP_FREEIPA_HA, (EntitlementCheckFunction) EntitlementService::freeIpaHaEnabled, false},
                 {"CDP_FREEIPA_HA == true", CDP_FREEIPA_HA, (EntitlementCheckFunction) EntitlementService::freeIpaHaEnabled, true},
+
+                {"CDP_FREEIPA_HA_REPAIR == false", CDP_FREEIPA_HA_REPAIR, (EntitlementCheckFunction) EntitlementService::freeIpaHaRepairEnabled, false},
+                {"CDP_FREEIPA_HA_REPAIR == true", CDP_FREEIPA_HA_REPAIR, (EntitlementCheckFunction) EntitlementService::freeIpaHaRepairEnabled, true},
 
                 {"CLOUDERA_INTERNAL_ACCOUNT == false", CLOUDERA_INTERNAL_ACCOUNT, (EntitlementCheckFunction) EntitlementService::internalTenant, false},
                 {"CLOUDERA_INTERNAL_ACCOUNT == true", CLOUDERA_INTERNAL_ACCOUNT, (EntitlementCheckFunction) EntitlementService::internalTenant, true},
