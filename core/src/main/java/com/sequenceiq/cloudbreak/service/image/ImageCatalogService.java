@@ -121,6 +121,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     @Inject
     private PrefixMatcherService prefixMatcherService;
 
+    @Inject
+    private LatestDefaultImageUuidProvider latestDefaultImageUuidProvider;
+
     @Override
     public Set<ImageCatalog> findAllByWorkspaceId(Long workspaceId) {
         Set<ImageCatalog> imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchived(workspaceId, false);
@@ -493,10 +496,16 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             List<Image> hdfImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV3.getImages().getHdfImages(), vMImageUUIDs);
             List<Image> cdhImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV3.getImages().getCdhImages(), vMImageUUIDs);
 
+            List<Image> defaultImages = defaultVMImageUUIDs.stream()
+                    .map(imageId -> getImage(imageId, imageCatalogV3.getImages()))
+                    .flatMap(Optional::stream)
+                    .collect(Collectors.toList());
+
+            Collection<String> latestDefaultImageUuids = latestDefaultImageUuidProvider.getLatestDefaultImageUuids(imageFilter.getPlatforms(), defaultImages);
             Stream.of(baseImages.stream(), hdpImages.stream(), hdfImages.stream(), cdhImages.stream())
                     .reduce(Stream::concat)
                     .orElseGet(Stream::empty)
-                    .forEach(img -> img.setDefaultImage(defaultVMImageUUIDs.contains(img.getUuid())));
+                    .forEach(img -> img.setDefaultImage(latestDefaultImageUuids.contains(img.getUuid())));
 
             if (!imageFilter.isBaseImageEnabled()) {
                 baseImages.clear();

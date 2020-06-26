@@ -166,6 +166,9 @@ public class ImageCatalogServiceTest {
     @Mock
     private PrefixMatcherService prefixMatcherService;
 
+    @Mock
+    private LatestDefaultImageUuidProvider latestDefaultImageUuidProvider;
+
     @Before
     public void beforeTest() throws Exception {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
@@ -208,6 +211,7 @@ public class ImageCatalogServiceTest {
         Set<String> supportedVersions = Set.of("2.1.0-dev.2");
         PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
         when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
+        setupLatestDefaultImageUuidProvider("7aca1fa6-980c-44e2-a75e-3144b18a5993");
 
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
@@ -221,6 +225,7 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
+        setupLatestDefaultImageUuidProvider("7aca1fa6-980c-44e2-a75e-3144b18a5993");
 
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
@@ -234,6 +239,7 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
+        setupLatestDefaultImageUuidProvider("f6e778fc-7f17-4535-9021-515351df3691");
 
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
@@ -717,6 +723,10 @@ public class ImageCatalogServiceTest {
     private void setupUserProfileService() {
         UserProfile userProfile = new UserProfile();
         when(userProfileService.getOrCreate(any(User.class))).thenReturn(userProfile);
+    }
+
+    private void setupLatestDefaultImageUuidProvider(String uuid) {
+        when(latestDefaultImageUuidProvider.getLatestDefaultImageUuids(any(), any())).thenReturn(List.of(uuid));
     }
 
     private ImageCatalog getImageCatalog() {
