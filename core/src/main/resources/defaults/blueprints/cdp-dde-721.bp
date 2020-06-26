@@ -152,7 +152,13 @@
           {
             "refName": "yarn-NODEMANAGER-BASE",
             "roleType": "NODEMANAGER",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "container_executor_allowed_system_users",
+                "value": "nobody, impala, hive, llama, hbase, solr"
+              }
+            ]
           },
           {
             "refName": "yarn-JOBHISTORY-BASE",
