@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,6 +71,8 @@ public class Flow2HandlerTest {
     private static final String FLOW_CHAIN_ID = "flowChainId";
 
     private static final String FLOW_TRIGGER_USERCRN = "flowTriggerUserCrn";
+
+    private static final FlowParameters FLOW_PARAMDETERS = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USERCRN, null);
 
     private static final Long STACK_ID = 1L;
 
@@ -164,10 +167,7 @@ public class Flow2HandlerTest {
         headers.put(Flow2Handler.FLOW_ID, FLOW_ID);
         dummyEvent = new Event<>(new Headers(headers), payload);
         flowState = new OwnFlowState();
-        doAnswer(invocation -> {
-            ((Runnable) invocation.getArgument(0)).run();
-            return null;
-        }).when(transactionService).required(any(Runnable.class));
+        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
         when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
         when(spanBuilder.addReference(anyString(), any())).thenReturn(spanBuilder);
         when(spanBuilder.ignoreActiveSpan()).thenReturn(spanBuilder);

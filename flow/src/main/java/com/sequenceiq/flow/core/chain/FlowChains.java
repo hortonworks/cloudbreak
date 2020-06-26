@@ -60,32 +60,17 @@ public class FlowChains {
         }
     }
 
-    public void removeLastTriggerEvent(String flowChainId, String flowTriggerUserCrn) {
+    public void triggerNextFlow(String flowChainId, String flowTriggerUserCrn, Map<Object, Object> contextParams) {
         Queue<Selectable> queue = flowChainMap.get(flowChainId);
         if (queue != null) {
             Selectable selectable = queue.poll();
             if (selectable != null) {
-                flowLogService.saveChain(flowChainId, flowChainParentMap.get(flowChainId), queue, flowTriggerUserCrn);
-            }
-        }
-    }
-
-    public void triggerNextFlow(String flowChainId, String flowTriggerUserCrn, Map<Object, Object> contextParams) {
-        Queue<Selectable> queue = flowChainMap.get(flowChainId);
-        if (queue != null) {
-            Selectable selectable = queue.peek();
-            if (selectable != null) {
                 sendEvent(flowChainId, flowTriggerUserCrn, selectable, contextParams);
             } else {
-                String parentFlowChainId = flowChainParentMap.get(flowChainId);
-                if (parentFlowChainId != null) {
-                    flowChainMap.get(parentFlowChainId).poll();
-                    flowLogService.saveChain(parentFlowChainId, flowChainParentMap.get(parentFlowChainId),
-                            flowChainMap.get(parentFlowChainId), flowTriggerUserCrn);
-                }
                 removeFlowChain(flowChainId);
                 triggerParentFlowChain(flowChainId, flowTriggerUserCrn, contextParams);
             }
+            flowLogService.saveChain(flowChainId, flowChainParentMap.get(flowChainId), queue, flowTriggerUserCrn);
         }
     }
 
