@@ -147,15 +147,19 @@ remove_local_backups() {
 
 upload_aws_backup() {
     echo "try to upload with AES256 encryption"
-    ret_code=$(/usr/bin/aws "${REGION_OPTION}" s3 cp --recursive --sse AES256 --no-progress "${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR}" >> "${LOGFILE}" 2>&1 || echo $?)
+    # shellcheck disable=SC2086
+    /usr/bin/aws ${REGION_OPTION} s3 cp --recursive --sse AES256 --no-progress "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}/${BACKUPDIR}" >> "${LOGFILE}" 2>&1
+    ret_code=$?
 
-    if [[ -n "$ret_code" ]] && [[ "$ret_code" == 1 ]]
+    if [[ "$ret_code" -ne "0" ]]
     then
         echo "try to upload with aws:kms encryption"
-        ret_code=$(/usr/bin/aws "${REGION_OPTION}" s3 cp --recursive --sse aws:kms --no-progress "${config[backup_path]}/${BACKUPDIR} ${BACKUP_LOCATION}/${BACKUPDIR}" >> "${LOGFILE}" 2>&1 || echo $?)
+        # shellcheck disable=SC2086
+        /usr/bin/aws ${REGION_OPTION} s3 cp --recursive --sse aws:kms --no-progress "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}/${BACKUPDIR}" >> "${LOGFILE}" 2>&1
+        ret_code=$?
     fi
 
-    if [[ -n "$ret_code" ]] && [[ "$ret_code" == 1 ]]
+    if [[ "$ret_code" -ne "0" ]]
     then
         error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
     else
