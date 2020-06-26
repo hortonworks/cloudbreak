@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig.KerberosConfigBuilder;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig.ProxyConfigBuilder;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
@@ -50,6 +53,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterCreationEnvironmentValidatorTest {
@@ -75,6 +79,9 @@ class ClusterCreationEnvironmentValidatorTest {
     @Mock
     private PlatformParameters platformParameters;
 
+    @Mock
+    private SdxClientService sdxClientService;
+
     @InjectMocks
     private ClusterCreationEnvironmentValidator underTest;
 
@@ -85,20 +92,40 @@ class ClusterCreationEnvironmentValidatorTest {
         when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
         when(cloudPlatformConnectors.get(any(), any())).thenReturn(connector);
         when(connector.parameters()).thenReturn(platformParameters);
+        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
         when(connector.displayNameToRegion(any())).thenReturn("region1");
         when(platformParameters.isAutoTlsSupported()).thenReturn(true);
+        ReflectionTestUtils.setField(underTest, "validateDatalakeAvailability", true);
     }
 
     @Test
     void testValidateShouldBeSuccessWhenStackRegionIsValidAndEnvironmentsResourcesAreNotGiven() {
         // GIVEN
         Stack stack = getStack();
+        User user = getUser();
         ClusterV4Request clusterRequest = new ClusterV4Request();
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertFalse(actualResult.hasError());
+    }
+
+    @Test
+    void testValidateShouldBeFailedWhenSDXIsNotAvailableInTheEnvironment() {
+        // GIVEN
+        Stack stack = getStack();
+        User user = getUser();
+        ClusterV4Request clusterRequest = new ClusterV4Request();
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
+        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList());
+        // WHEN
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
+        // THEN
+        assertTrue(actualResult.hasError());
+        assertEquals(1, actualResult.getErrors().size());
+        assertEquals("Data Lake is not available in your environment!",
+                actualResult.getErrors().get(0));
     }
 
     @Test
@@ -107,6 +134,7 @@ class ClusterCreationEnvironmentValidatorTest {
         String westUs2RegionName = "westus2";
         String westUs2RegionDisplayName = "West US 2";
         Stack stack = getStack();
+        User user = getUser();
         stack.setRegion(westUs2RegionName);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
@@ -117,7 +145,7 @@ class ClusterCreationEnvironmentValidatorTest {
         when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
         when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -128,6 +156,7 @@ class ClusterCreationEnvironmentValidatorTest {
         String westUs2RegionName = "westus2";
         String westUs2RegionDisplayName = "West US 2";
         Stack stack = getStack();
+        User user = getUser();
         stack.setRegion(westUs2RegionDisplayName);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
@@ -138,7 +167,7 @@ class ClusterCreationEnvironmentValidatorTest {
         when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
         when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -149,6 +178,7 @@ class ClusterCreationEnvironmentValidatorTest {
         String westUs2RegionName = "westus2";
         String westUs2RegionDisplayName = "West US 2";
         Stack stack = getStack();
+        User user = getUser();
         stack.setRegion(westUs2RegionName);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
@@ -159,7 +189,7 @@ class ClusterCreationEnvironmentValidatorTest {
         when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
         when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -170,6 +200,7 @@ class ClusterCreationEnvironmentValidatorTest {
         String westUs2RegionName = "westus2";
         String westUs2RegionDisplayName = "West US 2";
         Stack stack = getStack();
+        User user = getUser();
         stack.setRegion(westUs2RegionDisplayName);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
@@ -180,7 +211,7 @@ class ClusterCreationEnvironmentValidatorTest {
         when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
         when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -189,13 +220,14 @@ class ClusterCreationEnvironmentValidatorTest {
     void testValidateShouldBeSuccessWhenNoEnvironmentProvided() {
         // GIVEN
         Stack stack = getStack();
+        User user = getUser();
         stack.setEnvironmentCrn(null);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy");
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -204,12 +236,13 @@ class ClusterCreationEnvironmentValidatorTest {
     void testValidateShouldBeSuccessWhenResourcesAreInTheSameEnvironmentOrGlobals() {
         // GIVEN
         Stack stack = getStack();
+        User user = getUser();
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy");
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -218,6 +251,7 @@ class ClusterCreationEnvironmentValidatorTest {
     void testValidateShouldBeFailedWhenStackRegionIsInvalidAndEnvironmentsResourcesAreNotInGoodEnvironment() {
         // GIVEN
         Stack stack = getStack();
+        User user = getUser();
         stack.setRegion("region3");
         when(connector.displayNameToRegion(any())).thenReturn("region666");
         ClusterV4Request clusterRequest = new ClusterV4Request();
@@ -227,7 +261,7 @@ class ClusterCreationEnvironmentValidatorTest {
         environment.getRegions().setNames(Lists.newArrayList("region1", "region2"));
         environment.setName("env1");
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertTrue(actualResult.hasError());
         assertEquals(1, actualResult.getErrors().size());
@@ -239,6 +273,7 @@ class ClusterCreationEnvironmentValidatorTest {
     void testValidateShouldWorkWhenStackEnvIsNullButResourcesCouldBeFoundInTheSameWorkspace() {
         // GIVEN
         Stack stack = getStack();
+        User user = getUser();
         stack.setEnvironmentCrn(null);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy");
@@ -249,7 +284,7 @@ class ClusterCreationEnvironmentValidatorTest {
         clusterRequest.setDatabases(Set.of(rdsName));
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -258,6 +293,7 @@ class ClusterCreationEnvironmentValidatorTest {
     void testValidateShouldFailWhenProxyCouldNotBeFoundInTheSameWorkspace() {
         // GIVEN
         Stack stack = getStack();
+        User user = getUser();
         stack.setEnvironmentCrn(null);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy");
@@ -270,7 +306,7 @@ class ClusterCreationEnvironmentValidatorTest {
 //        when(user.getUserCrn()).thenReturn("aUserCRN");
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertTrue(actualResult.hasError());
         assertEquals(1, actualResult.getErrors().size());
@@ -282,6 +318,7 @@ class ClusterCreationEnvironmentValidatorTest {
     void testValidateShouldFailWhenRdsCouldNotBeFoundInTheSameWorkspace() {
         // GIVEN
         Stack stack = getStack();
+        User user = getUser();
         stack.setEnvironmentCrn(null);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy");
@@ -292,7 +329,7 @@ class ClusterCreationEnvironmentValidatorTest {
         clusterRequest.setDatabases(Set.of(rdsName, rdsName2));
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertTrue(actualResult.hasError());
         assertEquals(2, actualResult.getErrors().size());
@@ -320,6 +357,7 @@ class ClusterCreationEnvironmentValidatorTest {
     void testAutoTlsConfigurations(String testName, boolean cmAutoTls, boolean providerAutoTls, boolean expectedHasErrors) {
         // GIVEN
         Stack stack = getStack();
+        User user = getUser();
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         cmRequest.setEnableAutoTls(cmAutoTls);
@@ -328,7 +366,7 @@ class ClusterCreationEnvironmentValidatorTest {
         when(platformParameters.isAutoTlsSupported()).thenReturn(providerAutoTls);
 
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertEquals(expectedHasErrors, actualResult.hasError());
         if (expectedHasErrors) {
@@ -338,9 +376,10 @@ class ClusterCreationEnvironmentValidatorTest {
     }
 
     @Test
-    void testAutoTlsWithFreeIPA() {
+    void testAutoTlsWithFreeIpa() {
         // GIVEN
         Stack stack = getStack();
+        User user = getUser();
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         cmRequest.setEnableAutoTls(true);
@@ -350,7 +389,7 @@ class ClusterCreationEnvironmentValidatorTest {
         KerberosConfig kerberosConfig = KerberosConfigBuilder.aKerberosConfig().withType(KerberosType.ACTIVE_DIRECTORY).build();
         when(kerberosConfigService.get(any(), any())).thenReturn(Optional.of(kerberosConfig));
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertTrue(actualResult.hasError());
         assertEquals(1, actualResult.getErrors().size());
@@ -361,6 +400,7 @@ class ClusterCreationEnvironmentValidatorTest {
     void testAutoTlsByParentEnvironmentCloudPlatform() {
         // GIVEN
         Stack stack = getStack();
+        User user = getUser();
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         cmRequest.setEnableAutoTls(true);
@@ -374,7 +414,7 @@ class ClusterCreationEnvironmentValidatorTest {
         KerberosConfig kerberosConfig = KerberosConfigBuilder.aKerberosConfig().withType(KerberosType.ACTIVE_DIRECTORY).build();
         when(kerberosConfigService.get(any(), any())).thenReturn(Optional.of(kerberosConfig));
         // WHEN
-        underTest.validate(clusterRequest, stack, environment);
+        underTest.validate(clusterRequest, stack, environment, user);
         // THEN
         assertEquals(environment.getParentEnvironmentCloudPlatform(), argumentCaptor.getValue().value());
     }
@@ -415,5 +455,16 @@ class ClusterCreationEnvironmentValidatorTest {
         rdsConfig.setId(TestUtil.generateUniqueId());
         rdsConfig.setName(name);
         return rdsConfig;
+    }
+
+    private User getUser() {
+        User user = new User();
+        user.setUserId("horton@hortonworks.com");
+        user.setUserCrn("testCrn");
+        user.setUserName("Alma ur");
+        Tenant tenant = new Tenant();
+        tenant.setName("alma");
+        user.setTenant(tenant);
+        return user;
     }
 }

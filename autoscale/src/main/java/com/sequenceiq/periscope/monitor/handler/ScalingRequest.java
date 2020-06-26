@@ -83,7 +83,7 @@ public class ScalingRequest implements Runnable {
                 scaleDown(scalingAdjustment, totalNodes);
             }
         } catch (RuntimeException e) {
-            LOGGER.info("Error while executing ScaleRequest", e);
+            LOGGER.error("Error while executing ScaleRequest", e);
         }
     }
 
@@ -101,8 +101,8 @@ public class ScalingRequest implements Runnable {
         String userCrn = cluster.getClusterPertain().getUserCrn();
         try {
 
-            LOGGER.debug("Sending request to add '{}' instance(s) into host group '{}', triggered policy '{}', cluster '{}', user '{}'",
-                    scalingAdjustment, hostGroup, policy.getName(), stackCrn, userCrn);
+            LOGGER.info("Sending request to add '{}' instance(s) into host group '{}', triggered adjustmentType '{}', cluster '{}', user '{}'",
+                    scalingAdjustment, hostGroup, policy.getAdjustmentType(), stackCrn, userCrn);
             UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
             updateStackJson.setWithClusterEvent(true);
             InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
@@ -116,12 +116,12 @@ public class ScalingRequest implements Runnable {
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
         } catch (RuntimeException e) {
             scalingStatus = ScalingStatus.FAILED;
-            statusReason = "Couldn't trigger upscaling due to: " + e.getMessage();
-            LOGGER.info("Couldn't trigger upscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
+            statusReason = "Couldn't trigger upscaling due to CB Message : " + e.getMessage();
+            LOGGER.error("Couldn't trigger upscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
                     hostGroup, cluster.getStackCrn(), desiredNodeCount, e);
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED);
         } finally {
-            createHistoryAndNotify(totalNodes, statusReason, scalingStatus);
+            createHistoryAndNotify(scalingAdjustment, totalNodes, statusReason, scalingStatus);
         }
     }
 
@@ -133,13 +133,14 @@ public class ScalingRequest implements Runnable {
         String stackCrn = cluster.getStackCrn();
         String userCrn = cluster.getClusterPertain().getUserCrn();
         try {
-            LOGGER.debug("Sending request to remove '{}' node(s) from host group '{}', triggered policy '{}', cluster '{}', user '{}'",
-                    scalingAdjustment, hostGroup, policy.getName(), stackCrn, userCrn);
+            LOGGER.info("Sending request to remove '{}' node(s) from host group '{}', triggered adjustmentType '{}', cluster '{}', user '{}'",
+                    scalingAdjustment, hostGroup, policy.getAdjustmentType(), stackCrn, userCrn);
             UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
             HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
             hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             hostGroupAdjustmentJson.setWithStackUpdate(true);
             hostGroupAdjustmentJson.setHostGroup(hostGroup);
+            hostGroupAdjustmentJson.setValidateNodeCount(false);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
             cloudbreakCrnClient.withUserCrn(userCrn).autoscaleEndpoint()
                     .putCluster(stackCrn, cluster.getClusterPertain().getUserId(), updateClusterJson);
@@ -149,11 +150,11 @@ public class ScalingRequest implements Runnable {
         } catch (Exception e) {
             scalingStatus = ScalingStatus.FAILED;
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
-            statusReason = "Couldn't trigger downscaling due to: " + e.getMessage();
-            LOGGER.info("Couldn't trigger downscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
+            statusReason = "Couldn't trigger downscaling due to CB Message : " + e.getMessage();
+            LOGGER.error("Couldn't trigger downscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
                     hostGroup, cluster.getStackCrn(), desiredNodeCount, e);
         } finally {
-            createHistoryAndNotify(totalNodes, statusReason, scalingStatus);
+            createHistoryAndNotify(scalingAdjustment, totalNodes, statusReason, scalingStatus);
         }
     }
 
@@ -163,7 +164,7 @@ public class ScalingRequest implements Runnable {
         String statusReason = null;
         ScalingStatus scalingStatus = null;
         try {
-            LOGGER.debug("Sending request to remove  nodeIdCount '{}', nodeId(s) '{}' from host group '{}', cluster '{}', user '{}'",
+            LOGGER.info("Sending request to remove  nodeIdCount '{}', nodeId(s) '{}' from host group '{}', cluster '{}', user '{}'",
                     decommissionNodeIds.size(), decommissionNodeIds, hostGroup, cluster.getStackCrn(),
                     cluster.getClusterPertain().getUserCrn());
             cloudbreakCommunicator.decommissionInstancesForCluster(cluster, decommissionNodeIds);
@@ -173,16 +174,17 @@ public class ScalingRequest implements Runnable {
         } catch (Exception e) {
             scalingStatus = ScalingStatus.FAILED;
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
-            statusReason = "Couldn't trigger downscaling due to: " + e.getMessage();
-            LOGGER.info("Couldn't trigger decommissioning for host group '{}', cluster '{}', decommissionNodeCount '{}', " +
+            statusReason = "Couldn't trigger downscaling due to CB Message : " + e.getMessage();
+            LOGGER.error("Couldn't trigger decommissioning for host group '{}', cluster '{}', decommissionNodeCount '{}', " +
                     "decommissionNodeIds '{}' error '{}' ", hostGroup, cluster.getStackCrn(), decommissionNodeIds.size(), decommissionNodeIds, e);
         } finally {
-            createHistoryAndNotify(totalNodes, statusReason, scalingStatus);
+            createHistoryAndNotify(-decommissionNodeIds.size(), totalNodes, statusReason, scalingStatus);
         }
     }
 
-    private void createHistoryAndNotify(int totalNodes, String statusReason, ScalingStatus scalingStatus) {
-        History history = historyService.createEntry(scalingStatus, StringUtils.substring(statusReason, 0, STATUSREASON_MAX_LENGTH), totalNodes, policy);
+    private void createHistoryAndNotify(int adjustmentCount, int totalNodes, String statusReason, ScalingStatus scalingStatus) {
+        History history = historyService.createEntry(scalingStatus,
+                StringUtils.left(statusReason, STATUSREASON_MAX_LENGTH), totalNodes, adjustmentCount, policy);
         notificationSender.send(policy.getAlert().getCluster(), history);
     }
 }

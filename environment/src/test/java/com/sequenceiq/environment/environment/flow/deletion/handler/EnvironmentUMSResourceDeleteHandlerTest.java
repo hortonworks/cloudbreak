@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
@@ -47,7 +48,10 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
     private EnvironmentService environmentService;
 
     @Mock
-    private Event<EnvironmentDto> environmentDtoEvent;
+    private Event<EnvironmentDeletionDto> environmentDtoEvent;
+
+    @Mock
+    private EnvironmentDeletionDto environmentDeletionDto;
 
     @Mock
     private EnvironmentDto environmentDto;
@@ -64,7 +68,8 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
     @Test
     public void testAccept() {
         // GIVEN
-        given(environmentDtoEvent.getData()).willReturn(environmentDto);
+        given(environmentDtoEvent.getData()).willReturn(environmentDeletionDto);
+        given(environmentDeletionDto.getEnvironmentDto()).willReturn(environmentDto);
         given(environmentDto.getResourceCrn()).willReturn(TEST_CRN);
         given(environmentService.findEnvironmentById(any())).willReturn(Optional.of(new Environment()));
         doNothing().when(umsClient).notifyResourceDeleted(TEST_CRN, Optional.empty());
@@ -83,7 +88,8 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
         String crnFromQuery = TEST_CRN;
         Environment env = new Environment();
         env.setResourceCrn(crnFromQuery);
-        given(environmentDtoEvent.getData()).willReturn(environmentDto);
+        given(environmentDtoEvent.getData()).willReturn(environmentDeletionDto);
+        given(environmentDeletionDto.getEnvironmentDto()).willReturn(environmentDto);
         given(environmentDto.getResourceCrn()).willReturn(null);
         given(environmentService.findEnvironmentById(any())).willReturn(Optional.of(env));
         doNothing().when(umsClient).notifyResourceDeleted(crnFromQuery, Optional.empty());
@@ -99,7 +105,9 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
     @Test
     public void testAcceptWithException() {
         // GIVEN
-        given(environmentDtoEvent.getData()).willReturn(environmentDto);
+
+        given(environmentDtoEvent.getData()).willReturn(environmentDeletionDto);
+        given(environmentDeletionDto.getEnvironmentDto()).willReturn(environmentDto);
         given(environmentDto.getResourceCrn()).willReturn(TEST_CRN);
         given(environmentService.findEnvironmentById(any())).willReturn(Optional.of(new Environment()));
         doThrow(new UmsOperationException("ums exception")).when(umsClient).notifyResourceDeleted(TEST_CRN, Optional.empty());

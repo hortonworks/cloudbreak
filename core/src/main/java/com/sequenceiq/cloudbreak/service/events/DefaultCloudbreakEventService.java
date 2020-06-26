@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntrie
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
@@ -121,15 +122,16 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     public List<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId) {
         List<StructuredNotificationEvent> events = new ArrayList<>();
         if (stackId != null) {
-            events = structuredEventService.getEventsWithTypeAndResourceId(StructuredNotificationEvent.class, "stacks", stackId);
+            StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
+            events = structuredEventService.getEventsWithTypeAndResourceId(StructuredNotificationEvent.class, stackView.getType().getResourceType(), stackId);
         }
         return events;
     }
 
     @Override
-    public Page<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId, Pageable pageable) {
+    public Page<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId, String resourceType, Pageable pageable) {
         return Optional.ofNullable(stackId)
-                .map(id -> structuredEventService.getEventsLimitedWithTypeAndResourceId(StructuredNotificationEvent.class, "stacks", id, pageable))
+                .map(id -> structuredEventService.getEventsLimitedWithTypeAndResourceId(StructuredNotificationEvent.class, resourceType, id, pageable))
                 .orElse(Page.empty());
     }
 

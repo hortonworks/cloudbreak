@@ -45,7 +45,7 @@ public class ImageCatalogMockServerSetup {
 
     private void startMockImageCatalogs(TestParameter testParameter, String runTime) {
         String jsonPreparedICResponse = patchCbVersionAndRuntime(responseFromJsonFile("imagecatalog/catalog.json"), testParameter);
-        String jsonFreeIPACatalogResponse = responseFromJsonFile("imagecatalog/freeipa.json");
+        String jsonFreeIpaCatalogResponse = responseFromJsonFile("imagecatalog/freeipa.json");
         String jsonPreparedPrewarmICResponseString = responseFromJsonFile("imagecatalog/catalog-with-prewarmed.json")
                 .replaceAll("CDH_RUNTIME", runTime);
         String jsonPreparedPrewarmICResponse = patchCbVersionAndRuntime(jsonPreparedPrewarmICResponseString, testParameter);
@@ -55,7 +55,7 @@ public class ImageCatalogMockServerSetup {
         String upgradeImageCatalog = patchCbVersionAndRuntime(upgradeImageCatalogString, testParameter);
 
         startImageCatalog(IMAGE_CATALOG, jsonPreparedICResponse);
-        startImageCatalog(FREEIPA_IMAGE_CATALOG, jsonFreeIPACatalogResponse);
+        startImageCatalog(FREEIPA_IMAGE_CATALOG, jsonFreeIpaCatalogResponse);
         startImageCatalog(IMAGE_CATALOG_PREWARMED, jsonPreparedPrewarmICResponse);
         startImageCatalog(IMAGE_CATALOG_UPGRADE, upgradeImageCatalog);
     }

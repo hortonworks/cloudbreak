@@ -60,7 +60,7 @@ public class BootstrapService {
     }
 
     public void bootstrap(Long stackId, List<String> instanceIds) {
-        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findAllInStack(stackId).stream()
+        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findNotTerminatedForStack(stackId).stream()
                 .filter(instanceMetaData -> Objects.isNull(instanceIds) || instanceIds.contains(instanceMetaData.getInstanceId()))
                 .collect(Collectors.toSet());
         Stack stack = stackRepository.findById(stackId).get();

@@ -1,8 +1,6 @@
 package com.sequenceiq.periscope.api.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.periscope.doc.ApiDescription.HistoryJsonProperties;
 
 import io.swagger.annotations.ApiModel;
@@ -11,23 +9,8 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class AutoscaleClusterHistoryResponse implements Json {
 
-    @ApiModelProperty(HistoryJsonProperties.ID)
-    private long id;
-
-    @ApiModelProperty(HistoryJsonProperties.CLUSTERID)
-    private long clusterId;
-
     @ApiModelProperty(HistoryJsonProperties.CBSTACKCRN)
     private String stackCrn;
-
-    @ApiModelProperty(HistoryJsonProperties.ORIGINALNODECOUNT)
-    private int originalNodeCount;
-
-    @ApiModelProperty(HistoryJsonProperties.ADJUSTMENT)
-    private int adjustment;
-
-    @ApiModelProperty(HistoryJsonProperties.ADJUSTMENTTYPE)
-    private AdjustmentType adjustmentType;
 
     @ApiModelProperty(HistoryJsonProperties.SCALINGSTATUS)
     private ScalingStatus scalingStatus;
@@ -38,30 +21,9 @@ public class AutoscaleClusterHistoryResponse implements Json {
     @ApiModelProperty(HistoryJsonProperties.TIMESTAMP)
     private long timestamp;
 
-    @ApiModelProperty(HistoryJsonProperties.HOSTGROUP)
-    private String hostGroup;
-
-    @ApiModelProperty(HistoryJsonProperties.ALERTTYPE)
-    private AlertType alertType;
-
-    @ApiModelProperty(HistoryJsonProperties.PROPERTIES)
-    private Map<String, String> properties = new HashMap<>();
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public long getClusterId() {
-        return clusterId;
-    }
-
-    public void setClusterId(long clusterId) {
-        this.clusterId = clusterId;
-    }
+    @ApiModelProperty(HistoryJsonProperties.SCALINGACTIVITY)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private AutoscaleClusterHistoryActivity autoscaleClusterHistoryActivity;
 
     public String getStackCrn() {
         return stackCrn;
@@ -69,30 +31,6 @@ public class AutoscaleClusterHistoryResponse implements Json {
 
     public void setStackCrn(String stackCrn) {
         this.stackCrn = stackCrn;
-    }
-
-    public int getOriginalNodeCount() {
-        return originalNodeCount;
-    }
-
-    public void setOriginalNodeCount(int originalNodeCount) {
-        this.originalNodeCount = originalNodeCount;
-    }
-
-    public int getAdjustment() {
-        return adjustment;
-    }
-
-    public void setAdjustment(int adjustment) {
-        this.adjustment = adjustment;
-    }
-
-    public AdjustmentType getAdjustmentType() {
-        return adjustmentType;
-    }
-
-    public void setAdjustmentType(AdjustmentType adjustmentType) {
-        this.adjustmentType = adjustmentType;
     }
 
     public ScalingStatus getScalingStatus() {
@@ -119,27 +57,11 @@ public class AutoscaleClusterHistoryResponse implements Json {
         this.timestamp = timestamp;
     }
 
-    public String getHostGroup() {
-        return hostGroup;
+    public AutoscaleClusterHistoryActivity getAutoscaleClusterHistoryActivity() {
+        return autoscaleClusterHistoryActivity;
     }
 
-    public void setHostGroup(String hostGroup) {
-        this.hostGroup = hostGroup;
-    }
-
-    public AlertType getAlertType() {
-        return alertType;
-    }
-
-    public void setAlertType(AlertType alertType) {
-        this.alertType = alertType;
-    }
-
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
+    public void setAutoscaleClusterHistoryActivity(AutoscaleClusterHistoryActivity autoscaleClusterHistoryActivity) {
+        this.autoscaleClusterHistoryActivity = autoscaleClusterHistoryActivity;
     }
 }

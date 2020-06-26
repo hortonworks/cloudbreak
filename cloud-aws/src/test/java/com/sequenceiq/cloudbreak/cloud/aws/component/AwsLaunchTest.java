@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.component;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.component.ComponentTestUtil.AVAILABILITY_ZONE;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -15,26 +16,37 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.MockBeans;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult;
 import com.amazonaws.services.autoscaling.model.Instance;
 import com.amazonaws.services.autoscaling.model.LifecycleState;
+import com.amazonaws.services.autoscaling.waiters.AmazonAutoScalingWaiters;
+import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
+import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.amazonaws.services.cloudformation.model.Output;
 import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackResourceDetail;
+import com.amazonaws.services.cloudformation.waiters.AmazonCloudFormationWaiters;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribePrefixListsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
@@ -44,10 +56,13 @@ import com.amazonaws.services.ec2.model.DescribeVolumesResult;
 import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.VolumeState;
+import com.amazonaws.services.ec2.waiters.AmazonEC2Waiters;
+import com.amazonaws.waiters.Waiter;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
-import com.sequenceiq.cloudbreak.cloud.aws.task.AwsCreateStackStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -58,8 +73,18 @@ import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.ResourceType;
 
-@MockBeans(@MockBean(AwsCreateStackStatusCheckerTask.class))
-public class AwsLaunchTest extends AwsComponentTest {
+@RunWith(SpringRunner.class)
+@Import(TestConfig.class)
+@TestPropertySource(properties = {
+        "cb.max.aws.resource.name.length=200",
+        "cb.gcp.stopStart.batch.size=2",
+        "cb.gcp.create.batch.size=2",
+        "cb.aws.hostkey.verify=true",
+        "cb.aws.spotinstances.enabled=true",
+        "cb.aws.credential.cache.ttl=1"
+})
+@ActiveProfiles("component")
+public class AwsLaunchTest {
 
     private static final int INSTANCE_STATE_RUNNING = 16;
 
@@ -80,30 +105,60 @@ public class AwsLaunchTest extends AwsComponentTest {
     private PersistenceNotifier persistenceNotifier;
 
     @Inject
-    private AmazonCloudFormationRetryClient amazonCloudFormationRetryClient;
-
-    @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
-
-    @Inject
-    private AmazonEC2Client amazonEC2Client;
-
-    @Inject
-    private AwsCreateStackStatusCheckerTask awsCreateStackStatusCheckerTask;
-
-    @Inject
-    private AmazonAutoScalingRetryClient amazonAutoScalingRetryClient;
 
     @Inject
     private Retry retry;
 
+    @Inject
+    private ComponentTestUtil componentTestUtil;
+
+    @MockBean
+    private AmazonCloudFormationRetryClient amazonCloudFormationRetryClient;
+
+    @MockBean
+    private AmazonCloudFormationClient amazonCloudFormationClient;
+
+    @MockBean
+    private AmazonEC2Client amazonEC2Client;
+
+    @MockBean
+    private AmazonAutoScalingRetryClient amazonAutoScalingRetryClient;
+
+    @MockBean
+    private AmazonAutoScalingClient amazonAutoScalingClient;
+
+    @MockBean
+    private AmazonCloudFormationWaiters cfWaiters;
+
+    @MockBean
+    private AmazonAutoScalingWaiters asWaiters;
+
+    @MockBean
+    private AmazonEC2Waiters ecWaiters;
+
+    @MockBean
+    private Waiter<DescribeStacksRequest> cfStackWaiter;
+
+    @MockBean
+    private Waiter<DescribeInstancesRequest> instanceWaiter;
+
+    @MockBean
+    private AwsClient awsClient;
+
+    @MockBean
+    private Waiter<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequestWaiter;
+
+    @MockBean
+    private CustomAmazonWaiterProvider customAmazonWaiterProvider;
+
     @Test
     public void launchStack() throws Exception {
+        setup();
         setupRetryService();
         setupFreemarkerTemplateProcessing();
         setupDescribeStacksResponses();
         setupDescribeImagesResponse();
-        setupCreateStackStatusCheckerTask();
         setupDescribeStackResourceResponse();
         setupAutoscalingResponses();
         setupDescribeInstanceStatusResponse();
@@ -115,9 +170,9 @@ public class AwsLaunchTest extends AwsComponentTest {
 
         InMemoryStateStore.putStack(1L, PollGroup.POLLABLE);
 
-        AuthenticatedContext authenticatedContext = getAuthenticatedContext();
+        AuthenticatedContext authenticatedContext = componentTestUtil.getAuthenticatedContext();
         authenticatedContext.putParameter(AmazonEC2Client.class, amazonEC2Client);
-        awsResourceConnector.launch(authenticatedContext, getStackForLaunch(InstanceStatus.CREATE_REQUESTED, InstanceStatus.CREATE_REQUESTED),
+        awsResourceConnector.launch(authenticatedContext, componentTestUtil.getStackForLaunch(InstanceStatus.CREATE_REQUESTED, InstanceStatus.CREATE_REQUESTED),
                 persistenceNotifier, AdjustmentType.EXACT, Long.MAX_VALUE);
 
         // assert
@@ -127,13 +182,30 @@ public class AwsLaunchTest extends AwsComponentTest {
         verify(persistenceNotifier).notifyAllocation(argThat(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType())), any());
         verify(persistenceNotifier).notifyAllocation(argThat(cloudResource -> ResourceType.CLOUDFORMATION_STACK.equals(cloudResource.getType())), any());
 
-        InOrder inOrder = inOrder(amazonEC2Client, amazonCloudFormationRetryClient, awsCreateStackStatusCheckerTask);
+        InOrder inOrder = inOrder(amazonEC2Client, amazonCloudFormationRetryClient);
         inOrder.verify(amazonEC2Client).describeImages(any());
         inOrder.verify(amazonCloudFormationRetryClient).createStack(any());
-        inOrder.verify(awsCreateStackStatusCheckerTask).call();
         inOrder.verify(amazonEC2Client, times(2)).createVolume(any());
         inOrder.verify(amazonEC2Client, times(2)).attachVolume(any());
         inOrder.verify(amazonEC2Client, never()).describePrefixLists();
+    }
+
+    private void setup() {
+        when(awsClient.createAccess(any(), anyString())).thenReturn(amazonEC2Client);
+        when(awsClient.createAccess(any())).thenReturn(amazonEC2Client);
+        when(awsClient.createCloudFormationRetryClient(any(), anyString())).thenReturn(amazonCloudFormationRetryClient);
+        when(awsClient.createCloudFormationClient(any(), anyString())).thenReturn(amazonCloudFormationClient);
+        when(amazonCloudFormationClient.waiters()).thenReturn(cfWaiters);
+        when(cfWaiters.stackCreateComplete()).thenReturn(cfStackWaiter);
+        when(cfWaiters.stackDeleteComplete()).thenReturn(cfStackWaiter);
+        when(awsClient.createAutoScalingRetryClient(any(), anyString())).thenReturn(amazonAutoScalingRetryClient);
+        when(awsClient.createAutoScalingClient(any(), anyString())).thenReturn(amazonAutoScalingClient);
+        when(amazonAutoScalingClient.waiters()).thenReturn(asWaiters);
+        when(asWaiters.groupInService()).thenReturn(describeAutoScalingGroupsRequestWaiter);
+        when(amazonEC2Client.waiters()).thenReturn(ecWaiters);
+        when(ecWaiters.instanceRunning()).thenReturn(instanceWaiter);
+        when(ecWaiters.instanceTerminated()).thenReturn(instanceWaiter);
+        when(customAmazonWaiterProvider.getAutoscalingInstancesInServiceWaiter(any(), any())).thenReturn(describeAutoScalingGroupsRequestWaiter);
     }
 
     private void setupRetryService() {
@@ -224,12 +296,6 @@ public class AwsLaunchTest extends AwsComponentTest {
 
     private void setupDescribePrefixListsResponse() {
         when(amazonEC2Client.describePrefixLists()).thenReturn(new DescribePrefixListsResult());
-    }
-
-    private void setupCreateStackStatusCheckerTask() {
-        // TODO would be nice to call real method instead of mocking it
-        when(awsCreateStackStatusCheckerTask.completed(anyBoolean())).thenReturn(true);
-        when(awsCreateStackStatusCheckerTask.call()).thenReturn(true);
     }
 
     private void setupDescribeStackResourceResponse() {

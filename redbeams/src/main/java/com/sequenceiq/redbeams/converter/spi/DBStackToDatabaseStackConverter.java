@@ -157,5 +157,4 @@ public class DBStackToDatabaseStackConverter {
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceGroup);
     }
-
 }

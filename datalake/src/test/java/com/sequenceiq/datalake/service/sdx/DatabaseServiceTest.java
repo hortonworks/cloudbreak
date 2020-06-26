@@ -45,6 +45,8 @@ public class DatabaseServiceTest {
 
     private static final String DATABASE_CRN = "database crn";
 
+    private static final String CLUSTER_CRN = "cluster crn";
+
     @Captor
     public ArgumentCaptor<AllocateDatabaseServerV4Request> captor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
 
@@ -77,6 +79,7 @@ public class DatabaseServiceTest {
         SdxCluster cluster = new SdxCluster();
         cluster.setClusterName("NAME");
         cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        cluster.setCrn(CLUSTER_CRN);
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
         env.setName("ENV");
         env.setCloudPlatform("aws");
@@ -96,6 +99,7 @@ public class DatabaseServiceTest {
         assertThat(dbRequest.getDatabaseServer().getInstanceType(), is("instanceType"));
         assertThat(dbRequest.getDatabaseServer().getDatabaseVendor(), is("vendor"));
         assertThat(dbRequest.getDatabaseServer().getStorageSize(), is(100L));
+        assertThat(dbRequest.getClusterCrn(), is(CLUSTER_CRN));
         assertNotNull(dbRequest.getDatabaseServer().getAws());
         verifyZeroInteractions(sdxClusterRepository);
         verifyZeroInteractions(sdxStatusService);

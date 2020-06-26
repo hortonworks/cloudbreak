@@ -42,6 +42,8 @@ altus:
     host: localhost
   ums:
     host: localhost
+  audit:
+    enabled: true
 
 datalake:
   cert.dir: /certs/

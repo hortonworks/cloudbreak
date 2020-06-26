@@ -45,4 +45,6 @@ public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseSe
 
     @Query("SELECT c.resourceCrn FROM DatabaseServerConfig c WHERE c.name IN (:names)")
     List<Crn> findResourceCrnsByNames(@Param("names") Collection<String> names);
+
+    Optional<DatabaseServerConfig> findByClusterCrn(String clusterCrn);
 }

@@ -18,7 +18,7 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
-import com.sequenceiq.it.cloudbreak.dto.kerberos.FreeIPAKerberosDescriptorTestDto;
+import com.sequenceiq.it.cloudbreak.dto.kerberos.FreeIpaKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
@@ -65,7 +65,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(KerberosTestAssertion.validateCustomDomain("realm.addomain.com"))
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("realm.addomain.com", 7))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("realm.addomain.com", 12))
                 .validate();
     }
 
@@ -93,7 +93,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(KerberosTestAssertion.validateCustomDomain("custom.addomain.com"))
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("custom.addomain.com", 7))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("custom.addomain.com", 12))
                 .validate();
     }
 
@@ -102,15 +102,15 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
             given = "a FreeIPA based kerberos config with realm and without domain",
             when = "calling a stack creation with that kerberos config",
             then = "propagated realm should be used and salt action should be called")
-    public void testCreationWitKerberosAndStackWithoutCustomDomainAndFreeIPAWithoutDomainAndWithRealm(MockedTestContext testContext) {
+    public void testCreationWitKerberosAndStackWithoutCustomDomainAndFreeIpaWithoutDomainAndWithRealm(MockedTestContext testContext) {
         DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
         dynamicRouteStack.put(ClouderaManagerMock.API_V31 + "/cm/config", (request, response) -> new ApiConfigList());
         testContext
-                .given(FreeIPAKerberosDescriptorTestDto.class)
+                .given(FreeIpaKerberosDescriptorTestDto.class)
                 .withDomain(null)
                 .withRealm("realm.freeiparealm.com")
                 .given(KerberosTestDto.class)
-                .withFreeIPADescriptor()
+                .withFreeIpaDescriptor()
                 .when(kerberosTestClient.createV1())
                 .given(ClusterTestDto.class)
                 .given(StackTestDto.class)
@@ -118,7 +118,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(KerberosTestAssertion.validateCustomDomain("realm.freeiparealm.com"))
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("realm.freeiparealm.com", 7))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("realm.freeiparealm.com", 12))
                 .validate();
     }
 
@@ -127,16 +127,16 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
             given = "a FreeIPA based kerberos config with realm and domain",
             when = "calling a stack creation with that kerberos config",
             then = "propagated domain should be used and salt action should be called")
-    public void testCreationWitKerberosAndStackWithoutCustomDomainAndFreeIPAWithDomainAndWithRealm(MockedTestContext testContext) {
+    public void testCreationWitKerberosAndStackWithoutCustomDomainAndFreeIpaWithDomainAndWithRealm(MockedTestContext testContext) {
         DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
         dynamicRouteStack.put(ClouderaManagerMock.API_V31 + "/cm/config", (request, response) -> new ApiConfigList());
 
         testContext
-                .given(FreeIPAKerberosDescriptorTestDto.class)
+                .given(FreeIpaKerberosDescriptorTestDto.class)
                 .withDomain("custom.freeipadomain.com")
                 .withRealm("realm.freeiparealm.com")
                 .given(KerberosTestDto.class)
-                .withFreeIPADescriptor()
+                .withFreeIpaDescriptor()
                 .when(kerberosTestClient.createV1())
                 .given(ClusterTestDto.class)
                 .given(StackTestDto.class)
@@ -144,7 +144,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(KerberosTestAssertion.validateCustomDomain("custom.freeipadomain.com"))
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("custom.freeipadomain.com", 7))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("custom.freeipadomain.com", 12))
                 .validate();
     }
 }

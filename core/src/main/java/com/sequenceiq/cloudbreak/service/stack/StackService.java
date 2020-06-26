@@ -433,6 +433,16 @@ public class StackService implements ResourceIdProvider {
                 .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
     }
 
+    public StackView getViewByNameInWorkspace(String name, Long workspaceId) {
+        return stackViewService.findNotTerminatedByName(name, workspaceId)
+                .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
+    }
+
+    public StackView getViewByCrnInWorkspace(String crn, Long workspaceId) {
+        return stackViewService.findNotTerminatedByCrn(crn, workspaceId)
+                .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
+    }
+
     public String getResourceCrnInTenant(String name, String tenantName) {
         return stackViewService.findResourceCrnByNameAndTenantName(name, tenantName)
                 .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));

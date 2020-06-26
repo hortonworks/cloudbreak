@@ -42,6 +42,7 @@ import com.google.api.services.compute.model.Disk;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.common.api.type.EncryptionType;
 
 @Service
 public class GcpDiskEncryptionService {
@@ -74,11 +75,12 @@ public class GcpDiskEncryptionService {
     }
 
     public boolean hasCustomEncryptionRequested(InstanceTemplate template) {
-        return "CUSTOM".equalsIgnoreCase(Optional.ofNullable(template.getStringParameter("type")).orElse("DEFAULT"));
+        return EncryptionType.CUSTOM.name().equalsIgnoreCase(
+                Optional.ofNullable(template.getStringParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).orElse(EncryptionType.DEFAULT.name()));
     }
 
     public CustomerEncryptionKey createCustomerEncryptionKey(InstanceTemplate template) {
-        String key = Optional.ofNullable(template.getStringParameter("key")).orElse("");
+        String key = Optional.ofNullable(template.getStringParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).orElse("");
         String method = Optional.ofNullable(template.getStringParameter("keyEncryptionMethod")).orElse("RSA");
 
         switch (method) {

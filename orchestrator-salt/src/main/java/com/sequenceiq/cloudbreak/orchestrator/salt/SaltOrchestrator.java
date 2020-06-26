@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -53,6 +54,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.RoleTarget;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyFullResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
@@ -88,6 +90,12 @@ public class SaltOrchestrator implements HostOrchestrator {
     private static final int SLEEP_TIME = 10000;
 
     private static final int SLEEP_TIME_IN_SEC = SLEEP_TIME / 1000;
+
+    private static final String FREEIPA_MASTER_ROLE = "freeipa_primary";
+
+    private static final String FREEIPA_MASTER_REPLACEMENT_ROLE = "freeipa_primary_replacement";
+
+    private static final String FREEIPA_REPLICA_ROLE = "freeipa_replica";
 
     private static final String DISK_INITIALIZE = "format-and-mount-initialize.sh";
 
@@ -491,24 +499,27 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
-    public void installFreeIPA(GatewayConfig primaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
+    public void installFreeIpa(GatewayConfig primaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
-        Set<String> primaryServerHostname = Collections.singleton(primaryGateway.getHostname());
+        Set<String> freeIpaMasterHostname = new HashSet<>(getHostnamesForRoles(primaryGateway, Set.of(FREEIPA_MASTER_ROLE, FREEIPA_MASTER_REPLACEMENT_ROLE)));
+        Set<String> existingFreeIpaReplaceHostnames = new HashSet<>(getHostnamesForRoles(primaryGateway, Set.of(FREEIPA_REPLICA_ROLE)));
 
-        Set<String> replicaServersHostnames = allGatewayConfigs.stream()
-                .filter(gwc -> !gwc.getHostname().equals(primaryGateway.getHostname()))
-                .map(GatewayConfig::getHostname).collect(Collectors.toSet());
+        Set<String> unassignedHostnames = allGatewayConfigs.stream()
+                .map(GatewayConfig::getHostname)
+                .filter(hostname -> !freeIpaMasterHostname.contains(hostname))
+                .filter(hostname -> !existingFreeIpaReplaceHostnames.contains(hostname))
+                .collect(Collectors.toCollection(HashSet::new));
 
         try (SaltConnector sc = createSaltConnector(primaryGateway, saltErrorResolver)) {
-            LOGGER.debug("Set primary FreeIPA: {}", primaryServerHostname);
-            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(primaryServerHostname, allNodes, "freeipa_primary"), exitCriteriaModel, exitCriteria);
-            runNewService(sc, new HighStateRunner(primaryServerHostname, allNodes), exitCriteriaModel);
 
-            LOGGER.debug("Set replica FreeIPA: {}", replicaServersHostnames);
-            if (!replicaServersHostnames.isEmpty()) {
-                saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(replicaServersHostnames, allNodes, "freeipa_replica"), exitCriteriaModel, exitCriteria);
-                runNewService(sc, new HighStateRunner(replicaServersHostnames, allNodes), exitCriteriaModel);
-            }
+            installFreeIpaUpdateExistingReplicas(sc, existingFreeIpaReplaceHostnames, allNodes, exitCriteriaModel);
+
+            unassignedHostnames.removeAll(installFreeIpaPrimary(sc, primaryGateway, freeIpaMasterHostname, unassignedHostnames, existingFreeIpaReplaceHostnames,
+                    allNodes, exitCriteriaModel));
+
+            installFreeIpaReplicas(sc, unassignedHostnames, allNodes, exitCriteriaModel);
+
+            LOGGER.debug("Completed installing FreeIPA");
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.warn("CloudbreakOrchestratorException occurred during FreeIPA installation", e);
             throw e;
@@ -522,6 +533,72 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.warn("Error occurred during FreeIPA installation", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
+    }
+
+    private void installFreeIpaUpdateExistingReplicas(SaltConnector sc, Set<String> existingFreeIpaReplaceHostnames, Set<Node> allNodes,
+            ExitCriteriaModel exitCriteriaModel) throws Exception {
+        LOGGER.debug("Exsting Replica FreeIPAs: [{}]", existingFreeIpaReplaceHostnames);
+        // The existing replicas need to be serialized into high state. See the comments in CB-7335 for more details.
+        for (String existingReplicaHostname : existingFreeIpaReplaceHostnames) {
+            LOGGER.debug("Applying changes to FreeIPA replica {}", existingReplicaHostname);
+            runNewService(sc, new HighStateRunner(Set.of(existingReplicaHostname), allNodes), exitCriteriaModel);
+        }
+    }
+
+    private void installFreeIpaReplicas(SaltConnector sc, Set<String> newFreeIpaReplaceHostnames, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws Exception {
+        LOGGER.debug("New Replica FreeIPAs: [{}]", newFreeIpaReplaceHostnames);
+        if (!newFreeIpaReplaceHostnames.isEmpty()) {
+            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(newFreeIpaReplaceHostnames, allNodes, FREEIPA_REPLICA_ROLE), exitCriteriaModel,
+                    exitCriteria);
+            runNewService(sc, new HighStateRunner(newFreeIpaReplaceHostnames, allNodes), exitCriteriaModel);
+        }
+    }
+
+    private Set<String> installFreeIpaPrimary(SaltConnector sc, GatewayConfig primaryGateway, Set<String> freeIpaMasterHostname, Set<String> unassignedHostnames,
+            Set<String> existingFreeIpaReplaceHostnames, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) throws Exception {
+        freeIpaMasterHostname = new HashSet<>(freeIpaMasterHostname);
+        if (!freeIpaMasterHostname.isEmpty()) {
+            LOGGER.debug("Existing primary FreeIPA: {}", freeIpaMasterHostname);
+        } else if (existingFreeIpaReplaceHostnames.isEmpty()) {
+            freeIpaMasterHostname.add(primaryGateway.getHostname());
+            LOGGER.debug("Initial primary FreeIPA: {}", freeIpaMasterHostname);
+            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(freeIpaMasterHostname, allNodes, FREEIPA_MASTER_ROLE), exitCriteriaModel, exitCriteria);
+        } else {
+            freeIpaMasterHostname.add(unassignedHostnames.stream().findFirst()
+                    .orElseThrow(() ->
+                            new NotFoundException("A primary FreeIPA instance is requried and there are no unassigned roles to assign as a primary")));
+            LOGGER.debug("Replacement primary FreeIPA: {}", freeIpaMasterHostname);
+            saltCommandRunner.runSaltCommand(sc,
+                    new GrainAddRunner(freeIpaMasterHostname, allNodes, FREEIPA_MASTER_REPLACEMENT_ROLE), exitCriteriaModel, exitCriteria);
+        }
+        runNewService(sc, new HighStateRunner(freeIpaMasterHostname, allNodes), exitCriteriaModel);
+        return freeIpaMasterHostname;
+    }
+
+    @Override
+    public Optional<String> getFreeIpaMasterHostname(GatewayConfig primaryGateway) throws CloudbreakOrchestratorException {
+        return getHostnamesForRoles(primaryGateway, Set.of(FREEIPA_MASTER_ROLE, FREEIPA_MASTER_REPLACEMENT_ROLE)).stream().findFirst();
+    }
+
+    private Set<String> getHostnamesForRoles(GatewayConfig primaryGateway, Set<String> rolesToSearch) throws CloudbreakOrchestratorFailedException {
+        Set<String> hostnames = new HashSet<>();
+        for (String roleToSearch : rolesToSearch) {
+            hostnames.addAll(getHostnamesForRole(primaryGateway, roleToSearch));
+        }
+        return hostnames;
+    }
+
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
+    private Set<String> getHostnamesForRole(GatewayConfig primaryGateway, String roleToSearch) throws CloudbreakOrchestratorFailedException {
+        Map<String, JsonNode> roles;
+        try (SaltConnector sc = createSaltConnector(primaryGateway, saltErrorResolver)) {
+            roles = SaltStates.getGrains(sc, new RoleTarget(roleToSearch), "roles");
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred when getting roles", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+        return roles.keySet();
     }
 
     @Override
@@ -644,10 +721,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void uploadRecipes(List<GatewayConfig> allGatewayConfigs, Map<String, List<RecipeModel>> recipes, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
-        GatewayConfig primaryGateway = allGatewayConfigs.stream()
-                .filter(GatewayConfig::isPrimary)
-                .findFirst()
-                .orElseThrow(() -> new CloudbreakOrchestratorFailedException("Primary gateway not found"));
+        GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector sc = createSaltConnector(primaryGateway)) {
             OrchestratorBootstrap scriptPillarSave = new PillarSave(sc, gatewayTargets, recipes, calculateRecipeExecutionTimeout());

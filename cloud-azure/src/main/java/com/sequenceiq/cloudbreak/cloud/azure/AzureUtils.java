@@ -8,14 +8,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -49,9 +52,11 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.ResourceType;
 
 import rx.Completable;
+import rx.Observable;
 import rx.schedulers.Schedulers;
 
 @Component
@@ -72,6 +77,10 @@ public class AzureUtils {
 
     @Value("${cb.max.azure.resource.name.length:}")
     private int maxResourceNameLength;
+
+    @Inject
+    @Qualifier("DefaultRetryService")
+    private Retry retryService;
 
     @Inject
     private AzurePremiumValidatorService azurePremiumValidatorService;
@@ -158,6 +167,11 @@ public class AzureUtils {
         return isNotEmpty(getCustomNetworkId(network)) && isNotEmpty(getCustomResourceGroupName(network)) && isListNotEmpty(getCustomSubnetIds(network));
     }
 
+    public String getInstanceName(CloudResource resource) {
+        String instanceId = resource.getInstanceId();
+        return Objects.nonNull(instanceId) ? StringUtils.substringAfterLast(instanceId, "/") : null;
+    }
+
     private boolean isListNotEmpty(Collection<String> c) {
         return c != null && !c.isEmpty();
     }
@@ -166,18 +180,8 @@ public class AzureUtils {
         return network.getParameters().containsKey(NO_PUBLIC_IP) ? network.getParameter(NO_PUBLIC_IP, Boolean.class) : false;
     }
 
-    public static List<CloudInstance> getInstanceList(CloudStack stack) {
+    public List<CloudInstance> getInstanceList(CloudStack stack) {
         return stack.getGroups().stream().flatMap(group -> group.getInstances().stream()).collect(Collectors.toList());
-    }
-
-    public static boolean hasManagedDisk(CloudStack stack) {
-        List<CloudInstance> instanceList = getInstanceList(stack);
-        return instanceList.stream().anyMatch(cloudInstance -> Boolean.TRUE.equals(cloudInstance.getTemplate().getParameter("managedDisk", Boolean.class)));
-    }
-
-    public static boolean hasUnmanagedDisk(CloudStack stack) {
-        List<CloudInstance> instanceList = getInstanceList(stack);
-        return instanceList.stream().anyMatch(cloudInstance -> !Boolean.TRUE.equals(cloudInstance.getTemplate().getParameter("managedDisk", Boolean.class)));
     }
 
     public String getCustomNetworkId(Network network) {
@@ -299,7 +303,7 @@ public class AzureUtils {
         for (String networkInterfaceName : networkInterfaceNames) {
             deleteCompletables.add(azureClient.deleteNetworkInterfaceAsync(resourceGroupName, networkInterfaceName)
                     .doOnError(throwable -> {
-                        LOGGER.error("Error happend on azure network interface delete: {}", networkInterfaceName, throwable);
+                        LOGGER.error("Error happened on azure network interface delete: {}", networkInterfaceName, throwable);
                         failedToDeleteNetworkInterfaces.add(networkInterfaceName);
                     })
                     .subscribeOn(Schedulers.io()));
@@ -319,7 +323,7 @@ public class AzureUtils {
         for (String publicIpName : publicIpNames) {
             deleteCompletables.add(azureClient.deletePublicIpAddressByNameAsync(resourceGroupName, publicIpName)
                     .doOnError(throwable -> {
-                        LOGGER.error("Error happend on azure public ip delete: {}", publicIpName, throwable);
+                        LOGGER.error("Error happened on azure public ip delete: {}", publicIpName, throwable);
                         failedToDeletePublicIps.add(publicIpName);
                     })
                     .subscribeOn(Schedulers.io()));
@@ -332,22 +336,56 @@ public class AzureUtils {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public void deleteManagedDisks(AzureClient azureClient, Collection<String> managedDiskIds) {
-        LOGGER.info("Delete managed disks: {}", managedDiskIds);
+    public void deleteAvailabilitySets(AzureClient azureClient, String resourceGroupName, Collection<String> availabilitySetNames) {
+        LOGGER.info("Delete availability sets: {}", availabilitySetNames);
         List<Completable> deleteCompletables = new ArrayList<>();
-        List<String> failedToDeleteManagedDisks = new ArrayList<>();
-        for (String managedDiskId : managedDiskIds) {
-            deleteCompletables.add(azureClient.deleteManagedDiskAsync(managedDiskId)
+        List<String> failedToDeleteAvailabiltySets = new ArrayList<>();
+        for (String availabilitySetName : availabilitySetNames) {
+            deleteCompletables.add(azureClient.deleteAvailabilitySetAsync(resourceGroupName, availabilitySetName)
                     .doOnError(throwable -> {
-                        LOGGER.error("Error happend on azure managed disk delete: {}", managedDiskId, throwable);
-                        failedToDeleteManagedDisks.add(managedDiskId);
+                        LOGGER.error("Error happened on azure availability set delete: {}", availabilitySetName, throwable);
+                        failedToDeleteAvailabiltySets.add(availabilitySetName);
                     })
                     .subscribeOn(Schedulers.io()));
         }
-        Completable.merge(deleteCompletables).await();
-        if (!failedToDeleteManagedDisks.isEmpty()) {
-            LOGGER.error("Can't delete every managed disks: {}", failedToDeleteManagedDisks);
-            throw new CloudbreakServiceException("Can't delete managed disks: " + failedToDeleteManagedDisks);
+        Completable.mergeDelayError(deleteCompletables).await();
+        if (!failedToDeleteAvailabiltySets.isEmpty()) {
+            LOGGER.error("Can't delete every availability set: {}", failedToDeleteAvailabiltySets);
+            throw new CloudbreakServiceException("Can't delete availability sets: " + failedToDeleteAvailabiltySets);
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteSecurityGroups(AzureClient azureClient, Collection<String> securityGroupIds) {
+        if (CollectionUtils.isNotEmpty(securityGroupIds)) {
+            LOGGER.info("Delete security groups with id-s: {}", securityGroupIds);
+
+            Observable<String> deletionObservable = azureClient.deleteSecurityGroupsAsnyc(securityGroupIds)
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happened during the deletion of the security groups ", throwable);
+                        throw new CloudbreakServiceException("Can't delete all security groups: ", throwable);
+                    })
+                    .doOnCompleted(() -> LOGGER.debug("Delete security groups completed successfully"))
+                    .subscribeOn(Schedulers.io());
+            deletionObservable.subscribe(sg -> LOGGER.debug("Deleting {}", sg));
+            deletionObservable.toCompletable().await();
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteNetworks(AzureClient azureClient, Collection<String> networkIds) {
+        if (CollectionUtils.isNotEmpty(networkIds)) {
+            LOGGER.info("Delete networks with id-s: {}", networkIds);
+
+            Observable<String> deletionObservable = azureClient.deleteNetworksAsync(networkIds)
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happened during the deletion of the networks ", throwable);
+                        throw new CloudbreakServiceException("Can't delete all networks: ", throwable);
+                    })
+                    .doOnCompleted(() -> LOGGER.debug("Delete networks completed successfully"))
+                    .subscribeOn(Schedulers.io());
+            deletionObservable.subscribe(network -> LOGGER.debug("Deleting {}", network));
+            deletionObservable.toCompletable().await();
         }
     }
 
@@ -400,5 +438,31 @@ public class AzureUtils {
             return Optional.of(String.format("%s %s deletion failed, status code %s, error message: %s, details: %s",
                     resourceType, resourceId, errorCode, cloudError.message(), details));
         }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteManagedDisks(AzureClient azureClient, Collection<String> managedDiskIds) {
+        if (CollectionUtils.isNotEmpty(managedDiskIds)) {
+            LOGGER.info("Delete managed disks with id-s: {}", managedDiskIds);
+
+            Observable<String> deletionObservable = azureClient.deleteManagedDiskAsync(managedDiskIds)
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happened during the deletion of the managed disks ", throwable);
+                        throw new CloudbreakServiceException("Can't delete all managed disks: ", throwable);
+                    })
+                    .doOnCompleted(() -> LOGGER.debug("Delete managed disks completed successfully"))
+                    .subscribeOn(Schedulers.io());
+            deletionObservable.subscribe(disk -> LOGGER.debug("Deleting {}", disk));
+            deletionObservable.toCompletable().await();
+        }
+    }
+
+    public void checkResourceGroupExistence(AzureClient client, String resourceGroupName) {
+        retryService.testWith2SecDelayMax5Times(() -> {
+            if (!client.resourceGroupExists(resourceGroupName)) {
+                throw new Retry.ActionFailedException("Resource group not exists");
+            }
+            return true;
+        });
     }
 }

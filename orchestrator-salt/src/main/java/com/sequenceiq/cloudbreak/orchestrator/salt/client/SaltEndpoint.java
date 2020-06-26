@@ -9,6 +9,7 @@ public enum SaltEndpoint {
     BOOT_FILE_DISTRIBUTE("saltboot/file/distribute"),
     BOOT_ACTION_DISTRIBUTE("saltboot/salt/action/distribute"),
     BOOT_HOSTNAME_ENDPOINT("saltboot/hostname/distribute"),
+    BOOT_FINGERPRINT_DISTRIBUTE("saltboot/salt/minion/fingerprint/distribute"),
     SALT_RUN("saltapi/run");
 
     private final String contextPath;

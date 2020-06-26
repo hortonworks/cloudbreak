@@ -92,4 +92,5 @@ vault:
 altus:
   ums:
     host: localhost
-
+  audit:
+    enabled: false

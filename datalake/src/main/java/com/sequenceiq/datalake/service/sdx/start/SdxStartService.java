@@ -69,7 +69,7 @@ public class SdxStartService {
     public FlowIdentifier triggerStartIfClusterNotRunning(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
         checkFreeipaRunning(cluster.getEnvCrn());
-        return sdxReactorFlowManager.triggerSdxStartFlow(cluster.getId());
+        return sdxReactorFlowManager.triggerSdxStartFlow(cluster);
     }
 
     public void start(Long sdxId) {

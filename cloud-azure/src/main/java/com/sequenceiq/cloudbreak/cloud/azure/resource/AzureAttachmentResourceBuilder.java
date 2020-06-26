@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.management.compute.Disk;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
@@ -47,23 +50,32 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
                 .findFirst()
                 .orElseThrow(() -> new AzureResourceException("Instance resource not found"));
 
+        CloudContext cloudContext = auth.getCloudContext();
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
+        AzureClient client = getAzureClient(auth);
+        VirtualMachine vm = client.getVirtualMachine(resourceGroupName, instance.getName());
+        Set<String> diskIds = vm.dataDisks().values().stream().map(VirtualMachineDataDisk::id).collect(Collectors.toSet());
+
         CloudResource volumeSet = buildableResource.stream()
                 .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AZURE_VOLUMESET))
                 .filter(cloudResource -> !instance.getInstanceId().equals(cloudResource.getInstanceId()))
                 .findFirst()
                 .orElseThrow(() -> new AzureResourceException("Volume set resource not found"));
 
-        CloudContext cloudContext = auth.getCloudContext();
-        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
-        AzureClient client = getAzureClient(auth);
 
         VolumeSetAttributes volumeSetAttributes = getVolumeSetAttributes(volumeSet);
         volumeSetAttributes.getVolumes()
                 .forEach(volume -> {
-                            Disk disk = client.getDiskById(volume.getId());
-                            VirtualMachine vm = client.getVirtualMachine(resourceGroupName, instance.getName());
-                            client.attachDiskToVm(disk, vm);
-                        });
+                    Disk disk = client.getDiskById(volume.getId());
+                    if (!diskIds.contains(disk.id())) {
+                        if (disk.isAttachedToVirtualMachine()) {
+                            client.detachDiskFromVm(disk.id(), client.getVirtualMachine(disk.virtualMachineId()));
+                        }
+                        client.attachDiskToVm(disk, vm);
+                    } else {
+                        LOGGER.debug("Managed disk {} is already attached to VM {}", disk, vm);
+                    }
+                });
         volumeSet.setInstanceId(instance.getInstanceId());
         volumeSet.setStatus(CommonStatus.CREATED);
         return List.of(volumeSet);
@@ -79,7 +91,7 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
         return ResourceType.AZURE_VOLUMESET;
     }
 
-    private VolumeSetAttributes getVolumeSetAttributes(CloudResource volumeSet)  {
+    private VolumeSetAttributes getVolumeSetAttributes(CloudResource volumeSet) {
         return volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
     }
 

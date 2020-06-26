@@ -53,14 +53,14 @@ public class DatalakeUpgradeWaitHandler extends ExceptionCatcherEventHandler<Dat
             upgradeService.waitCloudbreakFlow(sdxId, pollingConfig, "Stack Upgrade");
             response = new DatalakeImageChangeEvent(sdxId, userId, request.getImageId());
         } catch (UserBreakException userBreakException) {
-            LOGGER.info("Upgrade polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.error("Upgrade polling exited before timeout. Cause: ", userBreakException);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.info("Upgrade poller stopped for cluster: {}", sdxId);
+            LOGGER.error("Upgrade poller stopped for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake upgrade timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.info("Upgrade polling failed for cluster: {}", sdxId);
+            LOGGER.error("Upgrade polling failed for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId, exception);
         }
         sendEvent(response, event);

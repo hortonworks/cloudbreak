@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.deletion.handler.sdx;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -22,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
@@ -51,7 +53,7 @@ class DataLakeClustersDeleteHandlerTest {
     private SdxDeleteService sdxDeleteService;
 
     @Mock
-    private Event<EnvironmentDto> environmentDtoEvent;
+    private Event<EnvironmentDeletionDto> environmentDtoEvent;
 
     @Mock
     private Event.Headers headers;
@@ -69,7 +71,13 @@ class DataLakeClustersDeleteHandlerTest {
                 .withResourceCrn(RESOURCE_CRN)
                 .withName(ENV_NAME)
                 .build();
-        when(environmentDtoEvent.getData()).thenReturn(eventDto);
+        EnvironmentDeletionDto build = EnvironmentDeletionDto
+                .builder()
+                .withId(ENV_ID)
+                .withForceDelete(false)
+                .withEnvironmentDto(eventDto)
+                .build();
+        when(environmentDtoEvent.getData()).thenReturn(build);
         when(environmentDtoEvent.getHeaders()).thenReturn(headers);
         doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Event.Headers.class));
     }
@@ -79,7 +87,7 @@ class DataLakeClustersDeleteHandlerTest {
         Environment environment = new Environment();
         when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
         underTest.accept(environmentDtoEvent);
-        verify(sdxDeleteService).deleteSdxClustersForEnvironment(any(PollingConfig.class), eq(environment));
+        verify(sdxDeleteService).deleteSdxClustersForEnvironment(any(PollingConfig.class), eq(environment), eq(false));
         verify(eventSender).sendEvent(any(EnvDeleteEvent.class), eq(headers));
         verify(eventSender, never()).sendEvent(any(EnvClusterDeleteFailedEvent.class), any());
         EnvDeleteEvent capturedDeleteEvent = (EnvDeleteEvent) baseNamedFlowEvent.getValue();
@@ -93,7 +101,7 @@ class DataLakeClustersDeleteHandlerTest {
     void acceptEnvironmentNotFound() {
         when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.empty());
         underTest.accept(environmentDtoEvent);
-        verify(sdxDeleteService, never()).deleteSdxClustersForEnvironment(any(), any());
+        verify(sdxDeleteService, never()).deleteSdxClustersForEnvironment(any(), any(), anyBoolean());
         verify(eventSender).sendEvent(any(EnvDeleteEvent.class), eq(headers));
         verify(eventSender, never()).sendEvent(any(EnvClusterDeleteFailedEvent.class), any());
         EnvDeleteEvent capturedDeleteEvent = (EnvDeleteEvent) baseNamedFlowEvent.getValue();
@@ -108,7 +116,7 @@ class DataLakeClustersDeleteHandlerTest {
         IllegalStateException error = new IllegalStateException("error");
         when(environmentService.findEnvironmentById(ENV_ID)).thenThrow(error);
         underTest.accept(environmentDtoEvent);
-        verify(sdxDeleteService, never()).deleteSdxClustersForEnvironment(any(), any());
+        verify(sdxDeleteService, never()).deleteSdxClustersForEnvironment(any(), any(), anyBoolean());
         verify(eventSender).sendEvent(any(EnvClusterDeleteFailedEvent.class), eq(headers));
         verify(eventSender, never()).sendEvent(any(EnvDeleteEvent.class), any());
         EnvClusterDeleteFailedEvent capturedDeleteFailedEvent = (EnvClusterDeleteFailedEvent) baseNamedFlowEvent.getValue();

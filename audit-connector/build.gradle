@@ -16,14 +16,18 @@ dependencies {
     compile project(':common')
     compile project(':grpc-common')
     compile project(':auth-connector')
+    compile project(':structuredevent-model')
+    compile project(':flow')
 
     implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: '2.0.3.RELEASE'
+    implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.10.11'
 
     implementation ("io.grpc:grpc-all:1.22.0") {
         exclude group: 'org.mockito'
     }
     testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: assertjVersion
     testImplementation group: 'org.mockito',                         name: 'mockito-core',                   version: mockitoVersion
+    testImplementation group: 'org.mockito',                         name: 'mockito-inline',                 version: mockitoVersion
 }
 
 checkstyle {

@@ -103,6 +103,9 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
     @OneToMany(mappedBy = "server", fetch = FetchType.EAGER)
     private Set<DatabaseConfig> databases;
 
+    @Column
+    private String clusterCrn;
+
     public Long getId() {
         return id;
     }
@@ -273,6 +276,14 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
 
     public void setDbStack(DBStack dbStack) {
         this.dbStack = dbStack;
+    }
+
+    public String getClusterCrn() {
+        return clusterCrn;
+    }
+
+    public void setClusterCrn(String clusterCrn) {
+        this.clusterCrn = clusterCrn;
     }
 
     /**

@@ -55,7 +55,7 @@ public class EnvironmentReactorFlowManager {
         return Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
     }
 
-    public void triggerDeleteFlow(Environment environment, String userCrn) {
+    public void triggerDeleteFlow(Environment environment, String userCrn, boolean forced) {
         LOGGER.info("Environment deletion flow triggered for '{}'.", environment.getName());
         flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
@@ -63,12 +63,13 @@ public class EnvironmentReactorFlowManager {
                 .withSelector(START_FREEIPA_DELETE_EVENT.selector())
                 .withResourceId(environment.getId())
                 .withResourceName(environment.getName())
+                .withForceDelete(forced)
                 .build();
 
         eventSender.sendEvent(envDeleteEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
-    public void triggerForcedDeleteFlow(Environment environment, String userCrn) {
+    public void triggerCascadingDeleteFlow(Environment environment, String userCrn, boolean forced) {
         LOGGER.info("Environment forced deletion flow triggered for '{}'.", environment.getName());
         flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
@@ -76,6 +77,7 @@ public class EnvironmentReactorFlowManager {
                 .withSelector(ENV_DELETE_CLUSTERS_TRIGGER_EVENT)
                 .withResourceId(environment.getId())
                 .withResourceName(environment.getName())
+                .withForceDelete(forced)
                 .build();
 
         eventSender.sendEvent(envDeleteEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));

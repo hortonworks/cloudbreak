@@ -30,13 +30,13 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.BlockDeviceMapping;
 import com.amazonaws.services.ec2.model.CopyImageResult;
+import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.EbsBlockDevice;
 import com.amazonaws.services.ec2.model.Image;
+import com.amazonaws.services.ec2.waiters.AmazonEC2Waiters;
+import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
-import com.sequenceiq.cloudbreak.cloud.aws.task.AMICopyStatusCheckerTask;
-import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -73,19 +74,16 @@ public class EncryptedImageCopyServiceTest {
     private AmazonEC2Client ec2Client;
 
     @Mock
-    private AwsPollTaskFactory awsPollTaskFactory;
+    private AmazonEC2Waiters ec2Waiters;
 
     @Mock
-    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
+    private Waiter<DescribeImagesRequest> waiter;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private CloudStack cloudStack;
 
     @Mock
     private PersistenceNotifier resourceNotifier;
-
-    @Mock
-    private AMICopyStatusCheckerTask amiCopyStatusCheckerTask;
 
     @InjectMocks
     private EncryptedImageCopyService underTest;
@@ -102,7 +100,7 @@ public class EncryptedImageCopyServiceTest {
     @Test
     public void testCreateEncryptedImagesWhenNoEncryptionIsRequired() {
         InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", false), 0L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         List<Group> groups = new ArrayList<>();
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30, identity));
@@ -118,7 +116,7 @@ public class EncryptedImageCopyServiceTest {
     public void testCreateEncryptedImagesWhenEveryGroupNeedToBeEncryptedWithTheDefaultKmsKey()
             throws InterruptedException, ExecutionException, TimeoutException {
         InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true), 0L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         List<Group> groups = new ArrayList<>();
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30, identity));
@@ -128,14 +126,14 @@ public class EncryptedImageCopyServiceTest {
         String encryptedImageId = "ami-87654321";
         when(ec2Client.copyImage(any())).thenReturn(new CopyImageResult().withImageId(encryptedImageId));
 
-        when(awsPollTaskFactory.newAMICopyStatusCheckerTask(any(), any(), any())).thenReturn(amiCopyStatusCheckerTask);
-        when(amiCopyStatusCheckerTask.call()).thenReturn(false);
+        when(ec2Client.waiters()).thenReturn(ec2Waiters);
+        when(ec2Waiters.imageAvailable()).thenReturn(waiter);
 
         Map<String, String> encryptedImages = underTest.createEncryptedImages(authenticatedContext(), cloudStack, resourceNotifier);
 
         verify(ec2Client, times(1)).copyImage(any());
         verify(resourceNotifier, times(1)).notifyAllocation(any(), any());
-        verify(awsBackoffSyncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
+        verify(waiter, times(1)).run(any());
         Assert.assertEquals(encryptedImages.size(), 2);
         Assert.assertTrue(encryptedImages.values().stream().allMatch(el -> el.equals(encryptedImageId)));
     }
@@ -144,7 +142,8 @@ public class EncryptedImageCopyServiceTest {
     public void testCreateEncryptedImagesWhenEveryGroupNeedToBeEncryptedWithCustomKmsKey()
             throws InterruptedException, ExecutionException, TimeoutException {
         InstanceTemplate temp = new InstanceTemplate("medium", "groupName", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true,
+                        InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         List<Group> groups = new ArrayList<>();
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30, identity));
@@ -154,14 +153,14 @@ public class EncryptedImageCopyServiceTest {
         String encryptedImageId = "ami-87654321";
         when(ec2Client.copyImage(any())).thenReturn(new CopyImageResult().withImageId(encryptedImageId));
 
-        when(awsPollTaskFactory.newAMICopyStatusCheckerTask(any(), any(), any())).thenReturn(amiCopyStatusCheckerTask);
-        when(amiCopyStatusCheckerTask.call()).thenReturn(false);
+        when(ec2Client.waiters()).thenReturn(ec2Waiters);
+        when(ec2Waiters.imageAvailable()).thenReturn(waiter);
 
         Map<String, String> encryptedImages = underTest.createEncryptedImages(authenticatedContext(), cloudStack, resourceNotifier);
 
         verify(ec2Client, times(1)).copyImage(any());
         verify(resourceNotifier, times(1)).notifyAllocation(any(), any());
-        verify(awsBackoffSyncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
+        verify(waiter, times(1)).run(any());
         Assert.assertEquals(encryptedImages.size(), 2);
         Assert.assertTrue(encryptedImages.values().stream().allMatch(el -> el.equals(encryptedImageId)));
     }
@@ -174,12 +173,14 @@ public class EncryptedImageCopyServiceTest {
         List<Group> groups = new ArrayList<>();
 
         InstanceTemplate temp = new InstanceTemplate("medium", "master", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true,
+                        InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30, identity));
 
         InstanceTemplate temp2 = new InstanceTemplate("medium", "worker", 1L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/almafa23-6ac8"), 1L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true,
+                        InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "arn:aws:kms:eu-west-1:980678888888:key/almafa23-6ac8"), 1L, "imageId");
         CloudInstance instance2 = new CloudInstance("SECOND_ID", temp2, null);
         groups.add(new Group("worker", InstanceGroupType.CORE, singletonList(instance2), null, null, null, null, null, null, 30, identity));
 
@@ -189,14 +190,14 @@ public class EncryptedImageCopyServiceTest {
                 .thenReturn(new CopyImageResult().withImageId(encryptedImageId))
                 .thenReturn(new CopyImageResult().withImageId(secondEncryptedImageId));
 
-        when(awsPollTaskFactory.newAMICopyStatusCheckerTask(any(), any(), any())).thenReturn(amiCopyStatusCheckerTask);
-        when(amiCopyStatusCheckerTask.call()).thenReturn(false);
+        when(ec2Client.waiters()).thenReturn(ec2Waiters);
+        when(ec2Waiters.imageAvailable()).thenReturn(waiter);
 
         Map<String, String> encryptedImages = underTest.createEncryptedImages(authenticatedContext(), cloudStack, resourceNotifier);
 
         verify(ec2Client, times(2)).copyImage(any());
         verify(resourceNotifier, times(2)).notifyAllocation(any(), any());
-        verify(awsBackoffSyncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
+        verify(waiter, times(1)).run(any());
         Assert.assertEquals(encryptedImages.size(), 2);
         Assert.assertTrue(encryptedImages.containsValue(encryptedImageId));
         Assert.assertTrue(encryptedImages.containsValue(secondEncryptedImageId));
@@ -210,17 +211,19 @@ public class EncryptedImageCopyServiceTest {
         List<Group> groups = new ArrayList<>();
 
         InstanceTemplate temp = new InstanceTemplate("medium", "master", 0L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true,
+                        InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "arn:aws:kms:eu-west-1:980678888888:key/7e9173f2-6ac8"), 0L, "imageId");
         CloudInstance instance = new CloudInstance("SOME_ID", temp, null);
         groups.add(new Group("master", InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, 30, identity));
 
         InstanceTemplate temp2 = new InstanceTemplate("medium", "worker", 1L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", true, "key", "arn:aws:kms:eu-west-1:980678888888:key/almafa23-6ac8"), 1L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true,
+                        InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "arn:aws:kms:eu-west-1:980678888888:key/almafa23-6ac8"), 1L, "imageId");
         CloudInstance instance2 = new CloudInstance("SECOND_ID", temp2, null);
         groups.add(new Group("worker", InstanceGroupType.CORE, singletonList(instance2), null, null, null, null, null, null, 30, identity));
 
         InstanceTemplate unencryptedTemp = new InstanceTemplate("medium", "worker", 1L, emptyList(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("encrypted", false), 1L, "imageId");
+                Map.of(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false), 1L, "imageId");
         CloudInstance unencryptedInstance = new CloudInstance("UNENCRYPTED_ID", unencryptedTemp, null);
         groups.add(new Group("compute", InstanceGroupType.CORE, singletonList(unencryptedInstance), null, null, null, null, null, null, 30, identity));
 
@@ -230,14 +233,14 @@ public class EncryptedImageCopyServiceTest {
                 .thenReturn(new CopyImageResult().withImageId(encryptedImageId))
                 .thenReturn(new CopyImageResult().withImageId(secondEncryptedImageId));
 
-        when(awsPollTaskFactory.newAMICopyStatusCheckerTask(any(), any(), any())).thenReturn(amiCopyStatusCheckerTask);
-        when(amiCopyStatusCheckerTask.call()).thenReturn(false);
+        when(ec2Client.waiters()).thenReturn(ec2Waiters);
+        when(ec2Waiters.imageAvailable()).thenReturn(waiter);
 
         Map<String, String> encryptedImages = underTest.createEncryptedImages(authenticatedContext(), cloudStack, resourceNotifier);
 
         verify(ec2Client, times(2)).copyImage(any());
         verify(resourceNotifier, times(2)).notifyAllocation(any(), any());
-        verify(awsBackoffSyncPollingScheduler, times(1)).schedule(amiCopyStatusCheckerTask);
+        verify(waiter, times(1)).run(any());
         Assert.assertEquals(encryptedImages.size(), 2);
         Assert.assertTrue(encryptedImages.containsValue(encryptedImageId));
         Assert.assertTrue(encryptedImages.containsValue(secondEncryptedImageId));

@@ -32,6 +32,7 @@ import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.client.model.DnsZoneList;
 import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.Host;
+import com.sequenceiq.freeipa.client.model.IpaServer;
 import com.sequenceiq.freeipa.client.model.Keytab;
 import com.sequenceiq.freeipa.client.model.PasswordPolicy;
 import com.sequenceiq.freeipa.client.model.Permission;
@@ -152,6 +153,17 @@ public class FreeIpaClient {
     public Host deleteHost(String fqdn) throws FreeIpaClientException {
         Map<String, Object> params = Map.of("updatedns", true);
         return (Host) invoke("host_del", List.of(fqdn), params, Host.class).getResult();
+    }
+
+    public Set<IpaServer> findAllServers() throws FreeIpaClientException {
+        List<Object> flags = List.of();
+        Map<String, Object> params = Map.of(
+                "sizelimit", 0,
+                "timelimit", 0
+        );
+        ParameterizedType type = TypeUtils
+                .parameterize(Set.class, IpaServer.class);
+        return (Set<IpaServer>) invoke("server_find", flags, params, type).getResult();
     }
 
     public Host deleteServer(String fqdn) throws FreeIpaClientException {

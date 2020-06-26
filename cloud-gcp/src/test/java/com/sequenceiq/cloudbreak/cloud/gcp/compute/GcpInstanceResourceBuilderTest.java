@@ -76,6 +76,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.CloudIdentityType;
@@ -293,13 +294,13 @@ public class GcpInstanceResourceBuilderTest {
 
     @Test
     public void testInstanceEncryptionWithDefault() throws Exception {
-        ImmutableMap<String, Object> params = ImmutableMap.of("type", "DEFAULT");
+        ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
         doTestDefaultDiskEncryption(params);
     }
 
     @Test
     public void testInstanceEncryptionWithEmptyType() throws Exception {
-        ImmutableMap<String, Object> params = ImmutableMap.of("type", "");
+        ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, "");
         doTestDefaultDiskEncryption(params);
     }
 
@@ -323,35 +324,39 @@ public class GcpInstanceResourceBuilderTest {
     @Test
     public void testInstanceEncryptionWithRawMethodEmptyKey() throws Exception {
         String encryptionKey = "";
-        ImmutableMap<String, Object> params = ImmutableMap.of("type", "CUSTOM", "keyEncryptionMethod", "RAW");
+        ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
+                "keyEncryptionMethod", "RAW");
         doTestDiskEncryption(encryptionKey, params);
     }
 
     @Test
     public void testInstanceEncryptionWithRawMethod() throws Exception {
         String encryptionKey = "theKey";
-        ImmutableMap<String, Object> params = ImmutableMap.of("type", "CUSTOM", "keyEncryptionMethod", "RAW", "key", encryptionKey);
+        ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
+                "keyEncryptionMethod", "RAW", InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, encryptionKey);
         doTestDiskEncryption(encryptionKey, params);
     }
 
     @Test
     public void testInstanceEncryptionWithEmptyMethod() throws Exception {
         String encryptionKey = "";
-        ImmutableMap<String, Object> params = ImmutableMap.of("type", "CUSTOM");
+        ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name());
         doTestDiskEncryption(encryptionKey, params);
     }
 
     @Test
     public void testInstanceEncryptionWithRsaMethodEmptyKey() throws Exception {
         String encryptionKey = "";
-        ImmutableMap<String, Object> params = ImmutableMap.of("type", "CUSTOM", "keyEncryptionMethod", "RSA");
+        ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
+                "keyEncryptionMethod", "RSA");
         doTestDiskEncryption(encryptionKey, params);
     }
 
     @Test
     public void testInstanceEncryptionWithRsaMethod() throws Exception {
         String encryptionKey = "theKey";
-        ImmutableMap<String, Object> params = ImmutableMap.of("type", "CUSTOM", "keyEncryptionMethod", "RSA", "key", encryptionKey);
+        ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
+                "keyEncryptionMethod", "RSA", InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, encryptionKey);
         doTestDiskEncryption(encryptionKey, params);
     }
 
@@ -392,7 +397,8 @@ public class GcpInstanceResourceBuilderTest {
     @Test
     public void testStartWithDefaultEncryption() throws Exception {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-        CloudInstance cloudInstance = newCloudInstance(Map.of("type", "DEFAULT"), instanceAuthentication);
+        CloudInstance cloudInstance = newCloudInstance(Map.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()),
+                instanceAuthentication);
 
         doTestDefaultEncryption(cloudInstance);
     }
@@ -438,7 +444,8 @@ public class GcpInstanceResourceBuilderTest {
         CustomerEncryptionKey customerEncryptionKey = new CustomerEncryptionKey();
         customerEncryptionKey.setRawKey("HelloWorld==");
 
-        Map<String, Object> params = Map.of("type", "CUSTOM", "keyEncryptionMethod", "RAW", "key", "Hello World");
+        Map<String, Object> params = Map.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
+                "keyEncryptionMethod", "RAW", InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "Hello World");
         doTestCustomEncryption(params, customerEncryptionKey);
     }
 
@@ -489,7 +496,8 @@ public class GcpInstanceResourceBuilderTest {
         CustomerEncryptionKey customerEncryptionKey = new CustomerEncryptionKey();
         customerEncryptionKey.setRawKey("HelloWorld==");
 
-        Map<String, Object> params = Map.of("type", "CUSTOM", "keyEncryptionMethod", "RSA", "key", "Hello World");
+        Map<String, Object> params = Map.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
+                "keyEncryptionMethod", "RSA", InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "Hello World");
         doTestCustomEncryption(params, customerEncryptionKey);
     }
 
@@ -498,7 +506,9 @@ public class GcpInstanceResourceBuilderTest {
         CustomerEncryptionKey customerEncryptionKey = new CustomerEncryptionKey();
         customerEncryptionKey.setRawKey("HelloWorld==");
 
-        Map<String, Object> params = Map.of("type", "CUSTOM", "key", "Hello World");
+        Map<String, Object> params = Map.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
+                InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "Hello World");
         doTestCustomEncryption(params, customerEncryptionKey);
     }
+
 }

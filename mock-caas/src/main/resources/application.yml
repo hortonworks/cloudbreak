@@ -13,9 +13,12 @@ auth:
     baseimage.enable: true
     event-generation:
       expiration-minutes: 10
-    freeipa.ha.enable: true
+    freeipa.ha:
+      enable: true
+      repair.enable: true
     cloudstoragevalidation.enable: true
     runtime.upgrade.enable: true
     sshpublickey.file: key.pub
     raz.enable: true
     freeipadlebsencryption.enable: false
+    azure.single.resourcegroup.enable: false

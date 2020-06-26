@@ -57,7 +57,7 @@ public class TelemetryAgentServiceTest {
     public void testStopTelemetryAgent() throws Exception {
         // GIVEN
         given(stackRepository.findById(1L)).willReturn(Optional.of(createStack()));
-        given(instanceMetaDataRepository.findAllInStack(1L)).willReturn(createInstanceMetadataSet());
+        given(instanceMetaDataRepository.findNotTerminatedForStack(1L)).willReturn(createInstanceMetadataSet());
         doNothing().when(hostOrchestrator).stopTelemetryAgent(anyList(), anySet(), any(ExitCriteriaModel.class));
         // WHEN
         underTest.stopTelemetryAgent(1L);
@@ -69,7 +69,7 @@ public class TelemetryAgentServiceTest {
     public void testStopTelemetryAgentThrowsException() throws Exception {
         // GIVEN
         given(stackRepository.findById(1L)).willReturn(Optional.of(createStack()));
-        given(instanceMetaDataRepository.findAllInStack(1L)).willReturn(createInstanceMetadataSet());
+        given(instanceMetaDataRepository.findNotTerminatedForStack(1L)).willReturn(createInstanceMetadataSet());
         doThrow(new CloudbreakOrchestratorFailedException("error")).when(hostOrchestrator).stopTelemetryAgent(anyList(), anySet(), any(ExitCriteriaModel.class));
         // WHEN
         underTest.stopTelemetryAgent(1L);

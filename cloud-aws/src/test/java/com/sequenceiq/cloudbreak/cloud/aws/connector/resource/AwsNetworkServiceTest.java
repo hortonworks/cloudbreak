@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
-import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -74,9 +73,6 @@ public class AwsNetworkServiceTest {
 
     @Mock
     private CloudFormationTemplateBuilder cloudFormationTemplateBuilder;
-
-    @Mock
-    private AwsPollTaskFactory awsPollTaskFactory;
 
     @Mock
     private CloudFormationStackUtil cloudFormationStackUtil;

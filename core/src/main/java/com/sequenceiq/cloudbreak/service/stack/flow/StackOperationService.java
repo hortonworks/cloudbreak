@@ -26,6 +26,7 @@ import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -161,7 +162,7 @@ public class StackOperationService {
                 .map(InstanceGroup::getTemplate)
                 .map(Template::getAttributes)
                 .map(Json::getMap)
-                .map(attributes -> attributes.getOrDefault("spotPercentage", 0))
+                .map(attributes -> attributes.getOrDefault(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, 0))
                 .map(spotPercentage -> Integer.parseInt(spotPercentage.toString()))
                 .anyMatch(spotPercentage -> spotPercentage != 0);
     }

@@ -28,22 +28,23 @@ public class DatahubDeletionService {
         this.datahubService = datahubService;
     }
 
-    public void deleteDatahubClustersForEnvironment(PollingConfig pollingConfig, Environment environment) {
+    public void deleteDatahubClustersForEnvironment(PollingConfig pollingConfig, Environment environment, boolean force) {
         Collection<StackViewV4Response> list = datahubService.list(environment.getResourceCrn()).getResponses();
         LOGGER.info("Found {} Data Hub clusters for environment {}.", list.size(), environment.getName());
         if (list.isEmpty()) {
             LOGGER.info("No Data Hub clusters found for environment.");
         } else {
-            waitDatahubClustersDeletion(pollingConfig, environment, list);
+            waitDatahubClustersDeletion(pollingConfig, environment, list, force);
             LOGGER.info("Data hub deletion finished.");
         }
     }
 
-    private void waitDatahubClustersDeletion(PollingConfig pollingConfig, Environment environment, Collection<StackViewV4Response> list) {
+    private void waitDatahubClustersDeletion(PollingConfig pollingConfig, Environment environment, Collection<StackViewV4Response> list,
+        boolean force) {
         DistroXMultiDeleteV1Request multiDeleteRequest = new DistroXMultiDeleteV1Request();
         multiDeleteRequest.setCrns(list.stream().map(StackViewV4Response::getCrn).collect(Collectors.toSet()));
         LOGGER.debug("Calling distroXV1Endpoint.deleteMultiple with crn [{}]", multiDeleteRequest.getCrns());
-        datahubService.deleteMultiple(environment.getResourceCrn(), multiDeleteRequest, true);
+        datahubService.deleteMultiple(environment.getResourceCrn(), multiDeleteRequest, force);
 
         LOGGER.debug("Starting poller to check all Datahub stacks for environment {} are deleted", environment.getName());
         Polling.stopAfterDelay(pollingConfig.getTimeout(), pollingConfig.getTimeoutTimeUnit())

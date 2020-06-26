@@ -21,5 +21,4 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
 
     @Query("SELECT r FROM Resource r WHERE r.stack.id = :stackId")
     List<Resource> findAllByStackId(@Param("stackId") long stackId);
-
 }

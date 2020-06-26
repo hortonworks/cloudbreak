@@ -66,7 +66,7 @@ public class UserKeytabService {
         }
     }
 
-    private void validateFreeIPAState(String workloadUsername, String environmentCrn) {
+    private void validateFreeIpaState(String workloadUsername, String environmentCrn) {
         String accountId = Crn.safeFromString(environmentCrn).getAccountId();
         FreeIpaClient freeIpaClient;
         try {
@@ -96,7 +96,7 @@ public class UserKeytabService {
 
         String workloadUsername = getActorWorkloadCredentialsResponse.getWorkloadUsername();
 
-        validateFreeIPAState(workloadUsername, environmentCrn);
+        validateFreeIpaState(workloadUsername, environmentCrn);
 
         List<ActorKerberosKey> actorKerberosKeys = getActorWorkloadCredentialsResponse.getKerberosKeysList();
         return userKeytabGenerator.generateKeytabBase64(workloadUsername, realm, actorKerberosKeys);

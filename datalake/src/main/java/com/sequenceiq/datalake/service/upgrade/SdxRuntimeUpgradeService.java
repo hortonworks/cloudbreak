@@ -100,7 +100,7 @@ public class SdxRuntimeUpgradeService {
 
     private FlowIdentifier triggerDatalakeUpgradeFlow(String imageId, SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
-        return sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(cluster.getId(), imageId);
+        return sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(cluster, imageId);
     }
 
     private String getMessage(String imageId) {

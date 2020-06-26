@@ -100,7 +100,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .withSecurityGroupIdForKnox(hybridCloudSecurityGroupID)
                 .given(EnvironmentTestDto.class)
                 .withSecurityAccess();
-        createEnvironmentWithNetworkAndFreeIPA(testContext);
+        createEnvironmentWithNetworkAndFreeIpa(testContext);
 
         testContext.given(CHILD_ENVIRONMENT_CREDENTIAL_KEY, CredentialTestDto.class, CHILD_CLOUD_PLATFORM)
                 .when(credentialTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT_CREDENTIAL_KEY))

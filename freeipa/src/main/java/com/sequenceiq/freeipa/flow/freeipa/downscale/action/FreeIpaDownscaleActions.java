@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResourcesRequest;
@@ -28,10 +29,12 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.flow.core.Flow;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
+import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
@@ -39,6 +42,8 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.cert.RevokeCertsRequest
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.cert.RevokeCertsResponse;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.dns.RemoveDnsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.dns.RemoveDnsResponse;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHostsFromOrchestrationRequest;
@@ -61,6 +66,7 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 
 @Configuration
 public class FreeIpaDownscaleActions {
@@ -72,6 +78,9 @@ public class FreeIpaDownscaleActions {
 
     @Inject
     private TerminationService terminationService;
+
+    @Inject
+    private InstanceGroupService instanceGroupService;
 
     @Bean(name = "STARTING_DOWNSCALE_STATE")
     public Action<?, ?> startingDownscaleAction() {
@@ -87,9 +96,11 @@ public class FreeIpaDownscaleActions {
                         .map(InstanceMetaData::getDiscoveryFQDN)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
-                setHosts(variables, fqdns);
-                LOGGER.info("Starting downscale of stack {} instances [{}]", stack.getId(), instanceIds);
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS, "Starting downscale");
+                setDownscaleHosts(variables, fqdns);
+                setRepair(variables, payload.isRepair());
+                setInstanceCountByGroup(variables, payload.getInstanceCountByGroup());
+                LOGGER.info("Starting downscale {}", payload);
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Starting downscale");
                 sendEvent(context, STARTING_DOWNSCALE_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
         };
@@ -101,11 +112,11 @@ public class FreeIpaDownscaleActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS, "Updating cluster proxy registration.");
-                List<String> instanceIds = getInstanceIds(variables);
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Updating cluster proxy registration.");
+                List<String> repairInstanceIds = getInstanceIds(variables);
                 List<String> instanceIdsToRegister = stack.getNotDeletedInstanceMetaDataList().stream()
                         .map(InstanceMetaData::getInstanceId)
-                        .filter(instanceId -> !instanceIds.contains(instanceId))
+                        .filter(instanceId -> !repairInstanceIds.contains(instanceId))
                         .collect(Collectors.toList());
                 ClusterProxyUpdateRegistrationRequest request = new ClusterProxyUpdateRegistrationRequest(stack.getId(), instanceIdsToRegister);
                 sendEvent(context, request.selector(), request);
@@ -119,9 +130,9 @@ public class FreeIpaDownscaleActions {
             @Override
             protected void doExecute(StackContext context, ClusterProxyUpdateRegistrationSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS, "Stopping telemetry");
-                List<String> instanceIds = getInstanceIds(variables);
-                StopTelemetryRequest stopTelemetryRequest = new StopTelemetryRequest(stack.getId(), instanceIds);
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Stopping telemetry");
+                List<String> repairInstanceIds = getInstanceIds(variables);
+                StopTelemetryRequest stopTelemetryRequest = new StopTelemetryRequest(stack.getId(), repairInstanceIds);
                 sendEvent(context, stopTelemetryRequest.selector(), stopTelemetryRequest);
             }
         };
@@ -133,10 +144,10 @@ public class FreeIpaDownscaleActions {
             @Override
             protected void doExecute(StackContext context, StopTelemetryResponse payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS, "Collecting resources");
-                List<String> instanceIds = getInstanceIds(variables);
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Collecting resources");
+                List<String> repairInstanceIds = getInstanceIds(variables);
                 List<CloudResource> cloudResources = getCloudResources(stack);
-                List<CloudInstance> cloudInstances = getCloudInstances(stack, instanceIds);
+                List<CloudInstance> cloudInstances = getCloudInstances(stack, repairInstanceIds);
                 DownscaleStackCollectResourcesRequest request = new DownscaleStackCollectResourcesRequest(context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack(), cloudResources, cloudInstances);
                 sendEvent(context, request.selector(), request);
@@ -150,10 +161,10 @@ public class FreeIpaDownscaleActions {
             @Override
             protected void doExecute(StackContext context, DownscaleStackCollectResourcesResult payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS, "Decommissioning instances");
-                List<String> instanceIds = getInstanceIds(variables);
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Decommissioning instances");
+                List<String> repairInstanceIds = getInstanceIds(variables);
                 List<CloudResource> cloudResources = getCloudResources(stack);
-                List<CloudInstance> cloudInstances = getCloudInstances(stack, instanceIds);
+                List<CloudInstance> cloudInstances = getNonTerminatedCloudInstances(stack, repairInstanceIds);
                 DownscaleStackRequest request = new DownscaleStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
                         cloudResources, cloudInstances, payload.getResourcesToScale());
                 sendEvent(context, request.selector(), request);
@@ -166,8 +177,8 @@ public class FreeIpaDownscaleActions {
         return new AbstractDownscaleAction<>(DownscaleStackResult.class) {
             @Override
             protected void doExecute(StackContext context, DownscaleStackResult payload, Map<Object, Object> variables) {
-                CleanupEvent cleanupEvent = buildCleanupEvent(context, getHosts(variables));
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS, "Removing servers");
+                CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
+                stackUpdater.updateStackStatus(context.getStack().getId(), getInProgressStatus(variables), "Removing servers");
                 RemoveServersRequest request = new RemoveServersRequest(cleanupEvent);
                 sendEvent(context, request);
             }
@@ -179,8 +190,8 @@ public class FreeIpaDownscaleActions {
         return new AbstractDownscaleAction<>(RemoveServersResponse.class) {
             @Override
             protected void doExecute(StackContext context, RemoveServersResponse payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS, "Revoking certificates");
-                CleanupEvent cleanupEvent = buildCleanupEvent(context, getHosts(variables));
+                stackUpdater.updateStackStatus(context.getStack().getId(), getInProgressStatus(variables), "Revoking certificates");
+                CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
                 RevokeCertsRequest request = new RevokeCertsRequest(cleanupEvent, context.getStack());
                 sendEvent(context, request);
             }
@@ -192,8 +203,8 @@ public class FreeIpaDownscaleActions {
         return new AbstractDownscaleAction<>(RevokeCertsResponse.class) {
             @Override
             protected void doExecute(StackContext context, RevokeCertsResponse payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS, "Remove DNS entries");
-                CleanupEvent cleanupEvent = buildCleanupEvent(context, getHosts(variables));
+                stackUpdater.updateStackStatus(context.getStack().getId(), getInProgressStatus(variables), "Remove DNS entries");
+                CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
                 RemoveDnsRequest request = new RemoveDnsRequest(cleanupEvent);
                 sendEvent(context, request);
             }
@@ -205,8 +216,8 @@ public class FreeIpaDownscaleActions {
         return new AbstractDownscaleAction<>(RemoveDnsResponse.class) {
             @Override
             protected void doExecute(StackContext context, RemoveDnsResponse payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS, "Removing hosts from orchestration");
-                CleanupEvent cleanupEvent = buildCleanupEvent(context, getHosts(variables));
+                stackUpdater.updateStackStatus(context.getStack().getId(), getInProgressStatus(variables), "Removing hosts from orchestration");
+                CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
                 RemoveHostsFromOrchestrationRequest request = new RemoveHostsFromOrchestrationRequest(cleanupEvent);
                 sendEvent(context, request);
             }
@@ -219,9 +230,16 @@ public class FreeIpaDownscaleActions {
             @Override
             protected void doExecute(StackContext context, RemoveHostsFromOrchestrationSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS, "Updating metadata");
-                List<String> instanceIds = getInstanceIds(variables);
-                terminationService.finalizeTermination(stack.getId(), instanceIds);
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Updating metadata");
+                List<String> repairInstanceIds = getInstanceIds(variables);
+                terminationService.finalizeTermination(stack.getId(), repairInstanceIds);
+                if (!isRepair(variables)) {
+                    int nodeCount = getInstanceCountByGroup(variables);
+                    for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                        instanceGroup.setNodeCount(nodeCount);
+                        instanceGroupService.save(instanceGroup);
+                    }
+                }
                 sendEvent(context, UPDATE_METADATA_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
         };
@@ -236,10 +254,12 @@ public class FreeIpaDownscaleActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
-                successDetails.getAdditionalDetails().put("Hosts", getHosts(variables));
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_COMPLETED, "Downscale complete");
-                operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(successDetails), Collections.emptyList());
+                stackUpdater.updateStackStatus(stack.getId(), getDownscaleCompleteStatus(variables), "Downscale complete");
+                if (!isRepair(variables)) {
+                    SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
+                    successDetails.getAdditionalDetails().put("Hosts", getDownscaleHosts(variables));
+                    operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(successDetails), Collections.emptyList());
+                }
                 sendEvent(context, DOWNSCALE_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
         };
@@ -251,6 +271,14 @@ public class FreeIpaDownscaleActions {
 
             @Inject
             private OperationService operationService;
+
+            @Override
+            protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<DownscaleState, DownscaleFlowEvent> stateContext,
+                    DownscaleFailureEvent payload) {
+                Flow flow = getFlow(flowParameters.getFlowId());
+                flow.setFlowFailed(payload.getException());
+                return super.createFlowContext(flowParameters, stateContext, payload);
+            }
 
             @Override
             protected Object getFailurePayload(DownscaleFailureEvent payload, Optional<StackContext> flowContext, Exception ex) {
@@ -271,7 +299,7 @@ public class FreeIpaDownscaleActions {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
                 }
                 String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_FAILED, errorReason);
+                stackUpdater.updateStackStatus(context.getStack().getId(), getFailedStatus(variables), errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }

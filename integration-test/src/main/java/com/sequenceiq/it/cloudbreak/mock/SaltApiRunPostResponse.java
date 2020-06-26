@@ -16,15 +16,20 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionKeysOnMasterResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 import spark.Request;
 import spark.Response;
@@ -33,13 +38,16 @@ public class SaltApiRunPostResponse extends ITResponse {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltApiRunPostResponse.class);
 
+    private final List<Minion> minions;
+
     private final Map<String, CloudVmMetaDataStatus> instanceMap;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Map<String, Multimap<String, String>> grains = new HashMap<>();
 
-    public SaltApiRunPostResponse(Map<String, CloudVmMetaDataStatus> instanceMap) {
+    public SaltApiRunPostResponse(List<Minion> minions, Map<String, CloudVmMetaDataStatus> instanceMap) {
+        this.minions = minions;
         this.instanceMap = instanceMap;
         objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(Visibility.NONE));
     }
@@ -104,8 +112,25 @@ public class SaltApiRunPostResponse extends ITResponse {
                 return responseFromJsonFile("saltapi/cmd_run_empty_response.json");
             }
         }
+        if (body.contains("key.list_all")) {
+            return keyListAll();
+        }
         LOGGER.error("no response for this SALT RUN request: " + body);
         throw new IllegalStateException("no response for this SALT RUN request: " + body);
+    }
+
+    protected Object keyListAll() throws JsonProcessingException {
+        MinionKeysOnMasterResponse response = new MinionKeysOnMasterResponse();
+        Map<String, JsonNode> result = new HashMap<>();
+        ObjectNode data = JsonNodeFactory.instance.objectNode().putObject("data");
+        ObjectNode returnNode = data.putObject("return");
+        ArrayNode minionsNode = returnNode.putArray("minions");
+        minions.forEach(minion -> {
+            minionsNode.add(minion.getId());
+        });
+        result.put("data", data);
+        response.setResult(List.of(result));
+        return objectMapper.writeValueAsString(response);
     }
 
     protected Object stateApply() {

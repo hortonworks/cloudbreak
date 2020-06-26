@@ -150,7 +150,18 @@
         "x1e.32xlarge", 
         "x1e.4xlarge", 
         "x1e.8xlarge", 
-        "x1e.xlarge"
+        "x1e.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "govcloud-us", 
       "defaultVmType": "i2.4xlarge"
@@ -259,7 +270,18 @@
         "t3.small", 
         "t3.xlarge", 
         "x1.16xlarge", 
-        "x1.32xlarge"
+        "x1.32xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "ap-south-1", 
       "defaultVmType": "i2.4xlarge"
@@ -392,7 +414,18 @@
         "x1e.32xlarge", 
         "x1e.4xlarge", 
         "x1e.8xlarge", 
-        "x1e.xlarge"
+        "x1e.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "ap-northeast-2", 
       "defaultVmType": "i2.4xlarge"
@@ -580,7 +613,18 @@
         "z1d.6xlarge", 
         "z1d.large", 
         "z1d.metal", 
-        "z1d.xlarge"
+        "z1d.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "ap-southeast-1", 
       "defaultVmType": "i2.4xlarge"
@@ -751,7 +795,18 @@
         "z1d.6xlarge", 
         "z1d.large", 
         "z1d.metal", 
-        "z1d.xlarge"
+        "z1d.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "ap-southeast-2", 
       "defaultVmType": "i2.4xlarge"
@@ -936,7 +991,18 @@
         "z1d.6xlarge", 
         "z1d.large", 
         "z1d.metal", 
-        "z1d.xlarge"
+        "z1d.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "ap-northeast-1", 
       "defaultVmType": "i2.4xlarge"
@@ -1039,7 +1105,18 @@
         "t3.small", 
         "t3.xlarge", 
         "x1.16xlarge", 
-        "x1.32xlarge"
+        "x1.32xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "ca-central-1", 
       "defaultVmType": "m4.4xlarge"
@@ -1213,7 +1290,18 @@
         "z1d.6xlarge", 
         "z1d.large", 
         "z1d.metal", 
-        "z1d.xlarge"
+        "z1d.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "eu-central-1", 
       "defaultVmType": "i2.4xlarge"
@@ -1420,7 +1508,18 @@
         "z1d.6xlarge", 
         "z1d.large", 
         "z1d.metal", 
-        "z1d.xlarge"
+        "z1d.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "eu-west-1", 
       "defaultVmType": "i2.4xlarge"
@@ -1534,7 +1633,18 @@
         "z1d.6xlarge", 
         "z1d.large", 
         "z1d.metal", 
-        "z1d.xlarge"
+        "z1d.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "eu-west-2", 
       "defaultVmType": "m4.4xlarge"
@@ -1634,7 +1744,18 @@
         "t3.small", 
         "t3.xlarge", 
         "x1.16xlarge", 
-        "x1.32xlarge"
+        "x1.32xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "eu-west-3", 
       "defaultVmType": "m5.xlarge"
@@ -1709,7 +1830,18 @@
         "t3.micro", 
         "t3.nano", 
         "t3.small", 
-        "t3.xlarge"
+        "t3.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "eu-north-1", 
       "defaultVmType": "i3.4xlarge"
@@ -1802,7 +1934,18 @@
         "t3.small", 
         "t3.xlarge", 
         "x1.16xlarge", 
-        "x1.32xlarge"
+        "x1.32xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "sa-east-1", 
       "defaultVmType": "i2.4xlarge"
@@ -2021,7 +2164,18 @@
         "z1d.6xlarge", 
         "z1d.large", 
         "z1d.metal", 
-        "z1d.xlarge"
+        "z1d.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "us-east-1", 
       "defaultVmType": "i2.4xlarge"
@@ -2202,7 +2356,18 @@
         "x1e.32xlarge", 
         "x1e.4xlarge", 
         "x1e.8xlarge", 
-        "x1e.xlarge"
+        "x1e.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "us-east-2", 
       "defaultVmType": "i2.4xlarge"
@@ -2350,7 +2515,18 @@
         "z1d.6xlarge", 
         "z1d.large", 
         "z1d.metal", 
-        "z1d.xlarge"
+        "z1d.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "us-west-1", 
       "defaultVmType": "i2.4xlarge"
@@ -2569,7 +2745,18 @@
         "z1d.6xlarge", 
         "z1d.large", 
         "z1d.metal", 
-        "z1d.xlarge"
+        "z1d.xlarge",
+        "m5n.2xlarge",
+        "m5n.4xlarge",
+        "m5n.8xlarge",
+        "r5n.2xlarge",
+        "r5n.4xlarge",
+        "r5n.8xlarge",
+        "r5dn.xlarge",
+        "r5dn.2xlarge",
+        "r5dn.4xlarge",
+        "r5dn.8xlarge",
+        "r5dn.16xlarge"
       ], 
       "zone": "us-west-2", 
       "defaultVmType": "i2.4xlarge"

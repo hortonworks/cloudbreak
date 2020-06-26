@@ -48,8 +48,9 @@ public class DistroXImagesTests extends AbstractE2ETest {
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithNetworkAndFreeIPA(testContext);
+        createEnvironmentWithNetworkAndFreeIpa(testContext);
         initializeDefaultBlueprints(testContext);
+        createDatalake(testContext);
     }
 
     @Ignore("This test case should be re-enabled in case of InternalSDXDistroXTest has been removed")
