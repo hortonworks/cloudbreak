@@ -13,6 +13,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 
 public class AuthorizationAnnotationUtils {
 
@@ -24,6 +25,6 @@ public class AuthorizationAnnotationUtils {
         return List.of(CheckPermissionByResourceCrn.class, CheckPermissionByResourceName.class, CheckPermissionByAccount.class,
                 DisableCheckPermissions.class, CheckPermissionByResourceCrnList.class, CheckPermissionByResourceNameList.class,
                 CheckPermissionByResourceObject.class, CheckPermissionByEnvironmentCrn.class, CheckPermissionByEnvironmentName.class,
-                FilterListBasedOnPermissions.class);
+                FilterListBasedOnPermissions.class, InternalOnly.class);
     }
 }

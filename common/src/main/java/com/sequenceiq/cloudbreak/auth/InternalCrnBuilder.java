@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.auth.security;
+package com.sequenceiq.cloudbreak.auth;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.converter.instance.template;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.freeipa.converter.instance.template.InstanceTemplateRequestToTemplateConverter.ATTRIBUTE_SPOT_PERCENTAGE;
 import static com.sequenceiq.freeipa.converter.instance.template.InstanceTemplateRequestToTemplateConverter.ATTRIBUTE_VOLUME_ENCRYPTED;
 import static com.sequenceiq.freeipa.converter.instance.template.InstanceTemplateRequestToTemplateConverter.ATTRIBUTE_VOLUME_ENCRYPTION_TYPE;

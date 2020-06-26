@@ -7,8 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -30,8 +28,6 @@ import reactor.bus.Event;
 public class SetPasswordHandler implements EventHandler<SetPasswordRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SetPasswordHandler.class);
-
-    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     @Inject
     private StackService stackService;

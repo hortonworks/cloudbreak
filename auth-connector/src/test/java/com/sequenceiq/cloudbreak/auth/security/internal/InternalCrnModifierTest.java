@@ -25,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.CrnUser;
+import com.sequenceiq.cloudbreak.auth.CrnUser;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InternalCrnModifierTest {
