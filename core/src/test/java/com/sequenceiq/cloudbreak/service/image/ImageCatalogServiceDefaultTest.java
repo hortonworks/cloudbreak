@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -88,6 +89,9 @@ public class ImageCatalogServiceDefaultTest {
     @Mock
     private PrefixMatcherService prefixMatcherService;
 
+    @Mock
+    private LatestDefaultImageUuidProvider latestDefaultImageUuidProvider;
+
     @InjectMocks
     private ImageCatalogService underTest;
 
@@ -159,9 +163,14 @@ public class ImageCatalogServiceDefaultTest {
         if (StringUtils.isNotEmpty(os)) {
             operatingSystems = Collections.singleton(os);
         }
+        setupLatestDefaultImageUuidProvider(expectedImageId);
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(provider), cbVersion, true, operatingSystems, clusterVersion);
         StatedImage statedImage = underTest.getImagePrewarmedDefaultPreferred(imageFilter, image -> true);
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
+    }
+
+    private void setupLatestDefaultImageUuidProvider(String uuid) {
+        when(latestDefaultImageUuidProvider.getLatestDefaultImageUuids(any(), any())).thenReturn(List.of(uuid));
     }
 }
