@@ -245,6 +245,9 @@ public enum ResourceEvent {
 
     CLUSTER_SALT_UPDATE_FAILED("cluster.salt.update.failed"),
     CLUSTER_SALT_UPDATE_FINISHED("cluster.salt.update.finished"),
+    CLUSTER_PILLAR_CONFIG_UPDATE_FAILED("cluster.pillar.config.update.failed"),
+    CLUSTER_PILLAR_CONFIG_UPDATE_FINISHED("cluster.pillar.config.update.finished"),
+    CLUSTER_PILLAR_CONFIG_UPDATE_STARTED("cluster.pillar.config.update.started"),
     CLUSTER_STOPPING("cluster.stopping"),
     CLUSTER_STOPPED("cluster.stopped"),
     CLUSTER_STOP_FAILED("cluster.stop.failed"),

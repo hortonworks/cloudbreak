@@ -258,4 +258,17 @@ public class ClusterCommonService {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         return clusterOperationService.updateSalt(stack);
     }
+
+    public FlowIdentifier updatePillarConfiguration(NameOrCrn nameOrCrn, Long workspaceId) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        MDCBuilder.buildMdcContext(stack);
+        if (!stack.isAvailable()) {
+            throw new BadRequestException(String.format(
+                "Stack '%s' is currently in '%s' state. Updates to the Pillar Configuration can "
+                    + "only be made when the underlying stack is 'AVAILABLE'.",
+                stack.getName(),
+                stack.getStatus()));
+        }
+        return clusterOperationService.updatePillarConfiguration(stack);
+    }
 }

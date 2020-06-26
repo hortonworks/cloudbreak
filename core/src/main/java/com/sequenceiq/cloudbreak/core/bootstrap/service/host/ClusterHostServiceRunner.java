@@ -223,6 +223,20 @@ public class ClusterHostServiceRunner {
         }
     }
 
+    public void updateClusterConfigs(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
+        try {
+            Set<Node> nodes = stackUtil.collectReachableNodes(stack);
+            GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            hostOrchestrator.initSaltConfig(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+        } catch (CloudbreakOrchestratorException | IOException e) {
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
     public Map<String, String> addClusterServices(Long stackId, String hostGroupName, Integer scalingAdjustment) {
         Map<String, String> candidates;
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);

@@ -196,6 +196,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    public FlowIdentifier updatePillarConfigurationByName(Long workspaceId, String name) {
+        return stackOperations.updatePillarConfiguration(NameOrCrn.ofName(name), workspaceId);
+    }
+
+    @Override
     public BackupV4Response backupDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId) {
         FlowIdentifier flowIdentifier =
             stackOperations.backupClusterDatabase(NameOrCrn.ofName(name), workspaceId, backupLocation, backupId);
