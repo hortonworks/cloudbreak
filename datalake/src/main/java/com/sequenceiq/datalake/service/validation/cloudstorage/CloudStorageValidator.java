@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.validation.cloudstorage;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

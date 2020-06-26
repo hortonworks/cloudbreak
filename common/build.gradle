@@ -66,6 +66,9 @@ dependencies {
   }
   compile group: 'javax.validation',                      name: 'validation-api',                 version: javaxValidationVersion
 
+  compile group: 'org.springframework.security',        name: 'spring-security-jwt',              version: '1.0.8.RELEASE'
+  compile group: 'org.springframework.security',        name: 'spring-security-core',             version: springFrameworkVersion
+
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test',       version: springBootVersion
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springBootVersion
 }

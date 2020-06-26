@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.audit.util;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 
 import org.springframework.stereotype.Component;
 

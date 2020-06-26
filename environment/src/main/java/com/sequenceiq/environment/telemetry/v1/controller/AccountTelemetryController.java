@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
@@ -79,6 +80,13 @@ public class AccountTelemetryController extends NotificationController implement
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public List<AnonymizationRule> listRules() {
         AccountTelemetryResponse response = get();
+        return response.getRules();
+    }
+
+    @Override
+    @InternalOnly
+    public List<AnonymizationRule> listRulesInAccount(String accountId) {
+        AccountTelemetryResponse response = accountTelemetryConverter.convert(accountTelemetryService.getOrDefault(accountId));
         return response.getRules();
     }
 

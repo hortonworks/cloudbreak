@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.vault.VaultException;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
@@ -52,7 +53,8 @@ public class ProxyConfigDtoService {
 
     public Optional<ProxyConfig> getByEnvironmentCrn(String environmentCrn) {
         try {
-            return Optional.ofNullable(convert(proxyEndpoint.getByEnvironmentCrn(environmentCrn)));
+            return Optional.ofNullable(ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                    convert(proxyEndpoint.getByEnvironmentCrn(environmentCrn))));
         } catch (NotFoundException ex) {
             return Optional.empty();
         }

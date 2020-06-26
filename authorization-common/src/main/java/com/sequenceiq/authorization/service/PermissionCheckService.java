@@ -21,10 +21,11 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.service.list.ListPermissionChecker;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 
 @Service
 public class PermissionCheckService {
@@ -73,6 +74,11 @@ public class PermissionCheckService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
+        if (annotations.stream().anyMatch(annotation -> annotation instanceof InternalOnly) &&
+            !InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
+            getAccessDeniedAndLogInternalActorRestriction(methodSignature);
+        }
+
         if (annotations.stream().anyMatch(annotation -> annotation instanceof DisableCheckPermissions)) {
             return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
         } else if (annotations.stream().anyMatch(annotation -> annotation instanceof FilterListBasedOnPermissions)) {
@@ -91,6 +97,12 @@ public class PermissionCheckService {
     private AccessDeniedException getAccessDeniedAndLogMissingAnnotation(Class<?> repositoryClass) {
         LOGGER.error("Class '{}' should be annotated with @{} and specify the resource!", repositoryClass.getCanonicalName(),
                 AuthorizationResource.class.getName());
+        return new AccessDeniedException("You have no access to this resource.");
+    }
+
+    private AccessDeniedException getAccessDeniedAndLogInternalActorRestriction(MethodSignature methodSignature) {
+        LOGGER.error("Method {} should be called by internal actor only.",
+                methodSignature.getMethod().getDeclaringClass().getSimpleName()  + "#" + methodSignature.getMethod().getName());
         return new AccessDeniedException("You have no access to this resource.");
     }
 }

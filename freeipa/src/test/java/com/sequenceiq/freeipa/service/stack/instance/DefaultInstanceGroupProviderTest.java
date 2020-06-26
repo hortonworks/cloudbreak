@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider.ATTRIBUTE_VOLUME_ENCRYPTED;
 import static com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider.ATTRIBUTE_VOLUME_ENCRYPTION_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
