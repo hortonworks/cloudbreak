@@ -33,6 +33,7 @@ public class NetworkDtoToResponseConverter {
                 .withCbSubnets(network.getCbSubnets())
                 .withDwxSubnets(network.getDwxSubnets())
                 .withMlxSubnets(network.getMlxSubnets())
+                .withLiftieSubnets(network.getMlxSubnets())
                 .withPreferedSubnetId(subnetIdProvider.provide(network, tunnel, network.getCloudPlatform()))
                 .withPrivateSubnetCreation(network.getPrivateSubnetCreation())
                 .withServiceEndpointCreation(network.getServiceEndpointCreation())

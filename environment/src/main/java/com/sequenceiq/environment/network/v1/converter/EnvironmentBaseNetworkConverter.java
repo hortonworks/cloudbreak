@@ -76,6 +76,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
             targetBuilder.withCbSubnets(mergeMaps(publicSubnet, privateSubnet));
             targetBuilder.withDwxSubnets(collectDwxSubnetType(source));
             targetBuilder.withMlxSubnets(collectMlxSubnetType(source));
+            targetBuilder.withLiftieSubnets(collectMlxSubnetType(source));
         }
     }
 
@@ -83,6 +84,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         targetBuilder.withCbSubnets(source.getSubnetMetas());
         targetBuilder.withDwxSubnets(source.getSubnetMetas());
         targetBuilder.withMlxSubnets(source.getSubnetMetas());
+        targetBuilder.withLiftieSubnets(source.getSubnetMetas());
     }
 
     private Map<String, CloudSubnet> collectBySubnetType(BaseNetwork source, SubnetType subnetType) {
