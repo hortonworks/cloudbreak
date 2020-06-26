@@ -50,7 +50,7 @@ class DatahubDeletionServiceTest {
         StackViewV4Responses responses = new StackViewV4Responses(Set.of());
         when(datahubService.list(anyString())).thenReturn(responses);
 
-        underTest.deleteDatahubClustersForEnvironment(pollingConfig, environment);
+        underTest.deleteDatahubClustersForEnvironment(pollingConfig, environment, true);
 
         verify(datahubService, never()).deleteMultiple(anyString(), any(), anyBoolean());
     }
@@ -76,7 +76,7 @@ class DatahubDeletionServiceTest {
                 new StackViewV4Responses(Set.of(distrox2)),
                 new StackViewV4Responses(Set.of()));
 
-        underTest.deleteDatahubClustersForEnvironment(pollingConfig, environment);
+        underTest.deleteDatahubClustersForEnvironment(pollingConfig, environment, true);
 
         ArgumentCaptor<DistroXMultiDeleteV1Request> captor = ArgumentCaptor.forClass(DistroXMultiDeleteV1Request.class);
         verify(datahubService).deleteMultiple(anyString(), captor.capture(), eq(true));
@@ -106,7 +106,7 @@ class DatahubDeletionServiceTest {
                 new StackViewV4Responses(Set.of(datahub2)),
                 new StackViewV4Responses(Set.of(datahub2)));
 
-        assertThatThrownBy(() -> underTest.deleteDatahubClustersForEnvironment(pollingConfig, environment))
+        assertThatThrownBy(() -> underTest.deleteDatahubClustersForEnvironment(pollingConfig, environment, true))
                 .isInstanceOf(UserBreakException.class)
                 .hasCauseInstanceOf(IllegalStateException.class);
 

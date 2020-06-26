@@ -26,7 +26,9 @@ import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
@@ -38,11 +40,15 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
@@ -74,6 +80,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
+    private SdxTestClient sdxTestClient;
 
     @Inject
     private FreeIpaRouteHandler freeIpaRouteHandler;
@@ -165,6 +174,19 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
+                .validate();
+    }
+
+    protected void createDatalake(TestContext testContext) {
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+
+        testContext
+                .given(SdxInternalTestDto.class)
+                .withDatabase(sdxDatabaseRequest)
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow(RunningParameter.key(resourcePropertyProvider().getName()))
+                .await(SdxClusterStatusResponse.RUNNING)
                 .validate();
     }
 
