@@ -21,8 +21,8 @@ public class AzureExceptionExtractor {
         return getIfNotNull(rootCause, this::getTransformedErrorMessage);
     }
 
-    private String getTransformedErrorMessage(Throwable rc) {
-        String errorDescription = rc.getMessage();
+    private String getTransformedErrorMessage(Throwable t) {
+        String errorDescription = t.getMessage();
         if (errorDescription != null) {
             JsonNode json;
             try {
