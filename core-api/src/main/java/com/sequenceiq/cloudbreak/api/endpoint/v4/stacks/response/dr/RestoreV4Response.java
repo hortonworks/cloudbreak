@@ -5,8 +5,10 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 public class RestoreV4Response {
     private FlowIdentifier flowIdentifier;
 
-    public RestoreV4Response(FlowIdentifier flowIdentifier) {
+    public RestoreV4Response() {
+    }
 
+    public RestoreV4Response(FlowIdentifier flowIdentifier) {
         this.flowIdentifier = flowIdentifier;
     }
 

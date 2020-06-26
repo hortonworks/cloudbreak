@@ -6,13 +6,16 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -23,6 +26,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageVali
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class CloudStorageValidatorTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
@@ -45,9 +49,11 @@ public class CloudStorageValidatorTest {
     @InjectMocks
     private CloudStorageValidator underTest;
 
-    @BeforeAll
-    static void setUp() {
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
+    @BeforeClass
+    public static void setUp() {
+        if (Strings.isNullOrEmpty(ThreadBasedUserCrnProvider.getUserCrn())) {
+            ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
+        }
     }
 
     @Test

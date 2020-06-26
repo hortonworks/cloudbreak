@@ -5,8 +5,10 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 public class BackupV4Response {
     private FlowIdentifier flowIdentifier;
 
-    public BackupV4Response(FlowIdentifier flowIdentifier) {
+    public BackupV4Response() {
+    }
 
+    public BackupV4Response(FlowIdentifier flowIdentifier) {
         this.flowIdentifier = flowIdentifier;
     }
 

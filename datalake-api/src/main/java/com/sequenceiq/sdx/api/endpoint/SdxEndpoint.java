@@ -187,13 +187,13 @@ public interface SdxEndpoint {
     @Path("{name}/backupDatabaseStatus")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get the status of datalake database backup operation", produces = MediaType.APPLICATION_JSON, nickname = "backupDatabaseStatus")
-    SdxDatabaseBackupStatusResponse backupDatabaseStatusByName(@PathParam("name") String name,
+    SdxDatabaseBackupStatusResponse getBackupDatabaseStatusByName(@PathParam("name") String name,
             @QueryParam("operationId") String operationId);
 
     @GET
     @Path("{name}/restoreDatabaseStatus")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get the status of datalake database restore operation", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatabaseStatus")
-    SdxDatabaseRestoreStatusResponse restoreDatabaseStatusByName(@PathParam("name") String name,
+    SdxDatabaseRestoreStatusResponse getRestoreDatabaseStatusByName(@PathParam("name") String name,
             @QueryParam("operationId") String operationId);
 }
