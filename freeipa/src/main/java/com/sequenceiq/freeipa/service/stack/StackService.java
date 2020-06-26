@@ -9,9 +9,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
@@ -19,7 +16,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
 @Service
-public class StackService implements ResourceBasedCrnProvider {
+public class StackService {
 
     @Inject
     private StackRepository stackRepository;
@@ -114,15 +111,5 @@ public class StackService implements ResourceBasedCrnProvider {
         } else {
             return stackRepository.findMultipleByEnvironmentCrnAndAccountIdWithStatuses(environmentCrns, accountId, statuses);
         }
-    }
-
-    @Override
-    public List<String> getResourceCrnsInAccount() {
-        return stackRepository.findAllEnvironmentCrnsByTenantId(ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.ENVIRONMENT;
     }
 }
