@@ -155,13 +155,6 @@
               }
             ],
             "base": true
-          },
-          {
-            "refName": "hbase-HBASETHRIFTSERVER-BASE",
-            "roleType": "HBASETHRIFTSERVER",
-            "displayName": null,
-            "configs": [],
-            "base": true
           }
         ]
       },
@@ -222,37 +215,6 @@
             "base": true
           }
         ]
-      },
-      {
-        "refName": "hue",
-        "serviceType": "HUE",
-        "serviceConfigs": [
-          {
-            "name": "hue_service_safety_valve",
-            "value": "[desktop]\napp_blacklist=impala,security,filebrowser,rdbms,jobsub,pig,sqoop,zookeeper,metastore,spark,oozie,indexer,hive,documents,indexes,search",
-            "ref": null,
-            "variable": null,
-            "autoConfig": false
-          }
-        ],
-        "roleConfigGroups": [
-          {
-            "refName": "hue-HUE_SERVER-BASE",
-            "roleType": "HUE_SERVER",
-            "displayName": null,
-            "configs": [],
-            "base": true
-          },
-          {
-            "refName": "hue-HUE_LOAD_BALANCER-BASE",
-            "roleType": "HUE_LOAD_BALANCER",
-            "displayName": null,
-            "configs": [],
-            "base": true
-          }
-        ],
-        "displayName": null,
-        "roles": []
       }
     ],
     "hostTemplates": [
@@ -263,9 +225,7 @@
           "hbase-GATEWAY-BASE",
           "hdfs-GATEWAY-BASE",
           "knox-KNOX-GATEWAY-BASE",
-          "yarn-GATEWAY-BASE",
-          "hue-HUE_SERVER-BASE",
-          "hue-HUE_LOAD_BALANCER-BASE"
+          "yarn-GATEWAY-BASE"
         ]
       },
       {
@@ -287,7 +247,6 @@
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hbase-GATEWAY-BASE",
-          "hbase-HBASETHRIFTSERVER-BASE",
           "hdfs-GATEWAY-BASE",
           "hdfs-JOURNALNODE-BASE",
           "yarn-JOBHISTORY-BASE",
