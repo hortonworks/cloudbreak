@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionExtractor;
 import com.sequenceiq.cloudbreak.cloud.response.AzureCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
@@ -49,6 +50,9 @@ public class AzureCredentialConnector implements CredentialConnector {
     @Inject
     private AzurePlatformParameters azurePlatformParameters;
 
+    @Inject
+    private AzureExceptionExtractor exceptionExtractor;
+
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
         CloudCredential cloudCredential = authenticatedContext.getCloudCredential();
@@ -68,7 +72,7 @@ public class AzureCredentialConnector implements CredentialConnector {
             }
         } catch (RuntimeException e) {
             LOGGER.warn(e.getMessage(), e);
-            return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, e.getMessage());
+            return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, exceptionExtractor.extractErrorMessage(e));
         }
         return new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
     }
