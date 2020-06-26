@@ -46,6 +46,8 @@ public class NetworkDto {
 
     private final Map<String, CloudSubnet> mlxSubnets;
 
+    private final Map<String, CloudSubnet> liftieSubnets;
+
     private final PrivateSubnetCreation privateSubnetCreation;
 
     private final ServiceEndpointCreation serviceEndpointCreation;
@@ -68,6 +70,7 @@ public class NetworkDto {
         cbSubnets = builder.cbSubnets;
         dwxSubnets = builder.dwxSubnets;
         mlxSubnets = builder.mlxSubnets;
+        liftieSubnets = builder.liftieSubnets;
         networkCidr = builder.networkCidr;
         networkCidrs = builder.networkCidrs;
         networkId = builder.networkId;
@@ -154,6 +157,10 @@ public class NetworkDto {
         return mlxSubnets;
     }
 
+    public Map<String, CloudSubnet> getLiftieSubnets() {
+        return liftieSubnets;
+    }
+
     public String getName() {
         return name;
     }
@@ -230,6 +237,8 @@ public class NetworkDto {
 
         private Map<String, CloudSubnet> mlxSubnets;
 
+        private Map<String, CloudSubnet> liftieSubnets;
+
         private String networkCidr;
 
         private Set<String> networkCidrs;
@@ -266,6 +275,7 @@ public class NetworkDto {
             cbSubnets = networkDto.cbSubnets;
             mlxSubnets = networkDto.mlxSubnets;
             dwxSubnets = networkDto.dwxSubnets;
+            liftieSubnets = networkDto.liftieSubnets;
             networkCidrs = networkDto.networkCidrs;
         }
 
@@ -320,6 +330,11 @@ public class NetworkDto {
 
         public Builder withMlxSubnets(Map<String, CloudSubnet> mlxSubnets) {
             this.mlxSubnets = mlxSubnets;
+            return this;
+        }
+
+        public Builder withLiftieSubnets(Map<String, CloudSubnet> liftieSubnets) {
+            this.liftieSubnets = liftieSubnets;
             return this;
         }
 
