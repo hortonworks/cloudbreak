@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -71,8 +72,11 @@ public class AzureCredentialConnector implements CredentialConnector {
                         });
             }
         } catch (RuntimeException e) {
-            LOGGER.warn(e.getMessage(), e);
-            return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, exceptionExtractor.extractErrorMessage(e));
+            String exceptionMessage = e.getMessage();
+            LOGGER.warn(exceptionMessage, e);
+            String errorMessage = Objects.requireNonNullElse(exceptionExtractor.extractErrorMessage(e),
+                    String.format("Could not verify the credential on Azure. Original message: %s", exceptionMessage));
+            return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
         }
         return new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
     }
