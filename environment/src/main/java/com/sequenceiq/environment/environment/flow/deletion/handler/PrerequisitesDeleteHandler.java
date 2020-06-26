@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
@@ -30,7 +29,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
-public class PrerequisitesDeleteHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {
+public class PrerequisitesDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrerequisitesDeleteHandler.class);
 
@@ -55,22 +54,15 @@ public class PrerequisitesDeleteHandler extends EventSenderAwareHandler<Environm
     }
 
     @Override
-    public void accept(Event<EnvironmentDeletionDto> environmentDtoEvent) {
-        EnvironmentDeletionDto environmentDeletionDto = environmentDtoEvent.getData();
-        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
+    public void accept(Event<EnvironmentDto> environmentDtoEvent) {
+        EnvironmentDto environmentDto = environmentDtoEvent.getData();
         environmentService.findEnvironmentById(environmentDto.getId())
                 .ifPresentOrElse(environment -> {
                             try {
                                 deletePrerequisites(environmentDto, environment);
                                 goToFinishedState(environmentDtoEvent);
                             } catch (Exception e) {
-                                if (environmentDeletionDto.isForceDelete()) {
-                                    LOGGER.warn("The %s was not successful but the environment deletion was requested " +
-                                            "as force delete so continue the deletion flow", selector());
-                                    goToFinishedState(environmentDtoEvent);
-                                } else {
-                                    goToFailedState(environmentDtoEvent, e.getMessage());
-                                }
+                                goToFailedState(environmentDtoEvent, e.getMessage());
                             }
                         }, () -> goToFailedState(environmentDtoEvent, String.format("Environment was not found with id '%s'.", environmentDto.getId()))
                 );
@@ -94,10 +86,9 @@ public class PrerequisitesDeleteHandler extends EventSenderAwareHandler<Environm
         return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant).setup());
     }
 
-    private void goToFailedState(Event<EnvironmentDeletionDto> environmentDtoEvent, String message) {
+    private void goToFailedState(Event<EnvironmentDto> environmentDtoEvent, String message) {
         LOGGER.debug("Going to failed state, message: {}.", message);
-        EnvironmentDeletionDto environmentDeletionDto = environmentDtoEvent.getData();
-        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
+        EnvironmentDto environmentDto = environmentDtoEvent.getData();
         EnvDeleteFailedEvent failureEvent = new EnvDeleteFailedEvent(
                 environmentDto.getId(),
                 environmentDto.getName(),
@@ -107,9 +98,8 @@ public class PrerequisitesDeleteHandler extends EventSenderAwareHandler<Environm
         eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
     }
 
-    private void goToFinishedState(Event<EnvironmentDeletionDto> environmentDtoEvent) {
-        EnvironmentDeletionDto environmentDeletionDto = environmentDtoEvent.getData();
-        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
+    private void goToFinishedState(Event<EnvironmentDto> environmentDtoEvent) {
+        EnvironmentDto environmentDto = environmentDtoEvent.getData();
         EnvCreationEvent envCreationEvent = EnvCreationEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
                 .withSelector(FINISH_ENV_DELETE_EVENT.selector())

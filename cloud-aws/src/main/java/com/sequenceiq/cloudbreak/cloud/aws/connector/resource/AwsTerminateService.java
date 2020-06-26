@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.BackoffCancellablePollingStrategy.getBackoffCancellablePollingStrategy;
+import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
+import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
 
 import java.util.List;
 
@@ -23,14 +25,14 @@ import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
-import com.amazonaws.waiters.Waiter;
-import com.amazonaws.waiters.WaiterParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -39,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -62,6 +65,12 @@ public class AwsTerminateService {
 
     @Inject
     private EncryptedImageCopyService encryptedImageCopyService;
+
+    @Inject
+    private AwsPollTaskFactory awsPollTaskFactory;
+
+    @Inject
+    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
     @Inject
     private AwsResourceConnector awsResourceConnector;
@@ -113,11 +122,12 @@ public class AwsTerminateService {
         LOGGER.debug("Delete cloudformation stack from resources");
         DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(cFStackName);
         cfRetryClient.deleteStack(deleteStackRequest);
-        Waiter<DescribeStacksRequest> stackDeleteCompleteWaiter = amazonCloudFormationClient.waiters().stackDeleteComplete();
+
+        PollTask<Boolean> task = awsPollTaskFactory.newAwsTerminateStackStatusCheckerTask(ac, amazonCloudFormationClient,
+                DELETE_COMPLETE, DELETE_FAILED, ERROR_STATUSES,
+                cFStackName);
         try {
-            WaiterParameters<DescribeStacksRequest> describeStacksRequestWaiterParameters = new WaiterParameters<>(describeStacksRequest)
-                    .withPollingStrategy(getBackoffCancellablePollingStrategy(null));
-            stackDeleteCompleteWaiter.run(describeStacksRequestWaiterParameters);
+            awsBackoffSyncPollingScheduler.schedule(task);
         } catch (Exception e) {
             LOGGER.debug("Cloudformation stack delete failed ", e);
             throw new CloudConnectorException(e.getMessage(), e);

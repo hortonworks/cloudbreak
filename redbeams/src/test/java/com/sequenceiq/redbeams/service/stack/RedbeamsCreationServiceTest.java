@@ -7,8 +7,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -64,8 +62,6 @@ class RedbeamsCreationServiceTest {
 
     private static final String TEMPLATE = "template";
 
-    private static final String CLUSTER_CRN = "cluster";
-
     @Mock
     private CrnService crnService;
 
@@ -83,9 +79,6 @@ class RedbeamsCreationServiceTest {
 
     @Mock
     private RedbeamsFlowManager flowManager;
-
-    @Mock
-    private DatabaseServerConfig databaseServerConfig;
 
     @InjectMocks
     private RedbeamsCreationService underTest;
@@ -115,20 +108,19 @@ class RedbeamsCreationServiceTest {
         databaseServer.setRootPassword(ROOT_PASSWORD);
         databaseServer.setDatabaseVendor(DatabaseVendor.POSTGRES);
         databaseServer.setPort(PORT);
-    }
 
-    @Test
-    public void testLaunchDatabaseServer() throws Exception {
         connector = mock(CloudConnector.class, RETURNS_DEEP_STUBS);
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(connector);
         when(connector.resources().getDBStackTemplate()).thenReturn(TEMPLATE);
+    }
 
+    @Test
+    public void testLaunchDatabaseServer() {
         Crn crn = Crn.fromString("crn:cdp:iam:us-west-1:1234:database:2312312");
         when(dbStackService.findByNameAndEnvironmentCrn(DB_STACK_NAME, ENVIRONMENT_CRN)).thenReturn(Optional.empty());
         when(dbStackService.save(dbStack)).thenReturn(dbStack);
-        when(databaseServerConfigService.getByClusterCrn(CLUSTER_CRN)).thenReturn(Optional.empty());
 
-        DBStack launchedStack = underTest.launchDatabaseServer(dbStack, CLUSTER_CRN);
+        DBStack launchedStack = underTest.launchDatabaseServer(dbStack);
         assertEquals(dbStack, launchedStack);
         verify(dbStackService).save(dbStack);
 
@@ -157,19 +149,6 @@ class RedbeamsCreationServiceTest {
         RedbeamsEvent provisionEvent = eventCaptor.getValue();
         assertEquals(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(), provisionEvent.selector());
         assertEquals(dbStack.getId(), provisionEvent.getResourceId());
-    }
-
-    @Test
-    public void testShouldNotLaunchDatabaseServerWhenDatabaseServerConfigIsAvailable() {
-        when(dbStackService.findByNameAndEnvironmentCrn(DB_STACK_NAME, ENVIRONMENT_CRN)).thenReturn(Optional.empty());
-        when(databaseServerConfigService.getByClusterCrn(CLUSTER_CRN)).thenReturn(Optional.of(databaseServerConfig));
-        when(databaseServerConfig.getDbStack()).thenReturn(Optional.of(dbStack));
-
-        DBStack launchedStack = underTest.launchDatabaseServer(dbStack, CLUSTER_CRN);
-        assertEquals(dbStack, launchedStack);
-
-        verifyZeroInteractions(flowManager);
-        verifyNoMoreInteractions(databaseServerConfigService);
     }
 
 }

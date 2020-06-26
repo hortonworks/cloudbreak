@@ -12,6 +12,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaSuccess;
+import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaPostInstallService;
 
 import reactor.bus.Event;
@@ -35,10 +36,10 @@ public class PostInstallFreeIpaHandler implements EventHandler<PostInstallFreeIp
 
     @Override
     public void accept(Event<PostInstallFreeIpaRequest> event) {
-        PostInstallFreeIpaRequest request = event.getData();
+        StackEvent request = event.getData();
         Selectable response;
         try {
-            freeIpaPostInstallService.postInstallFreeIpa(request.getResourceId(), request.isFullPostInstall());
+            freeIpaPostInstallService.postInstallFreeIpa(request.getResourceId());
             response = new PostInstallFreeIpaSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Post install tasks have failed", e);

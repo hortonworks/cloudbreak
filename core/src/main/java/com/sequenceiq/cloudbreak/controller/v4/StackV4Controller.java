@@ -29,8 +29,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RetryableFlowRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -193,15 +191,5 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     public FlowIdentifier updateSaltByName(Long workspaceId, String name) {
         return stackOperations.updateSalt(NameOrCrn.ofName(name), workspaceId);
-    }
-
-    @Override
-    public BackupV4Response backupDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId) {
-        return null;
-    }
-
-    @Override
-    public RestoreV4Response restoreDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId) {
-        return null;
     }
 }

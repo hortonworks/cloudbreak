@@ -65,11 +65,6 @@ public class RedbeamsDatabaseServerTestDto
         return this;
     }
 
-    public RedbeamsDatabaseServerTestDto withClusterCrn(String clusterCrn) {
-        getRequest().setClusterCrn(clusterCrn);
-        return this;
-    }
-
     public RedbeamsDatabaseServerTestDto await(Status status) {
         return await(status, emptyRunningParameter());
     }

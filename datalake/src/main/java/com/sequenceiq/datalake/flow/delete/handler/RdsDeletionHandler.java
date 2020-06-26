@@ -69,14 +69,14 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
             });
             response = new RdsDeletionSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
-            LOGGER.error("Database polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.info("Database polling exited before timeout. Cause: ", userBreakException);
             response = new SdxDeletionFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
+            LOGGER.info("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
             response = new SdxDeletionFailedEvent(sdxId, userId,
                     new PollerStoppedException("Database deletion timed out after " + DURATION_IN_MINUTES_FOR_DB_POLLING + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.error("Database polling failed for sdx: {}", sdxId, exception);
+            LOGGER.info("Database polling failed for sdx: {}", sdxId, exception);
             response = new SdxDeletionFailedEvent(sdxId, userId, exception);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in sdx database deletion wait phase", anotherException);

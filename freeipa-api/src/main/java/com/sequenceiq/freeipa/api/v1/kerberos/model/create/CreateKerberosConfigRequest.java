@@ -29,7 +29,7 @@ public class CreateKerberosConfigRequest {
 
     @Valid
     @ApiModelProperty
-    private FreeIpaKerberosDescriptor freeIpa;
+    private FreeIPAKerberosDescriptor freeIpa;
 
     @Valid
     @ApiModelProperty
@@ -57,11 +57,11 @@ public class CreateKerberosConfigRequest {
         activeDirectory = activeDirectoryKerberosDescriptor;
     }
 
-    public FreeIpaKerberosDescriptor getFreeIpa() {
+    public FreeIPAKerberosDescriptor getFreeIpa() {
         return freeIpa;
     }
 
-    public void setFreeIpa(FreeIpaKerberosDescriptor freeIpaKerberosDescriptor) {
+    public void setFreeIpa(FreeIPAKerberosDescriptor freeIpaKerberosDescriptor) {
         freeIpa = freeIpaKerberosDescriptor;
     }
 

@@ -47,16 +47,14 @@ public class TelemetryAgentService {
     public void stopTelemetryAgent(Long stackId, List<String> instanceIds) {
         try {
             Stack stack = stackRepository.findById(stackId).get();
-            Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataRepository.findNotTerminatedForStack(stackId);
+            Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataRepository.findAllInStack(stackId);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, instanceMetaDataSet);
             Set<Node> targetNodes = instanceMetaDataSet.stream()
                     .filter(instanceMetaData -> Objects.isNull(instanceIds) || instanceIds.contains(instanceMetaData.getInstanceId()))
                     .map(im -> new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
                             im.getInstanceGroup().getTemplate().getInstanceType(), im.getDiscoveryFQDN(), im.getInstanceGroup().getGroupName()))
                     .collect(Collectors.toSet());
-            if (!targetNodes.isEmpty()) {
-                hostOrchestrator.stopTelemetryAgent(gatewayConfigs, targetNodes, new StackBasedExitCriteriaModel(stackId));
-            }
+            hostOrchestrator.stopTelemetryAgent(gatewayConfigs, targetNodes,  new StackBasedExitCriteriaModel(stackId));
         } catch (CloudbreakOrchestratorFailedException e) {
             LOGGER.warn("Non-critical error during stopping telemetry agent", e);
         } catch (Exception e) {

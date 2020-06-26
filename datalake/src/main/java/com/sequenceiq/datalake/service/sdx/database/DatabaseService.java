@@ -119,7 +119,6 @@ public class DatabaseService {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         req.setEnvironmentCrn(env.getCrn());
         req.setDatabaseServer(getDatabaseServerRequest(CloudPlatform.valueOf(env.getCloudPlatform().toUpperCase(Locale.US)), sdxCluster));
-        req.setClusterCrn(sdxCluster.getCrn());
         return req;
     }
 

@@ -63,8 +63,6 @@ public class DatabaseServerV4ControllerTest {
 
     private static final String USER_CRN = "userCrn";
 
-    private static final String CLUSTER_CRN = "clusterCrn";
-
     @InjectMocks
     private DatabaseServerV4Controller underTest;
 
@@ -132,7 +130,6 @@ public class DatabaseServerV4ControllerTest {
         serverResponse2.setName("myotherserver");
 
         allocateRequest = new AllocateDatabaseServerV4Request();
-        allocateRequest.setClusterCrn(CLUSTER_CRN);
 
         allocateResponse = new DatabaseServerStatusV4Response();
 
@@ -176,14 +173,14 @@ public class DatabaseServerV4ControllerTest {
     public void testCreate() {
         when(dbStackConverter.convert(allocateRequest, USER_CRN)).thenReturn(dbStack);
         DBStack savedDBStack = new DBStack();
-        when(creationService.launchDatabaseServer(dbStack, CLUSTER_CRN)).thenReturn(savedDBStack);
+        when(creationService.launchDatabaseServer(dbStack)).thenReturn(savedDBStack);
         when(converterUtil.convert(savedDBStack, DatabaseServerStatusV4Response.class))
             .thenReturn(allocateResponse);
 
         DatabaseServerStatusV4Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->  underTest.create(allocateRequest));
 
         assertEquals(allocateResponse, response);
-        verify(creationService).launchDatabaseServer(dbStack, CLUSTER_CRN);
+        verify(creationService).launchDatabaseServer(dbStack);
     }
 
     @Test

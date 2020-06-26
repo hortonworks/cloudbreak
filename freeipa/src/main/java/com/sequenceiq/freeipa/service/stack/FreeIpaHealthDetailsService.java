@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.service.stack;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -105,7 +104,6 @@ public class FreeIpaHealthDetailsService {
 
     private Map<String, String> getNameIdMap(Stack stack) {
         return stack.getInstanceGroups().stream().flatMap(ig -> ig.getInstanceMetaData().stream())
-                .filter(im -> Objects.nonNull(im.getDiscoveryFQDN()) && Objects.nonNull(im.getInstanceId()))
                 .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getInstanceId));
     }
 

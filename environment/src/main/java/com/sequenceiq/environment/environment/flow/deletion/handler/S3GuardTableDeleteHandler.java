@@ -21,7 +21,6 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.LocationAwareCredential;
-import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
@@ -35,7 +34,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
-public class S3GuardTableDeleteHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {
+public class S3GuardTableDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(S3GuardTableDeleteHandler.class);
 
@@ -54,11 +53,8 @@ public class S3GuardTableDeleteHandler extends EventSenderAwareHandler<Environme
     }
 
     @Override
-    public void accept(Event<EnvironmentDeletionDto> environmentDtoEvent) {
-        EnvironmentDeletionDto environmentDeletionDto = environmentDtoEvent.getData();
-        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
-        EnvDeleteEvent envDeleteEvent = getEnvDeleteEvent(environmentDeletionDto);
-
+    public void accept(Event<EnvironmentDto> environmentDtoEvent) {
+        EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> {
                 BaseParameters environmentParameters = environment.getParameters();
@@ -70,21 +66,16 @@ public class S3GuardTableDeleteHandler extends EventSenderAwareHandler<Environme
                 }
             });
 
+            EnvDeleteEvent envDeleteEvent = getEnvDeleteEvent(environmentDto);
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            if (environmentDeletionDto.isForceDelete()) {
-                LOGGER.warn("The %s was not successful but the environment deletion was requested as force delete so " +
-                        "continue the deletion flow", selector());
-                eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
-            } else {
-                EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
-                        .withEnvironmentID(environmentDto.getId())
-                        .withException(e)
-                        .withResourceCrn(environmentDto.getResourceCrn())
-                        .withResourceName(environmentDto.getName())
-                        .build();
-                eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
-            }
+            EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
+                    .withEnvironmentID(environmentDto.getId())
+                    .withException(e)
+                    .withResourceCrn(environmentDto.getResourceCrn())
+                    .withResourceName(environmentDto.getName())
+                    .build();
+            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }
 
@@ -140,14 +131,11 @@ public class S3GuardTableDeleteHandler extends EventSenderAwareHandler<Environme
         return cloudPlatformConnectors.get(Platform.platform(cloudPlatform), Variant.variant(cloudPlatform)).noSql();
     }
 
-    private EnvDeleteEvent getEnvDeleteEvent(EnvironmentDeletionDto environmentDeletionDto) {
-        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
-
+    private EnvDeleteEvent getEnvDeleteEvent(EnvironmentDto environmentDto) {
         return EnvDeleteEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())
-                .withForceDelete(environmentDeletionDto.isForceDelete())
                 .withSelector(START_CLUSTER_DEFINITION_CLEANUP_EVENT.selector())
                 .build();
     }

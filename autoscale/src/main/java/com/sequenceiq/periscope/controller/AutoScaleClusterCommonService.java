@@ -83,19 +83,16 @@ public class AutoScaleClusterCommonService {
     }
 
     public Cluster setAutoscaleState(Long clusterId, Boolean enableAutoScaling) {
-        Cluster cluster = clusterService.findById(clusterId);
-        if (!cluster.isAutoscalingEnabled().equals(enableAutoScaling)) {
-            cluster = clusterService.setAutoscaleState(clusterId, enableAutoScaling);
-            createHistoryAndNotification(cluster);
-        }
+        Cluster cluster = clusterService.setAutoscaleState(clusterId, enableAutoScaling);
+        createHistoryAndNotification(cluster);
         return cluster;
     }
 
     private void createHistoryAndNotification(Cluster cluster) {
         History history;
         history = cluster.isAutoscalingEnabled()
-                ? historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", cluster)
-                : historyService.createEntry(ScalingStatus.DISABLED, "Autoscaling has been disabled for the cluster.", cluster);
+                ? historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster)
+                : historyService.createEntry(ScalingStatus.DISABLED, "Autoscaling has been disabled for the cluster.", 0, cluster);
         notificationSender.send(cluster, history);
     }
 

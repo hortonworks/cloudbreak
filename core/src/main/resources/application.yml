@@ -83,13 +83,6 @@ distrox:
     instance:
       types: true
 
-datalake:
-  validateAvailability: true
-
-altus:
-  audit:
-    enabled: true
-
 cb:
   enabledplatforms: AZURE,AWS,GCP,OPENSTACK
   platform.default.rootVolumeSize:
@@ -148,11 +141,13 @@ cb:
     disabled.instance.types:
     distrox:
       enabled.instance.types: >
-        t2.large,
-        t2.xlarge,
         m5.2xlarge,
         m5.4xlarge,
         m5.8xlarge,
+        d2.xlarge,
+        d2.2xlarge,
+        d2.4xlarge,
+        d2.8xlarge,
         r5.2xlarge,
         r5.4xlarge,
         r5.8xlarge,
@@ -165,27 +160,7 @@ cb:
         h1.2xlarge,
         h1.4xlarge,
         h1.8xlarge,
-        d2.xlarge,
-        d2.2xlarge,
-        d2.4xlarge,
-        d2.8xlarge,
-        r5d.16xlarge,
-        r5d.8xlarge,
-        r5d.4xlarge,
-        r5d.2xlarge,
-        r5d.xlarge,
-        m5n.2xlarge,
-        m5n.4xlarge,
-        m5n.8xlarge,
-        r5n.2xlarge,
-        r5n.4xlarge,
-        r5n.8xlarge,
-        r5dn.xlarge,
-        r5dn.2xlarge,
-        r5dn.4xlarge,
-        r5dn.8xlarge,
-        r5dn.16xlarge
-
+        r5d.4xlarge
     hostkey.verify: false
     role.session.name: cdp-provisioning
     cf.template.new.path: templates/aws-cf-stack.ftl
@@ -220,9 +195,7 @@ cb:
         Standard_L32s,
         Standard_NC6,
         Standard_NC24r,
-        Standard_L48s_v2,
-        Standard_D13_v2,
-        Standard_D14_v2
+        Standard_L48s_v2
 
   os:
     enable.autoimport: true
@@ -289,7 +262,6 @@ cb:
         7.2.1 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small-721;
         7.2.1 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-721;
         7.2.1 - Data Discovery and Exploration=cdp-dde-721;
-        7.2.1 - Streaming Analytics with Apache Flink=cdp-flink-ha-721;
 
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws

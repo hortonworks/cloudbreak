@@ -510,23 +510,6 @@
         }
       ],
       "dependencies": ["ZOOKEEPER", "HDFS", "HBASE"]
-    },
-    {
-      "name": "FLINK",
-      "displayName": "Flink",
-      "components": [
-        {
-          "name": "GATEWAY",
-          "groups": ["master", "manager"],
-          "base" : true
-        },
-        {
-          "name": "FLINK_HISTORY_SERVER",
-          "groups": ["manager"],
-          "base" : true
-        }
-      ],
-      "dependencies": ["ZOOKEEPER", "HDFS", "HBASE"]
     }
   ]
 }

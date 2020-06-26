@@ -54,14 +54,14 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
             response = new EnvWaitSuccessEvent(datalakeId, userId, detailedEnvironmentResponse);
             setEnvCreatedStatus(datalakeId);
         } catch (UserBreakException userBreakException) {
-            LOGGER.error("Env polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.info("Env polling exited before timeout. Cause: ", userBreakException);
             response = new SdxCreateFailedEvent(datalakeId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Env poller stopped for sdx: {}", datalakeId, pollerStoppedException);
+            LOGGER.info("Env poller stopped for sdx: {}", datalakeId, pollerStoppedException);
             response = new SdxCreateFailedEvent(datalakeId, userId,
                     new PollerStoppedException("Env wait timed out after " + DURATION_IN_MINUTES_FOR_ENV_POLLING + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.error("Env polling failed for sdx: {}", datalakeId, exception);
+            LOGGER.info("Env polling failed for sdx: {}", datalakeId, exception);
             response = new SdxCreateFailedEvent(datalakeId, userId, exception);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in sdx creation wait phase", anotherException);

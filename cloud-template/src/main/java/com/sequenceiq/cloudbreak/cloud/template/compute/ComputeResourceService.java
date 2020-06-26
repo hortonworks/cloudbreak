@@ -98,7 +98,6 @@ public class ComputeResourceService {
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context, AuthenticatedContext auth,
             Iterable<CloudResource> resources, boolean cancellable) {
-        LOGGER.debug("Deleting the following resources: {}", resources);
         List<CloudResourceStatus> results = new ArrayList<>();
         Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         Platform platform = auth.getCloudContext().getPlatform();

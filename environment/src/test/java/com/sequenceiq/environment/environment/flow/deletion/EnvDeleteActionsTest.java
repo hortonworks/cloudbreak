@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -155,7 +156,7 @@ class EnvDeleteActionsTest {
     void setUp() {
         FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
-        actionPayload = new EnvDeleteEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN, true);
+        actionPayload = new EnvDeleteEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actionPayload);
         when(stateContext.getExtendedState()).thenReturn(extendedState);
         when(extendedState.getVariables()).thenReturn(new HashMap<>());
@@ -197,6 +198,8 @@ class EnvDeleteActionsTest {
 
     private void testNoEnvironment(Supplier<Action<?, ?>> deleteAction, String selector) {
         Action<?, ?> action = configureAction(deleteAction);
+
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.empty());
 
         action.execute(stateContext);
 

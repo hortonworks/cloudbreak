@@ -20,11 +20,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.it.cloudbreak.mock.AbstractModelMock;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.mock.SaltApiRunPostResponse;
@@ -60,9 +57,10 @@ public class SaltMock extends AbstractModelMock {
         objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
         Service sparkService = getSparkService();
         getSaltBootHealth(sparkService);
+        postSaltBootRun(instanceMap, sparkService);
         postSaltBootFile(sparkService);
         postSaltBootPillar(sparkService);
-        postSaltBootActionDistribute(instanceMap, sparkService);
+        postSaltBootActionDistribute(sparkService);
         postSaltBootHostnameDistribute2(sparkService);
         postSaltBootFileDistribute(sparkService);
         postSaltBootPillarDistribute(sparkService);
@@ -127,11 +125,8 @@ public class SaltMock extends AbstractModelMock {
         }, gson()::toJson);
     }
 
-    private void postSaltBootActionDistribute(Map<String, CloudVmMetaDataStatus> instanceMap, Service sparkService) {
+    private void postSaltBootActionDistribute(Service sparkService) {
         sparkService.post(SALT_ACTION_DISTRIBUTE, (request, response) -> {
-            SaltAction saltAction = JsonUtil.readValue(request.body(), SaltAction.class);
-            List<Minion> minions = saltAction.getMinions();
-            postSaltBootRun(minions, instanceMap, sparkService);
             GenericResponses genericResponses = new GenericResponses();
             genericResponses.setResponses(new ArrayList<>());
             return genericResponses;
@@ -153,8 +148,8 @@ public class SaltMock extends AbstractModelMock {
         });
     }
 
-    private void postSaltBootRun(List<Minion> minions, Map<String, CloudVmMetaDataStatus> instanceMap, Service sparkService) {
-        sparkService.post(SALT_RUN, new SaltApiRunPostResponse(minions, instanceMap));
+    private void postSaltBootRun(Map<String, CloudVmMetaDataStatus> instanceMap, Service sparkService) {
+        sparkService.post(SALT_RUN, new SaltApiRunPostResponse(instanceMap));
     }
 
     private void getSaltBootHealth(Service sparkService) {

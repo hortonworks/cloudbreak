@@ -53,14 +53,14 @@ public class SdxStartWaitHandler extends ExceptionCatcherEventHandler<SdxStartWa
             sdxStartService.waitCloudbreakCluster(sdxId, pollingConfig);
             response = new SdxStartSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
-            LOGGER.error("Start polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.info("Start polling exited before timeout. Cause: ", userBreakException);
             response = new SdxStartFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Start poller stopped for stack: {}", sdxId);
+            LOGGER.info("Start poller stopped for stack: {}", sdxId);
             response = new SdxStartFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake start timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.error("Start polling failed for stack: {}", sdxId);
+            LOGGER.info("Start polling failed for stack: {}", sdxId);
             response = new SdxStartFailedEvent(sdxId, userId, exception);
         }
         sendEvent(response, event);

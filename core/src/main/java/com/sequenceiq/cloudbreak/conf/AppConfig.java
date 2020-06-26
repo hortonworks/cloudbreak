@@ -61,9 +61,8 @@ import com.sequenceiq.sdx.client.internal.SdxApiClientParams;
 @Configuration
 @EnableRetry
 public class AppConfig implements ResourceLoaderAware {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
 
-    private static final int AWAIT_TERMINATION_SECONDS = 60;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
 
     @Value("${cb.etc.config.dir:}")
     private String etcConfigDir;
@@ -207,8 +206,6 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setQueueCapacity(intermediateQueueCapacity);
         executor.setThreadNamePrefix("intermediateBuilderExecutor-");
         executor.setTaskDecorator(new MDCCleanerTaskDecorator());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(AWAIT_TERMINATION_SECONDS);
         executor.initialize();
         return executor;
     }
@@ -220,8 +217,6 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setQueueCapacity(queueCapacity);
         executor.setThreadNamePrefix("resourceBuilderExecutor-");
         executor.setTaskDecorator(new MDCCleanerTaskDecorator());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(AWAIT_TERMINATION_SECONDS);
         executor.initialize();
         return executor;
     }

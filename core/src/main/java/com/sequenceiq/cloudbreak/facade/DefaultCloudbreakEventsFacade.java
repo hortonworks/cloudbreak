@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -43,8 +42,8 @@ public class DefaultCloudbreakEventsFacade implements CloudbreakEventsFacade {
     }
 
     @Override
-    public Page<CloudbreakEventV4Response> retrieveEventsByStack(Long stackId, StackType stackType, Pageable pageable) {
-        Page<StructuredNotificationEvent> cloudbreakEvents = cloudbreakEventService.cloudbreakEventsForStack(stackId, stackType.getResourceType(), pageable);
+    public Page<CloudbreakEventV4Response> retrieveEventsByStack(Long stackId, Pageable pageable) {
+        Page<StructuredNotificationEvent> cloudbreakEvents = cloudbreakEventService.cloudbreakEventsForStack(stackId, pageable);
         LOGGER.debug("Convert notification events for stack [{}]", stackId);
         Page<CloudbreakEventV4Response> cloudbreakEventsJsons = cloudbreakEvents.map(eventConverter::convert);
         LOGGER.debug("Convert notification events for stack [{}] is done", stackId);

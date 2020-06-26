@@ -45,7 +45,7 @@ public class AzureVirtualMachineService {
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Map<String, VirtualMachine> getVirtualMachinesByName(AzureClient azureClient, String resourceGroup, Collection<String> privateInstanceIds) {
-        LOGGER.debug("Starting to retrieve vm metadata from Azure for ids: {}", privateInstanceIds);
+        LOGGER.debug("Starting to retrieve vm metadata from Azure.");
         PagedList<VirtualMachine> virtualMachines = azureClient.getVirtualMachines(resourceGroup);
         while (hasMissingVm(virtualMachines, privateInstanceIds) && virtualMachines.hasNextPage()) {
             virtualMachines.loadNextPage();
@@ -76,15 +76,8 @@ public class AzureVirtualMachineService {
     }
 
     private boolean hasMissingVm(PagedList<VirtualMachine> virtualMachines, Collection<String> privateInstanceIds) {
-        Set<String> virtualMachineNames = virtualMachines
-                .stream()
-                .map(VirtualMachine::name)
-                .collect(Collectors.toSet());
-        boolean hasMissingVm = !virtualMachineNames.containsAll(privateInstanceIds);
-        if (hasMissingVm) {
-            LOGGER.info("Fetched VM id-s ({}) do not contain one of the following id-s: {}", virtualMachineNames, privateInstanceIds);
-        }
-        return hasMissingVm;
+        Set<String> virtualMachineNames = virtualMachines.stream().map(VirtualMachine::name).collect(Collectors.toSet());
+        return !virtualMachineNames.containsAll(privateInstanceIds);
     }
 
     private Map<String, VirtualMachine> collectVirtualMachinesByName(Collection<String> privateInstanceIds, PagedList<VirtualMachine> virtualMachines) {

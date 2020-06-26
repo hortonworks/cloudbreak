@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
-import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
@@ -73,18 +72,12 @@ class IdBrokerMappingsDeleteHandlerTest {
 
     private EnvironmentDto environmentDto;
 
-    private Event<EnvironmentDeletionDto> environmentDtoEvent;
+    private Event<EnvironmentDto> environmentDtoEvent;
 
     @BeforeEach
     void setUp() {
         environmentDto = createEnvironmentDto();
-        EnvironmentDeletionDto build = EnvironmentDeletionDto
-                .builder()
-                .withId(ENVIRONMENT_ID)
-                .withForceDelete(false)
-                .withEnvironmentDto(environmentDto)
-                .build();
-        environmentDtoEvent = new Event<>(headers, build);
+        environmentDtoEvent = new Event<>(headers, environmentDto);
         eventArgumentCaptor = ArgumentCaptor.forClass(BaseNamedFlowEvent.class);
         headersArgumentCaptor = ArgumentCaptor.forClass(Event.Headers.class);
     }

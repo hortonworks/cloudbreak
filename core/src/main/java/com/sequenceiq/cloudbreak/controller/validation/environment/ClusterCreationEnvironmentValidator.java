@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.controller.validation.environment;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static java.util.Optional.ofNullable;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,9 +10,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -24,29 +20,19 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class ClusterCreationEnvironmentValidator {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationEnvironmentValidator.class);
-
-    @Value("${datalake.validateAvailability}")
-    private boolean validateDatalakeAvailability;
-
     @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
 
@@ -59,11 +45,7 @@ public class ClusterCreationEnvironmentValidator {
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
-    @Inject
-    private SdxClientService sdxClientService;
-
-    public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack,
-        DetailedEnvironmentResponse environment, User user) {
+    public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         String regionName = cloudPlatformConnectors.getDefault(platform(stack.cloudPlatform()))
                 .displayNameToRegion(stack.getRegion());
@@ -86,7 +68,6 @@ public class ClusterCreationEnvironmentValidator {
         validateRdsConfigNames(clusterRequest.getDatabases(), resultBuilder, workspaceId);
         validateProxyConfig(clusterRequest.getProxyConfigCrn(), resultBuilder);
         validateAutoTls(clusterRequest, stack, resultBuilder, parentEnvironmentCloudPlatform);
-        validateDatalakeConfig(stack, resultBuilder, user);
         return resultBuilder.build();
     }
 
@@ -150,17 +131,6 @@ public class ClusterCreationEnvironmentValidator {
         boolean freeipa = kerberosConfig.map(kc -> KerberosType.FREEIPA == kc.getType()).orElse(Boolean.FALSE);
         if (!freeipa) {
             resultBuilder.error("FreeIPA is not available in your environment!");
-        }
-    }
-
-    private void validateDatalakeConfig(Stack stack, ValidationResultBuilder resultBuilder, User user) {
-        if (CloudPlatform.MOCK.name().equalsIgnoreCase(stack.cloudPlatform())) {
-            LOGGER.info("No Data Lake validation for MOCK provider");
-        } else if (validateDatalakeAvailability) {
-            List<SdxClusterResponse> datalakes = sdxClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
-            if (datalakes.isEmpty()) {
-                resultBuilder.error("Data Lake is not available in your environment!");
-            }
         }
     }
 }

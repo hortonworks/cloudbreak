@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors;
@@ -162,7 +161,7 @@ class EnvClustersDeleteActionsTest {
     @BeforeEach
     void setUp() {
         FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
-        actionPayload = new EnvDeleteEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN, true);
+        actionPayload = new EnvDeleteEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN);
 
         when(stateContext.getMessageHeader(HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(actionPayload);
@@ -327,12 +326,12 @@ class EnvClustersDeleteActionsTest {
         verifyEventFactoryAndHeaders();
 
         Object payload = payloadArgumentCaptor.getValue();
-        assertThat(payload).isInstanceOf(EnvironmentDeletionDto.class);
+        assertThat(payload).isInstanceOf(EnvironmentDto.class);
 
-        EnvironmentDeletionDto environmentDto = (EnvironmentDeletionDto) payload;
-        assertThat(environmentDto.getEnvironmentDto().getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
-        assertThat(environmentDto.getEnvironmentDto().getName()).isEqualTo(ENVIRONMENT_NAME);
-        assertThat(environmentDto.getEnvironmentDto().getId()).isEqualTo(ENVIRONMENT_ID);
+        EnvironmentDto environmentDto = (EnvironmentDto) payload;
+        assertThat(environmentDto.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
+        assertThat(environmentDto.getName()).isEqualTo(ENVIRONMENT_NAME);
+        assertThat(environmentDto.getId()).isEqualTo(ENVIRONMENT_ID);
     }
 
     private void verifyEventFactoryAndHeaders() {

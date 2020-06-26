@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
-import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,22 +17,23 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.autoscaling.model.DetachInstancesRequest;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
-import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 @Service
 public class AwsDownscaleService {
@@ -53,6 +53,12 @@ public class AwsDownscaleService {
 
     @Inject
     private AwsResourceConnector awsResourceConnector;
+
+    @Inject
+    private AwsPollTaskFactory awsPollTaskFactory;
+
+    @Inject
+    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
     @Inject
     private AwsCloudWatchService awsCloudWatchService;
@@ -92,12 +98,16 @@ public class AwsDownscaleService {
                 LOGGER.warn(e.getErrorMessage());
             }
 
-            LOGGER.debug("Polling instance until terminated. [stack: {}, instance: {}]", auth.getCloudContext().getId(),
-                    asGroupName);
-            Waiter<DescribeInstancesRequest> instanceTerminatedWaiter = amazonEC2Client.waiters().instanceTerminated();
-            DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
-            StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(auth.getCloudContext().getId());
-            run(instanceTerminatedWaiter, describeInstancesRequest, stackCancellationCheck);
+            for (String instanceId : instanceIds) {
+                LOGGER.debug("Polling instance until terminated. [stack: {}, instance: {}]", auth.getCloudContext().getId(),
+                        asGroupName);
+                PollTask<Boolean> task = awsPollTaskFactory.newInstanceTerminationStatusCheckerTask(auth, instanceId, amazonEC2Client);
+                try {
+                    awsBackoffSyncPollingScheduler.schedule(task);
+                } catch (Exception e) {
+                    throw new CloudConnectorException(e.getMessage(), e);
+                }
+            }
         }
         return awsResourceConnector.check(auth, resources);
     }

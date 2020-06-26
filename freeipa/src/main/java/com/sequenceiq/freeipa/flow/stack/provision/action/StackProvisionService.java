@@ -2,7 +2,10 @@ package com.sequenceiq.freeipa.flow.stack.provision.action;
 
 import static java.lang.String.format;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +24,9 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -201,5 +206,26 @@ public class StackProvisionService {
 
     public void prepareImage(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.IMAGE_SETUP, "Image setup");
+    }
+
+    private List<CloudResourceStatus> removeFailedMetadata(Long stackId, List<CloudResourceStatus> statuses, Group group) {
+        Map<Long, CloudResourceStatus> failedResources = new HashMap<>();
+        Set<Long> groupPrivateIds = getPrivateIds(group);
+        for (CloudResourceStatus status : statuses) {
+            Long privateId = status.getPrivateId();
+            if (privateId != null && status.isFailed() && !failedResources.containsKey(privateId) && groupPrivateIds.contains(privateId)) {
+                failedResources.put(privateId, status);
+                instanceMetaDataService.deleteInstanceRequest(stackId, privateId);
+            }
+        }
+        return new ArrayList<>(failedResources.values());
+    }
+
+    private Set<Long> getPrivateIds(Group group) {
+        Set<Long> ids = new HashSet<>();
+        for (CloudInstance cloudInstance : group.getInstances()) {
+            ids.add(cloudInstance.getTemplate().getPrivateId());
+        }
+        return ids;
     }
 }

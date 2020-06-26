@@ -354,21 +354,5 @@ public class SdxCluster implements AccountIdAwareResource {
                 stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType,
                 databaseAvailabilityType, rangerRazEnabled);
     }
-
-    @Override
-    public String toString() {
-        return "SdxCluster{" +
-                "crn='" + crn + '\'' +
-                ", clusterName='" + clusterName + '\'' +
-                ", envName='" + envName + '\'' +
-                ", envCrn='" + envCrn + '\'' +
-                ", runtime='" + runtime + '\'' +
-                ", clusterShape=" + clusterShape +
-                ", createDatabase=" + createDatabase +
-                ", cloudStorageBaseLocation='" + cloudStorageBaseLocation + '\'' +
-                ", rangerRazEnabled=" + rangerRazEnabled +
-                '}';
-    }
-
     //CHECKSTYLE:ON
 }

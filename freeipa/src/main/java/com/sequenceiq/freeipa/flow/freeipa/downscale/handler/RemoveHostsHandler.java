@@ -67,21 +67,19 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
         Set<String> hostNames = request.getHosts();
         Selectable result;
         try {
-            if (!hostNames.isEmpty()) {
-                Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-                PollingResult orchestratorRemovalPollingResult =
-                        removeHostsFromOrchestrator(stack, new ArrayList<>(hostNames));
-                if (!PollingResult.isSuccess(orchestratorRemovalPollingResult)) {
-                    LOGGER.warn("Can not remove hosts from orchestrator: {}", hostNames);
-                }
-                // rebootstrap to update the minion's multi-master configuration
-                List<String> remainingInstanceIds = stack.getNotDeletedInstanceMetaDataList().stream()
-                        .filter(metadata -> Objects.nonNull(metadata.getDiscoveryFQDN()))
-                        .filter(metadata -> !hostNames.contains(metadata.getDiscoveryFQDN()))
-                        .map(InstanceMetaData::getInstanceId)
-                        .collect(Collectors.toList());
-                bootstrapService.bootstrap(stack.getId(), remainingInstanceIds);
+            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
+            PollingResult orchestratorRemovalPollingResult =
+                    removeHostsFromOrchestrator(stack, new ArrayList<>(hostNames));
+            if (!PollingResult.isSuccess(orchestratorRemovalPollingResult)) {
+                LOGGER.warn("Can not remove hosts from orchestrator: {}", hostNames);
             }
+            // rebootstrap to update the minion's multi-master configuration
+            List<String> remainingInstanceIds = stack.getNotDeletedInstanceMetaDataList().stream()
+                    .filter(metadata -> Objects.nonNull(metadata.getDiscoveryFQDN()))
+                    .filter(metadata -> !hostNames.contains(metadata.getDiscoveryFQDN()))
+                    .map(InstanceMetaData::getInstanceId)
+                    .collect(Collectors.toList());
+            bootstrapService.bootstrap(stack.getId(), remainingInstanceIds);
             result = new RemoveHostsFromOrchestrationSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Failed to remove hosts from orchestration", e);

@@ -95,7 +95,7 @@ public class SdxUpgradeService {
 
     private SdxUpgradeResponse triggerUpgrade(UpgradeOptionV4Response upgradeOption, SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeOsUpgradeFlow(cluster, upgradeOption);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeOsUpgradeFlow(cluster.getId(), upgradeOption);
         String imageId = upgradeOption.getUpgrade().getImageId();
         String message = getMessage(imageId);
         return new SdxUpgradeResponse(message, flowIdentifier);

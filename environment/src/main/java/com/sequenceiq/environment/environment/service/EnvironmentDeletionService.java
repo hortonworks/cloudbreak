@@ -45,64 +45,57 @@ public class EnvironmentDeletionService {
         this.environmentJobService = environmentJobService;
     }
 
-    public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn,
-        boolean cascading, boolean forced) {
+    public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn, boolean forced) {
         Optional<Environment> environment = environmentService
                 .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId);
         MDCBuilder.buildMdcContext(environment.orElseThrow(()
                 -> new NotFoundException(String.format("No environment found with name '%s'", environmentName))));
         LOGGER.debug(String.format("Deleting environment [name: %s]", environment.get().getName()));
-        delete(environment.get(), actualUserCrn, cascading, forced);
+        delete(environment.get(), actualUserCrn, forced);
         return environmentDtoConverter.environmentToDto(environment.get());
     }
 
-    public EnvironmentDto deleteByCrnAndAccountId(String crn, String accountId, String actualUserCrn,
-        boolean cascading, boolean forced) {
+    public EnvironmentDto deleteByCrnAndAccountId(String crn, String accountId, String actualUserCrn, boolean forced) {
         Optional<Environment> environment = environmentService
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId);
         MDCBuilder.buildMdcContext(environment.orElseThrow(()
                 -> new NotFoundException(String.format("No environment found with crn '%s'", crn))));
         LOGGER.debug(String.format("Deleting  environment [name: %s]", environment.get().getName()));
-        delete(environment.get(), actualUserCrn, cascading, forced);
+        delete(environment.get(), actualUserCrn, forced);
         return environmentDtoConverter.environmentToDto(environment.get());
     }
 
-    public Environment delete(Environment environment, String userCrn,
-        boolean cascading, boolean forced) {
+    public Environment delete(Environment environment, String userCrn, boolean forced) {
         MDCBuilder.buildMdcContext(environment);
         validateDeletion(environment);
         LOGGER.debug("Deleting environment with name: {}", environment.getName());
         environmentJobService.unschedule(environment);
-        if (cascading) {
-            reactorFlowManager.triggerCascadingDeleteFlow(environment, userCrn, forced);
+        if (forced) {
+            reactorFlowManager.triggerForcedDeleteFlow(environment, userCrn);
         } else {
-            if (!forced) {
-                checkIsEnvironmentDeletable(environment);
-            }
-            reactorFlowManager.triggerDeleteFlow(environment, userCrn, forced);
+            checkIsEnvironmentDeletable(environment);
+            reactorFlowManager.triggerDeleteFlow(environment, userCrn);
         }
         return environment;
     }
 
-    public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn,
-        boolean cascading, boolean forced) {
+    public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn, boolean forced) {
         return environmentService
                 .findByNameInAndAccountIdAndArchivedIsFalse(environmentNames, accountId).stream()
                 .map(environment -> {
                     LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
-                    delete(environment, actualUserCrn, cascading, forced);
+                    delete(environment, actualUserCrn, forced);
                     return environmentDtoConverter.environmentToDto(environment);
                 })
                 .collect(Collectors.toList());
     }
 
-    public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId, String actualUserCrn,
-        boolean cascading, boolean forced) {
+    public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId, String actualUserCrn, boolean forced) {
         return environmentService
                 .findByResourceCrnInAndAccountIdAndArchivedIsFalse(crns, accountId).stream()
                 .map(environment -> {
                     LOGGER.debug(String.format("Starting to archive environment [CRN: %s]", environment.getName()));
-                    delete(environment, actualUserCrn, cascading, forced);
+                    delete(environment, actualUserCrn, forced);
                     return environmentDtoConverter.environmentToDto(environment);
                 })
                 .collect(Collectors.toList());

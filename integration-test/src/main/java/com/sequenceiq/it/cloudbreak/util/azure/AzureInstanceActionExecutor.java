@@ -5,35 +5,30 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sequenceiq.it.cloudbreak.util.wait.CompletableWaitUtil;
 
 import rx.Completable;
 
 public class AzureInstanceActionExecutor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureInstanceActionExecutor.class);
+    private List<String> instanceIds;
 
-    private final List<String> instanceIds;
+    private Function<String, Completable> instanceAction;
 
-    private final Function<String, Completable> instanceAction;
+    private Function<String, Boolean> instanceCheck;
 
-    private final Function<String, AzureInstanceActionResult> getInstanceActionResult;
+    private int timeoutValue;
 
-    private final int timeoutValue;
-
-    private final TimeUnit timeoutUnit;
+    private TimeUnit timeoutUnit;
 
     private AzureInstanceActionExecutor(
             List<String> instanceIds,
             Function<String, Completable> instanceAction,
-            Function<String, AzureInstanceActionResult> getInstanceActionResult,
+            Function<String, Boolean> instanceCheck,
             int timeoutValue,
             TimeUnit timeoutUnit) {
         this.instanceAction = instanceAction;
-        this.getInstanceActionResult = getInstanceActionResult;
+        this.instanceCheck = instanceCheck;
         this.instanceIds = instanceIds;
         this.timeoutValue = timeoutValue;
         this.timeoutUnit = timeoutUnit;
@@ -44,9 +39,7 @@ public class AzureInstanceActionExecutor {
                 Completable.merge(instanceIds.stream().map(instanceAction).collect(Collectors.toList())),
                 timeoutValue,
                 timeoutUnit,
-                () -> instanceIds.parallelStream()
-                        .map(getInstanceActionResult)
-                        .collect(Collectors.toList())
+                () -> instanceIds.parallelStream().allMatch(instanceCheck::apply)
         ).doWait();
 
     }
@@ -59,7 +52,7 @@ public class AzureInstanceActionExecutor {
 
         private Function<String, Completable> instanceAction;
 
-        private Function<String, AzureInstanceActionResult> instanceStatusCheck;
+        private Function<String, Boolean> instanceStatusCheck;
 
         private List<String> instanceIds;
 
@@ -92,11 +85,11 @@ public class AzureInstanceActionExecutor {
         /**
          * Required
          *
-         * @param getInstanceActionResult - checks if the action has reached the desired end state
+         * @param check - checks if the action has reached the desired end state
          * @return the builder
          */
-        public AzureInstanceExecutorBuilder withInstanceStatusCheck(Function<String, AzureInstanceActionResult> getInstanceActionResult) {
-            this.instanceStatusCheck = getInstanceActionResult;
+        public AzureInstanceExecutorBuilder withInstanceStatusCheck(Function<String, Boolean> check) {
+            this.instanceStatusCheck = check;
             return this;
         }
 

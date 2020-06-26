@@ -14,7 +14,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -22,7 +21,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.converter.ClusterToClusterDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
@@ -66,12 +64,9 @@ public class StructuredFlowEventFactory {
 
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        String resourceType = (stack.getType() == null || stack.getType().equals(StackType.WORKLOAD))
-                ? CloudbreakEventService.DATAHUB_RESOURCE_TYPE
-                : CloudbreakEventService.DATALAKE_RESOURCE_TYPE;
-        OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), FLOW, resourceType, stackId, stack.getName(),
+        OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), FLOW, "stacks", stackId, stack.getName(),
                 nodeConfig.getId(), cbVersion, stack.getWorkspace().getId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(),
-                stack.getTenant().getName(), stack.getResourceCrn(), stack.getCreator().getUserCrn(), stack.getEnvironmentCrn(), null);
+                stack.getTenant().getName(), stack.getResourceCrn());
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
@@ -129,12 +124,9 @@ public class StructuredFlowEventFactory {
             LOGGER.info("Access denied in structured notification event creation, user: {}, stack: {}", userName, stackId, e);
         }
 
-        String resourceType = (stack.getType() == null || stack.getType().equals(StackType.WORKLOAD))
-                ? CloudbreakEventService.DATAHUB_RESOURCE_TYPE
-                : CloudbreakEventService.DATALAKE_RESOURCE_TYPE;
-        OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), NOTIFICATION, resourceType, stackId, stackName,
+        OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), NOTIFICATION, "stacks", stackId, stackName,
                 nodeConfig.getInstanceUUID(), cbVersion, stack.getWorkspace().getId(), userId, userName,
-                stack.getTenant().getName(), stack.getResourceCrn(), stack.getCreator().getUserCrn(), stack.getEnvironmentCrn(), null);
+                stack.getTenant().getName(), stack.getResourceCrn());
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 
@@ -157,8 +149,7 @@ public class StructuredFlowEventFactory {
                 ldapDetails.getUserId(),
                 null,
                 null,
-                ldapDetails.getId().toString(),
-                null, null, null
+                ldapDetails.getId().toString()
         );
         if (notifyWorkspace) {
             operationDetails.setWorkspaceId(ldapDetails.getWorkspaceId());
@@ -187,8 +178,7 @@ public class StructuredFlowEventFactory {
                 rdsDetails.getUserId(),
                 null,
                 null,
-                rdsDetails.getId().toString(),
-                null, null, null
+                rdsDetails.getId().toString()
         );
         if (notifyWorkspace) {
             operationDetails.setWorkspaceId(rdsDetails.getWorkspaceId());

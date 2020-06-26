@@ -18,7 +18,6 @@ import org.json.JSONObject;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
@@ -358,7 +357,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         }
         String crn = getResponse().getCrn();
 
-        return "SDX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), CloudbreakEventService.DATAHUB_RESOURCE_TYPE, null, crn);
+        return "SDX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), "stacks", null, crn);
     }
 
     protected CommonClusterManagerProperties commonClusterManagerProperties() {

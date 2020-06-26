@@ -12,7 +12,6 @@ import static org.springframework.test.util.AssertionErrors.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 import javax.inject.Inject;
@@ -30,7 +29,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsClient;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
@@ -50,7 +48,6 @@ import com.sequenceiq.periscope.repository.ClusterPertainRepository;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.LoadAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
-import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
 import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
 import com.sequenceiq.periscope.testcontext.EndpointTestContext;
 
@@ -93,9 +90,6 @@ public class DistroXAutoScaleClusterV1EndpointTest {
 
     @MockBean
     private ClusterProxyConfigurationService clusterProxyConfigurationService;
-
-    @MockBean
-    private AutoscaleRecommendationService recommendationService;
 
     @MockBean(name = "grpcUmsClient")
     private GrpcUmsClient grpcUmsClient;
@@ -143,8 +137,6 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         when(grpcUmsClient.getUserDetails(anyString(), anyString(), any())).thenReturn(user);
         when(umsAccountAuthorizationService.hasRightOfUser(anyString(), anyString())).thenReturn(true);
         when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("http://clusterproxy"));
-        when(recommendationService.getAutoscaleRecommendations(TEST_CLUSTER_CRN))
-                .thenReturn(new AutoscaleRecommendationV4Response(Set.of("compute"), Set.of("compute")));
     }
 
     @After

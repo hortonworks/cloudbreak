@@ -14,11 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.FreeIpaHostNotAvailableException;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
+import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
@@ -82,5 +84,12 @@ public class FreeipaChecker {
                 .flatMap(List::stream)
                 .map(m -> m.getName() + ": " + m.getMessage())
                 .collect(Collectors.joining(", "));
+    }
+
+    private String getPrimaryHostname(Set<InstanceMetaData> checkableInstances) {
+        InstanceMetaData instanceMetaData = checkableInstances.stream()
+                .filter(im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceMetadataType()))
+                .findFirst().orElseThrow(() -> new NotFoundException("Gateway instance does not found"));
+        return instanceMetaData.getDiscoveryFQDN();
     }
 }

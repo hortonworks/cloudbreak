@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
@@ -20,7 +19,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
-public class PublicKeyDeleteHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {
+public class PublicKeyDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PublicKeyDeleteHandler.class);
 
@@ -28,8 +27,7 @@ public class PublicKeyDeleteHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final EnvironmentResourceService environmentResourceService;
 
-    protected PublicKeyDeleteHandler(EventSender eventSender, EnvironmentService environmentService,
-        EnvironmentResourceService environmentResourceService) {
+    protected PublicKeyDeleteHandler(EventSender eventSender, EnvironmentService environmentService, EnvironmentResourceService environmentResourceService) {
 
         super(eventSender);
         this.environmentService = environmentService;
@@ -42,24 +40,16 @@ public class PublicKeyDeleteHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     @Override
-    public void accept(Event<EnvironmentDeletionDto> environmentDtoEvent) {
+    public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         LOGGER.debug("Accepting PublickeyDelete event");
-        EnvironmentDeletionDto environmentDeletionDto = environmentDtoEvent.getData();
-        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
-        EnvDeleteEvent envDeleteEvent = getEnvDeleteEvent(environmentDeletionDto);
+        EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(this::deleteManagedKey);
+            EnvDeleteEvent envDeleteEvent = getEnvDeleteEvent(environmentDto);
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            if (environmentDeletionDto.isForceDelete()) {
-                LOGGER.warn("The %s was not successful but the environment deletion was requested as force delete so " +
-                        "continue the deletion flow", selector());
-                eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
-            } else {
-                EnvDeleteFailedEvent failedEvent = new EnvDeleteFailedEvent(environmentDto.getId(),
-                        environmentDto.getName(), e, environmentDto.getResourceCrn());
-                eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
-            }
+            EnvDeleteFailedEvent failedEvent = new EnvDeleteFailedEvent(environmentDto.getId(), environmentDto.getName(), e, environmentDto.getResourceCrn());
+            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }
 
@@ -72,13 +62,11 @@ public class PublicKeyDeleteHandler extends EventSenderAwareHandler<EnvironmentD
         }
     }
 
-    private EnvDeleteEvent getEnvDeleteEvent(EnvironmentDeletionDto environmentDeletionDto) {
-        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
+    private EnvDeleteEvent getEnvDeleteEvent(EnvironmentDto environmentDto) {
         return EnvDeleteEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())
-                .withForceDelete(environmentDeletionDto.isForceDelete())
                 .withSelector(START_NETWORK_DELETE_EVENT.selector())
                 .build();
     }

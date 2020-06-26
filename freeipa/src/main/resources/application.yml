@@ -27,6 +27,7 @@ management:
       percentiles:
         "[http.server.requests]": "0.5, 0.95"
 
+
 freeipa:
   cert.dir: /certs/
   client:
@@ -98,8 +99,6 @@ info:
 altus:
   ums:
     host: localhost
-  audit:
-    enabled: false
 
 spring:
   application:

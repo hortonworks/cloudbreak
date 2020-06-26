@@ -58,7 +58,7 @@ public class ExternalDatabaseService {
 
     public void provisionDatabase(Cluster cluster, DatabaseAvailabilityType externalDatabase, DetailedEnvironmentResponse environment) {
         LOGGER.info("Create external {} database server in environment {} for DataHub {}", externalDatabase.name(), environment.getName(), cluster.getName());
-        AllocateDatabaseServerV4Request request = getDatabaseRequest(environment, externalDatabase, cluster);
+        AllocateDatabaseServerV4Request request = getDatabaseRequest(environment, externalDatabase);
         String databaseCrn;
         try {
             databaseCrn = redbeamsClient.create(request).getResourceCrn();
@@ -87,14 +87,10 @@ public class ExternalDatabaseService {
         clusterRepository.save(cluster);
     }
 
-    private AllocateDatabaseServerV4Request getDatabaseRequest(DetailedEnvironmentResponse environment, DatabaseAvailabilityType externalDatabase,
-            Cluster cluster) {
+    private AllocateDatabaseServerV4Request getDatabaseRequest(DetailedEnvironmentResponse environment, DatabaseAvailabilityType externalDatabase) {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         req.setEnvironmentCrn(environment.getCrn());
         req.setDatabaseServer(getDatabaseServerStackRequest(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.US)), externalDatabase));
-        if (cluster.getStack() != null) {
-            req.setClusterCrn(cluster.getStack().getResourceCrn());
-        }
         return req;
     }
 

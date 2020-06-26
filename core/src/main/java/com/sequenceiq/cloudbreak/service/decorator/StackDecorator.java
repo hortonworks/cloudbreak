@@ -306,9 +306,6 @@ public class StackDecorator {
         if (instanceGroups == 0L) {
             throw new BadRequestException("Gateway instance group not configured");
         }
-        if (instanceGroups > 1L) {
-            throw new BadRequestException("Multiple Gateway instance group configured, please use only one Gateway group");
-        }
     }
 
     private void validatFailurePolicy(Stack stack, FailurePolicy failurePolicy) {

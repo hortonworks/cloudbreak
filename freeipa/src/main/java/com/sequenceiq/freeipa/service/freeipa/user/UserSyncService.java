@@ -298,7 +298,7 @@ public class UserSyncService {
     UsersState getIpaUserState(FreeIpaClient freeIpaClient, UmsUsersState umsUsersState, boolean fullSync)
             throws FreeIpaClientException {
         return fullSync ? freeIpaUsersStateProvider.getUsersState(freeIpaClient) :
-                freeIpaUsersStateProvider.getFilteredFreeIpaState(freeIpaClient, umsUsersState.getRequestedWorkloadUsers());
+                freeIpaUsersStateProvider.getFilteredFreeIPAState(freeIpaClient, umsUsersState.getRequestedWorkloadUsers());
     }
 
     @VisibleForTesting

@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors;
@@ -66,7 +65,7 @@ public class EnvClustersDeleteActions {
                 EnvClustersDeleteState envClustersDeleteState = EnvClustersDeleteState.DATAHUB_CLUSTERS_DELETE_STARTED_STATE;
                 String logDeleteState = "Data Hub clusters";
 
-                EnvironmentDeletionDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent,
+                EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent,
                         envClustersDeleteState, logDeleteState);
                 sendEvent(context, DELETE_DATAHUB_CLUSTERS_EVENT.selector(), envDto);
             }
@@ -83,7 +82,7 @@ public class EnvClustersDeleteActions {
                 EnvClustersDeleteState envClustersDeleteState = EnvClustersDeleteState.DATALAKE_CLUSTERS_DELETE_STARTED_STATE;
                 String logDeleteState = "Data Lake clustesr";
 
-                EnvironmentDeletionDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent,
+                EnvironmentDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent,
                         envClustersDeleteState, logDeleteState);
                 sendEvent(context, DELETE_DATALAKE_CLUSTERS_EVENT.selector(), envDto);
             }
@@ -123,8 +122,8 @@ public class EnvClustersDeleteActions {
         };
     }
 
-    private EnvironmentDeletionDto commonUpdateEnvironmentAndNotify(CommonContext context, EnvDeleteEvent payload,
-        EnvironmentStatus environmentStatus, ResourceEvent resourceEvent, EnvClustersDeleteState envClustersDeleteState, String logDeleteState) {
+    private EnvironmentDto commonUpdateEnvironmentAndNotify(CommonContext context, EnvDeleteEvent payload,
+            EnvironmentStatus environmentStatus, ResourceEvent resourceEvent, EnvClustersDeleteState envClustersDeleteState, String logDeleteState) {
 
         environmentService
                 .findEnvironmentById(payload.getResourceId())
@@ -141,14 +140,7 @@ public class EnvClustersDeleteActions {
         envDto.setResourceCrn(payload.getResourceCrn());
         envDto.setName(payload.getResourceName());
         LOGGER.info("Flow entered into {}", envClustersDeleteState.name());
-
-        EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
-                .withEnvironmentDto(envDto)
-                .withForceDelete(payload.isForceDelete())
-                .withId(payload.getResourceId())
-                .build();
-
-        return environmentDeletionDto;
+        return envDto;
     }
 
     private abstract static class AbstractEnvClustersDeleteAction<P extends ResourceCrnPayload>

@@ -18,13 +18,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -56,7 +54,6 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
@@ -90,9 +87,6 @@ public class EnvironmentApiConverterTest {
 
     @Mock
     private NetworkRequestToDtoConverter networkRequestToDtoConverter;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @BeforeAll
     static void before() {
@@ -173,35 +167,6 @@ public class EnvironmentApiConverterTest {
         verify(accountTelemetryService).getOrDefault(any());
         verify(telemetryApiConverter).convert(eq(request.getTelemetry()), any());
         verify(networkRequestToDtoConverter).convert(request.getNetwork());
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = { false, true })
-    void testAzureSingleRgEnabledWithEmptyAzureRequest(Boolean azureSingleResourceGroupDeploymentEnabled) {
-        EnvironmentRequest request = createEnvironmentRequest(AZURE);
-        request.setAzure(null);
-        FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
-        EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
-        AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
-        Features features = mock(Features.class);
-        NetworkDto networkDto = mock(NetworkDto.class);
-
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString())).thenReturn(AZURE.name());
-        when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
-        when(accountTelemetry.getFeatures()).thenReturn(features);
-        when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
-        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
-        when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
-        when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(azureSingleResourceGroupDeploymentEnabled);
-
-        EnvironmentCreationDto actual = underTest.initCreationDto(request);
-        assertEquals(
-                azureSingleResourceGroupDeploymentEnabled
-                        ? ResourceGroupUsagePattern.USE_SINGLE
-                        : ResourceGroupUsagePattern.USE_MULTIPLE,
-                actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
-
     }
 
     private void assertLocation(LocationRequest request, LocationDto actual) {

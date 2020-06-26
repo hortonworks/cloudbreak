@@ -159,12 +159,7 @@ public class Crn {
         FREEIPA("freeipa", NON_ADMIN_SERVICE),
         DATAHUB("datahub", NON_ADMIN_SERVICE),
         DATALAKE("datalake", NON_ADMIN_SERVICE),
-        /**
-         * @deprecated {@link #DEX} was replaced by {@link #DE} and is kept here for backward compatibility.
-         */
-        @Deprecated
         DEX("dex", NON_ADMIN_SERVICE),
-        DE("de", NON_ADMIN_SERVICE),
         ACCOUNTTAG("accounttag", NON_ADMIN_SERVICE),
         ACCOUNTTELEMETRY("accounttelemetry", NON_ADMIN_SERVICE),
         ML("ml", NON_ADMIN_SERVICE);

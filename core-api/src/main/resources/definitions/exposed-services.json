@@ -583,20 +583,6 @@
       "apiIncluded": true,
       "visibleForDatalake": false,
       "visibleForDatahub": true
-    },
-    {
-      "name": "FLINK",
-      "displayName": "Flink Dashboard",
-      "serviceName": "FLINK_HISTORY_SERVER",
-      "knoxService": "FLINK",
-      "knoxUrl": "/flink/",
-      "ssoSupported": true,
-      "port": 8082,
-      "tlsPort": 8082,
-      "apiOnly": false,
-      "apiIncluded": false,
-      "visibleForDatalake": false,
-      "visibleForDatahub": true
     }
   ]
 }

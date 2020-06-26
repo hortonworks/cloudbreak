@@ -9,20 +9,20 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaChildEnvironmentAssertion;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPAChildEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractIntegrationTest {
 
     @Inject
-    private FreeIpaTestClient freeIpaTestClient;
+    private FreeIPATestClient freeIPATestClient;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -43,17 +43,17 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractIntegration
             then = "child environment uses the parent's freeipa")
     public void testAttachChildEnvironment(MockedTestContext testContext) {
         testContext
-                .given(FreeIpaTestDto.class)
+                .given(FreeIPATestDto.class)
                     .withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
-                .when(freeIpaTestClient.create())
+                .when(freeIPATestClient.create())
                 .await(Status.AVAILABLE)
-                .given(FreeIpaChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
+                .given(FreeIPAChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
                     .withNetwork()
                     .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIpaChildEnvironmentTestDto.class)
-                .when(freeIpaTestClient.attachChildEnvironment())
+                .given(FreeIPAChildEnvironmentTestDto.class)
+                .when(freeIPATestClient.attachChildEnvironment())
                 .then(FreeIpaChildEnvironmentAssertion.validateChildFreeipa())
                 .validate();
     }
@@ -66,19 +66,19 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractIntegration
     public void testParentFreeIpaDeleteFailure(MockedTestContext testContext) {
         String key = resourcePropertyProvider().getName();
         testContext
-                .given(FreeIpaTestDto.class)
+                .given(FreeIPATestDto.class)
                     .withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
-                .when(freeIpaTestClient.create())
+                .when(freeIPATestClient.create())
                 .await(Status.AVAILABLE)
-                .given(FreeIpaChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
+                .given(FreeIPAChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
                     .withNetwork()
                     .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIpaChildEnvironmentTestDto.class)
-                .when(freeIpaTestClient.attachChildEnvironment())
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.delete(), RunningParameter.key(key))
+                .given(FreeIPAChildEnvironmentTestDto.class)
+                .when(freeIPATestClient.attachChildEnvironment())
+                .given(FreeIPATestDto.class)
+                .when(freeIPATestClient.delete(), RunningParameter.key(key))
                 .expect(BadRequestException.class, RunningParameter.key(key))
                 .validate();
     }
@@ -91,22 +91,22 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractIntegration
             then = "it should succeed")
     public void testParentFreeIpaDeleteSuccess(MockedTestContext testContext) {
         testContext
-                .given(FreeIpaTestDto.class)
+                .given(FreeIPATestDto.class)
                     .withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
-                .when(freeIpaTestClient.create())
+                .when(freeIPATestClient.create())
                 .await(Status.AVAILABLE)
-                .given(FreeIpaChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
+                .given(FreeIPAChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
                     .withNetwork()
                     .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIpaChildEnvironmentTestDto.class)
-                .when(freeIpaTestClient.attachChildEnvironment())
-                .when(freeIpaTestClient.detachChildEnvironment())
-                .given(FreeIpaChildEnvironmentTestDto.class)
+                .given(FreeIPAChildEnvironmentTestDto.class)
+                .when(freeIPATestClient.attachChildEnvironment())
+                .when(freeIPATestClient.detachChildEnvironment())
+                .given(FreeIPAChildEnvironmentTestDto.class)
                 .then(FreeIpaChildEnvironmentAssertion.validateNoFreeipa())
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.delete())
+                .given(FreeIPATestDto.class)
+                .when(freeIPATestClient.delete())
                 .validate();
     }
 }

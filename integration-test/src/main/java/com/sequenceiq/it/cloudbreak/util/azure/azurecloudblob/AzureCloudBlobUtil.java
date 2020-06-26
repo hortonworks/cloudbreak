@@ -46,7 +46,7 @@ public class AzureCloudBlobUtil {
                 "datalake/" + clusterName + "_" + Crn.fromString(crn).getResource(), false);
     }
 
-    public void listFreeIpaFoldersInAContaier(String baseLocation, String clusterName, String crn) {
+    public void listFreeIPAFoldersInAContaier(String baseLocation, String clusterName, String crn) {
         azureCloudBlobClientActions.listSelectedDirectory(baseLocation,
                 "freeipa/" + clusterName + "_" + Crn.fromString(crn).getResource(), false);
     }

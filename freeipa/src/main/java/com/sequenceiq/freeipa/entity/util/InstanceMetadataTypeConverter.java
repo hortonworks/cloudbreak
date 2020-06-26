@@ -7,6 +7,6 @@ public class InstanceMetadataTypeConverter extends DefaultEnumConverter<Instance
 
     @Override
     public InstanceMetadataType getDefault() {
-        return InstanceMetadataType.GATEWAY;
+        return InstanceMetadataType.CORE;
     }
 }

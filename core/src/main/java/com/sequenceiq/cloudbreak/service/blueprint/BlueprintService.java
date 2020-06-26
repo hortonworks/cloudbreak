@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
-import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
@@ -198,10 +197,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     public AutoscaleRecommendation getAutoscaleRecommendation(Long workspaceId, String blueprintName) {
         return cloudResourceAdvisor.getAutoscaleRecommendation(workspaceId, blueprintName);
-    }
-
-    public ScaleRecommendation getScaleRecommendation(Long workspaceId, String blueprintName) {
-        return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName);
     }
 
     @Override

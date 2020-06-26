@@ -3,18 +3,18 @@ package com.sequenceiq.freeipa.service.freeipa.user.model;
 public class EnvironmentAccessRights {
     private final boolean accessEnvironment;
 
-    private final boolean adminFreeIpa;
+    private final boolean adminFreeIPA;
 
-    public EnvironmentAccessRights(boolean accessEnvironment, boolean adminFreeIpa) {
+    public EnvironmentAccessRights(boolean accessEnvironment, boolean adminFreeIPA) {
         this.accessEnvironment = accessEnvironment;
-        this.adminFreeIpa = adminFreeIpa;
+        this.adminFreeIPA = adminFreeIPA;
     }
 
     public boolean hasEnvironmentAccessRight() {
         return accessEnvironment;
     }
 
-    public boolean hasAdminFreeIpaRight() {
-        return adminFreeIpa;
+    public boolean hasAdminFreeIPARight() {
+        return adminFreeIPA;
     }
 }

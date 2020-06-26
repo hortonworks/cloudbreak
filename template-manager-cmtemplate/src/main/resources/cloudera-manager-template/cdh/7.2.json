@@ -115,10 +115,6 @@
     {
       "name": "QUEUEMANAGER",
       "version": "3.1.1"
-    },
-    {
-      "name": "FLINK",
-      "version": "1.10.1"
     }
   ],
   "version": "7.2.0",

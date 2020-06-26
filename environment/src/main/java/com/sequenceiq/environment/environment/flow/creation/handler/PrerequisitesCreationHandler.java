@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.flow.creation.handler;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PREREQUISITES_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
@@ -14,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -25,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.prerequisite.AzurePrerequisiteCreat
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.environment.featureswitch.AzureSingleResourceGroupFeatureSwitch;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -51,7 +50,7 @@ public class PrerequisitesCreationHandler extends EventSenderAwareHandler<Enviro
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    private final EntitlementService entitlementService;
+    private final AzureSingleResourceGroupFeatureSwitch azureSingleResourceGroupFeatureSwitch;
 
     private final CostTagging costTagging;
 
@@ -66,14 +65,14 @@ public class PrerequisitesCreationHandler extends EventSenderAwareHandler<Enviro
     protected PrerequisitesCreationHandler(EventSender eventSender,
             CloudPlatformConnectors cloudPlatformConnectors,
             CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
-            EntitlementService entitlementService,
+            AzureSingleResourceGroupFeatureSwitch azureSingleResourceGroupFeatureSwitch,
             CostTagging costTagging, EventBus eventBus, EnvironmentService environmentService,
             ParametersService parameterService,
             Clock clock) {
         super(eventSender);
         this.cloudPlatformConnectors = cloudPlatformConnectors;
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
-        this.entitlementService = entitlementService;
+        this.azureSingleResourceGroupFeatureSwitch = azureSingleResourceGroupFeatureSwitch;
         this.costTagging = costTagging;
         this.eventBus = eventBus;
         this.environmentService = environmentService;
@@ -90,7 +89,7 @@ public class PrerequisitesCreationHandler extends EventSenderAwareHandler<Enviro
                                 if (AZURE.name().equals(environmentDto.getCloudPlatform())) {
                                     createResourceGroup(environmentDto, environment);
                                 } else {
-                                    LOGGER.debug("Cloudplatform not Azure, not creating resource group.");
+                                    LOGGER.debug("Cloudplatform not azure, not creating resource group.");
                                 }
                                 goToNetworkCreationState(environmentDtoEvent);
                             } catch (Exception e) {
@@ -101,11 +100,10 @@ public class PrerequisitesCreationHandler extends EventSenderAwareHandler<Enviro
     }
 
     private void createResourceGroup(EnvironmentDto environmentDto, Environment environment) {
-        if (!entitlementService.azureSingleResourceGroupDeploymentEnabled(INTERNAL_ACTOR_CRN, environment.getAccountId())) {
+        if (!azureSingleResourceGroupFeatureSwitch.isActive()) {
             LOGGER.debug("Azure single resource group feature turned off, not creating resourcegroup.");
             return;
         }
-
         Optional<AzureResourceGroupDto> azureResourceGroupDtoOptional = getAzureResourceGroupDto(environmentDto);
         if (azureResourceGroupDtoOptional.isEmpty()) {
             LOGGER.debug("No azure resource group dto defined, not creating resource group.");

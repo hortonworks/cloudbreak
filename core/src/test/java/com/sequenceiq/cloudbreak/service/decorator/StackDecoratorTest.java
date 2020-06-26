@@ -219,13 +219,6 @@ public class StackDecoratorTest {
         verify(sharedServiceValidator, times(1)).checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class));
     }
 
-    @Test(expected = BadRequestException.class)
-    public void testDecorateWhenMethodCalledWithMultipleGatewayGroupThenShouldThrowBadRequestException() {
-        Set<InstanceGroup> instanceGroups = createInstanceGroups(GATEWAY, GATEWAY);
-        subject.setInstanceGroups(instanceGroups);
-        underTest.decorate(subject, request, user, workspace);
-    }
-
     @Test
     public void testDecoratorWhenClusterToAttachIsNotNullAndAllSharedServiceRequirementMeetsThenEverythingShouldGoFine() {
         SharedServiceV4Request sharedServiceV4Request = new SharedServiceV4Request();

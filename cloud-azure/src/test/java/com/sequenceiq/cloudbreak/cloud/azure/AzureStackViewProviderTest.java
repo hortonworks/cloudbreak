@@ -103,6 +103,7 @@ public class AzureStackViewProviderTest {
         when(group.getInstances()).thenReturn(List.of(cloudInstance));
         when(group.getType()).thenReturn(InstanceGroupType.CORE);
         when(group.getName()).thenReturn(GROUP_NAME);
+        when(group.getReferenceInstanceConfiguration()).thenReturn(cloudInstance);
         return Collections.singletonList(group);
     }
 

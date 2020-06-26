@@ -24,10 +24,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.waiters.AmazonCloudFormationWaiters;
 import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
@@ -35,6 +32,9 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClien
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
+import com.sequenceiq.cloudbreak.cloud.aws.task.AwsTerminateStackStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -89,10 +89,13 @@ public class AwsTerminateServiceIntegrationTest {
     private Retry retryService;
 
     @Mock
-    private AmazonCloudFormationWaiters cfWaiters;
+    private AwsPollTaskFactory awsPollTaskFactory;
 
     @Mock
-    private Waiter<DescribeStacksRequest> deletionWaiter;
+    private AwsTerminateStackStatusCheckerTask awsTerminateStackStatusCheckerTask;
+
+    @Mock
+    private AwsBackoffSyncPollingScheduler scheduler;
 
     @Mock
     private AwsContextBuilder contextBuilder;
@@ -149,8 +152,7 @@ public class AwsTerminateServiceIntegrationTest {
     public void testTerminateShouldCleanupEncryptedResourcesWhenCloudformationStackTerminated() {
         when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cloudFormationClient);
         when(awsClient.createCloudFormationRetryClient(any())).thenReturn(cloudFormationRetryClient);
-        when(cloudFormationClient.waiters()).thenReturn(cfWaiters);
-        when(cfWaiters.stackDeleteComplete()).thenReturn(deletionWaiter);
+        when(awsPollTaskFactory.newAwsTerminateStackStatusCheckerTask(any(), any(), any(), any(), any(), any())).thenReturn(awsTerminateStackStatusCheckerTask);
         CloudResource cfStackResource = mock(CloudResource.class);
         when(cfStackResource.getName()).thenReturn("stackName");
         when(cfStackUtil.getCloudFormationStackResource(any())).thenReturn(cfStackResource);
@@ -238,12 +240,9 @@ public class AwsTerminateServiceIntegrationTest {
         when(cfStackUtil.getCloudFormationStackResource(any())).thenReturn(cf);
         when(cfStackUtil.getAutoscalingGroupName(any(), anyString(), anyString())).thenReturn("alma");
         when(awsClient.createCloudFormationRetryClient(any())).thenReturn(cloudFormationRetryClient);
-        when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cloudFormationClient);
         when(awsClient.createAutoScalingClient(any(), any())).thenReturn(amazonAutoScalingClient);
         when(awsClient.createAutoScalingRetryClient(any(), any())).thenReturn(amazonAutoScalingRetryClient);
         when(amazonAutoScalingRetryClient.describeAutoScalingGroups(any())).thenReturn(describeAutoScalingGroupsResult);
-        when(cloudFormationClient.waiters()).thenReturn(cfWaiters);
-        when(cfWaiters.stackDeleteComplete()).thenReturn(deletionWaiter);
 
         List<CloudResourceStatus> result = underTest.terminate(authenticatedContext(), cloudStack, List.of(
                 new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(), cf, lc

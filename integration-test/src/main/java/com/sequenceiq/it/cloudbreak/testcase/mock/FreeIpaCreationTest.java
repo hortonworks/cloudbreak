@@ -7,11 +7,11 @@ import org.testng.annotations.Test;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaKerberosTestAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaLdapTestAssertion;
-import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
@@ -20,7 +20,7 @@ import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 public class FreeIpaCreationTest extends AbstractIntegrationTest {
 
     @Inject
-    private FreeIpaTestClient freeIpaTestClient;
+    private FreeIPATestClient freeIPATestClient;
 
     @Inject
     private FreeIpaRouteHandler freeIpaRouteHandler;
@@ -46,8 +46,8 @@ public class FreeIpaCreationTest extends AbstractIntegrationTest {
         });
         dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
         testContext
-                .given(FreeIpaTestDto.class).withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
-                .when(freeIpaTestClient.create())
+                .given(FreeIPATestDto.class).withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .when(freeIPATestClient.create())
                 .await(Status.AVAILABLE)
                 .then(FreeIpaKerberosTestAssertion.validate())
                 .then(FreeIpaLdapTestAssertion.validate())

@@ -21,13 +21,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.AzurePrerequisiteCreateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.environment.featureswitch.AzureSingleResourceGroupFeatureSwitch;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -61,8 +61,6 @@ class PrerequisitesCreationHandlerTest {
 
     private static final String REGION_NAME = "regionName";
 
-    private static final String ACCOUNT_ID = "accountId";
-
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
 
@@ -70,7 +68,7 @@ class PrerequisitesCreationHandlerTest {
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Mock
-    private EntitlementService entitlementService;
+    private AzureSingleResourceGroupFeatureSwitch azureSingleResourceGroupFeatureSwitch;
 
     @Mock
     private CostTagging costTagging;
@@ -113,13 +111,13 @@ class PrerequisitesCreationHandlerTest {
     void testWhenFeatureSwitchNotActive() {
         Event<EnvironmentDto> event = getEnvironmentDtoEvent(null);
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(getEnvironment()));
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(false);
+        when(azureSingleResourceGroupFeatureSwitch.isActive()).thenReturn(false);
         ArgumentCaptor<BaseNamedFlowEvent> envCreationEventArgumentCaptor = ArgumentCaptor.forClass(BaseNamedFlowEvent.class);
 
         underTest.accept(event);
 
         verify(eventBus, never()).notify(anyString(), any(Event.class));
-        verify(entitlementService).azureSingleResourceGroupDeploymentEnabled(anyString(), anyString());
+        verify(azureSingleResourceGroupFeatureSwitch).isActive();
         verifyNextFlowStepIsInvoked(envCreationEventArgumentCaptor);
         verify(parameterService, never()).updateResourceGroupName(any(), anyString());
         verify(setup, never()).createEnvironmentPrerequisites(any());
@@ -129,13 +127,13 @@ class PrerequisitesCreationHandlerTest {
     void testWhenNoResourceGroupDto() {
         Event<EnvironmentDto> event = getEnvironmentDtoEvent(null);
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(getEnvironment()));
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(true);
+        when(azureSingleResourceGroupFeatureSwitch.isActive()).thenReturn(true);
         ArgumentCaptor<BaseNamedFlowEvent> envCreationEventArgumentCaptor = ArgumentCaptor.forClass(BaseNamedFlowEvent.class);
 
         underTest.accept(event);
 
         verify(eventBus, never()).notify(anyString(), any(Event.class));
-        verify(entitlementService).azureSingleResourceGroupDeploymentEnabled(anyString(), anyString());
+        verify(azureSingleResourceGroupFeatureSwitch).isActive();
         verifyNextFlowStepIsInvoked(envCreationEventArgumentCaptor);
         verify(parameterService, never()).updateResourceGroupName(any(), anyString());
         verify(setup, never()).createEnvironmentPrerequisites(any());
@@ -165,13 +163,13 @@ class PrerequisitesCreationHandlerTest {
                         .build()
         );
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(getEnvironment()));
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(true);
+        when(azureSingleResourceGroupFeatureSwitch.isActive()).thenReturn(true);
         ArgumentCaptor<BaseNamedFlowEvent> envCreationEventArgumentCaptor = ArgumentCaptor.forClass(BaseNamedFlowEvent.class);
 
         underTest.accept(event);
 
         verify(eventBus, never()).notify(anyString(), any(Event.class));
-        verify(entitlementService).azureSingleResourceGroupDeploymentEnabled(anyString(), anyString());
+        verify(azureSingleResourceGroupFeatureSwitch).isActive();
         verifyNextFlowStepIsInvoked(envCreationEventArgumentCaptor);
         verify(parameterService, never()).updateResourceGroupName(any(), anyString());
         verify(setup, never()).createEnvironmentPrerequisites(any());
@@ -186,13 +184,13 @@ class PrerequisitesCreationHandlerTest {
                         .build()
         );
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(getEnvironment()));
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(true);
+        when(azureSingleResourceGroupFeatureSwitch.isActive()).thenReturn(true);
         ArgumentCaptor<BaseNamedFlowEvent> envCreationEventArgumentCaptor = ArgumentCaptor.forClass(BaseNamedFlowEvent.class);
 
         underTest.accept(event);
 
         verify(eventBus, never()).notify(anyString(), any(Event.class));
-        verify(entitlementService).azureSingleResourceGroupDeploymentEnabled(anyString(), anyString());
+        verify(azureSingleResourceGroupFeatureSwitch).isActive();
         verifyNextFlowStepIsInvoked(envCreationEventArgumentCaptor);
         verify(parameterService, never()).updateResourceGroupName(any(), anyString());
     }
@@ -206,7 +204,7 @@ class PrerequisitesCreationHandlerTest {
                         .build()
         );
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(getEnvironment()));
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(true);
+        when(azureSingleResourceGroupFeatureSwitch.isActive()).thenReturn(true);
         ArgumentCaptor<BaseNamedFlowEvent> envCreationEventArgumentCaptor = ArgumentCaptor.forClass(BaseNamedFlowEvent.class);
         ArgumentCaptor<EnvironmentPrerequisitesCreateRequest> environmentPrerequisitesCreateRequestArgumentCaptor
                 = ArgumentCaptor.forClass(EnvironmentPrerequisitesCreateRequest.class);
@@ -216,7 +214,7 @@ class PrerequisitesCreationHandlerTest {
         underTest.accept(event);
 
         verify(eventBus, never()).notify(anyString(), any(Event.class));
-        verify(entitlementService).azureSingleResourceGroupDeploymentEnabled(anyString(), anyString());
+        verify(azureSingleResourceGroupFeatureSwitch).isActive();
         verifyNextFlowStepIsInvoked(envCreationEventArgumentCaptor);
         verifyResourceGroupCreateIsInvoked(environmentPrerequisitesCreateRequestArgumentCaptor);
         verify(clock).getCurrentTimeMillis();
@@ -270,7 +268,6 @@ class PrerequisitesCreationHandlerTest {
     private Environment getEnvironment() {
         Environment environment = new Environment();
         environment.setId(ENVIRONMENT_ID);
-        environment.setAccountId(ACCOUNT_ID);
         return environment;
     }
 }

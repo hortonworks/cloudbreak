@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.client;
 
-import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltEndpoint.BOOT_FINGERPRINT_DISTRIBUTE;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltEndpoint.BOOT_HOSTNAME_ENDPOINT;
 import static java.util.Collections.singletonMap;
 
@@ -45,8 +44,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.SaltErrorResolver;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FingerprintRequest;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FingerprintsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.util.JaxRSUtil;
@@ -246,13 +243,6 @@ public class SaltConnector implements Closeable {
             throw new CloudbreakOrchestratorFailedException("Hostname resolution failed for nodes: " + nodeErrors);
         }
         return responses.getResponses().stream().collect(Collectors.toMap(GenericResponse::getAddress, GenericResponse::getStatus));
-    }
-
-    public FingerprintsResponse collectFingerPrints(FingerprintRequest request) {
-        Response fingerprintResponse = saltTarget.path(BOOT_FINGERPRINT_DISTRIBUTE.getContextPath()).request()
-                .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(request).getBytes()))
-                .post(Entity.json(request));
-        return JaxRSUtil.response(fingerprintResponse, FingerprintsResponse.class);
     }
 
     private void failedResponseErrorLog(Iterable<GenericResponse> failedResponses) {

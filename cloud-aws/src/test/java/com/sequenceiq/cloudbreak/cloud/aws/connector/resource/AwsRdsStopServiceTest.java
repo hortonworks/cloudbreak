@@ -1,30 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-
 import com.amazonaws.services.rds.AmazonRDS;
-import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.StopDBInstanceRequest;
-import com.amazonaws.waiters.Waiter;
-import com.amazonaws.waiters.WaiterTimedOutException;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -34,6 +14,23 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class AwsRdsStopServiceTest {
 
@@ -45,6 +42,12 @@ public class AwsRdsStopServiceTest {
 
     @Mock
     private AwsClient awsClient;
+
+    @Mock
+    private AwsPollTaskFactory awsPollTaskFactory;
+
+    @Mock
+    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
     @Mock
     private AuthenticatedContext authenticatedContext;
@@ -65,16 +68,13 @@ public class AwsRdsStopServiceTest {
     private AmazonRDS amazonRDS;
 
     @Mock
+    private PollTask<Boolean> task;
+
+    @Mock
     private DatabaseStack dbStack;
 
     @Mock
     private DatabaseServer databaseServer;
-
-    @Mock
-    private Waiter<DescribeDBInstancesRequest> rdsWaiter;
-
-    @Mock
-    private CustomAmazonWaiterProvider provider;
 
     @InjectMocks
     private AwsRdsStopService victim;
@@ -91,18 +91,18 @@ public class AwsRdsStopServiceTest {
         when(awsClient.createRdsClient(any(AwsCredentialView.class), eq(REGION))).thenReturn(amazonRDS);
         when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
-        when(provider.getDbInstanceStopWaiter(any())).thenReturn(rdsWaiter);
     }
 
     @Test
     public void shouldStopAndScheduleTask() throws InterruptedException, ExecutionException, TimeoutException {
         ArgumentCaptor<StopDBInstanceRequest> stopDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(StopDBInstanceRequest.class);
         when(amazonRDS.stopDBInstance(stopDBInstanceRequestArgumentCaptor.capture())).thenReturn(null);
+        when(awsPollTaskFactory.newRdbStatusCheckerTask(authenticatedContext, DB_INSTANCE_IDENTIFIER, SUCCESS_STATUS, amazonRDS)).thenReturn(task);
 
         victim.stop(authenticatedContext, dbStack);
 
         assertEquals(DB_INSTANCE_IDENTIFIER, stopDBInstanceRequestArgumentCaptor.getValue().getDBInstanceIdentifier());
-        verify(rdsWaiter, times(1)).run(any());
+        verify(awsBackoffSyncPollingScheduler).schedule(task);
     }
 
     @Test(expected = CloudConnectorException.class)
@@ -118,7 +118,8 @@ public class AwsRdsStopServiceTest {
     public void shouldThrowCloudConnectorExceptionInCaseOfSchedulerException() throws InterruptedException, ExecutionException, TimeoutException {
         ArgumentCaptor<StopDBInstanceRequest> stopDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(StopDBInstanceRequest.class);
         when(amazonRDS.stopDBInstance(stopDBInstanceRequestArgumentCaptor.capture())).thenReturn(null);
-        doThrow(WaiterTimedOutException.class).when(rdsWaiter).run(any());
+        when(awsPollTaskFactory.newRdbStatusCheckerTask(authenticatedContext, DB_INSTANCE_IDENTIFIER, SUCCESS_STATUS, amazonRDS)).thenReturn(task);
+        doThrow(RuntimeException.class).when(awsBackoffSyncPollingScheduler).schedule(task);
 
         victim.stop(authenticatedContext, dbStack);
     }

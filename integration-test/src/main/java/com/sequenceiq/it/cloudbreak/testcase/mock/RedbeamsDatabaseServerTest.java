@@ -39,7 +39,6 @@ public class RedbeamsDatabaseServerTest extends AbstractIntegrationTest {
     public void createRedbeamsDatabaseServerTest(MockedTestContext testContext) {
         String databaseName = resourcePropertyProvider().getName();
         String networkKey = "someOtherNetwork";
-        String clusterCrn = "crn:cdp:datalake:us-west-1:cloudera:datalake:793fef8e-81f3-4f80-b158-0d65abd13104";
         testContext
                 .given(networkKey, EnvironmentNetworkTestDto.class)
                 .withMock(new EnvironmentNetworkMockParams())
@@ -51,7 +50,6 @@ public class RedbeamsDatabaseServerTest extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(RedbeamsDatabaseServerTestDto.class)
                 .withName(databaseName)
-                .withClusterCrn(clusterCrn)
                 .when(redbeamsDatabaseServerTest.createV4())
                 .await(Status.AVAILABLE)
                 .when(redbeamsDatabaseServerTest.deleteV4())

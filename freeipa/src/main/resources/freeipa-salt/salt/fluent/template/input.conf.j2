@@ -116,46 +116,6 @@
   tag {{providerPrefix}}.ipa_backup
   read_from_head true
 </source>
-<source>
-  @type tail
-  format none
-  path /var/log/ipaclient-install.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ipaclient-install.log.pos
-  tag {{providerPrefix}}.ipa_client_install
-  read_from_head true
-</source>
-<source>
-  @type tail
-  format none
-  path /var/log/ipaclient-uninstall.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ipaclient-uninstall.log.pos
-  tag {{providerPrefix}}.ipa_client_uninstall
-  read_from_head true
-</source>
-<source>
-  @type tail
-  format none
-  path /var/log/ipaserver-uninstall.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ipaserver-uninstall.log.pos
-  tag {{providerPrefix}}.ipa_server_uninstall
-  read_from_head true
-</source>
-<source>
-  @type tail
-  format none
-  path /var/log/ipaserver-install.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ipaserver-install.log.pos
-  tag {{providerPrefix}}.ipa_server_install
-  read_from_head true
-</source>
-<source>
-  @type tail
-  format none
-  path /var/log/ipareplica-install.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ipareplica-install.log.pos
-  tag {{providerPrefix}}.ipa_replica_install
-  read_from_head true
-</source>
 </worker>
 {% else %}
 # DATABUS inputs are disabled

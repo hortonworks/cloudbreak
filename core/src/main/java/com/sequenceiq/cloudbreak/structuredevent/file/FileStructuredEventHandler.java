@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.structuredevent.conf.StructuredEventEnablementConfig;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import com.sequenceiq.cloudbreak.conf.StructuredEventSenderConfig;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
 import reactor.bus.Event;
 
@@ -26,7 +26,7 @@ public class FileStructuredEventHandler<T extends StructuredEvent> implements Ev
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Inject
-    private StructuredEventEnablementConfig structuredEventEnablementConfig;
+    private StructuredEventSenderConfig structuredEventSenderConfig;
 
     @Override
     public String selector() {
@@ -35,7 +35,7 @@ public class FileStructuredEventHandler<T extends StructuredEvent> implements Ev
 
     @Override
     public void accept(Event<T> structuredEvent) {
-        File file = new File(structuredEventEnablementConfig.getAuditFilePath());
+        File file = new File(structuredEventSenderConfig.getAuditFilePath());
         try {
             String structuredEventAsJson = objectMapper.writeValueAsString(structuredEvent);
             FileUtils.writeStringToFile(file, structuredEventAsJson + '\n', StandardCharsets.UTF_8, true);

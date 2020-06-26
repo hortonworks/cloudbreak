@@ -18,7 +18,6 @@ import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.endpoint.v1.AlertEndpoint;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
@@ -26,7 +25,6 @@ import com.sequenceiq.periscope.api.model.LoadAlertResponse;
 import com.sequenceiq.periscope.api.model.TimeAlertRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertResponse;
 import com.sequenceiq.periscope.api.model.TimeAlertValidationRequest;
-import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.converter.LoadAlertRequestConverter;
 import com.sequenceiq.periscope.converter.LoadAlertResponseConverter;
 import com.sequenceiq.periscope.converter.TimeAlertRequestConverter;
@@ -36,7 +34,6 @@ import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.service.AlertService;
-import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DateService;
@@ -77,12 +74,6 @@ public class AlertController implements AlertEndpoint {
 
     @Inject
     private EntitlementValidationService entitlementValidationService;
-
-    @Inject
-    private AutoscaleRecommendationService recommendationService;
-
-    @Inject
-    private CloudbreakMessagesService messagesService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
@@ -151,25 +142,25 @@ public class AlertController implements AlertEndpoint {
         alertService.deleteLoadAlert(clusterId, alertId);
     }
 
-    protected void createLoadAlerts(Long clusterId, List<LoadAlertRequest> loadAlerts) {
+    public void createLoadAlerts(Long clusterId, List<LoadAlertRequest> loadAlerts) {
         for (LoadAlertRequest loadAlert : loadAlerts) {
             createLoadAlert(clusterId, loadAlert);
         }
     }
 
-    protected void createTimeAlerts(Long clusterId, List<TimeAlertRequest> timeAlerts) {
+    public void createTimeAlerts(Long clusterId, List<TimeAlertRequest> timeAlerts) {
         for (TimeAlertRequest timeAlert : timeAlerts) {
             createTimeAlert(clusterId, timeAlert);
         }
     }
 
-    protected void validateLoadAlertRequests(Long clusterId, List<LoadAlertRequest> loadAlertRequests) {
+    public void validateLoadAlertRequests(Long clusterId, List<LoadAlertRequest> loadAlertRequests) {
         for (LoadAlertRequest loadAlertRequest : loadAlertRequests) {
             validateLoadAlert(clusterId, Optional.empty(), loadAlertRequest);
         }
     }
 
-    protected void validateTimeAlertRequests(Long clusterId, List<TimeAlertRequest> timeAlertRequests) {
+    public void validateTimeAlertRequests(Long clusterId, List<TimeAlertRequest> timeAlertRequests) {
         for (TimeAlertRequest timeAlertRequest : timeAlertRequests) {
             validateTimeAlert(clusterId, Optional.empty(), timeAlertRequest);
         }
@@ -185,36 +176,15 @@ public class AlertController implements AlertEndpoint {
                 ThreadBasedUserCrnProvider.getUserCrn(),
                 ThreadBasedUserCrnProvider.getAccountId(),
                 cluster.getCloudPlatform())) {
-            throw new BadRequestException(messagesService.getMessage(MessageCode.AUTOSCALING_ENTITLEMENT_NOT_ENABLED,
-                    List.of(cluster.getCloudPlatform(),  cluster.getStackName())));
-        }
-    }
-
-    private void validateSupportedHostGroup(Cluster cluster, String requestHostGroup, AlertType alertType) {
-        Set<String> supportedHostGroups = Optional.ofNullable(
-                recommendationService.getAutoscaleRecommendations(cluster.getStackCrn())).map(
-                recommendation -> {
-                    if (AlertType.LOAD.equals(alertType)) {
-                        return Optional.ofNullable(recommendation.getLoadBasedHostGroups()).orElse(Set.of());
-                    }
-                    if (AlertType.TIME.equals(alertType)) {
-                        return Optional.ofNullable(recommendation.getTimeBasedHostGroups()).orElse(Set.of());
-                    }
-                    return Set.of("");
-                }).orElse(Set.of(""));
-        if (!supportedHostGroups.contains(requestHostGroup)) {
-            throw new BadRequestException(messagesService.getMessage(MessageCode.UNSUPPORTED_AUTOSCALING_HOSTGROUP,
-                    List.of(requestHostGroup, alertType, cluster.getStackName(), supportedHostGroups)));
+            throw new BadRequestException(String.format("Autoscaling is not enabled for CloudPlatform '%s', Cluster '%s' in this Account",
+                    cluster.getCloudPlatform(), cluster.getStackCrn()));
         }
     }
 
     private void validateTimeAlert(Long clusterId, Optional<Long> alertId, TimeAlertRequest json) {
         Cluster cluster = getClusterForWorkspace(clusterId);
         alertId.ifPresentOrElse(updateAlert -> validateAlertForUpdate(cluster, updateAlert, AlertType.TIME),
-                () -> {
-                    validateAccountEntitlement(cluster);
-                    validateSupportedHostGroup(cluster, json.getScalingPolicy().getHostGroup(), AlertType.TIME);
-                });
+                () -> validateAccountEntitlement(cluster));
         try {
             dateService.validateTimeZone(json.getTimeZone());
             dateService.getCronExpression(json.getCron());
@@ -228,17 +198,16 @@ public class AlertController implements AlertEndpoint {
         alertId.ifPresentOrElse(updateAlert -> validateAlertForUpdate(cluster, updateAlert, AlertType.LOAD),
                 () -> {
                     validateAccountEntitlement(cluster);
-                    validateSupportedHostGroup(cluster, json.getScalingPolicy().getHostGroup(), AlertType.LOAD);
                     String requestHostGroup = json.getScalingPolicy().getHostGroup();
                     cluster.getLoadAlerts().stream().map(LoadAlert::getScalingPolicy).map(ScalingPolicy::getHostGroup)
                             .filter(hostGroup -> hostGroup.equalsIgnoreCase(requestHostGroup)).findAny()
                             .ifPresent(hostGroup -> {
-                                throw new BadRequestException(messagesService
-                                        .getMessage(MessageCode.LOAD_CONFIG_ALREADY_DEFINED, List.of(cluster.getStackName(), requestHostGroup)));
+                                throw new BadRequestException(String.format("LoadAlert is already defined for Cluster '%s', HostGroup '%s'",
+                                        cluster.getStackCrn(), requestHostGroup));
                             });
                     clusterProxyConfigurationService.getClusterProxyUrl()
-                            .orElseThrow(() ->  new BadRequestException(
-                                    messagesService.getMessage(MessageCode.CLUSTER_PROXY_NOT_CONFIGURED, List.of(cluster.getStackName()))));
+                            .orElseThrow(() ->  new BadRequestException(String.format("ClusterProxy Not Configured for Cluster '{}', " +
+                                    " Load Alert cannot be configured.", cluster.getStackCrn())));
                 });
     }
 
@@ -258,13 +227,12 @@ public class AlertController implements AlertEndpoint {
 
             default:
                 //Prometheus and Metrics Alerts not supported.
-                throw new BadRequestException(messagesService
-                        .getMessage(MessageCode.UNSUPPORTED_AUTOSCALING_TYPE, List.of(alertType, cluster.getStackName())));
+                throw new BadRequestException(String.format("Unsupported AlertType '%s'", alertType));
         }
 
         if (alert.isEmpty()) {
             throw new NotFoundException(
-                    messagesService.getMessage(MessageCode.AUTOSCALING_CONFIG_NOT_FOUND, List.of(alertType, alertId, cluster.getStackName())));
+                    String.format("Could not find '%s' alert with id: '%s', for cluster: '%s'", alertType, alertId, cluster.getStackCrn()));
         }
     }
 

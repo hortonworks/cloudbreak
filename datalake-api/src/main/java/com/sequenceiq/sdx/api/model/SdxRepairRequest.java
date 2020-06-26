@@ -23,12 +23,4 @@ public class SdxRepairRequest {
     public void setHostGroupNames(List<String> hostGroupNames) {
         this.hostGroupNames = hostGroupNames;
     }
-
-    @Override
-    public String toString() {
-        return "SdxRepairRequest{" +
-                "hostGroupName='" + hostGroupName + '\'' +
-                ", hostGroupNames=" + hostGroupNames +
-                '}';
-    }
 }

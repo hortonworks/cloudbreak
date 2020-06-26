@@ -8,9 +8,6 @@ import com.sequenceiq.freeipa.client.model.TopologySuffix;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -25,8 +22,6 @@ import java.util.stream.Collectors;
 
 @Service
 class FreeIpaTopologyService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaTopologyService.class);
 
     private static final Integer MAX_REPLICATION_CONNECTIONS = 4;
 
@@ -56,7 +51,6 @@ class FreeIpaTopologyService {
 
     @VisibleForTesting
     Set<UnorderedPair> generateTopology(Set<String> nodes) {
-        LOGGER.debug("Generating topology for FreeIPA [{}}", nodes);
         Map<String, Integer> connectionRemaining = nodes.stream()
                 .sorted()
                 .collect(Collectors.toMap(n -> n, n -> MAX_REPLICATION_CONNECTIONS, (k, v) -> v, LinkedHashMap::new));

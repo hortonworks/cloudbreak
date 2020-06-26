@@ -65,9 +65,6 @@ dependencies {
   testImplementation group: 'org.assertj',        name: 'assertj-core',                   version: assertjVersion
 
   compile project(':auth-connector')
-  compile (project(':audit-connector')) {
-    transitive = false;
-  }
 }
 
 dependencies {

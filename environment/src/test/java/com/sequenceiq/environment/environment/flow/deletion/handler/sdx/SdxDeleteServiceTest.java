@@ -60,7 +60,7 @@ class SdxDeleteServiceTest {
         Environment environment = new Environment();
         environment.setName("envName");
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(Set.of());
-        underTest.deleteSdxClustersForEnvironment(pollingConfig, environment, true);
+        underTest.deleteSdxClustersForEnvironment(pollingConfig, environment);
         verifyNoMoreInteractions(sdxEndpoint);
     }
 
@@ -78,7 +78,7 @@ class SdxDeleteServiceTest {
         sdx1.setCrn("crn1");
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(Set.of("crn1", "crn2"));
         when(sdxEndpoint.list(environment.getName())).thenReturn(List.of(sdx1)).thenReturn(List.of());
-        underTest.deleteSdxClustersForEnvironment(pollingConfig, environment, true);
+        underTest.deleteSdxClustersForEnvironment(pollingConfig, environment);
         verify(sdxEndpoint).deleteByCrn(eq("crn1"), eq(true));
         verify(sdxEndpoint).deleteByCrn(eq("crn2"), eq(true));
         verifyNoMoreInteractions(sdxEndpoint);
@@ -99,7 +99,7 @@ class SdxDeleteServiceTest {
         sdx2.setStatus(SdxClusterStatusResponse.DELETE_FAILED);
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(Set.of("crn1", "crn2"));
         when(sdxEndpoint.list(environment.getName())).thenReturn(List.of(sdx2));
-        assertThatThrownBy(() -> underTest.deleteSdxClustersForEnvironment(pollingConfig, environment, true))
+        assertThatThrownBy(() -> underTest.deleteSdxClustersForEnvironment(pollingConfig, environment))
                 .isInstanceOf(UserBreakException.class)
                 .hasCauseInstanceOf(IllegalStateException.class);
         verify(sdxEndpoint).deleteByCrn(eq("crn1"), eq(true));
@@ -119,7 +119,7 @@ class SdxDeleteServiceTest {
         environment.setName("envName");
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(emptySet());
         when(environmentResourceDeletionService.getDatalakeClusterNames(environment)).thenReturn(Set.of("name"));
-        underTest.deleteSdxClustersForEnvironment(pollingConfig, environment, true);
+        underTest.deleteSdxClustersForEnvironment(pollingConfig, environment);
         verify(stackV4Endpoint).delete(0L, "name", true);
         verify(sdxEndpoint, times(0)).deleteByCrn(anyString(), anyBoolean());
     }

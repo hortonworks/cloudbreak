@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import com.google.common.base.Joiner;
@@ -120,16 +119,6 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
         DateFormat df = new SimpleDateFormat(DATE_FORMAT);
         return Joiner.on("").join(name, DELIMITER, df.format(timestamp));
     }
-
-    protected int getDefaultHashLength() {
-        return DATE_FORMAT.length();
-    }
-
-    protected String appendHash(String name, String toBeHashed) {
-        return appendHash(name, toBeHashed, getDefaultHashLength());
-    }
-
-    protected String appendHash(String name, String toBeHashed, int length) {
-        return Joiner.on("").join(name, DELIMITER, DigestUtils.md5DigestAsHex(toBeHashed.getBytes()).substring(0, length));
-    }
 }
+
+

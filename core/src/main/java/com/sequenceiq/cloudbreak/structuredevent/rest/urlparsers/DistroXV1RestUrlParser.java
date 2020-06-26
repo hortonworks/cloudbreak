@@ -3,10 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @Component
 public class DistroXV1RestUrlParser extends RestUrlParser {
@@ -23,9 +20,7 @@ public class DistroXV1RestUrlParser extends RestUrlParser {
 
     private static final int MIN_GROUP_COUNT_FOR_EVENT = 3;
 
-    private static final int EVENT_GROUP_NUMBER_WITH_RESOURCE = 4;
-
-    private static final int EVENT_GROUP_NUMBER = 3;
+    private static final int EVENT_GROUP_NUMBER = 4;
 
     @Override
     protected Pattern getPattern() {
@@ -60,23 +55,14 @@ public class DistroXV1RestUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceType(Matcher matcher) {
-        return CloudbreakEventService.DATAHUB_RESOURCE_TYPE;
+        return "stacks";
     }
 
     @Override
     protected String getResourceEvent(Matcher matcher) {
         if (matcher.groupCount() > MIN_GROUP_COUNT_FOR_EVENT) {
-            return getResourceIdentifier(matcher);
+            return matcher.group(EVENT_GROUP_NUMBER);
         }
         return null;
     }
-
-    private String getResourceIdentifier(Matcher matcher) {
-        String eventWithResource = matcher.group(EVENT_GROUP_NUMBER_WITH_RESOURCE);
-        if (StringUtils.isEmpty(eventWithResource)) {
-            eventWithResource = matcher.group(EVENT_GROUP_NUMBER);
-        }
-        return eventWithResource;
-    }
-
 }

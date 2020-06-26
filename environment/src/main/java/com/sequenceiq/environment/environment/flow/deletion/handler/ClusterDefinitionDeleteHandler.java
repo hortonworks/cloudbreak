@@ -5,11 +5,8 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
@@ -21,9 +18,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
-public class ClusterDefinitionDeleteHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterDefinitionDeleteHandler.class);
+public class ClusterDefinitionDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
     private final EnvironmentResourceDeletionService environmentResourceDeletionService;
 
@@ -37,40 +32,30 @@ public class ClusterDefinitionDeleteHandler extends EventSenderAwareHandler<Envi
     }
 
     @Override
-    public void accept(Event<EnvironmentDeletionDto> environmentDtoEvent) {
-        EnvironmentDeletionDto environmentDeletionDto = environmentDtoEvent.getData();
-        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
+    public void accept(Event<EnvironmentDto> environmentDtoEvent) {
+        EnvironmentDto environmentDto = environmentDtoEvent.getData();
         AtomicReference<String> resourceCrn = new AtomicReference<>(null);
-
-        EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
-                .withResourceId(environmentDto.getResourceId())
-                .withResourceCrn(environmentDto.getResourceCrn())
-                .withResourceName(environmentDto.getName())
-                .withForceDelete(environmentDeletionDto.isForceDelete())
-                .withSelector(START_UMS_RESOURCE_DELETE_EVENT.selector())
-                .build();
-
         try {
             environmentService.findEnvironmentById(environmentDto.getId())
                     .ifPresent(environment -> {
                         resourceCrn.set(environment.getResourceCrn());
                         environmentResourceDeletionService.deleteClusterDefinitionsOnCloudbreak(environment.getResourceCrn());
                     });
+            EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
+                    .withResourceId(environmentDto.getResourceId())
+                    .withResourceCrn(environmentDto.getResourceCrn())
+                    .withResourceName(environmentDto.getName())
+                    .withSelector(START_UMS_RESOURCE_DELETE_EVENT.selector())
+                    .build();
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            if (environmentDeletionDto.isForceDelete()) {
-                LOGGER.warn("The %s was not successful but the environment deletion was requested as force delete so " +
-                        "continue the deletion flow", selector());
-                eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
-            } else {
-                EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
-                        .withEnvironmentID(environmentDto.getId())
-                        .withException(e)
-                        .withResourceCrn(environmentDto.getResourceCrn())
-                        .withResourceName(environmentDto.getName())
-                        .build();
-                eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
-            }
+            EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
+                    .withEnvironmentID(environmentDto.getId())
+                    .withException(e)
+                    .withResourceCrn(environmentDto.getResourceCrn())
+                    .withResourceName(environmentDto.getName())
+                    .build();
+            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }
 

@@ -176,12 +176,4 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
         return converterUtil.convert(autoscaleRecommendation, AutoscaleRecommendationV4Response.class);
     }
-
-    @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
-    public AutoscaleRecommendationV4Response getRecommendation(Long workspaceId, String blueprintName) {
-        AutoscaleRecommendation autoscaleRecommendation = blueprintService.getAutoscaleRecommendation(workspaceId, blueprintName);
-
-        return converterUtil.convert(autoscaleRecommendation, AutoscaleRecommendationV4Response.class);
-    }
 }

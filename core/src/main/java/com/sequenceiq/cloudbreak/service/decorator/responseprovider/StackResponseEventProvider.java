@@ -21,7 +21,7 @@ public class StackResponseEventProvider implements ResponseProvider {
     @Override
     public StackV4Response providerEntriesToStackResponse(Stack stack, StackV4Response stackResponse) {
         List<CloudbreakEventV4Response> cloudbreakEvents = cloudbreakEventsFacade
-                .retrieveEventsByStack(stack.getId(), stack.getType(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+                .retrieveEventsByStack(stack.getId(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
         stackResponse.setCloudbreakEvents(cloudbreakEvents);
         return stackResponse;
     }

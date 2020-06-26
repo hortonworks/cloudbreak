@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.KerberosType;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.ActiveDirectoryKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
-import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIpaKerberosDescriptor;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIPAKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.KerberosDescriptorBase;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.MITKerberosDescriptor;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
@@ -146,7 +146,7 @@ public class CreateKerberosConfigRequestToKerberosConfigConverterTest {
     @Test
     public void testFreeIpaWithoutName() {
         CreateKerberosConfigRequest request = new CreateKerberosConfigRequest();
-        request.setFreeIpa(new FreeIpaKerberosDescriptor());
+        request.setFreeIpa(new FreeIPAKerberosDescriptor());
 
         BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
             underTest.convert(request);
@@ -178,8 +178,8 @@ public class CreateKerberosConfigRequestToKerberosConfigConverterTest {
         return mitDescriptor;
     }
 
-    public FreeIpaKerberosDescriptor createFreeIpaDescriptor(boolean withDomain) {
-        FreeIpaKerberosDescriptor freeIpaDescriptor = new FreeIpaKerberosDescriptor();
+    public FreeIPAKerberosDescriptor createFreeIpaDescriptor(boolean withDomain) {
+        FreeIPAKerberosDescriptor freeIpaDescriptor = new FreeIPAKerberosDescriptor();
         setupCommonFields(freeIpaDescriptor);
         freeIpaDescriptor.setAdminUrl(ADMIN_URL);
         freeIpaDescriptor.setRealm(REALM);

@@ -17,14 +17,6 @@
         "s3:PutObject"
       ],
       "Resource": "arn:aws:s3:::${LOGS_LOCATION_BASE}/*"
-    },
-    {
-      "Effect": "Deny",
-      "Action": "s3:GetObject",
-      "Resource": [
-        "arn:aws:s3:::${LOGS_LOCATION_BASE}/cluster-backups",
-        "arn:aws:s3:::${LOGS_LOCATION_BASE}/cluster-backups/*"
-      ]
     }
   ]
 }

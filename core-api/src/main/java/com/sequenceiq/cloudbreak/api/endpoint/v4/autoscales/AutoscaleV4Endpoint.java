@@ -118,10 +118,4 @@ public interface AutoscaleV4Endpoint {
     @Path("/stack/crn/{crn}/recommendation")
     @Produces(MediaType.APPLICATION_JSON)
     AutoscaleRecommendationV4Response getRecommendation(@PathParam("crn") String clusterCrn);
-
-    @GET
-    @Path("recommendation")
-    @Produces(MediaType.APPLICATION_JSON)
-    AutoscaleRecommendationV4Response getRecommendation(@QueryParam("workspaceId") @Valid Long workspaceId,
-                                                        @QueryParam("blueprintName") @NotEmpty String blueprintName);
 }

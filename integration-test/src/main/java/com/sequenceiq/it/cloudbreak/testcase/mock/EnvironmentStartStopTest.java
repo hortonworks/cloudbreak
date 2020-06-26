@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -22,7 +22,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.ServerConnCheckFreeipaRpcResponse;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
@@ -36,7 +36,7 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
     private EnvironmentTestClient environmentTestClient;
 
     @Inject
-    private FreeIpaTestClient freeIpaTestClient;
+    private FreeIPATestClient freeIPATestClient;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -65,11 +65,11 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .given(FreeIpaTestDto.class)
+                .given(FreeIPATestDto.class)
                 .withCatalog(mockedTestContext
                 .getImageCatalogMockServerSetup()
                         .getFreeIpaImageCatalogUrl())
-                .when(freeIpaTestClient.create())
+                .when(freeIPATestClient.create())
                 .await(AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())

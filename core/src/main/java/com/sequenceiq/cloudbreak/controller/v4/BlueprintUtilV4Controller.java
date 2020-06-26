@@ -15,10 +15,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.GeneratedCm
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.ServiceDependencyMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.SupportedVersionsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.ScaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
-import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -52,14 +50,6 @@ public class BlueprintUtilV4Controller extends NotificationController implements
                 availabilityZone,
                 cdpResourceType);
         return converterUtil.convert(recommendation, RecommendationV4Response.class);
-    }
-
-    @Override
-    public ScaleRecommendationV4Response createRecommendation(Long workspaceId, String blueprintName) {
-        ScaleRecommendation recommendation = blueprintService.getScaleRecommendation(
-                workspaceId,
-                blueprintName);
-        return converterUtil.convert(recommendation, ScaleRecommendationV4Response.class);
     }
 
     @Override

@@ -11,16 +11,14 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
-import com.sequenceiq.common.api.type.EncryptionType;
 
 public class AwsInstanceViewTest {
 
     @Test
     public void testTemplateParameters() {
         Map<String, Object> map = new HashMap<>();
-        map.put(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true);
-        map.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name());
+        map.put("encrypted", true);
+        map.put("type", "CUSTOM");
 
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
                 map, 0L, "imageId");
@@ -33,7 +31,7 @@ public class AwsInstanceViewTest {
     @Test
     public void testOnDemand() {
         Map<String, Object> map = new HashMap<>();
-        map.put(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, 30);
+        map.put("spotPercentage", 30);
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
                 map, 0L, "imageId");
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);

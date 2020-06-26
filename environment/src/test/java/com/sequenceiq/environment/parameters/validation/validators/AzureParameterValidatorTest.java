@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -17,12 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.featureswitch.AzureSingleResourceGroupFeatureSwitch;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -46,7 +45,7 @@ public class AzureParameterValidatorTest {
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Mock
-    private EntitlementService entitlementService;
+    private AzureSingleResourceGroupFeatureSwitch azureSingleResourceGroupFeatureSwitch;
 
     @InjectMocks
     private AzureParameterValidator underTest;
@@ -54,7 +53,7 @@ public class AzureParameterValidatorTest {
     @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(true);
+        when(azureSingleResourceGroupFeatureSwitch.isActive()).thenReturn(true);
     }
 
     @Test
@@ -190,31 +189,7 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenFeatureTurnedOffAndUseMultipleThenNoError() {
-        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
-                .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
-                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
-                                .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW)
-                                .withName("myResourceGroup").build())
-                        .build())
-                .build();
-        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
-        AzureClient azureClient = mock(AzureClient.class);
-        when(azureClientService.getClient(any())).thenReturn(azureClient);
-        when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(false);
-
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
-
-        assertFalse(validationResult.hasError());
-        verify(credentialToCloudCredentialConverter, never()).convert(any());
-        verify(azureClientService, never()).getClient(any());
-        verify(entitlementService, times(1)).azureSingleResourceGroupDeploymentEnabled(anyString(), anyString());
-    }
-
-    @Test
-    public void testWhenFeatureTurnedOffAndUseSingleThenError() {
+    public void testWhenFeatureTurnedOffThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
@@ -227,13 +202,14 @@ public class AzureParameterValidatorTest {
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
         when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(false);
+        when(azureSingleResourceGroupFeatureSwitch.isActive()).thenReturn(false);
 
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
-        assertTrue(validationResult.hasError());
-        assertEquals("1. 'SINGLE' usage pattern for Resource Groups could not be specified, as feature is disabled",
-                validationResult.getFormattedErrors());
+        assertFalse(validationResult.hasError());
+        verify(credentialToCloudCredentialConverter, never()).convert(any());
+        verify(azureClientService, never()).getClient(any());
+        verify(azureSingleResourceGroupFeatureSwitch, times(2)).isActive();
     }
 
     @Test
@@ -242,9 +218,6 @@ public class AzureParameterValidatorTest {
     }
 
     private static class EnvironmentDtoBuilder {
-
-        private static final String ACCOUNT_ID = "accountId";
-
         private final EnvironmentDto environmentDto = new EnvironmentDto();
 
         private final Builder parametersDtoBuilder = ParametersDto.builder();
@@ -257,7 +230,6 @@ public class AzureParameterValidatorTest {
         public EnvironmentDto build() {
             ParametersDto parametersDto = parametersDtoBuilder.build();
             environmentDto.setParameters(parametersDto);
-            environmentDto.setAccountId(ACCOUNT_ID);
             return environmentDto;
         }
     }

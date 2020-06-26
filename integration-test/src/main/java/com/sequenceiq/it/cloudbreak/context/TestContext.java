@@ -33,7 +33,7 @@ import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
@@ -47,7 +47,7 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestMethodNameMissingException;
@@ -342,12 +342,12 @@ public abstract class TestContext implements ApplicationContextAware {
         setActingUser(acting);
         if (clients.get(acting.getAccessKey()) == null) {
             CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, acting);
-            FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, acting);
+            FreeIPAClient freeIPAClient = FreeIPAClient.createProxyFreeIPAClient(testParameter, acting);
             EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, acting);
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, acting);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, acting);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
-                    FreeIpaClient.class, freeIpaClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient,
+                    FreeIPAClient.class, freeIPAClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient,
                     RedbeamsClient.class, redbeamsClient);
             clients.put(acting.getAccessKey(), clientMap);
             cloudbreakClient.setWorkspaceId(0L);
@@ -680,7 +680,7 @@ public abstract class TestContext implements ApplicationContextAware {
         return entity;
     }
 
-    public <T extends FreeIpaTestDto, E extends com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status> T await(T entity, E desiredStatus,
+    public <T extends FreeIPATestDto, E extends com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status> T await(T entity, E desiredStatus,
             RunningParameter runningParameter) {
         checkShutdown();
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
@@ -688,7 +688,7 @@ public abstract class TestContext implements ApplicationContextAware {
             return entity;
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        FreeIpaTestDto awaitEntity = get(key);
+        FreeIPATestDto awaitEntity = get(key);
         freeIpaAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, getPollingDurationInMills(), maxRetry);
         return entity;
     }

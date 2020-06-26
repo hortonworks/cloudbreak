@@ -95,8 +95,8 @@ public class AwsCloudWatchService {
                     .filter(instanceId -> !instanceIdsFromStack.contains(instanceId))
                     .collect(Collectors.toList());
             if (!instanceIdsNotInStack.isEmpty()) {
-                LOGGER.warn("Instance IDs [{}] are not part of cloud stack {}, these instances may have already been deleted on the cloud provider side.",
-                        instanceIdsFromStack, stack);
+                LOGGER.error("Instance IDs [{}] are not part of stack {}", instanceIdsFromStack, stack);
+                throw new CloudConnectorException("Unable to delete cloud watch alarms for system failure because instances ID are not a part of the stack.");
             }
             deleteCloudWatchAlarmsForSystemFailures(regionName, credentialView, instanceIds);
         }

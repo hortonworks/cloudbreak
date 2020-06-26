@@ -5,17 +5,17 @@ import static java.lang.String.format;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class KerberosCreateAction implements Action<KerberosTestDto, FreeIpaClient> {
+public class KerberosCreateAction implements Action<KerberosTestDto, FreeIPAClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosCreateAction.class);
 
-    public KerberosTestDto action(TestContext testContext, KerberosTestDto testDto, FreeIpaClient client) throws Exception {
+    public KerberosTestDto action(TestContext testContext, KerberosTestDto testDto, FreeIPAClient client) throws Exception {
         Log.whenJson(LOGGER, format(" Kerberos post request:%n"), testDto.getRequest());
         testDto.setResponse(
                 client.getFreeIpaClient()

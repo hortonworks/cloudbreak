@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
@@ -245,6 +244,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         }
         String crn = getResponse().getCrn();
 
-        return "SDX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), CloudbreakEventService.DATAHUB_RESOURCE_TYPE, null, crn);
+        return "SDX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), "stacks", null, crn);
     }
 }

@@ -109,8 +109,6 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
         String cluster = "cmcluster";
         String imageSettings = "imageSettingsUpgrade";
         String networkKey = "someOtherNetwork";
-        String clusterCrn = "crn:cdp:datalake:us-west-1:cloudera:datalake:793fef8e-81f3-4f80-b158-0d65abd13104";
-
         testContext
                 .given(networkKey, EnvironmentNetworkTestDto.class)
                 .withMock(new EnvironmentNetworkMockParams())
@@ -122,7 +120,6 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(RedbeamsDatabaseServerTestDto.class)
                 .withEnvironmentCrn(testContext.get(EnvironmentTestDto.class).getResponse().getCrn())
-                .withClusterCrn(clusterCrn)
                 .when(redbeamsDatabaseServerTestClient.createV4())
                 .await(Status.AVAILABLE)
                 .given(clouderaManager, ClouderaManagerTestDto.class)

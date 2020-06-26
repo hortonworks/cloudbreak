@@ -46,15 +46,11 @@ public final class DateService {
             Date nextTime = cronExpression.next(startDate);
             ZonedDateTime zonedNextTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(nextTime.getTime()), currentTime.getZone()).atZone(ZoneId.of(timeZone));
             long interval = (zonedCurrentTime.toEpochSecond() - zonedNextTime.toEpochSecond()) * TimeUtil.SECOND_TO_MILLISEC;
-
-            boolean triggerReady = interval >= 0L && interval < monitorUpdateRate;
-            if (triggerReady) {
-                LOGGER.info("Time alert '{}' firing at '{}' compared to current time '{}' in timezone '{}'",
-                        alert.getName(), zonedNextTime, zonedCurrentTime, timeZone);
-            }
-            return triggerReady;
+            LOGGER.debug("Time alert '{}' next firing at '{}' compared to current time '{}' in timezone '{}'",
+                    alert.getName(), zonedNextTime, zonedCurrentTime, timeZone);
+            return interval >= 0L && interval < monitorUpdateRate;
         } catch (ParseException e) {
-            LOGGER.error("Invalid cron expression '{}', cluster '{}'", e.getMessage(), alert.getCluster().getStackCrn());
+            LOGGER.info("Invalid cron expression, {}", e.getMessage());
             return false;
         }
     }

@@ -126,8 +126,11 @@ public class AzureSetup implements Setup {
         try {
             CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
             if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
-                if (StringUtils.isEmpty(armStorage.getCustomImageId(client, ac, stack))) {
-                    return new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED);
+                if (AzureUtils.hasManagedDisk(stack)) {
+                    String customImageId = armStorage.getCustomImageId(client, ac, stack);
+                    if (customImageId == null) {
+                        return new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED);
+                    }
                 }
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
             } else if (CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus())) {

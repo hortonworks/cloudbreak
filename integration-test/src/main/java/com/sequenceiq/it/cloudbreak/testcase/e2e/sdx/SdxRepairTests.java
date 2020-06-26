@@ -14,13 +14,13 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
@@ -40,7 +40,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
     private StackTestClient stackTestClient;
 
     @Inject
-    private FreeIpaTestClient freeIpaTestClient;
+    private FreeIPATestClient freeIPATestClient;
 
     @Inject
     private WaitUtil waitUtil;
@@ -99,7 +99,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
-                .validate();
+                .skipWhenFailure();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -114,8 +114,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
         List<String> actualIDBrokerVolumeIds = new ArrayList<>();
         List<String> expectedIDBrokerVolumeIds = new ArrayList<>();
 
-        DescribeFreeIpaResponse describeFreeIpaResponse = testContext.given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
+        DescribeFreeIpaResponse describeFreeIpaResponse = testContext.given(FreeIPATestDto.class)
+                .when(freeIPATestClient.describe())
                 .getResponse();
 
         testContext
@@ -160,11 +160,11 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    getCloudFunctionality(tc).cloudStorageListContainerFreeIpa(getBaseLocation(testDto),
+                    getCloudFunctionality(tc).cloudStorageListContainerFreeIPA(getBaseLocation(testDto),
                             describeFreeIpaResponse.getName(), describeFreeIpaResponse.getCrn());
                     return testDto;
                 })
-                .validate();
+                .skipWhenFailure();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -179,8 +179,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
         List<String> actualMasterVolumeIds = new ArrayList<>();
         List<String> expectedMasterVolumeIds = new ArrayList<>();
 
-        DescribeFreeIpaResponse describeFreeIpaResponse = testContext.given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
+        DescribeFreeIpaResponse describeFreeIpaResponse = testContext.given(FreeIPATestDto.class)
+                .when(freeIPATestClient.describe())
                 .getResponse();
 
         testContext
@@ -225,7 +225,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
-                    getCloudFunctionality(tc).cloudStorageListContainerFreeIpa(getBaseLocation(testDto),
+                    getCloudFunctionality(tc).cloudStorageListContainerFreeIPA(getBaseLocation(testDto),
                             describeFreeIpaResponse.getName(), describeFreeIpaResponse.getCrn());
                     return testDto;
                 })

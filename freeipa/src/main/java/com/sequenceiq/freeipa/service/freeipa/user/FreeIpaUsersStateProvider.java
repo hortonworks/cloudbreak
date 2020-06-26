@@ -45,7 +45,7 @@ public class FreeIpaUsersStateProvider {
         return builder.build();
     }
 
-    public UsersState getFilteredFreeIpaState(FreeIpaClient freeIpaClient, Set<FmsUser> users) throws FreeIpaClientException {
+    public UsersState getFilteredFreeIPAState(FreeIpaClient freeIpaClient, Set<FmsUser> users) throws FreeIpaClientException {
         LOGGER.debug("Retrieving users with user ids [{}] from FreeIPA", users);
         UsersState.Builder builder = new UsersState.Builder();
 

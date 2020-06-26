@@ -27,9 +27,6 @@ public class EntitlementService {
     static final String CDP_FREEIPA_HA = "CDP_FREEIPA_HA";
 
     @VisibleForTesting
-    static final String CDP_FREEIPA_HA_REPAIR = "CDP_FREEIPA_HA_REPAIR";
-
-    @VisibleForTesting
     static final String CLOUDERA_INTERNAL_ACCOUNT = "CLOUDERA_INTERNAL_ACCOUNT";
 
     @VisibleForTesting
@@ -46,12 +43,6 @@ public class EntitlementService {
 
     @VisibleForTesting
     static final String CDP_FREEIPA_DL_EBS_ENCRYPTION = "CDP_FREEIPA_DL_EBS_ENCRYPTION";
-
-    @VisibleForTesting
-    static final String LOCAL_DEV = "LOCAL_DEV";
-
-    @VisibleForTesting
-    static final String CDP_AZURE_SINGLE_RESOURCE_GROUP = "CDP_AZURE_SINGLE_RESOURCE_GROUP";
 
     @Inject
     private GrpcUmsClient umsClient;
@@ -72,16 +63,8 @@ public class EntitlementService {
         return isEntitlementRegistered(actorCrn, accountID, CDP_FREEIPA_HA);
     }
 
-    public boolean freeIpaHaRepairEnabled(String actorCrn, String accountID) {
-        return isEntitlementRegistered(actorCrn, accountID, CDP_FREEIPA_HA_REPAIR);
-    }
-
     public boolean internalTenant(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CLOUDERA_INTERNAL_ACCOUNT);
-    }
-
-    public boolean localDevelopment(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, LOCAL_DEV);
     }
 
     public boolean fmsClusterProxyEnabled(String actorCrn, String accountId) {
@@ -102,10 +85,6 @@ public class EntitlementService {
 
     public boolean freeIpaDlEbsEncryptionEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_FREEIPA_DL_EBS_ENCRYPTION);
-    }
-
-    public boolean azureSingleResourceGroupDeploymentEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP);
     }
 
     public List<String> getEntitlements(String actorCrn, String accountId) {

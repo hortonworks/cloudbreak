@@ -31,7 +31,7 @@ public class TlsSecurityService {
 
     @Cacheable(cacheNames = "tlsConfigurationCache")
     public TlsConfiguration getTls(Long clusterId) {
-        LOGGER.debug("Get TlsConfiguration for clusterId: {}", clusterId);
+        LOGGER.info("Get TlsConfiguration for clusterId: {}", clusterId);
         SecurityConfig securityConfig = securityConfigService.getSecurityConfig(clusterId);
         return createTls(securityConfig);
     }

@@ -134,31 +134,28 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_ENVIRONMENT)
-    public SimpleEnvironmentResponse deleteByName(@ResourceName String environmentName, boolean cascading, boolean forced) {
+    public SimpleEnvironmentResponse deleteByName(@ResourceName String environmentName, boolean forced) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        EnvironmentDto environmentDto = environmentDeletionService.deleteByNameAndAccountId(
-                environmentName, accountId, actualUserCrn, cascading, forced);
+        EnvironmentDto environmentDto = environmentDeletionService.deleteByNameAndAccountId(environmentName, accountId, actualUserCrn, forced);
         return environmentResponseConverter.dtoToSimpleResponse(environmentDto);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_ENVIRONMENT)
-    public SimpleEnvironmentResponse deleteByCrn(@ResourceCrn @TenantAwareParam String crn, boolean cascading, boolean forced) {
+    public SimpleEnvironmentResponse deleteByCrn(@ResourceCrn @TenantAwareParam String crn, boolean forced) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        EnvironmentDto environmentDto = environmentDeletionService.deleteByCrnAndAccountId(
-                crn, accountId, actualUserCrn, cascading, forced);
+        EnvironmentDto environmentDto = environmentDeletionService.deleteByCrnAndAccountId(crn, accountId, actualUserCrn, forced);
         return environmentResponseConverter.dtoToSimpleResponse(environmentDto);
     }
 
     @Override
     @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.DELETE_ENVIRONMENT)
-    public SimpleEnvironmentResponses deleteMultipleByNames(@ResourceNameList Set<String> environmentNames, boolean cascading, boolean forced) {
+    public SimpleEnvironmentResponses deleteMultipleByNames(@ResourceNameList Set<String> environmentNames, boolean forced) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        List<EnvironmentDto> environmentDtos = environmentDeletionService.deleteMultipleByNames(
-                environmentNames, accountId, actualUserCrn, cascading, forced);
+        List<EnvironmentDto> environmentDtos = environmentDeletionService.deleteMultipleByNames(environmentNames, accountId, actualUserCrn, forced);
         Set<SimpleEnvironmentResponse> responses = environmentDtos.stream()
                 .map(environmentResponseConverter::dtoToSimpleResponse).collect(Collectors.toSet());
         return new SimpleEnvironmentResponses(responses);
@@ -166,11 +163,10 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceCrnList(action = AuthorizationResourceAction.DELETE_ENVIRONMENT)
-    public SimpleEnvironmentResponses deleteMultipleByCrns(@ResourceCrnList Set<String> crns, boolean cascading, boolean forced) {
+    public SimpleEnvironmentResponses deleteMultipleByCrns(@ResourceCrnList Set<String> crns, boolean forced) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        List<EnvironmentDto> environmentDtos = environmentDeletionService.deleteMultipleByCrns(
-                crns, accountId, actualUserCrn, cascading, forced);
+        List<EnvironmentDto> environmentDtos = environmentDeletionService.deleteMultipleByCrns(crns, accountId, actualUserCrn, forced);
         Set<SimpleEnvironmentResponse> responses = environmentDtos.stream()
                 .map(environmentResponseConverter::dtoToSimpleResponse).collect(Collectors.toSet());
         return new SimpleEnvironmentResponses(responses);

@@ -38,7 +38,7 @@ public class SecurityConfigService {
 
     @Cacheable(cacheNames = "securityConfigCache", key = "{ #clusterId }")
     public SecurityConfig getSecurityConfig(Long clusterId) {
-        LOGGER.debug("Get SecurityConfig for clusterId: {}", clusterId);
+        LOGGER.info("Get SecurityConfig for clusterId: {}", clusterId);
         SecurityConfig securityConfig = securityConfigRepository.findByClusterId(clusterId);
         if (securityConfig == null) {
             LOGGER.info("SecurityConfig not found by : {}", clusterId);

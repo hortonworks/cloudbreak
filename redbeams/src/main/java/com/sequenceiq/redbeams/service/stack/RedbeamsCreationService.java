@@ -23,8 +23,6 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 
-import java.util.Optional;
-
 @Service
 public class RedbeamsCreationService {
 
@@ -49,7 +47,7 @@ public class RedbeamsCreationService {
     @Inject
     private CostTagging costTagging;
 
-    public DBStack launchDatabaseServer(DBStack dbStack, String clusterCrn) {
+    public DBStack launchDatabaseServer(DBStack dbStack) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Create called with: {}", dbStack);
         }
@@ -58,49 +56,6 @@ public class RedbeamsCreationService {
             throw new BadRequestException("A stack for this database server already exists in the environment");
         }
 
-        Optional<DatabaseServerConfig> optionalDBServerConfig = databaseServerConfigService.getByClusterCrn(clusterCrn);
-
-        DBStack savedDbStack;
-        boolean startFlow = false;
-        if (optionalDBServerConfig.isEmpty()) {
-            LOGGER.debug("DataBaseServerConfig is not available by cluster crn '{}'", clusterCrn);
-            savedDbStack = saveDbStackAndRegisterDatabaseServerConfig(dbStack, clusterCrn);
-            startFlow = true;
-        } else {
-            DatabaseServerConfig dbServerConfig = optionalDBServerConfig.get();
-            if (dbServerConfig.getDbStack().isEmpty()) {
-                LOGGER.debug("DBStack is not available in DatabaseServerConfig '{}'", dbServerConfig.getResourceCrn());
-                savedDbStack = saveDbStackInDatabaseServerConfig(dbServerConfig, dbStack);
-                startFlow = true;
-            } else {
-                savedDbStack = dbServerConfig.getDbStack().get();
-            }
-        }
-
-        if (startFlow) {
-            flowManager.notify(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(),
-                    new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(), savedDbStack.getId()));
-        }
-
-        return savedDbStack;
-    }
-
-    private DBStack saveDbStackAndRegisterDatabaseServerConfig(DBStack dbStack, String clusterCrn) {
-        DBStack savedStack = saveDbStack(dbStack);
-        registerDatabaseServerConfig(savedStack, clusterCrn);
-
-        return savedStack;
-    }
-
-    private DBStack saveDbStackInDatabaseServerConfig(DatabaseServerConfig databaseServerConfig,  DBStack dbStack) {
-        DBStack savedDbStack = saveDbStack(dbStack);
-        databaseServerConfig.setDbStack(savedDbStack);
-        databaseServerConfigService.update(databaseServerConfig);
-
-        return savedDbStack;
-    }
-
-    private DBStack saveDbStack(DBStack dbStack) {
         // possible future change is to use a flow here (GetPlatformTemplateRequest, modified for database server)
         // for now, just get it synchronously / within this thread, it ought to be quick
         CloudPlatformVariant platformVariant = new CloudPlatformVariant(dbStack.getCloudPlatform(), dbStack.getPlatformVariant());
@@ -124,10 +79,16 @@ public class RedbeamsCreationService {
             LOGGER.info("Database server allocation request lacked a connection driver; defaulting to {}", connectionDriver);
         }
 
-        return dbStackService.save(dbStack);
+        DBStack savedStack = dbStackService.save(dbStack);
+
+        registerDatabaseServerConfig(savedStack);
+
+        flowManager.notify(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(),
+                new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(), dbStack.getId()));
+        return savedStack;
     }
 
-    private void registerDatabaseServerConfig(DBStack dbStack, String clusterCrn) {
+    private void registerDatabaseServerConfig(DBStack dbStack) {
         DatabaseServer databaseServer = dbStack.getDatabaseServer();
         DatabaseServerConfig dbServerConfig = new DatabaseServerConfig();
 
@@ -144,7 +105,6 @@ public class RedbeamsCreationService {
         dbServerConfig.setDbStack(dbStack);
         // host and port are set after allocation is complete, so leave as null
         dbServerConfig.setResourceCrn(dbStack.getResourceCrn());
-        dbServerConfig.setClusterCrn(clusterCrn);
 
         databaseServerConfigService.create(dbServerConfig, DEFAULT_WORKSPACE, false);
     }

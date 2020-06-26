@@ -21,34 +21,28 @@ import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
-import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
-import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
@@ -79,10 +73,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     private DatabaseTestClient databaseTestClient;
 
     @Inject
-    private FreeIpaTestClient freeIpaTestClient;
-
-    @Inject
-    private SdxTestClient sdxTestClient;
+    private FreeIPATestClient freeIPATestClient;
 
     @Inject
     private FreeIpaRouteHandler freeIpaRouteHandler;
@@ -104,7 +95,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironmentWithNetwork(testContext);
-        createDefaultFreeIpa(testContext);
+        createDefaultFreeIPA(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }
@@ -113,14 +104,14 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         return environmentTestClient;
     }
 
-    protected void createDefaultFreeIpa(TestContext testContext) {
+    protected void createDefaultFreeIPA(TestContext testContext) {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
         setUpFreeIpaRouteStubbing(mockedTestContext);
         testContext
-                .given(FreeIpaTestDto.class).withCatalog(mockedTestContext
+                .given(FreeIPATestDto.class).withCatalog(mockedTestContext
                     .getImageCatalogMockServerSetup()
                     .getFreeIpaImageCatalogUrl())
-                .when(freeIpaTestClient.create())
+                .when(freeIPATestClient.create())
                 .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .validate();
     }
@@ -177,19 +168,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
-    protected void createDatalake(TestContext testContext) {
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-
-        testContext
-                .given(SdxInternalTestDto.class)
-                .withDatabase(sdxDatabaseRequest)
-                .when(sdxTestClient.createInternal())
-                .awaitForFlow(RunningParameter.key(resourcePropertyProvider().getName()))
-                .await(SdxClusterStatusResponse.RUNNING)
-                .validate();
-    }
-
     protected void createDefaultCredential(TestContext testContext) {
         testContext.given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
@@ -234,7 +212,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         return validRds;
     }
 
-    protected void createEnvironmentWithNetworkAndFreeIpa(TestContext testContext) {
+    protected void createEnvironmentWithNetworkAndFreeIPA(TestContext testContext) {
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()

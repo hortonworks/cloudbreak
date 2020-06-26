@@ -12,7 +12,7 @@ public class EnvironmentDeleteByNameAction extends AbstractEnvironmentAction {
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception {
         SimpleEnvironmentResponse delete = client.getEnvironmentClient()
                 .environmentV1Endpoint()
-                .deleteByName(testDto.getName(), true, false);
+                .deleteByName(testDto.getName(), false);
         Log.whenJson("Environment delete response: ", delete);
         return testDto;
     }

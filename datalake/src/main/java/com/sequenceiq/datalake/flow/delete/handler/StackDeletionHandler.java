@@ -56,14 +56,14 @@ public class StackDeletionHandler extends ExceptionCatcherEventHandler<StackDele
             provisionerService.waitCloudbreakClusterDeletion(sdxId, pollingConfig);
             response = new StackDeletionSuccessEvent(sdxId, userId, stackDeletionWaitRequest.isForced());
         } catch (UserBreakException userBreakException) {
-            LOGGER.error("Deletion polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.info("Deletion polling exited before timeout. Cause: ", userBreakException);
             response = new SdxDeletionFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Deletion poller stopped for stack: {}", sdxId);
+            LOGGER.info("Deletion poller stopped for stack: {}", sdxId);
             response = new SdxDeletionFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake stack deletion timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.error("Deletion polling failed for stack: {}", sdxId);
+            LOGGER.info("Deletion polling failed for stack: {}", sdxId);
             response = new SdxDeletionFailedEvent(sdxId, userId, exception);
         }
         sendEvent(response, event);

@@ -49,7 +49,7 @@ public abstract class BaseAlert implements Clustered {
     }
 
     public String getDescription() {
-        return description != null ? description : "";
+        return description;
     }
 
     public void setDescription(String description) {

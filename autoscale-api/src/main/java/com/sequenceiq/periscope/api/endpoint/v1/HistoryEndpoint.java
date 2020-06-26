@@ -18,13 +18,19 @@ import com.sequenceiq.periscope.doc.ApiDescription.HistoryOpDescription;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v1/clusters/{clusterCrn}/history")
+@Path("/v1/clusters/{clusterId}/history")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/history", description = HISTORY_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Api(hidden = true, value = "/v1/history", description = HISTORY_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface HistoryEndpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = HistoryOpDescription.HISTORY_GET_ALL, produces = MediaType.APPLICATION_JSON, notes = HistoryNotes.NOTES)
-    List<AutoscaleClusterHistoryResponse> getHistory(@PathParam("clusterCrn") String clusterCrn);
+    List<AutoscaleClusterHistoryResponse> getHistory(@PathParam("clusterId") Long clusterId);
+
+    @GET
+    @Path("{historyId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = HistoryOpDescription.HISTORY_GET, produces = MediaType.APPLICATION_JSON, notes = HistoryNotes.NOTES)
+    AutoscaleClusterHistoryResponse getHistoryById(@PathParam("clusterId") Long clusterId, @PathParam("historyId") Long historyId);
 }

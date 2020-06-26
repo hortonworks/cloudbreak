@@ -2,19 +2,12 @@ package com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry;
 
 import java.util.List;
 
-import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 
-public class StopTelemetryRequest extends StackEvent {
-
-    private final List<String> instanceIds;
+public class StopTelemetryRequest extends DownscaleEvent {
 
     public StopTelemetryRequest(Long stackId, List<String> instanceIds) {
-        super(stackId);
-        this.instanceIds = instanceIds;
-    }
-
-    public List<String> getInstanceIds() {
-        return instanceIds;
+        super(stackId, instanceIds);
     }
 
 }

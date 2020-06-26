@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.LOCALLY_REDUNDANT;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.PREMIUM_LOCALLY_REDUNDANT;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.STANDARD_SSD_LRS;
@@ -138,7 +137,7 @@ public class AzurePlatformParameters implements PlatformParameters {
                 Optional.of("^[a-z0-9]{0,24}$")));
         additionalStackParameterValidations.add(new StackParamValidation("attachedStorageOption", false, ArmAttachedStorageOption.class,
                 Optional.empty()));
-        additionalStackParameterValidations.add(new StackParamValidation(RESOURCE_GROUP_NAME_PARAMETER, false, String.class,
+        additionalStackParameterValidations.add(new StackParamValidation(AzureResourceConnector.RESOURCE_GROUP_NAME, false, String.class,
                 Optional.empty()));
         return additionalStackParameterValidations;
     }

@@ -18,7 +18,7 @@ class AuditConfigTest {
                 // testCaseName      endpoint                  valid  configured   host         port  exception
                 { "null endpoint",   null,                     true,  false,       null,        null, null },
                 { "blank endpoint",  "   ",                    true,  false,       null,        null, null },
-                { "host only",       "hostname",               true,  true,        "hostname",  8982,   null },
+                { "host only",       "hostname",               true,  true,        "hostname",  80,   null },
                 { "host:port",       "hostname:1234",          true,  true,        "hostname",  1234, null },
                 { "host:port:extra", "hostname:1234:whatelse", false, false,       null,        null, IllegalArgumentException.class },
         };

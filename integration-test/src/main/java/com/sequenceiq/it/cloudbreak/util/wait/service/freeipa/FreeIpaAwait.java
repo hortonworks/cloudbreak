@@ -9,10 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.service.Await;
@@ -21,19 +21,19 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.Result;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitResult;
 
 @Component
-public class FreeIpaAwait implements Await<FreeIpaTestDto, Status> {
+public class FreeIpaAwait implements Await<FreeIPATestDto, Status> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaAwait.class);
 
     @Override
-    public FreeIpaTestDto await(FreeIpaTestDto entity, Status desiredStatus, TestContext testContext, RunningParameter runningParameter,
+    public FreeIPATestDto await(FreeIPATestDto entity, Status desiredStatus, TestContext testContext, RunningParameter runningParameter,
             Duration pollingInterval, int maxRetry) {
         try {
             if (entity == null) {
                 throw new RuntimeException("FreeIpa key has been provided but no result in resource map!");
             }
             Log.await(LOGGER, String.format("%s for %s", entity.getResponse().getName(), desiredStatus));
-            FreeIpaClient client = testContext.getMicroserviceClient(FreeIpaClient.class, testContext.getWho(runningParameter)
+            FreeIPAClient client = testContext.getMicroserviceClient(FreeIPAClient.class, testContext.getWho(runningParameter)
                     .getAccessKey());
             String environmentCrn = entity.getResponse().getEnvironmentCrn();
             if (desiredStatus.equals(DELETE_COMPLETED)) {
@@ -56,7 +56,7 @@ public class FreeIpaAwait implements Await<FreeIpaTestDto, Status> {
         return entity;
     }
 
-    private Result<WaitResult, Exception> waitForFreeIpaStatus(ExceptionChecker<FreeIpaWaitObject> statusChecker, FreeIpaClient client,
+    private Result<WaitResult, Exception> waitForFreeIpaStatus(ExceptionChecker<FreeIpaWaitObject> statusChecker, FreeIPAClient client,
             String environmentCrn, TestContext testContext, Status desiredStatus, Duration pollingInterval, int maxRetry) {
         return testContext.getFreeIpaWaitService().waitObject(
                 statusChecker,

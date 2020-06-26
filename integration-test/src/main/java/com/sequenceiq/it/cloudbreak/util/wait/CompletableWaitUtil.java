@@ -1,16 +1,10 @@
 package com.sequenceiq.it.cloudbreak.util.wait;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.util.azure.AzureInstanceActionResult;
 
 import rx.Completable;
 
@@ -22,9 +16,9 @@ public class CompletableWaitUtil {
 
     private final long timeoutSeconds;
 
-    private final Supplier<List<AzureInstanceActionResult>> check;
+    private final Supplier<Boolean> check;
 
-    public CompletableWaitUtil(Completable action, int timeoutValue, TimeUnit timeoutUnit, Supplier<List<AzureInstanceActionResult>> check) {
+    public CompletableWaitUtil(Completable action, int timeoutValue, TimeUnit timeoutUnit, Supplier<Boolean> check) {
         this.action = action;
         this.timeoutSeconds = timeoutUnit.toSeconds(timeoutValue);
         this.check = check;
@@ -45,18 +39,11 @@ public class CompletableWaitUtil {
         do {
             result = action.await(timeoutOneCycleSeconds, TimeUnit.SECONDS);
             counter++;
-            LOGGER.info("Waiting on instance action, finished: {}", result);
+            LOGGER.debug("Waiting on instance action, finished: {}", result);
         } while (!result && counter < numberOfCycles);
-        Log.log("Azure instance action wait cycle returned with result {}", result);
-        List<AzureInstanceActionResult> failedActions = check.get().stream().filter(r -> !r.isSuccess()).collect(Collectors.toList());
-        if (!failedActions.isEmpty()) {
-            throw new TestFailException(String.format("One or more instance actions have failed: %s",
-                    failedActions.stream().map(this::getReadableAzureInstanceActionResult).collect(Collectors.joining(","))));
+        LOGGER.debug("Wait cycle returned with result {}", result);
+        if (!check.get()) {
+            throw new RuntimeException("Stopping of instances has timed out");
         }
-        Log.log("Azure instance action completed successfully for all ids");
-    }
-
-    private String getReadableAzureInstanceActionResult(AzureInstanceActionResult azureInstanceActionResult) {
-        return String.format("[id=%s, powerstate=%s]", azureInstanceActionResult.getInstanceId(), azureInstanceActionResult.getInstanceState());
     }
 }

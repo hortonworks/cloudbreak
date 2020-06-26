@@ -7,9 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.caas.grpc.GrpcServer;
-import com.sequenceiq.caas.grpc.service.audit.MockAuditLogService;
-import com.sequenceiq.caas.grpc.service.auth.MockAuthorizationService;
-import com.sequenceiq.caas.grpc.service.auth.MockUserManagementService;
+import com.sequenceiq.caas.grpc.service.MockAuthorizationService;
+import com.sequenceiq.caas.grpc.service.MockUserManagementService;
 
 @Configuration
 public class GrpcServerConfig {
@@ -20,9 +19,6 @@ public class GrpcServerConfig {
     @Inject
     private MockAuthorizationService mockAuthorizationService;
 
-    @Inject
-    private MockAuditLogService mockAuditLogService;
-
     @Value("${grpc.server.port:8982}")
     private int grpcServerPort;
 
@@ -31,7 +27,6 @@ public class GrpcServerConfig {
         return new GrpcServer(
                 grpcServerPort,
                 mockUserManagementService.bindService(),
-                mockAuthorizationService.bindService(),
-                mockAuditLogService.bindService());
+                mockAuthorizationService.bindService());
     }
 }

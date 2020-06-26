@@ -64,7 +64,7 @@ public class ProvisionerService {
 
     private AttemptResult<StackV4Response> sdxCreationFailed(String statusReason) {
         String errorMessage = "Data Lake creation failed: " + statusReason;
-        LOGGER.error(errorMessage);
+        LOGGER.info(errorMessage);
         return AttemptResults.breakFor(errorMessage);
     }
 
@@ -216,15 +216,15 @@ public class ProvisionerService {
                                 return AttemptResults.finishWith(stackV4Response);
                             } else {
                                 if (Status.CREATE_FAILED.equals(stackV4Response.getStatus())) {
-                                    LOGGER.error("Stack creation failed {}", stackV4Response.getName());
+                                    LOGGER.info("Stack creation failed {}", stackV4Response.getName());
                                     return sdxCreationFailed(stackV4Response.getStatusReason());
                                 } else if (Status.CREATE_FAILED.equals(stackV4Response.getCluster().getStatus())) {
-                                    LOGGER.error("Cluster creation failed {}", stackV4Response.getCluster().getName());
+                                    LOGGER.info("Cluster creation failed {}", stackV4Response.getCluster().getName());
                                     return sdxCreationFailed(stackV4Response.getCluster().getStatusReason());
                                 } else {
                                     String message = sdxStatusService.getShortStatusMessage(stackV4Response);
                                     if (FINISHED.equals(flowState)) {
-                                        LOGGER.error("Cluster creation flow finished but stack or cluster is not available! {}", message);
+                                        LOGGER.warn("Cluster creation flow finished but stack or cluster is not available! {}", message);
                                         return sdxCreationFailed(message);
                                     } else {
                                         LOGGER.info("Cluster creation polling will continue, {}", message);

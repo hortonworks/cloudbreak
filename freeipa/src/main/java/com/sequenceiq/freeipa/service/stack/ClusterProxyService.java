@@ -139,7 +139,7 @@ public class ClusterProxyService {
         LOGGER.debug("Registering freeipa with cluster-proxy: Environment CRN = [{}], Stack CRN = [{}]", stack.getEnvironmentCrn(), stack.getResourceCrn());
 
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotTerminatedGatewayConfigs(stack);
         ClientCertificate clientCertificate = clientCertificates(stack);
 
         boolean usePrivateIpToTls = stack.getSecurityConfig().isUsePrivateIpToTls();

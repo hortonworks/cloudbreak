@@ -144,7 +144,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
 
         String cause = null;
         String messageTemplate;
-        long elapsedTimeRounded = Math.max(Math.round((double) retryCount * sleepTime / MS_IN_SEC / SEC_IN_MIN), MINIMUM_DISPLAYED_TIME_IN_MIN);
+        long elapsedTimeRounded = Math.max(Math.round((double) retryCount * SLEEP_TIME / MS_IN_SEC / SEC_IN_MIN), MINIMUM_DISPLAYED_TIME_IN_MIN);
         if (actualException != null) {
             cause = actualException.getMessage();
             messageTemplate = success == null

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.ActiveDirectoryKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
-import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIpaKerberosDescriptor;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIPAKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.KerberosDescriptorBase;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.MITKerberosDescriptor;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
@@ -39,7 +39,7 @@ public class KerberosConfigToCreateKerberosConfigRequestConverter {
                 request.setMit(getMit(source));
                 break;
             case FREEIPA:
-                request.setFreeIpa(getFreeIpa(source));
+                request.setFreeIpa(getFreeIPA(source));
                 break;
             default:
 
@@ -47,13 +47,13 @@ public class KerberosConfigToCreateKerberosConfigRequestConverter {
         return request;
     }
 
-    private FreeIpaKerberosDescriptor getFreeIpa(KerberosConfig source) {
-        FreeIpaKerberosDescriptor freeIpa = new FreeIpaKerberosDescriptor();
-        fillRequestWithCommonFields(freeIpa, source);
-        freeIpa.setAdminUrl(source.getAdminUrl());
-        freeIpa.setRealm(getFakeSecretIfNotNull(source.getRealm(), FAKE_REALM_POSTFIX));
-        freeIpa.setUrl(source.getUrl());
-        return freeIpa;
+    private FreeIPAKerberosDescriptor getFreeIPA(KerberosConfig source) {
+        FreeIPAKerberosDescriptor freeIPA = new FreeIPAKerberosDescriptor();
+        fillRequestWithCommonFields(freeIPA, source);
+        freeIPA.setAdminUrl(source.getAdminUrl());
+        freeIPA.setRealm(getFakeSecretIfNotNull(source.getRealm(), FAKE_REALM_POSTFIX));
+        freeIPA.setUrl(source.getUrl());
+        return freeIPA;
     }
 
     private MITKerberosDescriptor getMit(KerberosConfig source) {

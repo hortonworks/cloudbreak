@@ -239,18 +239,6 @@
     "actionType": "RESOURCE_DEPENDENT",
     "legacyRight": "datalake/write"
   },
-  "BACKUP_DATALAKE": {
-    "right": "datalake/backupDatalake",
-    "resourceType": "DATALAKE",
-    "actionType": "RESOURCE_DEPENDENT",
-    "legacyRight": "datalake/backupDatalake"
-  },
-  "RESTORE_DATALAKE": {
-    "right": "datalake/restoreDatalake",
-    "resourceType": "DATALAKE",
-    "actionType": "RESOURCE_DEPENDENT",
-    "legacyRight": "datalake/restoreDatalake"
-  },
   "UPGRADE_DATALAKE": {
     "right": "datalake/upgradeDatalake",
     "resourceType": "DATALAKE",

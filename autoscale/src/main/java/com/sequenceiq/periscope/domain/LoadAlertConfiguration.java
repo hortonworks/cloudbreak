@@ -40,13 +40,4 @@ public class LoadAlertConfiguration {
     public void setCoolDownMinutes(Integer coolDownMinutes) {
         this.coolDownMinutes = coolDownMinutes;
     }
-
-    @Override
-    public String toString() {
-        return "LoadAlertConfiguration{" +
-                "minResourceValue=" + minResourceValue +
-                ", maxResourceValue=" + maxResourceValue +
-                ", coolDownMinutes=" + coolDownMinutes +
-                '}';
-    }
 }

@@ -1,20 +1,21 @@
 package com.sequenceiq.environment.environment.service.freeipa;
 
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
+import java.util.Optional;
+
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.WebApplicationException;
-import java.util.Optional;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 
 @Service
 public class FreeIpaService {
@@ -83,17 +84,6 @@ public class FreeIpaService {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to detach child environment '%s' due to: '%s'",
                     detachChildEnvironmentRequest.getChildEnvironmentCrn(), errorMessage), e);
-            throw new FreeIpaOperationFailedException(errorMessage, e);
-        }
-    }
-
-    public HealthDetailsFreeIpaResponse getHealthDetails(String environmentCrn) {
-        try {
-            return freeIpaV1Endpoint.healthDetails(environmentCrn);
-        } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to get health details for the freeIpa of the given environment: '%s' due to: '%s'",
-                    environmentCrn, errorMessage), e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

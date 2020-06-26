@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Os;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAuth;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.join.MinionAcceptor;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 public class SaltBootstrap implements OrchestratorBootstrap {
@@ -76,8 +75,6 @@ public class SaltBootstrap implements OrchestratorBootstrap {
                 LOGGER.info("Missing nodes to run saltbootstrap: {}", targets);
                 throw new CloudbreakOrchestratorFailedException("There are missing nodes from saltbootstrap: " + targets);
             }
-
-            createMinionAcceptor(saltAction).acceptMinions();
         }
 
         MinionIpAddressesResponse minionIpAddressesResponse = SaltStates.collectMinionIpAddresses(sc);
@@ -96,10 +93,6 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         }
         LOGGER.debug("Bootstrapping of nodes completed: {}", originalTargets.size());
         return true;
-    }
-
-    protected MinionAcceptor createMinionAcceptor(SaltAction saltAction) {
-        return new MinionAcceptor(sc, saltAction.getMinions());
     }
 
     private SaltAction createBootstrap() {

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.encryption;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService.SNAPSHOT_NOT_FOUND_MSG_CODE;
-import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,15 +25,13 @@ import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.DeleteSnapshotRequest;
 import com.amazonaws.services.ec2.model.DeleteVolumeRequest;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
-import com.amazonaws.services.ec2.model.DescribeSnapshotsRequest;
-import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
-import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -45,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -66,6 +64,12 @@ public class EncryptedSnapshotService {
     private AwsClient awsClient;
 
     @Inject
+    private AwsPollTaskFactory awsPollTaskFactory;
+
+    @Inject
+    private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
+
+    @Inject
     private AwsTaggingService awsTaggingService;
 
     public boolean isEncryptedVolumeRequested(Group group) {
@@ -81,7 +85,7 @@ public class EncryptedSnapshotService {
         AmazonEC2Client client = awsClient.createAccess(awsCredentialView, regionName);
 
         Optional<String> snapshotId = prepareSnapshotForEncryptionBecauseThatDoesNotExist(ac, cloudStack, awsInstanceView, client, resourceNotifier);
-        if (snapshotId.isPresent()) {
+        if (snapshotId.isPresent())  {
             saveEncryptedResource(ac, resourceNotifier, ResourceType.AWS_SNAPSHOT, snapshotId.get(), group.getName());
             return snapshotId;
         }
@@ -114,8 +118,8 @@ public class EncryptedSnapshotService {
         return Optional.of(snapshotResult.getSnapshot().getSnapshotId());
     }
 
-    private void saveEncryptedResource(AuthenticatedContext ac, PersistenceNotifier resourceNotifier, ResourceType awsEncryptedVolume, String volumeId,
-            String groupName) {
+    private void saveEncryptedResource(AuthenticatedContext ac, PersistenceNotifier resourceNotifier, ResourceType awsEncryptedVolume,
+            String volumeId, String groupName) {
         CloudResource cloudResource = new Builder()
                 .type(awsEncryptedVolume)
                 .name(volumeId)
@@ -141,17 +145,28 @@ public class EncryptedSnapshotService {
     }
 
     private void checkSnapshotReadiness(AuthenticatedContext ac, AmazonEC2Client client, CreateSnapshotResult snapshotResult) {
-        Waiter<DescribeSnapshotsRequest> snapshotWaiter = client.waiters().snapshotCompleted();
-        DescribeSnapshotsRequest describeSnapshotsRequest = new DescribeSnapshotsRequest().withSnapshotIds(snapshotResult.getSnapshot().getSnapshotId());
-        StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        run(snapshotWaiter, describeSnapshotsRequest, stackCancellationCheck);
+        PollTask<Boolean> snapshotReadyChecker = awsPollTaskFactory
+                .newCreateSnapshotReadyStatusCheckerTask(ac, snapshotResult.getSnapshot().getSnapshotId(), client);
+        try {
+            Boolean statePollerResult = snapshotReadyChecker.call();
+            if (!snapshotReadyChecker.completed(statePollerResult)) {
+                awsBackoffSyncPollingScheduler.schedule(snapshotReadyChecker);
+            }
+        } catch (Exception e) {
+            throw new CloudConnectorException(e.getMessage(), e);
+        }
     }
 
     private void checkEbsVolumeStatus(AuthenticatedContext ac, AmazonEC2Client client, String volumeId) {
-        Waiter<DescribeVolumesRequest> volumeChecker = client.waiters().volumeAvailable();
-        DescribeVolumesRequest describeVolumesRequest = new DescribeVolumesRequest().withVolumeIds(volumeId);
-        StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        run(volumeChecker, describeVolumesRequest, stackCancellationCheck);
+        PollTask<Boolean> ebsVolumeStateChecker = awsPollTaskFactory.newEbsVolumeStatusCheckerTask(ac, client, volumeId);
+        try {
+            Boolean statePollerResult = ebsVolumeStateChecker.call();
+            if (!ebsVolumeStateChecker.completed(statePollerResult)) {
+                awsBackoffSyncPollingScheduler.schedule(ebsVolumeStateChecker);
+            }
+        } catch (Exception e) {
+            throw new CloudConnectorException(e.getMessage(), e);
+        }
     }
 
     private CreateSnapshotRequest prepareCreateSnapshotRequest(CreateVolumeResult volumeResult) {

@@ -2,14 +2,12 @@ package com.sequenceiq.periscope.service;
 
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 import static com.sequenceiq.periscope.api.model.ClusterState.SUSPENDED;
-import static com.sequenceiq.periscope.common.MessageCode.CLUSTER_EXISTS_FOR_CRN;
 import static com.sequenceiq.periscope.service.NotFoundException.notFound;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
@@ -27,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -71,9 +68,6 @@ public class ClusterService implements ResourceBasedCrnProvider {
 
     @Inject
     private SecurityConfigService securityConfigService;
-
-    @Inject
-    private CloudbreakMessagesService messagesService;
 
     @PostConstruct
     protected void init() {
@@ -259,8 +253,7 @@ public class ClusterService implements ResourceBasedCrnProvider {
                     return equalityOfStackCrn && equalityOfCMHost;
                 });
         if (clusterForTheSameStackAndClusterManager) {
-            throw new BadRequestException(
-                    messagesService.getMessage(CLUSTER_EXISTS_FOR_CRN, Set.of(stack.getStackCrn(), stack.getClusterManager().getVariant().name())));
+            throw new BadRequestException("Cluster exists for the same Cloudbreak stack crn and " + stack.getClusterManager().getVariant().name() + " host.");
         }
     }
 

@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.stack.instance;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -80,17 +79,6 @@ public class MetadataSetupService {
             instanceMetaDataService.save(instanceMetaDataEntry);
         }
         return newInstances;
-    }
-
-    public void cleanupRequestedInstances(Stack stack) {
-        Set<InstanceMetaData> requestedInstances = instanceMetaDataService.findNotTerminatedForStack(stack.getId()).stream()
-                .filter(instanceMetaData -> instanceMetaData.getInstanceStatus() == InstanceStatus.REQUESTED)
-                .collect(Collectors.toSet());
-        requestedInstances.forEach(instanceMetaData -> {
-            instanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());
-            instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
-        });
-        instanceMetaDataService.saveAll(requestedInstances);
     }
 
     private InstanceLifeCycle convertLifeCycle(CloudInstanceMetaData md) {

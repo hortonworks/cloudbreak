@@ -22,7 +22,7 @@ public class FreeipaService {
         try {
             return freeIpaV1Endpoint.describe(envCrn);
         } catch (NotFoundException e) {
-            LOGGER.error("Could not find freeipa with envCrn: " + envCrn, e);
+            LOGGER.info("Could not find freeipa with envCrn: " + envCrn);
         }
         return null;
     }

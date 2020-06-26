@@ -17,20 +17,29 @@ public class HistoryService {
     @Autowired
     private HistoryRepository historyRepository;
 
-    public History createEntry(ScalingStatus scalingStatus, String statusReason, int originalNodeCount, int adjustment, ScalingPolicy scalingPolicy) {
-        History history = new History(scalingStatus, statusReason, originalNodeCount, adjustment)
+    @Autowired
+    private ClusterService clusterService;
+
+    public History createEntry(ScalingStatus scalingStatus, String statusReason, int originalNodeCount, ScalingPolicy scalingPolicy) {
+        History history = new History(scalingStatus, statusReason, originalNodeCount)
                 .withScalingPolicy(scalingPolicy)
                 .withAlert(scalingPolicy.getAlert())
-                .withCluster(scalingPolicy.getCluster());
+                .withCluster(scalingPolicy.getAlert().getCluster());
         return historyRepository.save(history);
     }
 
-    public History createEntry(ScalingStatus scalingStatus, String statusReason, Cluster cluster) {
-        History history = new History(scalingStatus, statusReason, cluster.getStackCrn()).withCluster(cluster);
+    public History createEntry(ScalingStatus scalingStatus, String statusReason, int originalNodeCount, Cluster cluster) {
+        History history = new History(scalingStatus, statusReason, originalNodeCount)
+                .withCluster(cluster);
         return historyRepository.save(history);
     }
 
-    public List<History> getHistory(Long clusterId) {
-        return historyRepository.findFirst200ByClusterIdOrderByIdDesc(clusterId);
+    public List<History> getHistory(long clusterId) {
+        clusterService.findById(clusterId);
+        return historyRepository.findAllByCluster(clusterId);
+    }
+
+    public History getHistory(long clusterId, long historyId) {
+        return historyRepository.findByCluster(clusterId, historyId);
     }
 }

@@ -16,7 +16,6 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Host;
-import com.sequenceiq.freeipa.client.model.IpaServer;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 
 @Service
@@ -36,12 +35,7 @@ public class HostDeletionService {
     private Pair<Set<String>, Map<String, String>> removeHosts(FreeIpaClient client, Set<String> hosts, boolean servers) throws FreeIpaClientException {
         Set<String> hostCleanupSuccess = new HashSet<>();
         Map<String, String> hostCleanupFailed = new HashMap<>();
-        Set<String> existingHostFqdn;
-        if (servers) {
-            existingHostFqdn = collectExistingServersFqdns(client);
-        } else {
-            existingHostFqdn = collectExistingHostFqdns(client);
-        }
+        Set<String> existingHostFqdn = collectExistingHostFqdns(client);
         Set<String> hostsToRemove = filterHostsToBeRemoved(hosts, existingHostFqdn);
         LOGGER.debug("Hosts to delete: {}", hostsToRemove);
         for (String host : hostsToRemove) {
@@ -78,10 +72,6 @@ public class HostDeletionService {
 
     private Set<String> collectExistingHostFqdns(FreeIpaClient client) throws FreeIpaClientException {
         return client.findAllHost().stream().map(Host::getFqdn).collect(Collectors.toSet());
-    }
-
-    private Set<String> collectExistingServersFqdns(FreeIpaClient client) throws FreeIpaClientException {
-        return client.findAllServers().stream().map(IpaServer::getFqdn).collect(Collectors.toSet());
     }
 
     public void deleteHostsWithDeleteException(FreeIpaClient client, Set<String> hosts) throws FreeIpaClientException, DeleteException {

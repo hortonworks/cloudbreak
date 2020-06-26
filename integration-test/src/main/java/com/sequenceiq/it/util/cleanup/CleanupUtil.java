@@ -90,7 +90,7 @@ public class CleanupUtil extends CleanupClientUtil {
         if (!environmentNames.isEmpty()) {
             environmentNames.stream().forEach(environmentName -> LOG.info("Environment with name: {} will be deleted!", environmentName));
             try {
-                environment.environmentV1Endpoint().deleteMultipleByNames(environmentNames, true, false);
+                environment.environmentV1Endpoint().deleteMultipleByNames(environmentNames, true);
             } catch (Exception e) {
                 LOG.error("One or more environment cannot be deleted, because of: ", e);
             }

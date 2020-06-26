@@ -310,9 +310,9 @@ public class AzureClient {
         return azure.disks().getByResourceGroup(resourceGroupName, diskName);
     }
 
-    public Observable<String> deleteManagedDiskAsync(Collection<String> ids) {
-        LOGGER.debug("delete managed disk: id={}", ids);
-        return handleAuthException(() -> azure.disks().deleteByIdsAsync(ids));
+    public Completable deleteManagedDiskAsync(String id) {
+        LOGGER.debug("delete managed disk: id={}", id);
+        return handleAuthException(() -> azure.disks().deleteByIdAsync(id));
     }
 
     public DiskSkuTypes convertAzureDiskTypeToDiskSkuTypes(AzureDiskType diskType) {
@@ -406,10 +406,6 @@ public class AzureClient {
         return handleAuthException(() -> azure.virtualMachines().getByResourceGroup(resourceGroup, vmName));
     }
 
-    public VirtualMachine getVirtualMachine(String vmId) {
-        return handleAuthException(() -> azure.virtualMachines().getById(vmId));
-    }
-
     public Observable<VirtualMachine> getVirtualMachineAsync(String resourceGroup, String vmName) {
         return handleAuthException(() -> azure.virtualMachines().getByResourceGroupAsync(resourceGroup, vmName));
     }
@@ -445,10 +441,6 @@ public class AzureClient {
         handleAuthException(() -> azure.availabilitySets().deleteByResourceGroup(resourceGroup, asName));
     }
 
-    public Completable deleteAvailabilitySetAsync(String resourceGroup, String asName) {
-        return handleAuthException(() -> azure.availabilitySets().deleteByResourceGroupAsync(resourceGroup, asName));
-    }
-
     public Completable deallocateVirtualMachineAsync(String resourceGroup, String vmName) {
         return handleAuthException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName));
     }
@@ -480,10 +472,6 @@ public class AzureClient {
 
     public Completable deletePublicIpAddressByNameAsync(String resourceGroup, String ipName) {
         return handleAuthException(() -> azure.publicIPAddresses().deleteByResourceGroupAsync(resourceGroup, ipName));
-    }
-
-    public Observable<String> deleteSecurityGroupsAsnyc(Collection<String> ids) {
-        return handleAuthException(() -> azure.networkSecurityGroups().deleteByIdsAsync(ids));
     }
 
     public void deletePublicIpAddressById(String ipId) {
@@ -549,17 +537,8 @@ public class AzureClient {
         return handleAuthException(() -> azure.networkInterfaces().getByResourceGroup(resourceGroup, networkInterfaceName));
     }
 
-    public PagedList<NetworkInterface> getNetworkInterfaces(String resourceGroup) {
-        return handleAuthException(() -> azure.networkInterfaces().listByResourceGroup(resourceGroup));
-    }
-
-    public List<NetworkInterface> getNetworkInterfaceListByNames(String resourceGroup, Collection<String> attachedNetworkInterfaces) {
-        PagedList<NetworkInterface> networkInterfaces = getNetworkInterfaces(resourceGroup);
-        networkInterfaces.loadAll();
-        return networkInterfaces.stream()
-                .filter(networkInterface -> attachedNetworkInterfaces
-                .contains(networkInterface.name()))
-                .collect(Collectors.toList());
+    public Observable<NetworkInterface> getNetworkInterfaceAsync(String resourceGroup, String networkInterfaceName) {
+        return handleAuthException(() -> azure.networkInterfaces().getByResourceGroupAsync(resourceGroup, networkInterfaceName));
     }
 
     public NetworkInterface getNetworkInterfaceById(String networkInterfaceId) {
@@ -586,14 +565,6 @@ public class AzureClient {
             Network network = getNetworkByResourceGroup(resourceGroup, virtualNetwork);
             return network == null ? emptyMap() : network.subnets();
         });
-    }
-
-    public Observable<String> deleteNetworksAsync(Collection<String> networkIds) {
-        return handleAuthException(() -> azure.networks().deleteByIdsAsync(networkIds));
-    }
-
-    public NetworkSecurityGroups getSecurityGroups() {
-        return handleAuthException(azure::networkSecurityGroups);
     }
 
     public NetworkSecurityGroup getSecurityGroupProperties(String resourceGroup, String securityGroup) {
@@ -630,6 +601,10 @@ public class AzureClient {
     private Set<VirtualMachineSize> getAllElement(Collection<VirtualMachineSize> virtualMachineSizes, Set<VirtualMachineSize> resultList) {
         resultList.addAll(virtualMachineSizes);
         return resultList;
+    }
+
+    public NetworkSecurityGroups getSecurityGroups() {
+        return handleAuthException(azure::networkSecurityGroups);
     }
 
     public LoadBalancer getLoadBalancer(String resourceGroupName, String loadBalancerName) {

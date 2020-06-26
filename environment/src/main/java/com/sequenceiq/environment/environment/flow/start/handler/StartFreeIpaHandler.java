@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.flow.start.handler;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
@@ -7,11 +9,9 @@ import com.sequenceiq.environment.environment.flow.start.event.EnvStartFailedEve
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSelectors;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
-import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
-import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-import org.springframework.stereotype.Component;
+
 import reactor.bus.Event;
 
 @Component
@@ -19,12 +19,9 @@ public class StartFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto>
 
     private final FreeIpaPollerService freeIpaPollerService;
 
-    private final FreeIpaService freeIpaService;
-
-    protected StartFreeIpaHandler(EventSender eventSender, FreeIpaPollerService freeIpaPollerService, FreeIpaService freeIpaService) {
+    protected StartFreeIpaHandler(EventSender eventSender, FreeIpaPollerService freeIpaPollerService) {
         super(eventSender);
         this.freeIpaPollerService = freeIpaPollerService;
-        this.freeIpaService = freeIpaService;
     }
 
     @Override
@@ -36,11 +33,6 @@ public class StartFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto>
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            freeIpaService.describe(environmentDto.getResourceCrn()).ifPresent(freeIpa -> {
-                if (freeIpa.getStatus() != null && !freeIpa.getStatus().isStartable()) {
-                    throw new FreeIpaOperationFailedException("FreeIPA is not in a valid state to start! Current state is: " + freeIpa.getStatus().name());
-                }
-            });
             freeIpaPollerService.startAttachedFreeipaInstances(environmentDto.getId(), environmentDto.getResourceCrn());
             EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                     .withSelector(EnvStartStateSelectors.ENV_START_DATALAKE_EVENT.selector())
@@ -53,5 +45,4 @@ public class StartFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto>
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }
-
 }

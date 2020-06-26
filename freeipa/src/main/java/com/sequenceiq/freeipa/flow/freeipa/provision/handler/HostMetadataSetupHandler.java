@@ -2,8 +2,6 @@ package com.sequenceiq.freeipa.flow.freeipa.provision.handler;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -20,8 +18,6 @@ import reactor.bus.EventBus;
 
 @Component
 public class HostMetadataSetupHandler implements EventHandler<HostMetadataSetupRequest> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HostMetadataSetupHandler.class);
-
     @Inject
     private EventBus eventBus;
 
@@ -36,13 +32,11 @@ public class HostMetadataSetupHandler implements EventHandler<HostMetadataSetupR
     @Override
     public void accept(Event<HostMetadataSetupRequest> event) {
         StackEvent request = event.getData();
-        LOGGER.debug("Host metadata setup request {}", request);
         Selectable response;
         try {
             hostMetadataSetup.setupHostMetadata(request.getResourceId());
             response = new HostMetadataSetupSuccess(request.getResourceId());
         } catch (Exception e) {
-            LOGGER.debug("Host metadata setup failed", e);
             response = new HostMetadataSetupFailed(request.getResourceId(), e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));

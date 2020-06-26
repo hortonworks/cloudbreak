@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -48,8 +49,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -254,7 +255,7 @@ class SdxServiceTest {
         assertEquals("0.0.0.0/0", gateway.getSecurityGroup().getSecurityRules().get(1).getSubnet());
         assertEquals("22", gateway.getSecurityGroup().getSecurityRules().get(1).getPorts().get(0));
 
-        verify(sdxReactorFlowManager).triggerSdxCreation(createdSdxCluster);
+        verify(sdxReactorFlowManager).triggerSdxCreation(id);
     }
 
     @Test
@@ -445,10 +446,10 @@ class SdxServiceTest {
     void testDeleteSdxWhenNameIsProvidedShouldInitiateSdxDeletionFlow() {
         SdxCluster sdxCluster = getSdxClusterForDeletionTest();
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        when(sdxReactorFlowManager.triggerSdxDeletion(anyLong(), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         mockCBCallForDistroXClusters(Sets.newHashSet());
         underTest.deleteSdx(USER_CRN, "sdx-cluster-name", true);
-        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(SDX_ID, true);
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         verify(sdxStatusService, times(1))

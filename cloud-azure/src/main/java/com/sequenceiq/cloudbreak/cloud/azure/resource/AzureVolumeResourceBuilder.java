@@ -25,7 +25,6 @@ import org.springframework.util.CollectionUtils;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.compute.Disk;
 import com.microsoft.azure.management.resources.fluentcore.arm.AvailabilityZoneId;
-import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
@@ -68,30 +67,23 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
 
     @Override
     public List<CloudResource> create(AzureContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
-        LOGGER.info("Creating volume resources");
+        LOGGER.info("Create volume resources");
         List<CloudResource> computeResources = context.getComputeResources(privateId);
         if (Objects.isNull(computeResources) || computeResources.isEmpty()) {
             return null;
         }
-        CloudResource vm = context.getComputeResources(privateId)
-                .stream()
-                .filter(cloudResource -> ResourceType.AZURE_INSTANCE.equals(cloudResource.getType()))
-                .findFirst()
-                .get();
+        CloudResource vm = context.getComputeResources(privateId).stream()
+                .filter(cloudResource -> ResourceType.AZURE_INSTANCE.equals(cloudResource.getType())).findFirst().get();
 
         Optional<CloudResource> reattachableVolumeSet = computeResources.stream()
                 .filter(resource -> ResourceType.AZURE_VOLUMESET.equals(resource.getType()))
                 .filter(cloudResource -> CommonStatus.DETACHED.equals(cloudResource.getStatus()) || vm.getInstanceId().equals(cloudResource.getInstanceId()))
                 .findFirst();
-        LOGGER.debug("Reattachable volume set {}",
-                reattachableVolumeSet.map(cloudResource -> "is present with name:" + cloudResource.getName())
-                .orElse("is not present"));
 
-        return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, vm,
-                context.getStringParameter(PlatformParametersConsts.RESOURCE_CRN_PARAMETER))));
+        return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, vm)));
     }
 
-    private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group, CloudResource vm, String stackCrn) {
+    private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group, CloudResource vm) {
         return () -> {
             AzureResourceNameService resourceNameService = getResourceNameService();
 
@@ -105,7 +97,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
             return new Builder()
                     .persistent(true)
                     .type(resourceType())
-                    .name(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, stackCrn))
+                    .name(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId))
                     .group(group.getName())
                     .status(CommonStatus.REQUESTED)
                     .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
@@ -113,9 +105,9 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                             .withDeleteOnTermination(Boolean.TRUE)
                             .withVolumes(
                                     template.getVolumes().stream()
-                                            .map(volume -> new VolumeSetAttributes.Volume(
-                                                    resourceNameService.resourceName(ResourceType.AZURE_DISK, stackName, groupName, privateId,
-                                                            template.getVolumes().indexOf(volume), stackCrn), null, volume.getSize(), volume.getType()))
+                                            .map(volume -> new VolumeSetAttributes.Volume(resourceNameService.resourceName(
+                                                    ResourceType.AZURE_DISK, stackName, groupName, privateId, template.getVolumes().indexOf(volume)), null,
+                                                    volume.getSize(), volume.getType()))
                                             .collect(Collectors.toList()))
                             .build()))
                     .build();
@@ -157,14 +149,9 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
             DeviceNameGenerator generator = new DeviceNameGenerator();
             futures.addAll(volumeSet.getVolumes().stream()
                     .map(volume -> intermediateBuilderExecutor.submit(() -> {
-                        Disk result = client.getDiskByName(resourceGroupName, volume.getId());
-                        if (result == null) {
-                            result = client.createManagedDisk(
-                                    volume.getId(), volume.getSize(), AzureDiskType.getByValue(
-                                            volume.getType()), region, resourceGroupName, cloudStack.getTags());
-                        } else {
-                            LOGGER.debug("Managed disk for resourcegroup: {}, name: {} already exists: {}", resourceGroupName, volume.getId(), result);
-                        }
+                        Disk result = client.createManagedDisk(
+                                volume.getId(), volume.getSize(), AzureDiskType.getByValue(
+                                        volume.getType()), region, resourceGroupName, cloudStack.getTags());
                         String volumeId = result.id();
                         volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, generator.next(), volume.getSize(), volume.getType()));
                     }))
@@ -199,12 +186,11 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
 
     @Override
     public CloudResource delete(AzureContext context, AuthenticatedContext auth, CloudResource resource) throws InterruptedException {
-        LOGGER.info("Delete the disks from the instances if they are not reattached.");
+        LOGGER.info("Delete the disk from the instances if they are not reattached.");
         VolumeSetAttributes volumeSetAttributes = getVolumeSetAttributes(resource);
         List<CloudResourceStatus> cloudResourceStatuses = checkResources(ResourceType.AZURE_VOLUMESET, context, auth, List.of(resource));
         boolean anyDeleted = cloudResourceStatuses.stream().map(CloudResourceStatus::getStatus).anyMatch(ResourceStatus.DELETED::equals);
         if (!volumeSetAttributes.getDeleteOnTermination() && !anyDeleted) {
-            LOGGER.debug("Resource {} will be preserved for later reattachment.", resource.getName());
             resource.setStatus(CommonStatus.DETACHED);
             volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
             resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
@@ -212,17 +198,14 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
             throw new InterruptedException("Resource will be preserved for later reattachment.");
         }
 
-        LOGGER.debug("Resource {} will be deleted.", resource.getName());
         AzureClient client = getAzureClient(auth);
-        List<String> managedDiskIds = cloudResourceStatuses
-                .stream()
+        List<String> managedDiskIds = cloudResourceStatuses.stream()
                 .filter(cloudResourceStatus -> ResourceStatus.CREATED.equals(cloudResourceStatus.getStatus()))
                 .map(CloudResourceStatus::getCloudResource)
                 .map(this::getVolumeSetAttributes)
                 .map(VolumeSetAttributes::getVolumes)
                 .flatMap(List::stream)
-                .map(VolumeSetAttributes.Volume::getId)
-                .collect(Collectors.toList());
+                .map(VolumeSetAttributes.Volume::getId).collect(Collectors.toList());
         azureUtils.deleteManagedDisks(client, managedDiskIds);
         return null;
     }

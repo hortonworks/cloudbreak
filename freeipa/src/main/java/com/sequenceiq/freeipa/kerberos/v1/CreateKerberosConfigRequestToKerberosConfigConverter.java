@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.ActiveDirectoryKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
-import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIpaKerberosDescriptor;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIPAKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.MITKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.validation.KerberosRequestValidator;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
@@ -69,7 +69,7 @@ public class CreateKerberosConfigRequestToKerberosConfigConverter {
         return config;
     }
 
-    private KerberosConfig convertFreeIpa(FreeIpaKerberosDescriptor source) {
+    private KerberosConfig convertFreeIpa(FreeIPAKerberosDescriptor source) {
         KerberosConfig config = new KerberosConfig();
         config.setAdminUrl(source.getAdminUrl());
         config.setRealm(source.getRealm());

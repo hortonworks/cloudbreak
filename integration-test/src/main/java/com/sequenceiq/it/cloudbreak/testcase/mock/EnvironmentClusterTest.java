@@ -56,6 +56,46 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }
+/*
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is an environment with a attached shared resources and a running cluster that is using these resources",
+            when = "the resource delete endpoints and environment delete endpoints are called",
+            then = "non of the operations should succeed")
+    public void testCreateWlClusterDeleteFails(MockedTestContext testContext) {
+        createEnvWithResources(testContext);
+//        createDefaultRdsConfig(testContext);
+//        createDefaultLdapConfig(testContext);
+        createDefaultProxyConfig(testContext);
+
+        testContext.given(StackTestDto.class)
+                .withEnvironment(EnvironmentTestDto.class)
+                .withCluster(
+                        setResources(
+                                testContext,
+//                                testContext.get(DatabaseTestDto.class).getName(),
+//                                testContext.get(LdapTestDto.class).getName(),
+                                "",
+                                "",
+                                testContext.get(ProxyTestDto.class).getResponse().getCrn()
+                        )
+                )
+                .when(stackTestClient.createV4())
+                .await(STACK_AVAILABLE)
+
+                .given(ProxyTestDto.class)
+                .deleteGiven(ProxyTestDto.class, proxyTestClient.delete(), RunningParameter.key(FORBIDDEN_KEY))
+//                .given(LdapTestDto.class)
+//                .deleteGiven(LdapTestDto.class, ldapTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
+//                .given(DatabaseTestDto.class)
+//                .deleteGiven(DatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
+                .given(CredentialTestDto.class)
+                .deleteGiven(CredentialTestDto.class, credentialTestClient.delete(), RunningParameter.key(FORBIDDEN_KEY))
+                .given(EnvironmentTestDto.class)
+                .deleteGiven(EnvironmentTestDto.class, environmentTestClient.delete(), RunningParameter.key(FORBIDDEN_KEY))
+                .validate();
+    }
+*/
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -154,6 +194,14 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     private ClusterTestDto setResources(TestContext testContext, String rdsName, String ldapName, String proxyName) {
         ClusterTestDto cluster = testContext.given(ClusterTestDto.class)
                 .valid();
+//        if (rdsName != null) {
+//            Set<String> rdsSet = new LinkedHashSet<>();
+//            rdsSet.add(rdsName);
+//            cluster.withRdsConfigNames(rdsSet);
+//        }
+//        if (ldapName != null) {
+//            cluster.withLdapConfigName(ldapName);
+//        }
         if (rdsName != null) {
             cluster.withProxyConfigName(proxyName);
         }

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers;
 
-import static com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService.DATAHUB_RESOURCE_TYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -58,18 +57,16 @@ public class DistroXV1RestUrlParserTest {
             = "{index}: testMatch(url: {0}, should match {1}, resourceCrn: {2}, resourceName: {3}, resourceType: {4}, resourceEvent: {5}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {"v1/distrox/name/asdf", true, null, "asdf", DATAHUB_RESOURCE_TYPE, "asdf"},
-                {"v1/distrox/random/asdf", false, null, null, DATAHUB_RESOURCE_TYPE, null},
-                {"v1/distrox/name/asdf/event", true, null, "asdf", DATAHUB_RESOURCE_TYPE, "event"},
-                {"v1/name/asdf", false, null, null, DATAHUB_RESOURCE_TYPE, null},
-                {"distrox", false, null, null, DATAHUB_RESOURCE_TYPE, null},
-                {"v2/distrox", false, null, null, DATAHUB_RESOURCE_TYPE, null},
-                {"v1/distrox", true, null, null, DATAHUB_RESOURCE_TYPE, null},
-                {"v1/distrox/name/event", true, null, "event", DATAHUB_RESOURCE_TYPE, "event"},
-                {"v1/distrox/crn/event", true, "event", null, DATAHUB_RESOURCE_TYPE, "event"},
-                {"v1/distrox/crn/test:crn:blabla", true, "test:crn:blabla", null, DATAHUB_RESOURCE_TYPE, "test:crn:blabla"},
-                {"v1/distrox/crn/test:crn:blabla/extrastuff", true, "test:crn:blabla", null, DATAHUB_RESOURCE_TYPE, "extrastuff"},
-                {"v1/distrox/crn/test:crn:blabla/extrastuff/andmore", true, "test:crn:blabla", null, DATAHUB_RESOURCE_TYPE, "extrastuff/andmore"}
+                {"v1/distrox/name/asdf", true, null, "asdf", "stacks", null},
+                {"v1/distrox/random/asdf", false, null, null, "stacks", null},
+                {"v1/distrox/name/asdf/event", true, null, "asdf", "stacks", "event"},
+                {"v1/name/asdf", false, null, null, "stacks", null},
+                {"distrox", false, null, null, "stacks", null},
+                {"v2/distrox", false, null, null, "stacks", null},
+                {"v1/distrox", true, null, null, "stacks", null},
+                {"v1/distrox/crn/test:crn:blabla", true, "test:crn:blabla", null, "stacks", null},
+                {"v1/distrox/crn/test:crn:blabla/extrastuff", true, "test:crn:blabla", null, "stacks", "extrastuff"},
+                {"v1/distrox/crn/test:crn:blabla/extrastuff/andmore", true, "test:crn:blabla", null, "stacks", "extrastuff/andmore"}
         });
     }
 }

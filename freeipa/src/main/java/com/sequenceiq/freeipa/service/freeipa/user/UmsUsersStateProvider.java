@@ -189,7 +189,7 @@ public class UmsUsersStateProvider {
                     }
                 });
 
-                if (environmentAccessRights.hasAdminFreeIpaRight()) {
+                if (environmentAccessRights.hasAdminFreeIPARight()) {
                     usersStateBuilder.addMemberToGroup(ADMIN_FREEIPA_GROUP, username);
                 }
 

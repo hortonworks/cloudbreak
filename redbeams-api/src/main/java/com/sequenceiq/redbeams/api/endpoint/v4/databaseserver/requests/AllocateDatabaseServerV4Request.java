@@ -37,11 +37,6 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
     @ApiModelProperty(value = DatabaseServer.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
-    @NotNull
-    @ValidCrn
-    @ApiModelProperty(value = DatabaseServer.CLUSTER_CRN, required = true)
-    private String clusterCrn;
-
     @Valid
     @ApiModelProperty(DBStack.NETWORK)
     private NetworkV4StackRequest network;
@@ -87,14 +82,6 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
 
     public void setDatabaseServer(DatabaseServerV4StackRequest databaseServer) {
         this.databaseServer = databaseServer;
-    }
-
-    public String getClusterCrn() {
-        return clusterCrn;
-    }
-
-    public void setClusterCrn(String clusterCrn) {
-        this.clusterCrn = clusterCrn;
     }
 
     @Override

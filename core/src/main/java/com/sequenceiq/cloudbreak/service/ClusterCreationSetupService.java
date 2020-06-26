@@ -105,7 +105,7 @@ public class ClusterCreationSetupService {
         fileSystemValidator.validateCloudStorage(stack.cloudPlatform(), credential, request.getCloudStorage(),
                 stack.getCreator().getUserId(), stack.getWorkspace().getId());
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
-        ValidationResult environmentValidationResult = environmentValidator.validate(request, stack, environment, user);
+        ValidationResult environmentValidationResult = environmentValidator.validate(request, stack, environment);
         if (environmentValidationResult.hasError()) {
             throw new BadRequestException(environmentValidationResult.getFormattedErrors());
         }

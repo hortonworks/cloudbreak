@@ -10,4 +10,4 @@ install-freeipa-replica:
     - failhard: True
     - unless: test -f /var/log/freeipa_install-executed
     - require:
-        - file: /opt/salt/scripts/freeipa_replica_install.sh
+        - file: /opt/salt/scripts/freeipa_install.sh

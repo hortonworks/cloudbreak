@@ -9,11 +9,11 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Prototype
-public class KerberosTestDto extends AbstractFreeIpaTestDto<CreateKerberosConfigRequest, DescribeKerberosConfigResponse, KerberosTestDto> {
+public class KerberosTestDto extends AbstractFreeIPATestDto<CreateKerberosConfigRequest, DescribeKerberosConfigResponse, KerberosTestDto> {
 
     public static final String DEFAULT_MASTERKEY = "masterkey";
 
@@ -92,13 +92,13 @@ public class KerberosTestDto extends AbstractFreeIpaTestDto<CreateKerberosConfig
         return this;
     }
 
-    public KerberosTestDto withFreeIpaDescriptor() {
-        getRequest().setFreeIpa(getTestContext().get(FreeIpaKerberosDescriptorTestDto.class).getRequest());
+    public KerberosTestDto withFreeIPADescriptor() {
+        getRequest().setFreeIpa(getTestContext().get(FreeIPAKerberosDescriptorTestDto.class).getRequest());
         return this;
     }
 
-    public KerberosTestDto withFreeIpaDescriptor(FreeIpaKerberosDescriptorTestDto freeIpaDescriptor) {
-        getRequest().setFreeIpa(freeIpaDescriptor.getRequest());
+    public KerberosTestDto withFreeIPADescriptor(FreeIPAKerberosDescriptorTestDto freeIPADescriptor) {
+        getRequest().setFreeIpa(freeIPADescriptor.getRequest());
         return this;
     }
 }

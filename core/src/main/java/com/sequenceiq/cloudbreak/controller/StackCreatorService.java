@@ -357,7 +357,7 @@ public class StackCreatorService {
                 LOGGER.info("Get datalake count in environment {}", stack.getEnvironmentCrn());
                 Long datalakesInEnv = datalakeResourcesService.countDatalakeResourcesInEnvironment(stack.getEnvironmentCrn());
                 if (datalakesInEnv >= 1L) {
-                    throw new BadRequestException("Only 1 Data Lake / Environment is allowed.");
+                    throw new BadRequestException("Only 1 datalake cluster / environment is allowed.");
                 }
             }
         } else if (stack.getType() == null) {

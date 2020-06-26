@@ -62,14 +62,14 @@ public class DatalakeChangeImageWaitHandler extends ExceptionCatcherEventHandler
                 response = new DatalakeUpgradeFailedEvent(sdxId, userId, new IllegalStateException(message));
             }
         } catch (UserBreakException userBreakException) {
-            LOGGER.error("Change image polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.info("Change image polling exited before timeout. Cause: ", userBreakException);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Change image poller stopped for cluster: {}", sdxId);
+            LOGGER.info("Change image poller stopped for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake repair timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.error("Change image polling failed for cluster: {}", sdxId);
+            LOGGER.info("Change image polling failed for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId, exception);
         }
         sendEvent(response, event);

@@ -90,7 +90,7 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         register(DistroXAutoScaleClusterV1Controller.class);
-        register(HistoryController.class);
+        register(AlertController.class);
         register(AuthorizationInfoController.class);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);

@@ -33,9 +33,8 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithNetworkAndFreeIpa(testContext);
+        createEnvironmentWithNetworkAndFreeIPA(testContext);
         initializeDefaultBlueprints(testContext);
-        createDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)

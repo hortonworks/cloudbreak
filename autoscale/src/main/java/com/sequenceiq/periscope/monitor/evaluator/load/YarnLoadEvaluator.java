@@ -169,8 +169,8 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
         scalingEvent.setHostGroupNodeCount(Optional.of(existingHostGroupSize));
         scalingEvent.setScalingNodeCount(Optional.of(targetScaleUpCount));
         eventPublisher.publishEvent(scalingEvent);
-        LOGGER.info("Triggered ScaleUp for Cluster '{}', NodeCount '{}', HostGroup '{}'",
-                cluster.getStackCrn(), targetScaleUpCount, policyHostGroup);
+        LOGGER.info("ScaleUp NodeCount '{}' for Cluster '{}', HostGroup '{}'", targetScaleUpCount, cluster.getStackCrn(), policyHostGroup);
+
     }
 
     public void sendScaleDownEvent(Integer targetScaleDownCount, Integer existingHostGroupSize,
@@ -183,7 +183,7 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
             scalingEvent.setScalingNodeCount(Optional.of(-targetScaleDownCount));
         }
         eventPublisher.publishEvent(scalingEvent);
-        LOGGER.info("Triggered ScaleDown for Cluster '{}', NodeCount '{}', HostGroup '{}', DecommissionNodeIds '{}'",
-                targetScaleDownCount, cluster.getStackCrn(), policyHostGroup, yarnRecommendedDecommissionHosts);
+        LOGGER.info("ScaleDown NodeCount '{}' for Cluster '{}', HostGroup '{}', NodeIds '{}'", targetScaleDownCount,
+                cluster.getStackCrn(), policyHostGroup, yarnRecommendedDecommissionHosts);
     }
 }

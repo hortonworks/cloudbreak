@@ -89,7 +89,7 @@ public class SdxStartServiceTest {
 
         underTest.triggerStartIfClusterNotRunning(sdxCluster);
 
-        verify(sdxReactorFlowManager).triggerSdxStartFlow(sdxCluster);
+        verify(sdxReactorFlowManager).triggerSdxStartFlow(CLUSTER_ID);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class SdxStartServiceTest {
 
         underTest.triggerStartIfClusterNotRunning(sdxCluster);
 
-        verify(sdxReactorFlowManager).triggerSdxStartFlow(sdxCluster);
+        verify(sdxReactorFlowManager).triggerSdxStartFlow(CLUSTER_ID);
     }
 
     @Test

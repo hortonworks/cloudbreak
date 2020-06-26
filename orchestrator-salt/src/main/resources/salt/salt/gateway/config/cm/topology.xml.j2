@@ -170,10 +170,6 @@
                 <name>zeppelinws.acl</name>
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
-            <param>
-                <name>flink.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
         </provider>
 {% endif %}
 
@@ -758,17 +754,6 @@
         {%- endfor %}
     </service>
     {%- endif %}
-    {%- endif %}
-
-    {% if 'FLINK_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
-        {% if 'FLINK' in exposed -%}
-        <service>
-            <role>FLINK</role>
-            {% for hostloc in salt['pillar.get']('gateway:location')['FLINK_HISTORY_SERVER'] -%}
-            <url>{{ protocol }}://{{ hostloc }}:{{ ports['FLINK'] }}</url>
-            {%- endfor %}
-        </service>
-        {%- endif %}
     {%- endif %}
 
 </topology>

@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
@@ -21,7 +20,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
-public class DataHubClusterDeletionHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {
+public class DataHubClusterDeletionHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataHubClusterDeletionHandler.class);
 
@@ -40,33 +39,23 @@ public class DataHubClusterDeletionHandler extends EventSenderAwareHandler<Envir
     }
 
     @Override
-    public void accept(Event<EnvironmentDeletionDto> environmentDtoEvent) {
+    public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         LOGGER.debug("Accepting DataHubClustersDelete event");
-        EnvironmentDeletionDto environmentDeletionDto = environmentDtoEvent.getData();
-        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
-        EnvDeleteEvent envDeleteEvent = getEnvDeleteEvent(environmentDeletionDto);
+        EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             PollingConfig pollingConfig = getPollingConfig();
             environmentService.findEnvironmentById(environmentDto.getId())
-                    .ifPresent(environment -> datahubDeletionService.deleteDatahubClustersForEnvironment(
-                            pollingConfig,
-                            environment,
-                            environmentDeletionDto.isForceDelete()));
+                    .ifPresent(environment -> datahubDeletionService.deleteDatahubClustersForEnvironment(pollingConfig, environment));
+            EnvDeleteEvent envDeleteEvent = getEnvDeleteEvent(environmentDto);
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            if (environmentDeletionDto.isForceDelete()) {
-                LOGGER.warn("The %s was not successful but the environment deletion was requested as force delete so " +
-                        "continue the deletion flow", selector());
-                eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
-            } else {
-                EnvClusterDeleteFailedEvent failedEvent = EnvClusterDeleteFailedEvent.builder()
-                        .withEnvironmentID(environmentDto.getId())
-                        .withException(e)
-                        .withResourceCrn(environmentDto.getResourceCrn())
-                        .withResourceName(environmentDto.getName())
-                        .build();
-                eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
-            }
+            EnvClusterDeleteFailedEvent failedEvent = EnvClusterDeleteFailedEvent.builder()
+                    .withEnvironmentID(environmentDto.getId())
+                    .withException(e)
+                    .withResourceCrn(environmentDto.getResourceCrn())
+                    .withResourceName(environmentDto.getName())
+                    .build();
+            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }
 
@@ -85,13 +74,11 @@ public class DataHubClusterDeletionHandler extends EventSenderAwareHandler<Envir
                 .build();
     }
 
-    private EnvDeleteEvent getEnvDeleteEvent(EnvironmentDeletionDto environmentDeletionDto) {
-        EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
+    private EnvDeleteEvent getEnvDeleteEvent(EnvironmentDto environmentDto) {
         return EnvDeleteEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())
-                .withForceDelete(environmentDeletionDto.isForceDelete())
                 .withSelector(START_DATALAKE_CLUSTERS_DELETE_EVENT.selector())
                 .build();
     }

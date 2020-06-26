@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
-import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -170,7 +169,7 @@ public class StackOperationServiceTest {
 
     private InstanceGroup createInstanceGroup(Integer spotPercentage) {
         Template template = new Template();
-        template.setAttributes(new Json(spotPercentage != null ? Map.of(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, spotPercentage) : Map.of()));
+        template.setAttributes(new Json(spotPercentage != null ? Map.of("spotPercentage", spotPercentage) : Map.of()));
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setTemplate(template);
         return instanceGroup;

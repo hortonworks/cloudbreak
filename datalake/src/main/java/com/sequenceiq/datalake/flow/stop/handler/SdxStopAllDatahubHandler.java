@@ -48,14 +48,14 @@ public class SdxStopAllDatahubHandler extends ExceptionCatcherEventHandler<SdxSt
             sdxStopService.stopAllDatahub(sdxId);
             response = new SdxEvent(SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT.event(), sdxId, userId);
         } catch (UserBreakException userBreakException) {
-            LOGGER.error("Polling exited before timeout. Cause ", userBreakException);
+            LOGGER.info("Polling exited before timeout. Cause ", userBreakException);
             response = new SdxStopFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Poller stopped for stack: " + sdxId, pollerStoppedException);
+            LOGGER.info("Poller stopped for stack: " + sdxId, pollerStoppedException);
             response = new SdxStopFailedEvent(sdxId, userId,
                     new PollerStoppedException("Datalake start timed out after " + DURATION_IN_MINUTES + " minutes", pollerStoppedException));
         } catch (PollerException exception) {
-            LOGGER.error("Polling failed for stack: {}", sdxId);
+            LOGGER.info("Polling failed for stack: {}", sdxId);
             response = new SdxStopFailedEvent(sdxId, userId, exception);
         }
         sendEvent(response, event);

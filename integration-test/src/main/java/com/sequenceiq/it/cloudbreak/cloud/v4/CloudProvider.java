@@ -26,7 +26,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTes
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -117,7 +117,7 @@ public interface CloudProvider {
 
     Integer gatewayPort(StackTestDtoBase stackEntity);
 
-    Integer gatewayPort(FreeIpaTestDto stackEntity);
+    Integer gatewayPort(FreeIPATestDto stackEntity);
 
     String getBlueprintName();
 

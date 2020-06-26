@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
@@ -131,8 +130,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
         }
         Long id = getResponse().getId();
 
-        return "DistroX audit events: "
-                + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), CloudbreakEventService.DATAHUB_RESOURCE_TYPE, id, null);
+        return "DistroX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), "stacks", id, null);
     }
 
     @Override

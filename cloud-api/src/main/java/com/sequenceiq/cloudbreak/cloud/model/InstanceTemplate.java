@@ -7,42 +7,8 @@ import java.util.Objects;
 
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
-import com.sequenceiq.common.api.type.EncryptionType;
 
 public class InstanceTemplate extends DynamicModel {
-
-    /**
-     * Key of the optional dynamic parameter denoting the type of encryption key to use for disk volume encryption. The exact interpretation of this setting
-     * is up to the target cloud provider.
-     *
-     * <p>
-     *     Permitted values are the names of enum constants in {@link EncryptionType}:
-     *     <ul>
-     *         <li>{@code "NONE"}, {@code null}: No encryption key. This setting essentially disables volume encryption.</li>
-     *         <li>{@code "DEFAULT"}: Use the default key. This is typically a cloud provider managed encryption key, but can also mean some customer-managed
-     *         key designated as the "default" in a cloud provider specific way.</li>
-     *         <li>{@code "CUSTOM"}: Use the customer-managed encryption key specified in {@link #VOLUME_ENCRYPTION_KEY_ID}.</li>
-     *     </ul>
-     * </p>
-     *
-     * @see #VOLUME_ENCRYPTION_KEY_ID
-     * @see #putParameter(String, Object)
-     * @see EncryptionType
-     */
-    public static final String VOLUME_ENCRYPTION_KEY_TYPE = "type";
-
-    /**
-     * Key of the dynamic parameter denoting the ID of the customer-managed encryption key to be used for disk volume encryption. Relevant and required only
-     * when {@link #VOLUME_ENCRYPTION_KEY_TYPE} equals {@code "CUSTOM"}. Its value will be ignored otherwise.
-     *
-     * <p>
-     *     When set, the value shall be a {@link String} containing the ID of the customer-managed encryption key in a cloud provider specific syntax.
-     * </p>
-     *
-     * @see #VOLUME_ENCRYPTION_KEY_TYPE
-     * @see #putParameter(String, Object)
-     */
-    public static final String VOLUME_ENCRYPTION_KEY_ID = "key";
 
     private final String flavor;
 

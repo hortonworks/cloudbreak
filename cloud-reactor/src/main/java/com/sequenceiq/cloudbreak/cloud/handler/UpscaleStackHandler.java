@@ -69,7 +69,6 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
             eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
             LOGGER.debug("Upscale successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            LOGGER.error("Upscaling stack failed", e);
             UpscaleStackResult result = new UpscaleStackResult(e.getMessage(), e, request.getResourceId());
             request.getResult().onNext(result);
             eventBus.notify(CloudPlatformResult.failureSelector(UpscaleStackResult.class), new Event<>(upscaleStackRequestEvent.getHeaders(), result));

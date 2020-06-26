@@ -7,20 +7,12 @@ import reactor.rx.Promise;
 
 public class EnvDeleteEvent extends BaseNamedFlowEvent {
 
-    private final boolean forceDelete;
-
-    public EnvDeleteEvent(String selector, Long resourceId, String resourceName, String resourceCrn, boolean forceDelete) {
+    public EnvDeleteEvent(String selector, Long resourceId, String resourceName, String resourceCrn) {
         super(selector, resourceId, resourceName, resourceCrn);
-        this.forceDelete = forceDelete;
     }
 
-    public EnvDeleteEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, String resourceName, String resourceCrn, boolean forceDelete) {
+    public EnvDeleteEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, String resourceName, String resourceCrn) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
-        this.forceDelete = forceDelete;
-    }
-
-    public boolean isForceDelete() {
-        return forceDelete;
     }
 
     public static EnvDeleteEventBuilder builder() {
@@ -36,8 +28,6 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
 
         private Long resourceId;
 
-        private boolean forceDelete;
-
         private Promise<AcceptResult> accepted;
 
         private EnvDeleteEventBuilder() {
@@ -45,11 +35,6 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
 
         public EnvDeleteEventBuilder withResourceName(String resourceName) {
             this.resourceName = resourceName;
-            return this;
-        }
-
-        public EnvDeleteEventBuilder withForceDelete(boolean forceDelete) {
-            this.forceDelete = forceDelete;
             return this;
         }
 
@@ -74,7 +59,7 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
         }
 
         public EnvDeleteEvent build() {
-            return new EnvDeleteEvent(selector, resourceId, accepted, resourceName, resourceCrn, forceDelete);
+            return new EnvDeleteEvent(selector, resourceId, accepted, resourceName, resourceCrn);
         }
     }
 }

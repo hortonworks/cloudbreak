@@ -16,9 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -36,6 +35,15 @@ import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceTypeProvider
 
 @Component
 public class InstanceTemplateRequestToTemplateConverter {
+
+    @VisibleForTesting
+    static final String ATTRIBUTE_VOLUME_ENCRYPTED = "encrypted";
+
+    @VisibleForTesting
+    static final String ATTRIBUTE_VOLUME_ENCRYPTION_TYPE = "type";
+
+    @VisibleForTesting
+    static final String ATTRIBUTE_SPOT_PERCENTAGE = "spotPercentage";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTemplateRequestToTemplateConverter.class);
 
@@ -60,13 +68,13 @@ public class InstanceTemplateRequestToTemplateConverter {
         Map<String, Object> attributes = new HashMap<>();
         if (cloudPlatform == CloudPlatform.AWS && entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, accountId)) {
             // FIXME Enable EBS encryption with appropriate KMS key
-            attributes.put(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE);
-            attributes.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
+            attributes.put(ATTRIBUTE_VOLUME_ENCRYPTED, Boolean.TRUE);
+            attributes.put(ATTRIBUTE_VOLUME_ENCRYPTION_TYPE, EncryptionType.DEFAULT.name());
         }
         Optional.ofNullable(source.getAws())
                 .map(AwsInstanceTemplateParameters::getSpot)
                 .map(AwsInstanceTemplateSpotParameters::getPercentage)
-                .ifPresent(spotPercentage -> attributes.put(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, spotPercentage));
+                .ifPresent(spotPercentage -> attributes.put(ATTRIBUTE_SPOT_PERCENTAGE, spotPercentage));
         template.setAttributes(new Json(attributes));
         return template;
     }

@@ -2,13 +2,11 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AUTOMATIC_USERSYNC_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE;
-import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE_SINGLE_RESOURCE_GROUP;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_BASE_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_CLOUD_STORAGE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FMS_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_DL_EBS_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_HA;
-import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CLOUDERA_INTERNAL_ACCOUNT;
@@ -70,9 +68,6 @@ class EntitlementServiceTest {
                 {"CDP_FREEIPA_HA == false", CDP_FREEIPA_HA, (EntitlementCheckFunction) EntitlementService::freeIpaHaEnabled, false},
                 {"CDP_FREEIPA_HA == true", CDP_FREEIPA_HA, (EntitlementCheckFunction) EntitlementService::freeIpaHaEnabled, true},
 
-                {"CDP_FREEIPA_HA_REPAIR == false", CDP_FREEIPA_HA_REPAIR, (EntitlementCheckFunction) EntitlementService::freeIpaHaRepairEnabled, false},
-                {"CDP_FREEIPA_HA_REPAIR == true", CDP_FREEIPA_HA_REPAIR, (EntitlementCheckFunction) EntitlementService::freeIpaHaRepairEnabled, true},
-
                 {"CLOUDERA_INTERNAL_ACCOUNT == false", CLOUDERA_INTERNAL_ACCOUNT, (EntitlementCheckFunction) EntitlementService::internalTenant, false},
                 {"CLOUDERA_INTERNAL_ACCOUNT == true", CLOUDERA_INTERNAL_ACCOUNT, (EntitlementCheckFunction) EntitlementService::internalTenant, true},
 
@@ -94,11 +89,6 @@ class EntitlementServiceTest {
                         (EntitlementCheckFunction) EntitlementService::freeIpaDlEbsEncryptionEnabled, false},
                 {"CDP_FREEIPA_DL_EBS_ENCRYPTION == true", CDP_FREEIPA_DL_EBS_ENCRYPTION,
                         (EntitlementCheckFunction) EntitlementService::freeIpaDlEbsEncryptionEnabled, true},
-
-                {"CDP_AZURE_SINGLE_RESOURCE_GROUP == false", CDP_AZURE_SINGLE_RESOURCE_GROUP,
-                        (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, false},
-                {"CDP_AZURE_SINGLE_RESOURCE_GROUP == true", CDP_AZURE_SINGLE_RESOURCE_GROUP,
-                        (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, true},
         };
     }
 

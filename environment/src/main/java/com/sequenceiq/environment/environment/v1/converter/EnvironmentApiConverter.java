@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
@@ -11,7 +10,6 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,7 +17,6 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
@@ -75,22 +72,18 @@ public class EnvironmentApiConverter {
 
     private final NetworkRequestToDtoConverter networkRequestToDtoConverter;
 
-    private final EntitlementService entitlementService;
-
     public EnvironmentApiConverter(TelemetryApiConverter telemetryApiConverter,
             TunnelConverter tunnelConverter,
             AccountTelemetryService accountTelemetryService,
             CredentialService credentialService,
             FreeIpaConverter freeIpaConverter,
-            NetworkRequestToDtoConverter networkRequestToDtoConverter,
-            EntitlementService entitlementService) {
+            NetworkRequestToDtoConverter networkRequestToDtoConverter) {
         this.telemetryApiConverter = telemetryApiConverter;
         this.accountTelemetryService = accountTelemetryService;
         this.tunnelConverter = tunnelConverter;
         this.credentialService = credentialService;
         this.freeIpaConverter = freeIpaConverter;
         this.networkRequestToDtoConverter = networkRequestToDtoConverter;
-        this.entitlementService = entitlementService;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
@@ -172,7 +165,10 @@ public class EnvironmentApiConverter {
         if (Objects.isNull(azureEnvironmentParameters)) {
             return ParametersDto.builder()
                     .withAzureParameters(AzureParametersDto.builder()
-                            .withResourceGroup(buildResourceGroupDto())
+                            .withResourceGroup(AzureResourceGroupDto.builder()
+                                    .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
+                                    .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW)
+                                    .build())
                             .build())
                     .build();
         }
@@ -202,20 +198,12 @@ public class EnvironmentApiConverter {
                                 .filter(resourceGroup -> Objects.nonNull(resourceGroup.getResourceGroupUsage()))
                                 .map(this::azureResourceGroupToAzureResourceGroupDto)
                                 .orElse(
-                                        buildResourceGroupDto())
+                                        AzureResourceGroupDto.builder()
+                                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
+                                                .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW)
+                                                .build())
                 ).build();
 
-    }
-
-    @NotNull
-    private AzureResourceGroupDto buildResourceGroupDto() {
-        ResourceGroupUsagePattern resourceGroupUsagePattern = azureSingleResourceGroupDeploymentEnabled()
-                ? ResourceGroupUsagePattern.USE_SINGLE
-                : ResourceGroupUsagePattern.USE_MULTIPLE;
-        return AzureResourceGroupDto.builder()
-                .withResourceGroupUsagePattern(resourceGroupUsagePattern)
-                .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW)
-                .build();
     }
 
     private AzureResourceGroupDto azureResourceGroupToAzureResourceGroupDto(AzureResourceGroup azureResourceGroup) {
@@ -315,16 +303,5 @@ public class EnvironmentApiConverter {
         features.setWorkloadAnalytics(featuresRequest.getWorkloadAnalytics());
         features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
         return features;
-    }
-
-    private boolean azureSingleResourceGroupDeploymentEnabled() {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        boolean azureSingleResourceGroupDeploymentEnabled =
-                entitlementService.azureSingleResourceGroupDeploymentEnabled(INTERNAL_ACTOR_CRN, accountId);
-        LOGGER.debug("Azure Single Resource Group deployment model is {}, generating default value accordingly!",
-                azureSingleResourceGroupDeploymentEnabled
-                        ? "enabled"
-                        : "disabled");
-        return azureSingleResourceGroupDeploymentEnabled;
     }
 }

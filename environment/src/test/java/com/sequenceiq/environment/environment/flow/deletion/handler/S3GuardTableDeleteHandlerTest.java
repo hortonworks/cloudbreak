@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
@@ -82,7 +81,7 @@ class S3GuardTableDeleteHandlerTest {
     private S3GuardTableDeleteHandler underTest;
 
     @Mock
-    private Event<EnvironmentDeletionDto> environmentDtoEvent;
+    private Event<EnvironmentDto> environmentDtoEvent;
 
     @Mock
     private Headers headers;
@@ -223,18 +222,11 @@ class S3GuardTableDeleteHandlerTest {
         assertEquals(DELETE_S3GUARD_TABLE_EVENT.selector(), underTest.selector());
     }
 
-    private EnvironmentDeletionDto createEnvironmentDto() {
-        EnvironmentDto build = EnvironmentDto.builder()
+    private EnvironmentDto createEnvironmentDto() {
+        return EnvironmentDto.builder()
                 .withId(ENVIRONMENT_ID)
                 .withName(ENVIRONMENT_NAME)
                 .withResourceCrn(ENVIRONMENT_CRN)
-                .build();
-
-        return EnvironmentDeletionDto
-                .builder()
-                .withId(ENVIRONMENT_ID)
-                .withForceDelete(false)
-                .withEnvironmentDto(build)
                 .build();
     }
 

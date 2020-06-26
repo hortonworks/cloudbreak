@@ -29,7 +29,7 @@ public class TlsHttpClientConfigurationService {
     private ClusterProxyConfigurationService clusterProxyConfigurationService;
 
     public HttpClientConfig buildTLSClientConfig(String stackCrn, String host, Tunnel tunnel) {
-        LOGGER.debug("Building HttpClientConfig for stackCrn: {}, host: {}", stackCrn, host);
+        LOGGER.info("Building HttpClientConfig for stackCrn: {}, host: {}", stackCrn, host);
         Long clusterId = clusterRepository.findIdStackCrn(stackCrn);
         TlsConfiguration tlsConfiguration = tlsSecurityService.getTls(clusterId);
         Optional<String> clusterProxyUrl = clusterProxyConfigurationService.getClusterProxyUrl();

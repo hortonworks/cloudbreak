@@ -108,7 +108,7 @@ setDomainsForCert() {
 }
 
 # Setup basic CNAME records for pointing to FreeIPA services
-echo "$FPW" | kinit $ADMIN_USER
+echo "$FPW" | kinit admin
 addCname kdc "ipa-ca.$DOMAIN."
 addCname kerberos "ipa-ca.$DOMAIN."
 addCname ldap "ipa-ca.$DOMAIN."

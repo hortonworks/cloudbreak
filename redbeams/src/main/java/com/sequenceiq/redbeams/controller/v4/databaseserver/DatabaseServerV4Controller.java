@@ -98,7 +98,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATABASE_SERVER)
     public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
         DBStack dbStack = dbStackConverter.convert(request, ThreadBasedUserCrnProvider.getUserCrn());
-        DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack, request.getClusterCrn());
+        DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack);
         return converterUtil.convert(savedDBStack, DatabaseServerStatusV4Response.class);
     }
 

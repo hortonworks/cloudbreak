@@ -36,7 +36,6 @@ import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -67,7 +66,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
-import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
@@ -94,8 +92,6 @@ public class StackToCloudStackConverterTest {
     private static final String CLOUD_PLATFORM = "MOCK";
 
     private static final String ENV_CRN = "env-crn";
-
-    private static final String STACK_CRN = "stack-crn";
 
     private static final String RESOURCE_GROUP = "resource-group";
 
@@ -163,7 +159,6 @@ public class StackToCloudStackConverterTest {
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         when(cluster.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
         when(cluster.getExtendedBlueprintText()).thenReturn(BLUEPRINT_TEXT);
@@ -602,7 +597,7 @@ public class StackToCloudStackConverterTest {
 
     @Test
     public void testConvertWhenStackPassingItsParametersThenThoseShouldBeStored() {
-        Map<String, String> expected = Map.of(PlatformParametersConsts.RESOURCE_CRN_PARAMETER, STACK_CRN);
+        Map<String, String> expected = new LinkedHashMap<>(0);
         when(stack.getParameters()).thenReturn(expected);
 
         CloudStack result = underTest.convert(stack);
@@ -841,7 +836,7 @@ public class StackToCloudStackConverterTest {
 
         assertEquals(RESOURCE_GROUP, parameters.get(RESOURCE_GROUP_NAME_PARAMETER));
         assertEquals(ResourceGroupUsage.SINGLE.name(), parameters.get(RESOURCE_GROUP_USAGE_PARAMETER));
-        assertEquals(4, parameters.size());
+        assertEquals(3, parameters.size());
     }
 
     @Test
@@ -865,7 +860,7 @@ public class StackToCloudStackConverterTest {
 
         assertFalse(parameters.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
         assertFalse(parameters.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
-        assertEquals(2, parameters.size());
+        assertEquals(1, parameters.size());
     }
 
     private StackAuthentication createStackAuthentication() {
@@ -900,11 +895,11 @@ public class StackToCloudStackConverterTest {
     }
 
     @Test
-    public void testBuildInstanceTemplateWithGcpEncryptionAttributes() throws Exception {
+    public void testBuildInstanceTemplateWithEncryptionAttributes() throws Exception {
         Template template = new Template();
         template.setVolumeTemplates(Sets.newHashSet());
-        template.setAttributes(new Json(Map.of("keyEncryptionMethod", "RAW", InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name())));
-        template.setSecretAttributes(new Json(Map.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "myKey")).getValue());
+        template.setAttributes(new Json(Map.of("keyEncryptionMethod", "RAW", "type", "CUSTOM")));
+        template.setSecretAttributes(new Json(Map.of("key", "myKey")).getValue());
 
         InstanceTemplate instanceTemplate = underTest.buildInstanceTemplate(
                 template, "name", 0L, InstanceStatus.CREATE_REQUESTED, "instanceImageId");
@@ -912,8 +907,7 @@ public class StackToCloudStackConverterTest {
         Map<String, Object> parameters = instanceTemplate.getParameters();
         assertNotNull(parameters);
         assertEquals("RAW", parameters.get("keyEncryptionMethod"));
-        assertEquals(EncryptionType.CUSTOM.name(), parameters.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE));
-        assertEquals("myKey", parameters.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID));
+        assertEquals("CUSTOM", parameters.get("type"));
+        assertEquals("myKey", parameters.get("key"));
     }
-
 }
