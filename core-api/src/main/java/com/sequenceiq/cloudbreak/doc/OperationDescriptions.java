@@ -54,6 +54,7 @@ public class OperationDescriptions {
         public static final String SET_MAINTENANCE_MODE_BY_NAME = "set maintenance mode for the cluster by name";
         public static final String SET_MAINTENANCE_MODE_BY_CRN = "set maintenance mode for the cluster by crn";
         public static final String UPDATE_SALT = "Update salt states on cluster";
+        public static final String UPDATE_PILLAR_CONFIG = "Update salt pillar configuration on cluster";
     }
 
     public static class ClusterTemplateOpDescription {

@@ -498,4 +498,8 @@ public class ClusterOperationService {
     public FlowIdentifier updateSalt(Stack stack) {
         return flowManager.triggerSaltUpdate(stack.getId());
     }
+
+    public FlowIdentifier updatePillarConfiguration(Stack stack) {
+        return flowManager.triggerPillarConfigurationUpdate(stack.getId());
+    }
 }

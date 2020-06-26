@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigurationUpdateEvent.PILLAR_CONFIG_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_UPSCALE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeEvent.CLUSTER_CREDENTIALCHANGE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
@@ -265,6 +266,11 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerSaltUpdate(Long stackId) {
         String selector = SALT_UPDATE_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
+    }
+
+    public FlowIdentifier triggerPillarConfigurationUpdate(Long stackId) {
+        String selector = PILLAR_CONFIG_UPDATE_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 

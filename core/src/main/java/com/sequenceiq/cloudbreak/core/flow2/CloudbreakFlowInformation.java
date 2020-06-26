@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminati
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleConfig;
@@ -63,7 +64,7 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
             ClusterStartFlowConfig.class, ClusterStopFlowConfig.class,
             ClusterUpscaleFlowConfig.class, ClusterDownscaleFlowConfig.class,
             ClusterUpgradeFlowConfig.class, ClusterResetFlowConfig.class, ChangePrimaryGatewayFlowConfig.class,
-            ClusterCertificateRenewFlowConfig.class, DatabaseBackupFlowConfig.class, DatabaseRestoreFlowConfig.class
+            ClusterCertificateRenewFlowConfig.class, DatabaseBackupFlowConfig.class, DatabaseRestoreFlowConfig.class, PillarConfigUpdateFlowConfig.class
     );
 
     @Inject

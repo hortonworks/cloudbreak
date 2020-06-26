@@ -229,6 +229,11 @@ public class StackOperations implements ResourceBasedCrnProvider {
         return clusterCommonService.updateSalt(nameOrCrn, workspaceId);
     }
 
+    public FlowIdentifier updatePillarConfiguration(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        LOGGER.debug("Starting pillar configuration update: " + nameOrCrn);
+        return clusterCommonService.updatePillarConfiguration(nameOrCrn, workspaceId);
+    }
+
     public UpgradeV4Response checkForClusterUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request) {
         if (nameOrCrn.hasName()) {
             String stackName = nameOrCrn.getName();
