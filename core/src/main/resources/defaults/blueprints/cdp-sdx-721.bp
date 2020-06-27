@@ -64,17 +64,35 @@
           {
             "base": true,
             "refName": "ranger-RANGER_USERSYNC-BASE",
-            "roleType": "RANGER_USERSYNC"
+            "roleType": "RANGER_USERSYNC",
+            "configs": [
+              {
+                "name" : "role_config_suppression_ranger_usersync_max_heap_size",
+                "value" : "true"
+              }
+            ]
           },
           {
             "base": true,
             "refName": "ranger-RANGER_TAGSYNC-BASE",
-            "roleType": "RANGER_TAGSYNC"
+            "roleType": "RANGER_TAGSYNC",
+            "configs": [
+              {
+                "name": "role_config_suppression_ranger_tagsync_max_heap_size",
+                "value": "true"
+              }
+            ]
           },
           {
             "base": true,
             "refName": "ranger-RANGER_ADMIN-BASE",
-            "roleType": "RANGER_ADMIN"
+            "roleType": "RANGER_ADMIN",
+            "configs": [
+              {
+                "name": "role_config_suppression_ranger_admin_max_heap_size",
+                "value": "true"
+              }
+            ]
           }
         ],
         "serviceConfigs": [
@@ -111,6 +129,10 @@
           {
             "base": true,
             "configs": [
+              {
+                "name": "role_config_suppression_atlas_max_heap_size",
+                "value": "true"
+              },
               {
                 "name": "atlas_authentication_method_file",
                 "value": "false"
@@ -189,6 +211,12 @@
             "roleType": "HBASETHRIFTSERVER"
           }
         ],
+        "serviceConfigs": [
+          {
+            "name": "service_config_suppression_hadoop_secure_web_ui",
+            "value": "true"
+          }
+        ],
         "serviceType": "HBASE"
       },
       {
@@ -197,7 +225,13 @@
           {
             "base": true,
             "refName": "hdfs-NAMENODE-BASE",
-            "roleType": "NAMENODE"
+            "roleType": "NAMENODE",
+            "configs": [
+              {
+                "name": "role_config_suppression_namenode_java_heapsize_minimum_validator",
+                "value": "true"
+              }
+            ]
           },
           {
             "base": true,
@@ -224,6 +258,14 @@
             {
                 "name": "enable_ranger_authorization",
                 "value": "true"
+            },
+            {
+              "name": "service_health_suppression_hdfs_verify_ec_with_topology",
+              "value": "true"
+            },
+            {
+              "name": "service_config_suppression_datanode_count_validator",
+              "value": "true"
             }
         ],
         "serviceType": "HDFS"
