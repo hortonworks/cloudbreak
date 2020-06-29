@@ -285,9 +285,10 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     }
 
     @Override
-    public Optional<TagsResponse> getTagsResponse() {
+    public String getTagValue(String key) {
         return Optional.ofNullable(tags)
-                .map(TagsV4Response::getUserDefined);
+                .map(t -> t.getTagValue(key))
+                .orElse(null);
     }
 
     public TelemetryResponse getTelemetry() {

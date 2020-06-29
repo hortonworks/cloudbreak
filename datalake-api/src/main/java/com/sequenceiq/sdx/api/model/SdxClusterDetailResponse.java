@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
-import com.sequenceiq.common.api.tag.response.TagsResponse;
 
 public class SdxClusterDetailResponse extends SdxClusterResponse implements TaggedResponse {
 
@@ -32,7 +31,9 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
     }
 
     @Override
-    public Optional<TagsResponse> getTagsResponse() {
-        return stackV4Response.getTagsResponse();
+    public String getTagValue(String key) {
+        return Optional.ofNullable(stackV4Response.getTags())
+                .map(tags -> tags.getTagValue(key))
+                .orElse(null);
     }
 }

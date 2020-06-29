@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
-import com.sequenceiq.common.api.tag.response.TagsResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -49,7 +48,7 @@ class TagsUtilTest {
 
         underTest.addTestNameTag(testDto, TEST_NAME);
 
-        assertThat(request.getTags().getTagValue(TagsUtil.TEST_NAME_TAG))
+        assertThat(request.getTags().get(TagsUtil.TEST_NAME_TAG))
                 .isEqualTo(TEST_NAME);
     }
 
@@ -74,7 +73,7 @@ class TagsUtilTest {
         DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
         StackV4Response response = new StackV4Response();
         TagsV4Response tags = new TagsV4Response();
-        tags.setUserDefined(new TagsResponse(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME)));
+        tags.setUserDefined(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME));
         response.setTags(tags);
         testDto.setResponse(response);
 

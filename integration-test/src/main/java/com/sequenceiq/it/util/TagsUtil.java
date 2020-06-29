@@ -1,15 +1,12 @@
 package com.sequenceiq.it.util;
 
-import static org.testng.Assert.assertTrue;
-
-import java.util.Optional;
+import static org.testng.Assert.assertNotNull;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
-import com.sequenceiq.common.api.tag.response.TagsResponse;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 
@@ -62,7 +59,6 @@ public class TagsUtil {
     }
 
     private void verifyTestNameTag(TaggedResponse response) {
-        Optional<TagsResponse> tagsResponse = response.getTagsResponse();
-        assertTrue(tagsResponse.isPresent() && tagsResponse.get().hasTag(TEST_NAME_TAG), MISSING_TEST_NAME_TAG_MESSAGE);
+        assertNotNull(response.getTagValue(TEST_NAME_TAG), MISSING_TEST_NAME_TAG_MESSAGE);
     }
 }
