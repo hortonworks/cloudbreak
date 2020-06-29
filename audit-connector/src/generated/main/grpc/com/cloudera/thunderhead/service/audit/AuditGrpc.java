@@ -217,78 +217,78 @@ public final class AuditGrpc {
      return getListEventsMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getConfigureExportMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse> METHOD_CONFIGURE_EXPORT = getConfigureExportMethodHelper();
+  @java.lang.Deprecated // Use {@link #getConfigureArchivingMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest,
+      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> METHOD_CONFIGURE_ARCHIVING = getConfigureArchivingMethodHelper();
 
-  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse> getConfigureExportMethod;
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest,
+      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> getConfigureArchivingMethod;
 
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse> getConfigureExportMethod() {
-    return getConfigureExportMethodHelper();
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest,
+      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> getConfigureArchivingMethod() {
+    return getConfigureArchivingMethodHelper();
   }
 
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse> getConfigureExportMethodHelper() {
-    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse> getConfigureExportMethod;
-    if ((getConfigureExportMethod = AuditGrpc.getConfigureExportMethod) == null) {
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest,
+      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> getConfigureArchivingMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> getConfigureArchivingMethod;
+    if ((getConfigureArchivingMethod = AuditGrpc.getConfigureArchivingMethod) == null) {
       synchronized (AuditGrpc.class) {
-        if ((getConfigureExportMethod = AuditGrpc.getConfigureExportMethod) == null) {
-          AuditGrpc.getConfigureExportMethod = getConfigureExportMethod = 
-              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse>newBuilder()
+        if ((getConfigureArchivingMethod = AuditGrpc.getConfigureArchivingMethod) == null) {
+          AuditGrpc.getConfigureArchivingMethod = getConfigureArchivingMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "audit.Audit", "ConfigureExport"))
+                  "audit.Audit", "ConfigureArchiving"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest.getDefaultInstance()))
+                  com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuditMethodDescriptorSupplier("ConfigureExport"))
+                  com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new AuditMethodDescriptorSupplier("ConfigureArchiving"))
                   .build();
           }
         }
      }
-     return getConfigureExportMethod;
+     return getConfigureArchivingMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetExportConfigMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse> METHOD_GET_EXPORT_CONFIG = getGetExportConfigMethodHelper();
+  @java.lang.Deprecated // Use {@link #getGetArchivingConfigMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest,
+      com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> METHOD_GET_ARCHIVING_CONFIG = getGetArchivingConfigMethodHelper();
 
-  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse> getGetExportConfigMethod;
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest,
+      com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> getGetArchivingConfigMethod;
 
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse> getGetExportConfigMethod() {
-    return getGetExportConfigMethodHelper();
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest,
+      com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> getGetArchivingConfigMethod() {
+    return getGetArchivingConfigMethodHelper();
   }
 
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse> getGetExportConfigMethodHelper() {
-    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest, com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse> getGetExportConfigMethod;
-    if ((getGetExportConfigMethod = AuditGrpc.getGetExportConfigMethod) == null) {
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest,
+      com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> getGetArchivingConfigMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest, com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> getGetArchivingConfigMethod;
+    if ((getGetArchivingConfigMethod = AuditGrpc.getGetArchivingConfigMethod) == null) {
       synchronized (AuditGrpc.class) {
-        if ((getGetExportConfigMethod = AuditGrpc.getGetExportConfigMethod) == null) {
-          AuditGrpc.getGetExportConfigMethod = getGetExportConfigMethod = 
-              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest, com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse>newBuilder()
+        if ((getGetArchivingConfigMethod = AuditGrpc.getGetArchivingConfigMethod) == null) {
+          AuditGrpc.getGetArchivingConfigMethod = getGetArchivingConfigMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest, com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "audit.Audit", "GetExportConfig"))
+                  "audit.Audit", "GetArchivingConfig"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest.getDefaultInstance()))
+                  com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuditMethodDescriptorSupplier("GetExportConfig"))
+                  com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new AuditMethodDescriptorSupplier("GetArchivingConfig"))
                   .build();
           }
         }
      }
-     return getGetExportConfigMethod;
+     return getGetArchivingConfigMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getArchiveAuditEventsMethod()} instead. 
@@ -412,22 +412,22 @@ public final class AuditGrpc {
 
     /**
      * <pre>
-     * Configure the audit service for exporting audit logs.
+     * Configure the audit service for archiving audit logs.
      * </pre>
      */
-    public void configureExport(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest request,
-        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getConfigureExportMethodHelper(), responseObserver);
+    public void configureArchiving(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getConfigureArchivingMethodHelper(), responseObserver);
     }
 
     /**
      * <pre>
-     * Retrieve the current export configuration.
+     * Retrieve the current archiving configuration.
      * </pre>
      */
-    public void getExportConfig(com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest request,
-        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetExportConfigMethodHelper(), responseObserver);
+    public void getArchivingConfig(com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetArchivingConfigMethodHelper(), responseObserver);
     }
 
     /**
@@ -478,19 +478,19 @@ public final class AuditGrpc {
                 com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse>(
                   this, METHODID_LIST_EVENTS)))
           .addMethod(
-            getConfigureExportMethodHelper(),
+            getConfigureArchivingMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
-                com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest,
-                com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse>(
-                  this, METHODID_CONFIGURE_EXPORT)))
+                com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest,
+                com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse>(
+                  this, METHODID_CONFIGURE_ARCHIVING)))
           .addMethod(
-            getGetExportConfigMethodHelper(),
+            getGetArchivingConfigMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
-                com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest,
-                com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse>(
-                  this, METHODID_GET_EXPORT_CONFIG)))
+                com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest,
+                com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse>(
+                  this, METHODID_GET_ARCHIVING_CONFIG)))
           .addMethod(
             getArchiveAuditEventsMethodHelper(),
             asyncUnaryCall(
@@ -582,24 +582,24 @@ public final class AuditGrpc {
 
     /**
      * <pre>
-     * Configure the audit service for exporting audit logs.
+     * Configure the audit service for archiving audit logs.
      * </pre>
      */
-    public void configureExport(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest request,
-        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse> responseObserver) {
+    public void configureArchiving(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> responseObserver) {
       asyncUnaryCall(
-          getChannel().newCall(getConfigureExportMethodHelper(), getCallOptions()), request, responseObserver);
+          getChannel().newCall(getConfigureArchivingMethodHelper(), getCallOptions()), request, responseObserver);
     }
 
     /**
      * <pre>
-     * Retrieve the current export configuration.
+     * Retrieve the current archiving configuration.
      * </pre>
      */
-    public void getExportConfig(com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest request,
-        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse> responseObserver) {
+    public void getArchivingConfig(com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> responseObserver) {
       asyncUnaryCall(
-          getChannel().newCall(getGetExportConfigMethodHelper(), getCallOptions()), request, responseObserver);
+          getChannel().newCall(getGetArchivingConfigMethodHelper(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -689,22 +689,22 @@ public final class AuditGrpc {
 
     /**
      * <pre>
-     * Configure the audit service for exporting audit logs.
+     * Configure the audit service for archiving audit logs.
      * </pre>
      */
-    public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse configureExport(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest request) {
+    public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse configureArchiving(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest request) {
       return blockingUnaryCall(
-          getChannel(), getConfigureExportMethodHelper(), getCallOptions(), request);
+          getChannel(), getConfigureArchivingMethodHelper(), getCallOptions(), request);
     }
 
     /**
      * <pre>
-     * Retrieve the current export configuration.
+     * Retrieve the current archiving configuration.
      * </pre>
      */
-    public com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse getExportConfig(com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest request) {
+    public com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse getArchivingConfig(com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest request) {
       return blockingUnaryCall(
-          getChannel(), getGetExportConfigMethodHelper(), getCallOptions(), request);
+          getChannel(), getGetArchivingConfigMethodHelper(), getCallOptions(), request);
     }
 
     /**
@@ -798,24 +798,24 @@ public final class AuditGrpc {
 
     /**
      * <pre>
-     * Configure the audit service for exporting audit logs.
+     * Configure the audit service for archiving audit logs.
      * </pre>
      */
-    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse> configureExport(
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> configureArchiving(
+        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest request) {
       return futureUnaryCall(
-          getChannel().newCall(getConfigureExportMethodHelper(), getCallOptions()), request);
+          getChannel().newCall(getConfigureArchivingMethodHelper(), getCallOptions()), request);
     }
 
     /**
      * <pre>
-     * Retrieve the current export configuration.
+     * Retrieve the current archiving configuration.
      * </pre>
      */
-    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse> getExportConfig(
-        com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> getArchivingConfig(
+        com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest request) {
       return futureUnaryCall(
-          getChannel().newCall(getGetExportConfigMethodHelper(), getCallOptions()), request);
+          getChannel().newCall(getGetArchivingConfigMethodHelper(), getCallOptions()), request);
     }
 
     /**
@@ -835,8 +835,8 @@ public final class AuditGrpc {
   private static final int METHODID_CREATE_ATTEMPT_AUDIT_EVENT = 2;
   private static final int METHODID_UPDATE_ATTEMPT_AUDIT_EVENT_WITH_RESULT = 3;
   private static final int METHODID_LIST_EVENTS = 4;
-  private static final int METHODID_CONFIGURE_EXPORT = 5;
-  private static final int METHODID_GET_EXPORT_CONFIG = 6;
+  private static final int METHODID_CONFIGURE_ARCHIVING = 5;
+  private static final int METHODID_GET_ARCHIVING_CONFIG = 6;
   private static final int METHODID_ARCHIVE_AUDIT_EVENTS = 7;
 
   private static final class MethodHandlers<Req, Resp> implements
@@ -876,13 +876,13 @@ public final class AuditGrpc {
           serviceImpl.listEvents((com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse>) responseObserver);
           break;
-        case METHODID_CONFIGURE_EXPORT:
-          serviceImpl.configureExport((com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest) request,
-              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse>) responseObserver);
+        case METHODID_CONFIGURE_ARCHIVING:
+          serviceImpl.configureArchiving((com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse>) responseObserver);
           break;
-        case METHODID_GET_EXPORT_CONFIG:
-          serviceImpl.getExportConfig((com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest) request,
-              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse>) responseObserver);
+        case METHODID_GET_ARCHIVING_CONFIG:
+          serviceImpl.getArchivingConfig((com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse>) responseObserver);
           break;
         case METHODID_ARCHIVE_AUDIT_EVENTS:
           serviceImpl.archiveAuditEvents((com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest) request,
@@ -954,8 +954,8 @@ public final class AuditGrpc {
               .addMethod(getCreateAttemptAuditEventMethodHelper())
               .addMethod(getUpdateAttemptAuditEventWithResultMethodHelper())
               .addMethod(getListEventsMethodHelper())
-              .addMethod(getConfigureExportMethodHelper())
-              .addMethod(getGetExportConfigMethodHelper())
+              .addMethod(getConfigureArchivingMethodHelper())
+              .addMethod(getGetArchivingConfigMethodHelper())
               .addMethod(getArchiveAuditEventsMethodHelper())
               .build();
         }

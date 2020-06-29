@@ -11,95 +11,97 @@ import "version.proto";
 // For future compatibility, all rpcs must take a request and return a response
 // even if there is initially no content for these messages.
 service Audit {
-  // Get the service version.
-  rpc GetVersion (version.VersionRequest)
-      returns (version.VersionResponse) {}
+    // Get the service version.
+    rpc GetVersion (version.VersionRequest)
+    returns (version.VersionResponse) {}
 
-  // Create a new standalone audit event.
-  rpc CreateAuditEvent(CreateAuditEventRequest)
-      returns (CreateAuditEventResponse) {}
+    // Create a new standalone audit event.
+    rpc CreateAuditEvent(CreateAuditEventRequest)
+    returns (CreateAuditEventResponse) {}
 
-  // Create a new attempt audit event. This call is normally followed by a
-  // call to UpdateAttemptAuditEventWithResult.
-  rpc CreateAttemptAuditEvent(CreateAttemptAuditEventRequest)
-      returns (CreateAttemptAuditEventResponse) {}
+    // Create a new attempt audit event. This call is normally followed by a
+    // call to UpdateAttemptAuditEventWithResult.
+    rpc CreateAttemptAuditEvent(CreateAttemptAuditEventRequest)
+    returns (CreateAttemptAuditEventResponse) {}
 
-  // Update an existing attempt audit event with result data.
-  rpc UpdateAttemptAuditEventWithResult(UpdateAttemptAuditEventWithResultRequest)
-      returns (UpdateAttemptAuditEventWithResultResponse) {}
+    // Update an existing attempt audit event with result data.
+    rpc UpdateAttemptAuditEventWithResult(UpdateAttemptAuditEventWithResultRequest)
+    returns (UpdateAttemptAuditEventWithResultResponse) {}
 
-  // List audit events.
-  rpc ListEvents (ListEventsRequest)
-      returns (ListEventsResponse) {
-    option (options.MethodExtension.paginates) = true;
-    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
-  }
+    // List audit events.
+    rpc ListEvents (ListEventsRequest)
+    returns (ListEventsResponse) {
+        option (options.MethodExtension.paginates) = true;
+        option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    }
 
-  // Configure the audit service for exporting audit logs.
-  rpc ConfigureExport (ConfigureExportRequest)
-      returns (ConfigureExportResponse) {
-  }
+    // Configure the audit service for archiving audit logs.
+    rpc ConfigureArchiving (ConfigureArchivingRequest)
+    returns (ConfigureArchivingResponse) {
+    }
 
-  // Retrieve the current export configuration.
-  rpc GetExportConfig (GetExportConfigRequest)
-      returns (GetExportConfigResponse) {
-  }
+    // Retrieve the current archiving configuration.
+    rpc GetArchivingConfig (GetArchivingConfigRequest)
+    returns (GetArchivingConfigResponse) {
+    }
 
-  // Archive audit events.
-  rpc ArchiveAuditEvents (ArchiveAuditEventsRequest)
-      returns (ArchiveAuditEventsResponse) {}
+    // Archive audit events.
+    rpc ArchiveAuditEvents (ArchiveAuditEventsRequest)
+    returns (ArchiveAuditEventsResponse) {}
 }
 
 // ========================================================================
 // SECTION 1. EXPORT MODEL
 //
-// These messages pertain to configuring export of audit events to customer
+// These messages pertain to configuring archiving of audit events to customer
 // cloud storage.
 // ========================================================================
 
-// Object for holding configuration information for the audit service.
-// [API analog: ConfigInfo]
-message ConfigInfo {
-  // The destination for the logs, e.g. S3 bucket name
-  string storageLocation = 1;
-  // The credential name or CRN to use
-  string credentialName = 2;
-  // Flag to enable/disable the export process
-  bool enabled = 3;
-  // The region for the logs, e.g. S3 region
-  string storageRegion = 4;
+// Object for holding archiving configuration information for the audit service.
+// [API analog: ArchivingConfigInfo]
+message ArchivingConfigInfo {
+    // The destination for the logs, e.g. S3 bucket name
+    string storageLocation = 1;
+    // The credential name or CRN to use
+    string credentialName = 2;
+    // Flag to enable/disable the archiving process
+    bool enabled = 3;
+    // The region to work with when accessing the logs, e.g. S3 region
+    string storageRegion = 4;
 }
 
-// Request object for the ConfigureExport method.
-// [API analog: ConfigureExportRequest]
-message ConfigureExportRequest {
-  // The destination for the logs, e.g. S3 bucket name
-  string storageLocation = 1;
-  // The credential name or CRN to use
-  string credentialName = 2;
-  // Flag to enable/disable the export process
-  bool enabled = 3;
-  // The region for the logs, e.g. S3 region
-  string storageRegion = 4;
+// Request object for the ConfigureArchiving method.
+// [API analog: ConfigureArchivingRequest]
+message ConfigureArchivingRequest {
+    // The destination for the logs, e.g. S3 bucket name
+    string storageLocation = 1;
+    // The credential name or CRN to use
+    string credentialName = 2;
+    // Flag to enable/disable the archiving process
+    bool enabled = 3;
+    // The region for the logs, e.g. S3 region
+    string storageRegion = 4;
+    // Whether to only verify the configuration, and not update it.
+    bool verifyOnly = 5;
 }
 
-// Response object for the ConfigureExport method.
-// [API analog: ConfigureExportResponse]
-message ConfigureExportResponse {
-  // The configuration information
-  ConfigInfo configuration = 1;
+// Response object for the ConfigureArchiving method.
+// [API analog: ConfigureArchivingResponse]
+message ConfigureArchivingResponse {
+    // The configuration information
+    ArchivingConfigInfo configuration = 1;
 }
 
-// Request object for the GetExportConfig method.
-// [API analog: GetExportConfigRequest]
-message GetExportConfigRequest {
+// Request object for the GetArchivingConfig method.
+// [API analog: GetArchivingConfigRequest]
+message GetArchivingConfigRequest {
 }
 
-// Response object for the GetExportConfig method.
-// [API analog: GetExportConfigResponse]
-message GetExportConfigResponse {
-  // The configuration information
-  ConfigInfo configuration = 1;
+// Response object for the GetArchivingConfig method.
+// [API analog: GetArchivingConfigResponse]
+message GetArchivingConfigResponse {
+    // The configuration information
+    ArchivingConfigInfo configuration = 1;
 }
 
 // ========================================================================
@@ -112,7 +114,7 @@ message GetExportConfigResponse {
 
 // Request to create a standalone audit event.
 message CreateAuditEventRequest {
-  AuditEvent auditEvent = 1;
+    AuditEvent auditEvent = 1;
 }
 
 // Response from creating a standalone audit event.
@@ -121,7 +123,7 @@ message CreateAuditEventResponse {
 
 // Request to create an attempt audit event.
 message CreateAttemptAuditEventRequest {
-  AuditEvent auditEvent = 1;
+    AuditEvent auditEvent = 1;
 }
 
 // Response from creating an attempt audit event.
@@ -130,7 +132,7 @@ message CreateAttemptAuditEventResponse {
 
 // Request to update an existing attempt audit event with result data.
 message UpdateAttemptAuditEventWithResultRequest {
-  AttemptAuditEventResult result = 1;
+    AttemptAuditEventResult result = 1;
 }
 
 // Response from updating an existing attempt audit event with result data.
@@ -139,31 +141,33 @@ message UpdateAttemptAuditEventWithResultResponse {
 
 // Request to list audit events. [API analog: ListEventsRequest]
 message ListEventsRequest {
-  // The beginning POSIX epoch time, in milliseconds, for the search range.
-  int64 fromTimestamp = 1;
-  // The ending POSIX epoch time, in milliseconds, for the search range.
-  int64 toTimestamp = 2;
-  // The account ID to retrieve events from.
-  string accountId = 3;
-  // The page size.
-  int32 pageSize = 4;
-  // The page token.
-  string pageToken = 5;
-  // The optional request ID. If specified, only events associated with this
-  // request ID are returned.
-  string requestId = 6;
-  // The optional source service. If specified, only events associated with this
-  // event source are returned. The source must be the name of a service as
-  // enumerated in the CRN definition.
-  string eventSource = 7;
+    // The beginning POSIX epoch time, in milliseconds, for the search range
+    // (inclusive).
+    int64 fromTimestamp = 1;
+    // The ending POSIX epoch time, in milliseconds, for the search range
+    // (exclusive).
+    int64 toTimestamp = 2;
+    // The account ID to retrieve events from.
+    string accountId = 3;
+    // The page size.
+    int32 pageSize = 4;
+    // The page token.
+    string pageToken = 5;
+    // The optional request ID. If specified, only events associated with this
+    // request ID are returned.
+    string requestId = 6;
+    // The optional source service. If specified, only events associated with this
+    // event source are returned. The source must be the name of a service as
+    // enumerated in the CRN definition.
+    string eventSource = 7;
 }
 
 // The response from listing audit events. [API analog: ListEventsResponse]
 message ListEventsResponse {
-  // The audit events that satisfy the query.
-  repeated CdpAuditEvent auditEvent = 1;
-  // The page token for requesting the next page of results.
-  string nextPageToken = 2;
+    // The audit events that satisfy the query.
+    repeated CdpAuditEvent auditEvent = 1;
+    // The page token for requesting the next page of results.
+    string nextPageToken = 2;
 }
 
 // Recorded information about an action, as submitted to the audit service.
@@ -172,157 +176,159 @@ message ListEventsResponse {
 // later. Control plane services use this message to submit audit data.
 // [Public model analog: CdpAuditEvent]
 message AuditEvent {
-  reserved 7;
-  // UUID for this event.
-  string id = 1;
-  // The Unix timestamp, in milliseconds (UTC), when the event occurred.
-  int64 timestamp = 2;
-  // Account id in which this event occurred.
-  string accountId = 3;
-  // Id of the request that initiated this event. Optional.
-  string requestId = 5;
-  // The name of the event. Each service defines all its audit event names.
-  string eventName = 6;
-  // The source IP address of the request leading to this event. Optional.
-  string sourceIPAddress = 8;
-  // The source service of the event. It must be the name of a service as
-  // enumerated in the CRN definition.
-  string eventSource = 9;
-  // The actor who initiated this event.
-  oneof actor {
-    // The CRN of the actor who initiated this event.
-    string actorCrn = 4;
-    // The name of the service that initiated this event. It must be the name
-    // of a service as enumerated in the CRN definition.
-    string actorServiceName = 10;
-  }
-  oneof EventType {
-    // Information specific to an API request.
-    ApiRequestData apiRequestData = 11;
-    // Information specific to a service event.
-    ServiceEventData serviceEventData = 12;
-    // Information specific to an interactive login event.
-    InteractiveLoginEventData interactiveLoginEventData = 13;
-  }
+    reserved 7;
+    // UUID for this event.
+    string id = 1;
+    // The Unix timestamp, in milliseconds (UTC), when the event occurred.
+    int64 timestamp = 2;
+    // Account id in which this event occurred.
+    string accountId = 3;
+    // Id of the request that initiated this event. Optional.
+    string requestId = 5;
+    // The name of the event. Each service defines all its audit event names.
+    string eventName = 6;
+    // The source IP address of the request leading to this event. Optional.
+    string sourceIPAddress = 8;
+    // The source service of the event. It must be the name of a service as
+    // enumerated in the CRN definition.
+    string eventSource = 9;
+    // The actor who initiated this event.
+    oneof actor {
+        // The CRN of the actor who initiated this event.
+        string actorCrn = 4;
+        // The name of the service that initiated this event. It must be the name
+        // of a service as enumerated in the CRN definition.
+        string actorServiceName = 10;
+    }
+    oneof EventType {
+        // Information specific to an API request.
+        ApiRequestData apiRequestData = 11;
+        // Information specific to a service event.
+        ServiceEventData serviceEventData = 12;
+        // Information specific to an interactive login event.
+        InteractiveLoginEventData interactiveLoginEventData = 13;
+    }
 }
 
 // Additional information about an audit event sent by control plane services
 // which is not directly triggered by an API request. [Public model
 // analog: CdpServiceEvent]
 message ServiceEventData {
-  // The schema version of the event details for this service event. Maintained
-  // by the service.
-  string detailsVersion = 1;
-  // Optional, opaque JSON that contains additional details for an audit event.
-  // Each service defines the structure of details for its audit events. It
-  // is strongly recommended that control plane service authors use versioned
-  // protobuf, and use code supplied by the audit service
-  // (AuditClient.printDetails) to convert protobuf details into JSON and to
-  // produce user-facing documentation.
-  string eventDetails = 2;
+    // The schema version of the event details for this service event. Maintained
+    // by the service.
+    string detailsVersion = 1;
+    // Optional, opaque JSON that contains additional details for an audit event.
+    // Each service defines the structure of details for its audit events. It
+    // is strongly recommended that control plane service authors use versioned
+    // protobuf, and use code supplied by the audit service
+    // (AuditClient.printDetails) to convert protobuf details into JSON and to
+    // produce user-facing documentation.
+    string eventDetails = 2;
 }
 
 // Additional information for an audit event for API requests. [Public model
 // analog: ApiRequestEvent]
 message ApiRequestData {
-  // The API request parameters.
-  string requestParameters = 1;
-  // Whether the request mutates the state of resources.
-  bool mutating = 2;
-  // The API version associated with the request.
-  string apiVersion = 3;
-  // The user agent that made the API request.
-  string userAgent = 4;
+    // The API request parameters.
+    string requestParameters = 1;
+    // Whether the request mutates the state of resources.
+    bool mutating = 2;
+    // The API version associated with the request.
+    string apiVersion = 3;
+    // The user agent that made the API request.
+    string userAgent = 4;
 }
 
 // Additional information for an audit event for interactive login events.
 // [Public model analog: InteractiveLoginEvent]
 message InteractiveLoginEventData {
-  reserved 5;
-  // The identity provider CRN used to interactively login. For Cloudera SSO the
-  // ID is 'crn:altus:iam:us-west-1:altus:samlProvider:cloudera-sso'. For
-  // identity provider connectors the connector's CRN is used.
-  string identityProviderCrn = 1;
-  // The identity provider session ID for this interactive login request. For
-  // SAML 2.0 identity federation this is the SessionIndex of the SAML
-  // AuthnResponse.
-  string identityProviderSessionId = 2;
-  // The user ID as indicated by the identity provider. The specific format and
-  // type of this identifier is determined by the IdP. For Cloudera SSO this is
-  // the email used to login.
-  string identityProviderUserId = 3;
-  // The email of the user as provided to CDP.
-  string email = 4;
-  // The first name of the user, if provided.
-  string firstName = 6;
-  // The last name of the user, if provided.
-  string lastName = 7;
-  // A list of group names the user belongs to as received in CDP. Only available
-  // for non Cloudera SSO login events.
-  repeated string groups = 8;
+    reserved 5;
+    // The identity provider CRN used to interactively login. For Cloudera SSO the
+    // ID is 'crn:altus:iam:us-west-1:altus:samlProvider:cloudera-sso'. For
+    // identity provider connectors the connector's CRN is used.
+    string identityProviderCrn = 1;
+    // The identity provider session ID for this interactive login request. For
+    // SAML 2.0 identity federation this is the SessionIndex of the SAML
+    // AuthnResponse.
+    string identityProviderSessionId = 2;
+    // The user ID as indicated by the identity provider. The specific format and
+    // type of this identifier is determined by the IdP. For Cloudera SSO this is
+    // the email used to login.
+    string identityProviderUserId = 3;
+    // The email of the user as provided to CDP.
+    string email = 4;
+    // The first name of the user, if provided.
+    string firstName = 6;
+    // The last name of the user, if provided.
+    string lastName = 7;
+    // A list of group names the user belongs to as received in CDP. Only available
+    // for non Cloudera SSO login events.
+    repeated string groups = 8;
+    // The Azure Object Id of the user, if provided.
+    string azureObjectId = 9;
 }
 
 // Result information corresponding to a previous attempt audit event.
 message AttemptAuditEventResult {
-  reserved 2,3,4,5,6,7,8,9,10,13;
-  // The event ID of the corresponding attempt audit event.
-  string id = 1;
-  // The Unix timestamp, in milliseconds (UTC), when the result occurred.
-  int64 resultTimestamp = 11;
-  // Result code.
-  string resultCode = 12;
-  // Optional result message, a short message (about one sentence) describing
-  // the result.
-  string resultMessage = 14;
-  oneof EventType {
-    // Information specific to an API request.
-    ResultApiRequestData resultApiRequestData = 15;
-    // Information about a service event result.
-    ResultServiceEventData resultServiceEventData = 16;
-    // Information about an interactive login event result.
-    ResultInteractiveLoginEventData resultInteractiveLoginEventData = 17;
-  }
+    reserved 2,3,4,5,6,7,8,9,10,13;
+    // The event ID of the corresponding attempt audit event.
+    string id = 1;
+    // The Unix timestamp, in milliseconds (UTC), when the result occurred.
+    int64 resultTimestamp = 11;
+    // Result code.
+    string resultCode = 12;
+    // Optional result message, a short message (about one sentence) describing
+    // the result.
+    string resultMessage = 14;
+    oneof EventType {
+        // Information specific to an API request.
+        ResultApiRequestData resultApiRequestData = 15;
+        // Information about a service event result.
+        ResultServiceEventData resultServiceEventData = 16;
+        // Information about an interactive login event result.
+        ResultInteractiveLoginEventData resultInteractiveLoginEventData = 17;
+    }
 }
 
 // Additional information for audit event result data for API requests.
 // [Public model analog: ApiRequestEvent]
 message ResultApiRequestData {
-  // The API response parameters.
-  string responseParameters = 1;
+    // The API response parameters.
+    string responseParameters = 1;
 }
 
 // Additional information for audit event result data sent by control plane
 // services which is not directly triggered by an API request.
 // [Public model analog: CdpServiceEvent]
 message ResultServiceEventData {
-  // The CRNs of the resources operated on.
-  repeated string resourceCrn = 1;
-  // Optional, opaque JSON that contains additional details for the result.
-  // Each service defines the structure of details for its results. It is
-  // strongly recommended that control plane service authors use versioned
-  // protobuf, and use code supplied by the audit service
-  // (AuditClient.printDetails) to convert protobuf details into JSON and to
-  // produce user-facing documentation.
-  // Note that there is no schema version specified for the result details.
-  // Their schema version must match that of the attempt event details.
-  string resultDetails = 2;
+    // The CRNs of the resources operated on.
+    repeated string resourceCrn = 1;
+    // Optional, opaque JSON that contains additional details for the result.
+    // Each service defines the structure of details for its results. It is
+    // strongly recommended that control plane service authors use versioned
+    // protobuf, and use code supplied by the audit service
+    // (AuditClient.printDetails) to convert protobuf details into JSON and to
+    // produce user-facing documentation.
+    // Note that there is no schema version specified for the result details.
+    // Their schema version must match that of the attempt event details.
+    string resultDetails = 2;
 }
 
 // Additional information for audit event result data for interactive login
 // events. [Public model analog: InteractiveLoginEvent]
 message ResultInteractiveLoginEventData {
-  // Whether the user was marked as account admin. Can only be 'true' for users
-  // using Cloudera SSO.
-  bool accountAdmin = 1;
-  // The CDP user CRN for the user. This may be empty if the login failed.
-  string userCrn = 2;
+    // Whether the user was marked as account admin. Can only be 'true' for users
+    // using Cloudera SSO.
+    bool accountAdmin = 1;
+    // The CDP user CRN for the user. This may be empty if the login failed.
+    string userCrn = 2;
 }
 
 // ========================================================================
 // SECTION 3. PUBLIC MODEL
 //
 // These messages are sent out by the audit service in response to listing
-// requests and for export to customer cloud storage. There are strong
+// requests and for archiving to customer cloud storage. There are strong
 // parallels between messages here and in the internal model, and exact
 // correspondence between messages here and in the public API model.
 // ========================================================================
@@ -331,19 +337,19 @@ message ResultInteractiveLoginEventData {
 // events are triggered by requests to public CDP API services. [Internal model
 // analogs: ApiRequestData, ResultApiRequestData] [API analog: ApiRequestEvent]
 message ApiRequestEvent {
-  reserved 7;
-  // The API request parameters.
-  string requestParameters = 1;
-  // The API response parameters.
-  string responseParameters = 2;
-  // Whether the request mutates the state of resources.
-  bool mutating = 3;
-  // The API version associated with the request.
-  string apiVersion = 4;
-  // The source IP address of the requester.
-  string sourceIPAddress = 5;
-  // The user agent that made the API request.
-  string userAgent = 6;
+    reserved 7;
+    // The API request parameters.
+    string requestParameters = 1;
+    // The API response parameters.
+    string responseParameters = 2;
+    // Whether the request mutates the state of resources.
+    bool mutating = 3;
+    // The API version associated with the request.
+    string apiVersion = 4;
+    // The source IP address of the requester.
+    string sourceIPAddress = 5;
+    // The user agent that made the API request.
+    string userAgent = 6;
 }
 
 // The public model for a service event, as a part of CdpAuditEvent. These
@@ -351,16 +357,16 @@ message ApiRequestEvent {
 // by a request to a public CDP API service. [Internal model analogs:
 // ServiceEventData, ResultServiceEventData] [API analog: CdpServiceEvent]
 message CdpServiceEvent {
-  // Optional JSON that contains additional details for an event and/or a result
-  // associated with the event. The contents of this field are a merging of
-  // event and result details. So, as in the internal model, each service
-  // defines the structure of details, preferably with versioned protobuf.
-  string additionalServiceEventDetails = 1;
-  // The CRNs of the resources operated on.
-  repeated string resourceCrn = 2;
-  // The schema version of the additional service event details for this service
-  // event. Maintained by the service.
-  string detailsVersion = 3;
+    // Optional JSON that contains additional details for an event and/or a result
+    // associated with the event. The contents of this field are a merging of
+    // event and result details. So, as in the internal model, each service
+    // defines the structure of details, preferably with versioned protobuf.
+    string additionalServiceEventDetails = 1;
+    // The CRNs of the resources operated on.
+    repeated string resourceCrn = 2;
+    // The schema version of the additional service event details for this service
+    // event. Maintained by the service.
+    string detailsVersion = 3;
 }
 
 // The public model for a login event, as a part of CdpAuditEvent. CDP logs
@@ -369,127 +375,123 @@ message CdpServiceEvent {
 // [Internal model analogs: InteractiveLoginData, ResultInteractiveLoginData]
 // [API analog: InteractiveLoginEvent]
 message InteractiveLoginEvent {
-  // The identity provider CRN used to interactively login. For Cloudera SSO the
-  // ID is 'crn:altus:iam:us-west-1:altus:samlProvider:cloudera-sso'. For
-  // identity provider connectors the connector's CRN is used.
-  string identityProviderCrn = 1;
-  // The identity provider session ID for this interactive login request. For
-  // SAML 2.0 identity federation this is the SessionIndex of the SAML
-  // AuthnResponse.
-  string identityProviderSessionId = 2;
-  // The user ID as indicated by the identity provider. The specific format and
-  // type of this identifier is determined by the IdP. For Cloudera SSO this is
-  // the email used to login.
-  string identityProviderUserId = 3;
-  // The email of the user as provided to CDP.
-  string email = 4;
-  // The source IP address from which the login request came from.
-  string sourceIPAddress = 5;
-  // The first name of the user, if provided.
-  string firstName = 6;
-  // The last name of the user, if provided.
-  string lastName = 7;
-  // Whether the user was marked as account admin. Can only be 'true' for users
-  // using Cloudera SSO.
-  bool accountAdmin = 8;
-  // A list of group names the user belongs to as received in CDP. Only available
-  // for non Cloudera SSO login events.
-  repeated string groups = 9;
-  // The CDP user CRN for the user. This may be empty if the login failed.
-  string userCrn = 10;
+    // The identity provider CRN used to interactively login. For Cloudera SSO the
+    // ID is 'crn:altus:iam:us-west-1:altus:samlProvider:cloudera-sso'. For
+    // identity provider connectors the connector's CRN is used.
+    string identityProviderCrn = 1;
+    // The identity provider session ID for this interactive login request. For
+    // SAML 2.0 identity federation this is the SessionIndex of the SAML
+    // AuthnResponse.
+    string identityProviderSessionId = 2;
+    // The user ID as indicated by the identity provider. The specific format and
+    // type of this identifier is determined by the IdP. For Cloudera SSO this is
+    // the email used to login.
+    string identityProviderUserId = 3;
+    // The email of the user as provided to CDP.
+    string email = 4;
+    // The source IP address from which the login request came from.
+    string sourceIPAddress = 5;
+    // The first name of the user, if provided.
+    string firstName = 6;
+    // The last name of the user, if provided.
+    string lastName = 7;
+    // Whether the user was marked as account admin. Can only be 'true' for users
+    // using Cloudera SSO.
+    bool accountAdmin = 8;
+    // A list of group names the user belongs to as received in CDP. Only available
+    // for non Cloudera SSO login events.
+    repeated string groups = 9;
+    // The CDP user CRN for the user. This may be empty if the login failed.
+    string userCrn = 10;
 }
 
 // Identity information about the actor that initiated an event. Only one of
 // the fields in this message may be set. [Internal model analog: "actor" oneof
 // in AuditEvent] [API analog: ActorIdentity]
 message ActorIdentity {
-  oneof actorType {
-    // The CRN of the actor who initiated this event.
-    string actorCrn = 1;
-    // The name of the service that initiated this event. It must be the name
-    // of a service as enumerated in the CRN definition.
-    string actorServiceName = 2;
-  }
+    oneof actorType {
+        // The CRN of the actor who initiated this event.
+        string actorCrn = 1;
+        // The name of the service that initiated this event. It must be the name
+        // of a service as enumerated in the CRN definition.
+        string actorServiceName = 2;
+    }
 }
 
 // The public model for an audit event. [Internal model analog: AuditEvent]
 message CdpAuditEvent {
-  // The version of the event structure.
-  string version = 1;
-  // UUID for this event.
-  string id = 2;
-  // The source service of the event. It must be the name of a service as
-  // enumerated in the CRN definition.
-  string eventSource = 3;
-  // The name of the event. Each source defines all its event names, and a name
-  // must be unique for its source.
-  string eventName = 4;
-  // The Unix timestamp, in milliseconds (UTC), when the event occurred.
-  int64 timestamp = 5;
-  // The actor who initiated this event.
-  ActorIdentity actorIdentity = 6;
-  // Account id in which this event occurred in.
-  string accountId = 7;
-  // Id of the request that initiated this event. Optional.
-  string requestId = 8;
-  // Optional result code.
-  string resultCode = 9;
-  // Optional result message, a short message (about one sentence) describing
-  // the result.
-  string resultMessage = 10;
-  // More information specific to the category of the audit event. Only one
-  // category is used.
-  oneof eventType {
-    // Information originating from an API request.
-    ApiRequestEvent apiRequestEvent = 11;
-    // Information originating from an event generated by a CDP service.
-    CdpServiceEvent cdpServiceEvent = 12;
-    // Information originating from a login event.
-    InteractiveLoginEvent interactiveLoginEvent = 13;
-  }
-  // The unique identifier assigned to the batch of audit events in which the
-  // audit event was archived
-  string archiveId = 14;
-  // The optional Unix timestamp, in milliseconds (UTC), when the audit event was archived
-  // to the object store.
-  oneof archiveTimestampOptional {
-    int64 archiveTimestamp = 15;
-  }
+    reserved 15;
+    // The version of the event structure.
+    string version = 1;
+    // UUID for this event.
+    string id = 2;
+    // The source service of the event. It must be the name of a service as
+    // enumerated in the CRN definition.
+    string eventSource = 3;
+    // The name of the event. Each source defines all its event names, and a name
+    // must be unique for its source.
+    string eventName = 4;
+    // The Unix timestamp, in milliseconds (UTC), when the event occurred.
+    int64 timestamp = 5;
+    // The actor who initiated this event.
+    ActorIdentity actorIdentity = 6;
+    // Account id in which this event occurred in.
+    string accountId = 7;
+    // Id of the request that initiated this event. Optional.
+    string requestId = 8;
+    // Optional result code.
+    string resultCode = 9;
+    // Optional result message, a short message (about one sentence) describing
+    // the result.
+    string resultMessage = 10;
+    // More information specific to the category of the audit event. Only one
+    // category is used.
+    oneof eventType {
+        // Information originating from an API request.
+        ApiRequestEvent apiRequestEvent = 11;
+        // Information originating from an event generated by a CDP service.
+        CdpServiceEvent cdpServiceEvent = 12;
+        // Information originating from a login event.
+        InteractiveLoginEvent interactiveLoginEvent = 13;
+    }
+    // The unique identifier assigned to the batch of audit events in which the
+    // audit event was archived
+    string archiveId = 14;
 }
 
 // ========================================================================
 // SECTION 4. ARCHIVE MODEL
 //
-// These messages pertain to control over archiving (i.e., export of audit
-// data to customer cloud storage).
+// These messages pertain to control over archiving (i.e., archiving of
+// audit data to customer cloud storage).
 // ========================================================================
 
 // Request to archive audit events.
 message ArchiveAuditEventsRequest {
-  // The beginning POSIX epoch time, in milliseconds, for the search range.
-  int64 fromTimestamp = 1;
-  // The ending POSIX epoch time, in milliseconds, for the search range.
-  int64 toTimestamp = 2;
-  // The account ID to retrieve events from.
-  string accountId = 3;
+    // The beginning POSIX epoch time, in milliseconds, for the search range.
+    int64 fromTimestamp = 1;
+    // The ending POSIX epoch time, in milliseconds, for the search range.
+    int64 toTimestamp = 2;
+    // The account ID to retrieve events from.
+    string accountId = 3;
 }
 
 // Response from archiving audit events.
 message ArchiveAuditEventsResponse {
-  // The number of events archived.
-  int64 eventCount = 1;
-  // The details about the batches of events archived.
-  repeated ArchiveAuditEventsBatchResponse eventBatches = 2;
+    // The number of events archived.
+    int64 eventCount = 1;
+    // The details about the batches of events archived.
+    repeated ArchiveAuditEventsBatchResponse eventBatches = 2;
 }
 
 // Information about a batch of audit events that were archived.
 message ArchiveAuditEventsBatchResponse {
-  // The account ID for which events were archived.
-  string accountId = 1;
-  // The number of events archived.
-  int64 eventCount = 2;
-  // The archive ID of the batch.
-  string archiveId = 3;
-  // The archive timestamp of the batch.
-  int64 archiveTimestamp = 4;
+    // The account ID for which events were archived.
+    string accountId = 1;
+    // The number of events archived.
+    int64 eventCount = 2;
+    // The archive ID of the batch.
+    string archiveId = 3;
+    // The archive timestamp of the batch.
+    int64 archiveTimestamp = 4;
 }
