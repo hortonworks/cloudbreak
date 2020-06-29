@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.common;
 
+import static java.lang.String.format;
+
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Set;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.StatusKind;
 
@@ -85,7 +89,61 @@ public enum Status {
                 || Status.STOP_FAILED.equals(this);
     }
 
+    @VisibleForTesting
+    static EnumSet<Status> mappableToFailed() {
+        return EnumSet.of(
+                REQUESTED,
+                CREATE_IN_PROGRESS,
+                UPDATE_IN_PROGRESS,
+                DELETE_IN_PROGRESS,
+                PRE_DELETE_IN_PROGRESS,
+                START_IN_PROGRESS,
+                STOP_IN_PROGRESS,
+                BACKUP_IN_PROGRESS,
+                RESTORE_IN_PROGRESS
+        );
+    }
+
+    @VisibleForTesting
+    static EnumSet<Status> notMappableToFailed() {
+        return EnumSet.of(
+                AVAILABLE,
+                UPDATE_REQUESTED,
+                UPDATE_FAILED,
+                BACKUP_FAILED,
+                RESTORE_FAILED,
+                CREATE_FAILED,
+                ENABLE_SECURITY_FAILED,
+                DELETE_FAILED,
+                DELETED_ON_PROVIDER_SIDE,
+                DELETE_COMPLETED,
+                STOPPED,
+                STOP_REQUESTED,
+                START_REQUESTED,
+                START_FAILED,
+                STOP_FAILED,
+                WAIT_FOR_SYNC,
+                MAINTENANCE_MODE_ENABLED,
+                AMBIGUOUS,
+                EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
+                EXTERNAL_DATABASE_CREATION_FAILED,
+                EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
+                EXTERNAL_DATABASE_DELETION_FINISHED,
+                EXTERNAL_DATABASE_DELETION_FAILED,
+                BACKUP_FAILED,
+                BACKUP_FINISHED,
+                RESTORE_FAILED,
+                RESTORE_FINISHED);
+    }
+
     public Status mapToFailedIfInProgress() {
+        if (mappableToFailed().contains(this)) {
+            return convertStatus();
+        }
+        return this;
+    }
+
+    private Status convertStatus() {
         switch (this) {
             case REQUESTED:
             case CREATE_IN_PROGRESS:
@@ -104,7 +162,7 @@ public enum Status {
             case RESTORE_IN_PROGRESS:
                 return RESTORE_FAILED;
             default:
-                return this;
+                throw new IllegalArgumentException(format("State '%s' is declared to mappable to failed state but not handled.", this));
         }
     }
 
