@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.microsoft.aad.adal4j.AuthenticationException;
+import com.microsoft.azure.CloudException;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
@@ -136,7 +137,15 @@ public class AzureClient {
     }
 
     public boolean resourceGroupExists(String name) {
-        return getResourceGroups().contain(name);
+        try {
+            return getResourceGroups().contain(name);
+        } catch (CloudException e) {
+            if (e.getMessage().contains("Status code 403")) {
+                LOGGER.info("Resource group {} does not exist or insufficient permission to access it, exception: {}", name, e);
+                return false;
+            }
+            throw e;
+        }
     }
 
     public boolean isResourceGroupEmpty(String name) {
@@ -558,7 +567,7 @@ public class AzureClient {
         networkInterfaces.loadAll();
         return networkInterfaces.stream()
                 .filter(networkInterface -> attachedNetworkInterfaces
-                .contains(networkInterface.name()))
+                        .contains(networkInterface.name()))
                 .collect(Collectors.toList());
     }
 
