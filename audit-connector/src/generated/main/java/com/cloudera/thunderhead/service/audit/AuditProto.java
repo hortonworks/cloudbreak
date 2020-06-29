@@ -14,8 +14,8 @@ public final class AuditProto {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
-  public interface ConfigInfoOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:audit.ConfigInfo)
+  public interface ArchivingConfigInfoOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:audit.ArchivingConfigInfo)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -56,7 +56,7 @@ public final class AuditProto {
 
     /**
      * <pre>
-     * Flag to enable/disable the export process
+     * Flag to enable/disable the archiving process
      * </pre>
      *
      * <code>bool enabled = 3;</code>
@@ -65,7 +65,7 @@ public final class AuditProto {
 
     /**
      * <pre>
-     * The region for the logs, e.g. S3 region
+     * The region to work with when accessing the logs, e.g. S3 region
      * </pre>
      *
      * <code>string storageRegion = 4;</code>
@@ -73,7 +73,7 @@ public final class AuditProto {
     java.lang.String getStorageRegion();
     /**
      * <pre>
-     * The region for the logs, e.g. S3 region
+     * The region to work with when accessing the logs, e.g. S3 region
      * </pre>
      *
      * <code>string storageRegion = 4;</code>
@@ -83,22 +83,22 @@ public final class AuditProto {
   }
   /**
    * <pre>
-   * Object for holding configuration information for the audit service.
-   * [API analog: ConfigInfo]
+   * Object for holding archiving configuration information for the audit service.
+   * [API analog: ArchivingConfigInfo]
    * </pre>
    *
-   * Protobuf type {@code audit.ConfigInfo}
+   * Protobuf type {@code audit.ArchivingConfigInfo}
    */
-  public  static final class ConfigInfo extends
+  public  static final class ArchivingConfigInfo extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:audit.ConfigInfo)
-      ConfigInfoOrBuilder {
+      // @@protoc_insertion_point(message_implements:audit.ArchivingConfigInfo)
+      ArchivingConfigInfoOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use ConfigInfo.newBuilder() to construct.
-    private ConfigInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use ArchivingConfigInfo.newBuilder() to construct.
+    private ArchivingConfigInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private ConfigInfo() {
+    private ArchivingConfigInfo() {
       storageLocation_ = "";
       credentialName_ = "";
       enabled_ = false;
@@ -110,7 +110,7 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private ConfigInfo(
+    private ArchivingConfigInfo(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -173,15 +173,15 @@ public final class AuditProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigInfo_descriptor;
+      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ArchivingConfigInfo_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigInfo_fieldAccessorTable
+      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ArchivingConfigInfo_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.class, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder.class);
+              com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.class, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder.class);
     }
 
     public static final int STORAGELOCATION_FIELD_NUMBER = 1;
@@ -272,7 +272,7 @@ public final class AuditProto {
     private boolean enabled_;
     /**
      * <pre>
-     * Flag to enable/disable the export process
+     * Flag to enable/disable the archiving process
      * </pre>
      *
      * <code>bool enabled = 3;</code>
@@ -285,7 +285,7 @@ public final class AuditProto {
     private volatile java.lang.Object storageRegion_;
     /**
      * <pre>
-     * The region for the logs, e.g. S3 region
+     * The region to work with when accessing the logs, e.g. S3 region
      * </pre>
      *
      * <code>string storageRegion = 4;</code>
@@ -304,7 +304,7 @@ public final class AuditProto {
     }
     /**
      * <pre>
-     * The region for the logs, e.g. S3 region
+     * The region to work with when accessing the logs, e.g. S3 region
      * </pre>
      *
      * <code>string storageRegion = 4;</code>
@@ -381,10 +381,10 @@ public final class AuditProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo)) {
+      if (!(obj instanceof com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo)) {
         return super.equals(obj);
       }
-      com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo other = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo) obj;
+      com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo other = (com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo) obj;
 
       boolean result = true;
       result = result && getStorageLocation()
@@ -420,69 +420,69 @@ public final class AuditProto {
       return hash;
     }
 
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parseFrom(byte[] data)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parseFrom(java.io.InputStream input)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parseDelimitedFrom(java.io.InputStream input)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parseDelimitedFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -495,7 +495,7 @@ public final class AuditProto {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo prototype) {
+    public static Builder newBuilder(com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -512,30 +512,30 @@ public final class AuditProto {
     }
     /**
      * <pre>
-     * Object for holding configuration information for the audit service.
-     * [API analog: ConfigInfo]
+     * Object for holding archiving configuration information for the audit service.
+     * [API analog: ArchivingConfigInfo]
      * </pre>
      *
-     * Protobuf type {@code audit.ConfigInfo}
+     * Protobuf type {@code audit.ArchivingConfigInfo}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:audit.ConfigInfo)
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder {
+        // @@protoc_insertion_point(builder_implements:audit.ArchivingConfigInfo)
+        com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigInfo_descriptor;
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ArchivingConfigInfo_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigInfo_fieldAccessorTable
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ArchivingConfigInfo_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.class, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder.class);
+                com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.class, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder.class);
       }
 
-      // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.newBuilder()
+      // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -567,17 +567,17 @@ public final class AuditProto {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigInfo_descriptor;
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ArchivingConfigInfo_descriptor;
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.getDefaultInstance();
+      public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo build() {
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo result = buildPartial();
+      public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo build() {
+        com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -585,8 +585,8 @@ public final class AuditProto {
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo buildPartial() {
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo result = new com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo(this);
+      public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo buildPartial() {
+        com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo result = new com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo(this);
         result.storageLocation_ = storageLocation_;
         result.credentialName_ = credentialName_;
         result.enabled_ = enabled_;
@@ -629,16 +629,16 @@ public final class AuditProto {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo) {
-          return mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo)other);
+        if (other instanceof com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo) {
+          return mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo other) {
-        if (other == com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.getDefaultInstance()) return this;
+      public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo other) {
+        if (other == com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.getDefaultInstance()) return this;
         if (!other.getStorageLocation().isEmpty()) {
           storageLocation_ = other.storageLocation_;
           onChanged();
@@ -669,11 +669,11 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo parsedMessage = null;
+        com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo) e.getUnfinishedMessage();
+          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -864,7 +864,7 @@ public final class AuditProto {
       private boolean enabled_ ;
       /**
        * <pre>
-       * Flag to enable/disable the export process
+       * Flag to enable/disable the archiving process
        * </pre>
        *
        * <code>bool enabled = 3;</code>
@@ -874,7 +874,7 @@ public final class AuditProto {
       }
       /**
        * <pre>
-       * Flag to enable/disable the export process
+       * Flag to enable/disable the archiving process
        * </pre>
        *
        * <code>bool enabled = 3;</code>
@@ -887,7 +887,7 @@ public final class AuditProto {
       }
       /**
        * <pre>
-       * Flag to enable/disable the export process
+       * Flag to enable/disable the archiving process
        * </pre>
        *
        * <code>bool enabled = 3;</code>
@@ -902,7 +902,7 @@ public final class AuditProto {
       private java.lang.Object storageRegion_ = "";
       /**
        * <pre>
-       * The region for the logs, e.g. S3 region
+       * The region to work with when accessing the logs, e.g. S3 region
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
@@ -921,7 +921,7 @@ public final class AuditProto {
       }
       /**
        * <pre>
-       * The region for the logs, e.g. S3 region
+       * The region to work with when accessing the logs, e.g. S3 region
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
@@ -941,7 +941,7 @@ public final class AuditProto {
       }
       /**
        * <pre>
-       * The region for the logs, e.g. S3 region
+       * The region to work with when accessing the logs, e.g. S3 region
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
@@ -958,7 +958,7 @@ public final class AuditProto {
       }
       /**
        * <pre>
-       * The region for the logs, e.g. S3 region
+       * The region to work with when accessing the logs, e.g. S3 region
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
@@ -971,7 +971,7 @@ public final class AuditProto {
       }
       /**
        * <pre>
-       * The region for the logs, e.g. S3 region
+       * The region to work with when accessing the logs, e.g. S3 region
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
@@ -1000,48 +1000,48 @@ public final class AuditProto {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:audit.ConfigInfo)
+      // @@protoc_insertion_point(builder_scope:audit.ArchivingConfigInfo)
     }
 
-    // @@protoc_insertion_point(class_scope:audit.ConfigInfo)
-    private static final com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:audit.ArchivingConfigInfo)
+    private static final com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo();
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo();
     }
 
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo getDefaultInstance() {
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<ConfigInfo>
-        PARSER = new com.google.protobuf.AbstractParser<ConfigInfo>() {
+    private static final com.google.protobuf.Parser<ArchivingConfigInfo>
+        PARSER = new com.google.protobuf.AbstractParser<ArchivingConfigInfo>() {
       @java.lang.Override
-      public ConfigInfo parsePartialFrom(
+      public ArchivingConfigInfo parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ConfigInfo(input, extensionRegistry);
+        return new ArchivingConfigInfo(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<ConfigInfo> parser() {
+    public static com.google.protobuf.Parser<ArchivingConfigInfo> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<ConfigInfo> getParserForType() {
+    public com.google.protobuf.Parser<ArchivingConfigInfo> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo getDefaultInstanceForType() {
+    public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface ConfigureExportRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:audit.ConfigureExportRequest)
+  public interface ConfigureArchivingRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:audit.ConfigureArchivingRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -1082,7 +1082,7 @@ public final class AuditProto {
 
     /**
      * <pre>
-     * Flag to enable/disable the export process
+     * Flag to enable/disable the archiving process
      * </pre>
      *
      * <code>bool enabled = 3;</code>
@@ -1106,29 +1106,39 @@ public final class AuditProto {
      */
     com.google.protobuf.ByteString
         getStorageRegionBytes();
+
+    /**
+     * <pre>
+     * Whether to only verify the configuration, and not update it.
+     * </pre>
+     *
+     * <code>bool verifyOnly = 5;</code>
+     */
+    boolean getVerifyOnly();
   }
   /**
    * <pre>
-   * Request object for the ConfigureExport method.
-   * [API analog: ConfigureExportRequest]
+   * Request object for the ConfigureArchiving method.
+   * [API analog: ConfigureArchivingRequest]
    * </pre>
    *
-   * Protobuf type {@code audit.ConfigureExportRequest}
+   * Protobuf type {@code audit.ConfigureArchivingRequest}
    */
-  public  static final class ConfigureExportRequest extends
+  public  static final class ConfigureArchivingRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:audit.ConfigureExportRequest)
-      ConfigureExportRequestOrBuilder {
+      // @@protoc_insertion_point(message_implements:audit.ConfigureArchivingRequest)
+      ConfigureArchivingRequestOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use ConfigureExportRequest.newBuilder() to construct.
-    private ConfigureExportRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use ConfigureArchivingRequest.newBuilder() to construct.
+    private ConfigureArchivingRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private ConfigureExportRequest() {
+    private ConfigureArchivingRequest() {
       storageLocation_ = "";
       credentialName_ = "";
       enabled_ = false;
       storageRegion_ = "";
+      verifyOnly_ = false;
     }
 
     @java.lang.Override
@@ -1136,7 +1146,7 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private ConfigureExportRequest(
+    private ConfigureArchivingRequest(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -1178,6 +1188,11 @@ public final class AuditProto {
               storageRegion_ = s;
               break;
             }
+            case 40: {
+
+              verifyOnly_ = input.readBool();
+              break;
+            }
             default: {
               if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -1199,15 +1214,15 @@ public final class AuditProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureExportRequest_descriptor;
+      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureArchivingRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureExportRequest_fieldAccessorTable
+      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureArchivingRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest.class, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest.Builder.class);
+              com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest.class, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest.Builder.class);
     }
 
     public static final int STORAGELOCATION_FIELD_NUMBER = 1;
@@ -1298,7 +1313,7 @@ public final class AuditProto {
     private boolean enabled_;
     /**
      * <pre>
-     * Flag to enable/disable the export process
+     * Flag to enable/disable the archiving process
      * </pre>
      *
      * <code>bool enabled = 3;</code>
@@ -1349,6 +1364,19 @@ public final class AuditProto {
       }
     }
 
+    public static final int VERIFYONLY_FIELD_NUMBER = 5;
+    private boolean verifyOnly_;
+    /**
+     * <pre>
+     * Whether to only verify the configuration, and not update it.
+     * </pre>
+     *
+     * <code>bool verifyOnly = 5;</code>
+     */
+    public boolean getVerifyOnly() {
+      return verifyOnly_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1375,6 +1403,9 @@ public final class AuditProto {
       if (!getStorageRegionBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, storageRegion_);
       }
+      if (verifyOnly_ != false) {
+        output.writeBool(5, verifyOnly_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -1397,6 +1428,10 @@ public final class AuditProto {
       if (!getStorageRegionBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, storageRegion_);
       }
+      if (verifyOnly_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, verifyOnly_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -1407,10 +1442,10 @@ public final class AuditProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest)) {
+      if (!(obj instanceof com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest)) {
         return super.equals(obj);
       }
-      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest other = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest) obj;
+      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest other = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest) obj;
 
       boolean result = true;
       result = result && getStorageLocation()
@@ -1421,6 +1456,8 @@ public final class AuditProto {
           == other.getEnabled());
       result = result && getStorageRegion()
           .equals(other.getStorageRegion());
+      result = result && (getVerifyOnly()
+          == other.getVerifyOnly());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -1441,74 +1478,77 @@ public final class AuditProto {
           getEnabled());
       hash = (37 * hash) + STORAGEREGION_FIELD_NUMBER;
       hash = (53 * hash) + getStorageRegion().hashCode();
+      hash = (37 * hash) + VERIFYONLY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getVerifyOnly());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parseFrom(byte[] data)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parseFrom(java.io.InputStream input)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parseDelimitedFrom(java.io.InputStream input)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parseDelimitedFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1521,7 +1561,7 @@ public final class AuditProto {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest prototype) {
+    public static Builder newBuilder(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -1538,30 +1578,30 @@ public final class AuditProto {
     }
     /**
      * <pre>
-     * Request object for the ConfigureExport method.
-     * [API analog: ConfigureExportRequest]
+     * Request object for the ConfigureArchiving method.
+     * [API analog: ConfigureArchivingRequest]
      * </pre>
      *
-     * Protobuf type {@code audit.ConfigureExportRequest}
+     * Protobuf type {@code audit.ConfigureArchivingRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:audit.ConfigureExportRequest)
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequestOrBuilder {
+        // @@protoc_insertion_point(builder_implements:audit.ConfigureArchivingRequest)
+        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureExportRequest_descriptor;
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureArchivingRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureExportRequest_fieldAccessorTable
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureArchivingRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest.class, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest.Builder.class);
+                com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest.class, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest.Builder.class);
       }
 
-      // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest.newBuilder()
+      // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -1587,23 +1627,25 @@ public final class AuditProto {
 
         storageRegion_ = "";
 
+        verifyOnly_ = false;
+
         return this;
       }
 
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureExportRequest_descriptor;
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureArchivingRequest_descriptor;
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest.getDefaultInstance();
+      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest build() {
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest result = buildPartial();
+      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest build() {
+        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -1611,12 +1653,13 @@ public final class AuditProto {
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest buildPartial() {
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest result = new com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest(this);
+      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest buildPartial() {
+        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest result = new com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest(this);
         result.storageLocation_ = storageLocation_;
         result.credentialName_ = credentialName_;
         result.enabled_ = enabled_;
         result.storageRegion_ = storageRegion_;
+        result.verifyOnly_ = verifyOnly_;
         onBuilt();
         return result;
       }
@@ -1655,16 +1698,16 @@ public final class AuditProto {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest) {
-          return mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest)other);
+        if (other instanceof com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest other) {
-        if (other == com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest.getDefaultInstance()) return this;
+      public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest other) {
+        if (other == com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest.getDefaultInstance()) return this;
         if (!other.getStorageLocation().isEmpty()) {
           storageLocation_ = other.storageLocation_;
           onChanged();
@@ -1679,6 +1722,9 @@ public final class AuditProto {
         if (!other.getStorageRegion().isEmpty()) {
           storageRegion_ = other.storageRegion_;
           onChanged();
+        }
+        if (other.getVerifyOnly() != false) {
+          setVerifyOnly(other.getVerifyOnly());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -1695,11 +1741,11 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest parsedMessage = null;
+        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest) e.getUnfinishedMessage();
+          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -1890,7 +1936,7 @@ public final class AuditProto {
       private boolean enabled_ ;
       /**
        * <pre>
-       * Flag to enable/disable the export process
+       * Flag to enable/disable the archiving process
        * </pre>
        *
        * <code>bool enabled = 3;</code>
@@ -1900,7 +1946,7 @@ public final class AuditProto {
       }
       /**
        * <pre>
-       * Flag to enable/disable the export process
+       * Flag to enable/disable the archiving process
        * </pre>
        *
        * <code>bool enabled = 3;</code>
@@ -1913,7 +1959,7 @@ public final class AuditProto {
       }
       /**
        * <pre>
-       * Flag to enable/disable the export process
+       * Flag to enable/disable the archiving process
        * </pre>
        *
        * <code>bool enabled = 3;</code>
@@ -2013,6 +2059,44 @@ public final class AuditProto {
         onChanged();
         return this;
       }
+
+      private boolean verifyOnly_ ;
+      /**
+       * <pre>
+       * Whether to only verify the configuration, and not update it.
+       * </pre>
+       *
+       * <code>bool verifyOnly = 5;</code>
+       */
+      public boolean getVerifyOnly() {
+        return verifyOnly_;
+      }
+      /**
+       * <pre>
+       * Whether to only verify the configuration, and not update it.
+       * </pre>
+       *
+       * <code>bool verifyOnly = 5;</code>
+       */
+      public Builder setVerifyOnly(boolean value) {
+        
+        verifyOnly_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Whether to only verify the configuration, and not update it.
+       * </pre>
+       *
+       * <code>bool verifyOnly = 5;</code>
+       */
+      public Builder clearVerifyOnly() {
+        
+        verifyOnly_ = false;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -2026,48 +2110,48 @@ public final class AuditProto {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:audit.ConfigureExportRequest)
+      // @@protoc_insertion_point(builder_scope:audit.ConfigureArchivingRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:audit.ConfigureExportRequest)
-    private static final com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:audit.ConfigureArchivingRequest)
+    private static final com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest();
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest();
     }
 
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest getDefaultInstance() {
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<ConfigureExportRequest>
-        PARSER = new com.google.protobuf.AbstractParser<ConfigureExportRequest>() {
+    private static final com.google.protobuf.Parser<ConfigureArchivingRequest>
+        PARSER = new com.google.protobuf.AbstractParser<ConfigureArchivingRequest>() {
       @java.lang.Override
-      public ConfigureExportRequest parsePartialFrom(
+      public ConfigureArchivingRequest parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ConfigureExportRequest(input, extensionRegistry);
+        return new ConfigureArchivingRequest(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<ConfigureExportRequest> parser() {
+    public static com.google.protobuf.Parser<ConfigureArchivingRequest> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<ConfigureExportRequest> getParserForType() {
+    public com.google.protobuf.Parser<ConfigureArchivingRequest> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportRequest getDefaultInstanceForType() {
+    public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface ConfigureExportResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:audit.ConfigureExportResponse)
+  public interface ConfigureArchivingResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:audit.ConfigureArchivingResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -2075,7 +2159,7 @@ public final class AuditProto {
      * The configuration information
      * </pre>
      *
-     * <code>.audit.ConfigInfo configuration = 1;</code>
+     * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
     boolean hasConfiguration();
     /**
@@ -2083,36 +2167,36 @@ public final class AuditProto {
      * The configuration information
      * </pre>
      *
-     * <code>.audit.ConfigInfo configuration = 1;</code>
+     * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
-    com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo getConfiguration();
+    com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getConfiguration();
     /**
      * <pre>
      * The configuration information
      * </pre>
      *
-     * <code>.audit.ConfigInfo configuration = 1;</code>
+     * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
-    com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder getConfigurationOrBuilder();
+    com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder getConfigurationOrBuilder();
   }
   /**
    * <pre>
-   * Response object for the ConfigureExport method.
-   * [API analog: ConfigureExportResponse]
+   * Response object for the ConfigureArchiving method.
+   * [API analog: ConfigureArchivingResponse]
    * </pre>
    *
-   * Protobuf type {@code audit.ConfigureExportResponse}
+   * Protobuf type {@code audit.ConfigureArchivingResponse}
    */
-  public  static final class ConfigureExportResponse extends
+  public  static final class ConfigureArchivingResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:audit.ConfigureExportResponse)
-      ConfigureExportResponseOrBuilder {
+      // @@protoc_insertion_point(message_implements:audit.ConfigureArchivingResponse)
+      ConfigureArchivingResponseOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use ConfigureExportResponse.newBuilder() to construct.
-    private ConfigureExportResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use ConfigureArchivingResponse.newBuilder() to construct.
+    private ConfigureArchivingResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private ConfigureExportResponse() {
+    private ConfigureArchivingResponse() {
     }
 
     @java.lang.Override
@@ -2120,7 +2204,7 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private ConfigureExportResponse(
+    private ConfigureArchivingResponse(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2140,11 +2224,11 @@ public final class AuditProto {
               done = true;
               break;
             case 10: {
-              com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder subBuilder = null;
+              com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder subBuilder = null;
               if (configuration_ != null) {
                 subBuilder = configuration_.toBuilder();
               }
-              configuration_ = input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.parser(), extensionRegistry);
+              configuration_ = input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(configuration_);
                 configuration_ = subBuilder.buildPartial();
@@ -2173,25 +2257,25 @@ public final class AuditProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureExportResponse_descriptor;
+      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureArchivingResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureExportResponse_fieldAccessorTable
+      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureArchivingResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse.class, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse.Builder.class);
+              com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse.class, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse.Builder.class);
     }
 
     public static final int CONFIGURATION_FIELD_NUMBER = 1;
-    private com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo configuration_;
+    private com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo configuration_;
     /**
      * <pre>
      * The configuration information
      * </pre>
      *
-     * <code>.audit.ConfigInfo configuration = 1;</code>
+     * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
     public boolean hasConfiguration() {
       return configuration_ != null;
@@ -2201,19 +2285,19 @@ public final class AuditProto {
      * The configuration information
      * </pre>
      *
-     * <code>.audit.ConfigInfo configuration = 1;</code>
+     * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
-    public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo getConfiguration() {
-      return configuration_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.getDefaultInstance() : configuration_;
+    public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getConfiguration() {
+      return configuration_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.getDefaultInstance() : configuration_;
     }
     /**
      * <pre>
      * The configuration information
      * </pre>
      *
-     * <code>.audit.ConfigInfo configuration = 1;</code>
+     * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
-    public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder getConfigurationOrBuilder() {
+    public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder getConfigurationOrBuilder() {
       return getConfiguration();
     }
 
@@ -2257,10 +2341,10 @@ public final class AuditProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse)) {
+      if (!(obj instanceof com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse)) {
         return super.equals(obj);
       }
-      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse) obj;
+      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse) obj;
 
       boolean result = true;
       result = result && (hasConfiguration() == other.hasConfiguration());
@@ -2288,69 +2372,69 @@ public final class AuditProto {
       return hash;
     }
 
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parseFrom(byte[] data)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parseFrom(java.io.InputStream input)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parseDelimitedFrom(java.io.InputStream input)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parseDelimitedFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2363,7 +2447,7 @@ public final class AuditProto {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse prototype) {
+    public static Builder newBuilder(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -2380,30 +2464,30 @@ public final class AuditProto {
     }
     /**
      * <pre>
-     * Response object for the ConfigureExport method.
-     * [API analog: ConfigureExportResponse]
+     * Response object for the ConfigureArchiving method.
+     * [API analog: ConfigureArchivingResponse]
      * </pre>
      *
-     * Protobuf type {@code audit.ConfigureExportResponse}
+     * Protobuf type {@code audit.ConfigureArchivingResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:audit.ConfigureExportResponse)
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponseOrBuilder {
+        // @@protoc_insertion_point(builder_implements:audit.ConfigureArchivingResponse)
+        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureExportResponse_descriptor;
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureArchivingResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureExportResponse_fieldAccessorTable
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureArchivingResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse.class, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse.Builder.class);
+                com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse.class, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse.Builder.class);
       }
 
-      // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse.newBuilder()
+      // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -2433,17 +2517,17 @@ public final class AuditProto {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureExportResponse_descriptor;
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureArchivingResponse_descriptor;
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse.getDefaultInstance();
+      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse build() {
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse result = buildPartial();
+      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse build() {
+        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -2451,8 +2535,8 @@ public final class AuditProto {
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse buildPartial() {
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse result = new com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse(this);
+      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse buildPartial() {
+        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse result = new com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse(this);
         if (configurationBuilder_ == null) {
           result.configuration_ = configuration_;
         } else {
@@ -2496,16 +2580,16 @@ public final class AuditProto {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse) {
-          return mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse)other);
+        if (other instanceof com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse other) {
-        if (other == com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse.getDefaultInstance()) return this;
+      public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse other) {
+        if (other == com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse.getDefaultInstance()) return this;
         if (other.hasConfiguration()) {
           mergeConfiguration(other.getConfiguration());
         }
@@ -2524,11 +2608,11 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse parsedMessage = null;
+        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse) e.getUnfinishedMessage();
+          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -2538,15 +2622,15 @@ public final class AuditProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo configuration_ = null;
+      private com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo configuration_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder> configurationBuilder_;
+          com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder> configurationBuilder_;
       /**
        * <pre>
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
       public boolean hasConfiguration() {
         return configurationBuilder_ != null || configuration_ != null;
@@ -2556,11 +2640,11 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo getConfiguration() {
+      public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getConfiguration() {
         if (configurationBuilder_ == null) {
-          return configuration_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.getDefaultInstance() : configuration_;
+          return configuration_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.getDefaultInstance() : configuration_;
         } else {
           return configurationBuilder_.getMessage();
         }
@@ -2570,9 +2654,9 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
-      public Builder setConfiguration(com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo value) {
+      public Builder setConfiguration(com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo value) {
         if (configurationBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -2590,10 +2674,10 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
       public Builder setConfiguration(
-          com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder builderForValue) {
+          com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder builderForValue) {
         if (configurationBuilder_ == null) {
           configuration_ = builderForValue.build();
           onChanged();
@@ -2608,13 +2692,13 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
-      public Builder mergeConfiguration(com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo value) {
+      public Builder mergeConfiguration(com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo value) {
         if (configurationBuilder_ == null) {
           if (configuration_ != null) {
             configuration_ =
-              com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.newBuilder(configuration_).mergeFrom(value).buildPartial();
+              com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.newBuilder(configuration_).mergeFrom(value).buildPartial();
           } else {
             configuration_ = value;
           }
@@ -2630,7 +2714,7 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
       public Builder clearConfiguration() {
         if (configurationBuilder_ == null) {
@@ -2648,9 +2732,9 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder getConfigurationBuilder() {
+      public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder getConfigurationBuilder() {
         
         onChanged();
         return getConfigurationFieldBuilder().getBuilder();
@@ -2660,14 +2744,14 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder getConfigurationOrBuilder() {
+      public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder getConfigurationOrBuilder() {
         if (configurationBuilder_ != null) {
           return configurationBuilder_.getMessageOrBuilder();
         } else {
           return configuration_ == null ?
-              com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.getDefaultInstance() : configuration_;
+              com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.getDefaultInstance() : configuration_;
         }
       }
       /**
@@ -2675,14 +2759,14 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder> 
+          com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder> 
           getConfigurationFieldBuilder() {
         if (configurationBuilder_ == null) {
           configurationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder>(
+              com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder>(
                   getConfiguration(),
                   getParentForChildren(),
                   isClean());
@@ -2703,68 +2787,68 @@ public final class AuditProto {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:audit.ConfigureExportResponse)
+      // @@protoc_insertion_point(builder_scope:audit.ConfigureArchivingResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:audit.ConfigureExportResponse)
-    private static final com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:audit.ConfigureArchivingResponse)
+    private static final com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse();
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse();
     }
 
-    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse getDefaultInstance() {
+    public static com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<ConfigureExportResponse>
-        PARSER = new com.google.protobuf.AbstractParser<ConfigureExportResponse>() {
+    private static final com.google.protobuf.Parser<ConfigureArchivingResponse>
+        PARSER = new com.google.protobuf.AbstractParser<ConfigureArchivingResponse>() {
       @java.lang.Override
-      public ConfigureExportResponse parsePartialFrom(
+      public ConfigureArchivingResponse parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ConfigureExportResponse(input, extensionRegistry);
+        return new ConfigureArchivingResponse(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<ConfigureExportResponse> parser() {
+    public static com.google.protobuf.Parser<ConfigureArchivingResponse> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<ConfigureExportResponse> getParserForType() {
+    public com.google.protobuf.Parser<ConfigureArchivingResponse> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureExportResponse getDefaultInstanceForType() {
+    public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface GetExportConfigRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:audit.GetExportConfigRequest)
+  public interface GetArchivingConfigRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:audit.GetArchivingConfigRequest)
       com.google.protobuf.MessageOrBuilder {
   }
   /**
    * <pre>
-   * Request object for the GetExportConfig method.
-   * [API analog: GetExportConfigRequest]
+   * Request object for the GetArchivingConfig method.
+   * [API analog: GetArchivingConfigRequest]
    * </pre>
    *
-   * Protobuf type {@code audit.GetExportConfigRequest}
+   * Protobuf type {@code audit.GetArchivingConfigRequest}
    */
-  public  static final class GetExportConfigRequest extends
+  public  static final class GetArchivingConfigRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:audit.GetExportConfigRequest)
-      GetExportConfigRequestOrBuilder {
+      // @@protoc_insertion_point(message_implements:audit.GetArchivingConfigRequest)
+      GetArchivingConfigRequestOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use GetExportConfigRequest.newBuilder() to construct.
-    private GetExportConfigRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use GetArchivingConfigRequest.newBuilder() to construct.
+    private GetArchivingConfigRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private GetExportConfigRequest() {
+    private GetArchivingConfigRequest() {
     }
 
     @java.lang.Override
@@ -2772,7 +2856,7 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private GetExportConfigRequest(
+    private GetArchivingConfigRequest(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2811,15 +2895,15 @@ public final class AuditProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetExportConfigRequest_descriptor;
+      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetArchivingConfigRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetExportConfigRequest_fieldAccessorTable
+      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetArchivingConfigRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest.class, com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest.Builder.class);
+              com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest.class, com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest.Builder.class);
     }
 
     private byte memoizedIsInitialized = -1;
@@ -2855,10 +2939,10 @@ public final class AuditProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest)) {
+      if (!(obj instanceof com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest)) {
         return super.equals(obj);
       }
-      com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest other = (com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest) obj;
+      com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest other = (com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest) obj;
 
       boolean result = true;
       result = result && unknownFields.equals(other.unknownFields);
@@ -2877,69 +2961,69 @@ public final class AuditProto {
       return hash;
     }
 
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parseFrom(byte[] data)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parseFrom(java.io.InputStream input)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parseDelimitedFrom(java.io.InputStream input)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parseDelimitedFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2952,7 +3036,7 @@ public final class AuditProto {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest prototype) {
+    public static Builder newBuilder(com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -2969,30 +3053,30 @@ public final class AuditProto {
     }
     /**
      * <pre>
-     * Request object for the GetExportConfig method.
-     * [API analog: GetExportConfigRequest]
+     * Request object for the GetArchivingConfig method.
+     * [API analog: GetArchivingConfigRequest]
      * </pre>
      *
-     * Protobuf type {@code audit.GetExportConfigRequest}
+     * Protobuf type {@code audit.GetArchivingConfigRequest}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:audit.GetExportConfigRequest)
-        com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequestOrBuilder {
+        // @@protoc_insertion_point(builder_implements:audit.GetArchivingConfigRequest)
+        com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetExportConfigRequest_descriptor;
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetArchivingConfigRequest_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetExportConfigRequest_fieldAccessorTable
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetArchivingConfigRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest.class, com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest.Builder.class);
+                com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest.class, com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest.Builder.class);
       }
 
-      // Construct using com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest.newBuilder()
+      // Construct using com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -3016,17 +3100,17 @@ public final class AuditProto {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetExportConfigRequest_descriptor;
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetArchivingConfigRequest_descriptor;
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest.getDefaultInstance();
+      public com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest build() {
-        com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest result = buildPartial();
+      public com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest build() {
+        com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -3034,8 +3118,8 @@ public final class AuditProto {
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest buildPartial() {
-        com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest result = new com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest(this);
+      public com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest buildPartial() {
+        com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest result = new com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest(this);
         onBuilt();
         return result;
       }
@@ -3074,16 +3158,16 @@ public final class AuditProto {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest) {
-          return mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest)other);
+        if (other instanceof com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest other) {
-        if (other == com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest.getDefaultInstance()) return this;
+      public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest other) {
+        if (other == com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest.getDefaultInstance()) return this;
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -3099,11 +3183,11 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest parsedMessage = null;
+        com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest) e.getUnfinishedMessage();
+          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -3125,48 +3209,48 @@ public final class AuditProto {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:audit.GetExportConfigRequest)
+      // @@protoc_insertion_point(builder_scope:audit.GetArchivingConfigRequest)
     }
 
-    // @@protoc_insertion_point(class_scope:audit.GetExportConfigRequest)
-    private static final com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:audit.GetArchivingConfigRequest)
+    private static final com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest();
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest();
     }
 
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest getDefaultInstance() {
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<GetExportConfigRequest>
-        PARSER = new com.google.protobuf.AbstractParser<GetExportConfigRequest>() {
+    private static final com.google.protobuf.Parser<GetArchivingConfigRequest>
+        PARSER = new com.google.protobuf.AbstractParser<GetArchivingConfigRequest>() {
       @java.lang.Override
-      public GetExportConfigRequest parsePartialFrom(
+      public GetArchivingConfigRequest parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GetExportConfigRequest(input, extensionRegistry);
+        return new GetArchivingConfigRequest(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<GetExportConfigRequest> parser() {
+    public static com.google.protobuf.Parser<GetArchivingConfigRequest> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<GetExportConfigRequest> getParserForType() {
+    public com.google.protobuf.Parser<GetArchivingConfigRequest> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigRequest getDefaultInstanceForType() {
+    public com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
   }
 
-  public interface GetExportConfigResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:audit.GetExportConfigResponse)
+  public interface GetArchivingConfigResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:audit.GetArchivingConfigResponse)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -3174,7 +3258,7 @@ public final class AuditProto {
      * The configuration information
      * </pre>
      *
-     * <code>.audit.ConfigInfo configuration = 1;</code>
+     * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
     boolean hasConfiguration();
     /**
@@ -3182,36 +3266,36 @@ public final class AuditProto {
      * The configuration information
      * </pre>
      *
-     * <code>.audit.ConfigInfo configuration = 1;</code>
+     * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
-    com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo getConfiguration();
+    com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getConfiguration();
     /**
      * <pre>
      * The configuration information
      * </pre>
      *
-     * <code>.audit.ConfigInfo configuration = 1;</code>
+     * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
-    com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder getConfigurationOrBuilder();
+    com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder getConfigurationOrBuilder();
   }
   /**
    * <pre>
-   * Response object for the GetExportConfig method.
-   * [API analog: GetExportConfigResponse]
+   * Response object for the GetArchivingConfig method.
+   * [API analog: GetArchivingConfigResponse]
    * </pre>
    *
-   * Protobuf type {@code audit.GetExportConfigResponse}
+   * Protobuf type {@code audit.GetArchivingConfigResponse}
    */
-  public  static final class GetExportConfigResponse extends
+  public  static final class GetArchivingConfigResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:audit.GetExportConfigResponse)
-      GetExportConfigResponseOrBuilder {
+      // @@protoc_insertion_point(message_implements:audit.GetArchivingConfigResponse)
+      GetArchivingConfigResponseOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use GetExportConfigResponse.newBuilder() to construct.
-    private GetExportConfigResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use GetArchivingConfigResponse.newBuilder() to construct.
+    private GetArchivingConfigResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private GetExportConfigResponse() {
+    private GetArchivingConfigResponse() {
     }
 
     @java.lang.Override
@@ -3219,7 +3303,7 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private GetExportConfigResponse(
+    private GetArchivingConfigResponse(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -3239,11 +3323,11 @@ public final class AuditProto {
               done = true;
               break;
             case 10: {
-              com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder subBuilder = null;
+              com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder subBuilder = null;
               if (configuration_ != null) {
                 subBuilder = configuration_.toBuilder();
               }
-              configuration_ = input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.parser(), extensionRegistry);
+              configuration_ = input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(configuration_);
                 configuration_ = subBuilder.buildPartial();
@@ -3272,25 +3356,25 @@ public final class AuditProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetExportConfigResponse_descriptor;
+      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetArchivingConfigResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetExportConfigResponse_fieldAccessorTable
+      return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetArchivingConfigResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse.class, com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse.Builder.class);
+              com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse.class, com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse.Builder.class);
     }
 
     public static final int CONFIGURATION_FIELD_NUMBER = 1;
-    private com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo configuration_;
+    private com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo configuration_;
     /**
      * <pre>
      * The configuration information
      * </pre>
      *
-     * <code>.audit.ConfigInfo configuration = 1;</code>
+     * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
     public boolean hasConfiguration() {
       return configuration_ != null;
@@ -3300,19 +3384,19 @@ public final class AuditProto {
      * The configuration information
      * </pre>
      *
-     * <code>.audit.ConfigInfo configuration = 1;</code>
+     * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
-    public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo getConfiguration() {
-      return configuration_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.getDefaultInstance() : configuration_;
+    public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getConfiguration() {
+      return configuration_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.getDefaultInstance() : configuration_;
     }
     /**
      * <pre>
      * The configuration information
      * </pre>
      *
-     * <code>.audit.ConfigInfo configuration = 1;</code>
+     * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
-    public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder getConfigurationOrBuilder() {
+    public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder getConfigurationOrBuilder() {
       return getConfiguration();
     }
 
@@ -3356,10 +3440,10 @@ public final class AuditProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse)) {
+      if (!(obj instanceof com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse)) {
         return super.equals(obj);
       }
-      com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse) obj;
+      com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse) obj;
 
       boolean result = true;
       result = result && (hasConfiguration() == other.hasConfiguration());
@@ -3387,69 +3471,69 @@ public final class AuditProto {
       return hash;
     }
 
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parseFrom(byte[] data)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parseFrom(java.io.InputStream input)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parseDelimitedFrom(java.io.InputStream input)
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parseDelimitedFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parseFrom(
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -3462,7 +3546,7 @@ public final class AuditProto {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse prototype) {
+    public static Builder newBuilder(com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -3479,30 +3563,30 @@ public final class AuditProto {
     }
     /**
      * <pre>
-     * Response object for the GetExportConfig method.
-     * [API analog: GetExportConfigResponse]
+     * Response object for the GetArchivingConfig method.
+     * [API analog: GetArchivingConfigResponse]
      * </pre>
      *
-     * Protobuf type {@code audit.GetExportConfigResponse}
+     * Protobuf type {@code audit.GetArchivingConfigResponse}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:audit.GetExportConfigResponse)
-        com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponseOrBuilder {
+        // @@protoc_insertion_point(builder_implements:audit.GetArchivingConfigResponse)
+        com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetExportConfigResponse_descriptor;
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetArchivingConfigResponse_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetExportConfigResponse_fieldAccessorTable
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetArchivingConfigResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse.class, com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse.Builder.class);
+                com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse.class, com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse.Builder.class);
       }
 
-      // Construct using com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse.newBuilder()
+      // Construct using com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -3532,17 +3616,17 @@ public final class AuditProto {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetExportConfigResponse_descriptor;
+        return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetArchivingConfigResponse_descriptor;
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse.getDefaultInstance();
+      public com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse build() {
-        com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse result = buildPartial();
+      public com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse build() {
+        com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -3550,8 +3634,8 @@ public final class AuditProto {
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse buildPartial() {
-        com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse result = new com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse(this);
+      public com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse buildPartial() {
+        com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse result = new com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse(this);
         if (configurationBuilder_ == null) {
           result.configuration_ = configuration_;
         } else {
@@ -3595,16 +3679,16 @@ public final class AuditProto {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse) {
-          return mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse)other);
+        if (other instanceof com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse other) {
-        if (other == com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse.getDefaultInstance()) return this;
+      public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse other) {
+        if (other == com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse.getDefaultInstance()) return this;
         if (other.hasConfiguration()) {
           mergeConfiguration(other.getConfiguration());
         }
@@ -3623,11 +3707,11 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse parsedMessage = null;
+        com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse) e.getUnfinishedMessage();
+          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -3637,15 +3721,15 @@ public final class AuditProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo configuration_ = null;
+      private com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo configuration_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder> configurationBuilder_;
+          com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder> configurationBuilder_;
       /**
        * <pre>
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
       public boolean hasConfiguration() {
         return configurationBuilder_ != null || configuration_ != null;
@@ -3655,11 +3739,11 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo getConfiguration() {
+      public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getConfiguration() {
         if (configurationBuilder_ == null) {
-          return configuration_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.getDefaultInstance() : configuration_;
+          return configuration_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.getDefaultInstance() : configuration_;
         } else {
           return configurationBuilder_.getMessage();
         }
@@ -3669,9 +3753,9 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
-      public Builder setConfiguration(com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo value) {
+      public Builder setConfiguration(com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo value) {
         if (configurationBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -3689,10 +3773,10 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
       public Builder setConfiguration(
-          com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder builderForValue) {
+          com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder builderForValue) {
         if (configurationBuilder_ == null) {
           configuration_ = builderForValue.build();
           onChanged();
@@ -3707,13 +3791,13 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
-      public Builder mergeConfiguration(com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo value) {
+      public Builder mergeConfiguration(com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo value) {
         if (configurationBuilder_ == null) {
           if (configuration_ != null) {
             configuration_ =
-              com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.newBuilder(configuration_).mergeFrom(value).buildPartial();
+              com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.newBuilder(configuration_).mergeFrom(value).buildPartial();
           } else {
             configuration_ = value;
           }
@@ -3729,7 +3813,7 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
       public Builder clearConfiguration() {
         if (configurationBuilder_ == null) {
@@ -3747,9 +3831,9 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder getConfigurationBuilder() {
+      public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder getConfigurationBuilder() {
         
         onChanged();
         return getConfigurationFieldBuilder().getBuilder();
@@ -3759,14 +3843,14 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
-      public com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder getConfigurationOrBuilder() {
+      public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder getConfigurationOrBuilder() {
         if (configurationBuilder_ != null) {
           return configurationBuilder_.getMessageOrBuilder();
         } else {
           return configuration_ == null ?
-              com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.getDefaultInstance() : configuration_;
+              com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.getDefaultInstance() : configuration_;
         }
       }
       /**
@@ -3774,14 +3858,14 @@ public final class AuditProto {
        * The configuration information
        * </pre>
        *
-       * <code>.audit.ConfigInfo configuration = 1;</code>
+       * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder> 
+          com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder> 
           getConfigurationFieldBuilder() {
         if (configurationBuilder_ == null) {
           configurationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ConfigInfoOrBuilder>(
+              com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder>(
                   getConfiguration(),
                   getParentForChildren(),
                   isClean());
@@ -3802,41 +3886,41 @@ public final class AuditProto {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:audit.GetExportConfigResponse)
+      // @@protoc_insertion_point(builder_scope:audit.GetArchivingConfigResponse)
     }
 
-    // @@protoc_insertion_point(class_scope:audit.GetExportConfigResponse)
-    private static final com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:audit.GetArchivingConfigResponse)
+    private static final com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse();
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse();
     }
 
-    public static com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse getDefaultInstance() {
+    public static com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<GetExportConfigResponse>
-        PARSER = new com.google.protobuf.AbstractParser<GetExportConfigResponse>() {
+    private static final com.google.protobuf.Parser<GetArchivingConfigResponse>
+        PARSER = new com.google.protobuf.AbstractParser<GetArchivingConfigResponse>() {
       @java.lang.Override
-      public GetExportConfigResponse parsePartialFrom(
+      public GetArchivingConfigResponse parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GetExportConfigResponse(input, extensionRegistry);
+        return new GetArchivingConfigResponse(input, extensionRegistry);
       }
     };
 
-    public static com.google.protobuf.Parser<GetExportConfigResponse> parser() {
+    public static com.google.protobuf.Parser<GetArchivingConfigResponse> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<GetExportConfigResponse> getParserForType() {
+    public com.google.protobuf.Parser<GetArchivingConfigResponse> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.cloudera.thunderhead.service.audit.AuditProto.GetExportConfigResponse getDefaultInstanceForType() {
+    public com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -6953,7 +7037,8 @@ public final class AuditProto {
 
     /**
      * <pre>
-     * The beginning POSIX epoch time, in milliseconds, for the search range.
+     * The beginning POSIX epoch time, in milliseconds, for the search range
+     * (inclusive).
      * </pre>
      *
      * <code>int64 fromTimestamp = 1;</code>
@@ -6962,7 +7047,8 @@ public final class AuditProto {
 
     /**
      * <pre>
-     * The ending POSIX epoch time, in milliseconds, for the search range.
+     * The ending POSIX epoch time, in milliseconds, for the search range
+     * (exclusive).
      * </pre>
      *
      * <code>int64 toTimestamp = 2;</code>
@@ -7181,7 +7267,8 @@ public final class AuditProto {
     private long fromTimestamp_;
     /**
      * <pre>
-     * The beginning POSIX epoch time, in milliseconds, for the search range.
+     * The beginning POSIX epoch time, in milliseconds, for the search range
+     * (inclusive).
      * </pre>
      *
      * <code>int64 fromTimestamp = 1;</code>
@@ -7194,7 +7281,8 @@ public final class AuditProto {
     private long toTimestamp_;
     /**
      * <pre>
-     * The ending POSIX epoch time, in milliseconds, for the search range.
+     * The ending POSIX epoch time, in milliseconds, for the search range
+     * (exclusive).
      * </pre>
      *
      * <code>int64 toTimestamp = 2;</code>
@@ -7804,7 +7892,8 @@ public final class AuditProto {
       private long fromTimestamp_ ;
       /**
        * <pre>
-       * The beginning POSIX epoch time, in milliseconds, for the search range.
+       * The beginning POSIX epoch time, in milliseconds, for the search range
+       * (inclusive).
        * </pre>
        *
        * <code>int64 fromTimestamp = 1;</code>
@@ -7814,7 +7903,8 @@ public final class AuditProto {
       }
       /**
        * <pre>
-       * The beginning POSIX epoch time, in milliseconds, for the search range.
+       * The beginning POSIX epoch time, in milliseconds, for the search range
+       * (inclusive).
        * </pre>
        *
        * <code>int64 fromTimestamp = 1;</code>
@@ -7827,7 +7917,8 @@ public final class AuditProto {
       }
       /**
        * <pre>
-       * The beginning POSIX epoch time, in milliseconds, for the search range.
+       * The beginning POSIX epoch time, in milliseconds, for the search range
+       * (inclusive).
        * </pre>
        *
        * <code>int64 fromTimestamp = 1;</code>
@@ -7842,7 +7933,8 @@ public final class AuditProto {
       private long toTimestamp_ ;
       /**
        * <pre>
-       * The ending POSIX epoch time, in milliseconds, for the search range.
+       * The ending POSIX epoch time, in milliseconds, for the search range
+       * (exclusive).
        * </pre>
        *
        * <code>int64 toTimestamp = 2;</code>
@@ -7852,7 +7944,8 @@ public final class AuditProto {
       }
       /**
        * <pre>
-       * The ending POSIX epoch time, in milliseconds, for the search range.
+       * The ending POSIX epoch time, in milliseconds, for the search range
+       * (exclusive).
        * </pre>
        *
        * <code>int64 toTimestamp = 2;</code>
@@ -7865,7 +7958,8 @@ public final class AuditProto {
       }
       /**
        * <pre>
-       * The ending POSIX epoch time, in milliseconds, for the search range.
+       * The ending POSIX epoch time, in milliseconds, for the search range
+       * (exclusive).
        * </pre>
        *
        * <code>int64 toTimestamp = 2;</code>
@@ -14369,6 +14463,24 @@ public final class AuditProto {
      */
     com.google.protobuf.ByteString
         getGroupsBytes(int index);
+
+    /**
+     * <pre>
+     * The Azure Object Id of the user, if provided.
+     * </pre>
+     *
+     * <code>string azureObjectId = 9;</code>
+     */
+    java.lang.String getAzureObjectId();
+    /**
+     * <pre>
+     * The Azure Object Id of the user, if provided.
+     * </pre>
+     *
+     * <code>string azureObjectId = 9;</code>
+     */
+    com.google.protobuf.ByteString
+        getAzureObjectIdBytes();
   }
   /**
    * <pre>
@@ -14395,6 +14507,7 @@ public final class AuditProto {
       firstName_ = "";
       lastName_ = "";
       groups_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      azureObjectId_ = "";
     }
 
     @java.lang.Override
@@ -14464,6 +14577,12 @@ public final class AuditProto {
                 mutable_bitField0_ |= 0x00000040;
               }
               groups_.add(s);
+              break;
+            }
+            case 74: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              azureObjectId_ = s;
               break;
             }
             default: {
@@ -14815,6 +14934,48 @@ public final class AuditProto {
       return groups_.getByteString(index);
     }
 
+    public static final int AZUREOBJECTID_FIELD_NUMBER = 9;
+    private volatile java.lang.Object azureObjectId_;
+    /**
+     * <pre>
+     * The Azure Object Id of the user, if provided.
+     * </pre>
+     *
+     * <code>string azureObjectId = 9;</code>
+     */
+    public java.lang.String getAzureObjectId() {
+      java.lang.Object ref = azureObjectId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        azureObjectId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Azure Object Id of the user, if provided.
+     * </pre>
+     *
+     * <code>string azureObjectId = 9;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAzureObjectIdBytes() {
+      java.lang.Object ref = azureObjectId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        azureObjectId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -14849,6 +15010,9 @@ public final class AuditProto {
       }
       for (int i = 0; i < groups_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, groups_.getRaw(i));
+      }
+      if (!getAzureObjectIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, azureObjectId_);
       }
       unknownFields.writeTo(output);
     }
@@ -14885,6 +15049,9 @@ public final class AuditProto {
         size += dataSize;
         size += 1 * getGroupsList().size();
       }
+      if (!getAzureObjectIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, azureObjectId_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -14915,6 +15082,8 @@ public final class AuditProto {
           .equals(other.getLastName());
       result = result && getGroupsList()
           .equals(other.getGroupsList());
+      result = result && getAzureObjectId()
+          .equals(other.getAzureObjectId());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -14942,6 +15111,8 @@ public final class AuditProto {
         hash = (37 * hash) + GROUPS_FIELD_NUMBER;
         hash = (53 * hash) + getGroupsList().hashCode();
       }
+      hash = (37 * hash) + AZUREOBJECTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAzureObjectId().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -15094,6 +15265,8 @@ public final class AuditProto {
 
         groups_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000040);
+        azureObjectId_ = "";
+
         return this;
       }
 
@@ -15133,6 +15306,7 @@ public final class AuditProto {
           bitField0_ = (bitField0_ & ~0x00000040);
         }
         result.groups_ = groups_;
+        result.azureObjectId_ = azureObjectId_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -15214,6 +15388,10 @@ public final class AuditProto {
             ensureGroupsIsMutable();
             groups_.addAll(other.groups_);
           }
+          onChanged();
+        }
+        if (!other.getAzureObjectId().isEmpty()) {
+          azureObjectId_ = other.azureObjectId_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -15945,6 +16123,95 @@ public final class AuditProto {
   checkByteStringIsUtf8(value);
         ensureGroupsIsMutable();
         groups_.add(value);
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object azureObjectId_ = "";
+      /**
+       * <pre>
+       * The Azure Object Id of the user, if provided.
+       * </pre>
+       *
+       * <code>string azureObjectId = 9;</code>
+       */
+      public java.lang.String getAzureObjectId() {
+        java.lang.Object ref = azureObjectId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          azureObjectId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Azure Object Id of the user, if provided.
+       * </pre>
+       *
+       * <code>string azureObjectId = 9;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAzureObjectIdBytes() {
+        java.lang.Object ref = azureObjectId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          azureObjectId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Azure Object Id of the user, if provided.
+       * </pre>
+       *
+       * <code>string azureObjectId = 9;</code>
+       */
+      public Builder setAzureObjectId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        azureObjectId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Azure Object Id of the user, if provided.
+       * </pre>
+       *
+       * <code>string azureObjectId = 9;</code>
+       */
+      public Builder clearAzureObjectId() {
+        
+        azureObjectId_ = getDefaultInstance().getAzureObjectId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Azure Object Id of the user, if provided.
+       * </pre>
+       *
+       * <code>string azureObjectId = 9;</code>
+       */
+      public Builder setAzureObjectIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        azureObjectId_ = value;
         onChanged();
         return this;
       }
@@ -26006,14 +26273,7 @@ public final class AuditProto {
     com.google.protobuf.ByteString
         getArchiveIdBytes();
 
-    /**
-     * <code>int64 archiveTimestamp = 15;</code>
-     */
-    long getArchiveTimestamp();
-
     public com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent.EventTypeCase getEventTypeCase();
-
-    public com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent.ArchiveTimestampOptionalCase getArchiveTimestampOptionalCase();
   }
   /**
    * <pre>
@@ -26182,11 +26442,6 @@ public final class AuditProto {
               archiveId_ = s;
               break;
             }
-            case 120: {
-              archiveTimestampOptionalCase_ = 15;
-              archiveTimestampOptional_ = input.readInt64();
-              break;
-            }
             default: {
               if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -26257,42 +26512,6 @@ public final class AuditProto {
     getEventTypeCase() {
       return EventTypeCase.forNumber(
           eventTypeCase_);
-    }
-
-    private int archiveTimestampOptionalCase_ = 0;
-    private java.lang.Object archiveTimestampOptional_;
-    public enum ArchiveTimestampOptionalCase
-        implements com.google.protobuf.Internal.EnumLite {
-      ARCHIVETIMESTAMP(15),
-      ARCHIVETIMESTAMPOPTIONAL_NOT_SET(0);
-      private final int value;
-      private ArchiveTimestampOptionalCase(int value) {
-        this.value = value;
-      }
-      /**
-       * @deprecated Use {@link #forNumber(int)} instead.
-       */
-      @java.lang.Deprecated
-      public static ArchiveTimestampOptionalCase valueOf(int value) {
-        return forNumber(value);
-      }
-
-      public static ArchiveTimestampOptionalCase forNumber(int value) {
-        switch (value) {
-          case 15: return ARCHIVETIMESTAMP;
-          case 0: return ARCHIVETIMESTAMPOPTIONAL_NOT_SET;
-          default: return null;
-        }
-      }
-      public int getNumber() {
-        return this.value;
-      }
-    };
-
-    public ArchiveTimestampOptionalCase
-    getArchiveTimestampOptionalCase() {
-      return ArchiveTimestampOptionalCase.forNumber(
-          archiveTimestampOptionalCase_);
     }
 
     public static final int VERSION_FIELD_NUMBER = 1;
@@ -26841,17 +27060,6 @@ public final class AuditProto {
       }
     }
 
-    public static final int ARCHIVETIMESTAMP_FIELD_NUMBER = 15;
-    /**
-     * <code>int64 archiveTimestamp = 15;</code>
-     */
-    public long getArchiveTimestamp() {
-      if (archiveTimestampOptionalCase_ == 15) {
-        return (java.lang.Long) archiveTimestampOptional_;
-      }
-      return 0L;
-    }
-
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -26908,10 +27116,6 @@ public final class AuditProto {
       if (!getArchiveIdBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 14, archiveId_);
       }
-      if (archiveTimestampOptionalCase_ == 15) {
-        output.writeInt64(
-            15, (long)((java.lang.Long) archiveTimestampOptional_));
-      }
       unknownFields.writeTo(output);
     }
 
@@ -26967,11 +27171,6 @@ public final class AuditProto {
       }
       if (!getArchiveIdBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, archiveId_);
-      }
-      if (archiveTimestampOptionalCase_ == 15) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(
-              15, (long)((java.lang.Long) archiveTimestampOptional_));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -27033,17 +27232,6 @@ public final class AuditProto {
         case 0:
         default:
       }
-      result = result && getArchiveTimestampOptionalCase().equals(
-          other.getArchiveTimestampOptionalCase());
-      if (!result) return false;
-      switch (archiveTimestampOptionalCase_) {
-        case 15:
-          result = result && (getArchiveTimestamp()
-              == other.getArchiveTimestamp());
-          break;
-        case 0:
-        default:
-      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -27092,15 +27280,6 @@ public final class AuditProto {
         case 13:
           hash = (37 * hash) + INTERACTIVELOGINEVENT_FIELD_NUMBER;
           hash = (53 * hash) + getInteractiveLoginEvent().hashCode();
-          break;
-        case 0:
-        default:
-      }
-      switch (archiveTimestampOptionalCase_) {
-        case 15:
-          hash = (37 * hash) + ARCHIVETIMESTAMP_FIELD_NUMBER;
-          hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-              getArchiveTimestamp());
           break;
         case 0:
         default:
@@ -27270,8 +27449,6 @@ public final class AuditProto {
 
         eventTypeCase_ = 0;
         eventType_ = null;
-        archiveTimestampOptionalCase_ = 0;
-        archiveTimestampOptional_ = null;
         return this;
       }
 
@@ -27334,11 +27511,7 @@ public final class AuditProto {
           }
         }
         result.archiveId_ = archiveId_;
-        if (archiveTimestampOptionalCase_ == 15) {
-          result.archiveTimestampOptional_ = archiveTimestampOptional_;
-        }
         result.eventTypeCase_ = eventTypeCase_;
-        result.archiveTimestampOptionalCase_ = archiveTimestampOptionalCase_;
         onBuilt();
         return result;
       }
@@ -27446,15 +27619,6 @@ public final class AuditProto {
             break;
           }
         }
-        switch (other.getArchiveTimestampOptionalCase()) {
-          case ARCHIVETIMESTAMP: {
-            setArchiveTimestamp(other.getArchiveTimestamp());
-            break;
-          }
-          case ARCHIVETIMESTAMPOPTIONAL_NOT_SET: {
-            break;
-          }
-        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -27494,21 +27658,6 @@ public final class AuditProto {
       public Builder clearEventType() {
         eventTypeCase_ = 0;
         eventType_ = null;
-        onChanged();
-        return this;
-      }
-
-      private int archiveTimestampOptionalCase_ = 0;
-      private java.lang.Object archiveTimestampOptional_;
-      public ArchiveTimestampOptionalCase
-          getArchiveTimestampOptionalCase() {
-        return ArchiveTimestampOptionalCase.forNumber(
-            archiveTimestampOptionalCase_);
-      }
-
-      public Builder clearArchiveTimestampOptional() {
-        archiveTimestampOptionalCase_ = 0;
-        archiveTimestampOptional_ = null;
         onChanged();
         return this;
       }
@@ -29039,36 +29188,6 @@ public final class AuditProto {
         
         archiveId_ = value;
         onChanged();
-        return this;
-      }
-
-      /**
-       * <code>int64 archiveTimestamp = 15;</code>
-       */
-      public long getArchiveTimestamp() {
-        if (archiveTimestampOptionalCase_ == 15) {
-          return (java.lang.Long) archiveTimestampOptional_;
-        }
-        return 0L;
-      }
-      /**
-       * <code>int64 archiveTimestamp = 15;</code>
-       */
-      public Builder setArchiveTimestamp(long value) {
-        archiveTimestampOptionalCase_ = 15;
-        archiveTimestampOptional_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int64 archiveTimestamp = 15;</code>
-       */
-      public Builder clearArchiveTimestamp() {
-        if (archiveTimestampOptionalCase_ == 15) {
-          archiveTimestampOptionalCase_ = 0;
-          archiveTimestampOptional_ = null;
-          onChanged();
-        }
         return this;
       }
       @java.lang.Override
@@ -31811,30 +31930,30 @@ public final class AuditProto {
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_audit_ConfigInfo_descriptor;
+    internal_static_audit_ArchivingConfigInfo_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_audit_ConfigInfo_fieldAccessorTable;
+      internal_static_audit_ArchivingConfigInfo_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_audit_ConfigureExportRequest_descriptor;
+    internal_static_audit_ConfigureArchivingRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_audit_ConfigureExportRequest_fieldAccessorTable;
+      internal_static_audit_ConfigureArchivingRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_audit_ConfigureExportResponse_descriptor;
+    internal_static_audit_ConfigureArchivingResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_audit_ConfigureExportResponse_fieldAccessorTable;
+      internal_static_audit_ConfigureArchivingResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_audit_GetExportConfigRequest_descriptor;
+    internal_static_audit_GetArchivingConfigRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_audit_GetExportConfigRequest_fieldAccessorTable;
+      internal_static_audit_GetArchivingConfigRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_audit_GetExportConfigResponse_descriptor;
+    internal_static_audit_GetArchivingConfigResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_audit_GetExportConfigResponse_fieldAccessorTable;
+      internal_static_audit_GetArchivingConfigResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_audit_CreateAuditEventRequest_descriptor;
   private static final 
@@ -31965,120 +32084,121 @@ public final class AuditProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\013audit.proto\022\005audit\032\roptions.proto\032\rver" +
-      "sion.proto\"e\n\nConfigInfo\022\027\n\017storageLocat" +
-      "ion\030\001 \001(\t\022\026\n\016credentialName\030\002 \001(\t\022\017\n\007ena" +
-      "bled\030\003 \001(\010\022\025\n\rstorageRegion\030\004 \001(\t\"q\n\026Con" +
-      "figureExportRequest\022\027\n\017storageLocation\030\001" +
-      " \001(\t\022\026\n\016credentialName\030\002 \001(\t\022\017\n\007enabled\030" +
-      "\003 \001(\010\022\025\n\rstorageRegion\030\004 \001(\t\"C\n\027Configur" +
-      "eExportResponse\022(\n\rconfiguration\030\001 \001(\0132\021" +
-      ".audit.ConfigInfo\"\030\n\026GetExportConfigRequ" +
-      "est\"C\n\027GetExportConfigResponse\022(\n\rconfig" +
-      "uration\030\001 \001(\0132\021.audit.ConfigInfo\"@\n\027Crea" +
-      "teAuditEventRequest\022%\n\nauditEvent\030\001 \001(\0132" +
-      "\021.audit.AuditEvent\"\032\n\030CreateAuditEventRe" +
-      "sponse\"G\n\036CreateAttemptAuditEventRequest" +
-      "\022%\n\nauditEvent\030\001 \001(\0132\021.audit.AuditEvent\"" +
-      "!\n\037CreateAttemptAuditEventResponse\"Z\n(Up" +
-      "dateAttemptAuditEventWithResultRequest\022." +
-      "\n\006result\030\001 \001(\0132\036.audit.AttemptAuditEvent" +
-      "Result\"+\n)UpdateAttemptAuditEventWithRes" +
-      "ultResponse\"\237\001\n\021ListEventsRequest\022\025\n\rfro" +
-      "mTimestamp\030\001 \001(\003\022\023\n\013toTimestamp\030\002 \001(\003\022\021\n" +
-      "\taccountId\030\003 \001(\t\022\020\n\010pageSize\030\004 \001(\005\022\021\n\tpa" +
-      "geToken\030\005 \001(\t\022\021\n\trequestId\030\006 \001(\t\022\023\n\013even" +
-      "tSource\030\007 \001(\t\"U\n\022ListEventsResponse\022(\n\na" +
-      "uditEvent\030\001 \003(\0132\024.audit.CdpAuditEvent\022\025\n" +
-      "\rnextPageToken\030\002 \001(\t\"\213\003\n\nAuditEvent\022\n\n\002i" +
-      "d\030\001 \001(\t\022\021\n\ttimestamp\030\002 \001(\003\022\021\n\taccountId\030" +
-      "\003 \001(\t\022\021\n\trequestId\030\005 \001(\t\022\021\n\teventName\030\006 " +
-      "\001(\t\022\027\n\017sourceIPAddress\030\010 \001(\t\022\023\n\013eventSou" +
-      "rce\030\t \001(\t\022\022\n\010actorCrn\030\004 \001(\tH\000\022\032\n\020actorSe" +
-      "rviceName\030\n \001(\tH\000\022/\n\016apiRequestData\030\013 \001(" +
-      "\0132\025.audit.ApiRequestDataH\001\0223\n\020serviceEve" +
-      "ntData\030\014 \001(\0132\027.audit.ServiceEventDataH\001\022" +
-      "E\n\031interactiveLoginEventData\030\r \001(\0132 .aud" +
-      "it.InteractiveLoginEventDataH\001B\007\n\005actorB" +
-      "\013\n\tEventTypeJ\004\010\007\020\010\"@\n\020ServiceEventData\022\026" +
-      "\n\016detailsVersion\030\001 \001(\t\022\024\n\014eventDetails\030\002" +
-      " \001(\t\"d\n\016ApiRequestData\022\031\n\021requestParamet" +
-      "ers\030\001 \001(\t\022\020\n\010mutating\030\002 \001(\010\022\022\n\napiVersio" +
-      "n\030\003 \001(\t\022\021\n\tuserAgent\030\004 \001(\t\"\305\001\n\031Interacti" +
-      "veLoginEventData\022\033\n\023identityProviderCrn\030" +
-      "\001 \001(\t\022!\n\031identityProviderSessionId\030\002 \001(\t" +
-      "\022\036\n\026identityProviderUserId\030\003 \001(\t\022\r\n\005emai" +
-      "l\030\004 \001(\t\022\021\n\tfirstName\030\006 \001(\t\022\020\n\010lastName\030\007" +
-      " \001(\t\022\016\n\006groups\030\010 \003(\tJ\004\010\005\020\006\"\203\003\n\027AttemptAu" +
-      "ditEventResult\022\n\n\002id\030\001 \001(\t\022\027\n\017resultTime" +
-      "stamp\030\013 \001(\003\022\022\n\nresultCode\030\014 \001(\t\022\025\n\rresul" +
-      "tMessage\030\016 \001(\t\022;\n\024resultApiRequestData\030\017" +
-      " \001(\0132\033.audit.ResultApiRequestDataH\000\022?\n\026r" +
-      "esultServiceEventData\030\020 \001(\0132\035.audit.Resu" +
-      "ltServiceEventDataH\000\022Q\n\037resultInteractiv" +
-      "eLoginEventData\030\021 \001(\0132&.audit.ResultInte" +
-      "ractiveLoginEventDataH\000B\013\n\tEventTypeJ\004\010\002" +
-      "\020\003J\004\010\003\020\004J\004\010\004\020\005J\004\010\005\020\006J\004\010\006\020\007J\004\010\007\020\010J\004\010\010\020\tJ\004" +
-      "\010\t\020\nJ\004\010\n\020\013J\004\010\r\020\016\"2\n\024ResultApiRequestData" +
-      "\022\032\n\022responseParameters\030\001 \001(\t\"D\n\026ResultSe" +
-      "rviceEventData\022\023\n\013resourceCrn\030\001 \003(\t\022\025\n\rr" +
-      "esultDetails\030\002 \001(\t\"H\n\037ResultInteractiveL" +
-      "oginEventData\022\024\n\014accountAdmin\030\001 \001(\010\022\017\n\007u" +
-      "serCrn\030\002 \001(\t\"\240\001\n\017ApiRequestEvent\022\031\n\021requ" +
-      "estParameters\030\001 \001(\t\022\032\n\022responseParameter" +
-      "s\030\002 \001(\t\022\020\n\010mutating\030\003 \001(\010\022\022\n\napiVersion\030" +
-      "\004 \001(\t\022\027\n\017sourceIPAddress\030\005 \001(\t\022\021\n\tuserAg" +
-      "ent\030\006 \001(\tJ\004\010\007\020\010\"e\n\017CdpServiceEvent\022%\n\035ad" +
-      "ditionalServiceEventDetails\030\001 \001(\t\022\023\n\013res" +
-      "ourceCrn\030\002 \003(\t\022\026\n\016detailsVersion\030\003 \001(\t\"\373" +
-      "\001\n\025InteractiveLoginEvent\022\033\n\023identityProv" +
-      "iderCrn\030\001 \001(\t\022!\n\031identityProviderSession" +
-      "Id\030\002 \001(\t\022\036\n\026identityProviderUserId\030\003 \001(\t" +
-      "\022\r\n\005email\030\004 \001(\t\022\027\n\017sourceIPAddress\030\005 \001(\t" +
-      "\022\021\n\tfirstName\030\006 \001(\t\022\020\n\010lastName\030\007 \001(\t\022\024\n" +
-      "\014accountAdmin\030\010 \001(\010\022\016\n\006groups\030\t \003(\t\022\017\n\007u" +
-      "serCrn\030\n \001(\t\"L\n\rActorIdentity\022\022\n\010actorCr" +
-      "n\030\001 \001(\tH\000\022\032\n\020actorServiceName\030\002 \001(\tH\000B\013\n" +
-      "\tactorType\"\342\003\n\rCdpAuditEvent\022\017\n\007version\030" +
-      "\001 \001(\t\022\n\n\002id\030\002 \001(\t\022\023\n\013eventSource\030\003 \001(\t\022\021" +
-      "\n\teventName\030\004 \001(\t\022\021\n\ttimestamp\030\005 \001(\003\022+\n\r" +
-      "actorIdentity\030\006 \001(\0132\024.audit.ActorIdentit" +
-      "y\022\021\n\taccountId\030\007 \001(\t\022\021\n\trequestId\030\010 \001(\t\022" +
-      "\022\n\nresultCode\030\t \001(\t\022\025\n\rresultMessage\030\n \001" +
-      "(\t\0221\n\017apiRequestEvent\030\013 \001(\0132\026.audit.ApiR" +
-      "equestEventH\000\0221\n\017cdpServiceEvent\030\014 \001(\0132\026" +
-      ".audit.CdpServiceEventH\000\022=\n\025interactiveL" +
-      "oginEvent\030\r \001(\0132\034.audit.InteractiveLogin" +
-      "EventH\000\022\021\n\tarchiveId\030\016 \001(\t\022\032\n\020archiveTim" +
-      "estamp\030\017 \001(\003H\001B\013\n\teventTypeB\032\n\030archiveTi" +
-      "mestampOptional\"Z\n\031ArchiveAuditEventsReq" +
-      "uest\022\025\n\rfromTimestamp\030\001 \001(\003\022\023\n\013toTimesta" +
-      "mp\030\002 \001(\003\022\021\n\taccountId\030\003 \001(\t\"n\n\032ArchiveAu" +
-      "ditEventsResponse\022\022\n\neventCount\030\001 \001(\003\022<\n" +
-      "\014eventBatches\030\002 \003(\0132&.audit.ArchiveAudit" +
-      "EventsBatchResponse\"u\n\037ArchiveAuditEvent" +
-      "sBatchResponse\022\021\n\taccountId\030\001 \001(\t\022\022\n\neve" +
-      "ntCount\030\002 \001(\003\022\021\n\tarchiveId\030\003 \001(\t\022\030\n\020arch" +
-      "iveTimestamp\030\004 \001(\0032\352\005\n\005Audit\022A\n\nGetVersi" +
-      "on\022\027.version.VersionRequest\032\030.version.Ve" +
-      "rsionResponse\"\000\022U\n\020CreateAuditEvent\022\036.au" +
-      "dit.CreateAuditEventRequest\032\037.audit.Crea" +
-      "teAuditEventResponse\"\000\022j\n\027CreateAttemptA" +
-      "uditEvent\022%.audit.CreateAttemptAuditEven" +
-      "tRequest\032&.audit.CreateAttemptAuditEvent" +
-      "Response\"\000\022\210\001\n!UpdateAttemptAuditEventWi" +
-      "thResult\022/.audit.UpdateAttemptAuditEvent" +
-      "WithResultRequest\0320.audit.UpdateAttemptA" +
-      "uditEventWithResultResponse\"\000\022K\n\nListEve" +
-      "nts\022\030.audit.ListEventsRequest\032\031.audit.Li" +
-      "stEventsResponse\"\010\220\246\035\001\230\246\035\024\022R\n\017ConfigureE" +
-      "xport\022\035.audit.ConfigureExportRequest\032\036.a" +
-      "udit.ConfigureExportResponse\"\000\022R\n\017GetExp" +
-      "ortConfig\022\035.audit.GetExportConfigRequest" +
-      "\032\036.audit.GetExportConfigResponse\"\000\022[\n\022Ar" +
-      "chiveAuditEvents\022 .audit.ArchiveAuditEve" +
-      "ntsRequest\032!.audit.ArchiveAuditEventsRes" +
-      "ponse\"\000B4\n&com.cloudera.thunderhead.serv" +
-      "ice.auditB\nAuditProtob\006proto3"
+      "sion.proto\"n\n\023ArchivingConfigInfo\022\027\n\017sto" +
+      "rageLocation\030\001 \001(\t\022\026\n\016credentialName\030\002 \001" +
+      "(\t\022\017\n\007enabled\030\003 \001(\010\022\025\n\rstorageRegion\030\004 \001" +
+      "(\t\"\210\001\n\031ConfigureArchivingRequest\022\027\n\017stor" +
+      "ageLocation\030\001 \001(\t\022\026\n\016credentialName\030\002 \001(" +
+      "\t\022\017\n\007enabled\030\003 \001(\010\022\025\n\rstorageRegion\030\004 \001(" +
+      "\t\022\022\n\nverifyOnly\030\005 \001(\010\"O\n\032ConfigureArchiv" +
+      "ingResponse\0221\n\rconfiguration\030\001 \001(\0132\032.aud" +
+      "it.ArchivingConfigInfo\"\033\n\031GetArchivingCo" +
+      "nfigRequest\"O\n\032GetArchivingConfigRespons" +
+      "e\0221\n\rconfiguration\030\001 \001(\0132\032.audit.Archivi" +
+      "ngConfigInfo\"@\n\027CreateAuditEventRequest\022" +
+      "%\n\nauditEvent\030\001 \001(\0132\021.audit.AuditEvent\"\032" +
+      "\n\030CreateAuditEventResponse\"G\n\036CreateAtte" +
+      "mptAuditEventRequest\022%\n\nauditEvent\030\001 \001(\013" +
+      "2\021.audit.AuditEvent\"!\n\037CreateAttemptAudi" +
+      "tEventResponse\"Z\n(UpdateAttemptAuditEven" +
+      "tWithResultRequest\022.\n\006result\030\001 \001(\0132\036.aud" +
+      "it.AttemptAuditEventResult\"+\n)UpdateAtte" +
+      "mptAuditEventWithResultResponse\"\237\001\n\021List" +
+      "EventsRequest\022\025\n\rfromTimestamp\030\001 \001(\003\022\023\n\013" +
+      "toTimestamp\030\002 \001(\003\022\021\n\taccountId\030\003 \001(\t\022\020\n\010" +
+      "pageSize\030\004 \001(\005\022\021\n\tpageToken\030\005 \001(\t\022\021\n\treq" +
+      "uestId\030\006 \001(\t\022\023\n\013eventSource\030\007 \001(\t\"U\n\022Lis" +
+      "tEventsResponse\022(\n\nauditEvent\030\001 \003(\0132\024.au" +
+      "dit.CdpAuditEvent\022\025\n\rnextPageToken\030\002 \001(\t" +
+      "\"\213\003\n\nAuditEvent\022\n\n\002id\030\001 \001(\t\022\021\n\ttimestamp" +
+      "\030\002 \001(\003\022\021\n\taccountId\030\003 \001(\t\022\021\n\trequestId\030\005" +
+      " \001(\t\022\021\n\teventName\030\006 \001(\t\022\027\n\017sourceIPAddre" +
+      "ss\030\010 \001(\t\022\023\n\013eventSource\030\t \001(\t\022\022\n\010actorCr" +
+      "n\030\004 \001(\tH\000\022\032\n\020actorServiceName\030\n \001(\tH\000\022/\n" +
+      "\016apiRequestData\030\013 \001(\0132\025.audit.ApiRequest" +
+      "DataH\001\0223\n\020serviceEventData\030\014 \001(\0132\027.audit" +
+      ".ServiceEventDataH\001\022E\n\031interactiveLoginE" +
+      "ventData\030\r \001(\0132 .audit.InteractiveLoginE" +
+      "ventDataH\001B\007\n\005actorB\013\n\tEventTypeJ\004\010\007\020\010\"@" +
+      "\n\020ServiceEventData\022\026\n\016detailsVersion\030\001 \001" +
+      "(\t\022\024\n\014eventDetails\030\002 \001(\t\"d\n\016ApiRequestDa" +
+      "ta\022\031\n\021requestParameters\030\001 \001(\t\022\020\n\010mutatin" +
+      "g\030\002 \001(\010\022\022\n\napiVersion\030\003 \001(\t\022\021\n\tuserAgent" +
+      "\030\004 \001(\t\"\334\001\n\031InteractiveLoginEventData\022\033\n\023" +
+      "identityProviderCrn\030\001 \001(\t\022!\n\031identityPro" +
+      "viderSessionId\030\002 \001(\t\022\036\n\026identityProvider" +
+      "UserId\030\003 \001(\t\022\r\n\005email\030\004 \001(\t\022\021\n\tfirstName" +
+      "\030\006 \001(\t\022\020\n\010lastName\030\007 \001(\t\022\016\n\006groups\030\010 \003(\t" +
+      "\022\025\n\razureObjectId\030\t \001(\tJ\004\010\005\020\006\"\203\003\n\027Attemp" +
+      "tAuditEventResult\022\n\n\002id\030\001 \001(\t\022\027\n\017resultT" +
+      "imestamp\030\013 \001(\003\022\022\n\nresultCode\030\014 \001(\t\022\025\n\rre" +
+      "sultMessage\030\016 \001(\t\022;\n\024resultApiRequestDat" +
+      "a\030\017 \001(\0132\033.audit.ResultApiRequestDataH\000\022?" +
+      "\n\026resultServiceEventData\030\020 \001(\0132\035.audit.R" +
+      "esultServiceEventDataH\000\022Q\n\037resultInterac" +
+      "tiveLoginEventData\030\021 \001(\0132&.audit.ResultI" +
+      "nteractiveLoginEventDataH\000B\013\n\tEventTypeJ" +
+      "\004\010\002\020\003J\004\010\003\020\004J\004\010\004\020\005J\004\010\005\020\006J\004\010\006\020\007J\004\010\007\020\010J\004\010\010\020" +
+      "\tJ\004\010\t\020\nJ\004\010\n\020\013J\004\010\r\020\016\"2\n\024ResultApiRequestD" +
+      "ata\022\032\n\022responseParameters\030\001 \001(\t\"D\n\026Resul" +
+      "tServiceEventData\022\023\n\013resourceCrn\030\001 \003(\t\022\025" +
+      "\n\rresultDetails\030\002 \001(\t\"H\n\037ResultInteracti" +
+      "veLoginEventData\022\024\n\014accountAdmin\030\001 \001(\010\022\017" +
+      "\n\007userCrn\030\002 \001(\t\"\240\001\n\017ApiRequestEvent\022\031\n\021r" +
+      "equestParameters\030\001 \001(\t\022\032\n\022responseParame" +
+      "ters\030\002 \001(\t\022\020\n\010mutating\030\003 \001(\010\022\022\n\napiVersi" +
+      "on\030\004 \001(\t\022\027\n\017sourceIPAddress\030\005 \001(\t\022\021\n\tuse" +
+      "rAgent\030\006 \001(\tJ\004\010\007\020\010\"e\n\017CdpServiceEvent\022%\n" +
+      "\035additionalServiceEventDetails\030\001 \001(\t\022\023\n\013" +
+      "resourceCrn\030\002 \003(\t\022\026\n\016detailsVersion\030\003 \001(" +
+      "\t\"\373\001\n\025InteractiveLoginEvent\022\033\n\023identityP" +
+      "roviderCrn\030\001 \001(\t\022!\n\031identityProviderSess" +
+      "ionId\030\002 \001(\t\022\036\n\026identityProviderUserId\030\003 " +
+      "\001(\t\022\r\n\005email\030\004 \001(\t\022\027\n\017sourceIPAddress\030\005 " +
+      "\001(\t\022\021\n\tfirstName\030\006 \001(\t\022\020\n\010lastName\030\007 \001(\t" +
+      "\022\024\n\014accountAdmin\030\010 \001(\010\022\016\n\006groups\030\t \003(\t\022\017" +
+      "\n\007userCrn\030\n \001(\t\"L\n\rActorIdentity\022\022\n\010acto" +
+      "rCrn\030\001 \001(\tH\000\022\032\n\020actorServiceName\030\002 \001(\tH\000" +
+      "B\013\n\tactorType\"\260\003\n\rCdpAuditEvent\022\017\n\007versi" +
+      "on\030\001 \001(\t\022\n\n\002id\030\002 \001(\t\022\023\n\013eventSource\030\003 \001(" +
+      "\t\022\021\n\teventName\030\004 \001(\t\022\021\n\ttimestamp\030\005 \001(\003\022" +
+      "+\n\ractorIdentity\030\006 \001(\0132\024.audit.ActorIden" +
+      "tity\022\021\n\taccountId\030\007 \001(\t\022\021\n\trequestId\030\010 \001" +
+      "(\t\022\022\n\nresultCode\030\t \001(\t\022\025\n\rresultMessage\030" +
+      "\n \001(\t\0221\n\017apiRequestEvent\030\013 \001(\0132\026.audit.A" +
+      "piRequestEventH\000\0221\n\017cdpServiceEvent\030\014 \001(" +
+      "\0132\026.audit.CdpServiceEventH\000\022=\n\025interacti" +
+      "veLoginEvent\030\r \001(\0132\034.audit.InteractiveLo" +
+      "ginEventH\000\022\021\n\tarchiveId\030\016 \001(\tB\013\n\teventTy" +
+      "peJ\004\010\017\020\020\"Z\n\031ArchiveAuditEventsRequest\022\025\n" +
+      "\rfromTimestamp\030\001 \001(\003\022\023\n\013toTimestamp\030\002 \001(" +
+      "\003\022\021\n\taccountId\030\003 \001(\t\"n\n\032ArchiveAuditEven" +
+      "tsResponse\022\022\n\neventCount\030\001 \001(\003\022<\n\014eventB" +
+      "atches\030\002 \003(\0132&.audit.ArchiveAuditEventsB" +
+      "atchResponse\"u\n\037ArchiveAuditEventsBatchR" +
+      "esponse\022\021\n\taccountId\030\001 \001(\t\022\022\n\neventCount" +
+      "\030\002 \001(\003\022\021\n\tarchiveId\030\003 \001(\t\022\030\n\020archiveTime" +
+      "stamp\030\004 \001(\0032\374\005\n\005Audit\022A\n\nGetVersion\022\027.ve" +
+      "rsion.VersionRequest\032\030.version.VersionRe" +
+      "sponse\"\000\022U\n\020CreateAuditEvent\022\036.audit.Cre" +
+      "ateAuditEventRequest\032\037.audit.CreateAudit" +
+      "EventResponse\"\000\022j\n\027CreateAttemptAuditEve" +
+      "nt\022%.audit.CreateAttemptAuditEventReques" +
+      "t\032&.audit.CreateAttemptAuditEventRespons" +
+      "e\"\000\022\210\001\n!UpdateAttemptAuditEventWithResul" +
+      "t\022/.audit.UpdateAttemptAuditEventWithRes" +
+      "ultRequest\0320.audit.UpdateAttemptAuditEve" +
+      "ntWithResultResponse\"\000\022K\n\nListEvents\022\030.a" +
+      "udit.ListEventsRequest\032\031.audit.ListEvent" +
+      "sResponse\"\010\220\246\035\001\230\246\035\024\022[\n\022ConfigureArchivin" +
+      "g\022 .audit.ConfigureArchivingRequest\032!.au" +
+      "dit.ConfigureArchivingResponse\"\000\022[\n\022GetA" +
+      "rchivingConfig\022 .audit.GetArchivingConfi" +
+      "gRequest\032!.audit.GetArchivingConfigRespo" +
+      "nse\"\000\022[\n\022ArchiveAuditEvents\022 .audit.Arch" +
+      "iveAuditEventsRequest\032!.audit.ArchiveAud" +
+      "itEventsResponse\"\000B4\n&com.cloudera.thund" +
+      "erhead.service.auditB\nAuditProtob\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -32094,35 +32214,35 @@ public final class AuditProto {
           com.cloudera.thunderhead.service.common.options.Options.getDescriptor(),
           com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
         }, assigner);
-    internal_static_audit_ConfigInfo_descriptor =
+    internal_static_audit_ArchivingConfigInfo_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_audit_ConfigInfo_fieldAccessorTable = new
+    internal_static_audit_ArchivingConfigInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_audit_ConfigInfo_descriptor,
+        internal_static_audit_ArchivingConfigInfo_descriptor,
         new java.lang.String[] { "StorageLocation", "CredentialName", "Enabled", "StorageRegion", });
-    internal_static_audit_ConfigureExportRequest_descriptor =
+    internal_static_audit_ConfigureArchivingRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
-    internal_static_audit_ConfigureExportRequest_fieldAccessorTable = new
+    internal_static_audit_ConfigureArchivingRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_audit_ConfigureExportRequest_descriptor,
-        new java.lang.String[] { "StorageLocation", "CredentialName", "Enabled", "StorageRegion", });
-    internal_static_audit_ConfigureExportResponse_descriptor =
+        internal_static_audit_ConfigureArchivingRequest_descriptor,
+        new java.lang.String[] { "StorageLocation", "CredentialName", "Enabled", "StorageRegion", "VerifyOnly", });
+    internal_static_audit_ConfigureArchivingResponse_descriptor =
       getDescriptor().getMessageTypes().get(2);
-    internal_static_audit_ConfigureExportResponse_fieldAccessorTable = new
+    internal_static_audit_ConfigureArchivingResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_audit_ConfigureExportResponse_descriptor,
+        internal_static_audit_ConfigureArchivingResponse_descriptor,
         new java.lang.String[] { "Configuration", });
-    internal_static_audit_GetExportConfigRequest_descriptor =
+    internal_static_audit_GetArchivingConfigRequest_descriptor =
       getDescriptor().getMessageTypes().get(3);
-    internal_static_audit_GetExportConfigRequest_fieldAccessorTable = new
+    internal_static_audit_GetArchivingConfigRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_audit_GetExportConfigRequest_descriptor,
+        internal_static_audit_GetArchivingConfigRequest_descriptor,
         new java.lang.String[] { });
-    internal_static_audit_GetExportConfigResponse_descriptor =
+    internal_static_audit_GetArchivingConfigResponse_descriptor =
       getDescriptor().getMessageTypes().get(4);
-    internal_static_audit_GetExportConfigResponse_fieldAccessorTable = new
+    internal_static_audit_GetArchivingConfigResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_audit_GetExportConfigResponse_descriptor,
+        internal_static_audit_GetArchivingConfigResponse_descriptor,
         new java.lang.String[] { "Configuration", });
     internal_static_audit_CreateAuditEventRequest_descriptor =
       getDescriptor().getMessageTypes().get(5);
@@ -32195,7 +32315,7 @@ public final class AuditProto {
     internal_static_audit_InteractiveLoginEventData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_audit_InteractiveLoginEventData_descriptor,
-        new java.lang.String[] { "IdentityProviderCrn", "IdentityProviderSessionId", "IdentityProviderUserId", "Email", "FirstName", "LastName", "Groups", });
+        new java.lang.String[] { "IdentityProviderCrn", "IdentityProviderSessionId", "IdentityProviderUserId", "Email", "FirstName", "LastName", "Groups", "AzureObjectId", });
     internal_static_audit_AttemptAuditEventResult_descriptor =
       getDescriptor().getMessageTypes().get(17);
     internal_static_audit_AttemptAuditEventResult_fieldAccessorTable = new
@@ -32249,7 +32369,7 @@ public final class AuditProto {
     internal_static_audit_CdpAuditEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_audit_CdpAuditEvent_descriptor,
-        new java.lang.String[] { "Version", "Id", "EventSource", "EventName", "Timestamp", "ActorIdentity", "AccountId", "RequestId", "ResultCode", "ResultMessage", "ApiRequestEvent", "CdpServiceEvent", "InteractiveLoginEvent", "ArchiveId", "ArchiveTimestamp", "EventType", "ArchiveTimestampOptional", });
+        new java.lang.String[] { "Version", "Id", "EventSource", "EventName", "Timestamp", "ActorIdentity", "AccountId", "RequestId", "ResultCode", "ResultMessage", "ApiRequestEvent", "CdpServiceEvent", "InteractiveLoginEvent", "ArchiveId", "EventType", });
     internal_static_audit_ArchiveAuditEventsRequest_descriptor =
       getDescriptor().getMessageTypes().get(26);
     internal_static_audit_ArchiveAuditEventsRequest_fieldAccessorTable = new

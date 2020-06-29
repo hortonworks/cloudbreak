@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.audit.converter.AttemptAuditEventResultToGrpcAt
 import com.sequenceiq.cloudbreak.audit.converter.AuditEventToGrpcAuditEventConverter;
 import com.sequenceiq.cloudbreak.audit.model.AttemptAuditEventResult;
 import com.sequenceiq.cloudbreak.audit.model.AuditEvent;
-import com.sequenceiq.cloudbreak.audit.model.ConfigInfo;
 import com.sequenceiq.cloudbreak.audit.model.ListAuditEvent;
 import com.sequenceiq.cloudbreak.audit.util.ActorUtil;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
@@ -54,47 +53,6 @@ public class AuditClient {
         this.auditEventConverter = auditEventConverter;
         this.resultConverter = resultConverter;
         this.actorUtil = actorUtil;
-    }
-
-    public ConfigInfo getExportConfig(String actorCrn, String requestId) {
-        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            String internalRequestId = Optional.ofNullable(requestId).orElseGet(uuidSupplier());
-
-            AuditProto.ConfigInfo response = newStub(channelWrapper.getChannel(), internalRequestId, actorCrn)
-                    .getExportConfig(AuditProto.GetExportConfigRequest.newBuilder().build()).getConfiguration();
-
-            return ConfigInfo.builder()
-                    .withActorCrn(actorCrn)
-                    .withRequestId(internalRequestId)
-                    .withEnabled(response.getEnabled())
-                    .withCredentialName(response.getCredentialName())
-                    .withStorageRegion(response.getStorageRegion())
-                    .withStorageLocation(response.getStorageLocation())
-                    .build();
-        }
-    }
-
-    public ConfigInfo configureExport(ConfigInfo configInfo) {
-        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            String actorCrn = configInfo.getActorCrn();
-            String requestId = Optional.ofNullable(configInfo.getRequestId()).orElseGet(uuidSupplier());
-            AuditProto.ConfigInfo response = newStub(channelWrapper.getChannel(), requestId, actorCrn)
-                    .configureExport(AuditProto.ConfigureExportRequest.newBuilder()
-                            .setEnabled(configInfo.isEnabled())
-                            .setCredentialName(configInfo.getCredentialName())
-                            .setStorageRegion(configInfo.getStorageRegion())
-                            .setStorageLocation(configInfo.getStorageLocation())
-                            .build()).getConfiguration();
-
-            return ConfigInfo.builder()
-                    .withActorCrn(actorCrn)
-                    .withRequestId(requestId)
-                    .withEnabled(response.getEnabled())
-                    .withCredentialName(response.getCredentialName())
-                    .withStorageRegion(response.getStorageRegion())
-                    .withStorageLocation(response.getStorageLocation())
-                    .build();
-        }
     }
 
     @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
