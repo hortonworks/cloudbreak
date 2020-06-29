@@ -158,9 +158,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public FlowIdentifier triggerDatalakeClusterUpgrade(Long stackId, StatedImage targetImage) {
+    public FlowIdentifier triggerDatalakeClusterUpgrade(Long stackId, StatedImage currentImage, StatedImage targetImage) {
         String selector = FlowChainTriggers.DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new DatalakeClusterUpgradeTriggerEvent(selector, stackId, targetImage));
+        return reactorNotifier.notify(stackId, selector, new DatalakeClusterUpgradeTriggerEvent(selector, stackId, currentImage, targetImage));
     }
 
     public FlowIdentifier triggerClusterCredentialReplace(Long stackId, String userName, String password) {

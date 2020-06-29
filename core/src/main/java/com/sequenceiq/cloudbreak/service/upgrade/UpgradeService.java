@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -148,8 +149,8 @@ public class UpgradeService {
                         List.of(errorMsg));
                 throw new BadRequestException(errorMsg);
             } else {
-                StatedImage targetImage = updateImageComponents(imageId, stack);
-                return flowManager.triggerDatalakeClusterUpgrade(stack.getId(), targetImage);
+                Pair<StatedImage, StatedImage> images = updateImageComponents(imageId, stack);
+                return flowManager.triggerDatalakeClusterUpgrade(stack.getId(), images.getLeft(), images.getRight());
             }
 
         } else {
@@ -157,15 +158,16 @@ public class UpgradeService {
         }
     }
 
-    private StatedImage updateImageComponents(String imageId, Stack stack) {
+    private Pair<StatedImage, StatedImage> updateImageComponents(String imageId, Stack stack) {
         String stackName = stack.getName();
-        Long stackId = stack.getId();
         try {
-            Image currentImage = componentConfigProviderService.getImage(stackId);
+            Image currentImage = componentConfigProviderService.getImage(stack.getId());
+            StatedImage currentStatedImage =
+                    imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), currentImage.getImageId());
             StatedImage targetStatedImage =
                     imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), imageId);
             imageService.updateComponentsByStackId(stack, targetStatedImage);
-            return targetStatedImage;
+            return Pair.of(currentStatedImage, targetStatedImage);
 
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             LOGGER.warn(String.format("Image was not found for stack %s", stackName));

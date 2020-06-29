@@ -40,10 +40,10 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
         DetailedStackStatus detailedStackStatus = stackStatusOpt.orElse(unknownStackStatus).getDetailedStackStatus();
         if (DetailedStackStatus.CLUSTER_UPGRADE_FAILED.equals(detailedStackStatus)) {
             chain.add(new DatalakeClusterUpgradeTriggerEvent(
-                    CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT.event(), event.getResourceId(), event.accepted(), event.getTargetImage()));
+                    CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT.event(), event.getResourceId(), event.accepted(), event.getCurrentImage(), event.getTargetImage()));
         } else {
             chain.add(new DatalakeClusterUpgradeTriggerEvent(
-                    CLUSTER_MANAGER_UPGRADE_EVENT.event(), event.getResourceId(), event.accepted(), event.getTargetImage()));
+                    CLUSTER_MANAGER_UPGRADE_EVENT.event(), event.getResourceId(), event.accepted(), event.getCurrentImage(), event.getTargetImage()));
         }
 
         return chain;

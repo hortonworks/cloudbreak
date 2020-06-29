@@ -120,7 +120,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerStackImageUpdate(STACK_ID, "asdf", null, null);
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
         underTest.triggerClusterCertificationRenewal(STACK_ID);
-        underTest.triggerDatalakeClusterUpgrade(STACK_ID, null);
+        underTest.triggerDatalakeClusterUpgrade(STACK_ID, null, null);
         underTest.triggerSaltUpdate(STACK_ID);
         underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null);
         underTest.triggerDatalakeDatabaseRestore(STACK_ID, null, null);
