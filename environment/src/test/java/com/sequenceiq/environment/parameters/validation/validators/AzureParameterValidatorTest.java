@@ -186,7 +186,7 @@ public class AzureParameterValidatorTest {
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. Resource group 'myResourceGroup' does not exist.", validationResult.getFormattedErrors());
+        assertEquals("1. Resource group 'myResourceGroup' does not exist or insufficient permission to access it.", validationResult.getFormattedErrors());
     }
 
     @Test

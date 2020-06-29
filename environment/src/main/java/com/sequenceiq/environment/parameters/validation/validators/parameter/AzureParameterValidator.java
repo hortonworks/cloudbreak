@@ -83,7 +83,8 @@ public class AzureParameterValidator implements ParameterValidator {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environmentDto.getCredential());
         AzureClient azureClient = azureClientService.getClient(cloudCredential);
         if (!azureClient.resourceGroupExists(azureResourceGroupDto.getName())) {
-            validationResultBuilder.error(String.format("Resource group '%s' does not exist.", azureResourceGroupDto.getName()));
+            validationResultBuilder.error(
+                    String.format("Resource group '%s' does not exist or insufficient permission to access it.", azureResourceGroupDto.getName()));
         }
         return validationResultBuilder.build();
     }
