@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -322,7 +324,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
         decoratePillarWithClouderaManagerCsds(cluster, servicePillar);
-        decoratePillarWithClouderaManagerSettings(servicePillar);
+        decoratePillarWithClouderaManagerSettings(servicePillar, cluster.getId());
     }
 
     private void saveSssdAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
@@ -435,11 +437,14 @@ public class ClusterHostServiceRunner {
                         singletonMap("csd-urls", csdUrls))));
     }
 
-    private void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar) {
+    private void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar, Long clusterId) {
+        ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
+        boolean deterministicUidGid = isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_1);
         servicePillar.put("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
                 singletonMap("cloudera-manager", singletonMap("settings", Map.of(
                         "heartbeat_interval", cmHeartbeatInterval,
-                        "missed_heartbeat_interval", cmMissedHeartbeatInterval)))));
+                        "missed_heartbeat_interval", cmMissedHeartbeatInterval,
+                        "deterministic_uid_gid", deterministicUidGid)))));
     }
 
     private void decoratePillarWithTags(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
