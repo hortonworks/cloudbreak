@@ -64,8 +64,8 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
         RdsWaitRequest rdsWaitRequest = event.getData();
         Long sdxId = rdsWaitRequest.getResourceId();
         String userId = rdsWaitRequest.getUserId();
-        DetailedEnvironmentResponse env = environmentService.waitNetworkAndGetEnvironment(sdxId);
         try {
+            DetailedEnvironmentResponse env = environmentService.waitNetworkAndGetEnvironment(sdxId);
             sdxClusterRepository.findById(sdxId).ifPresentOrElse(sdxCluster -> {
                 if (sdxCluster.hasExternalDatabase()) {
                     validForDatabaseCreation(sdxId, env);
