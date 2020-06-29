@@ -13,7 +13,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatalakeClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -34,6 +33,8 @@ import com.sequenceiq.flow.core.FlowState;
 @Configuration
 public class ClusterUpgradeActions {
 
+    private static final String CURRENT_IMAGE = "CURRENT_IMAGE";
+
     private static final String TARGET_IMAGE = "TARGET_IMAGE";
 
     @Inject
@@ -49,6 +50,7 @@ public class ClusterUpgradeActions {
             @Override
             protected void prepareExecution(DatalakeClusterUpgradeTriggerEvent payload, Map<Object, Object> variables) {
                 super.prepareExecution(payload, variables);
+                variables.put(CURRENT_IMAGE, payload.getCurrentImage());
                 variables.put(TARGET_IMAGE, payload.getTargetImage());
             }
 
@@ -60,13 +62,15 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, DatalakeClusterUpgradeTriggerEvent payload, Map<Object, Object> variables) {
-                clusterUpgradeService.upgradeClusterManager(context.getStackId(), payload.getTargetImage());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(ClusterUpgradeContext context) {
-                return new ClusterManagerUpgradeRequest(context.getStackId());
+                boolean clusterManagerUpdateNeeded =
+                        clusterUpgradeService.upgradeClusterManager(context.getStackId(), payload.getCurrentImage(), payload.getTargetImage());
+                Selectable event;
+                if (clusterManagerUpdateNeeded) {
+                    event = new ClusterManagerUpgradeRequest(context.getStackId());
+                } else {
+                    event = new ClusterManagerUpgradeSuccess(context.getStackId());
+                }
+                sendEvent(context, event.selector(), event);
             }
 
             @Override
@@ -88,15 +92,16 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterManagerUpgradeSuccess payload, Map<Object, Object> variables) {
+                StatedImage currentImage = (StatedImage) variables.get(CURRENT_IMAGE);
                 StatedImage targetImage = (StatedImage) variables.get(TARGET_IMAGE);
-                Image image = targetImage.getImage();
-                clusterUpgradeService.upgradeCluster(context.getStackId(), image);
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(ClusterUpgradeContext context) {
-                return new ClusterUpgradeRequest(context.getStackId());
+                boolean clusterRuntimeUpgradeNeeded = clusterUpgradeService.upgradeCluster(context.getStackId(), currentImage, targetImage);
+                Selectable event;
+                if (clusterRuntimeUpgradeNeeded) {
+                    event = new ClusterUpgradeRequest(context.getStackId());
+                } else {
+                    event = new ClusterUpgradeSuccess(context.getStackId());
+                }
+                sendEvent(context, event.selector(), event);
             }
 
             @Override
@@ -118,9 +123,9 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeSuccess payload, Map<Object, Object> variables) {
+                StatedImage currentImage = (StatedImage) variables.get(CURRENT_IMAGE);
                 StatedImage targetImage = (StatedImage) variables.get(TARGET_IMAGE);
-                Image image = targetImage.getImage();
-                clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), image);
+                clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), currentImage, targetImage);
                 sendEvent(context);
             }
 
