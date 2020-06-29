@@ -50,7 +50,6 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestMethodNameMissingException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
@@ -383,10 +382,9 @@ public abstract class TestContext implements ApplicationContextAware {
         return this;
     }
 
-    public String getTestMethodName() {
+    public Optional<String> getTestMethodName() {
         return Optional.ofNullable(this.contextParameters.get(TEST_METHOD_NAME))
-                .map(Object::toString)
-                .orElseThrow(TestMethodNameMissingException::new);
+                .map(Object::toString);
     }
 
     protected String getActingUserAccessKey() {
@@ -421,7 +419,7 @@ public abstract class TestContext implements ApplicationContextAware {
         initialized = true;
         try {
             bean.valid();
-            tagsUtil.addTestNameTag(bean, getTestMethodName());
+            tagsUtil.addTestNameTag(bean, getTestMethodName().orElse("missingTestMethodName"));
         } catch (Exception e) {
             LOGGER.error("init of [{}] bean is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), bean.getName(), e);
             Log.when(null, key + " initialization is failed: " + ResponseUtil.getErrorMessage(e));
