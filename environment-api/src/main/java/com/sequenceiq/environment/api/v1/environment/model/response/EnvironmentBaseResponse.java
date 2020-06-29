@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
-import com.sequenceiq.common.api.tag.response.TagsResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
@@ -289,9 +288,10 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
     }
 
     @Override
-    public Optional<TagsResponse> getTagsResponse() {
+    public String getTagValue(String key) {
         return Optional.ofNullable(tags)
-                .map(TagResponse::getUserDefined);
+                .map(t -> t.getTagValue(key))
+                .orElse(null);
     }
 
     public String getParentEnvironmentCrn() {
