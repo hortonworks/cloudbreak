@@ -57,6 +57,7 @@ npm-debug.log
 start-local.sh
 cloudbreak.log
 cloudbreak-log/*.log
+mock-thunderhead-log/*.log
 autoscale-log/
 environment-log/
 core/cloudbreak-log/
