@@ -30,6 +30,7 @@ import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -71,6 +72,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxMetricService metricService;
+
+    @Inject
+    private SdxDatabaseDrService sdxDatabaseDrService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -246,24 +250,31 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.BACKUP_DATALAKE)
     public SdxDatabaseBackupResponse backupDatabaseByName(@ResourceName String name, String backupId, String backupLocation) {
-        return null;
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
+        return sdxDatabaseDrService.triggerDatabaseBackup(sdxCluster, backupId, backupLocation);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxDatabaseRestoreResponse restoreDatabaseByName(@ResourceName String name, String backupId, String backupLocation) {
-        return null;
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
+        return sdxDatabaseDrService.triggerDatabaseRestore(sdxCluster, backupId, backupLocation);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.BACKUP_DATALAKE)
-    public SdxDatabaseBackupStatusResponse backupDatabaseStatusByName(@ResourceName String name, String operationId) {
-        return null;
+    public SdxDatabaseBackupStatusResponse getBackupDatabaseStatusByName(@ResourceName String name, String operationId) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
+        return sdxDatabaseDrService.getDatabaseBackupStatus(sdxCluster, operationId);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.RESTORE_DATALAKE)
-    public SdxDatabaseRestoreStatusResponse restoreDatabaseStatusByName(@ResourceName String name, String operationId) {
-        return null;
-    }
+    public SdxDatabaseRestoreStatusResponse getRestoreDatabaseStatusByName(@ResourceName String name, String operationId) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
+        return sdxDatabaseDrService.getDatabaseRestoreStatus(sdxCluster, operationId);    }
 }

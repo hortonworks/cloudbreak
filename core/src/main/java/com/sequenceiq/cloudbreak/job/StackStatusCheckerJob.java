@@ -141,9 +141,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.MAINTENANCE_MODE_ENABLED,
                 Status.EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
                 Status.BACKUP_IN_PROGRESS,
-                Status.BACKUP_FAILED,
-                Status.RESTORE_IN_PROGRESS,
-                Status.RESTORE_FAILED
+                Status.RESTORE_IN_PROGRESS
         );
     }
 
@@ -156,7 +154,11 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.START_FAILED,
                 Status.STOPPED,
                 Status.STOP_FAILED,
-                Status.AMBIGUOUS
+                Status.AMBIGUOUS,
+                Status.RESTORE_FAILED,
+                Status.BACKUP_FAILED,
+                Status.BACKUP_FINISHED,
+                Status.RESTORE_FINISHED
         );
     }
 
