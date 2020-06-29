@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
@@ -28,8 +27,8 @@ public class AccountTagClientService {
 
     public Map<String, String> list() {
         try {
-            AccountTagResponses list = ThreadBasedUserCrnProvider
-                    .doAs(GrpcUmsClient.INTERNAL_ACTOR_CRN, () -> accountTagEndpoint.list());
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            AccountTagResponses list = ThreadBasedUserCrnProvider.doAsInternalActor(() -> accountTagEndpoint.listInAccount(accountId));
             return list.getResponses()
                     .stream()
                     .collect(Collectors.toMap(AccountTagResponse::getKey, AccountTagResponse::getValue));

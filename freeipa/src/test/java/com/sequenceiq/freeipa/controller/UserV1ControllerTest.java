@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.controller;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,8 +22,6 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
@@ -39,8 +38,6 @@ import com.sequenceiq.freeipa.service.operation.OperationService;
 public class UserV1ControllerTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
-
-    private static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
@@ -144,7 +141,7 @@ public class UserV1ControllerTest {
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
-        assertEquals(status, ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> underTest.synchronizeAllUsers(request)));
+        assertEquals(status, ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.synchronizeAllUsers(request)));
 
         verify(userSyncService, times(1)).synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, INTERNAL_ACTOR_CRN,
                 environments, users, machineUsers, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);

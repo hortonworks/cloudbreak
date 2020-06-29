@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.client;
 
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 
 public class CloudbreakInternalCrnClient {
 

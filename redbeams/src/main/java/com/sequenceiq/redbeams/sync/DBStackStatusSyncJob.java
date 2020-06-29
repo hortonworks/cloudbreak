@@ -1,22 +1,20 @@
 package com.sequenceiq.redbeams.sync;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
+import javax.inject.Inject;
+
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.statuschecker.job.StatusCheckerJob;
-
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 public class DBStackStatusSyncJob extends StatusCheckerJob {
 
@@ -43,8 +41,7 @@ public class DBStackStatusSyncJob extends StatusCheckerJob {
         } else {
             try {
                 measure(() -> {
-                    Crn internalCrnForService = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForService();
-                    ThreadBasedUserCrnProvider.doAs(internalCrnForService.toString(), () -> {
+                    ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
                         dbStackStatusSyncService.sync(dbStack);
                     });
                 }, LOGGER, ":::Auto sync::: DB stack sync in {}ms");

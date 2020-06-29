@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.auth.security;
+package com.sequenceiq.cloudbreak.auth;
 
 import java.util.Collection;
 import java.util.HashSet;

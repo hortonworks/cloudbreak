@@ -55,6 +55,7 @@ import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.EnvironmentCrn;
 import com.sequenceiq.authorization.annotation.EnvironmentName;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
@@ -86,6 +87,7 @@ public class EnforceAuthorizationLogicsUtil {
                     .put(CheckPermissionByResourceNameList.class, anyCollectionFrom(ResourceNameList.class, list(String.class), set(String.class)))
                     .put(DisableCheckPermissions.class, noRestriction())
                     .put(CheckPermissionByAccount.class, noRestriction())
+                    .put(InternalOnly.class, noRestriction())
                     .put(FilterListBasedOnPermissions.class,
                             returnsAnyOf(
                                     list(ResourceCrnAwareApiModel.class),

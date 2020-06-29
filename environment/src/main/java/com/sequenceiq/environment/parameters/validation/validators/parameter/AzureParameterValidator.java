@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.parameters.validation.validators.parameter;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation.USE_EXISTING;
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_MULTIPLE;
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_SINGLE;

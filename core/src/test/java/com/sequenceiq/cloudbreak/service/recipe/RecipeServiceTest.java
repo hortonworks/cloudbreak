@@ -148,7 +148,7 @@ public class RecipeServiceTest {
         when(workspaceService.retrieveForUser(any())).thenReturn(Set.of(workspace));
         when(recipeRepository.save(any())).thenReturn(recipe);
 
-        ThreadBasedUserCrnProvider.doAs(GrpcUmsClient.INTERNAL_ACTOR_CRN, () ->
+        ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                 underTest.createForLoggedInUser(recipe, 1L, "account_id", "creator"));
 
         assertThat(recipe.getCreator(), is("creator"));

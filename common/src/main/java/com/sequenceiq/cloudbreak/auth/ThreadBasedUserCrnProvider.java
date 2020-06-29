@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 
 public class ThreadBasedUserCrnProvider {
 
+    public static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadBasedUserCrnProvider.class);
 
     private static final ThreadLocal<String> USER_CRN = new ThreadLocal<>();
@@ -94,6 +96,10 @@ public class ThreadBasedUserCrnProvider {
         }
     }
 
+    public static <T> T doAsInternalActor(Supplier<T> callable) {
+        return doAs(INTERNAL_ACTOR_CRN, callable);
+    }
+
     public static void doAs(String userCrn, Runnable runnable) {
         String previousUserCrn = getUserCrn();
         removeUserCrn();
@@ -106,5 +112,9 @@ public class ThreadBasedUserCrnProvider {
                 setUserCrn(previousUserCrn);
             }
         }
+    }
+
+    public static void doAsInternalActor(Runnable runnable) {
+        doAs(INTERNAL_ACTOR_CRN, runnable);
     }
 }

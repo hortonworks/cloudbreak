@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -20,16 +21,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn.Service;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
-
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VirtualGroupServiceTest {
-
-    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Service.IAM).getInternalCrnForServiceAsString();
 
     private static final String MOCK_VIRTUAL_GROUP = "mock_virtual_group";
 
@@ -61,7 +57,7 @@ public class VirtualGroupServiceTest {
         assertEquals(UmsRight.values().length, result.size());
         verify(grpcUmsClient, times(UmsRight.values().length)).setWorkloadAdministrationGroupName(crnCaptor.capture(), eq(ACCOUNT_ID),
                 eq(Optional.empty()), rightCaptor.capture(), eq(ENV_CRN));
-        assertEquals(IAM_INTERNAL_ACTOR_CRN, crnCaptor.getValue());
+        assertEquals(INTERNAL_ACTOR_CRN, crnCaptor.getValue());
         for (UmsRight umsRight : UmsRight.values()) {
             assertEquals(MOCK_VIRTUAL_GROUP, result.get(umsRight));
             assertTrue(rightCaptor.getAllValues().contains(umsRight.getRight()));
@@ -95,7 +91,7 @@ public class VirtualGroupServiceTest {
 
         verify(grpcUmsClient, times(1)).setWorkloadAdministrationGroupName(crnCaptor.capture(), eq(ACCOUNT_ID),
                 eq(Optional.empty()), rightCaptor.capture(), eq(ENV_CRN));
-        assertEquals(IAM_INTERNAL_ACTOR_CRN, crnCaptor.getValue());
+        assertEquals(INTERNAL_ACTOR_CRN, crnCaptor.getValue());
         assertEquals(MOCK_VIRTUAL_GROUP, result);
         assertTrue(rightCaptor.getAllValues().contains(UmsRight.ENVIRONMENT_ACCESS.getRight()));
     }
@@ -112,7 +108,7 @@ public class VirtualGroupServiceTest {
 
         verify(grpcUmsClient, times(1)).setWorkloadAdministrationGroupName(crnCaptor.capture(), eq(ACCOUNT_ID),
                 eq(Optional.empty()), rightCaptor.capture(), eq(ENV_CRN));
-        assertEquals(IAM_INTERNAL_ACTOR_CRN, crnCaptor.getValue());
+        assertEquals(INTERNAL_ACTOR_CRN, crnCaptor.getValue());
         assertEquals(MOCK_VIRTUAL_GROUP, result);
         assertTrue(rightCaptor.getAllValues().contains(UmsRight.ENVIRONMENT_ACCESS.getRight()));
     }
@@ -135,7 +131,7 @@ public class VirtualGroupServiceTest {
 
         verify(grpcUmsClient, times(UmsRight.values().length)).deleteWorkloadAdministrationGroupName(crnCaptor.capture(), eq(ACCOUNT_ID),
                 eq(Optional.empty()), rightCaptor.capture(), eq(ENV_CRN));
-        assertEquals(IAM_INTERNAL_ACTOR_CRN, crnCaptor.getValue());
+        assertEquals(INTERNAL_ACTOR_CRN, crnCaptor.getValue());
         for (UmsRight right : UmsRight.values()) {
             assertTrue(rightCaptor.getAllValues().contains(right.getRight()));
         }
