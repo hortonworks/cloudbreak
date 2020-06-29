@@ -10,6 +10,8 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.audit.AuditGrpc;
@@ -94,6 +96,7 @@ public class AuditClient {
         }
     }
 
+    @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
     public void createAuditEvent(AuditEvent auditEvent) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             String actorCrn = actorUtil.getActorCrn(auditEvent.getActor());
