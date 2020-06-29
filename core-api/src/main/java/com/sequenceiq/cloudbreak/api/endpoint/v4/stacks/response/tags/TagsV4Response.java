@@ -1,12 +1,15 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags;
 
+import java.util.Optional;
+
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.common.api.tag.response.TagsResponse;
 import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class TagsV4Response implements JsonEntity {
+public class TagsV4Response implements JsonEntity, TaggedResponse {
 
     @ApiModelProperty(StackModelDescription.APPLICATION_TAGS)
     private TagsResponse application = new TagsResponse();
@@ -39,5 +42,13 @@ public class TagsV4Response implements JsonEntity {
 
     public void setDefaults(TagsResponse defaults) {
         this.defaults = defaults;
+    }
+
+    @Override
+    public String getTagValue(String key) {
+        return Optional.ofNullable(application.getTagValue(key))
+                .or(() -> Optional.ofNullable(userDefined.getTagValue(key)))
+                .or(() -> Optional.ofNullable(defaults.getTagValue(key)))
+                .orElse(null);
     }
 }

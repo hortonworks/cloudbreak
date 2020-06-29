@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
-import com.sequenceiq.common.api.tag.response.TagsResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -286,9 +285,10 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     }
 
     @Override
-    public Optional<TagsResponse> getTagsResponse() {
+    public String getTagValue(String key) {
         return Optional.ofNullable(tags)
-                .map(TagsV4Response::getUserDefined);
+                .map(t -> t.getTagValue(key))
+                .orElse(null);
     }
 
     public TelemetryResponse getTelemetry() {
