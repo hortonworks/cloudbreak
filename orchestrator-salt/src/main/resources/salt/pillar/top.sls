@@ -11,6 +11,7 @@ base:
     - proxy.proxy
     - databus
     - cloudera-manager.csd
+    - cloudera-manager.settings
     - fluent
     - metering
     - mount.disk
@@ -62,7 +63,6 @@ base:
     - cloudera-manager.database
     - cloudera-manager.communication
     - cloudera-manager.autotls
-    - cloudera-manager.settings
     - gateway.init
     - gateway.ldap
     - gateway.settings
