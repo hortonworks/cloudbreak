@@ -97,11 +97,11 @@ public class AwsClient {
     }
 
     public AmazonEC2Client getAmazonEC2Client(AwsSessionCredentialProvider awsSessionCredentialProvider) {
-        return new AmazonEC2Client(awsSessionCredentialProvider);
+        return new AmazonEC2Client(awsSessionCredentialProvider, getDefaultClientConfiguration());
     }
 
     public AmazonEC2Client getAmazonEC2Client(BasicAWSCredentials basicAWSCredentials) {
-        return new AmazonEC2Client(basicAWSCredentials);
+        return new AmazonEC2Client(basicAWSCredentials, getDefaultClientConfiguration());
     }
 
     public AmazonCloudWatchClient createCloudWatchClient(AwsCredentialView awsCredential, String regionName) {
@@ -151,8 +151,8 @@ public class AwsClient {
 
     public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {
         AmazonAutoScalingClient client = isRoleAssumeRequired(awsCredential) ?
-                new AmazonAutoScalingClient(createAwsSessionCredentialProvider(awsCredential)) :
-                new AmazonAutoScalingClient(createAwsCredentials(awsCredential));
+                new AmazonAutoScalingClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
+                new AmazonAutoScalingClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
         client.setRegion(RegionUtils.getRegion(regionName));
         return client;
     }
@@ -180,6 +180,7 @@ public class AwsClient {
     public AmazonRDS createRdsClient(AwsCredentialView awsCredentialView, String region) {
         return AmazonRDSClientBuilder.standard()
                 .withCredentials(getCredentialProvider(awsCredentialView))
+                .withClientConfiguration(getDefaultClientConfiguration())
                 .withRegion(region)
                 .build();
     }
