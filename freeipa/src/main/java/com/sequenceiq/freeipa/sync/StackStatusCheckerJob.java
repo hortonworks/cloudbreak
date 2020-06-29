@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -85,8 +83,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private void syncAStack(Stack stack) {
         try {
             checkedMeasure(() -> {
-                Crn internalCrnForService = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForService();
-                ThreadBasedUserCrnProvider.doAs(internalCrnForService.toString(), () -> {
+                ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
                     Set<InstanceMetaData> notTerminatedForStack = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
                     Set<InstanceMetaData> checkableInstances = notTerminatedForStack.stream().filter(i -> !i.isDeletedOnProvider())
                             .collect(Collectors.toSet());

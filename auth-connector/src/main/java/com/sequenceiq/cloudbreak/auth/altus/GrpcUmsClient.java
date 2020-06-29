@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
@@ -50,8 +50,6 @@ import io.grpc.StatusRuntimeException;
 
 @Component
 public class GrpcUmsClient {
-
-    public static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcUmsClient.class);
 
@@ -588,7 +586,7 @@ public class GrpcUmsClient {
     // @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
     public void assignResourceRole(String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = makeClient(channelWrapper.getChannel(), INTERNAL_ACTOR_CRN);
+            UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             LOGGER.info("Assigning {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);
             client.assignResourceRole(requestId.orElse(UUID.randomUUID().toString()), userCrn, resourceCrn, resourceRoleCrn);
             LOGGER.info("Assigned {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);
@@ -614,7 +612,7 @@ public class GrpcUmsClient {
     // @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
     public void unassignResourceRole(String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = makeClient(channelWrapper.getChannel(), INTERNAL_ACTOR_CRN);
+            UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             LOGGER.info("Unassigning {} role for resource {} from user {}", resourceRoleCrn, resourceCrn, userCrn);
             client.unassignResourceRole(requestId.orElse(UUID.randomUUID().toString()), userCrn, resourceCrn, resourceRoleCrn);
             LOGGER.info("Unassigned {} role for resource {} from user {}", resourceRoleCrn, resourceCrn, userCrn);
@@ -626,7 +624,7 @@ public class GrpcUmsClient {
     public void notifyResourceDeleted(String resourceCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             LOGGER.debug("Notify UMS about resource ('{}') was deleted", resourceCrn);
-            UmsClient client = makeClient(channelWrapper.getChannel(), INTERNAL_ACTOR_CRN);
+            UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             client.notifyResourceDeleted(requestId.orElse(UUID.randomUUID().toString()), resourceCrn);
             LOGGER.info("Notified UMS about deletion of resource {}", resourceCrn);
         } catch (Exception e) {

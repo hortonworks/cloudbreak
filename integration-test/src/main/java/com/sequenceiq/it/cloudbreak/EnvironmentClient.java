@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak;
 import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceApiKeyClient;

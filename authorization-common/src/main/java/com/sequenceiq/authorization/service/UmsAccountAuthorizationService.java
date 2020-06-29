@@ -72,7 +72,7 @@ public class UmsAccountAuthorizationService {
             throw new AccessDeniedException(unauthorizedMessage);
         }
         validateAction(action);
-        if (!umsClient.checkRight(GrpcUmsClient.INTERNAL_ACTOR_CRN, actorCrn.toString(), umsRightProvider.getRight(action), getRequestId())) {
+        if (!umsClient.checkRight(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, actorCrn.toString(), umsRightProvider.getRight(action), getRequestId())) {
             String unauthorizedMessage = String.format("You have no right to perform %s on user %s.", umsRightProvider.getRight(action), targetUserCrnStr);
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);

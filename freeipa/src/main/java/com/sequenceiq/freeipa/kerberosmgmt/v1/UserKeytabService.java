@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.freeipa.controller.exception.NotFoundException.notFound;
 
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.security.internal;
 
-import com.sequenceiq.cloudbreak.auth.security.CrnUser;
+import com.sequenceiq.cloudbreak.auth.CrnUser;
 
 public class InternalUserModifier {
 

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -71,6 +72,12 @@ public class AccountTagController extends NotificationController implements Acco
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public AccountTagResponses list() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return listInAccount(accountId);
+    }
+
+    @Override
+    @InternalOnly
+    public AccountTagResponses listInAccount(String accountId) {
         Set<AccountTag> accountTags = accountTagService.get(accountId);
         List<AccountTagResponse> accountTagResponses = accountTagToAccountTagResponsesConverter.convert(accountTags);
         defaultInternalAccountTagService.merge(accountTagResponses);

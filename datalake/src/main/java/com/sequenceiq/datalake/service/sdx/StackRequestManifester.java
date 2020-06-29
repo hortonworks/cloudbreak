@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 
 import java.io.IOException;
 import java.util.HashMap;

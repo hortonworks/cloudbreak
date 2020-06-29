@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static java.util.Map.entry;
 
 import java.util.Map;
