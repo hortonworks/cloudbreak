@@ -50,14 +50,14 @@ dump_to_azure() {
   SERVICE="$1"
   doLog "INFO Dumping ${SERVICE}"
   LOCAL_BACKUP=${DATE_DIR}/${SERVICE}_backup
-  pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=plain --file="$LOCAL_BACKUP" >>$LOGFILE 2>&1 || errorExit "Unable to dump ${SERVICE}"
+  pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=plain --file="$LOCAL_BACKUP" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to dump ${SERVICE}"
 
   doLog "INFO Uploading to ${BACKUP_LOCATION}"
   AZURE_LOCATION="${BACKUP_LOCATION}/${SERVICE}_backup"
-  azcopy copy "$LOCAL_BACKUP" "$AZURE_LOCATION" >>$LOGFILE 2>&1 || errorExit "Unable to upload $SERVICE backup"
+  azcopy copy "$LOCAL_BACKUP" "$AZURE_LOCATION" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to upload $SERVICE backup"
   doLog "INFO Completed upload to ${BACKUP_LOCATION}"
 
-  rm -v "$LOCAL_BACKUP" >>$LOGFILE 2>&1
+  rm -v "$LOCAL_BACKUP" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 
   doLog "INFO ${SERVICE} dumped to "
 }
@@ -70,7 +70,7 @@ run_azure_backup() {
   dump_to_azure "hive"
   dump_to_azure "ranger"
 
-  rmdir -v "$DATE_DIR" >>$LOGFILE 2>&1
+  rmdir -v "$DATE_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 }
 
 dump_to_s3() {
@@ -79,14 +79,14 @@ dump_to_s3() {
   doLog "INFO Dumping ${SERVICE} to ${S3_LOCATION}"
 
   doLog "INFO Try to upload with AES256 encryption"
-  ret_code=$(pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2>>$LOGFILE | /usr/bin/aws s3 cp --sse AES256 --no-progress - "${S3_LOCATION}" 2>>$LOGFILE || echo $?)
+  ret_code=$(pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2> >(tee -a $LOGFILE >&2) | /usr/bin/aws s3 cp --sse AES256 --no-progress - "${S3_LOCATION}" 2> >(tee -a $LOGFILE >&2) || echo $?)
 
-  if [[ -n "$ret_code" ]] && [[ "$ret_code" == 1 ]]; then
+  if [[ -n "$ret_code" ]] && [[ "$ret_code" -ne 0 ]]; then
     doLog "INFO Try to upload with aws:kms encryption"
-    ret_code=$(pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2>>$LOGFILE | /usr/bin/aws s3 cp --sse aws:kms --no-progress - "${S3_LOCATION}" 2>>$LOGFILE || echo $?)
+    ret_code=$(pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2> >(tee -a $LOGFILE >&2) | /usr/bin/aws s3 cp --sse aws:kms --no-progress - "${S3_LOCATION}" 2> >(tee -a $LOGFILE >&2) || echo $?)
   fi
 
-  if [[ -n "$ret_code" ]] && [[ "$ret_code" == 1 ]]; then
+  if [[ -n "$ret_code" ]] && [[ "$ret_code" -ne 0 ]]; then
     errorExit "Unable to dump ${SERVICE}."
   else
     doLog "INFO ${SERVICE} dumped to ${S3_LOCATION}"
