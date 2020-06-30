@@ -246,6 +246,10 @@ public class ClusterService implements ResourceBasedCrnProvider {
         return clusterRepository.findByLoadAlertAndStackTypeAndClusterStateAndAutoscaling(stackType, state, autoscalingEnabled, nodeId);
     }
 
+    public List<Long> findTimeAlertClustersForNode(StackType stackType, boolean autoscalingEnabled, String nodeId) {
+        return clusterRepository.findByTimeAlertAndStackTypeAndAutoscaling(stackType, autoscalingEnabled, nodeId);
+    }
+
     public void validateClusterUniqueness(MonitoredStack stack) {
         Iterable<Cluster> clusters = clusterRepository.findAll();
         boolean clusterForTheSameStackAndClusterManager = StreamSupport.stream(clusters.spliterator(), false)

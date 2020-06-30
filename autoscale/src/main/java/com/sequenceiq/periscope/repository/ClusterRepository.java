@@ -54,6 +54,13 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
             @Param("autoScalingEnabled") Boolean autoScalingEnabled,
             @Param("periscopeNodeId") String periscopeNodeId);
 
+    @Query("SELECT distinct c.id FROM Cluster c JOIN c.timeAlerts timealert WHERE c.stackType = :stackType " +
+            " and c.autoscalingEnabled = :autoScalingEnabled" +
+            " and (:periscopeNodeId IS NULL or c.periscopeNodeId = :periscopeNodeId) ")
+    List<Long> findByTimeAlertAndStackTypeAndAutoscaling(@Param("stackType") StackType stackType,
+            @Param("autoScalingEnabled") Boolean autoScalingEnabled,
+            @Param("periscopeNodeId") String periscopeNodeId);
+
     List<Cluster> findByStateAndPeriscopeNodeId(ClusterState state, String nodeId);
 
     List<Cluster> findAllByPeriscopeNodeId(String nodeId);
