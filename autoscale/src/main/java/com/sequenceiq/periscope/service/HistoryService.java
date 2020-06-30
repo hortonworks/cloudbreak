@@ -3,6 +3,8 @@ package com.sequenceiq.periscope.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.api.model.ScalingStatus;
@@ -30,7 +32,8 @@ public class HistoryService {
         return historyRepository.save(history);
     }
 
-    public List<History> getHistory(Long clusterId) {
-        return historyRepository.findFirst200ByClusterIdOrderByIdDesc(clusterId);
+    public List<History> getHistory(Long clusterId, Integer historyCount) {
+        PageRequest pageable = PageRequest.of(0, historyCount, Sort.by("id").descending());
+        return historyRepository.findByClusterId(clusterId, pageable);
     }
 }

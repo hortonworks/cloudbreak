@@ -48,6 +48,8 @@ public class HistoryControllerTest {
 
     private String testClusterCrn = "crn:cdp:iam:us-west-1:%s:cluster:mockuser@cloudera.com";
 
+    private String testClusterName = "testCluster";
+
     private Long workspaceId = 100L;
 
     private Long clusterId = 100L;
@@ -67,28 +69,40 @@ public class HistoryControllerTest {
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage("cluster 'crn:cdp:iam:us-west-1:%s:cluster:mockuser@cloudera.com' not found.");
 
-        underTest.getHistory(testClusterCrn);
+        underTest.getHistoryByCrn(testClusterCrn, 10);
     }
 
     @Test
     public void testGetHistoryWhenNoHistory() {
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
         when(clusterService.findOneByStackCrnAndWorkspaceId(testClusterCrn, workspaceId)).thenReturn(Optional.of(cluster));
-        when(historyService.getHistory(clusterId)).thenReturn(List.of());
+        when(historyService.getHistory(clusterId, 10)).thenReturn(List.of());
 
-        List<AutoscaleClusterHistoryResponse> historyResponses = underTest.getHistory(testClusterCrn);
+        List<AutoscaleClusterHistoryResponse> historyResponses = underTest.getHistoryByCrn(testClusterCrn, 10);
         assertEquals("History Response size is 0", 0, historyResponses.size());
     }
 
     @Test
-    public void testGetHistoryWhenHistoryFound() {
+    public void testGetHistoryByCrnWhenHistoryFound() {
         List<History> mockHistoryResponses = List.of(new History(), new History());
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
         when(clusterService.findOneByStackCrnAndWorkspaceId(testClusterCrn, workspaceId)).thenReturn(Optional.of(cluster));
-        when(historyService.getHistory(clusterId)).thenReturn(mockHistoryResponses);
+        when(historyService.getHistory(clusterId, 10)).thenReturn(mockHistoryResponses);
         when(historyConverter.convertAllToJson(any(List.class))).thenCallRealMethod();
 
-        List<AutoscaleClusterHistoryResponse> historyResponses = underTest.getHistory(testClusterCrn);
+        List<AutoscaleClusterHistoryResponse> historyResponses = underTest.getHistoryByCrn(testClusterCrn, 10);
+        assertEquals("History Response size is 2", 2, historyResponses.size());
+    }
+
+    @Test
+    public void testGetHistoryByNameWhenHistoryFound() {
+        List<History> mockHistoryResponses = List.of(new History(), new History());
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
+        when(clusterService.findOneByStackNameAndWorkspaceId(testClusterName, workspaceId)).thenReturn(Optional.of(cluster));
+        when(historyService.getHistory(clusterId, 10)).thenReturn(mockHistoryResponses);
+        when(historyConverter.convertAllToJson(any(List.class))).thenCallRealMethod();
+
+        List<AutoscaleClusterHistoryResponse> historyResponses = underTest.getHistoryByName(testClusterName, 10);
         assertEquals("History Response size is 2", 2, historyResponses.size());
     }
 }

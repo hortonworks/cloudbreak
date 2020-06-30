@@ -17,7 +17,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4R
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
+import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.MetricType;
@@ -61,6 +63,9 @@ public class ScalingRequest implements Runnable {
 
     @Inject
     private CloudbreakCommunicator cloudbreakCommunicator;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
 
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount, List<String> decommissionNodeIds) {
         this.cluster = cluster;
@@ -116,7 +121,7 @@ public class ScalingRequest implements Runnable {
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
         } catch (RuntimeException e) {
             scalingStatus = ScalingStatus.FAILED;
-            statusReason = "Couldn't trigger upscaling due to CB Message : " + e.getMessage();
+            statusReason = getMessageForCBStatus("Upscaling", e.getMessage());
             LOGGER.error("Couldn't trigger upscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
                     hostGroup, cluster.getStackCrn(), desiredNodeCount, e);
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED);
@@ -150,7 +155,7 @@ public class ScalingRequest implements Runnable {
         } catch (Exception e) {
             scalingStatus = ScalingStatus.FAILED;
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
-            statusReason = "Couldn't trigger downscaling due to CB Message : " + e.getMessage();
+            statusReason = getMessageForCBStatus("Downscaling", e.getMessage());
             LOGGER.error("Couldn't trigger downscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
                     hostGroup, cluster.getStackCrn(), desiredNodeCount, e);
         } finally {
@@ -174,7 +179,7 @@ public class ScalingRequest implements Runnable {
         } catch (Exception e) {
             scalingStatus = ScalingStatus.FAILED;
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
-            statusReason = "Couldn't trigger downscaling due to CB Message : " + e.getMessage();
+            statusReason = getMessageForCBStatus("Downscaling", e.getMessage());
             LOGGER.error("Couldn't trigger decommissioning for host group '{}', cluster '{}', decommissionNodeCount '{}', " +
                     "decommissionNodeIds '{}' error '{}' ", hostGroup, cluster.getStackCrn(), decommissionNodeIds.size(), decommissionNodeIds, e);
         } finally {
@@ -186,5 +191,16 @@ public class ScalingRequest implements Runnable {
         History history = historyService.createEntry(scalingStatus,
                 StringUtils.left(statusReason, STATUSREASON_MAX_LENGTH), totalNodes, adjustmentCount, policy);
         notificationSender.send(policy.getAlert().getCluster(), history);
+    }
+
+    private String getMessageForCBStatus(String action, String cbMessage) {
+        switch (cbMessage) {
+            case "HTTP 409 Conflict":
+                return messagesService.getMessage(MessageCode.CLUSTER_UPDATE_IN_PROGRESS, List.of(action, cluster.getStackName()));
+            case "HTTP 400 Bad Request":
+                return messagesService.getMessage(MessageCode.CLUSTER_NOT_AVAILABLE, List.of(action, cluster.getStackName()));
+            default:
+                return cbMessage;
+        }
     }
 }

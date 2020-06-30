@@ -58,8 +58,8 @@ public class ApiDescription {
     }
 
     public static class HistoryOpDescription {
-        public static final String HISTORY_GET_ALL = "retrieve full history";
-        public static final String HISTORY_GET = "retrieve a specific history";
+        public static final String HISTORY_GET_BY_CLUSTER = "retrieve history for cluster";
+        public static final String HISTORY_COUNT = "history record count";
     }
 
     public static class HistoryNotes {
