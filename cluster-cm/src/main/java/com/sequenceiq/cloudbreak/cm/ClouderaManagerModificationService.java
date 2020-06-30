@@ -136,6 +136,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 List<ApiHost> hosts = clouderaManagerApiFactory.getHostsResourceApi(apiClient).readHosts(null, null, SUMMARY).getItems();
                 ApiHostRefList body = createUpscaledHostRefList(upscaleHostNames, hosts);
                 clustersResourceApi.addHosts(clusterName, body);
+                // TODO Eventually (CM): activateParcel takes at least 20 seconds in CM.
+                //  Ideally, it should not be required (it is required right now) when a new node is being added to the cluster,
+                //  or if it is required, needs to be faster.
+
+                // TODO Eventually: Any possibility of parallelizing these operations. Does CM require the new node to be
+                //  up and running for some of these API calls.
                 activateParcel(clustersResourceApi);
                 applyHostGroupRolesOnUpscaledHosts(body, hostGroup.getName());
             } else {

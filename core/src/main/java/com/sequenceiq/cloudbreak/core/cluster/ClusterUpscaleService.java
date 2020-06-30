@@ -83,6 +83,9 @@ public class ClusterUpscaleService {
 
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         connector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId).getRunningInstanceMetaDataSet());
+        // TODO Eventually: This takes 10 seconds. Down to 5 seconds if using a more aggressive poll interval.
+        //  Likely a CM side optimization to be faster than 5 seconds.
+        // Otherhwise TODO: Question: Safe to switch to a 1-2s polling interval on this API?
     }
 
     public void uploadRecipesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {

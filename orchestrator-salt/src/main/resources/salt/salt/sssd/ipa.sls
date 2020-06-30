@@ -1,6 +1,7 @@
 {%- from 'sssd/settings.sls' import ipa with context %}
 {%- from 'metadata/settings.sls' import metadata with context %}
 
+{# Protect this via a grains[prewarmed] check}
 ipa_packages_install:
   pkg.installed:
     - refresh: False

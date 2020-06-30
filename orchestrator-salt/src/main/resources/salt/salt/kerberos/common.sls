@@ -1,4 +1,5 @@
 haveged:
+{# Protect this via a grains[prewarmed] check}
   pkg.installed:
     - unless:
       - rpm -q haveged
@@ -17,6 +18,7 @@ install_kerberos:
       - krb5-kdc
       - krb5-admin-server
 {% else %}
+{# Protect this via a grains[prewarmed] check}
 install_kerberos:
   pkg.installed:
     - pkgs:

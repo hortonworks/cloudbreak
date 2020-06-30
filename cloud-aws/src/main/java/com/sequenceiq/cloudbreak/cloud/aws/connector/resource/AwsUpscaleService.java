@@ -104,6 +104,13 @@ public class AwsUpscaleService {
 
         awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
 
+        // TODO: Reduce the polling interval from 10 seconds to something like 3-5 seconds.
+        //  Alternately a dynamic polling interval, with 'expectedRunTime' as a parameter.
+        //  e.g. 50 seconds to launch an instance - would poll every 10-15 seconds until the 40s mark,
+        //  after which it switches to 2-3 seconds.
+
+        // TODO Eventually: Try re-using connection. Each connection + call to AWS seems to take 300+ms on mow-priv.
+        //  Post new node addition - tagging etc ends up taking a couple of seconds.
         return singletonList(new CloudResourceStatus(cfStackUtil.getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
     }
 

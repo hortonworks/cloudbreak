@@ -27,6 +27,10 @@ include_access_config:
   file.replace:
     - name: /etc/unbound/unbound.conf
     - pattern: '#include: "otherfile.conf"'
+{# Replace this, and any file.replace with sed}
+{# name: "sed -i 's/#include: \"otherfile\\.conf\"/include: \\\"\\/etc\\/unbound\\/access.conf\\\"/g' /etc/unbound/unbound.conf"}
+{# file.replace OR the unless check triggers a module load, which takes 5 seconds with an unpatched image, 2 seconds with a patch
+{# to the image}
     - repl: 'include: "/etc/unbound/access.conf"'
     - unless: grep "/etc/unbound/access.conf" /etc/unbound/unbound.conf
 

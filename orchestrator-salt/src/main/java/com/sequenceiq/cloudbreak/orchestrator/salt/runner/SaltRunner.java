@@ -15,6 +15,15 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 public class SaltRunner {
 
     private static final int SLEEP_TIME = 10000;
+    // TODO Question: Customize this for different operations, or use an expectedDuration parameter to auto-tune.
+    //  Maybe expose this parameter in each function here, so that new API invocations are forced to think about
+    //  what the value here should be.
+
+    // By setting this to a lower value for specific calls (bootStrap, mount-disks, etc) - can end up saving 10-15 seconds
+    //  in node startup time.
+
+    // The downside is a potentially less scalable CB instance; horizontal scaling should take care of this if a faster poll
+    //  becomes a bottleneck.
 
     @Value("${cb.max.salt.new.service.retry.onerror}")
     private int maxRetryOnError;

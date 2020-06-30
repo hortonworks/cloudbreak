@@ -83,6 +83,13 @@ public class FreeIpaCleanupService {
     }
 
     private void pollCleanupOperation(OperationStatus operationStatus) {
+        // TODO Question: Is a cleanup operation required?
+        //  freeipa join for a new host uses the --force flag, which wouls presumably override old entries.
+        //  If that is the case - can this operation be skipped?
+        //  Alternately, have this executed as part of the salt ipa-client-install (if that is any faster)
+
+        //  This takes over 5 seconds due to the poll interval of 5s.
+        //  With a 1s poll interval, this operation still takes about 3.5 seconds.
         FreeIpaOperationPollerObject opretaionPollerObject = new FreeIpaOperationPollerObject(operationStatus.getOperationId(),
                 operationStatus.getOperationType().name(), operationV1Endpoint);
         Pair<PollingResult, Exception> pollingResult = freeIpaOperationChecker

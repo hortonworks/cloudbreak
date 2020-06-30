@@ -13,6 +13,10 @@
             <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
                 <loggerNameFilter>com.sequenceiq</loggerNameFilter>
                 <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [type:%X{resourceType:-springLog}] [crn:%X{resourceCrn:-}] [name:%X{resourceName:-}] [flow:%X{flowId:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [userCrn:%X{userCrn:-}] [environment:%X{environmentCrn:-}] [traceId:%X{traceId:-}] [spanId:%X{spanId:-}] %msg%n</pattern>
+                <!-- TODO Question: Unrelated to upscale perf. Can this format be changed to
+                <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [type:%X{resourceType:-springLog}] [crn:%X{resourceCrn:-}] [name:%X{resourceName:-}] [flow:%X{flowId:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [userCrn:%X{userCrn:-}] [environment:%X{environmentCrn:-}] [traceId:%X{traceId:-}] [spanId:%X{spanId:-}] ::: %msg%n</pattern>
+                ':::' being the only change (any distinguashable separator will do). Helps find the start of a log line more easily.
+                -->
             </layout>
         </encoder>
     </appender>

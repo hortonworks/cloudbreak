@@ -6,6 +6,9 @@ base:
     - metadata
     - docker
     - recipes.runner
+    {# Can some of these be parallelized? fluentd, metering, ipa seem like good candidates which can work independently.}
+    {# Salt seems to have some kind of a 'parallel' construct. Need to look into this a little more
+    {# TODO Question: Any specific concerns in trying to evaluate parallel execution?}
     - fluent
     - metering
     - ntp

@@ -60,11 +60,15 @@ public class RecipeEngine {
     public void executePostAmbariStartRecipes(Stack stack, Collection<Recipe> recipes) throws CloudbreakException {
         if ((stack.getCluster() != null && ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName()))
                 || recipesFound(recipes, POST_CLOUDERA_MANAGER_START)) {
+            // The ldapConfigService check forces this to run ALWAYS, which adds 10 seconds.
+            // TODO Question: Is it safe to remove the ldapConfigService.isLdap configured (Doesn't seem to do anything useful in the recipe execution)?
+            // 10s saved by removing that check.
             orchestratorRecipeExecutor.postClusterManagerStartRecipes(stack);
         }
     }
 
     public void executePostInstallRecipes(Stack stack) throws CloudbreakException {
+        // TODO: Change this to accept a list of recipes, and execute only if recipes exist.
         orchestratorRecipeExecutor.postClusterInstall(stack);
     }
 

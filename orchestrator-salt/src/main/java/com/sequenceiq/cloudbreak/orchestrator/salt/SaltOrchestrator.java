@@ -343,6 +343,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void initServiceRun(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorException {
+        // TODO Question: Why does this get called with allNodes set to all nodes in the cluster,
+        //  instead of just the new nodes which are being added?
+
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
         Set<String> gatewayTargetHostnames = getGatewayHostnames(allGateway);
@@ -353,14 +356,33 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
+            // Observation: The only pillar entries which seem to change when adding new nodes are disks and nodes.
+            //  PillarSave isn't very expensive - but the entire set of pillarSaves does take over 1 second.
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
                 OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargetIpAddresses, propertiesEntry.getValue());
                 saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
                 saltPillarRunner.call();
             }
 
+            // Each grainAddRunner takes at least 0.6 seconds (combination of grains.append + grains.get). Occasionally longer than 1 second.
+            //  All of the grain additions here end up adding 5 seconds to a new node addition.
+
+            // Salt allows for multiple grains to be added in a single call. This call, howeever, will not throw an error
+            //  if a grain already exists. Instead, it will keep appending to the list of grains.
+            //  Since this operation is called with all nodes - moving over to a single call to append multiple grains
+            //  will likely break a lot of things.
+
+            // TODO Question: Back to why this is invoked with allNodes vs new nodes only. NewNodes only allows for such optimizations.
+            //  In theory, this could be a grains.get + construct the append command in node batches (i.e. existing nodes will get almost no
+            //  changes. New nodes will be sent as a single bulk operation). Not familiar enough with the flow to be confident about making
+            //  such a change. 5s is a reasonable amount of time though.
             setAdMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, allNodeHostname);
             setIpaMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, allNodeHostname);
+
+            // TODO Question: Can some of these grains be set ahead of time during image building, or salt-bootstrap to
+            //  avoid some of these calls.
+
+            // TODO: Add a call here to set a 'prewarmed' role (or set this up in the image itself)
 
             // knox
             if (primaryGateway.getKnoxGatewayEnabled()) {
@@ -377,7 +399,11 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
             grainUploader.uploadGrains(allNodes, saltConfig.getGrainsProperties(), exitModel, sc, exitCriteria);
 
+            // TODO Question: Is SyncAllRunner needed? This takes about 1.8s. Operations seem to work fine without this.
+            //  Maybe this call is more optimal when adding a large set of nodes?
             saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allNodeHostname, allNodes), exitModel, exitCriteria);
+
+            // TODO Question: Similarly for MineUpdateRunner. About 1 second. Are mine updates required?
             saltCommandRunner.runSaltCommand(sc, new MineUpdateRunner(gatewayTargetHostnames, allNodes), exitModel, exitCriteria);
         } catch (ExecutionException e) {
             LOGGER.warn("Error occurred during bootstrap", e);
@@ -542,6 +568,8 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
             for (Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
                 OrchestratorBootstrap pillarSave = new PillarSave(sc, Sets.newHashSet(gatewayConfig.getPrivateAddress()), propertiesEntry.getValue());
+                // TODO Changed the polling interval for this command to 1-2 seconds.
+                //  The operation itself finishes quite fast, but the default polling interval of 10 seconds adds significant delay.
                 Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitCriteriaModel);
                 saltPillarRunner.call();
             }
@@ -892,9 +920,12 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
             // add 'recipe' grain to all nodes
             Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+
+            // TODO Question: Execute after the recipes check says that recipes need to execute?
             saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel, maxRetry,
                     exitCriteria);
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+            // TODO Question: Similarly here. Can the syncAllRunner be skipped?
             saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, exitCriteria);
             if (phase == PRE_CLOUDERA_MANAGER_START) {
                 // Execute highstate before recipe. Otherwise ipa domain names will not be resolvable in recipe scripts.

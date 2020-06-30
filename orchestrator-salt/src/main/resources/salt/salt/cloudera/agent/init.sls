@@ -2,6 +2,7 @@
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
 {%- set manager_server_fqdn = salt['pillar.get']('hosts')[metadata.server_address]['fqdn'] %}
 
+{# Protect this via a grains[prewarmed] check. Saves 20s from an rpm database rebuild}
 install-cloudera-manager-agent:
   pkg.installed:
     - failhard: True
@@ -11,6 +12,8 @@ install-cloudera-manager-agent:
     - unless:
       - rpm -q cloudera-manager-daemons cloudera-manager-agent
 
+{# Protect this via a grains[prewarmed] check}
+{# TODO Question: Can the prewarmed tag be set in the image itself?}
 {%- if not salt['pkg.version']('python-psycopg2') and not salt['pkg.version']('python2-psycopg2') %}
 install-psycopg2:
   cmd.run:

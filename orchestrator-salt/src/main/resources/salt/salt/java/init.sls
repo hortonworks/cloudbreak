@@ -6,6 +6,9 @@
   {% set java_home = '/usr/lib/jvm/java' %}
 {% endif %}
 
+{# TODO Question: Can this move into pre-warmed images, and be protected by a check}
+{# This is quite cheap, except for salt module loading taking time. More on this
+{#  in the image change patch}
 
 set_dns_ttl:
   file.replace:

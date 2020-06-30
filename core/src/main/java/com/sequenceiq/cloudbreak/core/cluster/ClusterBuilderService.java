@@ -173,6 +173,11 @@ public class ClusterBuilderService {
                 proxyConfig.orElse(null),
                 template);
         clusterService.save(cluster);
+        // There are not post-install recipes by default. Post-install doesn't seem to check the recipe list,
+        //  and executes always, which consistently adds 10s.
+        // TODO Question: Is there a reason for this, or is it safe to switch this to
+        //  recipeEngine.executePostInstallRecipes(stack, hostGroupService.getRecipesByCluster(cluster.getId()));
+        //  which would then execute only if recipes exist.
         recipeEngine.executePostInstallRecipes(stack);
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
         clusterCreationSuccessHandler.handleClusterCreationSuccess(instanceMetaDatas, stack.getCluster());

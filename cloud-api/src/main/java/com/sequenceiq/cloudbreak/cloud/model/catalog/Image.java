@@ -14,6 +14,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Image {
 
+    // TODO: Make pre-warmed information available somewhere in the ImageCatalog subsystem
+
     private final String date;
 
     private final Long created;
