@@ -42,6 +42,8 @@ public class History {
 
     public static final String CRON = "cron";
 
+    public static final String SCALING_TARGET = "scalingTarget";
+
     public static final String ALERT_RULE = "alertRule";
 
     public static final String PARAMETERS = "parameters";
@@ -122,6 +124,7 @@ public class History {
             TimeAlert ta = (TimeAlert) alert;
             properties.put(TIME_ZONE, ta.getTimeZone());
             properties.put(CRON, ta.getCron());
+            properties.put(SCALING_TARGET, "" + ta.getScalingPolicy().getScalingAdjustment());
             alertType = AlertType.TIME;
         } else if (alert instanceof PrometheusAlert) {
             PrometheusAlert pa = (PrometheusAlert) alert;
