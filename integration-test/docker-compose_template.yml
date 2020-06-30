@@ -3,15 +3,15 @@ networks:
   cbreak_default:
     external: true
 services:
-  thunderhead-mock:
+  caas-mock:
     networks:
       cbreak_default: {}
     ports:
       - 10080:8080
     volumes:
-    - ../mock-thunderhead/build/libs/mock-thunderhead.jar:/mock-thunderhead.jar
+    - ../mock-caas/build/libs/mock-caas.jar:/mock-caas.jar
     - ./integcb/etc:/etc/auth
-    command: java -jar /mock-thunderhead.jar
+    command: java -jar /mock-caas.jar
     image: openjdk:11-jdk
   test:
     networks:
@@ -32,7 +32,7 @@ services:
       - INTEGRATIONTEST_ENVIRONMENT_SERVER=http://dev-gateway
       - INTEGRATIONTEST_SDX_SERVER=http://dev-gateway
       - INTEGRATIONTEST_REDBEAMS_SERVER=http://dev-gateway
-      - ALTUS_AUDIT_ENDPOINT=thunderhead-mock
+      - ALTUS_AUDIT_ENDPOINT=caas-mock
       - CLOUDBREAK_URL=cloudbreak:8080
       - ENVIRONMENT_URL=environment:8088
       - SPRING_CONFIG_LOCATION=classpath:/application.yml,/it/it-application.yml

@@ -26,7 +26,7 @@ jobs:
             - redbeams/build/libs/redbeams.jar
             - datalake/build/libs/datalake.jar
             - autoscale/build/libs/periscope.jar
-            - mock-thunderhead/build/libs/mock-thunderhead.jar
+            - mock-caas/build/libs/mock-caas.jar
             - integration-test/build/libs/cloudbreak-integration-test.jar
 
   checkstyle-test:
