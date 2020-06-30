@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template;
 
-import static com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 
 import java.util.HashMap;
 import java.util.Map;
