@@ -26,5 +26,5 @@ fi
 chmod +x cbd
 cbd_version=$(CB_VERSION)
 mkdir etc
-cp ../../mock-thunderhead/src/test/resources/etc/license.txt etc/license.txt
+cp ../../mock-caas/src/test/resources/etc/license.txt etc/license.txt
 echo -e "$cbd_version"

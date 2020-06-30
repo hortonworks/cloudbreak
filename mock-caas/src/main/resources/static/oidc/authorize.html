@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../caas/jquery-3.3.1.min.js"></script>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="../caas/pics/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="../caas/css/reset.css" />
+    <link rel="stylesheet" type="text/css" href="../caas/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../caas/css/login.css" />
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="login-wrapper">
+            <div class="left-col">
+                <div class="hwk-logo"></div>
+                <div class="product-logo">
+                    <img src="../caas/css/images/product-logo.png" alt="Cloudbreak" />
+                </div>
+            </div>
+            <form class="right-col" id="loginform" action="authorize">
+                <div id="login_div">
+                    <div class="group-title">Sign In</div>
+                    <div class="field-group">
+                        <label for="tenant" aria-label="Tenant">Tenant</label>
+                        <input type="text" class="form-control" name="tenant" id="tenant" required/>
+                    </div>
+                    <div class="field-group">
+                        <label for="username" aria-label="Username">Username</label>
+                        <input type="text" class="form-control" name="username" id="username" required/>
+                    </div>
+                    <div class="action-group" style="margin: 0px">
+                        <button type="submit" id="loginBtn" class="btn btn-primary">Login</button>
+                    </div>
+                </div>
+                <div class="field-group" id="authorization_code_div" hidden>
+                    <label for="authorization_code" aria-label="authorization_code">Authorization code</label>
+                    <div style="display: flex">
+                        <input type="text" class="form-control" name="authorization_code" id="authorization_code" readonly>
+                        <button style="margin-left: 10px" type="button" onclick="copy()" class="btn btn-primary">Copy</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+    function getUrlVars() {
+        var vars = {};
+        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+            vars[key] = value;
+        });
+        return vars;
+    }
+
+    function getUrlParam(parameter, defaultvalue){
+        var urlparameter = defaultvalue;
+        if(window.location.href.indexOf(parameter) > -1){
+            urlparameter = getUrlVars()[parameter];
+        }
+        return urlparameter;
+    }
+
+    function copy() {
+        var authorizationCodeTextBox = document.getElementById("authorization_code");
+        authorizationCodeTextBox.select();
+        document.execCommand("copy");
+    }
+
+    var urlParam = getUrlParam("authorization_code");
+    if (urlParam) {
+        var authorizationCode = $('#authorization_code');
+        authorizationCode.val(urlParam);
+        $('#authorization_code_div').removeAttr('hidden');
+        $('#login_div').hide();
+    }
+
+    $("#loginform").submit(function(event) {
+        var input = $("<input>")
+            .attr("type", "hidden")
+            .attr("name", "redirect_uri").val("authorize.html");
+        $('#loginform').append(input);
+    });
+</script>
+
+</body>
+</html>

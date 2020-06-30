@@ -46,7 +46,7 @@ public class AutoscaleTestSuiteInitializer extends AbstractTestNGSpringContextTe
 
     @BeforeSuite(dependsOnMethods = "initContext")
     @Parameters("periscopeServer")
-    public void initCloudbreakSuite(@Optional("") String periscopeServer, @Optional("") String thunderheadProtocol, @Optional("") String thunderheadAddress) {
+    public void initCloudbreakSuite(@Optional("") String periscopeServer, @Optional("") String caasProtocol, @Optional("") String caasAddress) {
         periscopeServer = StringUtils.hasLength(periscopeServer) ? periscopeServer : defaultPeriscopeServer;
         String userCrn = itContext.getContextParam(IntegrationTestContext.USER_CRN);
 
