@@ -127,14 +127,17 @@
     {% set proxy_auth = True %}
     {% set proxy_user = salt['pillar.get']('proxy:user') %}
     {% set proxy_password = salt['pillar.get']('proxy:password') %}
+    {% set proxy_full_url =  proxy_protocol + "://" + proxy_user + ":"+ proxy_password + "@" + proxy_host + ":" + proxy_port %}
   {% else %}
     {% set proxy_auth = False %}
+    {% set proxy_full_url = proxy_url %}
   {% endif %}
 {% else %}
   {% set proxy_url = None %}
   {% set proxy_user = None %}
   {% set proxy_password = None %}
   {% set proxy_auth = False %}
+  {% set proxy_full_url = None %}
 {% endif %}
 
 {% do fluent.update({
@@ -185,5 +188,6 @@
     "proxyUrl": proxy_url,
     "proxyAuth": proxy_auth,
     "proxyUser": proxy_user,
-    "proxyPassword": proxy_password
+    "proxyPassword": proxy_password,
+    "proxyFullUrl": proxy_full_url
 }) %}
