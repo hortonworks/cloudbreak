@@ -51,18 +51,6 @@ public class AppConfig implements AsyncConfigurer {
     @Value("${cert.ignorePreValidation}")
     private boolean ignorePreValidation;
 
-    @Value("${caas.url:}")
-    private String caasUrl;
-
-    @Value("${caas.protocol:http}")
-    private String caasProtocol;
-
-    @Value("${caas.cert.validation:false}")
-    private boolean caasCertificateValidation;
-
-    @Value("${caas.cert.ignorePreValidation:false}")
-    private boolean caasIgnorePreValidation;
-
     @Inject
     private PersistRejectedThreadExecutionHandler persistRejectedThreadExecutionHandler;
 
