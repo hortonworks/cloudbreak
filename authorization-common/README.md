@@ -8,7 +8,6 @@ Every method of a controller should be annotated with one (or more if necessary)
 
 ## Account level authorization
 - you can annotate your API endpoint with `@CheckPermissionByAccount(action = ResourceAction.WRITE)` and permission check will be done only based on tenant, resource will not be taken into consideration in this case ([DefaultPermissionChecker](src/main/java/com/sequenceiq/authorization/service/DefaultPermissionChecker.java))
-- you can also annotate your API endpoint with `@DisableCheckPermissions`, but only if the method is used internally
 
 ## Resource based authorization
 Resource based authorization in Cloudbreak services mean that most of the API endpoints are or should be authorized based on a resource.
@@ -130,3 +129,29 @@ In this case we are calling the method `getResourceCrnByEnvironmentCrn` of the c
 ### I have some default resources and I want to exclude them from the auth authorization process. How can I do that?
 
 You need to implement the [DefaultResourceChecker](src/main/java/com/sequenceiq/authorization/service/DefaultResourceChecker.java) interface where you can mark different resources as defaults so that the framework won't go to UMS.
+
+### Internal calls
+
+Some APIs are used internal only between services, in this case we are using internal actor to call the given API. To restrict a method for internal actors only, you can annotate it `@InternalOnly`.
+
+#### But what about account id?
+
+We are using account id in service layer heavily, but internal actor CRN doesn't have that information, so there are specific requirements for APIs which can called with internal actor:
+
+- you should annotate controller with `@InternalReady`
+- your method should have at least one parameter which is some kind of resource CRN
+- annotate a CRN parameter with `@TenantAwareParam`, which will extract the account id from CRN parameter and use that in lower layers
+
+### APIs without authorization
+
+Some APIs are used to generate service informations, in this case you can call it without authorization. To do so, you can annotate it with `@DisabledCheckPermissions`.
+
+## Class level annotations for special cases
+
+There are some controller class which used to give service informations (info page, swagger, client version, etc.) and also some APIs used internally only.
+
+If every method of a controller class used internally only, you only need to annotate the class with `@InternalOnly` and every method will be restricted for internal actor.
+
+Same applies for API's methods which can called without authorization, in that case you need to annotate the class only with `@DisabledCheckPermissions`.
+
+**Please note that you have to make sure that only methods which don't provide any informations about and don't take actions on any resource should be annotated with `@DisabledCheckPermissions`**

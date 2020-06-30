@@ -23,7 +23,7 @@ public class ControllerLogContextAspects {
     @Inject
     private LogContextService logContextService;
 
-    @Pointcut("execution(public * com.sequenceiq.cloudbreak.controller.*Controller.*(..))")
+    @Pointcut("execution(public * com.sequenceiq.cloudbreak..*.*Controller.*(..))")
     public void interceptControllerMethodCalls() {
     }
 
