@@ -20,7 +20,7 @@ if [ $# -ne 5 ]; then
 fi
 
 CLOUD_PROVIDER=$(echo "$1" | tr '[:upper:]' '[:lower:]')
-CLOUD_LOCATION=$(echo "$2" | sed 's/\/\+$//g') # Clear trailng '/' (if present) for later path joining.
+BACKUP_LOCATION=$(echo "/test/path/" | sed 's/[/]$//g') # Clear trailng '/' (if present) for later path joining.
 HOST="$3"
 PORT="$4"
 USERNAME="$5"
