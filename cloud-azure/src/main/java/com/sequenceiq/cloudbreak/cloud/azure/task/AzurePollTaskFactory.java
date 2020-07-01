@@ -9,6 +9,8 @@ import com.sequenceiq.cloudbreak.cloud.azure.context.AzureInteractiveLoginStatus
 import com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.azure.task.networkinterface.NetworkInterfaceDetachChecker;
 import com.sequenceiq.cloudbreak.cloud.azure.task.networkinterface.NetworkInterfaceDetachCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.azure.task.storageaccount.StorageAccountChecker;
+import com.sequenceiq.cloudbreak.cloud.azure.task.storageaccount.StorageAccountCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -26,6 +28,11 @@ public class AzurePollTaskFactory {
     public PollTask<Boolean> networkInterfaceDetachCheckerTask(AuthenticatedContext authenticatedContext,
             NetworkInterfaceDetachCheckerContext networkInterfaceDetachCheckerContext) {
         return createPollTask(NetworkInterfaceDetachChecker.NAME, authenticatedContext, networkInterfaceDetachCheckerContext);
+    }
+
+    public PollTask<Boolean> storageAccountCheckerTask(AuthenticatedContext authenticatedContext,
+            StorageAccountCheckerContext storageAccountCheckerContext) {
+        return createPollTask(StorageAccountChecker.NAME, authenticatedContext, storageAccountCheckerContext);
     }
 
     @SuppressWarnings("unchecked")

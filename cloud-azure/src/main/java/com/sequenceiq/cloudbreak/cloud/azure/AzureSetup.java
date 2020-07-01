@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureStorage.IMAGES_CONTAINER;
 import static com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView.TENANT_ID;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
@@ -32,14 +31,11 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import com.microsoft.azure.storage.blob.CopyState;
-import com.microsoft.azure.storage.blob.CopyStatus;
-import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
-import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
+import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageSetupService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -56,7 +52,6 @@ import com.sequenceiq.cloudbreak.cloud.model.prerequisite.AzurePrerequisiteDelet
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisiteDeleteRequest;
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.FileSystemType;
@@ -69,9 +64,6 @@ public class AzureSetup implements Setup {
     private static final String TEST_CONTAINER = "cb-test-container";
 
     @Inject
-    private AzureStorage armStorage;
-
-    @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
     @Inject
@@ -80,6 +72,9 @@ public class AzureSetup implements Setup {
     @Inject
     private AzureUtils azureUtils;
 
+    @Inject
+    private AzureImageSetupService azureImageSetupService;
+
     @Override
     public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
         LOGGER.debug("Prepare image: {}", image);
@@ -87,7 +82,7 @@ public class AzureSetup implements Setup {
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AzureClient client = ac.getParameter(AzureClient.class);
         try {
-            copyVhdImageIfNecessary(ac, stack, image, region, client);
+            azureImageSetupService.copyVhdImageIfNecessary(ac, stack, image, region, client);
         } catch (Exception ex) {
             LOGGER.warn("Could not create image with the specified parameters", ex);
             throw new CloudConnectorException(image.getImageName() + " image copy failed: " + ExceptionUtils.getRootCause(ex).getMessage(), ex);
@@ -95,54 +90,9 @@ public class AzureSetup implements Setup {
         LOGGER.debug("Prepare image has been executed");
     }
 
-    private void copyVhdImageIfNecessary(AuthenticatedContext ac, CloudStack stack, Image image,
-            String region, AzureClient client) {
-
-        AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
-        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
-        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), stack);
-        String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(ac.getCloudContext(), stack);
-        if (!client.resourceGroupExists(resourceGroupName)) {
-            client.createResourceGroup(resourceGroupName, region, stack.getTags());
-        }
-        if (!client.resourceGroupExists(imageResourceGroupName)) {
-            client.createResourceGroup(imageResourceGroupName, region, stack.getTags());
-        }
-        armStorage.createStorage(client, imageStorageName, AzureDiskType.LOCALLY_REDUNDANT, imageResourceGroupName, region,
-                armStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags());
-        client.createContainerInStorage(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER);
-        if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
-            client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
-        }
-    }
-
     @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
-        String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(ac.getCloudContext(), stack);
-        AzureClient client = ac.getParameter(AzureClient.class);
-
-        AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
-        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), stack);
-        try {
-            CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
-            if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
-                if (StringUtils.isEmpty(armStorage.getCustomImageId(client, ac, stack))) {
-                    return new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED);
-                }
-                return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
-            } else if (CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus())) {
-                return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
-            } else {
-                int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / copyState.getTotalBytes());
-                LOGGER.info("CopyStatus, Total:{} / Pending:{} bytes, {}%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
-                return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
-            }
-        } catch (RuntimeException ex) {
-            String msg = String.format("Failed to check the status of the image in resource group '%s', image storage name '%s'",
-                    imageResourceGroupName, imageStorageName);
-            LOGGER.warn(msg, ex);
-            return new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);
-        }
+        return azureImageSetupService.checkImageStatus(ac, stack, image);
     }
 
     @Override
@@ -178,8 +128,7 @@ public class AzureSetup implements Setup {
                 .map(AzurePrerequisiteDeleteRequest::getResourceGroupName)
                 .ifPresentOrElse(
                         resourceGroupName -> deleteResourceGroup(azureClient, resourceGroupName),
-                        () -> LOGGER.debug("No azure resource group was defined, not deleting resource group.")
-                );
+                        () -> LOGGER.debug("No azure resource group was defined, not deleting resource group."));
     }
 
     private void deleteResourceGroup(AzureClient azureClient, String resourceGroupName) {
@@ -308,20 +257,6 @@ public class AzureSetup implements Setup {
                 throw new CloudConnectorException("The provided account does not belong to a valid storage account");
             }
         }
-    }
-
-    private boolean storageContainsImage(AzureClient client, String resourceGroupName, String storageName, String image) {
-        List<ListBlobItem> listBlobItems = client.listBlobInStorage(resourceGroupName, storageName, IMAGES_CONTAINER);
-        for (ListBlobItem listBlobItem : listBlobItems) {
-            if (getNameFromConnectionString(listBlobItem.getUri().getPath()).equals(image.split("/")[image.split("/").length - 1])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private String getNameFromConnectionString(String connection) {
-        return connection.split("/")[connection.split("/").length - 1];
     }
 
 }
