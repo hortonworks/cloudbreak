@@ -21,8 +21,8 @@ echo -e "\n\033[1;96m--- Create docker network\033[0m\n"
 docker network create cbreak_default || true
 
 date
-echo -e "\n\033[1;96m--- Start caas mock\033[0m\n"
-$INTEGCB_LOCATION/.deps/bin/docker-compose up -d caas-mock
+echo -e "\n\033[1;96m--- Start thunderhead mock\033[0m\n"
+$INTEGCB_LOCATION/.deps/bin/docker-compose up -d thunderhead-mock
 
 date
 echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
