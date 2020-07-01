@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -44,6 +46,9 @@ public class UpgradeOptionsResponseFactoryTest {
     @Mock
     private ImageService imageService;
 
+    @Mock
+    private ComponentVersionProvider componentVersionProvider;
+
     @Test
     public void testCreateV4ResponseShouldReturnTheUpgradeOptionsFromTheGivenParameters() throws CloudbreakImageNotFoundException {
         Map<String, String> packageVersions = createPackageVersions();
@@ -53,6 +58,7 @@ public class UpgradeOptionsResponseFactoryTest {
 
         when(imageService.determineImageName(CLOUD_PLATFORM, REGION, currentImage)).thenReturn(IMAGE_NAME);
         when(imageService.determineImageName(CLOUD_PLATFORM, REGION, availableImages.getAvailableImages().getCdhImages().get(0))).thenReturn(IMAGE_NAME);
+        when(componentVersionProvider.getComponentVersions(eq(packageVersions), any(), any())).thenReturn(expectedPackageVersions);
 
         UpgradeV4Response actual = underTest.createV4Response(currentImage, availableImages, CLOUD_PLATFORM, REGION, IMAGE_CATALOG_NAME);
 

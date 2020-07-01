@@ -33,8 +33,8 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
         this.imageId = imageId;
         this.imageCatalogName = imageCatalogName;
         this.created = created;
-        this.componentVersions = componentVersions;
         this.date = date;
+        this.componentVersions = componentVersions;
     }
 
     public String getImageName() {
