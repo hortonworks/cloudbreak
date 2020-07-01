@@ -30,6 +30,7 @@ public class BasicStackTests extends AbstractE2ETest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createEnvironmentWithNetworkAndFreeIpa(testContext);
+        createDatalake(testContext);
         initializeDefaultBlueprints(testContext);
     }
 
