@@ -195,7 +195,8 @@ public class CloudResourceAdvisor {
     private boolean fallbackGatewayFilter(String hostGroupName) {
         String lowerName = hostGroupName.toLowerCase();
         return lowerName.contains("master")
-                || lowerName.contains("services");
+                || lowerName.contains("services")
+                || lowerName.contains("manager");
     }
 
     private ResizeRecommendation recommendResize(BlueprintTextProcessor blueprintTextProcessor) {
