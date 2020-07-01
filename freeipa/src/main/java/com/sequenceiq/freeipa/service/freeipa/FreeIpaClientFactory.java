@@ -35,7 +35,7 @@ import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
+import com.sequenceiq.freeipa.util.ClusterProxyServiceAvailabilityChecker;
 
 @Service
 public class FreeIpaClientFactory {
@@ -96,7 +96,7 @@ public class FreeIpaClientFactory {
     }
 
     private boolean useLegacyClusterProxyRegistration(Stack stack) {
-        return !BalancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack);
+        return !ClusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack);
     }
 
     private FreeIpaClient getFreeIpaClient(Stack stack, boolean withPing, boolean forceCheckUnreachable, Optional<String> freeIpaFqdn)
