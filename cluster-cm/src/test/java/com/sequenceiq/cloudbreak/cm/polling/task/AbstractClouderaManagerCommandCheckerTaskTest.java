@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.net.ConnectException;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.List;
 
@@ -108,10 +109,12 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
         Stack stack = new Stack();
         BigDecimal id = new BigDecimal(ID);
         ClouderaManagerPollerObject pollerObject = new ClouderaManagerPollerObject(stack, apiClient, id);
+        SocketTimeoutException socketTimeoutException = new SocketTimeoutException("timeout");
+        ApiException apiException0 = new ApiException(socketTimeoutException);
         SocketException socketException = new SocketException("Network is unreachable (connect failed)");
-        ApiException apiException = new ApiException(socketException);
+        ApiException apiException1 = new ApiException(socketException);
         when(commandsResourceApi.readCommand(id))
-                .thenAnswer(new ExceptionThrowingApiCommandAnswer(apiException, apiException, apiException, apiException, apiException));
+                .thenAnswer(new ExceptionThrowingApiCommandAnswer(apiException0, apiException1, apiException1, apiException1, apiException1));
 
         for (int i = 0; i < FIVE; i++) {
             boolean inProgress = underTest.checkStatus(pollerObject);
