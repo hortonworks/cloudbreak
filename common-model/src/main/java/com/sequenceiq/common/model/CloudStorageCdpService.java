@@ -17,7 +17,12 @@ public enum CloudStorageCdpService {
     HBASE_ROOT,
     RANGER_AUDIT,
     PROFILER_SERVICE_FS_URI,
-    DEFAULT_FS;
+    DEFAULT_FS,
+    FLINK_HISTORYSERVER_ARCHIVE,
+    FLINK_JOBMANAGER_ARCHIVE,
+    FLINK_CHECKPOINTS,
+    FLINK_SAVEPOINTS,
+    FLINK_HIGH_AVAILABILITY;
 
     @JsonIgnore
     public static String typeListing() {

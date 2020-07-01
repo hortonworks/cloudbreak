@@ -98,6 +98,61 @@
       "relatedMissingServices": ["NAMENODE"],
       "requiredForAttachedCluster": true,
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "type": "FLINK_HISTORYSERVER_ARCHIVE",
+      "propertyName": "historyserver_archive_fs_dir",
+      "propertyFile": "flink-conf",
+      "description": "Directory to monitor for completed jobs",
+      "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/flink/applicationHistory",
+      "propertyDisplayName": "History Server Archive Directory",
+      "relatedServices": ["FLINK_HISTORY_SERVER"],
+      "requiredForAttachedCluster": true,
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
+    },
+    {
+      "type": "FLINK_JOBMANAGER_ARCHIVE",
+      "propertyName": "jobmanager_archive_fs_dir",
+      "propertyFile": "flink-conf",
+      "description": "Directory to upload completed jobs to",
+      "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/flink/applicationHistory",
+      "propertyDisplayName": "JobManager Archive Directory",
+      "relatedServices": ["FLINK_HISTORY_SERVER"],
+      "requiredForAttachedCluster": true,
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
+    },
+    {
+      "type": "FLINK_CHECKPOINTS",
+      "propertyName": "state_checkpoints_dir",
+      "propertyFile": "flink-conf",
+      "description": "The default directory used for storing the data files and meta data of checkpoints",
+      "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/flink/checkpoints",
+      "propertyDisplayName": "State Checkpoints Directory",
+      "relatedServices": ["FLINK_HISTORY_SERVER"],
+      "requiredForAttachedCluster": true,
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
+    },
+    {
+      "type": "FLINK_SAVEPOINTS",
+      "propertyName": "state_savepoints_dir",
+      "propertyFile": "flink-conf",
+      "description": "The default directory used for storing the data files and meta data of savepoints",
+      "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/flink/savepoints",
+      "propertyDisplayName": "State Savepoints Directory",
+      "relatedServices": ["FLINK_HISTORY_SERVER"],
+      "requiredForAttachedCluster": true,
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
+    },
+    {
+      "type": "FLINK_HIGH_AVAILABILITY",
+      "propertyName": "high_availability_storage_dir",
+      "propertyFile": "flink-conf",
+      "description": "File system path where Flink persists metadata in high-availability setups",
+      "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/flink/ha",
+      "propertyDisplayName": "High Availability Storage Directory",
+      "relatedServices": ["FLINK_HISTORY_SERVER"],
+      "requiredForAttachedCluster": true,
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
     }
   ]
 }
