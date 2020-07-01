@@ -68,7 +68,7 @@ integrationtest:
     defaultPassword: Admin123
     defaultPort: 7180
   cloudProvider: MOCK
-  runtimeVersion: 7.2.1
+  runtimeVersion: 7.2.0
 
   spot:
     enabledCloudPlatforms:
