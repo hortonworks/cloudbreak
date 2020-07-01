@@ -248,7 +248,7 @@ public class StackOperations implements ResourceBasedCrnProvider {
         }
     }
 
-    public GeneratedBlueprintV4Response postStackForBlueprint(NameOrCrn nameOrCrn, Long workspaceId, @Valid StackV4Request stackRequest) {
+    public GeneratedBlueprintV4Response postStackForBlueprint(@Valid StackV4Request stackRequest) {
         return stackCommonService.postStackForBlueprint(stackRequest);
     }
 
