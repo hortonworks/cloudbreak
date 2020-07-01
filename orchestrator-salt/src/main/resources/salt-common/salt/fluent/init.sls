@@ -93,6 +93,10 @@ install_fluentd_plugins:
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
     - mode: '0750'
+{%- if fluent.proxyFullUrl %}
+    - env:
+      - https_proxy: {{ fluent.proxyFullUrl }}
+{% endif %}
 
 check_fluentd_plugins:
    cmd.run:

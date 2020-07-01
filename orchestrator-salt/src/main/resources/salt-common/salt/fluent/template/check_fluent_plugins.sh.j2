@@ -18,6 +18,10 @@ function install_plugin() {
      install_command="${install_command} -v ${version}"
      /opt/td-agent/embedded/bin/fluent-gem uninstall "${plugin}"
   fi
+
+  if [[ -n "${https_proxy}" ]]; then
+     install_command="${install_command} --http-proxy ${https_proxy}"
+  fi
   echo "Run install command: ${install_command}"
   command_result=$(${install_command})
   echo "Install ${plugin} command output: ${command_result}"
