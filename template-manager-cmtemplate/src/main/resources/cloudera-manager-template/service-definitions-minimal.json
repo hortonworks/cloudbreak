@@ -238,6 +238,23 @@
       "dependencies": ["YARN", "HBASE"]
     },
     {
+      "name": "SPARK3_ON_YARN",
+      "displayName": "Spark 3",
+      "components": [
+        {
+          "name": "GATEWAY",
+          "groups": ["master", "worker", "compute"],
+          "base" : true
+        },
+        {
+          "name": "SPARK3_YARN_HISTORY_SERVER",
+          "groups": ["master"],
+          "base" : true
+        }
+      ],
+      "dependencies": ["YARN", "HBASE"]
+    },
+    {
       "name": "IMPALA",
       "displayName": "Impala",
       "componentNameInParcel": "impala",
