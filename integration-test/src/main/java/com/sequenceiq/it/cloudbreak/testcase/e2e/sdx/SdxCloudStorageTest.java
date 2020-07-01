@@ -15,7 +15,6 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.AmazonS3Util;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
@@ -28,9 +27,6 @@ public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
 
     @Inject
     private AmazonS3Util amazonS3Util;
-
-    @Inject
-    private WaitUtil waitUtil;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -51,10 +47,7 @@ public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.create(), key(sdx))
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
-                    return testDto;
-                })
+                .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
                     getCloudFunctionality(tc).cloudStorageListContainerDataLake(getBaseLocation(testDto),
                             testDto.getResponse().getName(), testDto.getResponse().getStackCrn());

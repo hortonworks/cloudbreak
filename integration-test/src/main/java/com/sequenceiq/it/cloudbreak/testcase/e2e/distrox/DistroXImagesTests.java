@@ -27,12 +27,12 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 
 public class DistroXImagesTests extends AbstractE2ETest {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXImagesTests.class);
 
-    private Map<String, InstanceStatus> instancesHealthy = new HashMap<>() {{
+    private static final Map<String, InstanceStatus> INSTANCES_HEALTHY = new HashMap<>() {{
         put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
         put(HostGroupType.COMPUTE.getName(), InstanceStatus.SERVICES_HEALTHY);
         put(HostGroupType.WORKER.getName(), InstanceStatus.SERVICES_HEALTHY);
@@ -40,9 +40,6 @@ public class DistroXImagesTests extends AbstractE2ETest {
 
     @Inject
     private DistroXTestClient distroXTestClient;
-
-    @Inject
-    private WaitUtil waitUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -99,7 +96,7 @@ public class DistroXImagesTests extends AbstractE2ETest {
                 .given(distrox, DistroXTestDto.class).withImageSettings(imageSettings)
                 .when(distroXTestClient.create(), key(distrox))
                 .await(STACK_AVAILABLE)
-                .then((tc, testDto, client) -> waitUtil.waitForDistroxInstanceStatus(testDto, tc, instancesHealthy))
+                .awaitForInstance(INSTANCES_HEALTHY)
                 .then((tc, dto, client) -> {
                     Log.log(LOGGER, format(" Image Catalog Name: %s ", dto.getResponse().getImage().getCatalogName()));
                     Log.log(LOGGER, format(" Image Catalog URL: %s ", dto.getResponse().getImage().getCatalogUrl()));

@@ -25,14 +25,10 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
-import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class MockSdxUpgradeTests extends AbstractIntegrationTest {
-
-    @Inject
-    private WaitUtil waitUtil;
 
     @Inject
     private RedbeamsDatabaseServerTestClient redbeamsDatabaseServerTestClient;
@@ -64,7 +60,6 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
         String cluster = "cmcluster";
         String imageSettings = "imageSettingsUpgrade";
         String networkKey = "someOtherNetwork";
-        String envKey = "sdxEnvKey";
         testContext
                 .given(networkKey, EnvironmentNetworkTestDto.class)
                 .withMock(new EnvironmentNetworkMockParams())
