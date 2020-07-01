@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,13 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 class TagsUtilTest {
 
     private static final String TEST_NAME = "testname";
+
+    private static final Map<String, String> DEFAULT_TAGS = Map.of(
+            "owner", "whoever",
+            "Cloudera-Environment-Resource-Name", "whatever",
+            "Cloudera-Creator-Resource-Name", "whoever",
+            "Cloudera-Resource-Name", "whatever"
+    );
 
     private final TagsUtil underTest = new TagsUtil();
 
@@ -53,41 +61,63 @@ class TagsUtilTest {
     }
 
     @Test
-    void verifyTestNameTagShouldNotFailWhenTestDtoIsNotAbstractTestDto() {
+    void verifyTagsShouldNotFailWhenTestDtoIsNotAbstractTestDto() {
         CloudbreakTestDto testDto = mock(CloudbreakTestDto.class);
 
-        assertThatCode(() -> underTest.verifyTestNameTag(testDto))
+        assertThatCode(() -> underTest.verifyTags(testDto))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    void verifyTestNameTagShouldNotFailWhenTestDtoDoesNotHaveTaggedResponse() {
+    void verifyTagsShouldNotFailWhenTestDtoDoesNotHaveTaggedResponse() {
         CloudbreakTestDto testDto = mock(AbstractTestDto.class);
 
-        assertThatCode(() -> underTest.verifyTestNameTag(testDto))
+        assertThatCode(() -> underTest.verifyTags(testDto))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    void verifyTestNameTagShouldVerifyTagToAbstractTestDtoWithTaggedResponse() {
+    void verifyTagsShouldVerifyTagToAbstractTestDtoWithTaggedResponse() {
         DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
         StackV4Response response = new StackV4Response();
         TagsV4Response tags = new TagsV4Response();
         tags.setUserDefined(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME));
+        tags.setDefaults(DEFAULT_TAGS);
         response.setTags(tags);
         testDto.setResponse(response);
 
-        assertThatCode(() -> underTest.verifyTestNameTag(testDto))
+        assertThatCode(() -> underTest.verifyTags(testDto))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    void verifyTestNameTagShouldFailWhenAbstractTestDtoWithTaggedResponseDoesNotHaveTestNameTag() {
+    void verifyTagsShouldFailWhenAbstractTestDtoWithTaggedResponseDoesNotHaveAllNeededTags() {
+        DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
+        StackV4Response response = new StackV4Response();
+        TagsV4Response tags = new TagsV4Response();
+        tags.setUserDefined(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME));
+        Map<String, String> defaultTags = new HashMap<>(DEFAULT_TAGS);
+        defaultTags.remove("owner");
+        tags.setDefaults(defaultTags);
+        response.setTags(tags);
+        testDto.setResponse(response);
+
+        assertThatThrownBy(() -> underTest.verifyTags(testDto))
+                .hasMessageContaining(String.format(TagsUtil.MISSING_DEFAULT_TAG, "owner"))
+                .matches(e -> !e.getMessage().contains(TagsUtil.MISSING_TEST_NAME_TAG_MESSAGE))
+                .matches(e -> defaultTags.keySet().stream().noneMatch(tag -> e.getMessage().contains(tag)));
+    }
+
+    @Test
+    void verifyTagsShouldFailWhenAbstractTestDtoWithTaggedResponseDoesNotHaveAnyNeededTags() {
         DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
         testDto.setResponse(new StackV4Response());
 
-        assertThatThrownBy(() -> underTest.verifyTestNameTag(testDto))
-                .hasMessageContaining(TagsUtil.MISSING_TEST_NAME_TAG_MESSAGE);
+        assertThatThrownBy(() -> underTest.verifyTags(testDto))
+                .hasMessageContaining(TagsUtil.MISSING_TEST_NAME_TAG_MESSAGE)
+                .satisfies(e ->
+                        TagsUtil.DEFAULT_TAGS.forEach(tag ->
+                                assertThat(e).hasMessageContaining(String.format(TagsUtil.MISSING_DEFAULT_TAG, tag))));
     }
 
 }

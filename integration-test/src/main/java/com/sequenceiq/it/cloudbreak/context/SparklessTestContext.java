@@ -1,23 +1,32 @@
 package com.sequenceiq.it.cloudbreak.context;
 
-import java.util.Optional;
+import javax.inject.Inject;
 
 import org.springframework.context.annotation.Primary;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestMethodNameMissingException;
+import com.sequenceiq.it.util.TagsUtil;
 
 @Prototype
 @Primary
 public class SparklessTestContext extends TestContext {
 
-    /**
-     * In non-mock tests we use the test method name as a tag, so we must be sure that is is there
-     */
+    @Inject
+    private TagsUtil tagsUtil;
+
     @Override
-    public Optional<String> getTestMethodName() {
-        Optional<String> testMethodName = super.getTestMethodName();
-        testMethodName.orElseThrow(TestMethodNameMissingException::new);
-        return testMethodName;
+    public <O extends CloudbreakTestDto> O init(Class<O> clss, CloudPlatform cloudPlatform) {
+        O bean = super.init(clss, cloudPlatform);
+        tagsUtil.addTestNameTag(bean, getTestMethodName().orElseThrow(TestMethodNameMissingException::new));
+        return bean;
+    }
+
+    @Override
+    public void cleanupTestContext() {
+        super.cleanupTestContext();
+        getResources().values().forEach(tagsUtil::verifyTags);
     }
 }
