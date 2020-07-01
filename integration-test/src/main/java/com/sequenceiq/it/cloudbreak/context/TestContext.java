@@ -69,7 +69,6 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsWaitObject;
-import com.sequenceiq.it.util.TagsUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public abstract class TestContext implements ApplicationContextAware {
@@ -159,9 +158,6 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private WaitService<CloudbreakWaitObject> cloudbreakWaitService;
-
-    @Inject
-    private TagsUtil tagsUtil;
 
     private DefaultModel model;
 
@@ -419,7 +415,6 @@ public abstract class TestContext implements ApplicationContextAware {
         initialized = true;
         try {
             bean.valid();
-            tagsUtil.addTestNameTag(bean, getTestMethodName().orElse("missingTestMethodName"));
         } catch (Exception e) {
             LOGGER.error("init of [{}] bean is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), bean.getName(), e);
             Log.when(null, key + " initialization is failed: " + ResponseUtil.getErrorMessage(e));
@@ -861,7 +856,6 @@ public abstract class TestContext implements ApplicationContextAware {
             }
         }
         shutdown();
-        testDtos.forEach(tagsUtil::verifyTestNameTag);
     }
 
     public void shutdown() {
