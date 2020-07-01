@@ -12,7 +12,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -122,8 +122,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         kerberosMgmtV1Service.cleanupByEnvironment(environmentCrn, accountId);
     }
 
-    // custom authorization check
-    @DisableCheckPermissions
+    @CustomPermissionCheck
     public String getUserKeytab(@NotEmpty String environmentCrn, @NotEmpty String targetUserCrn) {
         String actorCrn = checkActorCrn();
         LOGGER.debug("getUserKeytab() request for environmentCrn={} for targetUserCrn={} as actorCrn={}",

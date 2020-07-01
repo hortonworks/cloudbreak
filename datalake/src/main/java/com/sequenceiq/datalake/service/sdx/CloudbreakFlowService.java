@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.flow.api.FlowEndpoint;
@@ -44,12 +45,14 @@ public class CloudbreakFlowService {
         try {
             if (sdxCluster.getLastCbFlowChainId() != null) {
                 LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW_CHAIN, sdxCluster.getLastCbFlowChainId());
-                Boolean hasActiveFlow = flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()).getHasActiveFlow();
+                Boolean hasActiveFlow = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                        flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()).getHasActiveFlow());
                 logCbFlowChainStatus(sdxCluster, hasActiveFlow);
                 return getFlowState(hasActiveFlow);
             } else if (sdxCluster.getLastCbFlowId() != null) {
                 LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW, sdxCluster.getLastCbFlowId());
-                Boolean hasActiveFlow = flowEndpoint.hasFlowRunningByFlowId(sdxCluster.getLastCbFlowId()).getHasActiveFlow();
+                Boolean hasActiveFlow = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                        flowEndpoint.hasFlowRunningByFlowId(sdxCluster.getLastCbFlowId()).getHasActiveFlow());
                 logCbFlowStatus(sdxCluster, hasActiveFlow);
                 return getFlowState(hasActiveFlow);
             }

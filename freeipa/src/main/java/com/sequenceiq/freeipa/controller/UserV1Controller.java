@@ -14,7 +14,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -61,8 +61,7 @@ public class UserV1Controller implements UserV1Endpoint {
     private EnvironmentUserSyncStateCalculator environmentUserSyncStateCalculator;
 
     @Override
-    // custom permission check in service layer, reason: "null to all" behavior in case of empty environment CRN list
-    @DisableCheckPermissions
+    @CustomPermissionCheck
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
         String userCrn = checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -88,8 +87,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-    // custom permission check in service layer, reason: "null to all" behavior in case of empty environment CRN list
-    @DisableCheckPermissions
+    @CustomPermissionCheck
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String userCrn = checkActorCrn();
         String accountId = determineAccountId(userCrn, request.getAccountId());
@@ -103,8 +101,7 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
-    // custom permission check in service layer, reason: "null to all" behavior in case of empty environment CRN list
-    @DisableCheckPermissions
+    @CustomPermissionCheck
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
         String userCrn = checkActorCrn();
