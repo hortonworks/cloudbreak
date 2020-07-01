@@ -127,7 +127,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public GeneratedBlueprintV4Response postStackForBlueprint(Long workspaceId, String name, @Valid StackV4Request stackRequest) {
-        return stackOperations.postStackForBlueprint(NameOrCrn.ofName(name), workspaceId, stackRequest);
+        return stackOperations.postStackForBlueprint(stackRequest);
     }
 
     @Override
