@@ -98,6 +98,7 @@ public class CommonPermissionCheckingUtilsTest {
                 .build());
         when(umsRightProvider.getResourceType(any())).thenReturn(AuthorizationResourceType.IMAGE_CATALOG);
         when(umsRightProvider.getRight(eq(AuthorizationResourceAction.DELETE_IMAGE_CATALOG))).thenReturn("environments/deleteImageCatalog");
+        when(methodSignature.getMethod()).thenReturn(getClass().getMethods()[0]);
         underTest.init();
     }
 

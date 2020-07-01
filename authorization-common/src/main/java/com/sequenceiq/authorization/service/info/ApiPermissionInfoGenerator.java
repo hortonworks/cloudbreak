@@ -38,7 +38,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.annotation.ResourceObjectField;
 import com.sequenceiq.authorization.info.model.ApiAuthorizationInfo;
@@ -125,7 +127,13 @@ public class ApiPermissionInfoGenerator {
             message = "Authorization happening on specific field(s) of request object, this is happening only in case of new authorization.";
         }
         if (method.isAnnotationPresent(DisableCheckPermissions.class)) {
-            message = "Permission check disabled or custom permission check implemented.";
+            message = "Permission check disabled.";
+        }
+        if (method.isAnnotationPresent(CustomPermissionCheck.class)) {
+            message = "Custom permission check implemented, please ask developers for more information.";
+        }
+        if (method.isAnnotationPresent(InternalOnly.class)) {
+            message = "This API can be called by internal actor only.";
         }
         return ApiAuthorizationInfoBuilder.anApiAuthorizationInfo()
                 .withHttpMethod(httpMethod)

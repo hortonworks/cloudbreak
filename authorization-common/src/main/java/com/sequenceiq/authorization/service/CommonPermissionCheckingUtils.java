@@ -28,6 +28,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.defaults.CrnsByCategory;
@@ -127,7 +128,8 @@ public class CommonPermissionCheckingUtils {
     }
 
     public Object proceed(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
-        LOGGER.debug("Permission check took {} ms", System.currentTimeMillis() - startTime);
+        LOGGER.debug("Permission check took {} ms (method: {})", System.currentTimeMillis() - startTime,
+                methodSignature.getMethod().getDeclaringClass().getSimpleName() + "#" + methodSignature.getMethod().getName());
         try {
             Object proceed = proceedingJoinPoint.proceed();
             if (proceed == null) {
@@ -154,6 +156,10 @@ public class CommonPermissionCheckingUtils {
 
     public boolean isAuthorizationDisabled(ProceedingJoinPoint proceedingJoinPoint) {
         return proceedingJoinPoint.getTarget().getClass().isAnnotationPresent(DisableCheckPermissions.class);
+    }
+
+    public boolean isInternalOnly(ProceedingJoinPoint proceedingJoinPoint) {
+        return proceedingJoinPoint.getTarget().getClass().isAnnotationPresent(InternalOnly.class);
     }
 
     public <T> T getParameter(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, Class annotation, Class<T> target) {

@@ -51,6 +51,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.EnvironmentCrn;
 import com.sequenceiq.authorization.annotation.EnvironmentName;
@@ -88,6 +89,7 @@ public class EnforceAuthorizationLogicsUtil {
                     .put(DisableCheckPermissions.class, noRestriction())
                     .put(CheckPermissionByAccount.class, noRestriction())
                     .put(InternalOnly.class, noRestriction())
+                    .put(CustomPermissionCheck.class, noRestriction())
                     .put(FilterListBasedOnPermissions.class,
                             returnsAnyOf(
                                     list(ResourceCrnAwareApiModel.class),
@@ -117,9 +119,11 @@ public class EnforceAuthorizationLogicsUtil {
         Set<String> controllersClasses = REFLECTIONS.getTypesAnnotatedWith(Controller.class).stream().map(Class::getSimpleName).collect(Collectors.toSet());
         Set<String> authorizationResourceClasses = REFLECTIONS.getTypesAnnotatedWith(AuthorizationResource.class)
                 .stream().map(Class::getSimpleName).collect(Collectors.toSet());
-        Set<String> disabledAuthorizationClasses = REFLECTIONS.getTypesAnnotatedWith(DisableCheckPermissions.class)
-                .stream().map(Class::getSimpleName).collect(Collectors.toSet());
-        Set<String> controllersWithoutAnnotation = Sets.difference(controllersClasses, Sets.union(authorizationResourceClasses, disabledAuthorizationClasses));
+        Set<String> disabledAuthorizationClasses = Sets.union(
+                REFLECTIONS.getTypesAnnotatedWith(DisableCheckPermissions.class).stream().map(Class::getSimpleName).collect(Collectors.toSet()),
+                REFLECTIONS.getTypesAnnotatedWith(InternalOnly.class).stream().map(Class::getSimpleName).collect(Collectors.toSet()));
+        Set<String> controllersWithoutAnnotation = Sets.difference(controllersClasses,
+                Sets.union(authorizationResourceClasses, disabledAuthorizationClasses));
 
         assertTrue("These controllers are missing @AuthorizationResource annotation: " + Joiner.on(",").join(controllersWithoutAnnotation),
                 controllersWithoutAnnotation.isEmpty());
@@ -146,7 +150,7 @@ public class EnforceAuthorizationLogicsUtil {
                 .filter(method::isAnnotationPresent)
                 .collect(toList());
         if (annotations.isEmpty()) {
-            return List.of(invalid(method, "Missing aithz annotation."));
+            return List.of(invalid(method, "Missing authz annotation."));
         } else {
             return annotations
                     .stream()
