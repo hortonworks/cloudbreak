@@ -23,6 +23,9 @@ public class UpgradeOptionsResponseFactory {
     @Inject
     private ImageService imageService;
 
+    @Inject
+    private ComponentVersionProvider componentVersionProvider;
+
     public UpgradeV4Response createV4Response(Image currentImage, ImageFilterResult filteredImages, String cloudPlatform, String region,
             String imageCatalogName) {
         return new UpgradeV4Response(
@@ -47,13 +50,7 @@ public class UpgradeOptionsResponseFactory {
     }
 
     private ImageComponentVersions getComponentVersions(Map<String, String> packageVersions, String os, String osPatchLevel) {
-        return new ImageComponentVersions(
-                packageVersions.get("cm"),
-                packageVersions.get("cm-build-number"),
-                packageVersions.get("stack"),
-                packageVersions.get("cdh-build-number"),
-                os,
-                osPatchLevel);
+        return componentVersionProvider.getComponentVersions(packageVersions, os, osPatchLevel);
     }
 
     private String getImageName(Image image, String cloudPlatform, String region) {

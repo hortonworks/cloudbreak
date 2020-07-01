@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -100,6 +101,9 @@ public class UpgradeService {
     @Inject
     private CloudbreakEventService eventService;
 
+    @Inject
+    private ComponentVersionProvider componentVersionProvider;
+
     public UpgradeOptionV4Response getOsUpgradeOptionByStackNameOrCrn(Long workspaceId, NameOrCrn nameOrCrn, User user) {
         try {
             return transactionService.required(() -> {
@@ -134,7 +138,7 @@ public class UpgradeService {
         }
     }
 
-    public FlowIdentifier upgradeCluster(Long workspaceId, String stackName, String imageId)  {
+    public FlowIdentifier upgradeCluster(Long workspaceId, String stackName, String imageId) {
         Optional<Stack> stackOptional = stackService.findStackByNameAndWorkspaceId(stackName, workspaceId);
         if (stackOptional.isPresent()) {
             Stack stack = stackOptional.get();
@@ -164,8 +168,7 @@ public class UpgradeService {
             Image currentImage = componentConfigProviderService.getImage(stack.getId());
             StatedImage currentStatedImage =
                     imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), currentImage.getImageId());
-            StatedImage targetStatedImage =
-                    imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), imageId);
+            StatedImage targetStatedImage = imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), imageId);
             imageService.updateComponentsByStackId(stack, targetStatedImage);
             return Pair.of(currentStatedImage, targetStatedImage);
 
@@ -251,8 +254,8 @@ public class UpgradeService {
                 latestImage.getImage().getUuid(),
                 latestImage.getImageCatalogName(),
                 latestImage.getImage().getCreated(),
-                latestImage.getImage().getDate()
-        );
+                latestImage.getImage().getDate(),
+                getComponentVersions(latestImage.getImage()));
         response.setUpgrade(upgradeImageInfo);
         LOGGER.info("Datalake upgrade option evaulation finished, image found with image id {}", response.getUpgrade().getImageId());
         return response;
@@ -266,8 +269,8 @@ public class UpgradeService {
                 latestImage.getImage().getUuid(),
                 latestImage.getImageCatalogName(),
                 latestImage.getImage().getCreated(),
-                latestImage.getImage().getDate()
-        );
+                latestImage.getImage().getDate(),
+                getComponentVersions(latestImage.getImage()));
         response.setUpgrade(upgradeImageInfo);
         return response;
     }
@@ -287,10 +290,15 @@ public class UpgradeService {
                 image.getImageId(),
                 image.getImageCatalogName(),
                 currentImage.getCreated(),
-                currentImage.getDate());
+                currentImage.getDate(),
+                getComponentVersions(currentImage));
         UpgradeOptionV4Response response = new UpgradeOptionV4Response();
         response.setCurrent(currentImageInfo);
         return response;
+    }
+
+    private ImageComponentVersions getComponentVersions(com.sequenceiq.cloudbreak.cloud.model.catalog.Image image) {
+        return componentVersionProvider.getComponentVersions(image.getPackageVersions(), image.getOs(), image.getDate());
     }
 
     private UpgradeOptionV4Response notUpgradable(Image image, String reason) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {

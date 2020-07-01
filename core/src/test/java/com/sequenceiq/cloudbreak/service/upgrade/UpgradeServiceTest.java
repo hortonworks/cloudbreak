@@ -97,6 +97,9 @@ public class UpgradeServiceTest {
     @Mock
     private TransactionService transactionService;
 
+    @Mock
+    private ComponentVersionProvider componentVersionProvider;
+
     @InjectMocks
     private UpgradeService underTest;
 
