@@ -19,8 +19,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST;
-import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT_BY_CRN;
-import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RETRY_BY_CRN;
@@ -225,20 +224,6 @@ public interface DistroXV1Endpoint {
             nickname = "repairDistroXV1ByCrn")
     void repairClusterByCrn(@PathParam("crn") String crn, @Valid DistroXRepairV1Request clusterRepairRequest);
 
-    @POST
-    @Path("name/{name}/blueprint")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = POST_STACK_FOR_BLUEPRINT_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "postDistroXForBlueprintV1ByName")
-    GeneratedBlueprintV4Response postStackForBlueprintByName(@PathParam("name") String name, @Valid DistroXV1Request stackRequest);
-
-    @POST
-    @Path("crn/{crn}/blueprint")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = POST_STACK_FOR_BLUEPRINT_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "postDistroXForBlueprintV1ByCrn")
-    GeneratedBlueprintV4Response postStackForBlueprintByCrn(@PathParam("crn") String crn, @Valid DistroXV1Request stackRequest);
-
     @GET
     @Path("name/{name}/cli_create")
     @ApiOperation(value = GET_STACK_REQUEST_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
@@ -327,4 +312,11 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = CLI_COMMAND, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "getCreateClusterForCli")
     Object getCreateAwsClusterForCli(@NotNull @Valid DistroXV1Request request);
+
+    @POST
+    @Path("blueprint")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = POST_STACK_FOR_BLUEPRINT, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "postDistroXForBlueprintV1")
+    GeneratedBlueprintV4Response postStackForBlueprint(@Valid DistroXV1Request stackRequest);
 }

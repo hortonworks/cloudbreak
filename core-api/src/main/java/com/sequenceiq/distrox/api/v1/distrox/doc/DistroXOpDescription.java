@@ -33,8 +33,7 @@ public class DistroXOpDescription {
     public static final String DELETE_WITH_KERBEROS_BY_CRN = "deletes the stack (with kerberos cluster) by crn";
     public static final String GET_STACK_REQUEST_BY_NAME = "gets StackRequest by name";
     public static final String GET_STACK_REQUEST_BY_CRN = "gets StackRequest by crn";
-    public static final String POST_STACK_FOR_BLUEPRINT_BY_NAME = "posts stack for blueprint by name";
-    public static final String POST_STACK_FOR_BLUEPRINT_BY_CRN = "posts stack for blueprint by crn";
+    public static final String POST_STACK_FOR_BLUEPRINT = "posts stack for blueprint";
     public static final String DELETE_INSTANCE_BY_ID_BY_NAME = "deletes instance from the stack's cluster by name";
     public static final String DELETE_INSTANCE_BY_ID_BY_CRN = "deletes instance from the stack's cluster by crn";
     public static final String CHECK_IMAGE = "checks image in stack by name";

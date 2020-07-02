@@ -21,6 +21,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
@@ -287,21 +288,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
-    public GeneratedBlueprintV4Response postStackForBlueprintByName(@ResourceName String name, @Valid DistroXV1Request stackRequest) {
-        return stackOperations.postStackForBlueprint(
-                NameOrCrn.ofName(name),
-                workspaceService.getForCurrentUser().getId(),
-                stackRequestConverter.convert(stackRequest));
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
-    public GeneratedBlueprintV4Response postStackForBlueprintByCrn(@ResourceCrn String crn, @Valid DistroXV1Request stackRequest) {
-        return stackOperations.postStackForBlueprint(
-                NameOrCrn.ofCrn(crn),
-                workspaceService.getForCurrentUser().getId(),
-                stackRequestConverter.convert(stackRequest));
+    @DisableCheckPermissions
+    public GeneratedBlueprintV4Response postStackForBlueprint(@Valid DistroXV1Request stackRequest) {
+        return stackOperations.postStackForBlueprint(stackRequestConverter.convert(stackRequest));
     }
 
     @Override
