@@ -70,6 +70,10 @@ public class Group extends DynamicModel {
         return instances.get(0);
     }
 
+    public InstanceTemplate getReferenceInstanceTemplate() {
+        return getReferenceInstanceConfiguration().getTemplate();
+    }
+
     public String getName() {
         return name;
     }

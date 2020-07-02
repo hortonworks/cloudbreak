@@ -46,7 +46,7 @@ public class CloudFormationTemplateBuilder {
         int subnetCounter = 0;
         boolean multigw = context.stack.getGroups().stream().filter(g -> g.getType() == InstanceGroupType.GATEWAY).count() > 1;
         for (Group group : context.stack.getGroups()) {
-            AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate());
+            AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
             String encryptedAMI = context.encryptedAMIByGroupName.get(group.getName());
             AwsGroupView groupView = new AwsGroupView(
                     group.getInstancesSize(),

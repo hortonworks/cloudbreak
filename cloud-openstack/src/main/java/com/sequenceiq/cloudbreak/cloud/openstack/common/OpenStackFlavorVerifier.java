@@ -28,7 +28,7 @@ public class OpenStackFlavorVerifier {
         }
         Set<String> notFoundFlavors = new HashSet<>();
         for (Group instanceGroup : instanceGroups) {
-            String instanceType = instanceGroup.getReferenceInstanceConfiguration().getTemplate().getFlavor();
+            String instanceType = instanceGroup.getReferenceInstanceTemplate().getFlavor();
             boolean found = false;
             for (Flavor flavor : flavors) {
                 if (flavor.getName().equalsIgnoreCase(instanceType)) {

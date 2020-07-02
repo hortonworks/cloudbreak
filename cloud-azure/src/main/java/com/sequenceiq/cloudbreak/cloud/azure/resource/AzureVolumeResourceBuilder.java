@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
 import com.sequenceiq.cloudbreak.cloud.azure.service.AzureResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -95,8 +94,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         return () -> {
             AzureResourceNameService resourceNameService = getResourceNameService();
 
-            CloudInstance instance = group.getReferenceInstanceConfiguration();
-            InstanceTemplate template = instance.getTemplate();
+            InstanceTemplate template = group.getReferenceInstanceTemplate();
             String groupName = group.getName();
             CloudContext cloudContext = auth.getCloudContext();
             String stackName = cloudContext.getName();

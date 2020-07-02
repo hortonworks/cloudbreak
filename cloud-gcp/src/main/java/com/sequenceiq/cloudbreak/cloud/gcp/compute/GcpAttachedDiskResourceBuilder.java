@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -78,8 +77,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private CloudResource createAttachedDiskSet(GcpContext context, long privateId, AuthenticatedContext auth, Group group) {
-        CloudInstance instance = group.getReferenceInstanceConfiguration();
-        InstanceTemplate template = instance.getTemplate();
+        InstanceTemplate template = group.getReferenceInstanceTemplate();
         GcpResourceNameService resourceNameService = getResourceNameService();
         String groupName = group.getName();
         CloudContext cloudContext = auth.getCloudContext();
@@ -110,8 +108,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> resources, CloudStack cloudStack) throws Exception {
-        CloudInstance instance = group.getReferenceInstanceConfiguration();
-        InstanceTemplate template = instance.getTemplate();
+        InstanceTemplate template = group.getReferenceInstanceTemplate();
 
         List<String> operations = new ArrayList<>();
         List<String> syncedOperations = Collections.synchronizedList(operations);

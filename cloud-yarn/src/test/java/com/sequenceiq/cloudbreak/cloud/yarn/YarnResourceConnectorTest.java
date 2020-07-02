@@ -211,7 +211,7 @@ public class YarnResourceConnectorTest {
     }
 
     private void assertResource(Group group, YarnComponent yarnComponent) {
-        InstanceTemplate instanceTemplate = group.getReferenceInstanceConfiguration().getTemplate();
+        InstanceTemplate instanceTemplate = group.getReferenceInstanceTemplate();
         Integer cpuParam = instanceTemplate.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, Integer.class);
         assertEquals(cpuParam, Integer.valueOf(yarnComponent.getResource().getCpus()));
         Integer memoryParam = instanceTemplate.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, Integer.class);
