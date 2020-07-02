@@ -21,20 +21,22 @@ public class PollingService<T> {
      * @param interval    sleeps this many milliseconds between status checking attempts
      * @param maxAttempts signals how many times will the status check be executed before timeout
      */
-    public Pair<PollingResult, Exception> pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval, int maxAttempts, int maxFailure) {
-        return pollWithTimeout(statusCheckerTask, t, interval, new AttemptBasedTimeoutChecker(maxAttempts), maxFailure);
+    public Pair<PollingResult, Exception> pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval,
+            int maxAttempts, int maxConsecutiveFailures) {
+        return pollWithTimeout(statusCheckerTask, t, interval, new AttemptBasedTimeoutChecker(maxAttempts), maxConsecutiveFailures);
     }
 
-    public Pair<PollingResult, Exception> pollWithAbsoluteTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval, long waitSec, int maxFailure) {
-        return pollWithTimeout(statusCheckerTask, t, interval, new AbsolutTimeBasedTimeoutChecker(waitSec), maxFailure);
+    public Pair<PollingResult, Exception> pollWithAbsoluteTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval,
+            long maximumWaitTimeInSeconds, int maxConsecutiveFailures) {
+        return pollWithTimeout(statusCheckerTask, t, interval, new AbsolutTimeBasedTimeoutChecker(maximumWaitTimeInSeconds), maxConsecutiveFailures);
     }
 
     public Pair<PollingResult, Exception> pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval, TimeoutChecker timeoutChecker,
-            int maxFailure) {
+            int maxConsecutiveFailures) {
         boolean success = false;
         boolean timeout = false;
         int attempts = 0;
-        int failures = 0;
+        int consecutiveFailures = 0;
         Exception actual = null;
         boolean exit = statusCheckerTask.exitPolling(t);
         while (!timeout && !exit) {
@@ -42,16 +44,20 @@ public class PollingService<T> {
             try {
                 success = statusCheckerTask.checkStatus(t);
             } catch (Exception ex) {
-                LOGGER.debug("Exception occurred in the polling: {}", ex.getMessage(), ex);
-                failures++;
+                consecutiveFailures++;
                 actual = ex;
+                LOGGER.debug("Exception occurred in the polling: {}. Number of consecutive failures: [{}/{}]",
+                        ex.getMessage(), consecutiveFailures, maxConsecutiveFailures, ex);
             }
-            if (failures >= maxFailure) {
-                LOGGER.debug("Polling failure reached the limit which was {}, poller will drop the last exception.", maxFailure);
+            if (consecutiveFailures >= maxConsecutiveFailures) {
+                LOGGER.debug("Polling failure reached the limit which was {}, poller will drop the last exception.", maxConsecutiveFailures);
                 statusCheckerTask.handleException(actual);
                 return new ImmutablePair<>(PollingResult.FAILURE, actual);
             } else if (success) {
                 LOGGER.debug(statusCheckerTask.successMessage(t));
+                LOGGER.debug("Set the number of consecutive failures to 0, since we received a positve answer. Original number of consecutiveFailures: {}",
+                        consecutiveFailures);
+                consecutiveFailures = 0;
                 return new ImmutablePair<>(PollingResult.SUCCESS, actual);
             }
             sleep(interval);
@@ -68,8 +74,8 @@ public class PollingService<T> {
         return new ImmutablePair<>(PollingResult.EXIT, actual);
     }
 
-    public PollingResult pollWithTimeoutSingleFailure(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
-        return pollWithAbsoluteTimeout(statusCheckerTask, t, interval, maxAttempts, 1).getLeft();
+    public PollingResult pollWithAbsoluteTimeoutSingleFailure(StatusCheckerTask<T> statusCheckerTask, T t, int interval, long maximumWaitTimeInSeconds) {
+        return pollWithAbsoluteTimeout(statusCheckerTask, t, interval, maximumWaitTimeInSeconds, 1).getLeft();
     }
 
     public PollingResult pollWithAttemptSingleFailure(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
