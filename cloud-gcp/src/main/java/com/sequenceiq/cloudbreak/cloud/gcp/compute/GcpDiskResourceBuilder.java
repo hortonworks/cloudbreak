@@ -52,7 +52,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         disk.setName(buildableResources.get(0).getName());
         disk.setKind(GcpDiskType.HDD.getUrl(projectId, location.getAvailabilityZone()));
 
-        InstanceTemplate template = group.getReferenceInstanceConfiguration().getTemplate();
+        InstanceTemplate template = group.getReferenceInstanceTemplate();
         gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
 
         Map<String, String> customTags = new HashMap<>();

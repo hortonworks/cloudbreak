@@ -48,7 +48,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -105,8 +104,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.debug("Create volume resources");
 
-        CloudInstance instance = group.getReferenceInstanceConfiguration();
-        InstanceTemplate template = instance.getTemplate();
+        InstanceTemplate template = group.getReferenceInstanceTemplate();
         if (CollectionUtils.isEmpty(template.getVolumes())) {
             LOGGER.debug("No volume requested");
             return List.of();
@@ -126,8 +124,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         return () -> {
             AwsResourceNameService resourceNameService = getResourceNameService();
 
-            CloudInstance instance = group.getReferenceInstanceConfiguration();
-            InstanceTemplate template = instance.getTemplate();
+            InstanceTemplate template = group.getReferenceInstanceTemplate();
             String groupName = group.getName();
             CloudContext cloudContext = auth.getCloudContext();
             String stackName = cloudContext.getName();
@@ -182,7 +179,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         List<CloudResource> requestedResources = buildableResource.stream()
                 .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
-        Long ephemeralCount = group.getReferenceInstanceConfiguration().getTemplate().getVolumes().stream()
+        Long ephemeralCount = group.getReferenceInstanceTemplate().getVolumes().stream()
                 .filter(vol -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(vol.getType())).collect(Collectors.counting());
 
         LOGGER.debug("Start creating data volumes for stack: '{}' group: '{}'", auth.getCloudContext().getName(), group.getName());
@@ -230,15 +227,15 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     private boolean isFastEbsEncryptionEnabled(Group group) {
-        return new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).isFastEbsEncryptionEnabled();
+        return new AwsInstanceView(group.getReferenceInstanceTemplate()).isFastEbsEncryptionEnabled();
     }
 
     private boolean isEncryptedVolumeUsingFastApproachRequested(Group group) {
-        return new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).isEncryptedVolumes() && isFastEbsEncryptionEnabled(group);
+        return new AwsInstanceView(group.getReferenceInstanceTemplate()).isEncryptedVolumes() && isFastEbsEncryptionEnabled(group);
     }
 
     private String getVolumeEncryptionKey(Group group, boolean encryptedVolumeUsingFastApproach) {
-        AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate());
+        AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
         return encryptedVolumeUsingFastApproach && awsInstanceView.isKmsCustom() ? awsInstanceView.getKmsKey() : null;
     }
 

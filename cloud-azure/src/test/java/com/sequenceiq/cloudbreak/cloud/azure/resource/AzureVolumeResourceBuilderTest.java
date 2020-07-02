@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
 import com.sequenceiq.cloudbreak.cloud.azure.service.AzureResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -57,9 +56,6 @@ public class AzureVolumeResourceBuilderTest {
 
     @Mock
     private Image image;
-
-    @Mock
-    private CloudInstance cloudInstance;
 
     @Mock
     private InstanceTemplate instanceTemplate;
@@ -97,8 +93,7 @@ public class AzureVolumeResourceBuilderTest {
         CloudResource cloudResource2 = mock(CloudResource.class);
         when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(cloudResource1, cloudResource2));
         when(context.getStringParameter(PlatformParametersConsts.RESOURCE_CRN_PARAMETER)).thenReturn(STACK_CRN);
-        when(group.getReferenceInstanceConfiguration()).thenReturn(cloudInstance);
-        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
+        when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
         when(instanceTemplate.getVolumes()).thenReturn(List.of(volumeTemplate));
         when(auth.getCloudContext()).thenReturn(cloudContext);
         when(auth.getParameter(AzureClient.class)).thenReturn(azureClient);
