@@ -1,29 +1,33 @@
 package com.sequenceiq.cloudbreak.service.audit;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.audit.AuditEvent;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.comparator.audit.AuditEventComparator;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventRepository;
-
-import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
 @Service
 public class AuditEventService extends AbstractWorkspaceAwareResourceService<StructuredEventEntity> {
@@ -42,6 +46,9 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Value("${cb.audit.limit:10000}")
+    private int auditLimit;
 
     public AuditEvent getAuditEvent(Long auditId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
@@ -68,7 +75,9 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     }
 
     private List<AuditEvent> getEventsForUserWithTypeAndResourceIdByWorkspace(Workspace workspace, String resourceType, Long resourceId) {
-        List<StructuredEventEntity> events = structuredEventRepository.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
+        PageRequest pageable = PageRequest.of(0, auditLimit, Sort.by("timestamp").descending());
+        List<StructuredEventEntity> events = structuredEventRepository.findByWorkspaceAndResourceTypeAndResourceId(
+                workspace, resourceType, resourceId, pageable).get().collect(Collectors.toList());
         return events != null ? (List<AuditEvent>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(AuditEvent.class))) : Collections.emptyList();
