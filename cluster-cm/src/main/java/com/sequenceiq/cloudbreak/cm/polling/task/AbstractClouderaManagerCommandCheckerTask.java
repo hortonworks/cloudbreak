@@ -98,7 +98,9 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
     }
 
     private boolean isToleratedError(ApiException e) {
+        // Retry for BAD_REQUEST is not ideal, but sometimes CM sends back BAD_REQUESTS even for INTERNAL_SERVER_ERROR
         return e.getCode() == HttpStatus.INTERNAL_SERVER_ERROR.value()
+                || e.getCode() == HttpStatus.BAD_REQUEST.value()
                 || e.getCause() instanceof SocketException
                 || e.getCause() instanceof SocketTimeoutException;
     }
