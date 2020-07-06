@@ -17,5 +17,6 @@ public enum BlackListedTimeBasedAutoscaleRole {
     KUDU_TSERVER,
     SOLR_SERVER,
     NIFI_REGISTRY_SERVER,
-    HUE_LOAD_BALANCER
+    HUE_LOAD_BALANCER,
+    KNOX_GATEWAY
 }
