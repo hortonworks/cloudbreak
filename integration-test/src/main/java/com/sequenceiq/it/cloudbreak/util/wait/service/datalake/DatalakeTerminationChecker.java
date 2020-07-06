@@ -37,13 +37,11 @@ public class DatalakeTerminationChecker<T extends DatalakeWaitObject> extends Ex
             if (!status.equals(DELETED)) {
                 return false;
             }
+        } catch (NotFoundException e) {
+            LOGGER.warn("No datalake found with name '{}'", name, e);
         } catch (Exception e) {
-            if (e instanceof NotFoundException) {
-                LOGGER.warn("No datalake found with name '{}'", name, e);
-            } else {
-                LOGGER.error("Datalake termination failed: {}", e.getMessage(), e);
-                throw new TestFailException(String.format("Datalake termination failed: ", e.getMessage()));
-            }
+            LOGGER.error("Datalake termination failed: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("Datalake termination failed: ", e.getMessage()));
         }
         return true;
     }
@@ -93,7 +91,7 @@ public class DatalakeTerminationChecker<T extends DatalakeWaitObject> extends Ex
             SdxClusterResponse sdx = waitObject.getEndpoint().get(name);
             return Map.of("status", sdx.getStatus().name());
         } catch (NotFoundException e) {
-            LOGGER.warn("No sdx found with name '{}'! It has been deleted successfully.", name, e);
+            LOGGER.warn("No datalake found with name '{}'! It has been deleted successfully.", name, e);
             return Map.of("status", DELETED.name());
         }
     }

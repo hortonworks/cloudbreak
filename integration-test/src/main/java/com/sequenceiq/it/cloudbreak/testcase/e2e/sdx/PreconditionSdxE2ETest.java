@@ -23,7 +23,6 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
-import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 
 public class PreconditionSdxE2ETest extends AbstractE2ETest {
 
@@ -48,9 +47,6 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
-
-    @Inject
-    private WaitUtil waitUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
