@@ -60,9 +60,9 @@ At first, you should start every service from cbd to check that your cloud envir
 export CB_LOCAL_DEV_LIST=
 ```
 
-When this setup works, you can remove services from cbd, and run them locally. For example, in order to run Cloudbreak, Periscope, Datalake, FreeIPA, Redbeams, Environment, Auth Mock (and CAAS API), IDBroker Mapping Management, and Environments2 API services locally (from IDEA or the command line), put this into your `Profile`:
+When this setup works, you can remove services from cbd, and run them locally. For example, in order to run Cloudbreak, Periscope, Datalake, FreeIPA, Redbeams, Environment, Auth Mock (and THUNDERHEAD API), IDBroker Mapping Management, and Environments2 API services locally (from IDEA or the command line), put this into your `Profile`:
 ```
-export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake,freeipa,redbeams,environment,auth-mock,caas-api,idbmms,environments2-api
+export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake,freeipa,redbeams,environment,auth-mock,thunderhead-api,idbmms,environments2-api
 ```
 
 Containers for these applications won't be started and Uluwatu (or the `cdp` & `dp` CLI tools) will connect to Java processes running on your host.
@@ -317,7 +317,7 @@ CB_AWS_ACCOUNT_ID=
 
 ### Running Auth Mock in IDEA
 
-After importing the `cloudbreak` repo root, launch the Auth Mock application by executing the `com.sequenceiq.caas.MockCaasApplication` class (set `Use classpath of module` to `cloudbreak.mock-caas.main`) with the following JVM options:
+After importing the `cloudbreak` repo root, launch the Auth Mock application by executing the `com.sequenceiq.thunderhead.MockThunderheadApplication` class (set `Use classpath of module` to `cloudbreak.mock-thunderhead.main`) with the following JVM options:
 
 ```
 -Dauth.config.dir=<CBD_LOCAL_ETC>
@@ -325,7 +325,7 @@ After importing the `cloudbreak` repo root, launch the Auth Mock application by 
 
 Replace `<CBD_LOCAL_ETC>` with the full path of your `cbd-local/etc` directory that shall already contain the Cloudera Manager license file `license.txt`.
 
-Please make sure that `caas-api` has been added to `CB_LOCAL_DEV_LIST` list in `Profile` file of cbd.
+Please make sure that `thunderhead-api` has been added to `CB_LOCAL_DEV_LIST` list in `Profile` file of cbd.
 
 ## Command line
 
@@ -457,15 +457,15 @@ Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Prof
 To run Auth Mock from the command line, run the following Gradle command:
 
 ```
-./gradlew :mock-caas:bootRun -PjvmArgs="\
+./gradlew :mock-thunderhead:bootRun -PjvmArgs="\
 -Dserver.port=10080 \
 -Dauth.config.dir=<CBD_LOCAL_ETC> \
--Dspring.config.location=$(pwd)/mock-caas/src/main/resources/application.yml"
+-Dspring.config.location=$(pwd)/mock-thunderhead/src/main/resources/application.yml"
 ```
 
 Replace `<CBD_LOCAL_ETC>` with the full path of your `cbd-local/etc` directory that shall already contain the Cloudera Manager license file `license.txt`.
 
-Please make sure that `caas-api` has been added to `CB_LOCAL_DEV_LIST` list in `Profile` file of cbd.
+Please make sure that `thunderhead-api` has been added to `CB_LOCAL_DEV_LIST` list in `Profile` file of cbd.
 
 ## Database development
 

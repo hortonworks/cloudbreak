@@ -47,12 +47,6 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${redbeams.intermediate.threadpool.capacity.size:}")
     private int intermediateQueueCapacity;
 
-    // @Value("${cb.container.threadpool.core.size:}")
-    // private int containerCorePoolSize;
-
-    // @Value("${cb.container.threadpool.capacity.size:}")
-    // private int containerteQueueCapacity;
-
     @Value("${redbeams.client.id}")
     private String clientId;
 
@@ -64,18 +58,6 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Value("${cert.ignorePreValidation}")
     private boolean ignorePreValidation;
-
-    @Value("${caas.protocol:http}")
-    private String caasProtocol;
-
-    @Value("${caas.url:}")
-    private String caasUrl;
-
-    @Value("${caas.cert.validation:false}")
-    private boolean caasCertificateValidation;
-
-    @Value("${caas.cert.ignorePreValidation:false}")
-    private boolean caasIgnorePreValidation;
 
     private ResourceLoader resourceLoader;
 

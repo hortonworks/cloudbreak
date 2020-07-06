@@ -6,7 +6,7 @@ export DOCKER_TAG_ENVIRONMENT=dev
 export DOCKER_TAG_DATALAKE=dev
 export DOCKER_TAG_REDBEAMS=dev
 export DOCKER_TAG_PERISCOPE=dev
-export CB_JAVA_OPTS="-Dcaas.url=caas-mock:8080 -Drest.debug=true -Dmock.spi.endpoint=https://test:9443"
+export CB_JAVA_OPTS="-Dthunderhead.url=thunderhead-mock:8080 -Drest.debug=true -Dmock.spi.endpoint=https://test:9443"
 export UAA_DEFAULT_SECRET=cbsecret2015
 export UAA_DEFAULT_USER_PW=cloudbreak
 export REMOVE_CONTAINER=
@@ -14,7 +14,7 @@ export DPS_VERSION=2.0.0.0-142
 export CB_ENABLEDPLATFORMS=AZURE,AWS,GCP,OPENSTACK,YARN,MOCK
 export ENVIRONMENT_ENABLEDPLATFORMS=AZURE,AWS,YARN,MOCK
 export CB_DEFAULT_SUBSCRIPTION_ADDRESS=""
-export UMS_HOST=caas-mock
+export UMS_HOST=thunderhead-mock
 export CB_CLIENT_SECRET=cloudbreak
 export INGRESS_URLS=dev-gateway
 export CLUSTERPROXY_ENABLED=false
@@ -22,4 +22,4 @@ export ENVIRONMENT_AUTOSYNC_ENABLED=false
 
 export CB_CLUSTERDEFINITION_AMBARI_INTERNAL="HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2;                HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp30-edw-analytics;                HDP 3.0 - Data Lake: Apache Ranger, Apache Hive Metastore=hdp30-shared-services;                HDP 3.0 - Data Lake: Apache Ranger, Apache Atlas, Infrastructure Services=hdp30-shared-services-v2;                HDP 3.0 - Data Science Attached: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2-attached-v2;                HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2-standalone-v2;                HDP 3.0 - EDW-Analytics Attached: Apache Hive 3 LLAP=hdp30-edw-analytics-attached-v2;                HDP 3.0 - EDW-Analytics Standalone: Apache Hive 3 LLAP=hdp30-edw-analytics-standalone-v2"
 export CLUSTERPROXY_ENABLED=false
-export ALTUS_AUDIT_ENDPOINT=caas-mock
+export ALTUS_AUDIT_ENDPOINT=thunderhead-mock
