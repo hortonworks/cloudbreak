@@ -104,7 +104,7 @@
         "serviceConfigs": [
           {
             "name": "yarn_admin_acl",
-            "value": "yarn,hdfs,flink"
+            "value": "yarn,hdfs,flink,mapred"
           }
         ],
         "roleConfigGroups": [
