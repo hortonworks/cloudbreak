@@ -52,27 +52,27 @@ restore_db_from_local() {
 
   doLog "INFO Restoring $SERVICE"
 
-  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE};"
-  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};"
-  psql --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" < "$BACKUP" >>$LOGFILE 2>&1 || errorExit "Unable to restore ${SERVICE}"
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to drop database ${SERVICE}"
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to re-create database ${SERVICE}"
+  psql --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" < "$BACKUP" > $LOGFILE 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore ${SERVICE}"
   doLog "INFO Succesfully restored ${SERVICE}"
 }
 
 run_azure_restore() {
   mkdir -p "$BACKUPS_DIR"
-  azcopy login --identity >>$LOGFILE 2>&1 || errorExit "Could not login to Azure"
-  azcopy copy "$CLOUD_LOCATION"/* "$BACKUPS_DIR" >>$LOGFILE 2>&1 || errorExit "Could not copy backups from Azure."
+  azcopy login --identity > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Could not login to Azure"
+  azcopy copy "$CLOUD_LOCATION"/* "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Could not copy backups from Azure."
   restore_db_from_local "hive"
   restore_db_from_local "ranger"
-  rm -rfv "$BACKUPS_DIR" >>$LOGFILE 2>&1
+  rm -rfv "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 }
 
 run_aws_restore () {
   mkdir -p "$BACKUPS_DIR"
-  aws s3 cp "${CLOUD_LOCATION}/" "$BACKUPS_DIR" --recursive >>$LOGFILE 2>&1 || errorExit "Could not copy backups from AWS S3."
+  aws s3 cp "${CLOUD_LOCATION}/" "$BACKUPS_DIR" --recursive > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Could not copy backups from AWS S3."
   restore_db_from_local "hive"
   restore_db_from_local "ranger"
-  rm -rfv "$BACKUPS_DIR" >>$LOGFILE 2>&1
+  rm -rfv "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 }
 
 if [[ "$CLOUD_PROVIDER" == "azure" ]]; then
