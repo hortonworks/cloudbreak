@@ -76,7 +76,7 @@ public class MockUmsService {
         @Nonnull Optional<String> userName, String redirectUri, Boolean active) {
         if (tenant.isEmpty() || userName.isEmpty()) {
             LOGGER.info("redirect to sign in page");
-            httpServletResponse.setHeader(LOCATION_HEADER_KEY, "../thunderhead/auth/sign-in.html?redirect_uri=" + redirectUri);
+            httpServletResponse.setHeader(LOCATION_HEADER_KEY, "../auth/sign-in.html?redirect_uri=" + redirectUri);
         } else {
             Cookie cdpSessionToken = new Cookie(CDP_SESSION_TOKEN, getAltusToken(tenant.get(), userName.get()));
             cdpSessionToken.setDomain("");
