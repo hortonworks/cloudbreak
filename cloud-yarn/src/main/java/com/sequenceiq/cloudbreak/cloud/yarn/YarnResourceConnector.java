@@ -137,7 +137,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
                 stack.getLoginUserName(), stack.getPublicKey()));
         component.setArtifact(artifact);
         component.setDependencies(new ArrayList<>());
-        InstanceTemplate instanceTemplate = group.getReferenceInstanceConfiguration().getTemplate();
+        InstanceTemplate instanceTemplate = group.getReferenceInstanceTemplate();
         Resource resource = new Resource();
         resource.setCpus(instanceTemplate.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, Integer.class));
         resource.setMemory(instanceTemplate.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, Integer.class));

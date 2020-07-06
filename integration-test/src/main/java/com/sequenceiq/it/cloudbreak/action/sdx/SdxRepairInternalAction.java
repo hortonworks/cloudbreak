@@ -11,7 +11,6 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.util.FlowUtil;
 
 public class SdxRepairInternalAction implements Action<SdxInternalTestDto, SdxClient> {
 
@@ -24,7 +23,7 @@ public class SdxRepairInternalAction implements Action<SdxInternalTestDto, SdxCl
         FlowIdentifier flowIdentifier = client.getSdxClient()
                 .sdxEndpoint()
                 .repairCluster(testDto.getName(), testDto.getSdxRepairRequest());
-        FlowUtil.setFlow("SDX repair", testDto, flowIdentifier, client);
+        testDto.setFlow("SDX repair", flowIdentifier);
         Log.when(LOGGER, " SDX repair have been initiated.");
         return testDto;
     }

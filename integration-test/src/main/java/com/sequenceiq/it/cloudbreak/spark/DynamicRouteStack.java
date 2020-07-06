@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.spark;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.HttpMethod;
 
@@ -13,15 +13,16 @@ import spark.Service;
 
 public class DynamicRouteStack {
 
-    private Map<RouteKey, CustomizeableDynamicRoute> mockResponders = new HashMap<>();
+    private final Map<RouteKey, CustomizeableDynamicRoute> mockResponders;
 
-    private Service service;
+    private final Service service;
 
-    private DefaultModel model;
+    private final DefaultModel model;
 
     public DynamicRouteStack(Service service, DefaultModel model) {
         this.service = service;
         this.model = model;
+        mockResponders = new ConcurrentHashMap<>();
     }
 
     public Route get(String url, Route responseHandler) {

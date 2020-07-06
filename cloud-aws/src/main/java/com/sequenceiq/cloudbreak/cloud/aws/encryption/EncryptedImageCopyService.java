@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -93,8 +92,7 @@ public class EncryptedImageCopyService {
         Map<String, EncryptedImageConfig> configByGroupName = new HashMap<>();
         for (Group group : cloudStack.getGroups()) {
             if (isEncryptedVolumeRequested(group) && !isFastEbsEncryptionEnabled(group)) {
-                InstanceTemplate instanceTemplate = group.getReferenceInstanceConfiguration().getTemplate();
-                AwsInstanceView awsInstanceView = new AwsInstanceView(instanceTemplate);
+                AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
                 Optional<String> actualKmsKey = Optional.ofNullable(awsInstanceView.getKmsKey());
 
                 Optional<EncryptedImageConfig> existingEncryptedImageConfig = configByGroupName.values()
@@ -111,11 +109,11 @@ public class EncryptedImageCopyService {
     }
 
     private boolean isEncryptedVolumeRequested(Group group) {
-        return new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).isEncryptedVolumes();
+        return new AwsInstanceView(group.getReferenceInstanceTemplate()).isEncryptedVolumes();
     }
 
     private boolean isFastEbsEncryptionEnabled(Group group) {
-        return new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).isFastEbsEncryptionEnabled();
+        return new AwsInstanceView(group.getReferenceInstanceTemplate()).isFastEbsEncryptionEnabled();
     }
 
     private EncryptedImageConfig createEncryptedImageFromAMI(AmazonEC2Client client, AwsInstanceView awsInstanceView, String selectedAMIName,

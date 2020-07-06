@@ -41,6 +41,7 @@ import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.mock.AbstractModelMock;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.mock.ProfileAwareRoute;
@@ -482,7 +483,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
                         .ipAddress(entry.getValue().getMetaData().getPrivateIp())
                         .healthChecks(List.of(new ApiHealthCheck()
                                 .name("HOST_SCM_HEALTH")
-                                .summary(ApiHealthSummary.GOOD)))
+                                .summary(instanceStatusToApiHealthSummary(entry.getValue()))))
                         .lastHeartbeat(Instant.now().toString());
                 apiHostList.addItemsItem(apiHost);
             }
@@ -517,14 +518,22 @@ public class ClouderaManagerMock extends AbstractModelMock {
     }
 
     private ApiHost getApiHost(CloudVmMetaDataStatus cloudVmMetaDataStatus) {
+        ApiHealthSummary healthSummary = instanceStatusToApiHealthSummary(cloudVmMetaDataStatus);
         return new ApiHost()
                 .hostId(cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())
                 .hostname(HostNameUtil.generateHostNameByIp(cloudVmMetaDataStatus.getMetaData().getPrivateIp()))
                 .ipAddress(cloudVmMetaDataStatus.getMetaData().getPrivateIp())
                 .lastHeartbeat(Instant.now().plusSeconds(60000L).toString())
-                .healthSummary(ApiHealthSummary.GOOD)
+                .healthSummary(healthSummary)
                 .healthChecks(List.of(new ApiHealthCheck()
                         .name("HOST_SCM_HEALTH")
-                        .summary(ApiHealthSummary.GOOD)));
+                        .summary(healthSummary)));
+    }
+
+    private ApiHealthSummary instanceStatusToApiHealthSummary(CloudVmMetaDataStatus cloudVmMetaDataStatus) {
+        if (cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == InstanceStatus.STARTED) {
+            return ApiHealthSummary.GOOD;
+        }
+        return ApiHealthSummary.BAD;
     }
 }

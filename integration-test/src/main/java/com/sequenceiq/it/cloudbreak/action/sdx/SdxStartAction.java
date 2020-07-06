@@ -11,7 +11,6 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.util.FlowUtil;
 
 public class SdxStartAction implements Action<SdxInternalTestDto, SdxClient> {
 
@@ -21,7 +20,7 @@ public class SdxStartAction implements Action<SdxInternalTestDto, SdxClient> {
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, format(" Start SDX: %s ", testDto.getName()));
         FlowIdentifier flowIdentifier = client.getSdxClient().sdxEndpoint().startByName(testDto.getName());
-        FlowUtil.setFlow("SDX start", testDto, flowIdentifier, client);
+        testDto.setFlow("SDX start", flowIdentifier);
         Log.when(LOGGER, " SDX Start have been initiated. ");
         return testDto;
     }

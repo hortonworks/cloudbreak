@@ -10,7 +10,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.util.FlowUtil;
 
 public class SdxDeleteInternalAction implements Action<SdxInternalTestDto, SdxClient> {
 
@@ -22,7 +21,7 @@ public class SdxDeleteInternalAction implements Action<SdxInternalTestDto, SdxCl
         FlowIdentifier flowIdentifier = client.getSdxClient()
                 .sdxEndpoint()
                 .delete(testDto.getName(), false);
-        FlowUtil.setFlow("SDX delete", testDto, flowIdentifier, client);
+        testDto.setFlow("SDX delete", flowIdentifier);
         Log.whenJson(LOGGER, " Delete internal response: ",
                 client.getSdxClient().sdxEndpoint().list(testContext.get(EnvironmentTestDto.class).getName()));
         return testDto;

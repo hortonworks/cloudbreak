@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -18,9 +19,9 @@ public class DistroXScaleAction implements Action<DistroXTestDto, CloudbreakClie
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXScaleAction.class);
 
-    private Integer count;
+    private final Integer count;
 
-    private String hostGroup;
+    private final String hostGroup;
 
     public DistroXScaleAction(String hostGroup, Integer count) {
         this.count = count;
@@ -33,13 +34,13 @@ public class DistroXScaleAction implements Action<DistroXTestDto, CloudbreakClie
         DistroXScaleV1Request scaleRequest = new DistroXScaleV1Request();
         scaleRequest.setGroup(hostGroup);
         scaleRequest.setDesiredCount(count);
-        client.getCloudbreakClient()
+        FlowIdentifier flowIdentifier = client.getCloudbreakClient()
                 .distroXV1Endpoint()
                 .putScalingByName(testDto.getName(), scaleRequest);
         StackV4Response stackV4Response = client.getCloudbreakClient()
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), new HashSet<>(Arrays.asList("hardware_info", "events")));
-        testDto.setFlow("DistroX scale", stackV4Response.getFlowIdentifier());
+        testDto.setFlow("DistroX scale", flowIdentifier);
         LOGGER.info("Hardware info for stack after upscale: {}", stackV4Response.getHardwareInfoGroups());
         return testDto;
     }

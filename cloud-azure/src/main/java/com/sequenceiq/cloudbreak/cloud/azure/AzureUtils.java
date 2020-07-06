@@ -222,7 +222,7 @@ public class AzureUtils {
 
     public void validateStorageType(CloudStack stack) {
         for (Group group : stack.getGroups()) {
-            InstanceTemplate template = group.getReferenceInstanceConfiguration().getTemplate();
+            InstanceTemplate template = group.getReferenceInstanceTemplate();
             if (!template.getVolumes().isEmpty()) {
                 String volumeType = template.getVolumes().get(0).getType();
                 String flavor = template.getFlavor();

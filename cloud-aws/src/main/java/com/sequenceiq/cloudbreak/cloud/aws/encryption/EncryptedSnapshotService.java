@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -69,13 +68,12 @@ public class EncryptedSnapshotService {
     private AwsTaggingService awsTaggingService;
 
     public boolean isEncryptedVolumeRequested(Group group) {
-        return new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).isEncryptedVolumes();
+        return new AwsInstanceView(group.getReferenceInstanceTemplate()).isEncryptedVolumes();
     }
 
     public Optional<String> createSnapshotIfNeeded(AuthenticatedContext ac, CloudStack cloudStack, Group group, PersistenceNotifier resourceNotifier) {
-        InstanceTemplate instanceTemplate = group.getReferenceInstanceConfiguration().getTemplate();
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        AwsInstanceView awsInstanceView = new AwsInstanceView(instanceTemplate);
+        AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
         AwsCredentialView awsCredentialView = new AwsCredentialView(ac.getCloudCredential());
 
         AmazonEC2Client client = awsClient.createAccess(awsCredentialView, regionName);

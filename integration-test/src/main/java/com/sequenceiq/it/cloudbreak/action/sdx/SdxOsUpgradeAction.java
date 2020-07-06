@@ -11,7 +11,6 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.util.FlowUtil;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 
 public class SdxOsUpgradeAction implements Action<SdxInternalTestDto, SdxClient> {
@@ -27,7 +26,7 @@ public class SdxOsUpgradeAction implements Action<SdxInternalTestDto, SdxClient>
         FlowIdentifier flowIdentifier = client.getSdxClient()
                 .sdxUpgradeEndpoint()
                 .upgradeClusterByName(testDto.getName(), upgradeRequest).getFlowIdentifier();
-        FlowUtil.setFlow("SDX upgrade", testDto, flowIdentifier, client);
+        testDto.setFlow("SDX upgrade", flowIdentifier);
         Log.log(LOGGER, " SDX name: %s", client.getSdxClient().sdxEndpoint().get(testDto.getName()).getName());
         return testDto;
     }

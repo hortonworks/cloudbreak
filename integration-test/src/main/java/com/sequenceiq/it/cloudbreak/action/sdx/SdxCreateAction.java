@@ -8,7 +8,6 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.util.FlowUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 public class SdxCreateAction implements Action<SdxTestDto, SdxClient> {
@@ -22,7 +21,7 @@ public class SdxCreateAction implements Action<SdxTestDto, SdxClient> {
         SdxClusterResponse sdxClusterResponse = client.getSdxClient()
                 .sdxEndpoint()
                 .create(testDto.getName(), testDto.getRequest());
-        FlowUtil.setFlow("SDX create", testDto, sdxClusterResponse.getFlowIdentifier(), client);
+        testDto.setFlow("SDX create", sdxClusterResponse.getFlowIdentifier());
         Log.whenJson(LOGGER, " SDX create response: ", client.getSdxClient().sdxEndpoint().get(testDto.getName()));
         return testDto;
     }

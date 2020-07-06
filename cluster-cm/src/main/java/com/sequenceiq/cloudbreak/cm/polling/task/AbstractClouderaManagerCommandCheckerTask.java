@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import java.net.ConnectException;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -97,7 +98,11 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
     }
 
     private boolean isToleratedError(ApiException e) {
-        return e.getCode() == HttpStatus.INTERNAL_SERVER_ERROR.value() || e.getCause() instanceof SocketException;
+        // Retry for BAD_REQUEST is not ideal, but sometimes CM sends back BAD_REQUESTS even for INTERNAL_SERVER_ERROR
+        return e.getCode() == HttpStatus.INTERNAL_SERVER_ERROR.value()
+                || e.getCode() == HttpStatus.BAD_REQUEST.value()
+                || e.getCause() instanceof SocketException
+                || e.getCause() instanceof SocketTimeoutException;
     }
 
     protected boolean doStatusCheck(T pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
