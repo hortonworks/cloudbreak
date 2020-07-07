@@ -112,9 +112,11 @@ public class AlertControllerTest {
 
     private Long clusterId = 10L;
 
-    private Long workspaceId = 10L;
+    private String tenant = "testTenant";
 
     private Long alertId = 20L;
+
+    private Cluster aCluster;
 
     @BeforeClass
     public static void setupAll() {
@@ -124,20 +126,20 @@ public class AlertControllerTest {
     @Before
     public void setup() {
         underTest.setDateService(dateService);
+        aCluster = getACluster();
         when(entitlementValidationService.autoscalingEntitlementEnabled(anyString(), anyString(), anyString())).thenReturn(true);
         when(recommendationService.getAutoscaleRecommendations(anyString()))
                 .thenReturn(new AutoscaleRecommendationV4Response(Set.of("compute"), Set.of("compute")));
+        when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
+        when(clusterService.findOneByClusterIdAndTenant(clusterId, tenant)).thenReturn(Optional.of(aCluster));
     }
 
     @Test
     public void testLoadAlertUpdateNotFound() {
         LoadAlertRequest request = getALoadAlertRequest();
 
-        Optional<Cluster> aCluster = getACluster();
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
         when(messagesService.getMessage(AUTOSCALING_CONFIG_NOT_FOUND,
-                List.of(AlertType.LOAD, alertId, aCluster.get().getStackName()))).thenReturn("load.alert.not.found");
+                List.of(AlertType.LOAD, alertId, aCluster.getStackName()))).thenReturn("load.alert.not.found");
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage("load.alert.not.found");
@@ -150,10 +152,7 @@ public class AlertControllerTest {
         LoadAlertRequest request = getALoadAlertRequest();
         LoadAlert alert = getALoadAlert();
 
-        Optional<Cluster> aCluster = getACluster();
-        aCluster.get().setLoadAlerts(Set.of(alert));
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
+        aCluster.setLoadAlerts(Set.of(alert));
         when(loadAlertRequestConverter.convert(request)).thenReturn(alert);
 
         underTest.updateLoadAlert(clusterId, alertId, request);
@@ -164,10 +163,7 @@ public class AlertControllerTest {
     public void testLoadAlertCreate() {
         LoadAlertRequest request = getALoadAlertRequest();
 
-        Optional<Cluster> aCluster = getACluster();
         when(loadAlertRequestConverter.convert(request)).thenReturn(getALoadAlert());
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
         when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("http://clusterproxy"));
 
         underTest.createLoadAlert(clusterId, request);
@@ -178,12 +174,9 @@ public class AlertControllerTest {
     public void testLoadAlertCreateWhenClusterProxyNotRegistered() {
         LoadAlertRequest request = getALoadAlertRequest();
 
-        Optional<Cluster> aCluster = getACluster();
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
         when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.empty());
         when(messagesService.getMessage(CLUSTER_PROXY_NOT_CONFIGURED,
-                List.of(aCluster.get().getStackName()))).thenReturn("clusterproxy.not.registered");
+                List.of(aCluster.getStackName()))).thenReturn("clusterproxy.not.registered");
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("clusterproxy.not.registered");
@@ -195,13 +188,10 @@ public class AlertControllerTest {
     public void testLoadAlertCreateWhenHostGroupNotSupported() {
         LoadAlertRequest request = getALoadAlertRequest();
 
-        Optional<Cluster> aCluster = getACluster();
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
         when(recommendationService.getAutoscaleRecommendations(anyString()))
                 .thenReturn(new AutoscaleRecommendationV4Response(Set.of(""), Set.of("")));
-        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
         when(messagesService.getMessage(UNSUPPORTED_AUTOSCALING_HOSTGROUP,
-                List.of("compute", AlertType.LOAD, aCluster.get().getStackName(), Set.of("")))).thenReturn("duplicate.hostgroup");
+                List.of("compute", AlertType.LOAD, aCluster.getStackName(), Set.of("")))).thenReturn("duplicate.hostgroup");
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("duplicate.hostgroup");
@@ -212,15 +202,13 @@ public class AlertControllerTest {
     @Test
     public void testAccountNotEntitledForPlatform() {
         LoadAlertRequest request = getALoadAlertRequest();
-        Optional<Cluster> aCluster = getACluster();
-        aCluster.get().setCloudPlatform("Yarn");
+        aCluster.setCloudPlatform("Yarn");
 
         when(entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getUserCrn(),
                 ThreadBasedUserCrnProvider.getAccountId(), "Yarn")).thenReturn(false);
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
+        when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
         when(messagesService.getMessage(AUTOSCALING_ENTITLEMENT_NOT_ENABLED,
-                List.of(aCluster.get().getCloudPlatform(), aCluster.get().getStackName()))).thenReturn("account.not.entitled.for.platform");
+                List.of(aCluster.getCloudPlatform(), aCluster.getStackName()))).thenReturn("account.not.entitled.for.platform");
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("account.not.entitled.for.platform");
@@ -232,13 +220,11 @@ public class AlertControllerTest {
     public void testLoadAlertCreateDuplicate() {
         LoadAlertRequest request = getALoadAlertRequest();
 
-        Optional<Cluster> aCluster = getACluster();
-        aCluster.get().setLoadAlerts(Set.of(getALoadAlert()));
+        aCluster.setLoadAlerts(Set.of(getALoadAlert()));
 
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
+        when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
         when(messagesService.getMessage(LOAD_CONFIG_ALREADY_DEFINED,
-                List.of(aCluster.get().getStackName(), request.getScalingPolicy().getHostGroup()))).thenReturn("load.config.already.defined");
+                List.of(aCluster.getStackName(), request.getScalingPolicy().getHostGroup()))).thenReturn("load.config.already.defined");
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("load.config.already.defined");
@@ -255,10 +241,6 @@ public class AlertControllerTest {
         scalingPolicy.setHostGroup("compute");
         request.setScalingPolicy(scalingPolicy);
 
-        Optional<Cluster> aCluster = getACluster();
-
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
         when(timeAlertRequestConverter.convert(request)).thenReturn(new TimeAlert());
 
         underTest.createTimeAlert(clusterId, request);
@@ -269,11 +251,8 @@ public class AlertControllerTest {
     public void testTimeAlertUpdateNotFound() {
         TimeAlertRequest request = new TimeAlertRequest();
 
-        Optional<Cluster> aCluster = getACluster();
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
         when(messagesService.getMessage(AUTOSCALING_CONFIG_NOT_FOUND,
-                List.of(AlertType.TIME, alertId, aCluster.get().getStackName()))).thenReturn("time.alert.not.found");
+                List.of(AlertType.TIME, alertId, aCluster.getStackName()))).thenReturn("time.alert.not.found");
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage("time.alert.not.found");
@@ -292,10 +271,7 @@ public class AlertControllerTest {
         TimeAlert alert = new TimeAlert();
         alert.setId(alertId);
 
-        Optional<Cluster> aCluster = getACluster();
-        aCluster.get().setTimeAlerts(Set.of(alert));
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByClusterIdAndWorkspaceId(clusterId, workspaceId)).thenReturn(aCluster);
+        aCluster.setTimeAlerts(Set.of(alert));
         when(timeAlertRequestConverter.convert(request)).thenReturn(alert);
 
         underTest.updateTimeAlert(clusterId, alertId, request);
@@ -328,12 +304,12 @@ public class AlertControllerTest {
         return loadAlertRequest;
     }
 
-    private Optional<Cluster> getACluster() {
+    private Cluster getACluster() {
         Cluster cluster = new Cluster();
         cluster.setStackCrn("testcrn");
         cluster.setStackName("teststack");
         cluster.setCloudPlatform("AWS");
         cluster.setTunnel(Tunnel.CLUSTER_PROXY);
-        return Optional.of(cluster);
+        return cluster;
     }
 }

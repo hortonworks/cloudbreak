@@ -176,7 +176,7 @@ public class AlertController implements AlertEndpoint {
     }
 
     private Cluster getClusterForWorkspace(Long clusterId) {
-        return clusterService.findOneByClusterIdAndWorkspaceId(clusterId, restRequestThreadLocalService.getRequestedWorkspaceId())
+        return clusterService.findOneByClusterIdAndTenant(clusterId, restRequestThreadLocalService.getCloudbreakTenant())
                 .orElseThrow(NotFoundException.notFound("cluster", clusterId));
     }
 

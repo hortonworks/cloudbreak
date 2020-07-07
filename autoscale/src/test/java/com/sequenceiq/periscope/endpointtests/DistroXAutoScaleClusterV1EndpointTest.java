@@ -128,7 +128,7 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         testCluster.setCloudPlatform("AWS");
 
         ClusterPertain clusterPertain = new ClusterPertain();
-        clusterPertain.setTenant("test-tenant");
+        clusterPertain.setTenant(TEST_ACCOUNT_ID);
         clusterPertain.setWorkspaceId(TEST_WORKSPACE_ID);
         clusterPertain.setUserId(TEST_USER_ID.toString());
         clusterPertain.setUserCrn(TEST_USER_CRN);
