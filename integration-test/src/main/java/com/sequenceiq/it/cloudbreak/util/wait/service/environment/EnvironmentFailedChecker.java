@@ -36,11 +36,13 @@ public class EnvironmentFailedChecker<T extends EnvironmentWaitObject> extends E
             if (desiredStatus.equals(status)) {
                 return true;
             }
-        } catch (NotFoundException e) {
-            LOGGER.warn("No environment found with crn '{}'", crn, e);
         } catch (Exception e) {
-            LOGGER.error("Failed to get environment status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Failed to get environment status: %s", e.getMessage()));
+            if (e instanceof NotFoundException) {
+                LOGGER.warn("No environment found with crn '{}'", crn, e);
+            } else {
+                LOGGER.error("Failed to get environment status: {}", e.getMessage(), e);
+                throw new TestFailException(String.format("Failed to get environment status: %s", e.getMessage()));
+            }
         }
         return false;
     }

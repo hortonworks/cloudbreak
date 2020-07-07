@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxImagesTests extends PreconditionSdxE2ETest {
@@ -34,6 +35,9 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Inject
+    private WaitUtil waitUtil;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -50,7 +54,10 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.create(), key(sdx))
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .then((tc, testDto, client) -> {
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
+                    return testDto;
+                })
                 .validate();
     }
 
@@ -91,7 +98,10 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .then((tc, testDto, client) -> {
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
+                    return testDto;
+                })
                 .then((tc, dto, client) -> {
                     Log.log(LOGGER, format(" Image Catalog Name: %s ", dto.getResponse().getStackV4Response().getImage().getCatalogName()));
                     Log.log(LOGGER, format(" Image Catalog URL: %s ", dto.getResponse().getStackV4Response().getImage().getCatalogUrl()));

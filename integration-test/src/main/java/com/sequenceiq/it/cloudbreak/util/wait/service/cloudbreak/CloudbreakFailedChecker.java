@@ -35,11 +35,13 @@ public class CloudbreakFailedChecker<T extends CloudbreakWaitObject> extends Exc
             if (desiredStatuses.equals(actualStatuses)) {
                 return true;
             }
-        } catch (NotFoundException e) {
-            LOGGER.warn("No cluster found with name '{}'", name, e);
         } catch (Exception e) {
-            LOGGER.error("Failed to get cluster status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Failed to get cluster status: %s", e.getMessage()));
+            if (e instanceof NotFoundException) {
+                LOGGER.warn("No cluster found with name '{}'", name, e);
+            } else {
+                LOGGER.error("Failed to get cluster status: {}", e.getMessage(), e);
+                throw new TestFailException(String.format("Failed to get cluster status: %s", e.getMessage()));
+            }
         }
         return false;
     }

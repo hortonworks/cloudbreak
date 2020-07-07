@@ -37,11 +37,13 @@ public class RedbeamsTerminationChecker<T extends RedbeamsWaitObject> extends Ex
             if (!status.equals(DELETE_COMPLETED)) {
                 return false;
             }
-        } catch (NotFoundException e) {
-            LOGGER.warn("No DatabaseServerConfig found with crn '{}'", crn, e);
         } catch (Exception e) {
-            LOGGER.error("Redbeams termination failed: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Redbeams termination failed: ", e.getMessage()));
+            if (e instanceof NotFoundException) {
+                LOGGER.warn("No DatabaseServerConfig found with crn '{}'", crn, e);
+            } else {
+                LOGGER.error("Redbeams termination failed: {}", e.getMessage(), e);
+                throw new TestFailException(String.format("Redbeams termination failed: ", e.getMessage()));
+            }
         }
         return true;
     }

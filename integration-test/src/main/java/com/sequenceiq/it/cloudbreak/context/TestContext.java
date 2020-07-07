@@ -26,7 +26,6 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -47,7 +46,6 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -59,7 +57,7 @@ import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
-import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
 import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
@@ -70,10 +68,6 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentAwa
 import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
-import com.sequenceiq.it.cloudbreak.util.wait.service.instance.DistroxInstanceAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
-import com.sequenceiq.it.cloudbreak.util.wait.service.instance.SdxInstanceAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.instance.SdxInternalInstanceAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsWaitObject;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -107,7 +101,7 @@ public abstract class TestContext implements ApplicationContextAware {
     private TestContext testContext;
 
     @Inject
-    private FlowUtil flowUtilSingleStatus;
+    private WaitUtil waitUtilSingleStatus;
 
     @Inject
     private TestParameter testParameter;
@@ -152,15 +146,6 @@ public abstract class TestContext implements ApplicationContextAware {
     private CloudbreakAwait cloudbreakAwait;
 
     @Inject
-    private DistroxInstanceAwait distroxInstanceAwait;
-
-    @Inject
-    private SdxInstanceAwait sdxInstanceAwait;
-
-    @Inject
-    private SdxInternalInstanceAwait sdxInternalInstanceAwait;
-
-    @Inject
     private WaitService<EnvironmentWaitObject> environmentWaitService;
 
     @Inject
@@ -174,9 +159,6 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private WaitService<CloudbreakWaitObject> cloudbreakWaitService;
-
-    @Inject
-    private WaitService<InstanceWaitObject> instanceWaitService;
 
     private DefaultModel model;
 
@@ -241,10 +223,6 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public WaitService<CloudbreakWaitObject> getCloudbreakWaitService() {
         return cloudbreakWaitService;
-    }
-
-    public WaitService<InstanceWaitObject> getInstanceWaitService() {
-        return instanceWaitService;
     }
 
     public <T extends CloudbreakTestDto, U extends MicroserviceClient> T when(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,
@@ -608,14 +586,6 @@ public abstract class TestContext implements ApplicationContextAware {
         return cloudbreakClient;
     }
 
-    public SdxClient getSdxClient(String who) {
-        SdxClient sdxClient = (SdxClient) clients.getOrDefault(who, Map.of()).get(SdxClient.class);
-        if (sdxClient == null) {
-            throw new IllegalStateException("Should create a client for this user: " + who);
-        }
-        return sdxClient;
-    }
-
     public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends MicroserviceClient> msClientClass, String who) {
         U microserviceClient = (U) clients.getOrDefault(who, Map.of()).get(msClientClass);
         if (microserviceClient == null) {
@@ -626,10 +596,6 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public CloudbreakClient getCloudbreakClient() {
         return getCloudbreakClient(getActingUserAccessKey());
-    }
-
-    public SdxClient getSdxClient() {
-        return getSdxClient(getActingUserAccessKey());
     }
 
     public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends MicroserviceClient> msClientClass) {
@@ -662,7 +628,7 @@ public abstract class TestContext implements ApplicationContextAware {
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         SdxTestDto awaitEntity = get(key);
         SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter).getAccessKey());
-        flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
+        waitUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
         return entity;
     }
 
@@ -671,7 +637,7 @@ public abstract class TestContext implements ApplicationContextAware {
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         SdxInternalTestDto awaitEntity = get(key);
         SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter).getAccessKey());
-        flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
+        waitUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
         return entity;
     }
 
@@ -680,7 +646,7 @@ public abstract class TestContext implements ApplicationContextAware {
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         CloudbreakTestDto awaitEntity = get(key);
         CloudbreakClient cloudbreakClient = getCloudbreakClient();
-        flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, cloudbreakClient);
+        waitUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, cloudbreakClient);
         return entity;
     }
 
@@ -763,58 +729,6 @@ public abstract class TestContext implements ApplicationContextAware {
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         RedbeamsDatabaseServerTestDto awaitEntity = get(key);
         redbeamsAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, getPollingDurationInMills(), maxRetry);
-        return entity;
-    }
-
-    public <T extends DistroXTestDto, E extends InstanceStatus> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
-    }
-
-    public <T extends DistroXTestDto, E extends InstanceStatus> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
-            Duration pollingInterval) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Distrox Instance await should be skipped beacause of previous error. await [%s]", desiredStatuses));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        DistroXTestDto awaitEntity = get(key);
-        distroxInstanceAwait.await(awaitEntity, (Map<String, InstanceStatus>) desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
-        return entity;
-    }
-
-    public <T extends SdxTestDto, E extends InstanceStatus> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
-    }
-
-    public <T extends SdxTestDto, E extends InstanceStatus> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
-            Duration pollingInterval) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Sdx Instance await should be skipped beacause of previous error. await [%s]", desiredStatuses));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        SdxTestDto awaitEntity = get(key);
-        sdxInstanceAwait.await(awaitEntity, (Map<String, InstanceStatus>) desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
-        return entity;
-    }
-
-    public <T extends SdxInternalTestDto, E extends InstanceStatus> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
-    }
-
-    public <T extends SdxInternalTestDto, E extends InstanceStatus> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
-            Duration pollingInterval) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Sdx Instance await should be skipped beacause of previous error. await [%s]", desiredStatuses));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        SdxInternalTestDto awaitEntity = get(key);
-        sdxInternalInstanceAwait.await(awaitEntity, (Map<String, InstanceStatus>) desiredStatuses, getTestContext(), runningParameter, pollingInterval,
-                maxRetry);
         return entity;
     }
 

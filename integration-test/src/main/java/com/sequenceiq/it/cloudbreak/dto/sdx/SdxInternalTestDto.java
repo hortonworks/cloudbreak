@@ -6,7 +6,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,7 +17,6 @@ import javax.inject.Inject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -255,26 +253,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter) {
         return getTestContext().await(this, status, runningParameter);
-    }
-
-    public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses) {
-        return awaitForInstance(statuses, emptyRunningParameter());
-    }
-
-    public SdxInternalTestDto awaitForInstance(SdxInternalTestDto entity, Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().await(entity, statuses, runningParameter);
-    }
-
-    public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().await(this, statuses, runningParameter);
-    }
-
-    public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().await(this, statuses, runningParameter, pollingInterval);
-    }
-
-    public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses, Duration pollingInterval) {
-        return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 
     @Override

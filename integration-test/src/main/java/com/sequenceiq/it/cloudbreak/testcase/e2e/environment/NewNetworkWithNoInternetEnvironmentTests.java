@@ -25,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
@@ -41,6 +42,9 @@ public class NewNetworkWithNoInternetEnvironmentTests extends AbstractE2ETest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
+    private WaitUtil waitUtil;
 
     @Inject
     private SshJClientActions sshJClientActions;

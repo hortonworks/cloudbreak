@@ -15,12 +15,12 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 
 public abstract class AbstractFreeIpaTestDto<R, S, T extends CloudbreakTestDto> extends AbstractTestDto<R, S, T, FreeIpaClient> {
 
     @Inject
-    private FlowUtil flowUtil;
+    private WaitUtil waitUtil;
 
     protected AbstractFreeIpaTestDto(String newId) {
         super(newId);
@@ -88,7 +88,7 @@ public abstract class AbstractFreeIpaTestDto<R, S, T extends CloudbreakTestDto> 
         return getTestContext().then((T) this, FreeIpaClient.class, assertions.get(assertions.size() - 1), runningParameters.get(runningParameters.size() - 1));
     }
 
-    public FlowUtil getFlowUtil() {
-        return flowUtil;
+    public WaitUtil getWaitUtil() {
+        return waitUtil;
     }
 }

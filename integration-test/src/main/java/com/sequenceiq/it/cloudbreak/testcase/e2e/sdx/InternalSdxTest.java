@@ -11,6 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -19,6 +20,9 @@ public class InternalSdxTest extends PreconditionSdxE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Inject
+    private WaitUtil waitUtil;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -33,7 +37,11 @@ public class InternalSdxTest extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForInstance(getSdxInstancesHealthyState())
+                .then((tc, testDto, client) -> {
+                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
+                    return testDto;
+                })
+                .when(sdxTestClient.describeInternal())
                 .validate();
     }
 }

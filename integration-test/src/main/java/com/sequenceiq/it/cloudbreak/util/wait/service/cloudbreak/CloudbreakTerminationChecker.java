@@ -41,11 +41,13 @@ public class CloudbreakTerminationChecker<T extends CloudbreakWaitObject> extend
             if (isNotDeleted(actualStatuses)) {
                 return false;
             }
-        } catch (NotFoundException e) {
-            LOGGER.warn("No cluster found with name '{}'", name, e);
         } catch (Exception e) {
-            LOGGER.error("Cluster termination failed: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Cluster termination failed: %s", e.getMessage()));
+            if (e instanceof NotFoundException) {
+                LOGGER.warn("No cluster found with name '{}'", name, e);
+            } else {
+                LOGGER.error("Cluster termination failed: {}", e.getMessage(), e);
+                throw new TestFailException(String.format("Cluster termination failed: %s", e.getMessage()));
+            }
         }
         return true;
     }
