@@ -25,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.it.util.ResourceUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -36,6 +37,9 @@ public class MockSdxTests extends AbstractIntegrationTest {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Inject
+    private WaitUtil waitUtil;
 
     @Inject
     private SdxUtil sdxUtil;
