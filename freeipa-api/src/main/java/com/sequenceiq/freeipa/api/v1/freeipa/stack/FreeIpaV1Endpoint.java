@@ -83,7 +83,7 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.REBOOT, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "rebootV1")
-    void rebootInstances(@Valid RebootInstancesRequest request);
+    OperationStatus rebootInstances(@Valid RebootInstancesRequest request);
 
     @POST
     @Path("repair")

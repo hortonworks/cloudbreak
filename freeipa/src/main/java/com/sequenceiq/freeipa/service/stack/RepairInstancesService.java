@@ -39,7 +39,7 @@ import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.freeipa.repair.event.RepairEvent;
-import com.sequenceiq.freeipa.flow.instance.InstanceEvent;
+import com.sequenceiq.freeipa.flow.instance.reboot.RebootInstanceEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
@@ -232,7 +232,7 @@ public class RepairInstancesService {
      * @param accountId - The account id for the instance to reboot.
      * @param request - A RebootInstanceRequest containing request parameters.
      */
-    public void rebootInstances(String accountId, RebootInstancesRequest request) {
+    public OperationStatus rebootInstances(String accountId, RebootInstancesRequest request) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
         Map<String, InstanceMetaData> allInstancesByInstanceId = getAllInstancesFromStack(stack);
@@ -244,7 +244,13 @@ public class RepairInstancesService {
             throw new NotFoundException("No unhealthy instances to reboot.  Maybe use the force option.");
         }
 
-        flowManager.notify(REBOOT_EVENT.event(), new InstanceEvent(REBOOT_EVENT.event(), stack.getId(),
-                instancesToReboot.keySet().stream().collect(Collectors.toList())));
+
+        Operation operation = operationService.startOperation(accountId, OperationType.REBOOT, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
+        if (operation.getStatus() == OperationState.RUNNING) {
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_REQUESTED, "Reboot requested");
+            flowManager.notify(REBOOT_EVENT.event(), new RebootInstanceEvent(REBOOT_EVENT.event(), stack.getId(),
+                    instancesToReboot.keySet().stream().collect(Collectors.toList()), operation.getOperationId()));
+        }
+        return operationToOperationStatusConverter.convert(operation);
     }
 }
