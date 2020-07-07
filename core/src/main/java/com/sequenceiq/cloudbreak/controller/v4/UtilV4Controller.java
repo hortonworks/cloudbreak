@@ -82,8 +82,8 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
-    public StackMatrixV4Response getStackMatrix() {
-        return stackMatrixService.getStackMatrix();
+    public StackMatrixV4Response getStackMatrix(String imageCatalogName, String platform) throws Exception {
+        return stackMatrixService.getStackMatrix(0L, platform, imageCatalogName);
     }
 
     @Override

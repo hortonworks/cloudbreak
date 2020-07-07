@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -153,6 +154,9 @@ public class StackCreatorServiceTest {
 
     @Mock
     private Stack stack;
+
+    @Mock
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Test
     public void shouldThrowBadRequestWhenRequestIsInvalid() {

@@ -11,6 +11,7 @@ public final class ClouderaManagerProductToClouderaManagerProductV4Response {
     public static ClouderaManagerProductV4Response convert(ClouderaManagerProduct clouderaManagerProduct) {
         return new ClouderaManagerProductV4Response()
                 .withName(clouderaManagerProduct.getName())
+                .withDisplayName(clouderaManagerProduct.getDisplayName())
                 .withParcel(clouderaManagerProduct.getParcel())
                 .withVersion(clouderaManagerProduct.getVersion())
                 .withCsd(clouderaManagerProduct.getCsd());

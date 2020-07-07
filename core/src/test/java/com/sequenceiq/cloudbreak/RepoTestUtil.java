@@ -56,9 +56,8 @@ public class RepoTestUtil {
         return response;
     }
 
-    public static DefaultCDHInfo getDefaultCDHInfo(String minCM, String version) {
+    public static DefaultCDHInfo getDefaultCDHInfo(String version) {
         DefaultCDHInfo defaultCDHInfo = new DefaultCDHInfo();
-        defaultCDHInfo.setMinCM(minCM);
         defaultCDHInfo.setVersion(version);
         defaultCDHInfo.setRepo(getCMStackRepoDetails(version));
         return defaultCDHInfo;
@@ -88,9 +87,8 @@ public class RepoTestUtil {
         return utilRepo;
     }
 
-    public static ClouderaManagerStackDescriptorV4Response getCMStackDescriptorResponse(String minCM, String version) {
+    public static ClouderaManagerStackDescriptorV4Response getCMStackDescriptorResponse(String version) {
         ClouderaManagerStackDescriptorV4Response stackDescriptorV4Response = new ClouderaManagerStackDescriptorV4Response();
-        stackDescriptorV4Response.setMinCM(minCM);
         stackDescriptorV4Response.setVersion(version);
         stackDescriptorV4Response.setRepository(getCMStackRepoDetailsResponse(version));
         return stackDescriptorV4Response;

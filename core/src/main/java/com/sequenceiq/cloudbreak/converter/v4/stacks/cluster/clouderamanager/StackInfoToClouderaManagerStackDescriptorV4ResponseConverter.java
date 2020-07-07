@@ -16,7 +16,6 @@ public class StackInfoToClouderaManagerStackDescriptorV4ResponseConverter
     public ClouderaManagerStackDescriptorV4Response convert(DefaultCDHInfo source) {
         ClouderaManagerStackDescriptorV4Response stackDescriptorV4 = new ClouderaManagerStackDescriptorV4Response();
         stackDescriptorV4.setVersion(source.getVersion());
-        stackDescriptorV4.setMinCM(source.getMinCM());
         stackDescriptorV4.setRepository(defaultStackRepoDetailsToStackRepoDetailsV4Response(source.getRepo()));
         return stackDescriptorV4;
     }

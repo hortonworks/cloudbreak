@@ -13,6 +13,7 @@
         "os": "centos7",
         "os_type": "redhat7",
         "uuid": "f6e778fc-7f17-4535-9021-515351df3691",
+        "defaultImage": true,
         "package-versions": {
           "cm": "7.x.0",
           "salt": "2017.7.5",

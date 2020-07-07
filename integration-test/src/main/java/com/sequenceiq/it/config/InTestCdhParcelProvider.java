@@ -48,7 +48,6 @@ public class InTestCdhParcelProvider {
         cm.setStack(stack);
 
         defaultCDHInfo.setParcels(Lists.newArrayList(schemaRegistry, streamsMessagingManager, cfm));
-        defaultCDHInfo.setMinCM(runtimeVersion);
         defaultCDHInfo.setVersion(runtimeVersion);
         defaultCDHInfo.setRepo(cm);
 

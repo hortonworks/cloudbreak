@@ -73,9 +73,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public static final String UNDEFINED = "";
 
-    static final String CLOUDBREAK_DEFAULT_CATALOG_NAME = "cloudbreak-default";
+    public static final String CDP_DEFAULT_CATALOG_NAME = "cdp-default";
 
-    static final String CDP_DEFAULT_CATALOG_NAME = "cdp-default";
+    static final String CLOUDBREAK_DEFAULT_CATALOG_NAME = "cloudbreak-default";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
 
@@ -605,7 +605,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     private static Predicate<Image> isMatchingOs(Set<String> operatingSystems) {
-        return img -> operatingSystems.stream().anyMatch(os -> img.getOs().equalsIgnoreCase(os));
+        //This predicate should be used after image burning generates the right OS into the image catalog
+        //return img -> operatingSystems.stream().anyMatch(os -> img.getOs().equalsIgnoreCase(os));
+        return img -> operatingSystems.stream().anyMatch(os -> img.getOs().equalsIgnoreCase(os) || img.getOsType().equalsIgnoreCase(os));
     }
 
     private Optional<Image> getLatestImageDefaultPreferred(List<Image> images) {

@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreati
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConfigValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -118,7 +118,7 @@ public class ClusterCreationSetupService {
             Blueprint blueprint,
             User user,
             String parentEnvironmentCloudPlatform) throws IOException,
-            CloudbreakImageNotFoundException, TransactionExecutionException {
+            CloudbreakImageCatalogException, TransactionExecutionException {
         String stackName = stack.getName();
         Cluster clusterStub = stack.getCluster();
         stack.setCluster(null);
@@ -137,7 +137,7 @@ public class ClusterCreationSetupService {
         decorateStackWithCustomDomainIfAdOrIpaJoinable(stack);
 
         List<ClusterComponent> components = mutliCheckedMeasure(
-                (MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageNotFoundException>) () -> {
+                (MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageCatalogException>) () -> {
                     if (blueprint != null) {
                         Set<Component> allComponent = componentConfigProviderService.getAllComponentsByStackIdAndType(stack.getId(),
                                 Sets.newHashSet(ComponentType.CM_REPO_DETAILS, ComponentType.CDH_PRODUCT_DETAILS, ComponentType.IMAGE));

@@ -14,9 +14,9 @@ public class DefaultCDHInfo implements Versioned {
 
     private ClouderaManagerDefaultStackRepoDetails repo;
 
-    private String minCM;
-
     private List<ClouderaManagerProduct> parcels;
+
+    private List<String> csd;
 
     @Override
     public String getVersion() {
@@ -25,14 +25,6 @@ public class DefaultCDHInfo implements Versioned {
 
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    public String getMinCM() {
-        return minCM;
-    }
-
-    public void setMinCM(String minCM) {
-        this.minCM = minCM;
     }
 
     public ClouderaManagerDefaultStackRepoDetails getRepo() {
@@ -57,12 +49,22 @@ public class DefaultCDHInfo implements Versioned {
         this.parcels = parcels;
     }
 
+    public List<String> getCsd() {
+        if (csd == null) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(csd);
+    }
+
+    public void setCsd(List<String> csd) {
+        this.csd = csd;
+    }
+
     @Override
     public String toString() {
         return "StackInfo{"
                 + "version='" + version + '\''
                 + ", repo=" + repo
-                + ", minCM=" + minCM
                 + '}';
     }
 }

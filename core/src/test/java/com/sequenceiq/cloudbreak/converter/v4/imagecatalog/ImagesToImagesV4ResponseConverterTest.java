@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.imagecatalog;
 
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultCDHInfo;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -10,21 +11,22 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
+import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntries;
+import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
-import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
@@ -36,13 +38,13 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
     public static final String REDHAT_7 = "redhat7";
 
     @Mock
-    private DefaultCDHEntries defaultCDHEntries;
-
-    @Mock
     private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
 
     @Mock
     private ConverterUtil converterUtil;
+
+    @Mock
+    private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
 
     @InjectMocks
     private ImagesToImagesV4ResponseConverter underTest = new ImagesToImagesV4ResponseConverter();
@@ -53,15 +55,10 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
     }
 
     @Test
-    public void testConvert() {
-        setupClouderaManagerEntries();
+    public void testConvert() throws CloudbreakImageCatalogException {
         setupStackEntries();
         ImagesV4Response result = underTest.convert(createSource());
-        assertEquals(1, result.getBaseImages().size());
         assertEquals(1, result.getCdhImages().size());
-        BaseImageV4Response baseImageV4Response = result.getBaseImages().get(0);
-        assertEquals(1, baseImageV4Response.getCdhStacks().size());
-        assertEquals("6.1.0", baseImageV4Response.getClouderaManagerRepo().getVersion());
     }
 
     private Images getImages() {
@@ -84,21 +81,13 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
                 Collections.emptyList(), Collections.emptyList(), "1");
     }
 
-    private void setupStackEntries() {
+    private void setupStackEntries() throws CloudbreakImageCatalogException {
 
-        Map<String, DefaultCDHInfo> cdhEntries = new HashMap<>();
+        Map<String, ImageBasedDefaultCDHInfo> cdhEntries = new HashMap<>();
 
-        DefaultCDHInfo cdhInfo = getDefaultCDHInfo("6.1", "6.1.0-1.cdh6.1.0.p0.770702");
-        cdhEntries.put("6.1.0", cdhInfo);
-
-        when(defaultCDHEntries.getEntries()).thenReturn(cdhEntries);
-    }
-
-    private void setupClouderaManagerEntries() {
-
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setBaseUrl("http://public-repo-1.hortonworks.com/cm/centos7/6.1.0/updates/6.1.0");
-        clouderaManagerRepo.setVersion("6.1.0");
-        when(defaultClouderaManagerRepoService.getDefault(REDHAT_7)).thenReturn(clouderaManagerRepo);
+        DefaultCDHInfo cdhInfo = getDefaultCDHInfo("6.1.0-1.cdh6.1.0.p0.770702");
+        Image image = mock(Image.class);
+        cdhEntries.put("6.1.0", new ImageBasedDefaultCDHInfo(cdhInfo, image));
+        when(imageBasedDefaultCDHEntries.getEntries(Mockito.any(Images.class))).thenReturn(cdhEntries);
     }
 }
