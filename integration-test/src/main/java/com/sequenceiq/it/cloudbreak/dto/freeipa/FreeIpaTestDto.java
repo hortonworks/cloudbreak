@@ -24,6 +24,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
@@ -42,6 +43,8 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.context.Clue;
+import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -57,7 +60,7 @@ import com.sequenceiq.it.cloudbreak.search.Searchable;
 
 @Prototype
 public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIpaTestDto>
-        implements Purgable<ListFreeIpaResponse, FreeIpaClient>, Searchable {
+        implements Purgable<ListFreeIpaResponse, FreeIpaClient>, Searchable, Investigable {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -297,5 +300,16 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         when(freeIpaTestClient.delete(), key("delete-freeipa-" + getName()).withSkipOnFail(false));
+    }
+
+    @Override
+    public Clue investigate() {
+        if (getResponse() == null) {
+            return null;
+        }
+        boolean hasSpotTermination = getResponse().getInstanceGroups().stream()
+                .flatMap(ig -> ig.getMetaData().stream())
+                .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
+        return new Clue("FreeIpa", null, getResponse(), hasSpotTermination);
     }
 }

@@ -15,13 +15,16 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
+import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -229,12 +232,19 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     @Override
-    public String investigate() {
+    public Clue investigate() {
         if (getResponse() == null || getResponse().getCrn() == null) {
             return null;
         }
-        String crn = getResponse().getCrn();
 
-        return "SDX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), CloudbreakEventService.DATAHUB_RESOURCE_TYPE, null, crn);
+        AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
+                getTestContext().getCloudbreakClient(),
+                CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
+                null,
+                getResponse().getCrn());
+        boolean hasSpotTermination = getResponse().getStackV4Response().getInstanceGroups().stream()
+                .flatMap(ig -> ig.getMetadata().stream())
+                .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
+        return new Clue("SDX", auditEvents, getResponse(), hasSpotTermination);
     }
 }
