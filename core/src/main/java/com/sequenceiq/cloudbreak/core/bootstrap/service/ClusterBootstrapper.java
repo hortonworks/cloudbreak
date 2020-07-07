@@ -153,6 +153,7 @@ public class ClusterBootstrapper {
     }
 
     private void saveSaltComponent(Stack stack) {
+        LOGGER.info("Save salt component for stack: {}", stack.getName());
         ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getCluster().getId(), ComponentType.SALT_STATE);
         if (saltComponent == null) {
             try {
@@ -204,9 +205,11 @@ public class ClusterBootstrapper {
     }
 
     private List<GatewayConfig> collectAndCheckGateways(Stack stack) {
+        LOGGER.info("Collect and check gateways for {}", stack.getName());
         List<GatewayConfig> allGatewayConfig = new ArrayList<>();
         for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, isKnoxEnabled(stack));
+            LOGGER.info("Add gateway config: {}", gatewayConfig);
             allGatewayConfig.add(gatewayConfig);
             PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithAbsoluteTimeoutSingleFailure(
                     hostBootstrapApiCheckerTask, new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
