@@ -11,6 +11,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +41,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class TlsSecurityService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TlsSecurityService.class);
 
     @Inject
     private SecurityConfigService securityConfigService;
@@ -114,6 +118,8 @@ public class TlsSecurityService {
 
     public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
             SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
+        LOGGER.info("Build gateway config for stack with id: {}, gatewayInstance: {}, gatewayPort: {}, knoxGatewayEnabled: {}",
+                stackId, gatewayInstance, gatewayPort, knoxGatewayEnabled);
         SecurityConfig securityConfig = getSecurityConfigByStackIdOrThrowNotFound(stackId);
         Stack stack = stackService.getById(stackId);
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance, stack);
@@ -127,6 +133,7 @@ public class TlsSecurityService {
                 InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()), new String(decodeBase64(saltSignPrivateKeyB64)),
                 new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())), securityConfig.getUserFacingCert(), securityConfig.getUserFacingKey());
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
+            LOGGER.info("Create config for cluster proxy");
             gatewayConfig
                     .withPath(clusterProxyService.getProxyPath(stack.getResourceCrn()))
                     .withProtocol(clusterProxyConfiguration.getClusterProxyProtocol());
@@ -162,6 +169,7 @@ public class TlsSecurityService {
         if (securityConfig.isEmpty()) {
             return decorateWithCLusterProxyConfig(stackId, cloudPlatform, new HttpClientConfig(apiAddress));
         } else {
+            LOGGER.info("Security config is not empty");
             String serverCert = gateway == null ? null : gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
             String clientCertB64 = securityConfig.get().getClientCert();
             String clientKeyB64 = securityConfig.get().getClientKey();
@@ -172,9 +180,12 @@ public class TlsSecurityService {
     }
 
     private HttpClientConfig decorateWithCLusterProxyConfig(Long stackId, String cloudPlatform, HttpClientConfig httpClientConfig) {
+        LOGGER.info("Decorate with cluster proxy config");
         if (clusterProxyEnablementService.isClusterProxyApplicable(cloudPlatform)) {
+            LOGGER.info("Cluster proxy is applicable");
             Stack stack = stackService.getById(stackId);
             if (clusterProxyService.useClusterProxyForCommunication(stack)) {
+                LOGGER.info("Cluster proxy for communication");
                 return httpClientConfig.withClusterProxy(clusterProxyConfiguration.getClusterProxyUrl(), stack.getResourceCrn());
             }
         }

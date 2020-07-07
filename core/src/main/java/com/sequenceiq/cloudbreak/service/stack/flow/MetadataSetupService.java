@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceLifeCycle;
@@ -34,6 +36,8 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Service
 public class MetadataSetupService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataSetupService.class);
 
     @Inject
     private ImageService imageService;
@@ -73,6 +77,7 @@ public class MetadataSetupService {
 
     public int saveInstanceMetaData(Stack stack, Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
         try {
+            LOGGER.info("Save instance metadata for stack: {}", stack.getName());
             int newInstances = 0;
             Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
             boolean primaryIgSelected = allInstanceMetadata.stream().anyMatch(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
@@ -114,13 +119,17 @@ public class MetadataSetupService {
                                 primaryIgSelected = true;
                                 instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
                                 instanceMetaDataEntry.setServer(Boolean.TRUE);
+                                LOGGER.info("Primary gateway is not selected, let's select this instance: {}", instanceMetaDataEntry.getInstanceId());
                             } else {
+                                LOGGER.info("Primary gateway was selected");
                                 instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
                             }
                         } else {
+                            LOGGER.info("Instance is a core instance: {}", instanceMetaDataEntry.getInstanceId());
                             instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
                         }
                     } else {
+                        LOGGER.info("Instance group is null, instance will be a core instance: {}", instanceMetaDataEntry.getInstanceId());
                         instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
                     }
                 }
