@@ -35,7 +35,6 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 import net.schmizz.sshj.SSHClient;
@@ -64,7 +63,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
     private static final int SSH_CONNECT_TIMEOUT = 120000;
 
-    private Map<String, InstanceStatus> instancesHealthy = new HashMap<>() {{
+    private static final Map<String, InstanceStatus> INSTANCES_HEALTHY = new HashMap<>() {{
         put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
         put(HostGroupType.IDBROKER.getName(), InstanceStatus.SERVICES_HEALTHY);
     }};
@@ -83,9 +82,6 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
     @Inject
     private BlueprintTestClient blueprintTestClient;
-
-    @Inject
-    private WaitUtil waitUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -135,10 +131,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, instancesHealthy, true);
-                    return testDto;
-                })
+                .awaitForInstance(INSTANCES_HEALTHY)
                 .then((tc, dto, client) -> {
                     for (InstanceGroupV4Response ig : dto.getResponse().getStackV4Response().getInstanceGroups()) {
                         for (InstanceMetaDataV4Response i : ig.getMetadata()) {

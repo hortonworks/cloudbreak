@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
+import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 
 public abstract class AbstractFreeIpaAction<U extends AbstractFreeIpaTestDto> implements Action<U, FreeIpaClient> {
 
@@ -18,14 +18,14 @@ public abstract class AbstractFreeIpaAction<U extends AbstractFreeIpaTestDto> im
     @Override
     public U action(TestContext testContext, U testDto, FreeIpaClient client) throws Exception {
         int retries = 0;
-        while (retries <= testDto.getWaitUtil().getMaxRetry()) {
+        while (retries <= testDto.getFlowUtil().getMaxRetry()) {
             try {
                 return freeIpaAction(testContext, testDto, client);
             } catch (InternalServerErrorException e) {
                 String message = e.getResponse().readEntity(String.class);
                 LOGGER.info("Exception during executing FreeIPA action: ", e);
                 if (message.contains("Flows under operation")) {
-                    waitTillFlowInOperation(testDto.getWaitUtil());
+                    waitTillFlowInOperation(testDto.getFlowUtil());
                     retries++;
                 } else {
                     throw e;
@@ -37,9 +37,9 @@ public abstract class AbstractFreeIpaAction<U extends AbstractFreeIpaTestDto> im
 
     protected abstract U freeIpaAction(TestContext testContext, U testDto, FreeIpaClient client) throws Exception;
 
-    private void waitTillFlowInOperation(WaitUtil waitUtil) {
+    private void waitTillFlowInOperation(FlowUtil flowUtil) {
         try {
-            Thread.sleep(waitUtil.getPollingInterval());
+            Thread.sleep(flowUtil.getPollingInterval());
         } catch (InterruptedException e) {
             LOGGER.warn("Exception has been occurred during wait for flow to end: ", e);
         }

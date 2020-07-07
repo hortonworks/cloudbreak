@@ -25,7 +25,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
-import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxRepairTests extends PreconditionSdxE2ETest {
@@ -41,9 +40,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
-
-    @Inject
-    private WaitUtil waitUtil;
 
     @Inject
     private SshJUtil sshJUtil;
@@ -69,10 +65,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.create(), key(sdx))
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
-                    return testDto;
-                })
+                .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
@@ -80,18 +73,12 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     getCloudFunctionality(tc).deleteInstances(instancesToDelete);
                     return testDto;
                 })
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesDeletedOnProviderSideState(), false);
-                    return testDto;
-                })
+                .awaitForInstance(getSdxInstancesDeletedOnProviderSideState())
                 .when(sdxTestClient.repair(), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
-                    return testDto;
-                })
+                .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
@@ -123,28 +110,19 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.create(), key(sdx))
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
-                    return testDto;
-                })
+                .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
                     List<String> instancesToStop = sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName());
                     expectedIDBrokerVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instancesToStop));
                     getCloudFunctionality(tc).stopInstances(instancesToStop);
                     return testDto;
                 })
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, Map.of(IDBROKER.getName(), InstanceStatus.STOPPED), false);
-                    return testDto;
-                })
+                .awaitForInstance(Map.of(IDBROKER.getName(), InstanceStatus.STOPPED))
                 .when(sdxTestClient.repair(), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
-                    return testDto;
-                })
+                .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName());
                     actualIDBrokerVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instanceIds));
@@ -188,28 +166,19 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.create(), key(sdx))
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
-                    return testDto;
-                })
+                .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
                     List<String> instancesToStop = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     expectedMasterVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instancesToStop));
                     getCloudFunctionality(tc).stopInstances(instancesToStop);
                     return testDto;
                 })
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, Map.of(MASTER.getName(), InstanceStatus.STOPPED), false);
-                    return testDto;
-                })
+                .awaitForInstance(Map.of(MASTER.getName(), InstanceStatus.STOPPED))
                 .when(sdxTestClient.repair(), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
-                    return testDto;
-                })
+                .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     actualMasterVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instanceIds));

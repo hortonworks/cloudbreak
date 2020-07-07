@@ -15,12 +15,12 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
+import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 
 public abstract class AbstractEnvironmentTestDto<R, S, T extends CloudbreakTestDto> extends AbstractTestDto<R, S, T, EnvironmentClient> {
 
     @Inject
-    private WaitUtil waitUtil;
+    private FlowUtil flowUtil;
 
     protected AbstractEnvironmentTestDto(String newId) {
         super(newId);
@@ -89,7 +89,7 @@ public abstract class AbstractEnvironmentTestDto<R, S, T extends CloudbreakTestD
                 .then((T) this, EnvironmentClient.class, assertions.get(assertions.size() - 1), runningParameters.get(runningParameters.size() - 1));
     }
 
-    public WaitUtil getWaitUtil() {
-        return waitUtil;
+    public FlowUtil getFlowUtil() {
+        return flowUtil;
     }
 }
