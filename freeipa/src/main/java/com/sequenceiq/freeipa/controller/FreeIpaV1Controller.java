@@ -190,9 +190,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceObject
-    public void rebootInstances(@ResourceObject @Valid RebootInstancesRequest request) {
+    public OperationStatus rebootInstances(@ResourceObject @Valid RebootInstancesRequest request) {
         String accountId = crnService.getCurrentAccountId();
-        repairInstancesService.rebootInstances(accountId, request);
+        return repairInstancesService.rebootInstances(accountId, request);
     }
 
     @Override

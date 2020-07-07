@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.instance.reboot.action;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,11 +12,21 @@ import com.sequenceiq.freeipa.flow.instance.reboot.RebootState;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 
 public abstract class AbstractRebootAction<P extends Payload>
-        extends AbstractStackAction<RebootState, RebootEvent, RebootContext, P>  {
+        extends AbstractStackAction<RebootState, RebootEvent, RebootContext, P> {
+
+    protected static final String OPERATION_ID = "OPERATION_ID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRebootAction.class);
 
     protected AbstractRebootAction(Class<P> payloadClass) {
         super(payloadClass);
+    }
+
+    protected void setOperationId(Map<Object, Object> variables, String operationId) {
+        variables.put(OPERATION_ID, operationId);
+    }
+
+    protected String getOperationId(Map<Object, Object> variables) {
+        return (String) variables.get(OPERATION_ID);
     }
 }

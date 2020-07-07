@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +31,8 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -39,9 +42,11 @@ import com.sequenceiq.freeipa.flow.instance.InstanceEvent;
 import com.sequenceiq.freeipa.flow.instance.InstanceFailureEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootContext;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent;
+import com.sequenceiq.freeipa.flow.instance.reboot.RebootInstanceEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootService;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootState;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -70,16 +75,17 @@ public class RebootActions {
 
     @Bean(name = "REBOOT_STATE")
     public Action<?, ?> rebootAction() {
-        return new AbstractRebootAction<>(InstanceEvent.class) {
+        return new AbstractRebootAction<>(RebootInstanceEvent.class) {
             @Override
-            protected void doExecute(RebootContext context, InstanceEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(RebootContext context, RebootInstanceEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Starting reboot for {}", context.getInstanceIds());
+                setOperationId(variables, payload.getOperationId());
                 rebootService.startInstanceReboot(context);
                 sendEvent(context);
             }
 
             @Override
-            protected Object getFailurePayload(InstanceEvent payload, Optional<RebootContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(RebootInstanceEvent payload, Optional<RebootContext> flowContext, Exception ex) {
                 return new InstanceFailureEvent(payload.getResourceId(), ex, payload.getInstanceIds());
             }
 
@@ -92,7 +98,7 @@ public class RebootActions {
 
             @Override
             protected RebootContext createFlowContext(FlowParameters flowParameters, StateContext<RebootState, RebootEvent> stateContext,
-                    InstanceEvent payload) {
+                    RebootInstanceEvent payload) {
                 Long stackId = payload.getResourceId();
                 Stack stack = stackService.getStackById(stackId);
                 List<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stackId).stream()
@@ -112,10 +118,17 @@ public class RebootActions {
     @Bean(name = "REBOOT_FINISHED_STATE")
     public Action<?, ?> rebootFinishedAction() {
         return new AbstractRebootAction<>(RebootInstancesResult.class) {
+            @Inject
+            private OperationService operationService;
+
             @Override
             protected void doExecute(RebootContext context, RebootInstancesResult payload, Map<Object, Object> variables) {
                 rebootService.finishInstanceReboot(context, payload);
                 LOGGER.info("Finished rebooting {}.", context.getInstanceIds());
+                Stack stack = context.getStack();
+                SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
+                successDetails.getAdditionalDetails().put("InstanceIds", context.getInstanceIdList());
+                operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(successDetails), Collections.emptyList());
                 sendEvent(context);
             }
 
@@ -147,10 +160,18 @@ public class RebootActions {
     @Bean(name = "REBOOT_FAILED_STATE")
     public Action<?, ?> rebootFailureAction() {
         return new AbstractRebootAction<>(InstanceFailureEvent.class) {
+            @Inject
+            private OperationService operationService;
+
             @Override
             protected void doExecute(RebootContext context, InstanceFailureEvent payload, Map<Object, Object> variables) {
                 rebootService.handleInstanceRebootError(context);
-                LOGGER.error("Rebooting failed for {}.", context.getInstanceIds());
+                String message = String.format("Rebooting failed for {}.", context.getInstanceIds());
+                LOGGER.error(message);
+                Stack stack = context.getStack();
+                SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
+                FailureDetails failureDetails = new FailureDetails(stack.getEnvironmentCrn(), message);
+                operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 sendEvent(context, new InstanceEvent(RebootEvent.REBOOT_FAIL_HANDLED_EVENT.event(), context.getStack().getId(), context.getInstanceIdList()));
             }
 

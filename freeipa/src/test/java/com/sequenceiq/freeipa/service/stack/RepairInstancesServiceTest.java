@@ -95,6 +95,7 @@ class RepairInstancesServiceTest {
     public static void init() {
         stack1 = new Stack();
         stack1.setResourceCrn(ENVIRONMENT_ID1);
+        stack1.setEnvironmentCrn(ENVIRONMENT_ID1);
         InstanceGroup instanceGroup = new InstanceGroup();
         stack1.getInstanceGroups().add(instanceGroup);
         instanceGroup.setInstanceGroupType(InstanceGroupType.MASTER);
@@ -105,6 +106,7 @@ class RepairInstancesServiceTest {
 
         stack2 = new Stack();
         stack2.setResourceCrn(ENVIRONMENT_ID2);
+        stack2.setEnvironmentCrn(ENVIRONMENT_ID2);
         instanceGroup = new InstanceGroup();
         stack2.getInstanceGroups().add(instanceGroup);
         instanceGroup.setInstanceGroupType(InstanceGroupType.MASTER);
@@ -302,11 +304,14 @@ class RepairInstancesServiceTest {
 
     @Test
     public void testBasicSuccessReboot() throws Exception {
+        OperationStatus operationStatus = new OperationStatus();
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack1);
         Mockito.when(healthDetailsService.getHealthDetails(any(), any())).thenReturn(getMockDetails1());
+        Mockito.when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
+        Mockito.when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
         RebootInstancesRequest rebootInstancesRequest = new RebootInstancesRequest();
         rebootInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
-        underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest);
+        assertEquals(operationStatus, underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest));
 
         ArgumentCaptor<InstanceEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(InstanceEvent.class);
         verify(flowManager, times(1)).notify(eq(REBOOT_EVENT.event()), terminationEventArgumentCaptor.capture());
@@ -314,12 +319,15 @@ class RepairInstancesServiceTest {
 
     @Test
     public void testInstancesSuccessReboot() throws Exception {
+        OperationStatus operationStatus = new OperationStatus();
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack1);
         Mockito.when(healthDetailsService.getHealthDetails(any(), any())).thenReturn(getMockDetails1());
+        Mockito.when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
+        Mockito.when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
         RebootInstancesRequest rebootInstancesRequest = new RebootInstancesRequest();
         rebootInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
         rebootInstancesRequest.setInstanceIds(Arrays.asList("instance_1"));
-        underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest);
+        assertEquals(operationStatus, underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest));
 
         ArgumentCaptor<InstanceEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(InstanceEvent.class);
         verify(flowManager, times(1)).notify(eq(REBOOT_EVENT.event()), terminationEventArgumentCaptor.capture());
@@ -340,12 +348,15 @@ class RepairInstancesServiceTest {
 
     @Test
     public void testForceInstancesSuccessReboot() throws Exception {
+        OperationStatus operationStatus = new OperationStatus();
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack1);
+        Mockito.when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
+        Mockito.when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
         RebootInstancesRequest rebootInstancesRequest = new RebootInstancesRequest();
         rebootInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
         rebootInstancesRequest.setInstanceIds(Arrays.asList("instance_1"));
         rebootInstancesRequest.setForceReboot(true);
-        underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest);
+        assertEquals(operationStatus, underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest));
 
         ArgumentCaptor<InstanceEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(InstanceEvent.class);
         verify(flowManager, times(1)).notify(eq(REBOOT_EVENT.event()), terminationEventArgumentCaptor.capture());
@@ -368,22 +379,28 @@ class RepairInstancesServiceTest {
 
     @Test
     public void testNonForceMultiInstanceReboot() throws Exception {
+        OperationStatus operationStatus = new OperationStatus();
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack2);
         Mockito.when(healthDetailsService.getHealthDetails(any(), any())).thenReturn(getMockDetails2());
+        Mockito.when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
+        Mockito.when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
         RebootInstancesRequest rebootInstancesRequest = new RebootInstancesRequest();
         rebootInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID2);
-        underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest);
+        assertEquals(operationStatus, underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest));
         ArgumentCaptor<InstanceEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(InstanceEvent.class);
         verify(flowManager, times(1)).notify(eq(REBOOT_EVENT.event()), terminationEventArgumentCaptor.capture());
     }
 
     @Test
     public void testForceMultiInstanceReboot() throws Exception {
+        OperationStatus operationStatus = new OperationStatus();
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack2);
+        Mockito.when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
+        Mockito.when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
         RebootInstancesRequest rebootInstancesRequest = new RebootInstancesRequest();
         rebootInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID2);
         rebootInstancesRequest.setForceReboot(true);
-        underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest);
+        assertEquals(operationStatus, underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest));
         ArgumentCaptor<InstanceEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(InstanceEvent.class);
         verify(flowManager, times(1)).notify(eq(REBOOT_EVENT.event()), terminationEventArgumentCaptor.capture());
     }

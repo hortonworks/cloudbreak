@@ -6,6 +6,7 @@ public enum OperationType {
     USER_SYNC,
     SET_PASSWORD,
     CLEANUP,
+    REBOOT,
     REPAIR,
     DOWNSCALE,
     UPSCALE;
