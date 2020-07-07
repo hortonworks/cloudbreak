@@ -167,6 +167,12 @@
         "roleConfigGroups": [
           {
             "base": true,
+            "configs": [
+              {
+                "name": "solr_https_port",
+                "value": "8985"
+              }
+            ],
             "refName": "solr-SOLR_SERVER-BASE",
             "roleType": "SOLR_SERVER"
           }
