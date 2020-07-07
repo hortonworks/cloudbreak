@@ -49,4 +49,16 @@ public class ClusterProxyServiceAvailabilityCheckerTest {
         assertFalse(ClusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack));
     }
 
+    @Test
+    public void testAppVersionIsBlank() {
+        Stack stack = new Stack();
+        assertFalse(ClusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack));
+
+        stack.setAppVersion("");
+        assertFalse(ClusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack));
+
+        stack.setAppVersion(" ");
+        assertFalse(ClusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack));
+    }
+
 }
