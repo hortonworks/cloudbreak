@@ -10,7 +10,7 @@ public final class MonitorUpdateRate {
     /**
      * Every 30 seconds.
      */
-    public static final String METRIC_UPDATE_RATE_CRON = "0/30 * * * * ?";
+    public static final String EVERY_30_SECS_RATE_CRON = "0/30 * * * * ?";
 
     /**
      * Every 10 seconds.

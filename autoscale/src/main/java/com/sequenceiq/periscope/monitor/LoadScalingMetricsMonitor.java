@@ -9,25 +9,25 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
-import com.sequenceiq.periscope.monitor.evaluator.load.YarnAverageLoadEvaluator;
+import com.sequenceiq.periscope.monitor.evaluator.load.YarnScalingMetricsCollector;
 
 @Component
 @ConditionalOnProperty(prefix = "periscope.enabledAutoscaleMonitors.load-monitor", name = "enabled", havingValue = "true")
-public class LoadMonitor extends ClusterMonitor {
+public class LoadScalingMetricsMonitor extends ClusterMonitor {
 
     @Override
     public String getIdentifier() {
-        return "load-monitor";
+        return "load-scaling-metrics-monitor";
     }
 
     @Override
     public String getTriggerExpression() {
-        return MonitorUpdateRate.EVERY_TWO_MIN_RATE_CRON;
+        return MonitorUpdateRate.EVERY_30_SECS_RATE_CRON;
     }
 
     @Override
     public Class<? extends EvaluatorExecutor> getEvaluatorType(Cluster cluster) {
-        return YarnAverageLoadEvaluator.class;
+        return YarnScalingMetricsCollector.class;
     }
 
     @Override

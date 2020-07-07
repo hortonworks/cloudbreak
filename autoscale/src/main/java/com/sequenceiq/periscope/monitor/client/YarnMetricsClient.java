@@ -1,6 +1,10 @@
 package com.sequenceiq.periscope.monitor.client;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -37,6 +41,8 @@ public class YarnMetricsClient {
 
     private static final String DEFAULT_UPSCALE_RESOURCE_TYPE = "memory-mb";
 
+    private static final Integer UNDEFINED_DOWNSCALE_LIMIT = 10000;
+
     @Inject
     private TlsSecurityService tlsSecurityService;
 
@@ -54,7 +60,7 @@ public class YarnMetricsClient {
             String hostGroup) throws Exception {
         TlsConfiguration tlsConfig = tlsSecurityService.getTls(cluster.getId());
         String clusterProxyUrl = clusterProxyConfigurationService.getClusterProxyUrl()
-                .orElseThrow(() ->  new RuntimeException(String.format("ClusterProxy Not Configured for Cluster {}, " +
+                .orElseThrow(() -> new RuntimeException(String.format("ClusterProxy Not Configured for Cluster {}, " +
                         " cannot query YARN Metrics.", cluster.getStackCrn())));
 
         Client restClient = RestClientUtil.createClient(tlsConfig.getServerCert(),
@@ -81,4 +87,27 @@ public class YarnMetricsClient {
         return yarnResponse;
     }
 
+    public List<String> getYarnRecommendedDecommissionHosts(YarnScalingServiceV1Response yarnResponse,
+            Map<String, String> hostFqdnsToInstanceId, Optional<Integer> maxAllowedDownScale) {
+
+        return yarnResponse.getScaleDownCandidates().orElse(List.of()).stream()
+                .sorted(Comparator.comparingInt(YarnScalingServiceV1Response.DecommissionCandidate::getAmCount))
+                .map(YarnScalingServiceV1Response.DecommissionCandidate::getNodeId)
+                .map(nodeFqdn -> nodeFqdn.split(":")[0])
+                .filter(s -> hostFqdnsToInstanceId.keySet().contains(s))
+                .map(nodeFqdn -> hostFqdnsToInstanceId.get(nodeFqdn))
+                .limit(maxAllowedDownScale.orElse(UNDEFINED_DOWNSCALE_LIMIT))
+                .collect(Collectors.toList());
+    }
+
+    public Optional<Integer> getYarnRecommendedScaleUpCount(YarnScalingServiceV1Response yarnResponse, String policyHostGroup,
+            Integer maxAllowedHostGroupSize) {
+
+        return yarnResponse.getScaleUpCandidates()
+                .map(YarnScalingServiceV1Response.NewNodeManagerCandidates::getCandidates).orElse(List.of()).stream()
+                .filter(candidate -> candidate.getModelName().equalsIgnoreCase(policyHostGroup))
+                .findFirst()
+                .map(YarnScalingServiceV1Response.NewNodeManagerCandidates.Candidate::getCount)
+                .map(yarnCount -> Math.min(yarnCount, maxAllowedHostGroupSize));
+    }
 }
