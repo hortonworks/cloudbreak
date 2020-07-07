@@ -31,7 +31,7 @@ public class HistoryController implements HistoryEndpoint {
 
     @Override
     public List<AutoscaleClusterHistoryResponse> getHistory(String stackCrn) {
-        return clusterService.findOneByStackCrnAndWorkspaceId(stackCrn, restRequestThreadLocalService.getRequestedWorkspaceId())
+        return clusterService.findOneByStackCrnAndTenant(stackCrn, restRequestThreadLocalService.getCloudbreakTenant())
                 .map(cluster -> historyConverter.convertAllToJson(historyService.getHistory(cluster.getId())))
                 .orElseThrow(NotFoundException.notFound("cluster", stackCrn));
     }
