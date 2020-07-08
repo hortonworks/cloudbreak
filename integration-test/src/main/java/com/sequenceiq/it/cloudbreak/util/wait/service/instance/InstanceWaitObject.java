@@ -6,11 +6,9 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ORCHESTRATION_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.TERMINATED;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.NotFoundException;
@@ -18,7 +16,6 @@ import javax.ws.rs.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -30,22 +27,29 @@ public class InstanceWaitObject {
 
     private final String name;
 
-    private final Map<String, InstanceStatus> desiredStatuses;
+    private final String hostGroup;
+
+    private final InstanceStatus desiredStatus;
 
     private final TestContext testContext;
 
-    public InstanceWaitObject(TestContext testContext, String name, Map<String, InstanceStatus> desiredStatuses) {
+    public InstanceWaitObject(TestContext testContext, String name, String hostGroup, InstanceStatus desiredStatus) {
         this.testContext = testContext;
         this.name = name;
-        this.desiredStatuses = desiredStatuses;
+        this.hostGroup = hostGroup;
+        this.desiredStatus = desiredStatus;
     }
 
     public String getName() {
         return name;
     }
 
-    public Map<String, InstanceStatus> getDesiredStatuses() {
-        return desiredStatuses;
+    public String getHostGroup() {
+        return hostGroup;
+    }
+
+    public InstanceStatus getDesiredStatus() {
+        return desiredStatus;
     }
 
     public List<InstanceGroupV4Response> getInstanceGroups() {
@@ -65,13 +69,18 @@ public class InstanceWaitObject {
         return failedStatuses.contains(instanceStatus);
     }
 
-    public boolean isFailed(Map<String, InstanceStatus> instanceStatuses) {
-        Set<InstanceStatus> failedStatuses = Set.of(FAILED, ORCHESTRATION_FAILED, SERVICES_UNHEALTHY, DECOMMISSION_FAILED);
-        return !Sets.intersection(Set.of(instanceStatuses.values()), failedStatuses).isEmpty();
-    }
-
     public boolean isDeleted(InstanceStatus instanceStatus) {
         Set<InstanceStatus> deletedStatuses = Set.of(DELETED_ON_PROVIDER_SIDE, DELETED_BY_PROVIDER, DECOMMISSIONED, TERMINATED);
         return deletedStatuses.contains(instanceStatus);
+    }
+
+    public boolean isDeleteFailed(InstanceStatus instanceStatus) {
+        Set<InstanceStatus> failedStatuses = Set.of(FAILED, DECOMMISSION_FAILED);
+        return failedStatuses.contains(instanceStatus);
+    }
+
+    public boolean isNotDeleted(InstanceStatus instanceStatus) {
+        Set<InstanceStatus> deletedStatuses = Set.of(DELETED_ON_PROVIDER_SIDE, DELETED_BY_PROVIDER, DECOMMISSIONED, TERMINATED);
+        return !deletedStatuses.contains(instanceStatus);
     }
 }

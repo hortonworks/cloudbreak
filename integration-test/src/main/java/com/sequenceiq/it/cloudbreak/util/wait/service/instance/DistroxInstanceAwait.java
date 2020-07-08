@@ -1,10 +1,6 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.instance;
 
-import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
-import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
-
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -27,16 +23,6 @@ public class DistroxInstanceAwait implements Await<DistroXTestDto, InstanceStatu
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroxInstanceAwait.class);
 
-    private static final Map<String, InstanceStatus> DELETED_ON_PROVIDER_SIDE = new HashMap<>() {{
-        put(MASTER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
-        put(IDBROKER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
-    }};
-
-    private static final Map<String, InstanceStatus> ORCHESTRATION_FAILED = new HashMap<>() {{
-        put(MASTER.getName(), InstanceStatus.ORCHESTRATION_FAILED);
-        put(IDBROKER.getName(), InstanceStatus.ORCHESTRATION_FAILED);
-    }};
-
     @Override
     public DistroXTestDto await(DistroXTestDto entity, Map<String, InstanceStatus> desiredStatuses, TestContext testContext,
             RunningParameter runningParameter, Duration pollingInterval, int maxRetry) {
@@ -46,16 +32,18 @@ public class DistroxInstanceAwait implements Await<DistroXTestDto, InstanceStatu
             }
             Log.await(LOGGER, String.format("%s for %s", entity.getName(), desiredStatuses));
             String name = entity.getName();
-            if (desiredStatuses.equals(DELETED_ON_PROVIDER_SIDE)) {
-                waitForDistroxInstanceStatuses(new InstanceTerminationChecker<>(), name, testContext, desiredStatuses,
-                        pollingInterval, maxRetry);
-            } else if (desiredStatuses.equals(ORCHESTRATION_FAILED)) {
-                waitForDistroxInstanceStatuses(new InstanceFailedChecker<>(), name, testContext, desiredStatuses,
-                        pollingInterval, maxRetry);
-            } else {
-                waitForDistroxInstanceStatuses(new InstanceOperationChecker<>(), name, testContext, desiredStatuses,
-                        pollingInterval, maxRetry);
-            }
+
+            desiredStatuses.forEach((hostGroup, instanceStatus) -> {
+                InstanceWaitObject waitObject = new InstanceWaitObject(testContext, name, hostGroup, instanceStatus);
+
+                if (waitObject.isDeleted(instanceStatus)) {
+                    waitForDistroxInstanceStatus(new InstanceTerminationChecker<>(), testContext, waitObject, pollingInterval, maxRetry);
+                } else if (waitObject.isFailed(instanceStatus)) {
+                    waitForDistroxInstanceStatus(new InstanceFailedChecker<>(), testContext, waitObject, pollingInterval, maxRetry);
+                } else {
+                    waitForDistroxInstanceStatus(new InstanceOperationChecker<>(), testContext, waitObject, pollingInterval, maxRetry);
+                }
+            });
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e),
@@ -68,9 +56,8 @@ public class DistroxInstanceAwait implements Await<DistroXTestDto, InstanceStatu
         return entity;
     }
 
-    private Result<WaitResult, Exception> waitForDistroxInstanceStatuses(ExceptionChecker<InstanceWaitObject> statusChecker,
-            String name, TestContext testContext, Map<String, InstanceStatus> desiredStatuses, Duration pollingInterval, int maxRetry) {
-        return testContext.getInstanceWaitService().waitObject(statusChecker, new InstanceWaitObject(testContext, name, desiredStatuses),
-                testContext, pollingInterval, maxRetry, 1);
+    private Result<WaitResult, Exception> waitForDistroxInstanceStatus(ExceptionChecker<InstanceWaitObject> statusChecker, TestContext testContext,
+            InstanceWaitObject waitObject, Duration pollingInterval, int maxRetry) {
+        return testContext.getInstanceWaitService().waitObject(statusChecker, waitObject, testContext, pollingInterval, maxRetry, 1);
     }
 }
