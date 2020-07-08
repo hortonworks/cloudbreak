@@ -82,8 +82,8 @@ services:
       cbreak_default: {}
     volumes:
       - ./apidefinitions:/json
-    command: bash -c "for f in /json/cb*.json ; do echo check to $${f} ; swagger-diff -i $${f} /json/cb.json ; done;"
-    image: docker-private.infra.cloudera.com/cloudera_thirdparty/swagger/swagger-diff:1.0.0
+    command: /json/check.sh
+    image: docker-private.infra.cloudera.com/cloudera_thirdparty/swagger/swagger-diff:1.0.1
   swagger-validation:
     networks:
       cbreak_default: {}

@@ -54,7 +54,7 @@ fetch-secrets-docker:
 	mcr.microsoft.com/azure-cli /bin/bash -c 'cd /tmp/ && ./scripts/fetch-secrets.sh'
 
 docker-compose:
-	./scripts/docker-compose.sh
+	CB_VERSION=$(CB_VERSION) ./scripts/docker-compose.sh
 
 check-results:
 	./scripts/check-results.sh
