@@ -8,7 +8,6 @@ import java.time.temporal.ChronoUnit;
 import javax.inject.Inject;
 
 import org.testng.ITestContext;
-import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.assertion.audit.AuditGrpcServiceAssertion;
@@ -52,8 +51,6 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
     @Inject
     private AuditGrpcServiceAssertion auditGrpcServiceAssertion;
 
-    //CB-7294
-    @Ignore
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running DistroX cluster",
