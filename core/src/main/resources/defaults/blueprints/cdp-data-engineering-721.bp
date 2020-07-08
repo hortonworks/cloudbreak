@@ -82,7 +82,7 @@
         "serviceConfigs": [
           {
             "name": "yarn_admin_acl",
-            "value": "yarn,hive,hdfs"
+            "value": "yarn,hive,hdfs,mapred"
           }
         ],
         "roleConfigGroups": [
