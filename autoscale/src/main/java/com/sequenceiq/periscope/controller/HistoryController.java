@@ -31,14 +31,14 @@ public class HistoryController implements HistoryEndpoint {
 
     @Override
     public List<AutoscaleClusterHistoryResponse> getHistoryByCrn(String stackCrn, Integer historyCount) {
-        return clusterService.findOneByStackCrnAndWorkspaceId(stackCrn, restRequestThreadLocalService.getRequestedWorkspaceId())
+        return clusterService.findOneByStackCrnAndTenant(stackCrn, restRequestThreadLocalService.getCloudbreakTenant())
                 .map(cluster -> historyConverter.convertAllToJson(historyService.getHistory(cluster.getId(), historyCount)))
                 .orElseThrow(NotFoundException.notFound("cluster", stackCrn));
     }
 
     @Override
     public List<AutoscaleClusterHistoryResponse> getHistoryByName(String stackName, Integer historyCount) {
-        return clusterService.findOneByStackNameAndWorkspaceId(stackName, restRequestThreadLocalService.getRequestedWorkspaceId())
+        return clusterService.findOneByStackNameAndTenant(stackName, restRequestThreadLocalService.getCloudbreakTenant())
                 .map(cluster -> historyConverter.convertAllToJson(historyService.getHistory(cluster.getId(), historyCount)))
                 .orElseThrow(NotFoundException.notFound("cluster", stackName));
     }
