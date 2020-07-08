@@ -50,7 +50,7 @@ public class HistoryControllerTest {
 
     private String testClusterName = "testCluster";
 
-    private Long workspaceId = 100L;
+    private String tenant = "testTenant";
 
     private Long clusterId = 100L;
 
@@ -59,12 +59,12 @@ public class HistoryControllerTest {
     @Before
     public void setUp() {
         cluster.setId(clusterId);
+        when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
     }
 
     @Test
     public void testGetHistoryWhenClusterNotFound() {
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByStackCrnAndWorkspaceId(testClusterCrn, workspaceId)).thenReturn(Optional.empty());
+        when(clusterService.findOneByStackCrnAndTenant(testClusterCrn, tenant)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage("cluster 'crn:cdp:iam:us-west-1:%s:cluster:mockuser@cloudera.com' not found.");
@@ -74,8 +74,7 @@ public class HistoryControllerTest {
 
     @Test
     public void testGetHistoryWhenNoHistory() {
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByStackCrnAndWorkspaceId(testClusterCrn, workspaceId)).thenReturn(Optional.of(cluster));
+        when(clusterService.findOneByStackCrnAndTenant(testClusterCrn, tenant)).thenReturn(Optional.of(cluster));
         when(historyService.getHistory(clusterId, 10)).thenReturn(List.of());
 
         List<AutoscaleClusterHistoryResponse> historyResponses = underTest.getHistoryByCrn(testClusterCrn, 10);
@@ -85,8 +84,8 @@ public class HistoryControllerTest {
     @Test
     public void testGetHistoryByCrnWhenHistoryFound() {
         List<History> mockHistoryResponses = List.of(new History(), new History());
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByStackCrnAndWorkspaceId(testClusterCrn, workspaceId)).thenReturn(Optional.of(cluster));
+
+        when(clusterService.findOneByStackCrnAndTenant(testClusterCrn, tenant)).thenReturn(Optional.of(cluster));
         when(historyService.getHistory(clusterId, 10)).thenReturn(mockHistoryResponses);
         when(historyConverter.convertAllToJson(any(List.class))).thenCallRealMethod();
 
@@ -97,8 +96,7 @@ public class HistoryControllerTest {
     @Test
     public void testGetHistoryByNameWhenHistoryFound() {
         List<History> mockHistoryResponses = List.of(new History(), new History());
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByStackNameAndWorkspaceId(testClusterName, workspaceId)).thenReturn(Optional.of(cluster));
+        when(clusterService.findOneByStackNameAndTenant(testClusterName, tenant)).thenReturn(Optional.of(cluster));
         when(historyService.getHistory(clusterId, 10)).thenReturn(mockHistoryResponses);
         when(historyConverter.convertAllToJson(any(List.class))).thenCallRealMethod();
 

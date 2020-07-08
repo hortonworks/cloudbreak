@@ -51,7 +51,7 @@ public class AutoScaleClusterCommonService {
     }
 
     public List<Cluster> getDistroXClusters() {
-        return clusterService.findDistroXByWorkspace(restRequestThreadLocalService.getRequestedWorkspaceId());
+        return clusterService.findDistroXByTenant(restRequestThreadLocalService.getCloudbreakTenant());
     }
 
     public Cluster getCluster(Long clusterId) {
@@ -111,9 +111,9 @@ public class AutoScaleClusterCommonService {
 
     protected Cluster getClusterByCrnOrName(NameOrCrn nameOrCrn) {
         return nameOrCrn.hasName() ?
-                clusterService.findOneByStackNameAndWorkspaceId(nameOrCrn.getName(), restRequestThreadLocalService.getRequestedWorkspaceId())
+                clusterService.findOneByStackNameAndTenant(nameOrCrn.getName(), restRequestThreadLocalService.getCloudbreakTenant())
                         .orElseGet(() -> syncCBClusterByName(nameOrCrn.getName())) :
-                clusterService.findOneByStackCrnAndWorkspaceId(nameOrCrn.getCrn(), restRequestThreadLocalService.getRequestedWorkspaceId())
+                clusterService.findOneByStackCrnAndTenant(nameOrCrn.getCrn(), restRequestThreadLocalService.getCloudbreakTenant())
                         .orElseGet(() -> syncCBClusterByCrn(nameOrCrn.getCrn()));
     }
 

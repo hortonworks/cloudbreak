@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -46,17 +45,16 @@ public class AutoscaleClusterCommonServiceTest {
     @Mock
     private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
 
-    private Long workspaceId = 10L;
+    private String tenant = "testTenant";
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
     }
 
     @Test
     public void testGetClusterByCRNWhenPresentInDB() {
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByStackCrnAndWorkspaceId(TEST_CLUSTER_CRN, workspaceId)).thenReturn(getACluster());
+        when(clusterService.findOneByStackCrnAndTenant(TEST_CLUSTER_CRN, tenant)).thenReturn(getACluster());
 
         underTest.getClusterByCrnOrName(NameOrCrn.ofCrn(TEST_CLUSTER_CRN));
         verify(cloudbreakCommunicator, never()).getAutoscaleClusterByCrn(TEST_CLUSTER_CRN);
@@ -65,8 +63,7 @@ public class AutoscaleClusterCommonServiceTest {
 
     @Test
     public void testGetClusterByNameWhenPresentInDB() {
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByStackNameAndWorkspaceId(TEST_CLUSTER_NAME, workspaceId)).thenReturn(getACluster());
+        when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(getACluster());
 
         underTest.getClusterByCrnOrName(NameOrCrn.ofName(TEST_CLUSTER_NAME));
         verify(cloudbreakCommunicator, never()).getAutoscaleClusterByName(TEST_CLUSTER_NAME);
@@ -76,8 +73,7 @@ public class AutoscaleClusterCommonServiceTest {
     @Test
     public void testGetClusterByCRNWhenNotPresentInDBThenCBSyncByCrn() {
         AutoscaleStackV4Response autoscaleStackV4Response = mock(AutoscaleStackV4Response.class);
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByStackCrnAndWorkspaceId(TEST_CLUSTER_CRN, workspaceId)).thenReturn(Optional.empty());
+        when(clusterService.findOneByStackCrnAndTenant(TEST_CLUSTER_CRN, tenant)).thenReturn(Optional.empty());
         when(cloudbreakCommunicator.getAutoscaleClusterByCrn(TEST_CLUSTER_CRN)).thenReturn(autoscaleStackV4Response);
         when(autoscaleStackV4Response.getStackType()).thenReturn(StackType.WORKLOAD);
         when(clusterService.create(autoscaleStackV4Response)).thenReturn(getACluster().get());
@@ -90,8 +86,7 @@ public class AutoscaleClusterCommonServiceTest {
     @Test
     public void testGetClusterByNameWhenNotPresentInDBThenCBSyncByName() {
         AutoscaleStackV4Response autoscaleStackV4Response = mock(AutoscaleStackV4Response.class);
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByStackNameAndWorkspaceId(TEST_CLUSTER_NAME, workspaceId)).thenReturn(Optional.empty());
+        when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(Optional.empty());
         when(cloudbreakCommunicator.getAutoscaleClusterByName(TEST_CLUSTER_NAME)).thenReturn(autoscaleStackV4Response);
         when(autoscaleStackV4Response.getStackType()).thenReturn(StackType.WORKLOAD);
         when(clusterService.create(autoscaleStackV4Response)).thenReturn(getACluster().get());
@@ -103,8 +98,7 @@ public class AutoscaleClusterCommonServiceTest {
 
     @Test(expected = NotFoundException.class)
     public void testGetClusterByNameWhenNotFound() {
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByStackNameAndWorkspaceId(TEST_CLUSTER_NAME, workspaceId)).thenReturn(Optional.empty());
+        when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(Optional.empty());
         when(cloudbreakCommunicator.getAutoscaleClusterByName(TEST_CLUSTER_NAME)).thenThrow(NotFoundException.class);
 
         underTest.getClusterByCrnOrName(NameOrCrn.ofName(TEST_CLUSTER_NAME));
@@ -112,8 +106,7 @@ public class AutoscaleClusterCommonServiceTest {
 
     @Test(expected = NotFoundException.class)
     public void testGetClusterByCrnWhenNotFound() {
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(workspaceId);
-        when(clusterService.findOneByStackCrnAndWorkspaceId(TEST_CLUSTER_CRN, workspaceId)).thenReturn(Optional.empty());
+        when(clusterService.findOneByStackCrnAndTenant(TEST_CLUSTER_CRN, tenant)).thenReturn(Optional.empty());
         when(cloudbreakCommunicator.getAutoscaleClusterByCrn(TEST_CLUSTER_CRN)).thenThrow(NotFoundException.class);
 
         underTest.getClusterByCrnOrName(NameOrCrn.ofCrn(TEST_CLUSTER_CRN));

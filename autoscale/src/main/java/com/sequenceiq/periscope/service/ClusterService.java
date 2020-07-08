@@ -146,24 +146,24 @@ public class ClusterService implements ResourceBasedCrnProvider {
         return clusterRepository.findByUserId(user.getUserId());
     }
 
-    public List<Cluster> findDistroXByWorkspace(Long workspaceId) {
-        return clusterRepository.findByWorkspaceIdAndStackType(workspaceId, StackType.WORKLOAD);
+    public List<Cluster> findDistroXByTenant(String tenant) {
+        return clusterRepository.findByTenantAndStackType(tenant, StackType.WORKLOAD);
     }
 
     public Cluster findOneByStackId(Long stackId) {
         return clusterRepository.findByStackId(stackId);
     }
 
-    public Optional<Cluster> findOneByStackCrnAndWorkspaceId(String stackCrn, Long workspaceId) {
-        return  clusterRepository.findByStackCrnAndWorkspaceId(stackCrn, workspaceId);
+    public Optional<Cluster> findOneByStackCrnAndTenant(String stackCrn, String tenant) {
+        return  clusterRepository.findByStackCrnAndTenant(stackCrn, tenant);
     }
 
-    public Optional<Cluster> findOneByStackNameAndWorkspaceId(String stackName, Long workspaceId) {
-        return  clusterRepository.findByStackNameAndWorkspaceId(stackName, workspaceId);
+    public Optional<Cluster> findOneByStackNameAndTenant(String stackName, String tenant) {
+        return  clusterRepository.findByStackNameAndTenant(stackName, tenant);
     }
 
-    public Optional<Cluster> findOneByClusterIdAndWorkspaceId(Long clusterId, Long workspaceId) {
-        return  clusterRepository.findByClusterIdAndWorkspaceId(clusterId, workspaceId);
+    public Optional<Cluster> findOneByClusterIdAndTenant(Long clusterId, String tenant) {
+        return  clusterRepository.findByClusterIdAndTenant(clusterId, tenant);
     }
 
     public Cluster save(Cluster cluster) {
