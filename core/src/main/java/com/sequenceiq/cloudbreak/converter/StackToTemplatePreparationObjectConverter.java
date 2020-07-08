@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -218,8 +219,8 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
         }
     }
 
-    private Map<String, String> getStackUserDefinedTags(Stack source) throws IOException {
-        Map<String, String> userDefinedTags = new HashMap<>();
+    private Tags getStackUserDefinedTags(Stack source) throws IOException {
+        Tags userDefinedTags = new Tags();
         if (source.getTags() != null && source.getTags().get(StackTags.class) != null) {
             userDefinedTags = source.getTags().get(StackTags.class).getUserDefinedTags();
         }

@@ -126,11 +126,11 @@ public class AwsStackRequestHelper {
     }
 
     private Parameter getStackOwnerFromStack(AuthenticatedContext ac, CloudStack stack, String key, String referenceName) {
-        return getStackOwner(ac, stack.getTags().get(key), referenceName);
+        return getStackOwner(ac, stack.getTags().getTagValue(key), referenceName);
     }
 
     private Parameter getStackOwnerFromDatabase(AuthenticatedContext ac, DatabaseStack stack, String key, String referenceName) {
-        return getStackOwner(ac, stack.getTags().get(key), referenceName);
+        return getStackOwner(ac, stack.getTags().getTagValue(key), referenceName);
     }
 
     private Parameter getStackOwner(AuthenticatedContext ac, String tagValue, String referenceName) {

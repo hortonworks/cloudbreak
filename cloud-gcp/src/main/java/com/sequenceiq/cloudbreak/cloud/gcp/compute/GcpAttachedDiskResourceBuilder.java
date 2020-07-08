@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -125,7 +126,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
             for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
-                Disk disk = createDisk(projectId, volume, cloudStack.getTags(), volumeSetAttributes);
+                Disk disk = createDisk(projectId, volume, Tags.getAll(cloudStack.getTags()), volumeSetAttributes);
 
                 gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
                 Future<Void> submit = intermediateBuilderExecutor.submit(() -> {

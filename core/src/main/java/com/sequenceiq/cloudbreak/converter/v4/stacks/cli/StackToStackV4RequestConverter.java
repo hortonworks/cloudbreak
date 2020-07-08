@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.common.api.tag.request.TagsRequest;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 
@@ -169,7 +170,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
                     TagsV4Request tags = new TagsV4Request();
                     tags.setApplication(null);
                     tags.setDefaults(null);
-                    tags.setUserDefined(stackTags.getUserDefinedTags());
+                    tags.setUserDefined(new TagsRequest(stackTags.getUserDefinedTags()));
                     stackV2Request.setTags(tags);
                 }
             }

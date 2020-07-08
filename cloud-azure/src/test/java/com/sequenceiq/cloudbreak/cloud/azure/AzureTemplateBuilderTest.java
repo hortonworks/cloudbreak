@@ -38,7 +38,6 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureAcceleratedNetworkValidator;
@@ -65,6 +64,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.cloudbreak.util.Version;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 import freemarker.template.Configuration;
@@ -134,11 +134,9 @@ public class AzureTemplateBuilderTest {
 
     private final Gson gson = new Gson();
 
-    private final Map<String, String> tags = new HashMap<>();
+    private final Tags tags = new Tags();
 
     private final String templatePath;
-
-    private final Map<String, String> defaultTags = new HashMap<>();
 
     public AzureTemplateBuilderTest(String templatePath) {
         this.templatePath = templatePath;
@@ -208,9 +206,7 @@ public class AzureTemplateBuilderTest {
 
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
-        Map<String, String> userDefinedTags = Maps.newHashMap();
-        userDefinedTags.put("testtagkey1", "testtagvalue1");
-        userDefinedTags.put("testtagkey2", "testtagvalue2");
+        Tags userDefinedTags = new Tags(Map.of("testtagkey1", "testtagvalue1", "testtagkey2", "testtagvalue2"));
 
         cloudStack = new CloudStack(groups, network, image, parameters, userDefinedTags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);

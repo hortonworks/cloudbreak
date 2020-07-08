@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -95,7 +96,7 @@ class AwsVolumeResourceBuilderTest {
 
     private static final String AVAILABILITY_ZONE = "availabilityZone";
 
-    private static final Map<String, String> TAGS = Map.ofEntries(entry("key1", "value1"), entry("key2", "value2"));
+    private static final Tags TAGS = new Tags(Map.ofEntries(entry("key1", "value1"), entry("key2", "value2")));
 
     private static final Collection<Tag> EC2_TAGS = List.of(new Tag("ec2_key", "ec2_value"));
 

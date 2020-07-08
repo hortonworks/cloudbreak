@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +89,7 @@ import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -253,7 +253,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getEnvironmentCrn()).thenReturn(TestConstants.CRN);
         when(stackMock.getCluster()).thenReturn(sourceCluster);
         when(stackMock.getResourceCrn()).thenReturn("crn");
-        when(accountTagClientService.list()).thenReturn(new HashMap<>());
+        when(accountTagClientService.list()).thenReturn(new Tags());
         when(entitlementService.internalTenant(anyString(), anyString())).thenReturn(true);
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")

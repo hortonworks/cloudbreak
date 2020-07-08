@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.tag;
 
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
+import com.sequenceiq.common.api.tag.model.Tags;
 
 public interface CostTagging {
 
-    Map<String, String> prepareDefaultTags(CDPTagGenerationRequest t);
+    Tags prepareDefaultTags(CDPTagGenerationRequest t);
 
-    Map<String, String> mergeTags(CDPTagMergeRequest t);
+    Tags mergeTags(CDPTagMergeRequest t);
 
-    Map<String, String> generateAccountTags(CDPTagGenerationRequest t);
+    Tags generateAccountTags(CDPTagGenerationRequest t);
 }
