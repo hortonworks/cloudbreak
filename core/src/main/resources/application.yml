@@ -114,6 +114,8 @@ cb:
   freeipa:
     url: http://localhost:8090
     contextPath: /freeipa
+    dns:
+      ttl: 30
   sdx:
     url: http://localhost:8086
     contextPath: /dl

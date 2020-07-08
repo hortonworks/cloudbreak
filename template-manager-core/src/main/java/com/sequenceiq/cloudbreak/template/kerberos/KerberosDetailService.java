@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,6 +21,9 @@ import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Service
 public class KerberosDetailService {
+
+    @Value("${cb.freeipa.dns.ttl}")
+    private int dnsTtl;
 
     private final Gson gson = new Gson();
 
@@ -112,5 +116,9 @@ public class KerberosDetailService {
 
         return supportedOnCloudPlatform
                 && kerberosConfigOptional.isPresent() && isIpaJoinable(kerberosConfigOptional.get());
+    }
+
+    public int getDnsTtl() {
+        return dnsTtl;
     }
 }
