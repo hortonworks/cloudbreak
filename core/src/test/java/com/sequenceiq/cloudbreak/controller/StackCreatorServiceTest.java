@@ -168,7 +168,7 @@ public class StackCreatorServiceTest {
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("ERROR_REASON");
 
-        underTest.createStack(user, workspace, stackRequest);
+        underTest.createStack(user, workspace, stackRequest, false);
 
         verify(blueprintService).updateDefaultBlueprintCollection(WORKSPACE_ID);
         verify(stackRequestValidator).validate(stackRequest);
@@ -194,7 +194,7 @@ public class StackCreatorServiceTest {
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("The given recipe does not exist for the instance group \"INSTANCE_GROUP\": RECIPE_NAME");
 
-        underTest.createStack(user, workspace, stackRequest);
+        underTest.createStack(user, workspace, stackRequest, false);
 
         verify(blueprintService).updateDefaultBlueprintCollection(WORKSPACE_ID);
         verify(stackRequestValidator).validate(stackRequest);
@@ -218,7 +218,7 @@ public class StackCreatorServiceTest {
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("Cluster already exists: STACK_NAME");
 
-        underTest.createStack(user, workspace, stackRequest);
+        underTest.createStack(user, workspace, stackRequest, false);
 
         verify(blueprintService).updateDefaultBlueprintCollection(WORKSPACE_ID);
         verify(stackRequestValidator).validate(stackRequest);
@@ -257,7 +257,7 @@ public class StackCreatorServiceTest {
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("Given stack version (STACK_VERSION) does not match with shared context's runtime version (OTHER_VERSION)");
 
-        underTest.createStack(user, workspace, stackRequest);
+        underTest.createStack(user, workspace, stackRequest, false);
 
         verify(blueprintService).updateDefaultBlueprintCollection(WORKSPACE_ID);
         verify(stackRequestValidator).validate(stackRequest);

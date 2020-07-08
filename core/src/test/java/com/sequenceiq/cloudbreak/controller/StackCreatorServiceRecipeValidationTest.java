@@ -114,7 +114,7 @@ class StackCreatorServiceRecipeValidationTest {
 
         when(recipeService.get(any(NameOrCrn.class), eq(WORKSPACE_ID))).thenThrow(new NotFoundException("Recipe not found"));
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request));
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request, false));
 
         Assert.assertNotNull(exception);
         Assertions.assertEquals(String.format("The given recipe does not exist for the instance group \"%s\": %s", INSTANCE_GROUP_MASTER,
@@ -133,7 +133,7 @@ class StackCreatorServiceRecipeValidationTest {
 
         when(recipeService.get(any(NameOrCrn.class), eq(WORKSPACE_ID))).thenThrow(new NotFoundException("Recipe not found"));
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request));
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request, false));
 
         Assert.assertNotNull(exception);
         Assertions.assertTrue(exception.getMessage()
@@ -156,7 +156,7 @@ class StackCreatorServiceRecipeValidationTest {
         doAnswer(withNotFoundExceptionIfRecipeNameMatchesOtherwiseGiveRecipe(notExistingRecipe))
                 .when(recipeService).get(any(NameOrCrn.class), eq(WORKSPACE_ID));
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request));
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request, false));
 
         Assert.assertNotNull(exception);
         Assertions.assertEquals(String.format("The given recipe does not exist for the instance group \"%s\": %s", INSTANCE_GROUP_COMPUTE, notExistingRecipe),
@@ -177,7 +177,7 @@ class StackCreatorServiceRecipeValidationTest {
         when(converterUtil.convert(request, Stack.class)).thenReturn(TestUtil.stack());
         when(transactionService.required(any(Supplier.class))).thenReturn(TestUtil.stack());
         when(stackService.getIdByNameInWorkspace(anyString(), any(Long.class))).thenThrow(new NotFoundException("stack not found by name"));
-        underTest.createStack(user, workspace, request);
+        underTest.createStack(user, workspace, request, false);
 
         verify(recipeService, times(1)).get(any(NameOrCrn.class), anyLong());
     }
@@ -193,7 +193,7 @@ class StackCreatorServiceRecipeValidationTest {
         when(transactionService.required(any(Supplier.class))).thenReturn(TestUtil.stack());
         when(stackService.getIdByNameInWorkspace(anyString(), any(Long.class))).thenThrow(new NotFoundException("stack not found by name"));
 
-        underTest.createStack(user, workspace, request);
+        underTest.createStack(user, workspace, request, false);
 
         verify(recipeService, times(0)).get(any(NameOrCrn.class), anyLong());
     }
