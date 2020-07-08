@@ -60,7 +60,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public StackV4Response post(Long workspaceId, @Valid StackV4Request request) {
-        return stackOperations.post(workspaceId, request);
+        return stackOperations.post(workspaceId, request, false);
     }
 
     @Override

@@ -126,13 +126,13 @@ public class StackOperations implements ResourceBasedCrnProvider {
         return new StackViewV4Responses(stackViewResponses);
     }
 
-    public StackV4Response post(Long workspaceId, @Valid StackV4Request request) {
+    public StackV4Response post(Long workspaceId, @Valid StackV4Request request, boolean distroxRequest) {
         LOGGER.info("Post for Stack in workspace {}.", workspaceId);
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         LOGGER.info("Cloudbreak user for the requested stack is {}.", cloudbreakUser);
         Workspace workspace = workspaceService.get(workspaceId, user);
-        StackV4Response stackV4Response = stackCommonService.createInWorkspace(request, user, workspace);
+        StackV4Response stackV4Response = stackCommonService.createInWorkspace(request, user, workspace, distroxRequest);
         LOGGER.info("Adding environment name and credential to the response.");
         environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackV4Response);
         LOGGER.info("Adding SDX CRN and name to the response.");
