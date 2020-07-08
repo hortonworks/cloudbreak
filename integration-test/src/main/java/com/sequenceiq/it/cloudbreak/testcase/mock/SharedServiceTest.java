@@ -16,9 +16,6 @@ import javax.ws.rs.BadRequestException;
 import org.springframework.http.HttpMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
@@ -30,8 +27,8 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
-import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
+import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -41,11 +38,12 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
-import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
 
 public class SharedServiceTest extends AbstractIntegrationTest {
 
@@ -81,7 +79,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     private StackTestClient stackTestClient;
 
     @Inject
-    private DatabaseTestClient databaseTestClient;
+    private RedbeamsDatabaseTestClient databaseTestClient;
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(given = "a datalake cluster", when = "hive rds, ranger rds and ldap are attached", then = "the cluster will be available")
@@ -90,14 +88,14 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String rangerRdsName = resourcePropertyProvider().getName();
         String ldapName = resourcePropertyProvider().getName();
         String blueprintName = resourcePropertyProvider().getName();
-        DatabaseV4Request hiveRds = rdsRequest(DatabaseType.HIVE, hiveRdsName);
-        DatabaseV4Request rangerRds = rdsRequest(DatabaseType.RANGER, rangerRdsName);
+        DatabaseV4Request hiveRds = rdsRequest("HIVE", hiveRdsName);
+        DatabaseV4Request rangerRds = rdsRequest("RANGER", rangerRdsName);
         testContext.getModel().getAmbariMock().postSyncLdap();
         testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext
-                .given(HIVE, DatabaseTestDto.class).withRequest(hiveRds).withName(hiveRdsName)
+                .given(HIVE, RedbeamsDatabaseTestDto.class).withRequest(hiveRds).withName(hiveRdsName)
                 .when(databaseTestClient.createV4())
-                .given(RANGER, DatabaseTestDto.class).withRequest(rangerRds).withName(rangerRdsName)
+                .given(RANGER, RedbeamsDatabaseTestDto.class).withRequest(rangerRds).withName(rangerRdsName)
                 .when(databaseTestClient.createV4())
                 .given(LdapTestDto.class).withRequest(ldapRequest(ldapName)).withName(ldapName)
                 .when(ldapTestClient.createV1())
@@ -132,9 +130,9 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String ldapName = resourcePropertyProvider().getName();
         String blueprintName = resourcePropertyProvider().getName();
         testContext
-                .given(HIVE, DatabaseTestDto.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
+                .given(HIVE, RedbeamsDatabaseTestDto.class).valid().withType("HIVE").withName(hiveRdsName)
                 .when(databaseTestClient.createV4())
-                .given(RANGER, DatabaseTestDto.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
+                .given(RANGER, RedbeamsDatabaseTestDto.class).valid().withType("RANGER").withName(rangerRdsName)
                 .when(databaseTestClient.createV4())
                 .given(LdapTestDto.class).withName(ldapName)
                 .when(ldapTestClient.createV1())
@@ -161,9 +159,9 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String rangerRdsName = resourcePropertyProvider().getName();
         String blueprintName = resourcePropertyProvider().getName();
         testContext
-                .given(HIVE, DatabaseTestDto.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
+                .given(HIVE, RedbeamsDatabaseTestDto.class).valid().withType("HIVE").withName(hiveRdsName)
                 .when(databaseTestClient.createV4())
-                .given(RANGER, DatabaseTestDto.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
+                .given(RANGER, RedbeamsDatabaseTestDto.class).valid().withType("RANGER").withName(rangerRdsName)
                 .when(databaseTestClient.createV4())
                 .given(BlueprintTestDto.class).withName(blueprintName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withBlueprint(VALID_DL_BP)
@@ -189,7 +187,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String ldapName = resourcePropertyProvider().getName();
         String blueprintName = resourcePropertyProvider().getName();
         testContext
-                .given(HIVE, DatabaseTestDto.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
+                .given(HIVE, RedbeamsDatabaseTestDto.class).valid().withType("HIVE").withName(hiveRdsName)
                 .when(databaseTestClient.createV4())
                 .given(BlueprintTestDto.class).withName(blueprintName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withBlueprint(VALID_DL_BP)
@@ -217,7 +215,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         String ldapName = resourcePropertyProvider().getName();
         String blueprintName = resourcePropertyProvider().getName();
         testContext
-                .given(RANGER, DatabaseTestDto.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
+                .given(RANGER, RedbeamsDatabaseTestDto.class).valid().withType("RANGER").withName(rangerRdsName)
                 .when(databaseTestClient.createV4())
                 .given(BlueprintTestDto.class).withName(blueprintName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withBlueprint(VALID_DL_BP)
@@ -381,12 +379,12 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return request;
     }
 
-    private DatabaseV4Request rdsRequest(DatabaseType type, String name) {
+    private DatabaseV4Request rdsRequest(String type, String name) {
         DatabaseV4Request request = new DatabaseV4Request();
-        request.setConnectionURL(format("jdbc:postgresql://somedb.com:5432/%s-mydb", type.name().toLowerCase()));
+        request.setConnectionURL(format("jdbc:postgresql://somedb.com:5432/%s-mydb", type.toLowerCase()));
         request.setConnectionPassword("password");
         request.setConnectionUserName("someuser");
-        request.setType(type.name());
+        request.setType(type);
         request.setName(name);
         return request;
     }
@@ -396,7 +394,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     }
 
     private static Set<String> rdsConfigNamesFromResponse(StackTestDto entity) {
-        return entity.getResponse().getCluster().getDatabases().stream().map(DatabaseV4Base::getName).collect(Collectors.toSet());
+        return entity.getResponse().getCluster().getDatabases().stream().map(String::valueOf).collect(Collectors.toSet());
     }
 
     private static Set<String> rdsConfigNamesFromRequest(StackTestDto entity) {

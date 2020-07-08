@@ -10,19 +10,18 @@ import com.sequenceiq.it.cloudbreak.assertion.audit.AuditTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.AuditTestClient;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.ClusterTemplateTestClient;
-import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
+import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.audit.AuditTestDto;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
-import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
@@ -52,7 +51,7 @@ public class AuditTest extends AbstractIntegrationTest {
     private RecipeTestClient recipeTestClient;
 
     @Inject
-    private DatabaseTestClient databaseTestClient;
+    private RedbeamsDatabaseTestClient databaseTestClient;
 
     @Inject
     private AuditTestClient auditTestClient;
@@ -89,26 +88,6 @@ public class AuditTest extends AbstractIntegrationTest {
                 .withResourceType("cluster_templates")
                 .when(auditTestClient.listV4(), key(clusterTemplateName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(clusterTemplateName))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a Database is created",
-            then = "and audit record must be available in the database")
-    public void createValidDatabaseThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String databaseName = resourcePropertyProvider().getName();
-        testContext
-                .given(DatabaseTestDto.class)
-                .withName(databaseName)
-                .when(databaseTestClient.createV4(), key(databaseName))
-                .select(db -> db.getResponse().getId(), key(databaseName))
-                .given(AuditTestDto.class)
-                .withResourceIdByKey(databaseName)
-                .withResourceType("databases")
-                .when(auditTestClient.listV4(), key(databaseName))
-                .then(AuditTestAssertion.listContainsAtLeast(1), key(databaseName))
                 .validate();
     }
 

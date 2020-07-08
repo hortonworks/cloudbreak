@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -101,7 +100,7 @@ class EnvironmentResourceDeletionServiceTest {
     void getAttachedDistroXClusterNames() {
         when(distroXEndpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses());
         environmentResourceDeletionServiceUnderTest.getAttachedDistroXClusterNames(environment);
-        verify(distroXEndpoint).list(ArgumentMatchers.isNull(), eq(ENVIRONMENT_CRN));
+        verify(distroXEndpoint).list(isNull(), eq(ENVIRONMENT_CRN));
     }
 
     @Test
