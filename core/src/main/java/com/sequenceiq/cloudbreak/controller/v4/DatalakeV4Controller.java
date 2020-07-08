@@ -8,16 +8,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
 @Controller
-@DisableCheckPermissions
+@InternalOnly
+@InternalReady
 public class DatalakeV4Controller implements DatalakeV4Endpoint {
 
     @Lazy
@@ -28,13 +31,10 @@ public class DatalakeV4Controller implements DatalakeV4Endpoint {
     private WorkspaceService workspaceService;
 
     @Override
-    public StackViewV4Responses list(String environmentName, String environmentCrn) {
-        if (StringUtils.isNotEmpty(environmentCrn)) {
-            return stackOperations.listByEnvironmentCrn(workspaceService.getForCurrentUser().getId(), environmentCrn, List.of(StackType.DATALAKE));
+    public StackViewV4Responses list(@Deprecated String environment, @TenantAwareParam String environmentCrn) {
+        if (StringUtils.isBlank(environmentCrn) || StringUtils.isNotBlank(environment)) {
+            throw new BadRequestException("environment param is deprecated, only environmentCrn should be filled.");
         }
-        if (StringUtils.isNotEmpty(environmentName)) {
-            return stackOperations.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), environmentName, List.of(StackType.DATALAKE));
-        }
-        throw new BadRequestException("Either environment or environmentCrn query parameter should be set.");
+        return stackOperations.listByEnvironmentCrn(workspaceService.getForCurrentUser().getId(), environmentCrn, List.of(StackType.DATALAKE));
     }
 }

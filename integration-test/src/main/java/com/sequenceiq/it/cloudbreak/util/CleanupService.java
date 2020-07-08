@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 
@@ -50,13 +49,6 @@ public class CleanupService {
                 .stream()
                 .filter(recipe -> recipe.getName().startsWith("it-"))
                 .forEach(recipe -> deleteRecipe(workspaceId, cloudbreakClient, recipe.getId()));
-
-        cloudbreakClient.databaseV4Endpoint()
-                .list(workspaceId, null, Boolean.FALSE)
-                .getResponses()
-                .stream()
-                .filter(rds -> rds.getName().startsWith("it-"))
-                .forEach(rds -> deleteRdsConfigs(workspaceId, cloudbreakClient, rds.getId()));
     }
 
     public void deleteBlueprint(Long workspaceId, CloudbreakClient cloudbreakClient, Long blueprintId) {
@@ -110,18 +102,5 @@ public class CleanupService {
 
     public void deleteImageCatalog(CloudbreakClient cloudbreakClient, String name, Long workspaceId) {
         cloudbreakClient.imageCatalogV4Endpoint().deleteByName(workspaceId, name);
-    }
-
-    public void deleteRdsConfigs(Long workspaceId, CloudbreakClient cloudbreakClient, Long databaseId) {
-        if (databaseId != null) {
-            Optional<DatabaseV4Response> response = cloudbreakClient.databaseV4Endpoint().list(workspaceId, null, Boolean.FALSE)
-                    .getResponses()
-                    .stream()
-                    .filter(database -> database.getId().equals(databaseId))
-                    .findFirst();
-            if (response.isPresent()) {
-                cloudbreakClient.databaseV4Endpoint().delete(workspaceId, response.get().getName());
-            }
-        }
     }
 }

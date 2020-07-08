@@ -10,14 +10,14 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.it.cloudbreak.assertion.database.DatabaseTestAssertion;
-import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
+import com.sequenceiq.it.cloudbreak.assertion.database.RedbeamsDatabaseTestAssertion;
+import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 // import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
@@ -39,7 +39,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
     private static final Class<MockedTestContext> TEST_CONTEXT_CLASS = MockedTestContext.class;
 
     @Inject
-    private DatabaseTestClient databaseTestClient;
+    private RedbeamsDatabaseTestClient databaseTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -56,17 +56,17 @@ public class DatabaseTest extends AbstractIntegrationTest {
     public void createAndDeleteAndCreateWithSameNameThenShouldRecreatedDatabase(TestContext testContext) {
         String databaseName = resourcePropertyProvider().getName();
         testContext
-                .given(DatabaseTestDto.class)
+                .given(RedbeamsDatabaseTestDto.class)
                 .withName(databaseName)
                 .when(databaseTestClient.createV4(), RunningParameter.key(databaseName))
                 .when(databaseTestClient.listV4(), RunningParameter.key(databaseName))
-                .then(DatabaseTestAssertion.containsDatabaseName(databaseName, 1), RunningParameter.key(databaseName))
+                .then(RedbeamsDatabaseTestAssertion.containsDatabaseName(databaseName, 1), RunningParameter.key(databaseName))
                 .when(databaseTestClient.deleteV4(), RunningParameter.key(databaseName))
                 .when(databaseTestClient.listV4(), RunningParameter.key(databaseName))
-                .then(DatabaseTestAssertion.containsDatabaseName(databaseName, 0), RunningParameter.key(databaseName))
+                .then(RedbeamsDatabaseTestAssertion.containsDatabaseName(databaseName, 0), RunningParameter.key(databaseName))
                 .when(databaseTestClient.createV4(), RunningParameter.key(databaseName))
                 .when(databaseTestClient.listV4(), RunningParameter.key(databaseName))
-                .then(DatabaseTestAssertion.containsDatabaseName(databaseName, 1), RunningParameter.key(databaseName))
+                .then(RedbeamsDatabaseTestAssertion.containsDatabaseName(databaseName, 1), RunningParameter.key(databaseName))
                 .validate();
     }
 
@@ -79,11 +79,11 @@ public class DatabaseTest extends AbstractIntegrationTest {
     public void createAndCreateWithSameNameThenShouldThrowBadRequestException(TestContext testContext) {
         String databaseName = resourcePropertyProvider().getName();
         testContext
-                .given(DatabaseTestDto.class)
+                .given(RedbeamsDatabaseTestDto.class)
                 .withName(databaseName)
                 .when(databaseTestClient.createV4(), RunningParameter.key(databaseName))
                 .when(databaseTestClient.listV4(), RunningParameter.key(databaseName))
-                .then(DatabaseTestAssertion.containsDatabaseName(databaseName, 1), RunningParameter.key(databaseName))
+                .then(RedbeamsDatabaseTestAssertion.containsDatabaseName(databaseName, 1), RunningParameter.key(databaseName))
                 .when(databaseTestClient.createV4(), RunningParameter.key(databaseName))
                 .expect(BadRequestException.class, RunningParameter.key(databaseName))
                 .validate();

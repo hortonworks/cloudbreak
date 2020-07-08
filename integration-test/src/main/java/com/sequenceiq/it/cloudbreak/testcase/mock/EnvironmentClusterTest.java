@@ -8,7 +8,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
-import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
@@ -19,7 +18,7 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -36,9 +35,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
     @Inject
     private StackTestClient stackTestClient;
-
-    @Inject
-    private DatabaseTestClient databaseTestClient;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -89,7 +85,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.create())
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
-                .withCluster(setResources(testContext, testContext.get(DatabaseTestDto.class).getName(),
+                .withCluster(setResources(testContext, testContext.get(RedbeamsDatabaseTestDto.class).getName(),
                         null, null))
                 .when(stackTestClient.createV4())
                 .validate();

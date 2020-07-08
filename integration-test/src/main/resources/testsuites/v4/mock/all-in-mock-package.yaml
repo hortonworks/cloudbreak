@@ -2,5 +2,4 @@ name: "mock-tests"
 tests:
   - name: "newway mock testcases"
     packages:
-      - com.sequenceiq.it.cloudbreak.testcase.info.*
       - com.sequenceiq.it.cloudbreak.testcase.mock.*

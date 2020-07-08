@@ -19,20 +19,20 @@ import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRet
 import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
-import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
+import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -76,7 +76,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     private KerberosTestClient kerberosTestClient;
 
     @Inject
-    private DatabaseTestClient databaseTestClient;
+    private RedbeamsDatabaseTestClient databaseTestClient;
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -227,10 +227,10 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     protected Set<String> createDefaultRdsConfig(TestContext testContext) {
         testContext
-                .given(DatabaseTestDto.class)
+                .given(RedbeamsDatabaseTestDto.class)
                 .when(databaseTestClient.createIfNotExistV4());
         Set<String> validRds = new HashSet<>();
-        validRds.add(testContext.get(DatabaseTestDto.class).getName());
+        validRds.add(testContext.get(RedbeamsDatabaseTestDto.class).getName());
         return validRds;
     }
 
