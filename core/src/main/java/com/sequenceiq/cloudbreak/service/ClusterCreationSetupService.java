@@ -90,13 +90,14 @@ public class ClusterCreationSetupService {
     @Inject
     private CloudStorageConverter cloudStorageConverter;
 
-    public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace, DetailedEnvironmentResponse environment) {
-        validate(request, null, stack, user, workspace, environment);
+    public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace,
+        DetailedEnvironmentResponse environment, boolean distroxRequest) {
+        validate(request, null, stack, user, workspace, environment, distroxRequest);
     }
 
     @Measure(ClusterCreationSetupService.class)
     public void validate(ClusterV4Request request, CloudCredential cloudCredential, Stack stack, User user,
-            Workspace workspace, DetailedEnvironmentResponse environment) {
+            Workspace workspace, DetailedEnvironmentResponse environment, boolean distroxRequest) {
         MdcContext.builder().userCrn(user.getUserCrn()).tenant(user.getTenant().getName()).buildMdc();
         CloudCredential credential = cloudCredential;
         if (credential == null) {
@@ -105,7 +106,7 @@ public class ClusterCreationSetupService {
         fileSystemValidator.validateCloudStorage(stack.cloudPlatform(), credential, request.getCloudStorage(),
                 stack.getCreator().getUserId(), stack.getWorkspace().getId());
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
-        ValidationResult environmentValidationResult = environmentValidator.validate(request, stack, environment, user);
+        ValidationResult environmentValidationResult = environmentValidator.validate(request, stack, environment, user, distroxRequest);
         if (environmentValidationResult.hasError()) {
             throw new BadRequestException(environmentValidationResult.getFormattedErrors());
         }

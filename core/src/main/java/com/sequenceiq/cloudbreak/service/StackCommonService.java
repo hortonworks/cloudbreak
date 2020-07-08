@@ -113,8 +113,8 @@ public class StackCommonService {
     @Inject
     private BlueprintUpdaterConnectors blueprintUpdaterConnectors;
 
-    public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace) {
-        return stackCreatorService.createStack(user, workspace, stackRequest);
+    public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
+        return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
     }
 
     public StackV4Response get(Long id, Set<String> entries) {

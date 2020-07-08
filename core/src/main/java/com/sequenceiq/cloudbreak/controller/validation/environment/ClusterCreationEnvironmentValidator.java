@@ -63,7 +63,7 @@ public class ClusterCreationEnvironmentValidator {
     private SdxClientService sdxClientService;
 
     public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack,
-        DetailedEnvironmentResponse environment, User user) {
+        DetailedEnvironmentResponse environment, User user, boolean distroxRequest) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         String regionName = cloudPlatformConnectors.getDefault(platform(stack.cloudPlatform()))
                 .displayNameToRegion(stack.getRegion());
@@ -86,7 +86,7 @@ public class ClusterCreationEnvironmentValidator {
         validateRdsConfigNames(clusterRequest.getDatabases(), resultBuilder, workspaceId);
         validateProxyConfig(clusterRequest.getProxyConfigCrn(), resultBuilder);
         validateAutoTls(clusterRequest, stack, resultBuilder, parentEnvironmentCloudPlatform);
-        validateDatalakeConfig(stack, resultBuilder, user);
+        validateDatalakeConfig(stack, resultBuilder, user, distroxRequest);
         return resultBuilder.build();
     }
 
@@ -153,10 +153,10 @@ public class ClusterCreationEnvironmentValidator {
         }
     }
 
-    private void validateDatalakeConfig(Stack stack, ValidationResultBuilder resultBuilder, User user) {
+    private void validateDatalakeConfig(Stack stack, ValidationResultBuilder resultBuilder, User user, boolean distroxRequest) {
         if (CloudPlatform.MOCK.name().equalsIgnoreCase(stack.cloudPlatform())) {
             LOGGER.info("No Data Lake validation for MOCK provider");
-        } else if (validateDatalakeAvailability) {
+        } else if (validateDatalakeAvailability && distroxRequest) {
             List<SdxClusterResponse> datalakes = sdxClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             if (datalakes.isEmpty()) {
                 resultBuilder.error("Data Lake is not available in your environment!");

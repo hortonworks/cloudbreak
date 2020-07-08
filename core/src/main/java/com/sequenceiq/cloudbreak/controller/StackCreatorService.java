@@ -162,7 +162,7 @@ public class StackCreatorService {
     @Inject
     private GrpcUmsClient grpcUmsClient;
 
-    public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest) {
+    public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         long start = System.currentTimeMillis();
         blueprintService.updateDefaultBlueprintCollection(workspace.getId());
         LOGGER.info("Validate Stack request.");
@@ -245,7 +245,8 @@ public class StackCreatorService {
                     fileSystemValidator.validateFileSystem(stackValidation.getCredential().cloudPlatform(), cloudCredential,
                             stackValidationRequest.getFileSystem(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
 
-                    clusterCreationService.validate(stackRequest.getCluster(), cloudCredential, stack, user, workspace, environment);
+                    clusterCreationService.validate(stackRequest.getCluster(), cloudCredential, stack, user, workspace,
+                            environment, distroxRequest);
                 }
 
                 LOGGER.info("Fill up instanceMetadata for stack {}.", stackName);
