@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
+import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
@@ -70,7 +72,9 @@ public class MetricEvaluator extends EvaluatorExecutor {
             Cluster cluster = clusterService.findById(clusterId);
             MDCBuilder.buildMdcContext(cluster);
             AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
-            for (MetricAlert metricAlert : alertRepository.findAllWithScalingPolicyByCluster(clusterId)) {
+            List<MetricAlert> metricAlerts = alertRepository.findAllWithScalingPolicyByCluster(clusterId);
+            LOGGER.info("Metric alerts for cluster [id: {}]: {}", clusterId, metricAlerts);
+            for (MetricAlert metricAlert : metricAlerts) {
                 if (metricCondition.isMetricAlertTriggered(ambariClient, metricAlert)) {
                     eventPublisher.publishEvent(new ScalingEvent(metricAlert));
                     break;
