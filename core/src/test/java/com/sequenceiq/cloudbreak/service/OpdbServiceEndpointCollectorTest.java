@@ -143,6 +143,7 @@ public class OpdbServiceEndpointCollectorTest {
         Set<String> services = new HashSet<>();
         services.add("HBASEUI");
         services.add("HBASEJARS");
+        services.add("WEBHBASE");
         services.add("AVATICA");
         services.add("CM-UI");
         services.add("CM-API");
@@ -175,6 +176,7 @@ public class OpdbServiceEndpointCollectorTest {
         when(cmTemplateProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList(
             ServiceComponent.of("HBASE", "MASTER"),
             ServiceComponent.of("HBASE", "REGIONSERVER"),
+            ServiceComponent.of("HBASE", "HBASERESTSERVER"),
             ServiceComponent.of("PHOENIX", "PHOENIX_QUERY_SERVER"),
             ServiceComponent.of("CLOUDERA_MANAGER", "CM-API"),
             ServiceComponent.of("CLOUDERA_MANAGER_UI", "CM-UI")
@@ -185,6 +187,7 @@ public class OpdbServiceEndpointCollectorTest {
         Map<String, List<String>> componentPrivateIps = Maps.newHashMap();
         componentPrivateIps.put("MASTER", privateIps);
         componentPrivateIps.put("REGIONSERVER", privateIps);
+        componentPrivateIps.put("HBASERESTSERVER", privateIps);
         componentPrivateIps.put("PHOENIX_QUERY_SERVER", privateIps);
         componentPrivateIps.put("CM-UI", privateIps);
         componentPrivateIps.put("CM-API", privateIps);
@@ -216,9 +219,9 @@ public class OpdbServiceEndpointCollectorTest {
             .map(ClusterExposedServiceV4Response::getKnoxService).collect(Collectors.toSet());
 
         assertEquals(proxyServiceNames.toString(), 2, proxyServiceNames.size());
-        assertEquals(proxyApiServiceNames.toString(), 3, proxyApiServiceNames.size());
+        assertEquals(proxyApiServiceNames.toString(), 4, proxyApiServiceNames.size());
         assertEquals(new HashSet<>(Arrays.asList("CM-UI", "HBASEUI")), proxyServiceNames);
-        assertEquals(new HashSet<>(Arrays.asList("CM-API", "HBASEJARS", "AVATICA")), proxyApiServiceNames);
+        assertEquals(new HashSet<>(Arrays.asList("CM-API", "HBASEJARS", "WEBHBASE", "AVATICA")), proxyApiServiceNames);
         Optional<ClusterExposedServiceV4Response> hbasejars = proxyApiServices.stream().filter(
                 service -> service.getKnoxService().equals("HBASEJARS")).findFirst();
         Optional<ClusterExposedServiceV4Response> avatica = proxyApiServices.stream().filter(
@@ -232,7 +235,8 @@ public class OpdbServiceEndpointCollectorTest {
     private GatewayTopology gatewayTopology(String name) {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(name);
-        gatewayTopologyJson.setExposedServices(Arrays.asList("HBASEUI", "HBASEJARS", "AVATICA", "CM-UI", "CM-API"));
+        gatewayTopologyJson.setExposedServices(Arrays.asList("HBASEUI", "HBASEJARS", "AVATICA", "CM-UI", "CM-API",
+                "WEBHBASE"));
         ExposedServices exposedServices = exposedServicesConverter.convert(gatewayTopologyJson);
         GatewayTopology gatewayTopology = new GatewayTopology();
         gatewayTopology.setTopologyName(name);

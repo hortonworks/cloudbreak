@@ -162,7 +162,14 @@
               "displayName": null,
               "configs": [],
               "base": true
-           }
+           },
+          {
+            "refName": "hbase-HBASERESTSERVER-BASE",
+            "roleType": "HBASERESTSERVER",
+            "displayName": null,
+            "configs": [],
+            "base": true
+          }
         ]
       },
       {
@@ -288,6 +295,7 @@
         "roleConfigGroupsRefNames": [
           "hbase-GATEWAY-BASE",
           "hbase-HBASETHRIFTSERVER-BASE",
+          "hbase-HBASERESTSERVER-BASE",
           "hdfs-GATEWAY-BASE",
           "hdfs-JOURNALNODE-BASE",
           "yarn-JOBHISTORY-BASE",

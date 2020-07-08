@@ -261,12 +261,6 @@
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
              {%- endif %}
-             {% if 'WEBHBASE' in exposed and 'HBASERESTSERVER' in salt['pillar.get']('gateway:location') -%}
-             <param>
-                 <name>WEBHBASE</name>
-                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
-             </param>
-             {%- endif %}
              {% if 'JOBHISTORYUI' in exposed and 'JOBHISTORY' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>JOBHISTORYUI</name>
@@ -298,12 +292,6 @@
              {% if 'HBASEUI' in exposed and 'MASTER' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>HBASEUI</name>
-                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
-             </param>
-             {%- endif %}
-             {% if 'WEBHBASE' in exposed and 'HBASERESTSERVER' in salt['pillar.get']('gateway:location') -%}
-             <param>
-                 <name>WEBHBASE</name>
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
              {%- endif %}
@@ -607,17 +595,6 @@
         <role>HBASEUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['MASTER'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['HBASEUI'] }}</url>
-        {%- endfor %}
-    </service>
-    {%- endif %}
-    {%- endif %}
-
-    {% if 'HBASERESTSERVER' in salt['pillar.get']('gateway:location') -%}
-    {% if 'WEBHBASE' in exposed -%}
-    <service>
-        <role>WEBHBASE</role>
-        {% for hostloc in salt['pillar.get']('gateway:location')['HBASERESTSERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['WEBHBASE'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
