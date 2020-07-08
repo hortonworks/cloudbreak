@@ -352,6 +352,7 @@ public class ClusterHostServiceRunner {
             sssdConnfig.put("domain", kerberosConfig.getDomain());
             sssdConnfig.put("password", kerberosConfig.getPassword());
             sssdConnfig.put("server", kerberosConfig.getUrl());
+            sssdConnfig.put("dns_ttl", kerberosDetailService.getDnsTtl());
             // enumeration has performance impacts so it's only enabled if Ranger is installed on the cluster
             // otherwise the usersync does not work with nss
             boolean enumerate = !CollectionUtils.isEmpty(serviceLocations.get("RANGER_ADMIN"))

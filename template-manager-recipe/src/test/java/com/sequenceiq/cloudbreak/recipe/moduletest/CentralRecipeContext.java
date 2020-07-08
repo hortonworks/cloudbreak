@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.vault.core.VaultTemplate;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
@@ -23,6 +24,9 @@ import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @ContextConfiguration
+@TestPropertySource(properties = {
+        "cb.freeipa.dns.ttl=30"
+})
 public class CentralRecipeContext {
 
     @Inject
