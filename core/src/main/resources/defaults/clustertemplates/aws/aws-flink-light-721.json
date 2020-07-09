@@ -1,12 +1,12 @@
 {
-  "name": "7.2.1 - Streaming Analytics with Apache Flink for AWS",
+  "name": "7.2.1 - Streaming Analytics Light Duty for AWS",
   "description": "",
   "type": "STREAMING",
   "featureState": "PREVIEW",
   "cloudPlatform": "AWS",
 	"distroXTemplate": {
 			"cluster": {
-				"blueprintName": "7.2.1 - Streaming Analytics with Apache Flink"
+				"blueprintName": "7.2.1 - Streaming Analytics Light Duty with Apache Flink"
 			},
 			"instanceGroups": [{
 					"name": "worker",
