@@ -13,8 +13,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -22,6 +24,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -125,14 +128,19 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     }
 
     @Override
-    public String investigate() {
+    public Clue investigate() {
         if (getResponse() == null || getResponse().getId() == null) {
             return null;
         }
-        Long id = getResponse().getId();
-
-        return "DistroX audit events: "
-                + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), CloudbreakEventService.DATAHUB_RESOURCE_TYPE, id, null);
+        AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
+                getTestContext().getCloudbreakClient(),
+                CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
+                getResponse().getId(),
+                null);
+        boolean hasSpotTermination = getResponse().getInstanceGroups().stream()
+                .flatMap(ig -> ig.getMetadata().stream())
+                .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
+        return new Clue("DistroX", auditEvents, getResponse(), hasSpotTermination);
     }
 
     @Override

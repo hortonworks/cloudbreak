@@ -17,6 +17,8 @@ import javax.inject.Inject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -28,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.mock.MockCloudProvider;
+import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -361,13 +364,19 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     @Override
-    public String investigate() {
+    public Clue investigate() {
         if (getResponse() == null || getResponse().getCrn() == null) {
             return null;
         }
-        String crn = getResponse().getCrn();
-
-        return "SDX audit events: " + AuditUtil.getAuditEvents(getTestContext().getCloudbreakClient(), CloudbreakEventService.DATAHUB_RESOURCE_TYPE, null, crn);
+        AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
+                getTestContext().getCloudbreakClient(),
+                CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
+                null,
+                getResponse().getCrn());
+        boolean hasSpotTermination = getResponse().getStackV4Response().getInstanceGroups().stream()
+                .flatMap(ig -> ig.getMetadata().stream())
+                .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
+        return new Clue("SDX", auditEvents, getResponse(), hasSpotTermination);
     }
 
     protected CommonClusterManagerProperties commonClusterManagerProperties() {

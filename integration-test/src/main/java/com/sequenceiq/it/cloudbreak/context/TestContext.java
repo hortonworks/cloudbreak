@@ -25,7 +25,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -54,6 +53,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
+import com.sequenceiq.it.cloudbreak.util.ErrorLogMessageProvider;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
@@ -161,6 +161,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private WaitService<CloudbreakWaitObject> cloudbreakWaitService;
+
+    @Inject
+    private ErrorLogMessageProvider errorLogMessageProvider;
 
     private DefaultModel model;
 
@@ -770,23 +773,17 @@ public abstract class TestContext implements ApplicationContextAware {
     public void handleExceptionsDuringTest(TestErrorLog testErrorLog) {
         validated = true;
         checkShutdown();
-        Map<String, Exception> exceptionsDuringTest = getErrors();
-        if (!exceptionsDuringTest.isEmpty()) {
-            StringBuilder builder = new StringBuilder("All Exceptions that occurred during the test are logged after this message")
-                    .append(System.lineSeparator());
-            exceptionsDuringTest.forEach((msg, ex) -> {
-                LOGGER.error("Exception during test: " + msg, ex);
-                builder.append(msg).append(": ").append(ResponseUtil.getErrorMessage(ex)).append(System.lineSeparator());
-            });
-            collectStructuredEvents(builder);
-            exceptionsDuringTest.clear();
-            testErrorLog.report(LOGGER, builder.toString().replace("%", "%%"));
-        }
-    }
+        if (!exceptionMap.isEmpty()) {
+            List<Clue> clues = resources.values().stream()
+                    .filter(Investigable.class::isInstance)
+                    .map(Investigable.class::cast)
+                    .map(Investigable::investigate)
+                    .collect(Collectors.toList());
+            String errorMessage = errorLogMessageProvider.getMessage(exceptionMap, clues);
+            testErrorLog.report(LOGGER, errorMessage);
 
-    private void collectStructuredEvents(StringBuilder builder) {
-        Iterable<Investigable> investigables = Iterables.filter(resources.values(), Investigable.class);
-        investigables.forEach(dto -> builder.append(dto.investigate()).append(System.lineSeparator()));
+            exceptionMap.clear();
+        }
     }
 
     protected <T extends CloudbreakTestDto> T getEntityFromEntityClass(Class<T> entityClass, RunningParameter runningParameter) {
