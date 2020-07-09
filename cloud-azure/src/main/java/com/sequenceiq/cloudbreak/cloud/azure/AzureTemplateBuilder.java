@@ -143,7 +143,7 @@ public class AzureTemplateBuilder {
             if (azureDatabaseServerView.getPort() != null) {
                 LOGGER.warn("Found port {} in database stack, but Azure ignores it", azureDatabaseServerView.getPort());
             }
-            model.put("serverTags", databaseStack.getTags());
+            model.put("serverTags", Tags.getAll(databaseStack.getTags()));
             model.put("skuCapacity", azureDatabaseServerView.getSkuCapacity());
             model.put("skuFamily", azureDatabaseServerView.getSkuFamily());
             model.put("skuName", azureDatabaseServerView.getSkuName());
