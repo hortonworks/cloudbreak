@@ -1,12 +1,12 @@
 {
-  "name": "7.2.1 - Streaming Analytics with Apache Flink for Azure",
+  "name": "7.2.1 - Streaming Analytics Light Duty for Azure",
   "description": "",
   "type": "STREAMING",
   "featureState": "PREVIEW",
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.1 - Streaming Analytics with Apache Flink"
+      "blueprintName": "7.2.1 - Streaming Analytics Light Duty with Apache Flink"
     },
     "instanceGroups": [
       {

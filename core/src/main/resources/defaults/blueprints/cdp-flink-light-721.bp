@@ -1,5 +1,5 @@
 {
-  "description": "7.2.1 - Streaming Analytics with Apache Flink",
+  "description": "7.2.1 - Streaming Analytics Light Duty with Apache Flink",
   "blueprint": {
     "cdhVersion": "7.2.1",
     "displayName": "streaming-analytics",
