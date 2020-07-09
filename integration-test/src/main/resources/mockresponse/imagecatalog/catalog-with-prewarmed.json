@@ -111,9 +111,7 @@
           "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-23.jar"
         ]
       }
-    ],
-    "hdf-images": [],
-    "base-images": []
+    ]
   },
   "versions": {
     "cloudbreak": [

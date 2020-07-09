@@ -75,7 +75,7 @@ public class UpgradeOptionsResponseFactoryTest {
     }
 
     private ImageFilterResult createAvailableImages(Map<String, String> packageVersions) {
-        return new ImageFilterResult(new Images(null, null, null, List.of(createImage(packageVersions)), null), null);
+        return new ImageFilterResult(new Images(null, List.of(createImage(packageVersions)), null), null);
     }
 
     private Image createImage(Map<String, String> packageVersions) {

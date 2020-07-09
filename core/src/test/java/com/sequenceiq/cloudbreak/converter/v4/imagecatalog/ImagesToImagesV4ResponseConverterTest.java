@@ -58,9 +58,7 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
         setupStackEntries();
         ImagesV4Response result = underTest.convert(createSource());
         assertEquals(1, result.getBaseImages().size());
-        assertEquals(1, result.getHdfImages().size());
         assertEquals(1, result.getCdhImages().size());
-        assertEquals(1, result.getHdpImages().size());
         BaseImageV4Response baseImageV4Response = result.getBaseImages().get(0);
         assertEquals(1, baseImageV4Response.getCdhStacks().size());
         assertEquals("6.1.0", baseImageV4Response.getClouderaManagerRepo().getVersion());
@@ -69,8 +67,6 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
     private Images getImages() {
         Images images = new Images(
                 Collections.singletonList(getImage(REDHAT_7, null)),
-                Collections.singletonList(getImage(REDHAT_7, StackType.HDP)),
-                Collections.singletonList(getImage(REDHAT_7, StackType.HDF)),
                 Collections.singletonList(getImage(REDHAT_7, StackType.CDH)),
                 new HashSet<>()
         );

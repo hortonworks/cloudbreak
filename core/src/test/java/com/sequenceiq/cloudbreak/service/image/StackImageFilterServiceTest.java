@@ -101,7 +101,6 @@ public class StackImageFilterServiceTest {
         Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
 
         assertEquals(IMAGE_BASE_ID, images.getBaseImages().get(0).getUuid());
-        assertThat(images.getHdpImages(), empty());
         assertEquals(IMAGE_CDH_ID, images.getCdhImages().get(0).getUuid());
         verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
         verify(componentConfigProviderService).getImage(STACK_ID);
@@ -122,8 +121,6 @@ public class StackImageFilterServiceTest {
         Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
 
         assertEquals(IMAGE_BASE_ID, images.getBaseImages().get(0).getUuid());
-        assertThat(images.getHdpImages(), empty());
-        assertThat(images.getHdfImages(), empty());
         verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
         verify(componentConfigProviderService).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
@@ -173,9 +170,7 @@ public class StackImageFilterServiceTest {
     private StatedImages getStatedImages() {
         Images images = new Images(
                 Collections.singletonList(getImage("a", IMAGE_BASE_ID)),
-                Collections.singletonList(getImage("b", IMAGE_HDP_ID)),
-                Collections.singletonList(getImage("c", IMAGE_HDF_ID)),
-                Collections.singletonList(getImage("d", IMAGE_CDH_ID)),
+                Collections.singletonList(getImage("b", IMAGE_CDH_ID)),
                 new HashSet<>()
         );
         return StatedImages.statedImages(images, CUSTOM_IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);

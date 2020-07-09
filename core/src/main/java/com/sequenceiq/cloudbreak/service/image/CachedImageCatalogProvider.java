@@ -94,11 +94,9 @@ public class CachedImageCatalogProvider {
         Images catalogImages = catalog.getImages();
 
         List<Image> filteredBaseImages = filterImages(catalogImages.getBaseImages(), enabledOsPredicate());
-        List<Image> filteredHdpImages = filterImages(catalogImages.getHdpImages(), enabledOsPredicate());
-        List<Image> filteredHdfImages = filterImages(catalogImages.getHdfImages(), enabledOsPredicate());
         List<Image> filteredCdhImages = filterImages(catalogImages.getCdhImages(), enabledOsPredicate());
 
-        Images images = new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, filteredCdhImages, catalogImages.getSuppertedVersions());
+        Images images = new Images(filteredBaseImages, filteredCdhImages, catalogImages.getSuppertedVersions());
         return new CloudbreakImageCatalogV3(images, catalog.getVersions());
     }
 
@@ -145,10 +143,8 @@ public class CachedImageCatalogProvider {
 
     private void validateImageCatalogUuids(CloudbreakImageCatalogV3 imageCatalog) throws CloudbreakImageCatalogException {
         Stream<String> baseUuids = imageCatalog.getImages().getBaseImages().stream().map(Image::getUuid);
-        Stream<String> hdpUuids = imageCatalog.getImages().getHdpImages().stream().map(Image::getUuid);
-        Stream<String> hdfUuids = imageCatalog.getImages().getHdfImages().stream().map(Image::getUuid);
         Stream<String> cdhUuids = imageCatalog.getImages().getCdhImages().stream().map(Image::getUuid);
-        Stream<String> uuidStream = Stream.of(baseUuids, hdpUuids, hdfUuids, cdhUuids).
+        Stream<String> uuidStream = Stream.of(baseUuids, cdhUuids).
                 reduce(Stream::concat).
                 orElseGet(Stream::empty);
         List<String> uuidList = uuidStream.collect(Collectors.toList());
@@ -167,11 +163,9 @@ public class CachedImageCatalogProvider {
 
     private void cleanAndValidateMaps(CloudbreakImageCatalogV3 catalog) throws CloudbreakImageCatalogException {
         boolean baseImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getBaseImages());
-        boolean hdfImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getHdfImages());
-        boolean hdpImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getHdpImages());
         boolean cdhImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getCdhImages());
 
-        if (baseImagesValidate && hdfImagesValidate && hdpImagesValidate && cdhImagesValidate) {
+        if (baseImagesValidate && cdhImagesValidate) {
             throw new CloudbreakImageCatalogException("All images are empty or every items equals NULL");
         }
     }

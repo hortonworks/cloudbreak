@@ -21,9 +21,13 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class PrefixMatcherServiceTest {
 
-    private static final String V2_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json";
+    private static final String CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json";
 
-    private static Collection<CloudbreakVersion> versions;
+    private static final String RC_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-rc-image-catalog.json";
+
+    private static Collection<CloudbreakVersion> versionsFromV2Catalog;
+
+    private static Collection<CloudbreakVersion> versionsFromV3Catalog;
 
     @InjectMocks
     private PrefixMatcherService underTest;
@@ -33,19 +37,16 @@ public class PrefixMatcherServiceTest {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
-        versions = getVersions();
+        versionsFromV2Catalog = getVersions(CATALOG_FILE);
+        versionsFromV3Catalog = getVersions(RC_CATALOG_FILE);
     }
 
     @Test
     public void testPrefixMatchForCBVersionWithUnreleasedVersion() {
-        PrefixMatchImages actual = underTest.prefixMatchForCBVersion("2.1.0-dev.200", versions);
+        PrefixMatchImages actual = underTest.prefixMatchForCBVersion("2.1.0-dev.200", versionsFromV2Catalog);
 
-        assertTrue(actual.getvMImageUUIDs().contains("2.4.2.2-1-9a308050-4d5b-45a9-bfee-ce1cc444953d-2.5.0.1-265"));
-        assertTrue(actual.getvMImageUUIDs().contains("2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145"));
         assertTrue(actual.getvMImageUUIDs().contains("f6e778fc-7f17-4535-9021-515351df3691"));
-        assertTrue(actual.getvMImageUUIDs().contains("2.5.0.2-65-fe0ba14f-cb44-4573-ac8c-23cbc72bbd57-2.6.0.1-152"));
         assertTrue(actual.getvMImageUUIDs().contains("7aca1fa6-980c-44e2-a75e-3144b18a5993"));
-        assertTrue(actual.getvMImageUUIDs().contains("9958938a-1261-48e2-aff9-dbcb2cebf6cd"));
         assertTrue(actual.getDefaultVMImageUUIDs().contains("f6e778fc-7f17-4535-9021-515351df3691"));
         assertTrue(actual.getDefaultVMImageUUIDs().contains("7aca1fa6-980c-44e2-a75e-3144b18a5993"));
         assertTrue(actual.getSupportedVersions().contains("2.1.0-dev.1"));
@@ -56,15 +57,11 @@ public class PrefixMatcherServiceTest {
 
     @Test
     public void testPrefixMatchForCBVersionWithReleasedVersion() {
-        PrefixMatchImages actual = underTest.prefixMatchForCBVersion("2.1.0", versions);
+        PrefixMatchImages actual = underTest.prefixMatchForCBVersion("2.1.0", versionsFromV2Catalog);
 
         assertNotNull(actual);
-        assertTrue(actual.getvMImageUUIDs().contains("2.4.2.2-1-9a308050-4d5b-45a9-bfee-ce1cc444953d-2.5.0.1-265"));
-        assertTrue(actual.getvMImageUUIDs().contains("2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145"));
         assertTrue(actual.getvMImageUUIDs().contains("f6e778fc-7f17-4535-9021-515351df3691"));
-        assertTrue(actual.getvMImageUUIDs().contains("2.5.0.2-65-fe0ba14f-cb44-4573-ac8c-23cbc72bbd57-2.6.0.1-152"));
         assertTrue(actual.getvMImageUUIDs().contains("7aca1fa6-980c-44e2-a75e-3144b18a5993"));
-        assertTrue(actual.getvMImageUUIDs().contains("9958938a-1261-48e2-aff9-dbcb2cebf6cd"));
         assertTrue(actual.getDefaultVMImageUUIDs().isEmpty());
         assertTrue(actual.getSupportedVersions().contains("2.0.0"));
         assertTrue(actual.getSupportedVersions().contains("2.1.0-dev.100"));
@@ -72,18 +69,19 @@ public class PrefixMatcherServiceTest {
 
     @Test
     public void testPrefixMatchForCBVersionWithRcVersion() {
-        PrefixMatchImages actual = underTest.prefixMatchForCBVersion("1.16.4-rc.13", versions);
+        PrefixMatchImages actual = underTest.prefixMatchForCBVersion("2.7.0-rc.2", versionsFromV3Catalog);
 
-        assertTrue(actual.getvMImageUUIDs().contains("2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265"));
-        assertTrue(actual.getvMImageUUIDs().contains("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
-        assertTrue(actual.getDefaultVMImageUUIDs().isEmpty());
-        assertTrue(actual.getSupportedVersions().contains("1.16.4"));
-        assertTrue(actual.getSupportedVersions().contains("2.0.0-rc.1"));
-        assertTrue(actual.getSupportedVersions().contains("2.0.0-rc.2"));
+        assertTrue(actual.getvMImageUUIDs().contains("d4d57241-0be9-4ebf-9e00-5baea7bbed49"));
+        assertTrue(actual.getvMImageUUIDs().contains("0f575e42-9d90-4f85-5f8a-bdced2221dc3"));
+        assertTrue(actual.getvMImageUUIDs().contains("233a3a99-023d-468d-44d4-2d1330e81bab"));
+        assertTrue(actual.getDefaultVMImageUUIDs().contains("d4d57241-0be9-4ebf-9e00-5baea7bbed49"));
+        assertTrue(actual.getDefaultVMImageUUIDs().contains("0f575e42-9d90-4f85-5f8a-bdced2221dc3"));
+        assertTrue(actual.getSupportedVersions().contains("2.7.0-rc.1"));
+        assertTrue(actual.getSupportedVersions().contains("2.7.0-rc.2"));
     }
 
-    private static Collection<CloudbreakVersion> getVersions() throws IOException {
-        String catalogJson = FileReaderUtils.readFileFromClasspath(V2_CATALOG_FILE);
+    private static Collection<CloudbreakVersion> getVersions(String catalogFilePath) throws IOException {
+        String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFilePath);
         CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
         return catalog.getVersions().getCloudbreakVersions();
     }

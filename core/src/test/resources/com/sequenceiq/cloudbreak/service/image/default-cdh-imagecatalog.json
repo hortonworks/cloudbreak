@@ -1369,49 +1369,6 @@
         "uuid": "latest-hdp",
         "version": "2.5.2.5-3"
       }
-    ],
-    "hdf-images": [
-      {
-        "uuid": "9958938a-1261-48e2-aff9-dbcb2cebf6cd",
-        "date": "2016-09-20",
-        "version": "2.5.0.0-1157",
-        "os": "centos7",
-        "os_type": "redhat7",
-        "repo": {
-          "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.4.0.0-1157/",
-          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.4.0.0-1157/"
-        },
-        "stack-details": {
-          "version": "2.1.16.0-800",
-          "repo": {
-            "stack": {
-              "redhat6": "http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos6/2.x/BUILDS/2.4.10.0-80",
-              "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos7/2.x/BUILDS/2.4.10.0-80",
-              "repoid": "HDF-2.4"
-            },
-            "util": {
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos6",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.20/repos/centos7",
-              "repoid": "HDF-UTILS-1.1.0.20"
-            }
-          }
-        },
-        "images": {
-          "aws": {
-            "ap-northeast-1": "ami-0fc3016e",
-            "ap-northeast-2": "ami-4d6aa023",
-            "ap-southeast-1": "ami-ced60fad",
-            "ap-southeast-2": "ami-9f9eaafc",
-            "eu-central-1": "ami-cd4cbaa2",
-            "eu-west-1": "ami-0b067378",
-            "sa-east-1": "ami-70a5331c",
-            "us-east-1": "ami-70a73c67",
-            "us-west-1": "ami-3fe8ab5f",
-            "us-west-2": "ami-6bf9330b"
-          }
-        },
-        "description": "Cloudbreak's HDF official image"
-      }
     ]
   },
   "versions": {
@@ -1600,8 +1557,7 @@
           "2.4.2.2-1-9a308050-4d5b-45a9-bfee-ce1cc444953d-2.5.0.1-265",
           "2.5.0.2-65-fe0ba14f-cb44-4573-ac8c-23cbc72bbd57-2.6.0.1-152",
           "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145",
-          "latest-base",
-          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+          "latest-base"
         ]
       },
       {
@@ -1670,8 +1626,7 @@
           "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
           "latest-hdp",
           "latest-amazonlinux-hdp",
-          "second-latest-hdp",
-          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+          "second-latest-hdp"
         ],
         "images": [
           "latest-base",
@@ -1706,8 +1661,7 @@
           "second-latest-hdp",
           "latest-hdp",
           "latest-amazonlinux-hdp",
-          "third-latest-base-amazonlinux",
-          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+          "third-latest-base-amazonlinux"
         ]
       },
       {
@@ -1729,8 +1683,7 @@
           "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
           "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
           "second-latest-hdp",
-          "forth-latest-base-amazonlinux",
-          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+          "forth-latest-base-amazonlinux"
         ],
         "images": [
           "latest-base",
@@ -1765,8 +1718,7 @@
           "second-latest-hdp",
           "latest-hdp",
           "third-latest-base-amazonlinux",
-          "forth-latest-base-amazonlinux",
-          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+          "forth-latest-base-amazonlinux"
         ]
       },
       {
@@ -1807,8 +1759,7 @@
           "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
           "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
           "second-latest-hdp",
-          "latest-hdp",
-          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+          "latest-hdp"
         ]
       },
       {
@@ -1848,8 +1799,7 @@
           "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
           "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
           "second-latest-hdp",
-          "latest-hdp",
-          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+          "latest-hdp"
         ]
       },
       {
@@ -1890,8 +1840,7 @@
           "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
           "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
           "second-latest-hdp",
-          "latest-hdp",
-          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+          "latest-hdp"
         ]
       },
       {
@@ -1930,8 +1879,7 @@
           "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
           "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
           "second-latest-hdp",
-          "latest-hdp",
-          "9958938a-1261-48e2-aff9-dbcb2cebf6cd"
+          "latest-hdp"
         ]
       }
     ]

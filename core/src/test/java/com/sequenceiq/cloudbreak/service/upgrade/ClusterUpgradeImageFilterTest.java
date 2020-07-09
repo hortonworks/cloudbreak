@@ -73,7 +73,7 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnTheAvailableImage() {
         List<Image> properImages = List.of(properImage);
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, properImages, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, properImages, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImages)).thenReturn(imageFilterResult);
 
@@ -87,7 +87,7 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldReturnTheProperImageWhenTheCloudPlatformIsNotMatches() {
         Image availableImages = createImageWithDifferentPlatform();
         List<Image> allImage = List.of(availableImages, properImage);
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, allImage, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
 
@@ -100,7 +100,7 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnReasonMessageWhenTheCloudPlatformIsNotMatches() {
         List<Image> allImage = List.of(createImageWithDifferentPlatform());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, allImage, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
 
@@ -113,7 +113,7 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnReasonMessageWhenTheOsIsNotMatches() {
         List<Image> allImage = List.of(createImageWithDifferentOs());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, allImage, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
 
@@ -126,7 +126,7 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnReasonMessageWhenTheVersioningIsNotSupported() {
         List<Image> allImage = List.of(createImageWithDifferentStackVersioning());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, allImage, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
 
@@ -139,7 +139,7 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnReasonMessageWhenCmVersionIsNotAvailable() {
         List<Image> allImage = List.of(createImageWithoutCmVersion());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, allImage, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
 
@@ -154,7 +154,7 @@ public class ClusterUpgradeImageFilterTest {
         Image lowerCmImage = createImageWithLowerCmVersion();
         Image lowerCmAndCdpImage = createImageWithLowerCmAndCdpVersion();
         List<Image> availableImages = List.of(properImage, lowerCmImage, lowerCmAndCdpImage);
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
 
@@ -168,7 +168,7 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnReasonMessageWhenTheStackVersionIsNotGreater() {
         List<Image> availableImages = List.of(createImageWithSameStackAndCmVersion());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
 
@@ -182,7 +182,7 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldReturnTheProperImageWhenTheSaltVersionDoesNotMatch() {
         Image differentSaltVersionImage = createImageWithDifferentSaltVersion();
         List<Image> availableImages = List.of(properImage, differentSaltVersionImage);
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
 
@@ -195,7 +195,7 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnReasonMessageWhenTheSaltVersionDoesNotMatch() {
         List<Image> availableImages = List.of(createImageWithDifferentSaltVersion());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
 
@@ -209,7 +209,7 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldReturnTheProperImageWhenTheCurrentImageIsAlsoAvailable() {
         Image imageWithSameId = createImageWithCurrentImageId();
         List<Image> availableImages = List.of(properImage, imageWithSameId);
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
 
@@ -222,7 +222,7 @@ public class ClusterUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnReasonMessageWhenOnlyTheCurrentImageIsAvailable() {
         List<Image> availableImages = List.of(createImageWithCurrentImageId());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
 
@@ -236,7 +236,7 @@ public class ClusterUpgradeImageFilterTest {
     public void testFilterShouldReturnOnlyOneImageWhenLockComponentsIsSet() {
         List<Image> availableImages =
                 List.of(createImageWithSameStackAndCmVersion(), createImageWithSameStackAndCmVersion(), createImageWithDifferentStackVersioning());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, null, null, availableImages, null), "");
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
         lockComponents = true;
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);

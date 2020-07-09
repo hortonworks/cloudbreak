@@ -43,13 +43,7 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         ImagesV4Response res = new ImagesV4Response();
         List<BaseImageV4Response> baseImages = getBaseImageResponses(source);
         res.setBaseImages(baseImages);
-
-        List<ImageV4Response> hdpImages = convertImages(source.getHdpImages(), StackType.HDP);
-        List<ImageV4Response> hdfImages = convertImages(source.getHdfImages(), StackType.HDF);
         List<ImageV4Response> cdhImages = convertImages(source.getCdhImages(), StackType.CDH);
-
-        res.setHdpImages(hdpImages);
-        res.setHdfImages(hdfImages);
         res.setCdhImages(cdhImages);
         res.setSupportedVersions(source.getSuppertedVersions());
         return res;

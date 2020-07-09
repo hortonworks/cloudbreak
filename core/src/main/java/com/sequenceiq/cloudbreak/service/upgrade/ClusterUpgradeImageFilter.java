@@ -65,7 +65,7 @@ public class ClusterUpgradeImageFilter {
                 .filter(validateSaltVersion(currentImage))
                 .collect(Collectors.toList());
 
-        return new ImageFilterResult(new Images(null, null, null, images, null), getReason(images));
+        return new ImageFilterResult(new Images(null, images, null), getReason(images));
     }
 
     private Predicate<Image> filterCurrentImage(Image currentImage) {
