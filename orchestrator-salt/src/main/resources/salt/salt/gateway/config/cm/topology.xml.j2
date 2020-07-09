@@ -15,164 +15,180 @@
            </param>
         </provider>
 
+{%- if 'RANGER' in exposed and 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
+    {% set ranger_installed = True %}
+    {% set aclsauthz_prefix = 'AclsAuthz.' %}
+{%- else -%}
+    {% set ranger_installed = False %}
+    {% set aclsauthz_prefix = '' %}
+{%- endif -%}
+
 {% if salt['pillar.get']('gateway:envAccessGroup') is defined and salt['pillar.get']('gateway:envAccessGroup') | length > 0 %}
-        <provider>
-            <role>identity-assertion</role>
-            <name>HadoopGroupProvider</name>
-            <enabled>true</enabled>
-            <param>
-                <name>CENTRAL_GROUP_CONFIG_PREFIX</name>
-                <value>gateway.group.config.</value>
-            </param>
-        </provider>
-
-        <provider>
-            <role>authorization</role>
-            <name>AclsAuthz</name>
-            <enabled>true</enabled>
-            <param>
-                <name>knox.acl.mode</name>
-                <value>AND</value>
-            </param>
-            <param>
-                <name>atlas.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>atlas-api.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>cm-api.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>cm-ui.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>das.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>hbaseui.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>hdfsui.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>hive.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>hue.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>impalaui.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>kuduui.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>jobhistoryui.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>livyserver.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>nifi.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>nifi-registry.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>oozie.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>oozieui.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>data-discovery-service-api.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>profiler-admin-api.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>profiler-metrics-api.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>profiler-scheduler-api.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>ranger.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>rangerui.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>schema-registry.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>smm-ui.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>solr.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>sparkhistoryui.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>spark3historyui.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>webhdfs.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>yarnuiv2.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>resourcemanager.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>zeppelinui.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>zeppelinws.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
-                <name>flink.acl</name>
-                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-        </provider>
-{% endif %}
-
+    <provider>
+        <role>identity-assertion</role>
+        <name>HadoopGroupProvider</name>
+        <enabled>true</enabled>
+        <param>
+            <name>CENTRAL_GROUP_CONFIG_PREFIX</name>
+            <value>gateway.group.config.</value>
+        </param>
+    </provider>
+    <provider>
+    {%- if ranger_installed == True %}
+             <role>authorization</role>
+             <name>CompositeAuthz</name>
+             <enabled>true</enabled>
+             <param>
+                 <name>composite.provider.names</name>
+                 <value>AclsAuthz,XASecurePDPKnox</value>
+              </param>
+    {%- else %}
+             <role>authorization</role>
+             <name>AclsAuthz</name>
+             <enabled>true</enabled>
+    {%- endif %}
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "knox.acl.mode" }}</name>
+                 <value>AND</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "atlas.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "atlas-api.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "cm-api.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "cm-ui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "das.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "hbaseui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "hdfsui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "hive.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "hue.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "impalaui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "kuduui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "jobhistoryui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "livyserver.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "nifi.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "nifi-registry.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "oozie.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "oozieui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "data-discovery-service-api.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "profiler-admin-api.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "profiler-metrics-api.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "profiler-scheduler-api.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "ranger.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "rangerui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "schema-registry.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "smm-ui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "solr.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "sparkhistoryui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "spark3historyui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "webhdfs.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "yarnuiv2.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "resourcemanager.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "zeppelinui.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "zeppelinws.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
+                 <name>{{ aclsauthz_prefix ~ "flink.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+         </provider>
+    {%- endif %}
          <provider>
              <role>ha</role>
              <name>HaProvider</name>
