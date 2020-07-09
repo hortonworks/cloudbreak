@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.tags.v1.controller;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,6 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
 import com.sequenceiq.environment.api.v1.tags.model.request.AccountTagRequests;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
@@ -104,12 +104,12 @@ public class AccountTagController extends NotificationController implements Acco
         } else if (!Strings.isNullOrEmpty(environmentName)) {
             environmentDto = environmentService.getByNameAndAccountId(environmentName, accountId);
         }
-        Tags accountTagsMap = new Tags();
+        Map<String, String> accountTagsMap = new HashMap<>();
         if (environmentDto != null) {
             accountTagsMap = accountTagService.generate(accountId, environmentDto);
         }
         Set<GeneratedAccountTagResponse> accountTags = new HashSet<>();
-        for (Map.Entry<String, String> entry : accountTagsMap.getAll().entrySet()) {
+        for (Map.Entry<String, String> entry : accountTagsMap.entrySet()) {
             GeneratedAccountTagResponse accountTag = new GeneratedAccountTagResponse();
             accountTag.setKey(entry.getKey());
             accountTag.setValue(entry.getValue());

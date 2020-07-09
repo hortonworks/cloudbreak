@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -158,7 +157,7 @@ public class FreeIpaInstallService {
         if (stack.getTags() != null && isNotBlank(stack.getTags().getValue())) {
             try {
                 StackTags stackTags = stack.getTags().get(StackTags.class);
-                Map<String, Object> tags = new HashMap<>(Tags.getAll(stackTags.getDefaultTags()));
+                Map<String, Object> tags = new HashMap<>(stackTags.getDefaultTags());
                 servicePillarConfig.put("tags", new SaltPillarProperties("/tags/init.sls",
                         Collections.singletonMap("tags", tags)));
             } catch (Exception e) {

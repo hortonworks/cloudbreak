@@ -1,43 +1,45 @@
 package com.sequenceiq.distrox.api.v1.distrox.model.tags;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
-import com.sequenceiq.common.api.tag.request.TagsRequest;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sequenceiq.common.model.JsonEntity;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public class TagsV1Request implements JsonEntity {
 
     @ApiModelProperty(StackModelDescription.APPLICATION_TAGS)
-    private TagsRequest application = new TagsRequest();
+    private Map<String, String> application = new HashMap<>();
 
     @ApiModelProperty(StackModelDescription.USERDEFINED_TAGS)
-    private TagsRequest userDefined = new TagsRequest();
+    private Map<String, String> userDefined = new HashMap<>();
 
     @ApiModelProperty(StackModelDescription.DEFAULT_TAGS)
-    private TagsRequest defaults = new TagsRequest();
+    private Map<String, String> defaults = new HashMap<>();
 
-    public TagsRequest getApplication() {
+    public Map<String, String> getApplication() {
         return application;
     }
 
-    public void setApplication(TagsRequest application) {
+    public void setApplication(Map<String, String> application) {
         this.application = application;
     }
 
-    public TagsRequest getUserDefined() {
+    public Map<String, String> getUserDefined() {
         return userDefined;
     }
 
-    public void setUserDefined(TagsRequest userDefined) {
+    public void setUserDefined(Map<String, String> userDefined) {
         this.userDefined = userDefined;
     }
 
-    public TagsRequest getDefaults() {
+    public Map<String, String> getDefaults() {
         return defaults;
     }
 
-    public void setDefaults(TagsRequest defaults) {
+    public void setDefaults(Map<String, String> defaults) {
         this.defaults = defaults;
     }
 }

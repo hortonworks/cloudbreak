@@ -29,6 +29,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -48,7 +49,6 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -169,13 +169,19 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields, template.getId(), instanceImageId);
     }
 
-    private Tags getUserDefinedTags(Stack stack) {
-        Tags result = new Tags();
+    private Map<String, String> getUserDefinedTags(Stack stack) {
+        Map<String, String> result = Maps.newHashMap();
         try {
             if (stack.getTags() != null && isNotBlank(stack.getTags().getValue())) {
                 StackTags stackTag = stack.getTags().get(StackTags.class);
-                result.addTags(stackTag.getUserDefinedTags());
-                result.addTags(stackTag.getDefaultTags());
+                Map<String, String> userDefined = stackTag.getUserDefinedTags();
+                Map<String, String> defaultTags = stackTag.getDefaultTags();
+                if (userDefined != null) {
+                    result.putAll(userDefined);
+                }
+                if (defaultTags != null) {
+                    result.putAll(defaultTags);
+                }
             }
         } catch (IOException e) {
             LOGGER.info("Exception during converting user defined tags.", e);

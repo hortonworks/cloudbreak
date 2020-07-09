@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.status.NovaInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NovaInstanceView;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -60,7 +59,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
             NovaInstanceView novaInstanceView = new NovaInstanceView(context.getName(), template, group.getType(), group.getLoginUserName());
             String imageId = osClient.imagesV2().list(Collections.singletonMap("name", cloudStack.getImage().getImageName())).get(0).getId();
             LOGGER.debug("Selected image id: {}", imageId);
-            Map<String, String> metadata = mergeMetadata(novaInstanceView.getMetadataMap(), Tags.getAll(cloudStack.getTags()));
+            Map<String, String> metadata = mergeMetadata(novaInstanceView.getMetadataMap(), cloudStack.getTags());
             ServerCreateBuilder serverCreateBuilder = Builders.server()
                     .name(resource.getName())
                     .image(imageId)

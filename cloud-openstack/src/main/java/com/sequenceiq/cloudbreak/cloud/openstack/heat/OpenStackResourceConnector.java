@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -90,7 +89,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         modelContext.withStackName(stackName);
         modelContext.withNeutronNetworkView(neutronNetworkView);
         modelContext.withTemplateString(stack.getTemplate());
-        modelContext.withTags(Tags.getAll(stack.getTags()));
+        modelContext.withTags(stack.getTags());
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
@@ -323,7 +322,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         modelContext.withStackName(stackName);
         modelContext.withNeutronNetworkView(neutronNetworkView);
         modelContext.withTemplateString(stack.getTemplate());
-        modelContext.withTags(Tags.getAll(stack.getTags()));
+        modelContext.withTags(stack.getTags());
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
@@ -355,7 +354,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         modelContext.withStackName(stackName);
         modelContext.withNeutronNetworkView(neutronNetworkView);
         modelContext.withTemplateString(stack.getTemplate());
-        modelContext.withTags(Tags.getAll(stack.getTags()));
+        modelContext.withTags(stack.getTags());
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
@@ -394,7 +393,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         modelContext.withStackName(stackName);
         modelContext.withNeutronNetworkView(neutronNetworkView);
         modelContext.withTemplateString(stack.getTemplate());
-        modelContext.withTags(Tags.getAll(stack.getTags()));
+        modelContext.withTags(stack.getTags());
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(

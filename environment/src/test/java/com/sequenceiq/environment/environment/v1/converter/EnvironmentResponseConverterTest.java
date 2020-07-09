@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -313,7 +312,7 @@ public class EnvironmentResponseConverterTest {
     }
 
     private EnvironmentTags createTags() {
-        return new EnvironmentTags(new Tags(Map.of("user", "cloudbreak")), new Tags(Map.of("department", "finance")));
+        return new EnvironmentTags(Map.of("user", "cloudbreak"), Map.of("department", "finance"));
     }
 
     private AuthenticationDto createAuthenticationDto() {

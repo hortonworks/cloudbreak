@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -104,7 +103,7 @@ public class S3GuardConfigProviderTest {
                 .withHostgroupViews(Set.of(master, worker))
                 .withGateway(gateway, "/cb/secret/signkey", new HashSet<>())
                 .withPlacementView(placementView)
-                .withDefaultTags(new Tags(Map.of("apple", "apple1")))
+                .withDefaultTags(Map.of("apple", "apple1"))
                 .build();
     }
 

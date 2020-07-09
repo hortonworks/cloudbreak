@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.common.api.tag.model.Tags;
 
 @Service
 public class AzureStorageAccountService {
@@ -46,8 +45,7 @@ public class AzureStorageAccountService {
         if (storageAccount == null) {
             try {
                 LOGGER.info("Creating storage account: {}", storageName);
-                armStorage.createStorage(client, storageName, LOCALLY_REDUNDANT, resourceGroup, region, isEncryptionNeeded(stack),
-                        Tags.getAll(stack.getTags()));
+                armStorage.createStorage(client, storageName, LOCALLY_REDUNDANT, resourceGroup, region, isEncryptionNeeded(stack), stack.getTags());
                 pollStorageAccountCreation(ac, new StorageAccountCheckerContext(client, resourceGroup, storageName));
             } catch (CloudException e) {
                 LOGGER.error("Error during storage account creation: {}.", storageName, e);

@@ -15,6 +15,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +41,6 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
@@ -169,7 +169,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         databaseServerRequest.setSecurityGroup(securityGroupRequest);
 
         when(uuidGeneratorService.randomUuid()).thenReturn("uuid");
-        when(accountTagService.list()).thenReturn(new Tags());
+        when(accountTagService.list()).thenReturn(new HashMap<>());
         when(uuidGeneratorService.uuidVariableParts(anyInt())).thenReturn("parts");
         when(entitlementService.internalTenant(anyString(), anyString())).thenReturn(true);
 

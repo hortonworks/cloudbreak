@@ -52,7 +52,6 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
-import com.sequenceiq.common.api.tag.model.Tags;
 
 @Service
 public class AwsNetworkConnector extends DefaultNetworkConnector {
@@ -221,7 +220,7 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
         return new CreatedCloudNetwork(networkRequest.getStackName(), vpcId, subnets);
     }
 
-    private CreateStackRequest createStackRequest(String stackName, String cloudFormationTemplate, Tags tags, String creatorUser) {
+    private CreateStackRequest createStackRequest(String stackName, String cloudFormationTemplate, Map<String, String> tags, String creatorUser) {
         Collection<Tag> awsTags = awsTaggingService.prepareCloudformationTags(null, tags);
         return new CreateStackRequest()
                 .withStackName(stackName)

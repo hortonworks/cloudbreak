@@ -26,7 +26,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.common.api.tag.request.TagsRequest;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -132,7 +131,7 @@ public class EnvironmentApiConverterTest {
         assertEquals(request.getRegions(), actual.getRegions());
         assertAuthentication(request.getAuthentication(), actual.getAuthentication());
         assertEquals(request.getAdminGroupName(), actual.getAdminGroupName());
-        assertEquals(request.getTags().getAll(), actual.getTags().getAll());
+        assertEquals(request.getTags(), actual.getTags());
         assertExperimentalFeatures(request, actual.getExperimentalFeatures());
         assertParameters(request, actual.getParameters(), cloudPlatform);
         assertEquals(request.getProxyConfigName(), actual.getProxyConfigName());
@@ -265,7 +264,7 @@ public class EnvironmentApiConverterTest {
         request.setCloudStorageValidation(CloudStorageValidation.DISABLED);
         request.setAdminGroupName("cb-admin");
         request.setProxyConfigName("my-proxy");
-        request.setTags(new TagsRequest(Map.of("owner", "cloudbreak")));
+        request.setTags(Map.of("owner", "cloudbreak"));
         request.setParentEnvironmentName("parent-env");
         setParameters(request, cloudPlatform);
         return request;

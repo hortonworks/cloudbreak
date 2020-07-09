@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -53,7 +52,8 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
             Address address = new Address();
             address.setName(resource.getName());
 
-            Map<String, Object> customTags = new HashMap<>(Tags.getAll(cloudStack.getTags()));
+            Map<String, Object> customTags = new HashMap<>();
+            customTags.putAll(cloudStack.getTags());
             address.setUnknownKeys(customTags);
             Insert networkInsert = context.getCompute().addresses().insert(projectId, region, address);
             try {

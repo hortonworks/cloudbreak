@@ -8,6 +8,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CR
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,12 +31,10 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.util.CidrUtil;
-import com.sequenceiq.common.api.tag.request.TagsRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
@@ -56,11 +55,11 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
@@ -231,10 +230,11 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void setTags(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {
-        Optional.ofNullable(environment.getTags())
-                .map(EnvironmentTags::getUserDefinedTags)
-                .map(tags -> new TagsRequest(tags.getAll()))
-                .ifPresent(createFreeIpaRequest::setTags);
+        Map<String, String> userDefinedTags = environment.getTags().getUserDefinedTags();
+        if (userDefinedTags == null) {
+            userDefinedTags = new HashMap<>();
+        }
+        createFreeIpaRequest.setTags(userDefinedTags);
     }
 
     private void setTelemetry(EnvironmentDto environmentDto, CreateFreeIpaRequest createFreeIpaRequest) {

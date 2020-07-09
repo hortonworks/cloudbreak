@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.model.network;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.common.api.tag.model.Tags;
 
 public class NetworkCreationRequest {
 
@@ -40,7 +41,7 @@ public class NetworkCreationRequest {
 
     private final boolean serviceEndpointsEnabled;
 
-    private final Tags tags;
+    private final Map<String, String> tags;
 
     private NetworkCreationRequest(Builder builder) {
         envId = builder.envId;
@@ -126,7 +127,7 @@ public class NetworkCreationRequest {
         return creatorCrn;
     }
 
-    public Tags getTags() {
+    public Map<String, String> getTags() {
         return tags;
     }
 
@@ -163,7 +164,7 @@ public class NetworkCreationRequest {
 
         private String creatorCrn;
 
-        private Tags tags = new Tags();
+        private Map<String, String> tags = new HashMap<>();
 
         public Builder withEnvId(Long envId) {
             this.envId = envId;
@@ -245,7 +246,7 @@ public class NetworkCreationRequest {
             return this;
         }
 
-        public Builder withTags(Tags tags) {
+        public Builder withTags(Map<String, String> tags) {
             this.tags = tags;
             return this;
         }

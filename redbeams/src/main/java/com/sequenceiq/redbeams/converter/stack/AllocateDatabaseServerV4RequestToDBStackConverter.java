@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -169,9 +168,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
                 .withAccountTags(accountTagService.list())
                 .build();
 
-        Tags defaultTags = costTagging.prepareDefaultTags(request);
+        Map<String, String> defaultTags = costTagging.prepareDefaultTags(request);
 
-        return new Json(new StackTags(new Tags(environment.getTags().getUserDefined()), new Tags(), defaultTags));
+        return new Json(new StackTags(environment.getTags().getUserDefined(), new HashMap<>(), defaultTags));
     }
 
     private void setRegion(DBStack dbStack, DetailedEnvironmentResponse environment) {

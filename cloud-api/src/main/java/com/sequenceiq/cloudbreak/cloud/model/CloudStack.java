@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.common.api.tag.model.Tags;
 
 /**
  * Class that describes complete structure of infrastructure that needs to be started on the Cloud Provider
@@ -28,19 +27,19 @@ public class CloudStack {
 
     private final Map<String, String> parameters;
 
-    private final Tags tags;
+    private final Map<String, String> tags;
 
     private final InstanceAuthentication instanceAuthentication;
 
     private final Optional<SpiFileSystem> fileSystem;
 
-    public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Tags tags, String template,
+    public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
             InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;
         this.parameters = ImmutableMap.copyOf(parameters);
-        this.tags = new Tags(tags);
+        this.tags = ImmutableMap.copyOf(tags);
         this.template = template;
         this.instanceAuthentication = instanceAuthentication;
         this.loginUserName = loginUserName;
@@ -64,7 +63,7 @@ public class CloudStack {
         return parameters;
     }
 
-    public Tags getTags() {
+    public Map<String, String> getTags() {
         return tags;
     }
 

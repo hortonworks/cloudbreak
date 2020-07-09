@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CentralTagUpdater;
 import com.sequenceiq.cloudbreak.tag.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
-import com.sequenceiq.common.api.tag.model.Tags;
 
 @ExtendWith(MockitoExtension.class)
 public class DefaultCostTaggingServiceAccountTagValidationTest {
@@ -36,13 +35,13 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
     @Test
     void prepareDefaultTagsWithResourceTagValidationWhenUserDefinedResourceTagsIsEmptyShouldThrowValidationFailed()
             throws AccountTagValidationFailed {
-        underTest.prepareDefaultTags(tagRequest(new Tags()));
+        underTest.prepareDefaultTags(tagRequest(new HashMap<>()));
     }
 
     @Test
     void prepareDefaultTagsWithResourceTagValidationWhenUserDefinedResourceTagsNotContainsAccountTagsKey()
             throws AccountTagValidationFailed {
-        Tags userDefinedTags = new Tags(Map.of("aNotCollidingKey", "aValue"));
+        Map<String, String> userDefinedTags = Map.of("aNotCollidingKey", "aValue");
 
         underTest.prepareDefaultTags(tagRequest(userDefinedTags));
     }
@@ -50,7 +49,7 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
     @Test
     void prepareDefaultTagsWithResourceTagValidationWhenUserDefinedResourceTagsContainsAccountTagsKey() {
         String collidingTagKey = "accountTagKey2";
-        Tags userDefinedTags = new Tags(Map.of(collidingTagKey, "a colliding key's Value"));
+        Map<String, String> userDefinedTags = Map.of(collidingTagKey, "a colliding key's Value");
 
         AccountTagValidationFailed exception = Assertions.assertThrows(AccountTagValidationFailed.class,
                 () -> underTest.prepareDefaultTags(tagRequest(userDefinedTags)));
@@ -62,9 +61,9 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
     void prepareDefaultTagsWithResourceTagValidationWhenUserDefinedResourceTagsContainsMultipleAccountTagsKey() {
         String collidingTagKey = "accountTagKey2";
         String collidingTagKey2 = "accountTagKey";
-        Tags resourceTags = new Tags(Map.of(
+        Map<String, String> resourceTags = Map.of(
                 collidingTagKey, "a colliding key's Value",
-                collidingTagKey2, "an other colliding key's value"));
+                collidingTagKey2, "an other colliding key's value");
 
         AccountTagValidationFailed exception = Assertions.assertThrows(AccountTagValidationFailed.class,
                 () -> underTest.prepareDefaultTags(tagRequest(resourceTags)));
@@ -77,21 +76,20 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
     void prepareDefaultTagsWithResourceTagValidationWhenAccountTagsIsEmpty() throws AccountTagValidationFailed {
         String notCollidingTagKey = "tagKey2";
         String notCollidingTagKey2 = "tagKey";
-        Tags resourceTags = new Tags(Map.of(
+        Map<String, String> resourceTags = Map.of(
                 notCollidingTagKey, "a not colliding key's Value",
-                notCollidingTagKey2, "another not colliding key's value"));
+                notCollidingTagKey2, "another not colliding key's value");
 
-        underTest.prepareDefaultTags(tagRequest(resourceTags, new Tags()));
+        underTest.prepareDefaultTags(tagRequest(resourceTags, new HashMap<>()));
     }
 
-    private CDPTagGenerationRequest tagRequest(Tags userDefinedResourceTags) {
+    private CDPTagGenerationRequest tagRequest(Map<String, String> userDefinedResourceTags) {
         return tagRequest(userDefinedResourceTags, null);
     }
 
-    private CDPTagGenerationRequest tagRequest(Tags userDefinedResourceTags, Tags accountTags) {
-        Tags defaultAccountTagKey = new Tags(Map.of(
-                "accountTagKey", "accountTagValue",
-                "accountTagKey2", "accountTagValue2"));
+    private CDPTagGenerationRequest tagRequest(Map<String, String> userDefinedResourceTags, Map<String, String> accountTags) {
+        Map<String, String> defaultccountTagKey = Map.of("accountTagKey", "accountTagValue",
+                "accountTagKey2", "accountTagValue2");
 
         return CDPTagGenerationRequest.Builder.builder()
                 .withEnvironmentCrn("environment-crn")
@@ -103,7 +101,7 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
                 .withIsInternalTenant(true)
                 .withSourceMap(new HashMap<>())
                 .withUserDefinedTags(userDefinedResourceTags)
-                .withAccountTags(Objects.requireNonNullElse(accountTags, defaultAccountTagKey))
+                .withAccountTags(Objects.requireNonNullElseGet(accountTags, () -> defaultccountTagKey))
                 .build();
     }
 }

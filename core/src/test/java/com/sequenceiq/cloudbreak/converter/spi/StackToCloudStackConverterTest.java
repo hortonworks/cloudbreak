@@ -67,7 +67,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -623,8 +622,25 @@ public class StackToCloudStackConverterTest {
     @Test
     public void testConvertWhenStackTagsNotNullButDoesNotContainsNeitherUserDefinedOrDefaultTagsThenEmptyMapsShouldBeStored() throws IOException {
         Json tags = mock(Json.class);
+        StackTags stackTags = mock(StackTags.class);
         when(stack.getTags()).thenReturn(tags);
-        when(tags.get(StackTags.class)).thenReturn(new StackTags(null, null, null));
+        when(tags.get(StackTags.class)).thenReturn(stackTags);
+        when(stackTags.getUserDefinedTags()).thenReturn(Collections.emptyMap());
+        when(stackTags.getDefaultTags()).thenReturn(Collections.emptyMap());
+
+        CloudStack result = underTest.convert(stack);
+
+        assertTrue(result.getTags().isEmpty());
+    }
+
+    @Test
+    public void testConvertWhenStackTagsNotNullButBothUserDefinedAndDefaultTagsAreNullThenEmptyMapsShouldBeStored() throws IOException {
+        Json tags = mock(Json.class);
+        StackTags stackTags = mock(StackTags.class);
+        when(stack.getTags()).thenReturn(tags);
+        when(tags.get(StackTags.class)).thenReturn(stackTags);
+        when(stackTags.getUserDefinedTags()).thenReturn(null);
+        when(stackTags.getDefaultTags()).thenReturn(null);
 
         CloudStack result = underTest.convert(stack);
 
@@ -633,24 +649,27 @@ public class StackToCloudStackConverterTest {
 
     @Test
     public void testConvertWhenTagsContainsOnlyUserDefinedTagsThenOnlyThoseWillBeStored() throws IOException {
-        Tags userDefinedTags = new Tags(createMap("userDefined"));
+//        Map<String, String> userDefinedTags = createMap("userDefined");
+        Map<String, String> userDefinedTags = createMap("userDefined");
         Json tags = mock(Json.class);
-        StackTags stackTags = new StackTags(userDefinedTags, null, null);
+        StackTags stackTags = mock(StackTags.class);
         when(stack.getTags()).thenReturn(tags);
         when(tags.get(StackTags.class)).thenReturn(stackTags);
+        when(stackTags.getUserDefinedTags()).thenReturn(userDefinedTags);
+        when(stackTags.getDefaultTags()).thenReturn(null);
 
         CloudStack result = underTest.convert(stack);
 
         assertEquals(userDefinedTags.size(), result.getTags().size());
-        userDefinedTags.getAll().forEach((key, value) -> {
-            assertTrue(result.getTags().hasTag(key));
-            assertEquals(value, result.getTags().getTagValue(key));
+        userDefinedTags.forEach((key, value) -> {
+            assertTrue(result.getTags().containsKey(key));
+            assertEquals(value, result.getTags().get(key));
         });
     }
 
     @Test
     public void testConvertWhenTagsContainsOnlyDefaultTagsThenOnlyThoseWillBeSaved() throws IOException {
-        Tags defaultTags = new Tags(createMap("default"));
+        Map<String, String> defaultTags = createMap("default");
         Json tags = mock(Json.class);
         StackTags stackTags = mock(StackTags.class);
         when(stack.getTags()).thenReturn(tags);
@@ -661,16 +680,16 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(defaultTags.size(), result.getTags().size());
-        defaultTags.getAll().forEach((key, value) -> {
-            assertTrue(result.getTags().hasTag(key));
-            assertEquals(value, result.getTags().getTagValue(key));
+        defaultTags.forEach((key, value) -> {
+            assertTrue(result.getTags().containsKey(key));
+            assertEquals(value, result.getTags().get(key));
         });
     }
 
     @Test
     public void testConvertWhenTagsContainsBothUserDefinedAndDefaultTagsThenBothShouldBeSaved() throws IOException {
-        Tags defaultTags = new Tags(createMap("default"));
-        Tags userDefined = new Tags(createMap("userDefined"));
+        Map<String, String> defaultTags = createMap("default");
+        Map<String, String> userDefined = createMap("userDefined");
         Json tags = mock(Json.class);
         StackTags stackTags = mock(StackTags.class);
         when(stack.getTags()).thenReturn(tags);
@@ -681,13 +700,13 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(defaultTags.size() + userDefined.size(), result.getTags().size());
-        defaultTags.getAll().forEach((key, value) -> {
-            assertTrue(result.getTags().hasTag(key));
-            assertEquals(value, result.getTags().getTagValue(key));
+        defaultTags.forEach((key, value) -> {
+            assertTrue(result.getTags().containsKey(key));
+            assertEquals(value, result.getTags().get(key));
         });
-        userDefined.getAll().forEach((key, value) -> {
-            assertTrue(result.getTags().hasTag(key));
-            assertEquals(value, result.getTags().getTagValue(key));
+        userDefined.forEach((key, value) -> {
+            assertTrue(result.getTags().containsKey(key));
+            assertEquals(value, result.getTags().get(key));
         });
     }
 

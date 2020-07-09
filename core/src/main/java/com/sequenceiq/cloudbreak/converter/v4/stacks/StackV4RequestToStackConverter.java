@@ -63,11 +63,9 @@ import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 
 @Component
 public class StackV4RequestToStackConverter extends AbstractConversionServiceAwareConverter<StackV4Request, Stack> {
@@ -267,21 +265,21 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         try {
             TagsV4Request tags = source.getTags();
             if (tags == null) {
-                return new Json(new StackTags(new Tags(environment.getTags().getUserDefined()), new Tags(), new Tags()));
+                return new Json(new StackTags(environment.getTags().getUserDefined(), new HashMap<>(), new HashMap<>()));
             }
 
-            Tags userDefined = Optional.ofNullable(environment.getTags())
-                    .map(TagResponse::getUserDefined)
-                    .map(Tags::new)
-                    .orElseGet(Tags::new);
+            Map<String, String> userDefined = new HashMap<>();
+            if (environment.getTags() != null && environment.getTags().getUserDefined() != null && !environment.getTags().getUserDefined().isEmpty()) {
+                userDefined = environment.getTags().getUserDefined();
+            }
 
             CDPTagMergeRequest request = CDPTagMergeRequest.Builder
                     .builder()
                     .withPlatform(source.getCloudPlatform().name())
-                    .withRequestTags(new Tags(tags.getUserDefined()))
+                    .withRequestTags(tags.getUserDefined())
                     .withEnvironmentTags(userDefined)
                     .build();
-            return new Json(new StackTags(costTagging.mergeTags(request), new Tags(tags.getApplication()), new Tags()));
+            return new Json(new StackTags(costTagging.mergeTags(request), tags.getApplication(), new HashMap<>()));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
