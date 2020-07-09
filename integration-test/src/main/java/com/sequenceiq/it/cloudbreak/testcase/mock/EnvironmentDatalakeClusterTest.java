@@ -60,7 +60,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
-                .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
                 .when(environmentTestClient.create())
                 .given(ClusterTestDto.class).valid()
@@ -94,7 +93,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
-                .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
                 .when(environmentTestClient.create())
                 .given(ClusterTestDto.class).valid()

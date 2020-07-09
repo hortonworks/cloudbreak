@@ -10,7 +10,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -128,7 +127,7 @@ public class EnvironmentApiConverterTest {
         assertEquals(freeIpaCreationDto, actual.getFreeIpaCreation());
         assertLocation(request.getLocation(), actual.getLocation());
         assertEquals(environmentTelemetry, actual.getTelemetry());
-        assertEquals(request.getRegions(), actual.getRegions());
+        assertEquals(1, actual.getRegions().size());
         assertAuthentication(request.getAuthentication(), actual.getAuthentication());
         assertEquals(request.getAdminGroupName(), actual.getAdminGroupName());
         assertEquals(request.getTags(), actual.getTags());
@@ -252,7 +251,6 @@ public class EnvironmentApiConverterTest {
         request.setName("test-cluster");
         request.setDescription("Test description.");
         request.setCredentialName(CREDENTIAL_NAME);
-        request.setRegions(Collections.singleton("us-west"));
         request.setLocation(createLocationRequest());
         request.setNetwork(new EnvironmentNetworkRequest());
         request.setTelemetry(new TelemetryRequest());

@@ -51,7 +51,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public static final String MOCK_CAPITAL = "MOCK";
 
-    public static final String EUROPE = "Europe";
+    public static final String LONDON = "London";
 
     private static final String DEFAULT_BLUEPRINT_CDH_VERSION = "7.0.2";
 

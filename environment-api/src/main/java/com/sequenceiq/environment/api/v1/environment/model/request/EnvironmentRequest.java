@@ -1,9 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -45,9 +43,6 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ResourceObjectField(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL, variableType = AuthorizationVariableType.NAME)
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_NAME_REQUEST)
     private String credentialName;
-
-    @ApiModelProperty(EnvironmentModelDescription.REGIONS)
-    private Set<String> regions = new HashSet<>();
 
     @ApiModelProperty(value = EnvironmentModelDescription.LOCATION, required = true)
     @NotNull
@@ -134,14 +129,6 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Override
     public void setCredentialName(String credentialName) {
         this.credentialName = credentialName;
-    }
-
-    public Set<String> getRegions() {
-        return regions;
-    }
-
-    public void setRegions(Set<String> regions) {
-        this.regions = regions == null ? new HashSet<>() : regions;
     }
 
     public LocationRequest getLocation() {

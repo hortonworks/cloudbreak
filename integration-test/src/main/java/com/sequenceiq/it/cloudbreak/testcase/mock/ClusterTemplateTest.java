@@ -357,7 +357,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
         testContext
                 .given("placementSettings", PlacementSettingsTestDto.class)
-                .withRegion(MockCloudProvider.EUROPE)
+                .withRegion(MockCloudProvider.LONDON)
                 .given("stackTemplate", StackTemplateTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .withPlacement("placementSettings")

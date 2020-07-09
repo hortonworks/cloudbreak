@@ -9,7 +9,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -140,11 +139,6 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withDescription(String description) {
         getRequest().setDescription(description);
-        return this;
-    }
-
-    public EnvironmentTestDto withRegions(Set<String> region) {
-        getRequest().setRegions(region);
         return this;
     }
 
