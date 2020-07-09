@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 
 @Component
 public class CleanupService {
@@ -24,18 +25,19 @@ public class CleanupService {
     @Value("${integrationtest.cleanup.retryCount}")
     private int cleanUpRetryCount;
 
-    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient, Long workspaceId) {
+    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient,
+            CloudbreakInternalCrnClient cloudbreakInternalClient, Long workspaceId) {
         if (cleanedUp) {
             return;
         }
         LOG.error("should replace the invalid environment value on stack deletion!");
         String environment = "suchAnInvalidValueWhichShouldBeReplacedAfterApiRefactor";
         cleanedUp = true;
-        cloudbreakClient.stackV4Endpoint()
+        cloudbreakInternalClient.withInternalCrn().stackV4Endpoint()
                 .list(workspaceId, environment, false).getResponses()
                 .stream()
                 .filter(stack -> stack.getName().startsWith("it-"))
-                .forEach(stack -> deleteStackAndWait(cloudbreakClient, workspaceId, stack.getName()));
+                .forEach(stack -> deleteStackAndWait(cloudbreakInternalClient, workspaceId, stack.getName()));
 
         cloudbreakClient.blueprintV4Endpoint()
                 .list(workspaceId, false)
@@ -72,7 +74,7 @@ public class CleanupService {
         }
     }
 
-    public void deleteStackAndWait(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName) {
+    public void deleteStackAndWait(CloudbreakInternalCrnClient cloudbreakClient, Long workspaceId, String stackName) {
         for (int i = 0; i < cleanUpRetryCount; i++) {
             if (deleteStack(cloudbreakClient, workspaceId, stackName)) {
                 WaitResult waitResult = CloudbreakUtil.waitForStackStatus(cloudbreakClient, workspaceId, stackName, "DELETE_COMPLETED");
@@ -88,10 +90,10 @@ public class CleanupService {
         }
     }
 
-    public boolean deleteStack(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName) {
+    public boolean deleteStack(CloudbreakInternalCrnClient cloudbreakClient, Long workspaceId, String stackName) {
         boolean result = false;
         if (stackName != null) {
-            cloudbreakClient.stackV4Endpoint().delete(workspaceId, stackName, false);
+            cloudbreakClient.withInternalCrn().stackV4Endpoint().delete(workspaceId, stackName, false);
             result = true;
         }
         return result;

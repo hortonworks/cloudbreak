@@ -78,7 +78,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     @Override
     public List<StackV4Response> getAll(CloudbreakClient client) {
-        StackV4Endpoint stackEndpoint = client.getCloudbreakClient().stackV4Endpoint();
+        StackV4Endpoint stackEndpoint = client.getCloudbreakInternalCrnClient().withInternalCrn().stackV4Endpoint();
         return stackEndpoint.list(client.getWorkspaceId(), null, false).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {

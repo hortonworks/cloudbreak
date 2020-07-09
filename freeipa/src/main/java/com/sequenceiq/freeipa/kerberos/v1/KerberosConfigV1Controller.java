@@ -17,7 +17,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareCrnParam;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
@@ -48,7 +48,7 @@ public class KerberosConfigV1Controller extends NotificationController implement
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public DescribeKerberosConfigResponse getForCluster(@ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
+    public DescribeKerberosConfigResponse getForCluster(@ResourceCrn @NotEmpty @TenantAwareCrnParam String environmentCrn,
             @NotEmpty String clusterName) throws Exception {
         String accountId = crnService.getCurrentAccountId();
         return kerberosConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);

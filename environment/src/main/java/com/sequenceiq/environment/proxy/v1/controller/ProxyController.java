@@ -17,7 +17,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareCrnParam;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
@@ -72,7 +72,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
-    public ProxyResponse getByEnvironmentCrn(@ResourceCrn @TenantAwareParam String environmentCrn) {
+    public ProxyResponse getByEnvironmentCrn(@ResourceCrn @TenantAwareCrnParam String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ProxyConfig proxyConfig = proxyConfigService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         return proxyConfigToProxyResponseConverter.convert(proxyConfig);

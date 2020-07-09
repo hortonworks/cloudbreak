@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareCrnParam;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
@@ -125,7 +125,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public EnvironmentUserSyncState getUserSyncState(@ResourceCrn @TenantAwareParam @NotEmpty String environmentCrn) {
+    public EnvironmentUserSyncState getUserSyncState(@ResourceCrn @TenantAwareCrnParam @NotEmpty String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Crn envCrn = Crn.safeFromString(environmentCrn);
 

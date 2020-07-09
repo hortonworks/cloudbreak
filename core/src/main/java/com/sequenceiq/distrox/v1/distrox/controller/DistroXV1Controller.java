@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareCrnParam;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -117,7 +117,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
-    public StackV4Response getByCrn(@ResourceCrn @TenantAwareParam String crn, Set<String> entries) {
+    public StackV4Response getByCrn(@ResourceCrn @TenantAwareCrnParam String crn, Set<String> entries) {
         return stackOperations.get(
                 NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),

@@ -36,6 +36,9 @@ public interface StackViewRepository extends WorkspaceResourceRepository<StackVi
     @Query("SELECT s FROM StackView s WHERE s.id= :id")
     Optional<StackView> findById(@Param("id") Long id);
 
+    @Query("SELECT s FROM StackView s WHERE s.terminated = null AND s.name LIKE :name")
+    Optional<StackView> findByName(@Param("name") String name);
+
     @Override
     default <S extends StackView> S save(S entity) {
         throw new UnsupportedOperationException("Save is not supported on stack view type");

@@ -26,7 +26,10 @@ import org.testng.annotations.Parameters;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -115,15 +118,19 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
                 .withDebug(true)
                 .build();
 
+        CloudbreakInternalCrnClient cloudbreakInternalClient =
+                new CloudbreakInternalCrnClient(cloudbreakClient, new InternalCrnBuilder(Crn.Service.IAM));
+
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, cloudbreakClient);
+        itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_INTERNAL_CLIENT, cloudbreakInternalClient);
         Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         if (cleanUpBeforeStart) {
-            cleanUpService.deleteTestStacksAndResources(cloudbreakClient.withCrn(userCrn), workspaceId);
+            cleanUpService.deleteTestStacksAndResources(cloudbreakClient.withCrn(userCrn), cloudbreakInternalClient, workspaceId);
         }
         putBlueprintToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
                 .blueprintV4Endpoint(), blueprintName, workspaceId);
-        putStackToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
-                .stackV4Endpoint(), workspaceId, stackName);
+        putStackToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_INTERNAL_CLIENT, CloudbreakInternalCrnClient.class)
+                .withInternalCrn().stackV4Endpoint(), workspaceId, stackName);
         if (StringUtils.hasLength(instanceGroups)) {
             List<String[]> instanceGroupStrings = templateAdditionHelper.parseCommaSeparatedRows(instanceGroups);
         }
@@ -188,9 +195,11 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     public void cleanUp(@Optional("true") boolean cleanUp) {
         if (isCleanUpNeeded(cleanUp)) {
             CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
+            CloudbreakInternalCrnClient cloudbreakInternalCrnClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_INTERNAL_CLIENT,
+                    CloudbreakInternalCrnClient.class);
             Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
             String stackId = itContext.getCleanUpParameter(CloudbreakITContextConstants.STACK_ID);
-            cleanUpService.deleteStackAndWait(cloudbreakClient, workspaceId, stackId);
+            cleanUpService.deleteStackAndWait(cloudbreakInternalCrnClient, workspaceId, stackId);
             List<InstanceGroup> instanceGroups = itContext.getCleanUpParameter(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
             if (instanceGroups != null && !instanceGroups.isEmpty()) {
                 Collection<String> deletedTemplates = new HashSet<>();

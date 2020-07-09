@@ -38,7 +38,7 @@ public class CloudbreakWaitObject {
     }
 
     public StackV4Endpoint getStackEndpoint() {
-        return client.getCloudbreakClient().stackV4Endpoint();
+        return client.getCloudbreakInternalCrnClient().withInternalCrn().stackV4Endpoint();
     }
 
     public Long getWorkspaceId() {

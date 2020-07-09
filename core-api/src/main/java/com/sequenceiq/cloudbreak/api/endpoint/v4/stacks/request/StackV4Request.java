@@ -12,6 +12,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -27,6 +28,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareApiModel;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.validation.DatalakeCrn;
@@ -39,7 +42,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class StackV4Request extends StackV4Base implements TaggableRequest {
+public class StackV4Request extends StackV4Base implements TaggableRequest, TenantAwareApiModel {
 
     @Valid
     @NotNull
@@ -239,5 +242,11 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
+    }
+
+    @JsonIgnore
+    @Override
+    public String getAccountId() {
+        return Crn.fromString(environmentCrn).getAccountId();
     }
 }

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -30,11 +30,11 @@ public class CloudbreakUtil {
     private CloudbreakUtil() {
     }
 
-    public static WaitResult waitForStackStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
+    public static WaitResult waitForStackStatus(CloudbreakInternalCrnClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
         return waitForStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("status", desiredStatus));
     }
 
-    private static WaitResult waitForStatuses(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName,
+    private static WaitResult waitForStatuses(CloudbreakInternalCrnClient cloudbreakClient, Long workspaceId, String stackName,
             Map<String, String> desiredStatuses) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Map<String, String> currentStatuses = new HashMap<>();
@@ -44,7 +44,7 @@ public class CloudbreakUtil {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatuses, stackName, currentStatuses);
 
             sleep();
-            StackV4Endpoint stackV4Endpoint = cloudbreakClient.stackV4Endpoint();
+            StackV4Endpoint stackV4Endpoint = cloudbreakClient.withInternalCrn().stackV4Endpoint();
             try {
                 StackStatusV4Response statusResult = stackV4Endpoint.getStatusByName(workspaceId, stackName);
                 for (String statusPath : desiredStatuses.keySet()) {

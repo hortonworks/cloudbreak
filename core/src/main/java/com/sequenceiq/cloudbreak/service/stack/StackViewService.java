@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -8,11 +10,13 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountIdProvider;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 
 @Service
-public class StackViewService {
+public class StackViewService implements AccountIdProvider {
 
     @Inject
     private StackViewRepository stackViewRepository;
@@ -45,4 +49,10 @@ public class StackViewService {
         return stackViewRepository.findResourceCrnsByTenant(tenantName);
     }
 
+    @Override
+    public String getAccountIdByResourceName(String resourceName) {
+        String resourceCrn = stackViewRepository.findByName(resourceName)
+                .orElseThrow(notFound("StackView", resourceName)).getResourceCrn();
+        return Crn.fromString(resourceCrn).getAccountId();
+    }
 }

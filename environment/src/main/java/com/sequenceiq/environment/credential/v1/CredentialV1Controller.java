@@ -28,7 +28,7 @@ import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareCrnParam;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -85,7 +85,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     @Override
     @CheckPermissionByEnvironmentCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
-    public CredentialResponse getByEnvironmentCrn(@TenantAwareParam @EnvironmentCrn String environmentCrn) {
+    public CredentialResponse getByEnvironmentCrn(@TenantAwareCrnParam @EnvironmentCrn String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         return credentialConverter.convert(credential);
@@ -101,7 +101,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
-    public CredentialResponse getByResourceCrn(@TenantAwareParam @ResourceCrn String credentialCrn) {
+    public CredentialResponse getByResourceCrn(@TenantAwareCrnParam @ResourceCrn String credentialCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return credentialConverter.convert(credentialService.getByCrnForAccountId(credentialCrn, accountId));
     }
@@ -127,7 +127,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_CREDENTIAL)
-    public CredentialResponse deleteByResourceCrn(@TenantAwareParam @ResourceCrn String crn) {
+    public CredentialResponse deleteByResourceCrn(@TenantAwareCrnParam @ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential deleted = credentialDeleteService.deleteByCrn(crn, accountId);
         notify(ResourceEvent.CREDENTIAL_DELETED);
@@ -206,7 +206,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
-    public CredentialResponse verifyByCrn(@TenantAwareParam @ResourceCrn String crn) {
+    public CredentialResponse verifyByCrn(@TenantAwareCrnParam @ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByCrnForAccountId(crn, accountId);
         Credential verifiedCredential = credentialService.verify(credential);

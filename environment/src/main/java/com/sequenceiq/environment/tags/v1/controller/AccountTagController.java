@@ -20,7 +20,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareCrnParam;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
 import com.sequenceiq.environment.api.v1.tags.model.request.AccountTagRequests;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
@@ -96,7 +96,7 @@ public class AccountTagController extends NotificationController implements Acco
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
-    public GeneratedAccountTagResponses generate(@ResourceName String environmentName, @ResourceCrn @TenantAwareParam String environmentCrn) {
+    public GeneratedAccountTagResponses generate(@ResourceName String environmentName, @ResourceCrn @TenantAwareCrnParam String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = null;
         if (!Strings.isNullOrEmpty(environmentCrn)) {

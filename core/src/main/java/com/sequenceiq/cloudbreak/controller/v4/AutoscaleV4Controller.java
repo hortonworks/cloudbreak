@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
-import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareCrnParam;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -129,7 +129,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     @DisableCheckPermissions
     @PreAuthorize("hasRole('AUTOSCALE') or hasRole('INTERNAL')")
-    public StackStatusV4Response getStatusByCrn(@TenantAwareParam String crn) {
+    public StackStatusV4Response getStatusByCrn(@TenantAwareCrnParam String crn) {
         return stackOperations.getStatus(crn);
     }
 
@@ -152,7 +152,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     @DisableCheckPermissions
     @PreAuthorize("hasRole('AUTOSCALE')")
-    public CertificateV4Response getCertificate(@TenantAwareParam String crn) {
+    public CertificateV4Response getCertificate(@TenantAwareCrnParam String crn) {
         return stackCommonService.getCertificate(crn);
     }
 
