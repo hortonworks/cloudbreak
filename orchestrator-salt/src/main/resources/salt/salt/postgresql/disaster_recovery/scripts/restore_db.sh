@@ -8,7 +8,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-if [ $# -ne 5 ]; then
+if [[ $# -ne 5 && $# -ne 6 ]]; then
   echo "Invalid inputs provided"
   echo "Script accepts 5 inputs:"
   echo "  1. Cloud Provider (azure | aws)"
@@ -16,6 +16,7 @@ if [ $# -ne 5 ]; then
   echo "  3. PostgreSQL host name."
   echo "  4. PostgreSQL port."
   echo "  5. PostgreSQL user name."
+  echo "  6. (optional) Log file location"
   exit 1
 fi
 
@@ -25,7 +26,7 @@ HOST="$3"
 PORT="$4"
 USERNAME="$5"
 
-LOGFILE=/var/log/dl_postgres_restore.log
+LOGFILE=${6:-/var/log/}/dl_postgres_backup.log
 echo "Logs at ${LOGFILE}"
 
 BACKUPS_DIR="/var/tmp/postgres_restore_staging"
@@ -75,6 +76,7 @@ run_aws_restore () {
   rm -rfv "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 }
 
+doLog "INFO Initiating restore"
 if [[ "$CLOUD_PROVIDER" == "azure" ]]; then
   run_azure_restore
 elif [[ "$CLOUD_PROVIDER" == "aws" ]]; then
