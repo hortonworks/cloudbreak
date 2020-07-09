@@ -325,7 +325,8 @@ public class Crn {
         FREEIPA("freeipa"),
         DATALAKE("datalake"),
         ACCOUNT_TAG("accountTag"),
-        ACCOUNT_TELEMETRY("accountTelemetry");
+        ACCOUNT_TELEMETRY("accountTelemetry"),
+        PROXY_CONIFG("proxyConfig");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
 
