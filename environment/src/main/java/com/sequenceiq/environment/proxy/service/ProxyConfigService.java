@@ -99,7 +99,7 @@ public class ProxyConfigService  {
         return Crn.builder()
                 .setService(Crn.Service.ENVIRONMENTS)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.CREDENTIAL)
+                .setResourceType(Crn.ResourceType.PROXY_CONIFG)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();
