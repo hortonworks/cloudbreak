@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.TimeAlert;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -139,6 +140,9 @@ public class DateServiceTest {
         testTime.setName("testAlert");
         testTime.setCron("0 0 12 * * ?");
         testTime.setTimeZone(timeZone);
+        Cluster cluster = new Cluster();
+        cluster.setStackCrn("testCrn");
+        testTime.setCluster(cluster);
         return testTime;
     }
 }

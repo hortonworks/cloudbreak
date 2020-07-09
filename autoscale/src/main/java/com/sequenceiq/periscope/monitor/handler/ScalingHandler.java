@@ -15,12 +15,15 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
+import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.monitor.evaluator.ScalingConstants;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
@@ -36,6 +39,9 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private HistoryService historyService;
 
     @Inject
     private ApplicationContext applicationContext;
@@ -67,7 +73,11 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
             cluster.setLastScalingActivityCurrent();
             clusterService.save(cluster);
         } else {
-            LOGGER.debug("No scaling activity required for cluster crn {}", cluster.getStackCrn());
+            String noScalingActivityMsg = String.format("Scaling activity not required for config '%s', cluster '%s'.", alert.getName(), cluster.getStackCrn());
+            LOGGER.info(noScalingActivityMsg);
+            if (alert instanceof TimeAlert) {
+                historyService.createEntry(ScalingStatus.SUCCESS, noScalingActivityMsg, hostGroupNodeCount, 0, policy);
+            }
         }
     }
 

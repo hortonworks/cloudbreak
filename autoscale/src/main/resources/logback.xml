@@ -63,6 +63,9 @@
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
         <level value="${PERISCOPE_SQL_LOG_LEVEL:-INFO}"/>
     </logger>
+    <logger name="com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerScheduledExecutor">
+        <level value="${PERISCOPE_LOG_LEVEL:-WARN}"/>
+    </logger>
     <logger name="org.glassfish.jersey.logging.LoggingFeature" level="ERROR">
         <appender-ref ref="PERISCOPE_NODEID_BASED"/>
         <appender-ref ref="STDOUT"/>
