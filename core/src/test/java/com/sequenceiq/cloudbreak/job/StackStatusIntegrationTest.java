@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -19,13 +20,10 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.quartz.JobExecutionContext;
@@ -123,9 +121,6 @@ class StackStatusIntegrationTest {
 
     @MockBean
     private StackInstanceStatusChecker stackStatusChecker;
-
-    @Captor
-    private ArgumentCaptor<InstanceMetaData> savedInstanceMetaDataArgumentCaptor;
 
     private Stack stack;
 
@@ -304,13 +299,12 @@ class StackStatusIntegrationTest {
     }
 
     private void assertInstancesSavedWithStatuses(Map<String, InstanceStatus> instanceStatuses) {
-        verify(instanceMetaDataService, times(instanceStatuses.size())).save(savedInstanceMetaDataArgumentCaptor.capture());
-        Assertions.assertThat(savedInstanceMetaDataArgumentCaptor.getAllValues())
-                .allSatisfy(savedInstanceMetaData -> {
-                    InstanceStatus expectedInstanceStatus = instanceStatuses.get(savedInstanceMetaData.getInstanceId());
-                    Assertions.assertThat(savedInstanceMetaData)
-                            .returns(expectedInstanceStatus, InstanceMetaData::getInstanceStatus);
-                });
+        verify(instanceMetaDataService, times(instanceStatuses.keySet().size())).updateInstanceStatus(any(), any());
+        for (Map.Entry<String, InstanceStatus> instanceStatusEntry : instanceStatuses.entrySet()) {
+            verify(instanceMetaDataService, times(1))
+                .updateInstanceStatus(argThat(im -> instanceStatusEntry.getKey().equals(im.getInstanceId())),
+                        argThat(status -> instanceStatusEntry.getValue().equals(status)));
+        }
     }
 
     private void setUpCloudVmInstanceStatuses(Map<String, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus> instanceStatuses) {

@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.projection.InstanceMetaDataGroupView;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -31,15 +31,26 @@ public class InstanceMetaDataService {
     @Inject
     private InstanceMetaDataRepository repository;
 
-    public void updateInstanceStatus(InstanceMetaData instanceMetaData, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus) {
+    @Inject
+    private TransactionService transactionService;
+
+    public void updateInstanceStatus(final InstanceMetaData instanceMetaData, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus) {
         updateInstanceStatus(instanceMetaData, newStatus, null);
     }
 
-    public void updateInstanceStatus(InstanceMetaData instanceMetaData, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus,
+    public void updateInstanceStatus(final InstanceMetaData instanceMetaData, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus,
             String statusReason) {
-        instanceMetaData.setInstanceStatus(newStatus);
-        instanceMetaData.setStatusReason(statusReason);
-        repository.save(instanceMetaData);
+        try {
+            LOGGER.info("Update {} status to {} with statusreason {}", instanceMetaData.getInstanceId(), newStatus, statusReason);
+            transactionService.requiresNew(() -> {
+                int modifiedRows = repository.updateStatusIfNotTerminated(instanceMetaData.getId(), newStatus, statusReason);
+                LOGGER.debug("{} row was updated", modifiedRows);
+                return modifiedRows;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            LOGGER.error("Can't update instance status", e);
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
     }
 
     public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, boolean save) {
@@ -68,7 +79,7 @@ public class InstanceMetaDataService {
             for (CloudInstance cloudInstance : group.getInstances()) {
                 InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
                 boolean exists = existingInGroup.stream().anyMatch(i -> i.getPrivateId().equals(instanceTemplate.getPrivateId()));
-                if (InstanceStatus.CREATE_REQUESTED == instanceTemplate.getStatus() && !exists) {
+                if (com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED == instanceTemplate.getStatus() && !exists) {
                     InstanceMetaData instanceMetaData = new InstanceMetaData();
                     instanceMetaData.setPrivateId(instanceTemplate.getPrivateId());
                     instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
