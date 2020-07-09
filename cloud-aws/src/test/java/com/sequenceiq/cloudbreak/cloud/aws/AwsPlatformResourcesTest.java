@@ -3,12 +3,14 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
@@ -46,7 +48,9 @@ import com.amazonaws.services.kms.model.ListAliasesRequest;
 import com.amazonaws.services.kms.model.ListAliasesResult;
 import com.amazonaws.services.kms.model.ListKeysRequest;
 import com.amazonaws.services.kms.model.ListKeysResult;
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformEncryptionKeysRequest;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -220,6 +224,76 @@ public class AwsPlatformResourcesTest {
                 underTest.encryptionKeys(new CloudCredential(1L, "aws-credential"), region("London"), new HashMap<>());
 
         Assert.assertEquals(4L, cloudEncryptionKeys.getCloudEncryptionKeys().size());
+    }
+
+    @Test
+    public void collectEncryptionKeyWithKeyIdWhenWeGetBackInfoThenItShouldReturnListWithSingleElement() {
+        DescribeKeyResult describeKeyResult = new DescribeKeyResult();
+        describeKeyResult.setKeyMetadata(new KeyMetadata());
+
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
+        when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenReturn(describeKeyResult);
+        Map<String, String> filters = Map.of(GetPlatformEncryptionKeysRequest.KEY_ID_FILTER_KEY, "aKeyId");
+
+        CloudEncryptionKeys cloudEncryptionKeys =
+                underTest.encryptionKeys(new CloudCredential(1L, "aws-credential"), region("London"), filters);
+
+        Assert.assertEquals(1L, cloudEncryptionKeys.getCloudEncryptionKeys().size());
+        Mockito.verify(awskmsClient, times(1)).describeKey(any(DescribeKeyRequest.class));
+        Mockito.verifyNoMoreInteractions(awskmsClient);
+    }
+
+    @Test
+    public void collectEncryptionKeyWithKeyIdWhenNoKMSKeyCouldBeFoundWithKeyIdThenItShouldReturnEmptyList() {
+        DescribeKeyResult describeKeyResult = new DescribeKeyResult();
+        describeKeyResult.setKeyMetadata(new KeyMetadata());
+
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
+        when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenThrow(NotFoundException.class);
+        Map<String, String> filters = Map.of(GetPlatformEncryptionKeysRequest.KEY_ID_FILTER_KEY, "aKeyId");
+
+        CloudEncryptionKeys cloudEncryptionKeys =
+                underTest.encryptionKeys(new CloudCredential(1L, "aws-credential"), region("London"), filters);
+
+        Assert.assertTrue(cloudEncryptionKeys.getCloudEncryptionKeys().isEmpty());
+        Mockito.verify(awskmsClient, times(1)).describeKey(any(DescribeKeyRequest.class));
+        Mockito.verifyNoMoreInteractions(awskmsClient);
+    }
+
+    @Test
+    public void collectEncryptionKeyWithKeyIdWhenUserDoNotHaveAccessToKMSKeyWithKeyIdThenItShouldThrowCCE() {
+        DescribeKeyResult describeKeyResult = new DescribeKeyResult();
+        describeKeyResult.setKeyMetadata(new KeyMetadata());
+
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
+        AmazonServiceException awsException = Mockito.mock(AmazonServiceException.class);
+        when(awsException.getStatusCode()).thenReturn(403);
+        when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenThrow(awsException);
+        Map<String, String> filters = Map.of(GetPlatformEncryptionKeysRequest.KEY_ID_FILTER_KEY, "aKeyId");
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage("Could not get encryption keys because the user does not have permissions to read");
+
+        underTest.encryptionKeys(new CloudCredential(1L, "aws-credential"), region("London"), filters);
+
+        Mockito.verify(awskmsClient, times(1)).describeKey(any(DescribeKeyRequest.class));
+        Mockito.verifyNoMoreInteractions(awskmsClient);
+    }
+
+    @Test
+    public void collectEncryptionKeyWithKeyIdWhenClientFailCallWithAmazonServiceExceptionThenItShouldThrowCCE() {
+        DescribeKeyResult describeKeyResult = new DescribeKeyResult();
+        describeKeyResult.setKeyMetadata(new KeyMetadata());
+
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
+        when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenThrow(AmazonServiceException.class);
+        Map<String, String> filters = Map.of(GetPlatformEncryptionKeysRequest.KEY_ID_FILTER_KEY, "aKeyId");
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage("Could not get encryption keys from Amazon:");
+
+        underTest.encryptionKeys(new CloudCredential(1L, "aws-credential"), region("London"), filters);
+
+        Mockito.verify(awskmsClient, times(1)).describeKey(any(DescribeKeyRequest.class));
+        Mockito.verifyNoMoreInteractions(awskmsClient);
     }
 
     @Test

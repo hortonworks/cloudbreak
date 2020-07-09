@@ -8,6 +8,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 
 public class GetPlatformEncryptionKeysRequest extends CloudPlatformRequest<GetPlatformEncryptionKeysResult> {
 
+    public static final String KEY_ID_FILTER_KEY = "KeyId";
+
     private final String variant;
 
     private final String region;
