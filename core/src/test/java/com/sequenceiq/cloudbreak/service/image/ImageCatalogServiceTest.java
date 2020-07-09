@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -31,8 +30,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -257,48 +254,33 @@ public class ImageCatalogServiceTest {
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, operatingSystems, null);
         StatedImages images = underTest.getStatedImagesFilteredByOperatingSystems(imageFilter, i -> true);
 
-        Set<Image> allImage = Stream.of(images.getImages().getHdpImages(), images.getImages().getHdpImages(), images.getImages().getBaseImages())
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-        boolean allMatch = allImage.stream().allMatch(image -> operatingSystems.contains(image.getOsType()));
+        boolean allMatch = images.getImages().getBaseImages().stream().allMatch(image -> operatingSystems.contains(image.getOsType()));
         assertTrue("All images should be based on supported OS", allMatch);
     }
 
     @Test
     public void testGetImagesWhenExactVersionExistsInCatalog() throws Exception {
-        String cbVersion = "1.16.4";
+        String cbVersion = "1.16.2";
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), cbVersion));
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("azure"), cbVersion));
 
-        boolean exactImageIdMatch = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required Ambari image with id.", exactImageIdMatch);
+        boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
+                .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
+        assertTrue("Result doesn't contain the required image with id.", exactImageIdMatch);
     }
 
     @Test
     public void testGetImagesWhenExactVersionExistsInCatalogAndMorePlatformRequested() throws Exception {
-        String cbVersion = "1.12.0";
+        String cbVersion = "2.0.0";
         ImageCatalog imageCatalog = getImageCatalog();
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, ImmutableSet.of("aws", "azure"), cbVersion));
-        boolean awsAndAzureWerePresentedInTheTest = false;
-        assertEquals(2L, images.getImages().getHdpImages().size());
-        for (Image image : images.getImages().getHdpImages()) {
-            boolean containsAws = images.getImages().getHdpImages().stream()
-                    .anyMatch(img -> img.getImageSetsByProvider().entrySet().stream().anyMatch(
-                            platformImages -> "aws".equals(platformImages.getKey())));
-            boolean containsAzure = images.getImages().getHdpImages().stream()
-                    .anyMatch(img -> img.getImageSetsByProvider().entrySet().stream().anyMatch(
-                            platformImages -> "azure_rm".equals(platformImages.getKey())));
-            if (image.getImageSetsByProvider().size() == 2) {
-                awsAndAzureWerePresentedInTheTest = true;
-                assertTrue("Result doesn't contain the required Ambari image with id.", containsAws && containsAzure);
-            } else if (image.getImageSetsByProvider().size() == 1) {
-                assertTrue("Result doesn't contain the required Ambari image with id.", containsAws || containsAzure);
-
-            }
+        StatedImages images = underTest.getImages(
+                new ImageFilter(imageCatalog, ImmutableSet.of("aws", "azure"), cbVersion, true, ImmutableSet.of("amazonlinux"), null));
+        for (Image image : images.getImages().getBaseImages()) {
+            boolean containsAws = image.getImageSetsByProvider().entrySet().stream().anyMatch(platformImages -> "aws".equals(platformImages.getKey()));
+            boolean containsAzure = image.getImageSetsByProvider().entrySet().stream().anyMatch(platformImages -> "azure_rm".equals(platformImages.getKey()));
+            assertTrue("Result doesn't contain the required image with id.", containsAws || containsAzure);
         }
-        assertTrue(awsAndAzureWerePresentedInTheTest);
     }
 
     @Test
@@ -306,10 +288,11 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, PROD_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0"));
+        StatedImages images = underTest.getImages(
+                new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0", true, ImmutableSet.of("amazonlinux"), null));
 
-        boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> "63cdb3bc-28a6-4cea-67e4-9842fdeeaefb".equals(img.getUuid()));
+        boolean match = images.getImages().getBaseImages().stream()
+                .anyMatch(img -> "0f575e42-9d90-4f85-5f8a-bdced2221dc3".equals(img.getUuid()));
         assertTrue("Result doesn't contain the required base image with id.", match);
     }
 
@@ -318,16 +301,17 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, DEV_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
-        Set<String> vMImageUUIDs = Set.of("b150efce-33ac-49c9-7206-7f148d162744");
-        Set<String> defaultVMImageUUIDs = Set.of("b150efce-33ac-49c9-7206-7f148d162744");
+        Set<String> vMImageUUIDs = Set.of("cab28152-f5e1-43e1-5107-9e7bbed33eef");
+        Set<String> defaultVMImageUUIDs = Set.of("cab28152-f5e1-43e1-5107-9e7bbed33eef");
         Set<String> supportedVersions = Set.of("2.1.0-dev.2");
         PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
         when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0-dev.132"));
+        StatedImages images = underTest.getImages(
+                new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0-dev.132", true, ImmutableSet.of("amazonlinux", "centos7"), null));
 
-        boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> "b150efce-33ac-49c9-7206-7f148d162744".equals(img.getUuid()));
+        boolean match = images.getImages().getBaseImages().stream()
+                .anyMatch(img -> "cab28152-f5e1-43e1-5107-9e7bbed33eef".equals(img.getUuid()));
         assertTrue("Result doesn't contain the required base image with id.", match);
     }
 
@@ -336,10 +320,11 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, RC_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0-rc.13"));
+        StatedImages images = underTest.getImages(
+                new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0-rc.13", true, ImmutableSet.of("amazonlinux", "centos7"), null));
 
-        boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> "bbc63453-086c-4bf7-4337-a04c37d51b68".equals(img.getUuid()));
+        boolean match = images.getImages().getBaseImages().stream()
+                .anyMatch(img -> "0f575e42-9d90-4f85-5f8a-bdced2221dc3".equals(img.getUuid()));
         assertTrue("Result doesn't contain the required base image with id.", match);
     }
 
@@ -348,16 +333,17 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, DEV_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
-        Set<String> vMImageUUIDs = Set.of("bbc63453-086c-4bf7-4337-a04c37d51b68");
-        Set<String> defaultVMImageUUIDs = Set.of("bbc63453-086c-4bf7-4337-a04c37d51b68");
+        Set<String> vMImageUUIDs = Set.of("0f575e42-9d90-4f85-5f8a-bdced2221dc3");
+        Set<String> defaultVMImageUUIDs = Set.of("0f575e42-9d90-4f85-5f8a-bdced2221dc3");
         Set<String> supportedVersions = Set.of("2.1.0-dev.2");
         PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
         when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0-rc.13"));
+        StatedImages images = underTest.getImages(
+                new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.6.0-rc.13", true, ImmutableSet.of("amazonlinux", "centos7"), null));
 
-        boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> img.getUuid().equals("bbc63453-086c-4bf7-4337-a04c37d51b68"));
+        boolean match = images.getImages().getBaseImages().stream()
+                .anyMatch(img -> img.getUuid().equals("0f575e42-9d90-4f85-5f8a-bdced2221dc3"));
         assertTrue("Result doesn't contain the required base image with id.", match);
     }
 
@@ -365,42 +351,41 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenSimilarDevVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        Set<String> vMImageUUIDs = Set.of("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2");
-        Set<String> defaultVMImageUUIDs = Set.of("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2");
+        Set<String> vMImageUUIDs = Set.of("666aa8bf-bc1a-4cc6-43f1-427b4432c8c2");
+        Set<String> defaultVMImageUUIDs = Set.of("666aa8bf-bc1a-4cc6-43f1-427b4432c8c2");
         Set<String> supportedVersions = Set.of("2.1.0-dev.2");
         PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
         when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "1.16.4-dev.132"));
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("azure"), "1.16.2-dev.132"));
 
-        boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required Ambari image with id.", match);
+        boolean match = images.getImages().getCdhImages().stream()
+                .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
+        assertTrue("Result doesn't contain the required image with id.", match);
     }
 
     @Test
     public void testGetImagesWhenSimilarRcVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        Set<String> vMImageUUIDs = Set.of("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2");
-        Set<String> defaultVMImageUUIDs = Set.of("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2");
+        Set<String> vMImageUUIDs = Set.of("666aa8bf-bc1a-4cc6-43f1-427b4432c8c2");
+        Set<String> defaultVMImageUUIDs = Set.of("666aa8bf-bc1a-4cc6-43f1-427b4432c8c2");
         Set<String> supportedVersions = Set.of("2.1.0-dev.1", "2.0.0", "2.1.0-dev.100", "2.1.0-dev.2");
         PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
 
-        when(prefixMatcherService.prefixMatchForCBVersion(eq("1.16.4-rc.13"), any())).thenReturn(prefixMatchImages);
+        when(prefixMatcherService.prefixMatchForCBVersion(eq("1.16.2-rc.13"), any())).thenReturn(prefixMatchImages);
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "1.16.4-rc.13"));
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("azure"), "1.16.2-rc.13"));
 
-        boolean match = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required Ambari image with id.", match);
+        boolean match = images.getImages().getCdhImages().stream()
+                .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
+        assertTrue("Result doesn't contain the required image with id.", match);
     }
 
     @Test
     public void testGetImagesWhenSimilarDevVersionExistsInCatalog() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
-        Set<String> vMImageUUIDs = Set.of("9958938a-1261-48e2-aff9-dbcb2cebf6cd", "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145",
-                "f6e778fc-7f17-4535-9021-515351df3691");
+        Set<String> vMImageUUIDs = Set.of("f6e778fc-7f17-4535-9021-515351df3691");
         Set<String> defaultVMImageUUIDs = Set.of("f6e778fc-7f17-4535-9021-515351df3691", "7aca1fa6-980c-44e2-a75e-3144b18a5993");
         Set<String> supportedVersions = Set.of("2.1.0-dev.1", "2.0.0", "2.1.0-dev.100", "2.1.0-dev.2");
         PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
@@ -409,43 +394,37 @@ public class ImageCatalogServiceTest {
 
         StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.1.0-dev.4000", true, null, null));
 
-        boolean hdfImgMatch = images.getImages().getHdfImages().stream()
-                .anyMatch(ambariImage -> "9958938a-1261-48e2-aff9-dbcb2cebf6cd".equals(ambariImage.getUuid()));
-        boolean hdpImgMatch = images.getImages().getHdpImages().stream()
-                .anyMatch(ambariImage -> "2.5.0.2-65-5288855d-d7b9-4b90-b326-ab4b168cf581-2.6.0.1-145".equals(ambariImage.getUuid()));
         boolean baseImgMatch = images.getImages().getBaseImages().stream()
-                .anyMatch(ambariImage -> "f6e778fc-7f17-4535-9021-515351df3691".equals(ambariImage.getUuid()));
-        assertTrue("Result doesn't contain the required Ambari image with id.", hdfImgMatch && hdpImgMatch && baseImgMatch);
+                .anyMatch(img -> "f6e778fc-7f17-4535-9021-515351df3691".equals(img.getUuid()));
+        assertTrue("Result doesn't contain the required image with id.", baseImgMatch);
     }
 
     @Test
     public void testGetImagesWhenSimilarRcVersionExistsInCatalog() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        Set<String> vMImageUUIDs = Set.of("2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265",
-                "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2");
-        Set<String> defaultVMImageUUIDs = Set.of("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2");
+        Set<String> vMImageUUIDs = Set.of("666aa8bf-bc1a-4cc6-43f1-427b4432c8c2");
+        Set<String> defaultVMImageUUIDs = Set.of("666aa8bf-bc1a-4cc6-43f1-427b4432c8c2");
         Set<String> supportedVersions = Set.of("2.1.0-dev.1", "2.0.0", "2.1.0-dev.100", "2.1.0-dev.2");
         PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
         when(prefixMatcherService.prefixMatchForCBVersion(eq("2.0.0-rc.4"), any())).thenReturn(prefixMatchImages);
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("aws"), "2.0.0-rc.4"));
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("azure"), "2.0.0-rc.4"));
 
-        boolean allMatch = images.getImages().getHdpImages().stream()
-                .allMatch(img -> "2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265".equals(img.getUuid())
-                        || "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required Ambari image with id.", allMatch);
+        boolean match = images.getImages().getCdhImages().stream()
+                .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
+        assertTrue("Result doesn't contain the required image with id.", match);
     }
 
     @Test
     public void testGetImagesWhenExactVersionExistsInCatalogForPlatform() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("AWS"), "1.16.4"));
+        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton("azure"), "1.16.2"));
 
-        boolean exactImageIdMatch = images.getImages().getHdpImages().stream()
-                .anyMatch(img -> "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2".equals(img.getUuid()));
-        assertTrue("Result doesn't contain the required Ambari image with id for the platform.", exactImageIdMatch);
+        boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
+                .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
+        assertTrue("Result doesn't contain the required image with id for the platform.", exactImageIdMatch);
     }
 
     @Test
@@ -567,8 +546,8 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesFromDefaultWithStackName() throws CloudbreakImageCatalogException {
-        when(stackImageFilterService.getApplicableImages(anyLong(), anyString())).thenReturn(new Images(Lists.newArrayList(), Lists.newArrayList(),
-                Lists.newArrayList(), Lists.newArrayList(), Sets.newHashSet()));
+        when(stackImageFilterService.getApplicableImages(anyLong(), anyString())).thenReturn(new Images(Lists.newArrayList(),
+                Lists.newArrayList(), Sets.newHashSet()));
 
         underTest.getImagesFromDefault(ORG_ID, "stack", null, Collections.emptySet());
 
@@ -615,8 +594,8 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWithStackName() throws CloudbreakImageCatalogException {
-        when(stackImageFilterService.getApplicableImages(anyLong(), anyString(), anyString())).thenReturn(new Images(Lists.newArrayList(), Lists.newArrayList(),
-                Lists.newArrayList(), Lists.newArrayList(), Sets.newHashSet()));
+        when(stackImageFilterService.getApplicableImages(anyLong(), anyString(), anyString())).thenReturn(new Images(Lists.newArrayList(),
+                Lists.newArrayList(), Sets.newHashSet()));
 
         underTest.getImagesByCatalogName(ORG_ID, "catalog", "stack", null);
 

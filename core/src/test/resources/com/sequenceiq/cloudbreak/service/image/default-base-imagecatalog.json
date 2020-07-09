@@ -175,9 +175,7 @@
         },
         "description": "Cloudbreak official base image"
       }
-    ],
-    "hdp-images": [],
-    "hdf-images": []
+    ]
   },
   "versions": {
     "cloudbreak": [

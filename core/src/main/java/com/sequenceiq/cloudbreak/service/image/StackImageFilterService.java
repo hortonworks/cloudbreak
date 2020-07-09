@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DEFAULT_CATALOG_NAME;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -71,8 +70,7 @@ public class StackImageFilterService {
                 filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getCdhImages(), currentImageUuid);
         LOGGER.info("Filtered CDH images: {}", filteredCdhImages);
 
-        return new Images(filteredBaseImages, Collections.emptyList(), Collections.emptyList(), filteredCdhImages,
-                statedImages.getImages().getSuppertedVersions());
+        return new Images(filteredBaseImages, filteredCdhImages, statedImages.getImages().getSuppertedVersions());
 
     }
 

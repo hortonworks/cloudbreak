@@ -29,9 +29,7 @@
         "os_type": "redhat7",
         "uuid": "1a6eadd2-5B95-4EC9-B300-13dc43208b64"
       }
-    ],
-    "hdf-images": [],
-    "hdp-images": []
+    ]
   },
   "versions": {
     "cloudbreak": [

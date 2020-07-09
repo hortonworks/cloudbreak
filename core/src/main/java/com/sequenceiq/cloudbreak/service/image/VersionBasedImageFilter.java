@@ -41,7 +41,7 @@ public class VersionBasedImageFilter {
         List<Image> images = availableImages.stream()
                 .filter(image -> imageIds.contains(image.getUuid()))
                 .collect(Collectors.toList());
-        return new ImageFilterResult(new Images(null, null, null, images, null), message);
+        return new ImageFilterResult(new Images(null, images, null), message);
     }
 
     private Set<String> getImageIds(Versions versions) {

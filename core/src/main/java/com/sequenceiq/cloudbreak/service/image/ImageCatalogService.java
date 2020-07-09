@@ -213,10 +213,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         if (!CollectionUtils.isEmpty(operatingSystems)) {
             Images rawImages = images.getImages();
             List<Image> baseImages = filterImagesByOperatingSystemsAndPackageVersion(rawImages.getBaseImages(), operatingSystems, imageFilterPredicate);
-            List<Image> hdpImages = filterImagesByOperatingSystemsAndPackageVersion(rawImages.getHdpImages(), operatingSystems, imageFilterPredicate);
-            List<Image> hdfImages = filterImagesByOperatingSystemsAndPackageVersion(rawImages.getHdfImages(), operatingSystems, imageFilterPredicate);
             List<Image> cdhImages = filterImagesByOperatingSystemsAndPackageVersion(rawImages.getCdhImages(), operatingSystems, imageFilterPredicate);
-            images = statedImages(new Images(baseImages, hdpImages, hdfImages, cdhImages, rawImages.getSuppertedVersions()),
+            images = statedImages(new Images(baseImages, cdhImages, rawImages.getSuppertedVersions()),
                     images.getImageCatalogUrl(), images.getImageCatalogName());
         }
         return images;
@@ -437,17 +435,11 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     private Images emptyImages() {
-        return new Images(emptyList(), emptyList(), emptyList(), emptyList(), emptySet());
+        return new Images(emptyList(), emptyList(), emptySet());
     }
 
     private Optional<? extends Image> getImage(String imageId, Images images) {
         Optional<? extends Image> image = findFirstWithImageId(imageId, images.getBaseImages());
-        if (image.isEmpty()) {
-            image = findFirstWithImageId(imageId, images.getHdpImages());
-        }
-        if (image.isEmpty()) {
-            image = findFirstWithImageId(imageId, images.getHdfImages());
-        }
         if (image.isEmpty()) {
             image = findFirstWithImageId(imageId, images.getCdhImages());
         }
@@ -492,8 +484,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             LOGGER.info("The following images are matching for CB version ({}): {} ", currentCbVersion, vMImageUUIDs);
 
             List<Image> baseImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV3.getImages().getBaseImages(), vMImageUUIDs);
-            List<Image> hdpImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV3.getImages().getHdpImages(), vMImageUUIDs);
-            List<Image> hdfImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV3.getImages().getHdfImages(), vMImageUUIDs);
             List<Image> cdhImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV3.getImages().getCdhImages(), vMImageUUIDs);
 
             List<Image> defaultImages = defaultVMImageUUIDs.stream()
@@ -502,7 +492,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                     .collect(Collectors.toList());
 
             Collection<String> latestDefaultImageUuids = latestDefaultImageUuidProvider.getLatestDefaultImageUuids(imageFilter.getPlatforms(), defaultImages);
-            Stream.of(baseImages.stream(), hdpImages.stream(), hdfImages.stream(), cdhImages.stream())
+            Stream.of(baseImages.stream(), cdhImages.stream())
                     .reduce(Stream::concat)
                     .orElseGet(Stream::empty)
                     .forEach(img -> img.setDefaultImage(latestDefaultImageUuids.contains(img.getUuid())));
@@ -510,7 +500,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             if (!imageFilter.isBaseImageEnabled()) {
                 baseImages.clear();
             }
-            images = statedImages(new Images(baseImages, hdpImages, hdfImages, cdhImages, suppertedVersions),
+            images = statedImages(new Images(baseImages, cdhImages, suppertedVersions),
                     imageFilter.getImageCatalog().getImageCatalogUrl(),
                     imageFilter.getImageCatalog().getName());
         } else {
@@ -630,10 +620,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private List<Image> getImagesForClusterType(StatedImages statedImages, String clusterType) {
         switch (clusterType) {
-            case "HDP":
-                return statedImages.getImages().getHdpImages();
-            case "HDF":
-                return statedImages.getImages().getHdfImages();
             case "CDH":
                 return statedImages.getImages().getCdhImages();
             default:

@@ -62,7 +62,7 @@ public class ImageCatalogPrewarmedTest extends AbstractIntegrationTest {
                 .when(imageCatalogTestClient.getImagesByNameV4(stackName), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
                     ImagesV4Response catalog = entity.getResponseByProvider();
-                    if (catalog.getBaseImages().isEmpty() && catalog.getHdpImages().isEmpty() && catalog.getHdfImages().isEmpty()) {
+                    if (catalog.getBaseImages().isEmpty()) {
                         String msg = format("The Images response should contain results for MOCK provider and stack with name: '%s'.", stackName);
                         throw new IllegalArgumentException(msg);
                     }
