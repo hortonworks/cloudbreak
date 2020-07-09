@@ -20,7 +20,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,6 +57,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
@@ -190,9 +190,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         sdxClusterRequest.setEnvironment("envir");
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.getTags().addTag("mytag", "tagecske");
         SdxCluster existing = new SdxCluster();
         existing.setEnvName("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Collections.singletonList(existing));
@@ -208,9 +206,7 @@ class SdxServiceTest {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.getTags().addTag("mytag", "tagecske");
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
@@ -347,9 +343,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         sdxClusterRequest.setEnvironment("envir");
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.getTags().addTag("mytag", "tagecske");
 
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
@@ -390,9 +384,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         sdxClusterRequest.setEnvironment("envir");
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tag");
-        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.getTags().addTag("mytag", "tag");
 
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
@@ -503,9 +495,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setRuntime("7.2.1");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.getTags().addTag("mytag", "tagecske");
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
@@ -532,9 +522,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setRuntime("7.2.1");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.getTags().addTag("mytag", "tagecske");
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
@@ -551,9 +539,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setRuntime("7.2.1");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.getTags().addTag("mytag", "tagecske");
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
@@ -570,9 +556,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setRuntime("7.2.1");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.getTags().addTag("mytag", "tagecske");
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
@@ -590,9 +574,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setRuntime("7.1.0");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.getTags().addTag("mytag", "tagecske");
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
@@ -609,9 +591,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setRuntime("7.2.0");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.addTags(new Tags(Map.of("mytag", "tagecske")));
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;

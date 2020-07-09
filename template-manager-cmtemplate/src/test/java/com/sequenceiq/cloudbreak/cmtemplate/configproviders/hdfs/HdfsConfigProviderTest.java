@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -122,7 +123,7 @@ public class HdfsConfigProviderTest {
                 .withHostgroupViews(Set.of(master, worker))
                 .withGateway(gateway, "/cb/secret/signkey", new HashSet<>())
                 .withPlacementView(placementView)
-                .withDefaultTags(Map.of("apple", "apple1"))
+                .withDefaultTags(new Tags(Map.of("apple", "apple1")))
                 .withProductDetails(new ClouderaManagerRepo().withVersion("7.1.0"), List.of())
                 .withStackType(StackType.DATALAKE)
                 .build();

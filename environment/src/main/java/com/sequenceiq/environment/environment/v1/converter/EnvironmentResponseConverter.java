@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.util.NullUtil;
+import com.sequenceiq.common.api.tag.response.TagsResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
@@ -198,8 +199,8 @@ public class EnvironmentResponseConverter {
 
     private TagResponse environmentTagsToTagResponse(EnvironmentTags tags) {
         TagResponse tagResponse = new TagResponse();
-        tagResponse.setDefaults(tags.getDefaultTags());
-        tagResponse.setUserDefined(tags.getUserDefinedTags());
+        tagResponse.setDefaults(new TagsResponse(tags.getDefaultTags()));
+        tagResponse.setUserDefined(new TagsResponse(tags.getUserDefinedTags()));
         return tagResponse;
     }
 

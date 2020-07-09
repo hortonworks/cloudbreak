@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -21,6 +19,7 @@ import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
 import com.amazonaws.services.ec2.model.Tag;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.common.api.tag.model.Tags;
 
 @Service
 public class AwsTaggingService {
@@ -29,23 +28,19 @@ public class AwsTaggingService {
 
     private static final int MAX_RESOURCE_PER_REQUEST = 1000;
 
-    public Collection<com.amazonaws.services.cloudformation.model.Tag> prepareCloudformationTags(AuthenticatedContext ac, Map<String, String> userDefinedTags) {
-        Collection<com.amazonaws.services.cloudformation.model.Tag> tags = new ArrayList<>();
-        tags.addAll(userDefinedTags.entrySet().stream()
+    public Collection<com.amazonaws.services.cloudformation.model.Tag> prepareCloudformationTags(AuthenticatedContext ac, Tags userDefinedTags) {
+        return userDefinedTags.getAll().entrySet().stream()
                 .map(entry -> prepareCloudformationTag(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList()));
-        return tags;
+                .collect(Collectors.toList());
     }
 
-    public Collection<com.amazonaws.services.ec2.model.Tag> prepareEc2Tags(AuthenticatedContext ac, Map<String, String> userDefinedTags) {
-        Collection<com.amazonaws.services.ec2.model.Tag> tags = new ArrayList<>();
-        tags.addAll(userDefinedTags.entrySet().stream()
+    public Collection<com.amazonaws.services.ec2.model.Tag> prepareEc2Tags(AuthenticatedContext ac, Tags userDefinedTags) {
+        return userDefinedTags.getAll().entrySet().stream()
                 .map(entry -> prepareEc2Tag(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList()));
-        return tags;
+                .collect(Collectors.toList());
     }
 
-    public void tagRootVolumes(AuthenticatedContext ac, AmazonEC2Client ec2Client, List<CloudResource> instanceResources, Map<String, String> userDefinedTags) {
+    public void tagRootVolumes(AuthenticatedContext ac, AmazonEC2Client ec2Client, List<CloudResource> instanceResources, Tags userDefinedTags) {
         String stackName = ac.getCloudContext().getName();
         LOGGER.debug("Fetch AWS instances to collect all root volume ids for stack: {}", stackName);
         List<String> instanceIds = instanceResources.stream().map(CloudResource::getInstanceId).collect(Collectors.toList());

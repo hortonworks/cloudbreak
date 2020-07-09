@@ -1,8 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -14,6 +12,7 @@ import com.sequenceiq.authorization.annotation.ResourceObjectField;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
+import com.sequenceiq.common.api.tag.request.TagsRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
@@ -97,7 +96,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.TAGS)
-    private Map<String, String> tags = new HashMap<>();
+    private TagsRequest tags = new TagsRequest();
 
     @ApiModelProperty(value = EnvironmentModelDescription.PARENT_ENVIRONMENT_NAME)
     private String parentEnvironmentName;
@@ -232,17 +231,17 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.azure = azure;
     }
 
-    public Map<String, String> getTags() {
+    public TagsRequest getTags() {
         return tags;
     }
 
-    public void setTags(Map<String, String> tags) {
+    public void setTags(TagsRequest tags) {
         this.tags = tags;
     }
 
     @Override
     public void addTag(String key, String value) {
-        tags.put(key, value);
+        tags.addTag(key, value);
     }
 
     public String getParentEnvironmentName() {

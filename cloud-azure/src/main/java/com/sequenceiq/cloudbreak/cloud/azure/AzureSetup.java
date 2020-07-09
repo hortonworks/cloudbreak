@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.model.prerequisite.AzurePrerequisiteDelet
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisiteDeleteRequest;
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.FileSystemType;
@@ -104,7 +105,7 @@ public class AzureSetup implements Setup {
             AzureClient client = ac.getParameter(AzureClient.class);
             persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
             if (!client.resourceGroupExists(resourceGroupName)) {
-                client.createResourceGroup(resourceGroupName, region, stack.getTags());
+                client.createResourceGroup(resourceGroupName, region, stack.getTags().getAll());
             }
         } catch (Exception ex) {
             throw new CloudConnectorException(ex);
@@ -118,7 +119,7 @@ public class AzureSetup implements Setup {
         azureClient.createResourceGroup(
                 environmentPrerequisitesCreateRequest.getAzure().getResourceGroupName(),
                 environmentPrerequisitesCreateRequest.getAzure().getLocationName(),
-                environmentPrerequisitesCreateRequest.getAzure().getTags());
+                Tags.getAll(environmentPrerequisitesCreateRequest.getAzure().getTags()));
     }
 
     @Override

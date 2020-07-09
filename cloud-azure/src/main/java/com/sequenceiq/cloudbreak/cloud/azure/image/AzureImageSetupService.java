@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 
@@ -111,7 +112,7 @@ public class AzureImageSetupService {
     private void createResourceGroupIfNotExists(AzureClient client, String resourceGroupName, String region, CloudStack stack) {
         if (!client.resourceGroupExists(resourceGroupName)) {
             LOGGER.info("Creating resource group: {}", resourceGroupName);
-            client.createResourceGroup(resourceGroupName, region, stack.getTags());
+            client.createResourceGroup(resourceGroupName, region, Tags.getAll(stack.getTags()));
         }
     }
 

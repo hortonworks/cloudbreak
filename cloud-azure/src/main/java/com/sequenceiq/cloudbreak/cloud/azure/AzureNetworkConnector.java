@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 
 @Service
@@ -134,7 +134,7 @@ public class AzureNetworkConnector implements NetworkConnector {
 
     private ResourceGroup getOrCreateResourceGroup(AzureClient azureClient, NetworkCreationRequest networkRequest) {
         String region = networkRequest.getRegion().value();
-        Map<String, String> tags = Collections.unmodifiableMap(networkRequest.getTags());
+        Map<String, String> tags = Tags.getAll(networkRequest.getTags());
         String resourceGroupName = networkRequest.getResourceGroup();
         ResourceGroup resourceGroup;
         if (StringUtils.isNotEmpty(resourceGroupName)) {
