@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -113,5 +114,11 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
             + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id AND i.instanceStatus = 'SERVICES_UNHEALTHY' "
             + "GROUP BY s.id")
     Set<StackInstanceCount> countUnhealthyByWorkspaceId(@Param("id") Long workspaceId);
+
+    @Modifying
+    @Query("UPDATE InstanceMetaData SET instanceStatus = :newInstanceStatus, statusReason = :newStatusReason " +
+            "WHERE id = :id AND instanceStatus <> 'TERMINATED'")
+    int updateStatusIfNotTerminated(@Param("id") Long id, @Param("newInstanceStatus") InstanceStatus newInstanceStatus,
+            @Param("newStatusReason") String newStatusReason);
 
 }

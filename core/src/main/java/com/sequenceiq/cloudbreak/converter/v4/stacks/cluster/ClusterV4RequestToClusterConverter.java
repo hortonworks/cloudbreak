@@ -133,7 +133,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         Set<ClusterComponent> components = new HashSet<>();
 
         ClouderaManagerV4Request clouderaManagerRequest = clusterRequest.getCm();
-        if (Objects.nonNull(clouderaManagerRequest) && !StackType.CDH.name().equals(cluster.getBlueprint().getStackType())) {
+        if (Objects.nonNull(clouderaManagerRequest) && cluster.getBlueprint() != null && !StackType.CDH.name().equals(cluster.getBlueprint().getStackType())) {
             throw new BadRequestException("Cannot process the provided Ambari blueprint with Cloudera Manager");
         }
 

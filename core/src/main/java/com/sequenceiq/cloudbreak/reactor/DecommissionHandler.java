@@ -147,8 +147,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
 
     private void updateInstanceStatuses(Collection<InstanceMetaData> instanceMetadatas, InstanceStatus instanceStatus, String statusReason) {
         for (InstanceMetaData instanceMetaData : instanceMetadatas) {
-            instanceMetaDataService.updateInstanceStatus(instanceMetaData, instanceStatus,
-                    statusReason);
+            instanceMetaDataService.updateInstanceStatus(instanceMetaData, instanceStatus, statusReason);
         }
     }
 

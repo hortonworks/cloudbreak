@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -94,7 +95,11 @@ public class StackSyncService {
                 } else {
                     state = InstanceSyncState.DELETED;
                 }
-                syncInstanceStatusByState(stack, counts, metaData, state);
+                try {
+                    syncInstanceStatusByState(stack, counts, metaData, state);
+                } catch (TransactionService.TransactionRuntimeExecutionException e) {
+                    LOGGER.error("Can't sync instance status by state!", e);
+                }
             }
             handleSyncResult(stack, counts, stackStatusUpdateEnabled);
         } catch (CloudbreakImageNotFoundException | IllegalArgumentException ex) {
@@ -177,36 +182,34 @@ public class StackSyncService {
         }
     }
 
-    private void syncStoppedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
+    private void syncStoppedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, final InstanceMetaData instance) {
         instanceStateCounts.put(InstanceSyncState.STOPPED, instanceStateCounts.get(InstanceSyncState.STOPPED) + 1);
         if (!instance.isTerminated() && instance.getInstanceStatus() != InstanceStatus.STOPPED) {
             LOGGER.debug("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
-            instance.setInstanceStatus(InstanceStatus.STOPPED);
-            instanceMetaDataService.save(instance);
+            instanceMetaDataService.updateInstanceStatus(instance, InstanceStatus.STOPPED);
         }
     }
 
-    private void syncRunningInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
+    private void syncRunningInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, final InstanceMetaData instance) {
         instanceStateCounts.put(InstanceSyncState.RUNNING, instanceStateCounts.get(InstanceSyncState.RUNNING) + 1);
         if (stack.getStatus() == WAIT_FOR_SYNC && instance.isCreated()) {
             LOGGER.debug("Instance '{}' is reported as created on the cloud provider but not member of the cluster, setting its state to FAILED.",
                     instance.getInstanceId());
-            instance.setInstanceStatus(InstanceStatus.FAILED);
-            instanceMetaDataService.save(instance);
+            instanceMetaDataService.updateInstanceStatus(instance, InstanceStatus.FAILED);
         } else if (!instance.isRunning()) {
             LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
             updateMetaDataToRunning(instance);
         }
     }
 
-    private void syncDeletedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance, InstanceSyncState state) {
+    private void syncDeletedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, final InstanceMetaData instance,
+            InstanceSyncState state) {
         if (!instance.isTerminated() || !instance.isDeletedOnProvider()) {
             if (instance.getInstanceId() == null) {
                 instanceStateCounts.put(InstanceSyncState.DELETED, instanceStateCounts.get(InstanceSyncState.DELETED) + 1);
                 LOGGER.debug("Instance with private id '{}' don't have instanceId, setting its state to DELETED.",
                         instance.getPrivateId());
-                instance.setInstanceStatus(InstanceStatus.TERMINATED);
-                instanceMetaDataService.save(instance);
+                instanceMetaDataService.updateInstanceStatus(instance, InstanceStatus.TERMINATED);
             } else {
                 instanceStateCounts.put(state, instanceStateCounts.get(state) + 1);
                 LOGGER.debug("Instance '{}' is reported as deleted on the cloud provider, setting its state to {}.",
@@ -273,17 +276,13 @@ public class StackSyncService {
     }
 
     private void updateMetaDataToDeletedOnProviderSide(Stack stack, InstanceMetaData instanceMetaData) {
-        instanceMetaData.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
-        instanceMetaDataService.save(instanceMetaData);
-
+        instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.DELETED_ON_PROVIDER_SIDE);
         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_DELETED_CBMETADATA,
                 Collections.singletonList(getInstanceName(instanceMetaData)));
     }
 
     private void updateMetaDataToDeletedByProvider(Stack stack, InstanceMetaData instanceMetaData) {
-        instanceMetaData.setInstanceStatus(InstanceStatus.DELETED_BY_PROVIDER);
-        instanceMetaDataService.save(instanceMetaData);
-
+        instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.DELETED_BY_PROVIDER);
         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_DELETED_BY_PROVIDER_CBMETADATA,
                 Collections.singletonList(getInstanceName(instanceMetaData)));
     }
@@ -296,8 +295,6 @@ public class StackSyncService {
 
     private void updateMetaDataToRunning(InstanceMetaData instanceMetaData) {
         LOGGER.info("Instance '{}' state to RUNNING.", instanceMetaData.getInstanceId());
-        instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
-        instanceMetaData.setStatusReason("Services running");
-        instanceMetaDataService.save(instanceMetaData);
+        instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.SERVICES_RUNNING, "Services running");
     }
 }

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -17,6 +19,9 @@ import reactor.bus.EventBus;
 
 @Component
 public class BootstrapMachineHandler implements EventHandler<BootstrapMachinesRequest> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BootstrapMachineHandler.class);
+
     @Inject
     private EventBus eventBus;
 
@@ -34,8 +39,10 @@ public class BootstrapMachineHandler implements EventHandler<BootstrapMachinesRe
         Selectable response;
         try {
             if (request.isReBootstrap()) {
+                LOGGER.info("RE-Bootstrap machines");
                 clusterBootstrapper.reBootstrapMachines(request.getResourceId());
             } else {
+                LOGGER.info("Bootstrap machines");
                 clusterBootstrapper.bootstrapMachines(request.getResourceId());
             }
             response = new BootstrapMachinesSuccess(request.getResourceId());
