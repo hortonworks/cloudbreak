@@ -18,8 +18,8 @@ import javax.inject.Inject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -132,6 +132,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto withStackRequest(StackV4Request stackV4Request) {
         getRequest().setStackV4Request(stackV4Request);
+        return this;
+    }
+
+    public SdxInternalTestDto addTags(Map<String, String> tags) {
+        getRequest().getStackV4Request().initAndGetTags().getUserDefined().putAll(tags);
         return this;
     }
 

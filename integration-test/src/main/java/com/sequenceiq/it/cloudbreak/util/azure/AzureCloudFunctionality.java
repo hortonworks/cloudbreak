@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.azure;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -22,6 +23,11 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     @Override
     public List<String> listInstanceVolumeIds(List<String> instanceIds) {
         return azureClientActions.listInstanceVolumeIds(instanceIds);
+    }
+
+    @Override
+    public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
+        return azureClientActions.listTagsByInstanceId(instanceIds);
     }
 
     @Override

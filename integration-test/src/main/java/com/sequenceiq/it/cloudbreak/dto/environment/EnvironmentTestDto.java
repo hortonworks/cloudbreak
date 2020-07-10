@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -234,6 +235,11 @@ public class EnvironmentTestDto
     public EnvironmentTestDto withParentEnvironment() {
         CloudbreakTestDto parentEnvDto = getTestContext().given(EnvironmentTestDto.class);
         return withParentEnvironment(parentEnvDto);
+    }
+
+    public EnvironmentTestDto addTags(Map<String, String> tags) {
+        getRequest().getTags().putAll(tags);
+        return this;
     }
 
     private EnvironmentTestDto withParentEnvironment(CloudbreakTestDto parentEnvDto) {

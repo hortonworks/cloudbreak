@@ -250,6 +250,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return this;
     }
 
+    public DistroXTestDto addTags(Map<String, String> tags) {
+        getRequest().initAndGetTags().getUserDefined().putAll(tags);
+        return this;
+    }
+
     @Override
     public Clue investigate() {
         if (getResponse() == null || getResponse().getId() == null) {

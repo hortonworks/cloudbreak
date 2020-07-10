@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.aws;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -26,6 +27,11 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     @Override
     public List<String> listInstanceVolumeIds(List<String> instanceIds) {
         return amazonEC2Util.listInstanceVolumeIds(instanceIds);
+    }
+
+    @Override
+    public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
+        return amazonEC2Util.listTagsByInstanceId(instanceIds);
     }
 
     @Override

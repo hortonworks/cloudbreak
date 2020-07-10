@@ -637,7 +637,7 @@ public abstract class TestContext implements ApplicationContextAware {
         return getSdxClient(getActingUserAccessKey());
     }
 
-    public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends MicroserviceClient> msClientClass) {
+    public <U extends MicroserviceClient> U getMicroserviceClient(Class<U> msClientClass) {
         return getMicroserviceClient(msClientClass, getActingUserAccessKey());
     }
 

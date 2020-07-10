@@ -1,10 +1,13 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.environment;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.assertion.util.CloudProviderSideTagAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -22,6 +25,12 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class EnvironmentStopStartTests extends AbstractE2ETest {
 
+    private static final Map<String, String> ENV_TAGS = Map.of("envTagKey", "envTagValue");
+
+    private static final Map<String, String> SDX_TAGS = Map.of("sdxTagKey", "sdxTagValue");
+
+    private static final Map<String, String> DX1_TAGS = Map.of("distroxTagKey", "distroxTagValue");
+
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
@@ -33,6 +42,9 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
 
     @Inject
     private CredentialTestClient credentialTestClient;
+
+    @Inject
+    private CloudProviderSideTagAssertion cloudProviderSideTagAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -50,24 +62,30 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
                 .given("telemetry", TelemetryTestDto.class)
-                .withLogging()
-                .withReportClusterLogs()
+                    .withLogging()
+                    .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
-                .withNetwork()
-                .withTelemetry("telemetry")
-                .withCreateFreeIpa(Boolean.TRUE)
+                    .withNetwork()
+                    .withTelemetry("telemetry")
+                    .withCreateFreeIpa(Boolean.TRUE)
+                    .addTags(ENV_TAGS)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .then(cloudProviderSideTagAssertion.verifyEnvironmentTags(ENV_TAGS))
                 .given(SdxInternalTestDto.class)
+                    .addTags(SDX_TAGS)
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow(RunningParameter.key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
+                .then(cloudProviderSideTagAssertion.verifyInternalSdxTags(SDX_TAGS))
                 .given("dx1", DistroXTestDto.class)
+                    .addTags(DX1_TAGS)
                 .when(distroXTestClient.create(), RunningParameter.key("dx1"))
                 .given("dx2", DistroXTestDto.class)
                 .when(distroXTestClient.create(), RunningParameter.key("dx2"))
                 .given("dx1", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, RunningParameter.key("dx1"))
+                .then(cloudProviderSideTagAssertion.verifyDistroxTags(DX1_TAGS))
                 .given("dx2", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, RunningParameter.key("dx2"))
                 .given(EnvironmentTestDto.class)

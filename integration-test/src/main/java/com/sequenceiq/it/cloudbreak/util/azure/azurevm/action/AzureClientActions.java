@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.azure.azurevm.action;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -98,5 +99,11 @@ public class AzureClientActions {
 
     public void setAzure(Azure azure) {
         this.azure = azure;
+    }
+
+    public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
+        return instanceIds.stream()
+                .map(id -> azure.virtualMachines().getByResourceGroup(getResourceGroupName(id), id))
+                .collect(Collectors.toMap(VirtualMachine::id, VirtualMachine::tags));
     }
 }
