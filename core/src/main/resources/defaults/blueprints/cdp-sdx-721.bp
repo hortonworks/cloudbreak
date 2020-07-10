@@ -171,6 +171,10 @@
               {
                 "name": "solr_https_port",
                 "value": "8985"
+              },
+              {
+                "name": "solr_java_opts",
+                "value": "{{JAVA_GC_ARGS}} -Dsolr.hdfs.allow.location.override=true"
               }
             ],
             "refName": "solr-SOLR_SERVER-BASE",
