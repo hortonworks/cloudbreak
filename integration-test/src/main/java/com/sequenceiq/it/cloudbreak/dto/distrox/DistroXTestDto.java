@@ -45,7 +45,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
-import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
+import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 
 @Prototype
 public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implements Purgable<StackV4Response, CloudbreakClient>, Investigable, Searchable {
@@ -60,7 +60,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     private DistroXTestClient distroXTestClient;
 
     @Inject
-    private WaitUtil waitUtil;
+    private FlowUtil flowUtil;
 
     public DistroXTestDto(TestContext testContext) {
         super(new DistroXV1Request(), testContext);
@@ -165,10 +165,30 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return this;
     }
 
+    public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses) {
+        return awaitForInstance(statuses, emptyRunningParameter());
+    }
+
+    public DistroXTestDto awaitForInstance(DistroXTestDto entity, Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
+        return getTestContext().await(entity, statuses, runningParameter);
+    }
+
+    public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
+        return getTestContext().await(this, statuses, runningParameter);
+    }
+
+    public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
+        return getTestContext().await(this, statuses, runningParameter, pollingInterval);
+    }
+
+    public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses, Duration pollingInterval) {
+        return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
+    }
+
     private void waitTillFlowInOperation() {
         while (hasFlow()) {
             try {
-                Thread.sleep(waitUtil.getPollingInterval());
+                Thread.sleep(flowUtil.getPollingInterval());
             } catch (InterruptedException e) {
                 LOGGER.warn("Exception has been occurred during wait for flow end: ", e);
             }

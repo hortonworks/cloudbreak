@@ -4,6 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -135,6 +136,26 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto awaitForFlow(RunningParameter runningParameter) {
         return getTestContext().awaitForFlow(this, runningParameter);
+    }
+
+    public SdxTestDto awaitForInstance(Map<String, InstanceStatus> statuses) {
+        return awaitForInstance(statuses, emptyRunningParameter());
+    }
+
+    public SdxTestDto awaitForInstance(SdxTestDto entity, Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
+        return getTestContext().await(entity, statuses, runningParameter);
+    }
+
+    public SdxTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
+        return getTestContext().await(this, statuses, runningParameter);
+    }
+
+    public SdxTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
+        return getTestContext().await(this, statuses, runningParameter, pollingInterval);
+    }
+
+    public SdxTestDto awaitForInstance(Map<String, InstanceStatus> statuses, Duration pollingInterval) {
+        return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 
     public SdxTestDto withCloudStorage() {

@@ -35,13 +35,11 @@ public class CloudbreakFailedChecker<T extends CloudbreakWaitObject> extends Exc
             if (desiredStatuses.equals(actualStatuses)) {
                 return true;
             }
+        } catch (NotFoundException e) {
+            LOGGER.warn("No cluster found with name '{}'", name, e);
         } catch (Exception e) {
-            if (e instanceof NotFoundException) {
-                LOGGER.warn("No cluster found with name '{}'", name, e);
-            } else {
-                LOGGER.error("Failed to get cluster status: {}", e.getMessage(), e);
-                throw new TestFailException(String.format("Failed to get cluster status: %s", e.getMessage()));
-            }
+            LOGGER.error("Failed to get cluster status or statusReason: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("Failed to get cluster status or statusReason: %s", e.getMessage()));
         }
         return false;
     }
@@ -57,9 +55,8 @@ public class CloudbreakFailedChecker<T extends CloudbreakWaitObject> extends Exc
             throw new TestFailException(String.format("Wait operation timed out, '%s' cluster has not been failed. Cluster status: '%s' " +
                     "statusReason: '%s'", name, actualStatuses, actualStatusReasons));
         } catch (Exception e) {
-            LOGGER.error("Wait operation timed out, failed to get cluster status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out, failed to get cluster status: %s",
-                    e.getMessage()));
+            LOGGER.error("Wait operation timed out! Failed to get cluster status or statusReason: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("Wait operation timed out! Failed to get cluster status or statusReason: %s", e.getMessage()));
         }
     }
 

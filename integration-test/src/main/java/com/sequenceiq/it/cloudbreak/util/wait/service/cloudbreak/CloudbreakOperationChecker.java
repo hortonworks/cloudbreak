@@ -51,12 +51,10 @@ public class CloudbreakOperationChecker<T extends CloudbreakWaitObject> extends 
             if (desiredStatuses.equals(actualStatuses)) {
                 LOGGER.info("Cluster '{}' is in desired state (status:'{}').", name, actualStatuses);
                 return true;
-            } else {
-                LOGGER.info("Cluster '{}' is NOT in desired state (status:'{}').", name, actualStatuses);
             }
         } catch (Exception e) {
-            LOGGER.error("Cluster has been failed. Also failed to get cluster status or statusReason: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Cluster has been failed. Also failed to get cluster status or statusReason: %s", e.getMessage()));
+            LOGGER.error("Failed to get cluster status or statusReason: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("Failed to get cluster status or statusReason: %s", e.getMessage()));
         }
         return false;
     }
@@ -72,11 +70,11 @@ public class CloudbreakOperationChecker<T extends CloudbreakWaitObject> extends 
             Map<String, Status> actualStatuses = Map.of("status", stackStatus.getStatus(), "clusterStatus", stackStatus.getClusterStatus());
             Map<String, String> actualStatusReasons = Map.of("stackStatusReason", stackStatus.getStatusReason(), "clusterStatusReason", stackStatus
                     .getClusterStatusReason());
-            throw new TestFailException(String.format("Wait operation timed out, cluster '%s' has been failed. Cluster status: '%s' "
+            throw new TestFailException(String.format("Wait operation timed out! Cluster '%s' has been failed. Cluster status: '%s' "
                     + "statusReason: '%s'", name, actualStatuses, actualStatusReasons));
         } catch (Exception e) {
-            LOGGER.error("Wait operation timed out. Also failed to get cluster status or statusReason: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out. Also failed to get cluster status or statusReason: %s", e.getMessage()));
+            LOGGER.error("Wait operation timed out! Failed to get cluster status or statusReason: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("Wait operation timed out! Failed to get cluster status or statusReason: %s", e.getMessage()));
         }
     }
 

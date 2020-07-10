@@ -26,7 +26,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
-import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.it.util.ResourceUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -40,9 +39,6 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
     @Inject
     private StackTestClient stackTestClient;
-
-    @Inject
-    private WaitUtil waitUtil;
 
     @Inject
     private SshJUtil sshJUtil;
@@ -82,10 +78,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
-                    return testDto;
-                })
+                .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
                     return sshJUtil.checkFilesOnHostByNameAndPath(testDto, client, List.of(MASTER.getName(), IDBROKER.getName()),
                             filePath, fileName, 1);
@@ -96,18 +89,12 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                     getCloudFunctionality(tc).stopInstances(instanceIdsToStop);
                     return testDto;
                 })
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesStoppedState(), false);
-                    return testDto;
-                })
+                .awaitForInstance(getSdxInstancesStoppedState())
                 .when(sdxTestClient.repairInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
-                .then((tc, testDto, client) -> {
-                    waitUtil.waitForSdxInstanceStatus(testDto.getResponse().getName(), tc, getSdxInstancesHealthyState(), true);
-                    return testDto;
-                })
+                .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
                     return sshJUtil.checkFilesOnHostByNameAndPath(testDto, client, List.of(MASTER.getName(), IDBROKER.getName()),
                             filePath, fileName, 1);
