@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
-import com.sequenceiq.common.api.tag.request.TagsRequest;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -100,7 +99,7 @@ public class StackRequestManifester {
             stackRequest.setName(sdxCluster.getClusterName());
             stackRequest.setType(StackType.DATALAKE);
             if (stackRequest.getTags() == null) {
-                TagsRequest userDefined = new TagsRequest(environment.getTags().getUserDefined());
+                Map<String, String> userDefined = environment.getTags().getUserDefined();
                 TagsV4Request tags = new TagsV4Request();
                 try {
                     Map<String, String> sdxUserDefined = new HashMap<>();
@@ -110,7 +109,7 @@ public class StackRequestManifester {
                             && !"null".equals(sdxCluster.getTags().getValue())) {
                         sdxUserDefined = sdxCluster.getTags().get(HashMap.class);
                     }
-                    userDefined.addTags(sdxUserDefined);
+                    userDefined.putAll(sdxUserDefined);
                     tags.setUserDefined(userDefined);
                 } catch (IOException e) {
                     LOGGER.error("Can not parse JSON to tags");

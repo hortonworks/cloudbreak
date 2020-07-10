@@ -99,7 +99,6 @@ import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Component
@@ -453,7 +452,7 @@ public class ClusterHostServiceRunner {
         if (stack.getTags() != null && isNotBlank(stack.getTags().getValue())) {
             try {
                 StackTags stackTags = stack.getTags().get(StackTags.class);
-                Map<String, String> tags = Tags.getAll(stackTags.getDefaultTags());
+                Map<String, Object> tags = new HashMap<>(stackTags.getDefaultTags());
                 servicePillarConfig.put("tags", new SaltPillarProperties("/tags/init.sls",
                         Collections.singletonMap("tags", tags)));
             } catch (Exception e) {

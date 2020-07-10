@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 import freemarker.template.Configuration;
@@ -115,7 +114,7 @@ public class AzureTemplateBuilder {
             model.put("existingVNETName", azureUtils.getCustomNetworkId(network));
             model.put("noPublicIp", azureUtils.isPrivateIp(network));
             model.put("noFirewallRules", false);
-            model.put("userDefinedTags", Tags.getAll(cloudStack.getTags()));
+            model.put("userDefinedTags", cloudStack.getTags());
             model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator.validate(armStack));
             model.put("isUpscale", UPSCALE.equals(azureInstanceTemplateOperation));
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(cloudStack), model);
@@ -143,7 +142,7 @@ public class AzureTemplateBuilder {
             if (azureDatabaseServerView.getPort() != null) {
                 LOGGER.warn("Found port {} in database stack, but Azure ignores it", azureDatabaseServerView.getPort());
             }
-            model.put("serverTags", Tags.getAll(databaseStack.getTags()));
+            model.put("serverTags", databaseStack.getTags());
             model.put("skuCapacity", azureDatabaseServerView.getSkuCapacity());
             model.put("skuFamily", azureDatabaseServerView.getSkuFamily());
             model.put("skuName", azureDatabaseServerView.getSkuName());

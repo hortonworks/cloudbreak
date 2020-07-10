@@ -111,7 +111,7 @@ public class StackRequestToCreateAWSClusterRequestConverter implements StackRequ
     private List<DatahubResourceTagRequest> getTags(TagsV4Request source) {
         List<DatahubResourceTagRequest> tags = new ArrayList<>();
         doIfNotNull(getIfNotNull(source, TagsV4Request::getUserDefined), userDefinedTags ->
-                userDefinedTags.getAll().forEach((k, v) -> {
+                userDefinedTags.forEach((k, v) -> {
                     DatahubResourceTagRequest tag = new DatahubResourceTagRequest();
                     tag.setKey(k);
                     tag.setValue(v);

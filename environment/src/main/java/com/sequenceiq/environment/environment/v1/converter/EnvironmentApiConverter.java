@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.util.NullUtil;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
@@ -113,7 +112,7 @@ public class EnvironmentApiConverter {
                 .withRegions(request.getRegions())
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
                 .withAdminGroupName(request.getAdminGroupName())
-                .withTags(new Tags(request.getTags()))
+                .withTags(request.getTags())
                 .withCrn(createCrn(ThreadBasedUserCrnProvider.getAccountId()))
                 .withExperimentalFeatures(ExperimentalFeatures.builder()
                         .withIdBrokerMappingSource(request.getIdBrokerMappingSource())

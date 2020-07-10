@@ -3,30 +3,31 @@ package com.sequenceiq.environment.environment.domain;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.common.api.tag.model.Tags;
 
 @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentTags {
 
-    private final Tags userDefinedTags;
+    private final Map<String, String> userDefinedTags;
 
-    private final Tags defaultTags;
+    private final Map<String, String> defaultTags;
 
-    public EnvironmentTags(@JsonProperty("userDefinedTags") Tags userDefinedTags,
-        @JsonProperty("defaultTags") Tags defaultTags) {
+    public EnvironmentTags(@JsonProperty("userDefinedTags") Map<String, String> userDefinedTags,
+        @JsonProperty("defaultTags") Map<String, String> defaultTags) {
         this.defaultTags = defaultTags;
         this.userDefinedTags = userDefinedTags;
     }
 
-    public Tags getUserDefinedTags() {
+    public Map<String, String> getUserDefinedTags() {
         return userDefinedTags;
     }
 
-    public Tags getDefaultTags() {
+    public Map<String, String> getDefaultTags() {
         return defaultTags;
     }
 

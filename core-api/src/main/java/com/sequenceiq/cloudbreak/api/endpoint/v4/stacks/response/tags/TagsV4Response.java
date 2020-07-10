@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
-import com.sequenceiq.common.api.tag.response.TagsResponse;
 import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -12,43 +13,43 @@ import io.swagger.annotations.ApiModelProperty;
 public class TagsV4Response implements JsonEntity, TaggedResponse {
 
     @ApiModelProperty(StackModelDescription.APPLICATION_TAGS)
-    private TagsResponse application = new TagsResponse();
+    private Map<String, String> application = new HashMap<>();
 
     @ApiModelProperty(StackModelDescription.USERDEFINED_TAGS)
-    private TagsResponse userDefined = new TagsResponse();
+    private Map<String, String> userDefined = new HashMap<>();
 
     @ApiModelProperty(StackModelDescription.DEFAULT_TAGS)
-    private TagsResponse defaults = new TagsResponse();
+    private Map<String, String> defaults = new HashMap<>();
 
-    public TagsResponse getApplication() {
+    public Map<String, String> getApplication() {
         return application;
     }
 
-    public void setApplication(TagsResponse application) {
+    public void setApplication(Map<String, String> application) {
         this.application = application;
     }
 
-    public TagsResponse getUserDefined() {
+    public Map<String, String> getUserDefined() {
         return userDefined;
     }
 
-    public void setUserDefined(TagsResponse userDefined) {
+    public void setUserDefined(Map<String, String> userDefined) {
         this.userDefined = userDefined;
     }
 
-    public TagsResponse getDefaults() {
+    public Map<String, String> getDefaults() {
         return defaults;
     }
 
-    public void setDefaults(TagsResponse defaults) {
+    public void setDefaults(Map<String, String> defaults) {
         this.defaults = defaults;
     }
 
     @Override
     public String getTagValue(String key) {
-        return Optional.ofNullable(application.getTagValue(key))
-                .or(() -> Optional.ofNullable(userDefined.getTagValue(key)))
-                .or(() -> Optional.ofNullable(defaults.getTagValue(key)))
+        return Optional.ofNullable(application.get(key))
+                .or(() -> Optional.ofNullable(userDefined.get(key)))
+                .or(() -> Optional.ofNullable(defaults.get(key)))
                 .orElse(null);
     }
 }

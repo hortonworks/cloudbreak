@@ -1,11 +1,12 @@
 package com.sequenceiq.sdx.api.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.common.api.tag.base.TagsBase;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
-import com.sequenceiq.common.api.tag.request.TagsRequest;
 
 public class SdxClusterRequest implements TaggableRequest {
 
@@ -24,7 +25,7 @@ public class SdxClusterRequest implements TaggableRequest {
     @Valid
     private SdxAwsRequest aws;
 
-    private TagsRequest tags = new TagsRequest();
+    private Map<String, String> tags;
 
     private boolean enableRangerRaz;
 
@@ -52,21 +53,28 @@ public class SdxClusterRequest implements TaggableRequest {
         this.runtime = runtime;
     }
 
-    public void setTags(TagsRequest tags) {
+    public void setTags(Map<String, String> tags) {
         this.tags = tags;
     }
 
-    public TagsRequest getTags() {
+    public Map<String, String> getTags() {
         return tags;
     }
 
     @Override
     public void addTag(String key, String value) {
-        tags.addTag(key, value);
+        initAndGetTags().put(key, value);
     }
 
-    public void addTags(TagsBase tags) {
-        tags.addTags(tags);
+    public Map<String, String> initAndGetTags() {
+        if (tags == null) {
+            tags = new HashMap<>();
+        }
+        return tags;
+    }
+
+    public void addTags(Map<String, String> tags) {
+        initAndGetTags().putAll(tags);
     }
 
     public SdxCloudStorageRequest getCloudStorage() {

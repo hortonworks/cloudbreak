@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.tag.request;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.common.api.tag.model.Tags;
 
 public class CDPTagMergeRequest {
 
     private final String platform;
 
-    private final Tags environmentTags;
+    private final Map<String, String> environmentTags;
 
-    private final Tags requestTags;
+    private final Map<String, String> requestTags;
 
     private CDPTagMergeRequest(CDPTagMergeRequest.Builder builder) {
         this.platform = builder.platform;
@@ -23,25 +24,25 @@ public class CDPTagMergeRequest {
         return platform;
     }
 
-    public Tags getEnvironmentTags() {
+    public Map<String, String> getEnvironmentTags() {
         return environmentTags;
     }
 
-    public Tags getRequestTags() {
+    public Map<String, String> getRequestTags() {
         return requestTags;
     }
 
     public boolean isKeyNotPresented(String key) {
-        return getRequestTags() == null || Strings.isNullOrEmpty(getRequestTags().getTagValue(key));
+        return getRequestTags() == null || Strings.isNullOrEmpty(getRequestTags().get(key));
     }
 
     public static class Builder {
 
         private String platform;
 
-        private Tags environmentTags = new Tags();
+        private Map<String, String> environmentTags = new HashMap<>();
 
-        private Tags requestTags = new Tags();
+        private Map<String, String> requestTags = new HashMap<>();
 
         public static Builder builder() {
             return new Builder();
@@ -52,12 +53,12 @@ public class CDPTagMergeRequest {
             return this;
         }
 
-        public Builder withEnvironmentTags(Tags environmentTags) {
+        public Builder withEnvironmentTags(Map<String, String> environmentTags) {
             this.environmentTags = environmentTags;
             return this;
         }
 
-        public Builder withRequestTags(Tags requestTags) {
+        public Builder withRequestTags(Map<String, String> requestTags) {
             this.requestTags = requestTags;
             return this;
         }

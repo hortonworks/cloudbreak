@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
+import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -34,7 +35,6 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
@@ -235,7 +235,7 @@ public class FreeIpaCreationHandlerTest {
         dto.setId(ENVIRONMENT_ID);
         dto.setResourceCrn(ENVIRONMENT_CRN);
         dto.setCloudPlatform(CloudPlatform.AWS.name());
-        dto.setTags(new EnvironmentTags(new Tags(), new Tags()));
+        dto.setTags(new EnvironmentTags(emptyMap(), emptyMap()));
         dto.setAuthentication(AuthenticationDto.builder().build());
         dto.setRegions(Set.of(createRegion("someWhereOverTheRainbow")));
         dto.setFreeIpaCreation(FreeIpaCreationDto.builder().withCreate(true).build());

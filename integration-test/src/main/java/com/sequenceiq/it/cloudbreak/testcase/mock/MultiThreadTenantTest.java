@@ -92,6 +92,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
     public void beforeTest(Method method, Object[] params) {
         MDC.put("testlabel", method.getDeclaringClass().getSimpleName() + '.' + method.getName());
         TestContext testContext = (TestContext) params[0];
+        testContext.setTestMethodName(method.getName());
         collectTestCaseDescription(testContext, method, params);
     }
 

@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.tag.DefaultApplicationTag;
-import com.sequenceiq.common.api.tag.model.Tags;
 
 public class CDPTagGenerationRequest {
 
@@ -26,9 +25,9 @@ public class CDPTagGenerationRequest {
 
     private final Map<String, String> sourceMap;
 
-    private final Tags accountTags;
+    private final Map<String, String> accountTags;
 
-    private final Tags userDefinedTags;
+    private final Map<String, String> userDefinedTags;
 
     private CDPTagGenerationRequest(CDPTagGenerationRequest.Builder builder) {
         this.platform = builder.platform;
@@ -79,11 +78,11 @@ public class CDPTagGenerationRequest {
         return getSourceMap() == null || Strings.isNullOrEmpty(getSourceMap().get(tag.key()));
     }
 
-    public Tags getAccountTags() {
+    public Map<String, String> getAccountTags() {
         return accountTags;
     }
 
-    public Tags getUserDefinedTags() {
+    public Map<String, String> getUserDefinedTags() {
         return userDefinedTags;
     }
 
@@ -105,9 +104,9 @@ public class CDPTagGenerationRequest {
 
         private Map<String, String> sourceMap = new HashMap<>();
 
-        private Tags accountTags = new Tags();
+        private Map<String, String> accountTags = new HashMap<>();
 
-        private Tags userDefinedTags = new Tags();
+        private Map<String, String> userDefinedTags = new HashMap<>();
 
         public static Builder builder() {
             return new Builder();
@@ -153,12 +152,12 @@ public class CDPTagGenerationRequest {
             return this;
         }
 
-        public Builder withAccountTags(Tags accountTags) {
+        public Builder withAccountTags(Map<String, String> accountTags) {
             this.accountTags = accountTags;
             return this;
         }
 
-        public Builder withUserDefinedTags(Tags userDefinedTags) {
+        public Builder withUserDefinedTags(Map<String, String> userDefinedTags) {
             this.userDefinedTags = userDefinedTags;
             return this;
         }

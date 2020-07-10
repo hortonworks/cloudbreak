@@ -95,7 +95,7 @@ public class DistroXV1RequestToCreateAzureClusterRequestConverter implements Dis
     private List<DatahubResourceTagRequest> getTags(TagsV1Request source) {
         List<DatahubResourceTagRequest> tags = new ArrayList<>();
         doIfNotNull(getIfNotNull(source, TagsV1Request::getUserDefined), userDefinedTags ->
-                userDefinedTags.getAll().forEach((k, v) -> {
+                userDefinedTags.forEach((k, v) -> {
                     DatahubResourceTagRequest tag = new DatahubResourceTagRequest();
                     tag.setKey(k);
                     tag.setValue(v);

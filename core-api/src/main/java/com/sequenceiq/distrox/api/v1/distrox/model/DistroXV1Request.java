@@ -127,7 +127,7 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     @Override
     public void addTag(String key, String value) {
-        initAndGetTags().getUserDefined().addTag(key, value);
+        initAndGetTags().getUserDefined().put(key, value);
     }
 
     public void setTags(TagsV1Request tags) {

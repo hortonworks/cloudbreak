@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.tags.domain.AccountTag;
 import com.sequenceiq.environment.tags.repository.AccountTagRepository;
@@ -58,7 +57,7 @@ public class AccountTagService {
         }
     }
 
-    public Tags generate(String accountId, EnvironmentDto environmentDto) {
+    public Map<String, String> generate(String accountId, EnvironmentDto environmentDto) {
         try {
             Map<String, String> accountTagsMap = accountTagRepository.findAllInAccount(accountId)
                     .stream()
@@ -73,7 +72,7 @@ public class AccountTagService {
                     .withResourceCrn(environmentDto.getResourceCrn())
                     .withIsInternalTenant(internalTenant)
                     .withUserName(getUserFromCrn(environmentDto.getCreator()))
-                    .withAccountTags(new Tags(accountTagsMap))
+                    .withAccountTags(accountTagsMap)
                     .build();
             return costTagging.generateAccountTags(request);
         } catch (DataIntegrityViolationException e) {
