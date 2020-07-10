@@ -21,7 +21,8 @@ public class EnvironmentService {
         if (stack.getEnvironmentCrn() != null) {
             DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(stack.getEnvironmentCrn());
             if (!desiredStatuses.contains(environmentResponse.getEnvironmentStatus())) {
-                throw new BadRequestException("Environment should be available, but the status is " + environmentResponse.getEnvironmentStatus());
+                throw new BadRequestException("This action requires the Environment to be available, but the status is "
+                        + environmentResponse.getEnvironmentStatus().getDescription());
             }
         }
     }
