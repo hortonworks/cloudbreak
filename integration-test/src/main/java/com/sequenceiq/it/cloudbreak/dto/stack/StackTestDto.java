@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -96,7 +97,8 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     @Override
     public void delete(TestContext testContext, StackV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true);
+            client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true,
+                    Crn.fromString(entity.getCrn()).getAccountId());
             testContext.await(this, STACK_DELETED, key("wait-purge-stack-" + entity.getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);

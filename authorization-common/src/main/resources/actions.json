@@ -358,5 +358,9 @@
     "right": "environments/modifyAuditCredential",
     "resourceType": "AUDIT_CREDENTIAL",
     "legacyRight": "environments/write"
+  },
+  "USE_INTERNALLY": {
+    "right": "cloudbreak/allowPowerUserOnly",
+    "legacyRight": "datahub/read"
   }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -71,13 +72,14 @@ public class SdxRepairServiceTest {
         cluster.setId(CLUSTER_ID.incrementAndGet());
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
+        cluster.setAccountId("accountid");
         SdxRepairRequest sdxRepairRequest = new SdxRepairRequest();
         sdxRepairRequest.setHostGroupNames(List.of("master"));
         SdxRepairSettings sdxRepairSettings = SdxRepairSettings.from(sdxRepairRequest);
 
         doNothing().when(cloudbreakFlowService).saveLastCloudbreakFlowChainId(any(), any());
         underTest.startRepairInCb(cluster, sdxRepairSettings);
-        verify(stackV4Endpoint).repairCluster(eq(0L), eq(CLUSTER_NAME), captor.capture());
+        verify(stackV4Endpoint).repairCluster(eq(0L), eq(CLUSTER_NAME), captor.capture(), anyString());
         assertEquals("master", captor.getValue().getHostGroups().get(0));
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", cluster);
@@ -89,10 +91,11 @@ public class SdxRepairServiceTest {
         cluster.setId(CLUSTER_ID.incrementAndGet());
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
+        cluster.setAccountId("accountid");
         StackV4Response resp = new StackV4Response();
         resp.setStatus(Status.UPDATE_FAILED);
         when(cloudbreakFlowService.getLastKnownFlowState(any())).thenReturn(FlowState.FINISHED);
-        when(stackV4Endpoint.get(eq(0L), eq("dummyCluster"), any())).thenReturn(resp);
+        when(stackV4Endpoint.get(eq(0L), eq("dummyCluster"), any(), anyString())).thenReturn(resp);
         AttemptResult<StackV4Response> attempt = underTest.checkClusterStatusDuringRepair(cluster);
         assertEquals(AttemptState.BREAK, attempt.getState());
     }

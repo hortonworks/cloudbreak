@@ -25,7 +25,8 @@ public class UpdateStackDataAction implements Action<StackRepositoryTestDto, Clo
 
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .putCluster(client.getWorkspaceId(), stackTestDto.getName(), request);
+                .putCluster(client.getWorkspaceId(), stackTestDto.getName(), request,
+                        testContext.getActingUserCrn().getAccountId());
 
         return testDto;
     }

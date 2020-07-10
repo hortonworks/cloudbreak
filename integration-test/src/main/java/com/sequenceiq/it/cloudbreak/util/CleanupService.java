@@ -23,7 +23,7 @@ public class CleanupService {
     @Value("${integrationtest.cleanup.retryCount}")
     private int cleanUpRetryCount;
 
-    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient, Long workspaceId) {
+    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient, Long workspaceId, String accountId) {
         if (cleanedUp) {
             return;
         }
@@ -34,7 +34,7 @@ public class CleanupService {
                 .list(workspaceId, environment, false).getResponses()
                 .stream()
                 .filter(stack -> stack.getName().startsWith("it-"))
-                .forEach(stack -> deleteStackAndWait(cloudbreakClient, workspaceId, stack.getName()));
+                .forEach(stack -> deleteStackAndWait(cloudbreakClient, workspaceId, stack.getName(), accountId));
 
         cloudbreakClient.blueprintV4Endpoint()
                 .list(workspaceId, false)
@@ -64,10 +64,11 @@ public class CleanupService {
         }
     }
 
-    public void deleteStackAndWait(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName) {
+    public void deleteStackAndWait(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String accountId) {
         for (int i = 0; i < cleanUpRetryCount; i++) {
-            if (deleteStack(cloudbreakClient, workspaceId, stackName)) {
-                WaitResult waitResult = CloudbreakUtil.waitForStackStatus(cloudbreakClient, workspaceId, stackName, "DELETE_COMPLETED");
+            if (deleteStack(cloudbreakClient, workspaceId, stackName, accountId)) {
+                WaitResult waitResult = CloudbreakUtil.waitForStackStatus(cloudbreakClient, workspaceId, stackName,
+                        "DELETE_COMPLETED", accountId);
                 if (waitResult == WaitResult.SUCCESSFUL) {
                     break;
                 }
@@ -80,10 +81,10 @@ public class CleanupService {
         }
     }
 
-    public boolean deleteStack(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName) {
+    public boolean deleteStack(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String accountId) {
         boolean result = false;
         if (stackName != null) {
-            cloudbreakClient.stackV4Endpoint().delete(workspaceId, stackName, false);
+            cloudbreakClient.stackV4Endpoint().delete(workspaceId, stackName, false, accountId);
             result = true;
         }
         return result;

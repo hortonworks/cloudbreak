@@ -47,7 +47,7 @@ public class SdxRetryService {
                     if (SDX_STACK_CREATION_IN_PROGRESS_EVENT.name().equals(lastSuccessfulStateLog.getNextEvent())) {
                         LOGGER.info("Last successful state was " + SDX_STACK_CREATION_IN_PROGRESS_STATE + ", so try a retry on stack");
                         try {
-                            stackV4Endpoint.retry(0L, sdxCluster.getClusterName());
+                            stackV4Endpoint.retry(0L, sdxCluster.getClusterName(), sdxCluster.getAccountId());
                         } catch (BadRequestException e) {
                             LOGGER.info("Sdx retry failed on cloudbreak side, but try to restart the flow. Related exception: ", e);
                         }

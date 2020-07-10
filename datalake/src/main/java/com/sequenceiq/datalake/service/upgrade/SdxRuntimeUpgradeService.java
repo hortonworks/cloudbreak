@@ -66,13 +66,13 @@ public class SdxRuntimeUpgradeService {
     @Inject
     private EntitlementService entitlementService;
 
-    public SdxUpgradeResponse checkForUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeSdxClusterRequest) {
-        return checkForSdxUpgradeResponse(userCrn, upgradeSdxClusterRequest, clusterName);
+    public SdxUpgradeResponse checkForUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeSdxClusterRequest, String accountId) {
+        return checkForSdxUpgradeResponse(userCrn, upgradeSdxClusterRequest, clusterName, accountId);
     }
 
-    public SdxUpgradeResponse checkForUpgradeByCrn(String userCrn, String crn, SdxUpgradeRequest upgradeSdxClusterRequest) {
+    public SdxUpgradeResponse checkForUpgradeByCrn(String userCrn, String crn, SdxUpgradeRequest upgradeSdxClusterRequest, String accountId) {
         String clusterName = getClusterName(userCrn, crn);
-        return checkForSdxUpgradeResponse(userCrn, upgradeSdxClusterRequest, clusterName);
+        return checkForSdxUpgradeResponse(userCrn, upgradeSdxClusterRequest, clusterName, accountId);
     }
 
     private String getClusterName(String userCrn, String clusterCrn) {
@@ -80,16 +80,16 @@ public class SdxRuntimeUpgradeService {
         return cluster.getClusterName();
     }
 
-    public SdxUpgradeResponse triggerUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeRequest) {
+    public SdxUpgradeResponse triggerUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeRequest, String accountId) {
         SdxCluster cluster = sdxService.getByNameInAccount(userCrn, clusterName);
-        SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByName(userCrn, clusterName, upgradeRequest);
+        SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByName(userCrn, clusterName, upgradeRequest, accountId);
         List<ImageInfoV4Response> imageInfoV4Responses = validateUpgradeCandidates(clusterName, sdxUpgradeResponse);
         return initSdxUpgrade(imageInfoV4Responses, upgradeRequest, cluster);
     }
 
-    public SdxUpgradeResponse triggerUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest) {
+    public SdxUpgradeResponse triggerUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest, String accountId) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
-        SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByCrn(userCrn, clusterCrn, upgradeRequest);
+        SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByCrn(userCrn, clusterCrn, upgradeRequest, accountId);
         List<ImageInfoV4Response> imageInfoV4Responses = validateUpgradeCandidates(cluster.getClusterName(), sdxUpgradeResponse);
         return initSdxUpgrade(imageInfoV4Responses, upgradeRequest, cluster);
     }
@@ -99,10 +99,11 @@ public class SdxRuntimeUpgradeService {
         return entitlementService.runtimeUpgradeEnabled(INTERNAL_ACTOR_CRN, accountId);
     }
 
-    private SdxUpgradeResponse checkForSdxUpgradeResponse(String userCrn, SdxUpgradeRequest upgradeSdxClusterRequest, String clusterName) {
+    private SdxUpgradeResponse checkForSdxUpgradeResponse(String userCrn, SdxUpgradeRequest upgradeSdxClusterRequest,
+            String clusterName, String accountId) {
         verifyRuntimeUpgradeEntitlement(userCrn);
         UpgradeV4Response upgradeV4Response = stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, clusterName,
-                sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest));
+                sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest), accountId);
         filterSdxUpgradeResponse(upgradeSdxClusterRequest, upgradeV4Response);
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4Response);
     }

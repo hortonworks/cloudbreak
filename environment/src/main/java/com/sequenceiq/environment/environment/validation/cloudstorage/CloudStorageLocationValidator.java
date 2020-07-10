@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
@@ -34,8 +33,7 @@ public class CloudStorageLocationValidator {
         String bucketName = getBucketName(fileSystemType, storageLocation);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
         ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName);
-        ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
+        ObjectStorageMetadataResponse response = cloudProviderServicesV4Endopint.getObjectStorageMetaData(request);
         resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().equals(response.getRegion()),
                 String.format("Object storage location [%s] of bucket '%s' must match environment location [%s]",
                         response.getRegion(),

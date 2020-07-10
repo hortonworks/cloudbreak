@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceDeletionService;
 import com.sequenceiq.environment.util.PollingConfig;
@@ -117,10 +118,16 @@ class SdxDeleteServiceTest {
                 .build();
         Environment environment = new Environment();
         environment.setName("envName");
+        environment.setResourceCrn(Crn.builder().setAccountId("asd")
+                .setResource("asd")
+                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+                .setService(Crn.Service.ENVIRONMENTS)
+                .setPartition(Crn.Partition.CDP)
+                .build().toString());
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(emptySet());
         when(environmentResourceDeletionService.getDatalakeClusterNames(environment)).thenReturn(Set.of("name"));
         underTest.deleteSdxClustersForEnvironment(pollingConfig, environment, true);
-        verify(stackV4Endpoint).delete(0L, "name", true);
+        verify(stackV4Endpoint).delete(eq(0L), eq("name"), eq(true), anyString());
         verify(sdxEndpoint, times(0)).deleteByCrn(anyString(), anyBoolean());
     }
 }

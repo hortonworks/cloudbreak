@@ -65,7 +65,7 @@ public class CloudbreakAwait implements Await<CloudbreakTestDto, Status> {
 
     private Result<WaitResult, Exception> waitForCloudbreakStatuses(ExceptionChecker<CloudbreakWaitObject> statusChecker, CloudbreakClient client,
             String name, TestContext testContext, Map<String, Status> desiredStatuses, Duration pollingInterval, int maxRetry) {
-        return testContext.getCloudbreakWaitService().waitObject(statusChecker, new CloudbreakWaitObject(client, name, desiredStatuses), testContext,
-                pollingInterval, maxRetry, 1);
+        return testContext.getCloudbreakWaitService().waitObject(statusChecker, new CloudbreakWaitObject(client, name, desiredStatuses,
+                        testContext.getActingUserCrn().getAccountId()), testContext, pollingInterval, maxRetry, 1);
     }
 }

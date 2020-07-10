@@ -31,7 +31,7 @@ public class StackTestAction {
         Log.whenJson(LOGGER, " Stack delete request:\n", entity.getRequest());
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .delete(client.getWorkspaceId(), entity.getName(), false);
+                .delete(client.getWorkspaceId(), entity.getName(), false, testContext.getActingUserCrn().getAccountId());
         Log.whenJson(LOGGER, " Stack deletion was successful:\n", entity.getResponse());
         Log.when(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
         return entity;
@@ -46,7 +46,8 @@ public class StackTestAction {
         }
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .deleteInstance(client.getWorkspaceId(), entity.getName(), forced != null && forced, instanceId);
+                .deleteInstance(client.getWorkspaceId(), entity.getName(), forced != null && forced, instanceId,
+                        testContext.getActingUserCrn().getAccountId());
         Log.whenJson(LOGGER, " Stack delete instance was successful:\n", entity.getResponse());
         return entity;
     }
@@ -56,7 +57,7 @@ public class StackTestAction {
         entity.setResponse(
                 client.getCloudbreakClient()
                         .stackV4Endpoint()
-                        .post(client.getWorkspaceId(), entity.getRequest()));
+                        .post(client.getWorkspaceId(), entity.getRequest(), testContext.getActingUserCrn().getAccountId()));
         Log.whenJson(LOGGER, " Stack created was successful:\n", entity.getResponse());
         Log.when(LOGGER, " CRN: " + entity.getResponse().getCrn());
 
@@ -68,7 +69,8 @@ public class StackTestAction {
         entity.setResponse(
                 client.getCloudbreakClient()
                         .stackV4Endpoint()
-                        .get(client.getWorkspaceId(), entity.getName(), new HashSet<>()));
+                        .get(client.getWorkspaceId(), entity.getName(), new HashSet<>(),
+                                testContext.getActingUserCrn().getAccountId()));
         Log.whenJson(LOGGER, " Stack get was successful:\n", entity.getResponse());
         Log.when(LOGGER, " CRN: " + entity.getResponse().getCrn());
 
@@ -77,7 +79,8 @@ public class StackTestAction {
 
     public static StackTestDto refresh(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws IOException {
         entity.setResponse(
-                client.getCloudbreakClient().stackV4Endpoint().get(client.getWorkspaceId(), entity.getName(), Collections.emptySet())
+                client.getCloudbreakClient().stackV4Endpoint().get(client.getWorkspaceId(), entity.getName(), Collections.emptySet(),
+                        testContext.getActingUserCrn().getAccountId())
         );
         Log.whenJson(LOGGER, " Stack refresh (get) was successful:\n", entity.getResponse());
         return entity;
@@ -85,7 +88,8 @@ public class StackTestAction {
 
     public static StackTestDto start(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, " Stack post request:\n", entity.getRequest());
-        client.getCloudbreakClient().stackV4Endpoint().putStart(client.getWorkspaceId(), entity.getName());
+        client.getCloudbreakClient().stackV4Endpoint().putStart(client.getWorkspaceId(), entity.getName(),
+                testContext.getActingUserCrn().getAccountId());
         Log.whenJson(LOGGER, " Stack was started successful:\n", entity.getResponse());
         Log.log(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
         return entity;
@@ -93,7 +97,8 @@ public class StackTestAction {
 
     public static StackTestDto stop(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, " Stack post request:\n", entity.getRequest());
-        client.getCloudbreakClient().stackV4Endpoint().putStop(client.getWorkspaceId(), entity.getName());
+        client.getCloudbreakClient().stackV4Endpoint().putStop(client.getWorkspaceId(), entity.getName(),
+                testContext.getActingUserCrn().getAccountId());
         Log.whenJson(LOGGER, " Stack was stopped successful:\n", entity.getResponse());
         Log.when(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
         return entity;
@@ -106,7 +111,7 @@ public class StackTestAction {
         userNamePasswordV4Request.setUserName(entity.getRequest().getCluster().getUserName());
         userNamePasswordV4Request.setPassword("testnewambaripassword");
         client.getCloudbreakClient().stackV4Endpoint().putPassword(client.getWorkspaceId(),
-                entity.getName(), userNamePasswordV4Request);
+                entity.getName(), userNamePasswordV4Request, testContext.getActingUserCrn().getAccountId());
         Log.whenJson(LOGGER, "Ambari password was modified successfully in stack:\n", entity.getResponse());
         Log.when(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
         return entity;
@@ -114,7 +119,8 @@ public class StackTestAction {
 
     public static StackTestDto sync(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, " Stack sync requested.");
-        client.getCloudbreakClient().stackV4Endpoint().sync(client.getWorkspaceId(), entity.getName());
+        client.getCloudbreakClient().stackV4Endpoint().sync(client.getWorkspaceId(), entity.getName(),
+                testContext.getActingUserCrn().getAccountId());
         Log.whenJson(LOGGER, " Stack sync was successful:\n", entity.getResponse());
         return entity;
     }
@@ -124,7 +130,8 @@ public class StackTestAction {
         GeneratedBlueprintV4Response bp = client.getCloudbreakClient().stackV4Endpoint().postStackForBlueprint(
                 client.getWorkspaceId(),
                 entity.getName(),
-                entity.getRequest());
+                entity.getRequest(),
+                testContext.getActingUserCrn().getAccountId());
         entity.withGeneratedBlueprint(bp);
         Log.whenJson(LOGGER, " get generated blueprint was successful:\n", entity.getGeneratedBlueprint());
         return entity;
@@ -134,7 +141,8 @@ public class StackTestAction {
         Log.whenJson(LOGGER, " Stack get cli skeleton:\n", entity.getRequest());
         StackV4Request request = client.getCloudbreakClient().stackV4Endpoint().getRequestfromName(
                 client.getWorkspaceId(),
-                entity.getName());
+                entity.getName(),
+                testContext.getActingUserCrn().getAccountId());
         entity.setRequest(request);
         Log.whenJson(LOGGER, " get cli skeleton was successfully:\n", entity.getRequest());
         return entity;

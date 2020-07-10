@@ -19,7 +19,8 @@ public class StackRequestAction implements Action<StackTestDto, CloudbreakClient
         Log.when(LOGGER, " Stack get cli skeleton:" + testDto.getName());
         StackV4Request request = client.getCloudbreakClient().stackV4Endpoint().getRequestfromName(
                 client.getWorkspaceId(),
-                testDto.getName());
+                testDto.getName(),
+                testContext.getActingUserCrn().getAccountId());
         testDto.setRequest(request);
         Log.whenJson(LOGGER, " get cli skeleton was successfully:\n", testDto.getRequest());
         return testDto;
