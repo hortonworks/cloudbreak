@@ -7,8 +7,6 @@
 {% set metering_rmp_repo_url = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/thunderhead-metering-heartbeat-application/clients/'%}
 {% set metering_rpm_location = metering_rmp_repo_url + metering_package_name + '-' + metering_package_version + '.x86_64.rpm' %}
 
-{% if metering.enabled %}
-
 {%- if os == "RedHat" or os == "CentOS" %}
 
 {% if metering.is_systemd %}
@@ -46,6 +44,7 @@ stop_metering_heartbeat_application:
       - group
       - mode
 
+{% if metering.enabled %}
 /etc/metering/generate_heartbeats.ini:
   file.managed:
     - source: salt://metering/template/generate_heartbeats.ini.j2
@@ -53,6 +52,7 @@ stop_metering_heartbeat_application:
     - user: "root"
     - group: "root"
     - mode: 640
+{% endif %}
 
 /etc/systemd/system/metering-heartbeat-application.service:
   file.managed:
@@ -62,6 +62,7 @@ stop_metering_heartbeat_application:
     - group: "root"
     - mode: 640
 
+{% if metering.enabled %}
 start_metering_heartbeat_application:
   service.running:
     - enable: True
