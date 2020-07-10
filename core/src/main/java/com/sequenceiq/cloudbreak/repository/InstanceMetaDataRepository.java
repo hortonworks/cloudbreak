@@ -8,13 +8,13 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.domain.projection.InstanceMetaDataGroupView;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -50,14 +50,6 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
     Optional<InstanceMetaData> findHostInStack(@Param("stackId") Long stackId, @Param("hostName") String hostName);
-
-    @Query("SELECT i.instanceGroup.groupName as groupName, i.instanceGroup.instanceGroupType as instanceGroupType " +
-            "FROM InstanceMetaData i " +
-            "WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
-    Optional<InstanceMetaDataGroupView> findInstanceGroupViewInClusterByName(@Param("stackId") Long stackId, @Param("hostName") String hostName);
-
-    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
-    Optional<InstanceMetaData> findHostInStackWithoutInstanceGroup(@Param("stackId") Long stackId, @Param("hostName") String hostName);
 
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.id= :instanceGroupId AND i.instanceStatus in ('CREATED')")
@@ -97,9 +89,6 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
             + " i.instanceStatus <> 'TERMINATED' AND i.instanceGroup.stack.id= :stackId")
     Optional<String> getPrimaryGatewayDiscoveryFQDNByInstanceGroup(@Param("stackId") Long stackId, @Param("instanceGroupId") Long instanceGroupId);
 
-    @Query("SELECT max(imd.privateId) FROM InstanceMetaData imd WHERE imd.instanceGroup IN :instanceGroups")
-    Long getMaxPrivateId(@Param("instanceGroups") List<InstanceGroup> instanceGroups);
-
     @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
             + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id "
             + "AND i.instanceStatus <> 'TERMINATED' "
@@ -109,9 +98,8 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     Set<StackInstanceCount> countByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn,
             @Param("stackTypes") List<StackType> stackTypes);
 
-    @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
-            + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id AND i.instanceStatus = 'SERVICES_UNHEALTHY' "
-            + "GROUP BY s.id")
-    Set<StackInstanceCount> countUnhealthyByWorkspaceId(@Param("id") Long workspaceId);
+    @Modifying
+    @Query("UPDATE InstanceMetaData i SET i.serverCert = :serverCert WHERE i.id = :id")
+    int updateServerCert(@Param("id") Long id, @Param("serverCert") String serverCert);
 
 }

@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClusterToClouderaManagerV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.UptimeStat;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
@@ -101,7 +102,8 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
     }
 
     private void setUptime(Cluster source, ClusterV4Response clusterResponse) {
-        long uptime = stackUtil.getUptimeForCluster(source, source.isAvailable());
+        UptimeStat uptimeStat = new UptimeStat(source.getUpSince(), source.getUptime());
+        long uptime = stackUtil.getUptimeForCluster(uptimeStat, source.isAvailable());
         int minutes = (int) ((uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);
         int hours = (int) (uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE));
         clusterResponse.setUptime(uptime);

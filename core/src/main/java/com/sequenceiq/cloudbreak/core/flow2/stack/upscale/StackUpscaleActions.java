@@ -212,6 +212,7 @@ public class StackUpscaleActions {
                 InstanceGroup ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(payload.getResourceId(), context.getInstanceGroupName())
                         .orElseThrow(NotFoundException.notFound("instanceGroup", context.getInstanceGroupName()));
                 if (InstanceGroupType.GATEWAY == ig.getInstanceGroupType()) {
+                    // TODO: optimize
                     Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
                     InstanceMetaData gatewayMetaData = stack.getPrimaryGatewayInstance();
                     CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);

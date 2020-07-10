@@ -28,12 +28,12 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.transition.Transition;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance.MaintenanceModeValidationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationFlowConfig;
@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartFlowConfig
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleConfig;
@@ -319,11 +318,6 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public List<StackStatusView> findByEnvironmentCrnAndStackType(String environmentCrn, StackType type) {
-            return null;
-        }
-
-        @Override
         public Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, Boolean showTerminated, Long terminatedAfter) {
             return Optional.empty();
         }
@@ -369,16 +363,6 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findAllAliveWithInstanceGroups() {
-            return null;
-        }
-
-        @Override
-        public List<StackStatusView> findByStatuses(List<Status> statuses) {
-            return null;
-        }
-
-        @Override
         public Optional<StackClusterStatusView> getStatusByCrn(String crn) {
             return Optional.empty();
         }
@@ -404,16 +388,6 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Long findWorkspaceIdByCrn(String crn) {
-            return null;
-        }
-
-        @Override
-        public Optional<Workspace> findWorkspaceByCrn(String crn) {
-            return Optional.empty();
-        }
-
-        @Override
         public Optional<Stack> findTemplateWithLists(Long id) {
             return Optional.empty();
         }
@@ -426,11 +400,6 @@ public class OfflineStateGenerator {
         @Override
         public String findTimeToLiveValueForSTack(Long stackId, String ttl) {
             return null;
-        }
-
-        @Override
-        public Boolean anyStackInWorkspace(Long workspaceId) {
-            return Boolean.TRUE;
         }
 
         @Override

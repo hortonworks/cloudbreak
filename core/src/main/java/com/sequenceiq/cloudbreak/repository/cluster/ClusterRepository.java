@@ -1,19 +1,18 @@
 package com.sequenceiq.cloudbreak.repository.cluster;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.UptimeStat;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
@@ -30,12 +29,6 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
             + "LEFT JOIN FETCH c.rdsConfigs WHERE c.id= :id")
     Optional<Cluster> findOneWithLists(@Param("id") Long id);
 
-    @Query("SELECT c FROM Cluster c WHERE c.stack IS NOT NULL AND c.stack.terminated IS NULL AND c.status IN :statuses")
-    List<Cluster> findByStatuses(@Param("statuses") Collection<Status> statuses);
-
-    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.stack WHERE c.workspace = null")
-    Set<Cluster> findAllWithNoWorkspace();
-
     Set<Cluster> findByBlueprint(Blueprint blueprint);
 
     @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE rc.id= :id AND c.status != 'DELETE_COMPLETED'")
@@ -44,6 +37,14 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     @Query("SELECT c.name FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE rc.id= :id AND c.status != 'DELETE_COMPLETED'")
     Set<String> findNamesByRdsConfig(@Param("id") Long rdsConfigId);
 
-    @Query("SELECT COUNT(c) FROM Cluster c WHERE c.workspace.id = :workspaceId AND c.environmentCrn = :environmentCrn AND c.status != 'DELETE_COMPLETED'")
-    Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentCrn") String environmentCrn);
+    @Modifying
+    @Query("UPDATE Cluster c SET c.upSince = :upSince WHERE c.stack.id = :stackId")
+    int updateUpSinceByStackId(@Param("stackId") long stackId, @Param("upSince") long upSince);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.uptime = :uptime WHERE c.stack.id = :stackId")
+    int updateUptimeByStackId(@Param("stackId") long stackId, @Param("uptime") String uptime);
+
+    @Query("SELECT new com.sequenceiq.cloudbreak.domain.stack.cluster.UptimeStat(c.upSince, c.uptime) FROM Cluster c WHERE c.stack.id = :stackId")
+    UptimeStat findUptimeStatByStackId(@Param("stackId") long stackId);
 }

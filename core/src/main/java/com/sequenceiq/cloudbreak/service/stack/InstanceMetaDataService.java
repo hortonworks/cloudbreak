@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -16,7 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.domain.projection.InstanceMetaDataGroupView;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -43,6 +45,7 @@ public class InstanceMetaDataService {
     }
 
     public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, boolean save) {
+        List<InstanceMetaData> instanceMetaDataToSave = new ArrayList<>();
         for (CloudInstance cloudInstance : cloudInstances) {
             InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), cloudInstance.getTemplate().getGroupName());
             if (instanceGroup != null) {
@@ -51,10 +54,13 @@ public class InstanceMetaDataService {
                 instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
                 instanceMetaData.setInstanceGroup(instanceGroup);
                 if (save) {
-                    repository.save(instanceMetaData);
+                    instanceMetaDataToSave.add(instanceMetaData);
                 }
                 instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
             }
+        }
+        if (save) {
+            repository.saveAll(instanceMetaDataToSave);
         }
         return stack;
     }
@@ -75,16 +81,6 @@ public class InstanceMetaDataService {
                     instanceMetaData.setInstanceGroup(instanceGroup);
                     repository.save(instanceMetaData);
                 }
-            }
-        }
-    }
-
-    public void deleteInstanceRequest(Long stackId, Long privateId) {
-        Set<InstanceMetaData> instanceMetaData = repository.findAllInStack(stackId);
-        for (InstanceMetaData metaData : instanceMetaData) {
-            if (metaData.getPrivateId().equals(privateId)) {
-                repository.delete(metaData);
-                break;
             }
         }
     }
@@ -119,10 +115,6 @@ public class InstanceMetaDataService {
         return repository.save(instanceMetaData);
     }
 
-    public Set<InstanceMetaData> findAllInStack(Long stackId) {
-        return repository.findAllInStack(stackId);
-    }
-
     public Set<InstanceMetaData> findNotTerminatedForStack(Long stackId) {
         return repository.findNotTerminatedForStack(stackId);
     }
@@ -137,14 +129,6 @@ public class InstanceMetaDataService {
 
     public Optional<InstanceMetaData> findHostInStack(Long stackId, String hostName) {
         return repository.findHostInStack(stackId, hostName);
-    }
-
-    public Optional<InstanceMetaDataGroupView> findInstanceGroupViewInClusterByName(Long stackId, String hostName) {
-        return repository.findInstanceGroupViewInClusterByName(stackId, hostName);
-    }
-
-    public Optional<InstanceMetaData> findHostInStackWithoutInstanceGroup(Long stackId, String hostName) {
-        return repository.findHostInStackWithoutInstanceGroup(stackId, hostName);
     }
 
     public Set<InstanceMetaData> findUnusedHostsInInstanceGroup(Long instanceGroupId) {
@@ -177,6 +161,13 @@ public class InstanceMetaDataService {
 
     public Optional<InstanceMetaData> findById(Long id) {
         return repository.findById(id);
+    }
+
+    public void updateServerCert(Long id, String serverCert) {
+        int affectedRows = repository.updateServerCert(id, serverCert);
+        if (affectedRows == 0) {
+            throw notFound("Instance metadata", id).get();
+        }
     }
 
     public Set<InstanceMetaData> findRemovableInstances(Long stackId, String groupName) {

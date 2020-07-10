@@ -153,6 +153,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                                                                 boolean singlePrimaryGateway, boolean kerberosSecured) {
         Stack stack = stackService.getByIdWithListsInTransaction(event.getStackId());
         boolean singleNodeCluster = clusterService.isSingleNode(stack);
+        // TODO: optimize
         ClusterManagerType cmType = ClusterManagerType.CLOUDERA_MANAGER;
         return new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(), hostGroupName,
                 hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames), singlePrimaryGateway,

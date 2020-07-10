@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
@@ -69,18 +67,11 @@ public class TlsSetupService {
             nginxTarget.path("/").request().get().close();
             X509Certificate[] chain = x509TrustManager.getChain();
             String serverCert = PkiUtil.convert(chain[0]);
-            InstanceMetaData metaData = getInstanceMetaData(gwInstance);
-            metaData.setServerCert(BaseEncoding.base64().encode(serverCert.getBytes()));
-            instanceMetaDataService.save(metaData);
+            instanceMetaDataService.updateServerCert(gwInstance.getId(), BaseEncoding.base64().encode(serverCert.getBytes()));
         } catch (Exception e) {
             throw new CloudbreakException("Failed to retrieve the server's certificate from Nginx."
                     + " Please check your security group is open enough and the Management Console can access your VPC and subnet."
                     + " Please also Make sure your Subnets can route to the internet and you have public DNS and IP options enabled", e);
         }
-    }
-
-    private InstanceMetaData getInstanceMetaData(InstanceMetaData gwInstance) {
-        return instanceMetaDataService.findById(gwInstance.getId())
-                .orElseThrow(notFound("Instance metadata", gwInstance.getId()));
     }
 }

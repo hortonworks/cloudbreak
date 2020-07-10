@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.UptimeStat;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -301,6 +302,24 @@ public class ClusterService {
         return cluster;
     }
 
+    public void updateUpSinceByStackId(long stackId, Date time) {
+        int affectedRows = repository.updateUpSinceByStackId(stackId, time.getTime());
+        if (affectedRows == 0) {
+            throw notFound("cluster", stackId).get();
+        }
+    }
+
+    public void updateUptimeByStackId(long stackId, String uptime) {
+        int affectedRows = repository.updateUptimeByStackId(stackId, uptime);
+        if (affectedRows == 0) {
+            throw notFound("cluster", stackId).get();
+        }
+    }
+
+    public Optional<UptimeStat> getUptimeStatByStackId(long stackId) {
+        return Optional.ofNullable(repository.findUptimeStatByStackId(stackId));
+    }
+
     public Cluster updateCreationDateOnCluster(Cluster cluster) {
         if (cluster.getCreationStarted() == null) {
             cluster.setCreationStarted(new Date().getTime());
@@ -394,14 +413,6 @@ public class ClusterService {
 
     public Set<Cluster> findByBlueprint(Blueprint blueprint) {
         return repository.findByBlueprint(blueprint);
-    }
-
-    public List<Cluster> findByStatuses(Collection<Status> statuses) {
-        return repository.findByStatuses(statuses);
-    }
-
-    public Optional<Cluster> findOneByStackId(Long stackId) {
-        return repository.findOneByStackId(stackId);
     }
 
     public Optional<Cluster> findOneWithLists(Long id) {

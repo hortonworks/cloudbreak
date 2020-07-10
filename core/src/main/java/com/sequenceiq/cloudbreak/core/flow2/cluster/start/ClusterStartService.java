@@ -18,10 +18,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
@@ -73,10 +71,7 @@ public class ClusterStartService {
     }
 
     public void clusterStartFinished(StackView stack) {
-        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId())
-                .orElseThrow(NotFoundException.notFound("cluster", stack.getId()));
-        cluster.setUpSince(new Date().getTime());
-        clusterService.updateCluster(cluster);
+        clusterService.updateUpSinceByStackId(stack.getId(), new Date());
         updateInstancesToHealthy(stack);
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster started.");

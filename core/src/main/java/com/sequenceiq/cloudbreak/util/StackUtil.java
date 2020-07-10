@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.UptimeStat;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -188,14 +188,14 @@ public class StackUtil {
         return extractClusterManagerIp(stack.getId());
     }
 
-    public long getUptimeForCluster(Cluster cluster, boolean addUpsinceToUptime) {
+    public long getUptimeForCluster(UptimeStat uptimeStat, boolean addUpsinceToUptime) {
         Duration uptime = Duration.ZERO;
-        if (StringUtils.isNotBlank(cluster.getUptime())) {
-            uptime = Duration.parse(cluster.getUptime());
+        if (StringUtils.isNotBlank(uptimeStat.getUptime())) {
+            uptime = Duration.parse(uptimeStat.getUptime());
         }
-        if (cluster.getUpSince() != null && addUpsinceToUptime) {
+        if (uptimeStat.getUpSince() != null && addUpsinceToUptime) {
             long now = new Date().getTime();
-            uptime = uptime.plusMillis(now - cluster.getUpSince());
+            uptime = uptime.plusMillis(now - uptimeStat.getUpSince());
         }
         return uptime.toMillis();
     }

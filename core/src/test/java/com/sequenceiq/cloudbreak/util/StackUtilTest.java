@@ -15,11 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.UptimeStat;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 
@@ -41,29 +40,26 @@ public class StackUtilTest {
 
     @Test
     public void testGetUptimeForClusterZero() {
-        Cluster cluster = new Cluster();
-        cluster.setStatus(Status.CREATE_IN_PROGRESS);
-        long uptime = stackUtil.getUptimeForCluster(cluster, true);
+        long uptime = stackUtil.getUptimeForCluster(new UptimeStat(), true);
         assertEquals(0L, uptime);
     }
 
     @Test
     public void testGetUptimeForClusterNoGetUpSince() {
-        Cluster cluster = new Cluster();
+        UptimeStat uptimeStat = new UptimeStat();
         int minutes = 10;
-        cluster.setUptime(Duration.ofMinutes(minutes).toString());
-        long uptime = stackUtil.getUptimeForCluster(cluster, false);
+        uptimeStat.setUptime(Duration.ofMinutes(minutes).toString());
+        long uptime = stackUtil.getUptimeForCluster(uptimeStat, false);
         assertEquals(Duration.ofMinutes(minutes).toMillis(), uptime);
     }
 
     @Test
     public void testGetUptimeForCluster() {
-        Cluster cluster = new Cluster();
+        UptimeStat uptimeStat = new UptimeStat();
         int minutes = 10;
-        cluster.setUptime(Duration.ofMinutes(minutes).toString());
-        cluster.setStatus(Status.AVAILABLE);
-        cluster.setUpSince(new Date().getTime());
-        long uptime = stackUtil.getUptimeForCluster(cluster, true);
+        uptimeStat.setUptime(Duration.ofMinutes(minutes).toString());
+        uptimeStat.setUpSince(new Date().getTime());
+        long uptime = stackUtil.getUptimeForCluster(uptimeStat, true);
         assertTrue(uptime >= Duration.ofMinutes(minutes).toMillis());
     }
 

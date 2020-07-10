@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -358,10 +357,6 @@ public class StackService implements ResourceIdProvider {
         }
     }
 
-    public List<StackStatusView> getByEnvironmentCrnAndStackType(String environmentCrn, StackType stackType) {
-        return stackRepository.findByEnvironmentCrnAndStackType(environmentCrn, stackType);
-    }
-
     public StackV4Response getByNameInWorkspaceWithEntries(String name, Long workspaceId, Set<String> entries, User user, StackType stackType) {
         try {
             return transactionService.required(() -> {
@@ -436,11 +431,6 @@ public class StackService implements ResourceIdProvider {
     public StackView getViewByNameInWorkspace(String name, Long workspaceId) {
         return stackViewService.findNotTerminatedByName(name, workspaceId)
                 .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
-    }
-
-    public StackView getViewByCrnInWorkspace(String crn, Long workspaceId) {
-        return stackViewService.findNotTerminatedByCrn(crn, workspaceId)
-                .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
     }
 
     public String getResourceCrnInTenant(String name, String tenantName) {
@@ -609,14 +599,6 @@ public class StackService implements ResourceIdProvider {
         return stackRepository.findAllAlive();
     }
 
-    public Set<Stack> getAllAliveWithInstanceGroups() {
-        return stackRepository.findAllAliveWithInstanceGroups();
-    }
-
-    public List<StackStatusView> getByStatuses(List<Status> statuses) {
-        return stackRepository.findByStatuses(statuses);
-    }
-
     public List<StackStatusView> getStatuses(Set<Long> stackIds) {
         return stackRepository.findStackStatusesWithoutAuth(stackIds);
     }
@@ -777,14 +759,6 @@ public class StackService implements ResourceIdProvider {
         return Optional.ofNullable(stackRepository.findTimeToLiveValueForSTack(stackId, PlatformParametersConsts.TTL_MILLIS))
                 .map(Long::valueOf)
                 .map(Duration::ofMillis);
-    }
-
-    public Boolean anyStackInWorkspace(Long workspaceId) {
-        try {
-            return transactionService.required(() -> stackRepository.anyStackInWorkspace(workspaceId));
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
     }
 
     public Boolean templateInUse(Long id) {
