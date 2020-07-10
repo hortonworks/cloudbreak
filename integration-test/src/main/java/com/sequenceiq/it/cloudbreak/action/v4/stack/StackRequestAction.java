@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -19,7 +20,8 @@ public class StackRequestAction implements Action<StackTestDto, CloudbreakClient
         Log.when(LOGGER, " Stack get cli skeleton:" + testDto.getName());
         StackV4Request request = client.getCloudbreakClient().stackV4Endpoint().getRequestfromName(
                 client.getWorkspaceId(),
-                testDto.getName());
+                testDto.getName(),
+                Crn.fromString(testDto.getResponse().getCrn()).getAccountId());
         testDto.setRequest(request);
         Log.whenJson(LOGGER, " get cli skeleton was successfully:\n", testDto.getRequest());
         return testDto;

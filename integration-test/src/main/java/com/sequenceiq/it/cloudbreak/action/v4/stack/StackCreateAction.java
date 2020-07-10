@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -19,7 +20,7 @@ public class StackCreateAction implements Action<StackTestDto, CloudbreakClient>
         Log.whenJson(LOGGER, " Stack post request:\n", testDto.getRequest());
         StackV4Response response = client.getCloudbreakClient()
                         .stackV4Endpoint()
-                        .post(client.getWorkspaceId(), testDto.getRequest());
+                        .post(client.getWorkspaceId(), testDto.getRequest(), Crn.fromString(testDto.getResponse().getCrn()).getAccountId());
         testDto.setResponse(response);
         testDto.setFlow("Stack create", response.getFlowIdentifier());
         Log.whenJson(LOGGER, " Stack created was successfully:\n", testDto.getResponse());

@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -39,7 +40,7 @@ public class ChangeImageAction implements Action<StackTestDto, CloudbreakClient>
 
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .changeImage(client.getWorkspaceId(), testDto.getName(), request);
+                .changeImage(client.getWorkspaceId(), testDto.getName(), request, Crn.fromString(testDto.getResponse().getCrn()).getAccountId());
 
         return testDto;
     }

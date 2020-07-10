@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -20,7 +21,8 @@ public class StackBlueprintRequestAction implements Action<StackTestDto, Cloudbr
         GeneratedBlueprintV4Response bp = client.getCloudbreakClient().stackV4Endpoint().postStackForBlueprint(
                 client.getWorkspaceId(),
                 testDto.getName(),
-                testDto.getRequest());
+                testDto.getRequest(),
+                Crn.fromString(testDto.getResponse().getCrn()).getAccountId());
         testDto.withGeneratedBlueprint(bp);
         Log.whenJson(LOGGER, " get generated blueprint was successfully:\n", testDto.getGeneratedBlueprint());
         return testDto;

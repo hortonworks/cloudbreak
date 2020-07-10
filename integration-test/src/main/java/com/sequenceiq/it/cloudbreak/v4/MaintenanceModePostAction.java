@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -41,7 +42,8 @@ public class MaintenanceModePostAction implements Action<StackTestDto, Cloudbrea
 
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .setClusterMaintenanceMode(client.getWorkspaceId(), testDto.getName(), request);
+                .setClusterMaintenanceMode(client.getWorkspaceId(), testDto.getName(), request,
+                        Crn.fromString(testDto.getResponse().getCrn()).getAccountId());
 
         return testDto;
     }

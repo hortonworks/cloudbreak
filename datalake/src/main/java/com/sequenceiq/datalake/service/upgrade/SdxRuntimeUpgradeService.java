@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -59,7 +61,8 @@ public class SdxRuntimeUpgradeService {
     public SdxUpgradeResponse checkForRuntimeUpgradeByName(String userCrn, String name, SdxUpgradeRequest upgradeSdxClusterRequest) {
         verifyRuntimeUpgradeEntitlement(userCrn);
         UpgradeV4Response upgradeV4Response = stackV4Endpoint.checkForClusterUpgradeByName(0L, name,
-                sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest));
+                sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest),
+                ThreadBasedUserCrnProvider.getAccountId());
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4Response);
     }
 
@@ -67,7 +70,8 @@ public class SdxRuntimeUpgradeService {
         verifyRuntimeUpgradeEntitlement(userCrn);
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
         UpgradeV4Response upgradeV4Response = stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, sdxCluster.getClusterName(),
-                sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest));
+                sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest),
+                Crn.fromString(crn).getAccountId());
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4Response);
     }
 

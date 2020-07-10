@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQU
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -34,6 +35,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -122,7 +124,7 @@ public class SdxStartServiceTest {
 
         underTest.start(CLUSTER_ID);
 
-        verify(stackV4Endpoint).putStart(0L, CLUSTER_NAME);
+        verify(stackV4Endpoint).putStart(eq(0L), eq(CLUSTER_NAME), anyString());
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(eq(sdxCluster), any());
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, "Datalake start in progress", sdxCluster);
     }
@@ -130,7 +132,7 @@ public class SdxStartServiceTest {
     @Test
     public void testStartWhenNotFoundException() {
         SdxCluster sdxCluster = sdxCluster();
-        doThrow(NotFoundException.class).when(stackV4Endpoint).putStart(0L, CLUSTER_NAME);
+        doThrow(NotFoundException.class).when(stackV4Endpoint).putStart(eq(0L), eq(CLUSTER_NAME), anyString());
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         underTest.start(CLUSTER_ID);
@@ -145,7 +147,7 @@ public class SdxStartServiceTest {
         SdxCluster sdxCluster = sdxCluster();
         ClientErrorException clientErrorException = mock(ClientErrorException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
-        doThrow(clientErrorException).when(stackV4Endpoint).putStart(0L, CLUSTER_NAME);
+        doThrow(clientErrorException).when(stackV4Endpoint).putStart(eq(0L), eq(CLUSTER_NAME), anyString());
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
@@ -159,7 +161,7 @@ public class SdxStartServiceTest {
         SdxCluster sdxCluster = sdxCluster();
         WebApplicationException clientErrorException = mock(WebApplicationException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
-        doThrow(clientErrorException).when(stackV4Endpoint).putStart(0L, CLUSTER_NAME);
+        doThrow(clientErrorException).when(stackV4Endpoint).putStart(eq(0L), eq(CLUSTER_NAME), anyString());
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
@@ -178,7 +180,8 @@ public class SdxStartServiceTest {
         clusterV4Response.setStatus(AVAILABLE);
         stackV4Response.setCluster(clusterV4Response);
 
-        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
+                .thenReturn(stackV4Response);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
 
@@ -195,7 +198,8 @@ public class SdxStartServiceTest {
         clusterV4Response.setStatus(START_REQUESTED);
         stackV4Response.setCluster(clusterV4Response);
 
-        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
+                .thenReturn(stackV4Response);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
 
@@ -210,7 +214,8 @@ public class SdxStartServiceTest {
         stackV4Response.setStatusReason("reason");
         stackV4Response.setStatus(START_FAILED);
 
-        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
+                .thenReturn(stackV4Response);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
 
@@ -230,7 +235,8 @@ public class SdxStartServiceTest {
         clusterV4Response.setStatusReason("cluster reason");
         stackV4Response.setCluster(clusterV4Response);
 
-        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
+                .thenReturn(stackV4Response);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
 
@@ -246,7 +252,8 @@ public class SdxStartServiceTest {
         stackV4Response.setStatusReason("reason");
         stackV4Response.setStatus(STOP_FAILED);
 
-        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
+                .thenReturn(stackV4Response);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
 
@@ -266,7 +273,8 @@ public class SdxStartServiceTest {
         clusterV4Response.setStatusReason("cluster reason");
         stackV4Response.setCluster(clusterV4Response);
 
-        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
+                .thenReturn(stackV4Response);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
 
@@ -278,6 +286,12 @@ public class SdxStartServiceTest {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(CLUSTER_ID);
         sdxCluster.setClusterName(CLUSTER_NAME);
+        sdxCluster.setCrn(Crn.builder().setAccountId("asd")
+                .setResource("asd")
+                .setResourceType(Crn.ResourceType.DATALAKE)
+                .setService(Crn.Service.DATALAKE)
+                .setPartition(Crn.Partition.CDP)
+                .build().toString());
         return sdxCluster;
     }
 

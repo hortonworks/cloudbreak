@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -22,7 +23,7 @@ public class StackDeleteAction implements Action<StackTestDto, CloudbreakClient>
         Log.when(LOGGER, format("Stack delete request: %s", testDto.getRequest().getName()));
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .delete(client.getWorkspaceId(), testDto.getName(), false);
+                .delete(client.getWorkspaceId(), testDto.getName(), false, Crn.fromString(testDto.getResponse().getCrn()).getAccountId());
         Log.whenJson(LOGGER, " Stack deletion was successful:\n", testDto.getResponse());
         return testDto;
     }

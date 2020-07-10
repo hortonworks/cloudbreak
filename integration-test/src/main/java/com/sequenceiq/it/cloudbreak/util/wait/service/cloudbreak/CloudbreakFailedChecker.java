@@ -22,7 +22,7 @@ public class CloudbreakFailedChecker<T extends CloudbreakWaitObject> extends Exc
         String name = waitObject.getName();
         Map<String, Status> desiredStatuses = waitObject.getDesiredStatuses();
         try {
-            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name);
+            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name, waitObject.getAccountId());
             Map<String, Status> actualStatuses = Map.of("status", stackStatus.getStatus(), "clusterStatus", stackStatus.getClusterStatus());
             LOGGER.info("Waiting for the '{}' state of '{}' cluster. Actual state is: '{}'", desiredStatuses, name, actualStatuses);
             if (waitObject.isDeleted(actualStatuses)) {
@@ -48,7 +48,7 @@ public class CloudbreakFailedChecker<T extends CloudbreakWaitObject> extends Exc
     public void handleTimeout(T waitObject) {
         String name = waitObject.getName();
         try {
-            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name);
+            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name, waitObject.getAccountId());
             Map<String, Status> actualStatuses = Map.of("status", stackStatus.getStatus(), "clusterStatus", stackStatus.getClusterStatus());
             Map<String, String> actualStatusReasons = Map.of("stackStatusReason", stackStatus.getStatusReason(), "clusterStatusReason", stackStatus
                     .getClusterStatusReason());
@@ -70,7 +70,7 @@ public class CloudbreakFailedChecker<T extends CloudbreakWaitObject> extends Exc
     public boolean exitWaiting(T waitObject) {
         String name = waitObject.getName();
         try {
-            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name);
+            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name, waitObject.getAccountId());
             if (stackStatus == null) {
                 LOGGER.info("'{}' cluster was not found. Exit waiting!", name);
                 return true;
@@ -86,7 +86,8 @@ public class CloudbreakFailedChecker<T extends CloudbreakWaitObject> extends Exc
 
     @Override
     public Map<String, String> getStatuses(T waitObject) {
-        StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), waitObject.getName());
+        StackStatusV4Response stackStatus = waitObject.getStackEndpoint()
+                .getStatusByName(waitObject.getWorkspaceId(), waitObject.getName(), waitObject.getAccountId());
         return Map.of("status", stackStatus.getStatus().name(), "clusterStatus", stackStatus.getClusterStatus().name());
     }
 }

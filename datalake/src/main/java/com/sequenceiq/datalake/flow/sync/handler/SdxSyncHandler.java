@@ -22,6 +22,7 @@ import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -78,7 +79,8 @@ public class SdxSyncHandler extends ExceptionCatcherEventHandler<SdxSyncWaitRequ
         try {
             LOGGER.debug("Polling stack sync process for id: {}", sdxId);
             SdxCluster sdxCluster = sdxService.getById(sdxId);
-            FlowIdentifier flowIdentifier = sdxService.sync(sdxCluster.getClusterName());
+            FlowIdentifier flowIdentifier = sdxService.sync(sdxCluster.getClusterName(),
+                    Crn.fromString(sdxCluster.getCrn()).getAccountId());
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
             StackV4Response stackV4Response = pollingSync(sdxCluster);
             updateSdxStatus(sdxCluster, stackV4Response);
@@ -116,7 +118,8 @@ public class SdxSyncHandler extends ExceptionCatcherEventHandler<SdxSyncWaitRequ
                 LOGGER.info("Sync polling will continue, cluster has an active flow in Cloudbreak, id: " + sdxCluster.getId());
                 return AttemptResults.justContinue();
             } else {
-                StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
+                StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(),
+                        Crn.fromString(sdxCluster.getCrn()).getAccountId());
                 return AttemptResults.finishWith(stackV4Response);
             }
         } catch (NotFoundException e) {

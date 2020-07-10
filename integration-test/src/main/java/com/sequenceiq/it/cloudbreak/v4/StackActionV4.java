@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -35,8 +36,8 @@ public class StackActionV4 {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get stack " + stackTestDto.getName());
         stackTestDto.setResponse(
-                client.getCloudbreakClient().stackV4Endpoint()
-                        .get(workspaceId, stackTestDto.getName(), null));
+                client.getCloudbreakClient().stackV4Endpoint().get(workspaceId, stackTestDto.getName(), null,
+                        Crn.fromString(stackTestDto.getResponse().getCrn()).getAccountId()));
         Log.whenJson(" stack get response: ", stackTestDto.getResponse());
     }
 
@@ -46,14 +47,15 @@ public class StackActionV4 {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all stack");
-        stackTestDto.setResponses(toStackResponseSet(client, workspaceId, client.getCloudbreakClient().stackV4Endpoint()
-                .list(workspaceId, null, false).getResponses()));
+        stackTestDto.setResponses(toStackResponseSet(client, workspaceId, client.getCloudbreakClient().stackV4Endpoint().list(workspaceId,
+                null, false).getResponses()));
     }
 
     private static Set<StackV4Response> toStackResponseSet(CloudbreakClient client, Long workspaceId, Collection<StackViewV4Response> stacks) {
         Set<StackV4Response> detailedStacks = new HashSet<>();
         stacks.stream().forEach(
-                stack -> detailedStacks.add(client.getCloudbreakClient().stackV4Endpoint().get(workspaceId, stack.getName(), null)));
+                stack -> detailedStacks.add(client.getCloudbreakClient().stackV4Endpoint().get(workspaceId, stack.getName(), null,
+                        Crn.fromString(stack.getCrn()).getAccountId())));
         return detailedStacks;
     }
 
@@ -65,14 +67,14 @@ public class StackActionV4 {
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" delete: " + entity.getName());
-        client.getCloudbreakClient().stackV4Endpoint()
-                .delete(workspaceId, entity.getName(), forced);
+        client.getCloudbreakClient().stackV4Endpoint().delete(workspaceId, entity.getName(), forced,
+                Crn.fromString(entity.getResponse().getCrn()).getAccountId());
     }
 
     public static StackTestDto delete(TestContext testContext, StackTestDto entity, CloudbreakClient cloudbreakClient) {
         Log.log(LOGGER, " delete: " + entity.getName());
-        cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
-                .delete(cloudbreakClient.getWorkspaceId(), entity.getName(), false);
+        cloudbreakClient.getCloudbreakClient().stackV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), entity.getName(), false,
+                testContext.getActingUserCrn().getAccountId());
         return entity;
     }
 
@@ -82,8 +84,8 @@ public class StackActionV4 {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" delete: " + stackTestDto.getName());
-        client.getCloudbreakClient().stackV4Endpoint()
-                .deleteWithKerberos(workspaceId, stackTestDto.getName(), false);
+        client.getCloudbreakClient().stackV4Endpoint().deleteWithKerberos(workspaceId, stackTestDto.getName(), false,
+                Crn.fromString(stackTestDto.getResponse().getCrn()).getAccountId());
     }
 
     public static void determineNetworkAwsFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {

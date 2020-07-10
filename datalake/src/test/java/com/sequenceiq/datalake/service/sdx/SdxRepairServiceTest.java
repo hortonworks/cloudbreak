@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -71,13 +73,19 @@ public class SdxRepairServiceTest {
         cluster.setId(CLUSTER_ID.incrementAndGet());
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
+        cluster.setCrn(Crn.builder().setAccountId("asd")
+                .setResource("asd")
+                .setResourceType(Crn.ResourceType.DATALAKE)
+                .setService(Crn.Service.DATALAKE)
+                .setPartition(Crn.Partition.CDP)
+                .build().toString());
         SdxRepairRequest sdxRepairRequest = new SdxRepairRequest();
         sdxRepairRequest.setHostGroupNames(List.of("master"));
         SdxRepairSettings sdxRepairSettings = SdxRepairSettings.from(sdxRepairRequest);
 
         doNothing().when(cloudbreakFlowService).saveLastCloudbreakFlowChainId(any(), any());
         underTest.startRepairInCb(cluster, sdxRepairSettings);
-        verify(stackV4Endpoint).repairCluster(eq(0L), eq(CLUSTER_NAME), captor.capture());
+        verify(stackV4Endpoint).repairCluster(eq(0L), eq(CLUSTER_NAME), captor.capture(), anyString());
         assertEquals("master", captor.getValue().getHostGroups().get(0));
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", cluster);
@@ -89,10 +97,16 @@ public class SdxRepairServiceTest {
         cluster.setId(CLUSTER_ID.incrementAndGet());
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
+        cluster.setCrn(Crn.builder().setAccountId("asd")
+                .setResource("asd")
+                .setResourceType(Crn.ResourceType.DATALAKE)
+                .setService(Crn.Service.DATALAKE)
+                .setPartition(Crn.Partition.CDP)
+                .build().toString());
         StackV4Response resp = new StackV4Response();
         resp.setStatus(Status.UPDATE_FAILED);
         when(cloudbreakFlowService.getLastKnownFlowState(any())).thenReturn(FlowState.FINISHED);
-        when(stackV4Endpoint.get(eq(0L), eq("dummyCluster"), any())).thenReturn(resp);
+        when(stackV4Endpoint.get(eq(0L), eq("dummyCluster"), any(), anyString())).thenReturn(resp);
         AttemptResult<StackV4Response> attempt = underTest.checkClusterStatusDuringRepair(cluster);
         assertEquals(AttemptState.BREAK, attempt.getState());
     }

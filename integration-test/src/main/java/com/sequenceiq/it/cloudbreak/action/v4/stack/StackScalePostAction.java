@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.v4.stack;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
@@ -36,7 +37,8 @@ public class StackScalePostAction implements Action<StackTestDto, CloudbreakClie
         Log.whenJson(" StackScale post request:\n", request);
         FlowIdentifier flowIdentifier = client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .putScaling(client.getWorkspaceId(), testDto.getName(), request);
+                .putScaling(client.getWorkspaceId(), testDto.getName(), request,
+                        Crn.fromString(testDto.getResponse().getCrn()).getAccountId());
         testDto.setFlow("Stack scale", flowIdentifier);
         return testDto;
     }

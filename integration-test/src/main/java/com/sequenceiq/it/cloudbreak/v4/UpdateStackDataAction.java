@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -25,7 +26,8 @@ public class UpdateStackDataAction implements Action<StackRepositoryTestDto, Clo
 
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .putCluster(client.getWorkspaceId(), stackTestDto.getName(), request);
+                .putCluster(client.getWorkspaceId(), stackTestDto.getName(), request,
+                        Crn.fromString(stackTestDto.getResponse().getCrn()).getAccountId());
 
         return testDto;
     }

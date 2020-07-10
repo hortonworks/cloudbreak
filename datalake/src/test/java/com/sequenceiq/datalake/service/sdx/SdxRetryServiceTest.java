@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -79,7 +80,7 @@ public class SdxRetryServiceTest {
         Assertions.assertThrows(BadRequestException.class,
                 () -> sdxRetryService.retrySdx(sdxCluster),
                 "Retry cannot be performed, because the last action was successful");
-        verify(stackV4Endpoint, times(0)).retry(any(), any());
+        verify(stackV4Endpoint, times(0)).retry(any(), any(), anyString());
         verify(flow2Handler, times(0)).restartFlow(anyString());
     }
 
@@ -88,6 +89,12 @@ public class SdxRetryServiceTest {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(1L);
         sdxCluster.setClusterName("sdxclustername");
+        sdxCluster.setCrn(Crn.builder().setAccountId("asd")
+                .setResource("asd")
+                .setResourceType(Crn.ResourceType.DATALAKE)
+                .setService(Crn.Service.DATALAKE)
+                .setPartition(Crn.Partition.CDP)
+                .build().toString());
         List<FlowLog> flowLogs = new LinkedList<>();
         FlowLog successfulFlowLog = new FlowLog();
         successfulFlowLog.setFlowId("FLOW_ID_1");
@@ -108,7 +115,7 @@ public class SdxRetryServiceTest {
         FlowIdentifier flowIdentifier = sdxRetryService.retrySdx(sdxCluster);
 
         assertEquals(new FlowIdentifier(FlowType.FLOW, "FLOW_ID_1"), flowIdentifier);
-        verify(stackV4Endpoint, times(1)).retry(any(), eq("sdxclustername"));
+        verify(stackV4Endpoint, times(1)).retry(any(), eq("sdxclustername"), anyString());
         verify(flow2Handler, times(1)).restartFlow(any(FlowLog.class));
     }
 
@@ -137,7 +144,7 @@ public class SdxRetryServiceTest {
         FlowIdentifier flowIdentifier = sdxRetryService.retrySdx(sdxCluster);
 
         assertEquals(new FlowIdentifier(FlowType.FLOW, "FLOW_ID_1"), flowIdentifier);
-        verify(stackV4Endpoint, times(0)).retry(any(), any());
+        verify(stackV4Endpoint, times(0)).retry(any(), any(), anyString());
         verify(flow2Handler, times(1)).restartFlow(any(FlowLog.class));
     }
 

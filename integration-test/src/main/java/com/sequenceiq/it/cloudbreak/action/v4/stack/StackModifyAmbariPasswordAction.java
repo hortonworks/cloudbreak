@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -22,7 +23,7 @@ public class StackModifyAmbariPasswordAction implements Action<StackTestDto, Clo
         userNamePasswordV4Request.setUserName(testDto.getRequest().getCluster().getUserName());
         userNamePasswordV4Request.setPassword("testnewambaripassword");
         client.getCloudbreakClient().stackV4Endpoint().putPassword(client.getWorkspaceId(),
-                testDto.getName(), userNamePasswordV4Request);
+                testDto.getName(), userNamePasswordV4Request, Crn.fromString(testDto.getResponse().getCrn()).getAccountId());
         Log.when(LOGGER, " user's password modified successfully");
         return testDto;
     }

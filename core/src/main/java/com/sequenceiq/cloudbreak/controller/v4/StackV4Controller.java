@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -33,6 +33,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -40,14 +43,15 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
 @WorkspaceEntityType(Stack.class)
-@DisableCheckPermissions
+@InternalReady
+@InternalOnly
 public class StackV4Controller extends NotificationController implements StackV4Endpoint {
 
     @Inject
     private StackOperations stackOperations;
 
     @Override
-    public StackViewV4Responses list(Long workspaceId, String environmentCrn, boolean onlyDatalakes) {
+    public StackViewV4Responses list(Long workspaceId, @TenantAwareParam String environmentCrn, boolean onlyDatalakes) {
         List<StackType> types = new ArrayList<>();
         if (onlyDatalakes) {
             types.add(StackType.DATALAKE);
@@ -59,151 +63,162 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
-    public StackV4Response post(Long workspaceId, @Valid StackV4Request request) {
+    public StackV4Response post(Long workspaceId, @Valid StackV4Request request, @NotNull @AccountId String accountId) {
         return stackOperations.post(workspaceId, request, false);
     }
 
     @Override
-    public StackV4Response get(Long workspaceId, String name, Set<String> entries) {
+    public StackV4Response get(Long workspaceId, String name, Set<String> entries, @NotNull @AccountId String accountId) {
         return stackOperations.get(NameOrCrn.ofName(name), workspaceId, entries, null);
     }
 
     @Override
-    public StackV4Response getByCrn(Long workspaceId, String crn, Set<String> entries) {
+    public StackV4Response getByCrn(Long workspaceId, @TenantAwareParam String crn, Set<String> entries) {
         return stackOperations.get(NameOrCrn.ofCrn(crn), workspaceId, entries, null);
     }
 
     @Override
-    public void delete(Long workspaceId, String name, boolean forced) {
+    public void delete(Long workspaceId, String name, boolean forced, @NotNull @AccountId String accountId) {
         stackOperations.delete(NameOrCrn.ofName(name), workspaceId, forced);
     }
 
     @Override
-    public FlowIdentifier sync(Long workspaceId, String name) {
+    public FlowIdentifier sync(Long workspaceId, String name, @NotNull @AccountId String accountId) {
         return stackOperations.sync(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
-    public FlowIdentifier retry(Long workspaceId, String name) {
+    public FlowIdentifier retry(Long workspaceId, String name, @NotNull @AccountId String accountId) {
         return stackOperations.retry(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
-    public List<RetryableFlowResponse> listRetryableFlows(Long workspaceId, String name) {
+    public List<RetryableFlowResponse> listRetryableFlows(Long workspaceId, String name, @NotNull @AccountId String accountId) {
         return stackOperations.getRetryableFlows(name, workspaceId)
                 .stream().map(retryable -> Builder.builder().setName(retryable.getName()).setFailDate(retryable.getFailDate()).build())
                 .collect(Collectors.toList());
     }
 
     @Override
-    public FlowIdentifier putStop(Long workspaceId, String name) {
+    public FlowIdentifier putStop(Long workspaceId, String name, @NotNull @AccountId String accountId) {
         return stackOperations.putStop(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
-    public FlowIdentifier putStart(Long workspaceId, String name) {
+    public FlowIdentifier putStart(Long workspaceId, String name, @NotNull @AccountId String accountId) {
         return stackOperations.putStart(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
-    public FlowIdentifier putScaling(Long workspaceId, String name, @Valid StackScaleV4Request updateRequest) {
+    public FlowIdentifier putScaling(Long workspaceId, String name, @Valid StackScaleV4Request updateRequest, @NotNull @AccountId String accountId) {
         return stackOperations.putScaling(NameOrCrn.ofName(name), workspaceId, updateRequest);
     }
 
     @Override
-    public FlowIdentifier repairCluster(Long workspaceId, String name, @Valid ClusterRepairV4Request clusterRepairRequest) {
+    public FlowIdentifier repairCluster(Long workspaceId, String name, @Valid ClusterRepairV4Request clusterRepairRequest,
+            @AccountId String accountId) {
         return stackOperations.repairCluster(NameOrCrn.ofName(name), workspaceId, clusterRepairRequest);
     }
 
     @Override
-    public FlowIdentifier upgradeOs(Long workspaceId, String name) {
+    public FlowIdentifier upgradeOs(Long workspaceId, String name, @NotNull @AccountId String accountId) {
         return stackOperations.upgradeOs(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
-    public UpgradeOptionV4Response checkForOsUpgrade(Long workspaceId, String name) {
+    public UpgradeOptionV4Response checkForOsUpgrade(Long workspaceId, String name, @NotNull @AccountId String accountId) {
         return stackOperations.checkForOsUpgrade(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
-    public GeneratedBlueprintV4Response postStackForBlueprint(Long workspaceId, String name, @Valid StackV4Request stackRequest) {
+    public GeneratedBlueprintV4Response postStackForBlueprint(Long workspaceId, String name, @Valid StackV4Request stackRequest,
+            @AccountId String accountId) {
         return stackOperations.postStackForBlueprint(stackRequest);
     }
 
     @Override
-    public FlowIdentifier changeImage(Long workspaceId, String name, @Valid StackImageChangeV4Request stackImageChangeRequest) {
+    public FlowIdentifier changeImage(Long workspaceId, String name, @Valid StackImageChangeV4Request stackImageChangeRequest,
+            @AccountId String accountId) {
         return stackOperations.changeImage(NameOrCrn.ofName(name), workspaceId, stackImageChangeRequest);
     }
 
     @Override
-    public void deleteWithKerberos(Long workspaceId, String name, boolean forced) {
+    public void deleteWithKerberos(Long workspaceId, String name, boolean forced, @NotNull @AccountId String accountId) {
         stackOperations.delete(NameOrCrn.ofName(name), workspaceId, forced);
     }
 
     @Override
-    public StackV4Request getRequestfromName(Long workspaceId, String name) {
+    public StackV4Request getRequestfromName(Long workspaceId, String name, @NotNull @AccountId String accountId) {
         return stackOperations.getRequest(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
-    public StackStatusV4Response getStatusByName(Long workspaceId, String name) {
+    public StackStatusV4Response getStatusByName(Long workspaceId, String name, @NotNull @AccountId String accountId) {
         return stackOperations.getStatus(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
-    public FlowIdentifier deleteInstance(Long workspaceId, String name, boolean forced, String instanceId) {
+    public FlowIdentifier deleteInstance(Long workspaceId, String name, boolean forced, String instanceId,
+            @AccountId String accountId) {
         return stackOperations.deleteInstance(NameOrCrn.ofName(name), workspaceId, forced, instanceId);
     }
 
     @Override
-    public FlowIdentifier deleteMultipleInstances(Long workspaceId, String name, List<String> instanceIds, boolean forced) {
+    public FlowIdentifier deleteMultipleInstances(Long workspaceId, String name, List<String> instanceIds, boolean forced,
+            @AccountId String accountId) {
         return stackOperations.deleteInstances(NameOrCrn.ofName(name), workspaceId, instanceIds, forced);
     }
 
     @Override
-    public FlowIdentifier putPassword(Long workspaceId, String name, @Valid UserNamePasswordV4Request userNamePasswordJson) {
+    public FlowIdentifier putPassword(Long workspaceId, String name, @Valid UserNamePasswordV4Request userNamePasswordJson,
+            @AccountId String accountId) {
         return stackOperations.putPassword(NameOrCrn.ofName(name), workspaceId, userNamePasswordJson);
     }
 
     @Override
-    public FlowIdentifier setClusterMaintenanceMode(Long workspaceId, String name, @NotNull MaintenanceModeV4Request maintenanceMode) {
+    public FlowIdentifier setClusterMaintenanceMode(Long workspaceId, String name, MaintenanceModeV4Request maintenanceMode,
+            @AccountId String accountId) {
         return stackOperations.setClusterMaintenanceMode(NameOrCrn.ofName(name), workspaceId, maintenanceMode);
     }
 
     @Override
-    public FlowIdentifier putCluster(Long workspaceId, String name, @Valid UpdateClusterV4Request updateJson) {
+    public FlowIdentifier putCluster(Long workspaceId, String name, @Valid UpdateClusterV4Request updateJson,
+            @AccountId String accountId) {
         return stackOperations.putCluster(NameOrCrn.ofName(name), workspaceId, updateJson);
     }
 
     @Override
-    public String getClusterHostsInventory(Long workspaceId, String name) {
+    public String getClusterHostsInventory(Long workspaceId, String name, @NotNull @AccountId String accountId) {
         return stackOperations.getClusterHostsInventory(workspaceId, name);
     }
 
     @Override
-    public UpgradeV4Response checkForClusterUpgradeByName(Long workspaceId, String name, UpgradeV4Request request) {
+    public UpgradeV4Response checkForClusterUpgradeByName(Long workspaceId, String name, UpgradeV4Request request,
+            @AccountId String accountId) {
         return stackOperations.checkForClusterUpgrade(NameOrCrn.ofName(name), workspaceId, request);
     }
 
     @Override
-    public FlowIdentifier upgradeClusterByName(Long workspaceId, String name, String imageId) {
+    public FlowIdentifier upgradeClusterByName(Long workspaceId, String name, String imageId, @NotNull @AccountId String accountId) {
         return stackOperations.upgradeCluster(NameOrCrn.ofName(name), workspaceId, imageId);
     }
 
     @Override
-    public FlowIdentifier updateSaltByName(Long workspaceId, String name) {
+    public FlowIdentifier updateSaltByName(Long workspaceId, String name, @NotNull @AccountId String accountId) {
         return stackOperations.updateSalt(NameOrCrn.ofName(name), workspaceId);
     }
 
     @Override
-    public BackupV4Response backupDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId) {
+    public BackupV4Response backupDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId,
+            @AccountId String accountId) {
         FlowIdentifier flowIdentifier =
             stackOperations.backupClusterDatabase(NameOrCrn.ofName(name), workspaceId, backupLocation, backupId);
         return new BackupV4Response(flowIdentifier);
     }
 
     @Override
-    public RestoreV4Response restoreDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId) {
+    public RestoreV4Response restoreDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId,
+            @AccountId String accountId) {
         FlowIdentifier flowIdentifier =
             stackOperations.restoreClusterDatabase(NameOrCrn.ofName(name), workspaceId, backupLocation, backupId);
         return new RestoreV4Response(flowIdentifier);

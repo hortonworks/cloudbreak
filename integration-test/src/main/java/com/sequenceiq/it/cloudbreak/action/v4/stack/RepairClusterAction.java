@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairNodesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -26,7 +27,8 @@ public class RepairClusterAction implements Action<StackTestDto, CloudbreakClien
         Log.whenJson(LOGGER, " Cluster repair request:\n", request);
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .repairCluster(client.getWorkspaceId(), testDto.getName(), request);
+                .repairCluster(client.getWorkspaceId(), testDto.getName(), request,
+                        Crn.fromString(testDto.getResponse().getCrn()).getAccountId());
         Log.when(LOGGER, " Cluster repair initiated.");
 
         return testDto;

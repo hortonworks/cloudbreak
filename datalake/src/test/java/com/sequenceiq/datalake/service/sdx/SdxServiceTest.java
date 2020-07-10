@@ -491,7 +491,7 @@ class SdxServiceTest {
 
         underTest.syncByCrn(USER_CRN, DATALAKE_CRN);
 
-        verify(stackV4Endpoint, times(1)).sync(0L, CLUSTER_NAME);
+        verify(stackV4Endpoint, times(1)).sync(eq(0L), eq(CLUSTER_NAME), anyString());
     }
 
     @Test

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -21,7 +22,7 @@ public class StackGetAction implements Action<StackTestDto, CloudbreakClient> {
         testDto.setResponse(
                 client.getCloudbreakClient()
                         .stackV4Endpoint()
-                        .get(client.getWorkspaceId(), testDto.getName(), new HashSet<>()));
+                        .get(client.getWorkspaceId(), testDto.getName(), new HashSet<>(), Crn.fromString(testDto.getResponse().getCrn()).getAccountId()));
         Log.whenJson(LOGGER, " Stack get was successful:\n", testDto.getResponse());
 
         return testDto;

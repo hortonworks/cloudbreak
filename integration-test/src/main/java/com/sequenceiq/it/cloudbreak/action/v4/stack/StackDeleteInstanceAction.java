@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.action.v4.stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -22,7 +23,8 @@ public class StackDeleteInstanceAction implements Action<StackTestDto, Cloudbrea
         Boolean forced = testContext.getSelected("forced");
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .deleteInstance(client.getWorkspaceId(), testDto.getName(), forced != null && forced, instanceId);
+                .deleteInstance(client.getWorkspaceId(), testDto.getName(), forced != null && forced, instanceId,
+                        Crn.fromString(testDto.getResponse().getCrn()).getAccountId());
         Log.whenJson(LOGGER, " Stack delete instance was successful:\n", testDto.getResponse());
         return testDto;
     }

@@ -27,10 +27,13 @@ public class CloudbreakWaitObject {
 
     private final Map<String, Status> desiredStatuses;
 
-    public CloudbreakWaitObject(CloudbreakClient client, String name, Map<String, Status> desiredStatuses) {
+    private final String accountId;
+
+    public CloudbreakWaitObject(CloudbreakClient client, String name, Map<String, Status> desiredStatuses, String accountId) {
         this.client = client;
         this.name = name;
         this.desiredStatuses = desiredStatuses;
+        this.accountId = accountId;
     }
 
     public DistroXV1Endpoint getDistroxEndpoint() {
@@ -51,6 +54,10 @@ public class CloudbreakWaitObject {
 
     public Map<String, Status> getDesiredStatuses() {
         return desiredStatuses;
+    }
+
+    public String getAccountId() {
+        return accountId;
     }
 
     public boolean isFailed(Map<String, Status> clusterStatuses) {

@@ -5,6 +5,7 @@ import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -17,7 +18,8 @@ public class StackRefreshAction implements Action<StackTestDto, CloudbreakClient
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
         testDto.setResponse(
-                client.getCloudbreakClient().stackV4Endpoint().get(client.getWorkspaceId(), testDto.getName(), Collections.emptySet())
+                client.getCloudbreakClient().stackV4Endpoint().get(client.getWorkspaceId(), testDto.getName(), Collections.emptySet(),
+                        Crn.fromString(testDto.getResponse().getCrn()).getAccountId())
         );
         return testDto;
     }
