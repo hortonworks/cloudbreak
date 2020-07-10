@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
@@ -73,8 +73,8 @@ class NetworkCreationRequestFactoryTest {
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
         when(defaultSubnetCidrProvider.provide(NETWORK_CIDR, false)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
-        when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
-        when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
+        when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new Tags());
+        when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new Tags());
 
         NetworkCreationRequest actual = underTest.create(environmentDto);
 
@@ -129,7 +129,7 @@ class NetworkCreationRequestFactoryTest {
     private EnvironmentDto.Builder createEnvironmentDtoWithoutAzureParams() {
         return EnvironmentDto.builder()
                 .withName(ENV_NAME)
-                .withTags(new EnvironmentTags(new HashMap<>(), new HashMap<>()))
+                .withTags(new EnvironmentTags(new Tags(), new Tags()))
                 .withCreator("creator")
                 .withCredential(new Credential())
                 .withCloudPlatform(CLOUD_PLATFORM)

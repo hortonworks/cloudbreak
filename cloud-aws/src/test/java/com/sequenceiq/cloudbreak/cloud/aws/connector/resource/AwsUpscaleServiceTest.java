@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -162,9 +163,7 @@ class AwsUpscaleServiceTest {
         Group worker = getWorkerGroup(instanceAuthentication);
         groups.add(worker);
 
-        Map<String, String> tags = new HashMap<>();
-        tags.put("owner", "cbuser");
-        tags.put("created", "yesterday");
+        Tags tags = new Tags(Map.of("owner", "cbuser", "created", "yesterday"));
         CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), tags, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
 
@@ -249,7 +248,7 @@ class AwsUpscaleServiceTest {
         Group worker = getWorkerGroup(instanceAuthentication);
         groups.add(worker);
 
-        CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), emptyMap(), null,
+        CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), new Tags(), null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
 
         List<CloudResource> cloudResourceList = Collections.emptyList();

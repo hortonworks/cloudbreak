@@ -172,7 +172,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     public SdxTestDto withTags(Map<String, String> tags) {
-        getRequest().addTags(tags);
+        getRequest().getTags().addTags(tags);
         return this;
     }
 

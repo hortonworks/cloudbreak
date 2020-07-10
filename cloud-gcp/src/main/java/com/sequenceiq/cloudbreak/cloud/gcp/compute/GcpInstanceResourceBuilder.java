@@ -9,7 +9,6 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -135,15 +134,14 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Tags tags = new Tags();
         List<String> tagList = new ArrayList<>();
-        Map<String, String> labels = new HashMap<>();
+        Map<String, String> labels = com.sequenceiq.common.api.tag.model.Tags.getAll(cloudStack.getTags());
         String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
         tagList.add(groupname);
 
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
-        cloudStack.getTags().forEach((key, value) -> tagList.add(key + '-' + value));
+        labels.forEach((key, value) -> tagList.add(key + '-' + value));
 
-        labels.putAll(cloudStack.getTags());
         tags.setItems(tagList);
 
         instance.setTags(tags);

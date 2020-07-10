@@ -1,12 +1,12 @@
 package com.sequenceiq.environment.environment.dto;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwareEnvRequest;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
@@ -51,7 +51,7 @@ public class EnvironmentCreationDto {
 
     private final ExperimentalFeatures experimentalFeatures;
 
-    private final Map<String, String> tags;
+    private final Tags tags;
 
     private final String parentEnvironmentName;
 
@@ -62,7 +62,7 @@ public class EnvironmentCreationDto {
             String creator, LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, FreeIpaCreationDto freeIpaCreation, AuthenticationDto authentication,
             Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, String adminGroupName,
-            ParametersDto parameters, ExperimentalFeatures experimentalFeatures, Map<String, String> tags, String crn,
+            ParametersDto parameters, ExperimentalFeatures experimentalFeatures, Tags tags, String crn,
             String parentEnvironmentName, String proxyConfigName) {
         //CHECKSTYLE:ON
         this.name = name;
@@ -86,11 +86,7 @@ public class EnvironmentCreationDto {
         this.adminGroupName = adminGroupName;
         this.parameters = parameters;
         this.experimentalFeatures = experimentalFeatures != null ? experimentalFeatures : new ExperimentalFeatures();
-        if (tags == null) {
-            this.tags = new HashMap<>();
-        } else {
-            this.tags = tags;
-        }
+        this.tags = Objects.requireNonNullElse(tags, new Tags());
         this.crn = crn;
         this.parentEnvironmentName = parentEnvironmentName;
         this.proxyConfigName = proxyConfigName;
@@ -168,7 +164,7 @@ public class EnvironmentCreationDto {
         return experimentalFeatures;
     }
 
-    public Map<String, String> getTags() {
+    public Tags getTags() {
         return tags;
     }
 
@@ -230,7 +226,7 @@ public class EnvironmentCreationDto {
 
         private ExperimentalFeatures experimentalFeatures;
 
-        private Map<String, String> tags = new HashMap<>();
+        private Tags tags = new Tags();
 
         private String crn;
 
@@ -326,7 +322,7 @@ public class EnvironmentCreationDto {
             return this;
         }
 
-        public Builder withTags(Map<String, String> tags) {
+        public Builder withTags(Tags tags) {
             this.tags = tags;
             return this;
         }

@@ -403,7 +403,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public TestContext setTestMethodName(String testMethodName) {
-        this.contextParameters.put(TEST_METHOD_NAME, testMethodName);
+        getTestContext().contextParameters.put(TEST_METHOD_NAME, testMethodName);
         return this;
     }
 

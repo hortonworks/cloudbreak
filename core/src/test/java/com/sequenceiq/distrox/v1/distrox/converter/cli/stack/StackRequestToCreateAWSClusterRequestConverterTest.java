@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.common.api.tag.request.TagsRequest;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -72,7 +73,7 @@ class StackRequestToCreateAWSClusterRequestConverterTest {
         assertEquals(request.getImage().getId(), result.getImage().getId());
         assertEquals(request.getNetwork().getAws().getSubnetId(), result.getSubnetId());
         assertEquals(request.getTags().getUserDefined().size(), result.getTags().size());
-        request.getTags().getUserDefined().forEach((key, value) ->
+        request.getTags().getUserDefined().getAll().forEach((key, value) ->
                 assertTrue(result.getTags().stream().anyMatch(tr -> key.equals(tr.getKey()) && value.equals(tr.getValue()))));
         assertInstanceGroups(request.getInstanceGroups(), result.getInstanceGroups());
     }
@@ -94,8 +95,7 @@ class StackRequestToCreateAWSClusterRequestConverterTest {
         network.setAws(awsNetwork);
         request.setNetwork(network);
         TagsV4Request tags = new TagsV4Request();
-        Map<String, String> userDefinedTags = Map.of("k1", "v1", "k2", "v2");
-        tags.setUserDefined(userDefinedTags);
+        tags.setUserDefined(new TagsRequest(Map.of("k1", "v1", "k2", "v2")));
         request.setTags(tags);
         InstanceGroupV4Request instanceGroup1 = getInstanceGroupV4Request("ig1");
         InstanceGroupV4Request instanceGroup2 = getInstanceGroupV4Request("ig2");

@@ -1,26 +1,26 @@
 package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.common.api.tag.model.Tags;
 
 public abstract class CommonTagValidator implements Validator {
 
-    protected void validate(TagSpecification ts, Map<String, String> tags) {
+    protected void validate(TagSpecification ts, Tags tags) {
         validateTagsAreNotMoreThanMaximum(ts, tags);
-        validateTagsAreTooShort(tags.keySet(), ts.getMinKeyLength(), "Following tag names are too short: %s");
-        validateTagAreTooLong(tags.keySet(), ts.getMaxKeyLength(), "Following tag names are too long: %s");
-        validateTagsAreWellFormatted(ts.getKeyValidator(), tags.keySet(), getKeyValidator(), "Following tag names are not well formatted: %s");
-        validateTagsAreTooShort(tags.values(), ts.getMinValueLength(), "Following tag values are too short: %s");
-        validateTagAreTooLong(tags.values(), ts.getMaxValueLength(), "Following tag values are too long: %s");
-        validateTagsAreWellFormatted(ts.getValueValidator(), tags.values(), getValueValidator(), "Following tag values are not well formatted: %s");
+        validateTagsAreTooShort(tags.getKeys(), ts.getMinKeyLength(), "Following tag names are too short: %s");
+        validateTagAreTooLong(tags.getKeys(), ts.getMaxKeyLength(), "Following tag names are too long: %s");
+        validateTagsAreWellFormatted(ts.getKeyValidator(), tags.getKeys(), getKeyValidator(), "Following tag names are not well formatted: %s");
+        validateTagsAreTooShort(tags.getValues(), ts.getMinValueLength(), "Following tag values are too short: %s");
+        validateTagAreTooLong(tags.getValues(), ts.getMaxValueLength(), "Following tag values are too long: %s");
+        validateTagsAreWellFormatted(ts.getValueValidator(), tags.getValues(), getValueValidator(), "Following tag values are not well formatted: %s");
     }
 
-    private void validateTagsAreNotMoreThanMaximum(TagSpecification ts, Map<String, String> tags) {
+    private void validateTagsAreNotMoreThanMaximum(TagSpecification ts, Tags tags) {
         if (tags.size() > ts.getMaxAmount()) {
             throw new IllegalArgumentException("Too much tags, maximum allowed: " + ts.getMaxAmount());
         }

@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.AzurePrerequisiteCreateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.prerequisite.EnvironmentPrerequisitesCreateRequest;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -210,7 +211,7 @@ class PrerequisitesCreationHandlerTest {
         ArgumentCaptor<BaseNamedFlowEvent> envCreationEventArgumentCaptor = ArgumentCaptor.forClass(BaseNamedFlowEvent.class);
         ArgumentCaptor<EnvironmentPrerequisitesCreateRequest> environmentPrerequisitesCreateRequestArgumentCaptor
                 = ArgumentCaptor.forClass(EnvironmentPrerequisitesCreateRequest.class);
-        when(costTagging.mergeTags(any())).thenReturn(Map.of());
+        when(costTagging.mergeTags(any())).thenReturn(new Tags());
         prepareCloudConnectorSetup();
 
         underTest.accept(event);
@@ -252,7 +253,9 @@ class PrerequisitesCreationHandlerTest {
         environmentDto.setId(ENVIRONMENT_ID);
         environmentDto.setCloudPlatform(AZURE.name());
         environmentDto.setLocation(LocationDto.builder().withName(REGION_NAME).build());
-        environmentDto.setTags(new EnvironmentTags(Map.of("envTag1Key", "envTag1Value"), Map.of("DefaultTag1Key", "DefaultTag1Value")));
+        environmentDto.setTags(new EnvironmentTags(
+                new Tags(Map.of("envTag1Key", "envTag1Value")),
+                new Tags(Map.of("DefaultTag1Key", "DefaultTag1Value"))));
         environmentDto.setParameters(ParametersDto.builder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(azureResourceGroupDto)

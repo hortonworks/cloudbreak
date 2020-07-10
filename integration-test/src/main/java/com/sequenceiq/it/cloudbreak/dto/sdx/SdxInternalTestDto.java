@@ -212,7 +212,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     public SdxInternalTestDto withTags(Map<String, String> tags) {
-        getRequest().addTags(tags);
+        getRequest().getTags().addTags(tags);
         return this;
     }
 

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import com.cloudera.cdp.datahub.model.CreateAWSClusterRequest;
 import com.cloudera.cdp.datahub.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.common.api.tag.request.TagsRequest;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
@@ -48,7 +49,7 @@ class DistroXV1RequestToCreateAWSClusterRequestConverterTest {
         assertEquals(request.getImage().getId(), result.getImage().getId());
         assertEquals(request.getNetwork().getAws().getSubnetId(), result.getSubnetId());
         assertEquals(request.getTags().getUserDefined().size(), result.getTags().size());
-        request.getTags().getUserDefined().forEach((key, value) ->
+        request.getTags().getUserDefined().getAll().forEach((key, value) ->
                 assertTrue(result.getTags().stream().anyMatch(tr -> key.equals(tr.getKey()) && value.equals(tr.getValue()))));
         assertInstanceGroups(request.getInstanceGroups(), result.getInstanceGroups());
     }
@@ -70,8 +71,7 @@ class DistroXV1RequestToCreateAWSClusterRequestConverterTest {
         network.setAws(awsNetwork);
         request.setNetwork(network);
         TagsV1Request tags = new TagsV1Request();
-        Map<String, String> userDefinedTags = Map.of("k1", "v1", "k2", "v2");
-        tags.setUserDefined(userDefinedTags);
+        tags.setUserDefined(new TagsRequest(Map.of("k1", "v1", "k2", "v2")));
         request.setTags(tags);
         InstanceGroupV1Request instanceGroup1 = getInstanceGroupV1Request("ig1");
         InstanceGroupV1Request instanceGroup2 = getInstanceGroupV1Request("ig2");

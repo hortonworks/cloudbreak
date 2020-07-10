@@ -134,7 +134,7 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     @Override
     public void addTag(String key, String value) {
-        initAndGetTags().getUserDefined().put(key, value);
+        initAndGetTags().getUserDefined().addTag(key, value);
     }
 
     public List<InstanceGroupV4Request> getInstanceGroups() {
