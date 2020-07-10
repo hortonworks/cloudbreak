@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak;
 
+import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,13 +13,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CentralTagUpdater;
 import com.sequenceiq.cloudbreak.tag.DefaultApplicationTag;
 import com.sequenceiq.cloudbreak.tag.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
-import com.sequenceiq.common.api.tag.model.Tags;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultCostTaggingServiceTest {
@@ -36,32 +35,32 @@ public class DefaultCostTaggingServiceTest {
 
     @Test
     public void testPrepareDefaultTagsForAWSShouldReturnAllDefaultMap() {
-        Tags result = underTest.prepareDefaultTags(tagRequest("AWS"));
+        Map<String, String> result = underTest.prepareDefaultTags(tagRequest("AWS"));
 
         Assert.assertEquals(3L, result.size());
-        Assert.assertEquals("environment-crn", result.getTagValue(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
-        Assert.assertEquals("creator-crn", result.getTagValue(DefaultApplicationTag.CREATOR_CRN.key()));
-        Assert.assertEquals("resource-crn", result.getTagValue(DefaultApplicationTag.RESOURCE_CRN.key()));
+        Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
+        Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
+        Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
     }
 
     @Test
     public void testPrepareDefaultTagsForAWSAndAdditionalTagsShouldReturnAllDefaultMapPlusTagsWhichAreNotEmpty() {
-        Tags result = underTest.prepareDefaultTags(tagRequest("AWS", new HashMap<>(), new HashMap<>()));
+        Map<String, String> result = underTest.prepareDefaultTags(tagRequest("AWS", new HashMap<>(), new HashMap<>()));
 
         Assert.assertEquals(3L, result.size());
-        Assert.assertEquals("environment-crn", result.getTagValue(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
-        Assert.assertEquals("creator-crn", result.getTagValue(DefaultApplicationTag.CREATOR_CRN.key()));
-        Assert.assertEquals("resource-crn", result.getTagValue(DefaultApplicationTag.RESOURCE_CRN.key()));
+        Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
+        Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
+        Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
     }
 
     @Test
     public void testPrepareDefaultTagsForGCPShouldReturnAllDefaultMap() {
-        Tags result = underTest.prepareDefaultTags(tagRequest("GCP"));
+        Map<String, String> result = underTest.prepareDefaultTags(tagRequest("GCP"));
 
         Assert.assertEquals(3L, result.size());
-        Assert.assertEquals("environment-crn", result.getTagValue(DefaultApplicationTag.ENVIRONMENT_CRN.key().toLowerCase()));
-        Assert.assertEquals("creator-crn", result.getTagValue(DefaultApplicationTag.CREATOR_CRN.key().toLowerCase()));
-        Assert.assertEquals("resource-crn", result.getTagValue(DefaultApplicationTag.RESOURCE_CRN.key().toLowerCase()));
+        Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key().toLowerCase()));
+        Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key().toLowerCase()));
+        Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key().toLowerCase()));
     }
 
     @Test
@@ -69,12 +68,12 @@ public class DefaultCostTaggingServiceTest {
         Map<String, String> sourceMap = new HashMap<>();
         sourceMap.put(DefaultApplicationTag.owner.key(), "appletree");
 
-        Tags result = underTest.prepareDefaultTags(tagRequest("AZURE", sourceMap, new HashMap<>()));
+        Map<String, String> result = underTest.prepareDefaultTags(tagRequest("AZURE", sourceMap, new HashMap<>()));
 
         Assert.assertEquals(3L, result.size());
-        Assert.assertEquals("environment-crn", result.getTagValue(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
-        Assert.assertEquals("creator-crn", result.getTagValue(DefaultApplicationTag.CREATOR_CRN.key()));
-        Assert.assertEquals("resource-crn", result.getTagValue(DefaultApplicationTag.RESOURCE_CRN.key()));
+        Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
+        Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
+        Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
     }
 
     @Test
@@ -90,13 +89,13 @@ public class DefaultCostTaggingServiceTest {
         requestTag.put("pear3", "pear3");
         requestTag.put("pear4", "pear4");
 
-        Tags result = underTest.mergeTags(mergeRequest("AWS", envMap, requestTag));
+        Map<String, String> result = underTest.mergeTags(mergeRequest("AWS", envMap, requestTag));
 
         Assert.assertEquals(4L, result.size());
-        Assert.assertEquals("pear3", result.getTagValue("pear3"));
-        Assert.assertEquals("pear4", result.getTagValue("pear4"));
-        Assert.assertEquals("apple3", result.getTagValue("apple3"));
-        Assert.assertEquals("apple4", result.getTagValue("apple4"));
+        Assert.assertEquals("pear3", "pear3");
+        Assert.assertEquals("pear4", "pear4");
+        Assert.assertEquals("apple3", "apple3");
+        Assert.assertEquals("apple4", "apple4");
     }
 
     @Test
@@ -152,16 +151,16 @@ public class DefaultCostTaggingServiceTest {
             .withAccountId("pepsi")
             .withIsInternalTenant(true)
             .withSourceMap(sourceMap)
-            .withAccountTags(new Tags(accountTags))
-            .withUserDefinedTags(new Tags(userTags))
+            .withAccountTags(accountTags)
+            .withUserDefinedTags(userTags)
             .build();
     }
 
     private CDPTagMergeRequest mergeRequest(String platform, Map<String, String> envMap, Map<String, String> requestTag) {
         return CDPTagMergeRequest.Builder.builder()
                 .withPlatform(platform)
-                .withEnvironmentTags(new Tags(envMap))
-                .withRequestTags(new Tags(requestTag))
+                .withEnvironmentTags(envMap)
+                .withRequestTags(requestTag)
                 .build();
     }
 }

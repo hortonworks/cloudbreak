@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
@@ -112,11 +111,11 @@ public class DBStackToDatabaseStackConverterTest {
         assertEquals("that", convertedStack.getDatabaseServer().getParameters().get("this"));
         assertEquals("template", convertedStack.getTemplate());
 
-        Tags tags = convertedStack.getTags();
+        Map<String, String> tags = convertedStack.getTags();
         assertEquals(3, tags.size());
-        assertEquals("uvalue1", tags.getTagValue("ukey1"));
-        assertEquals("dvalue1", tags.getTagValue("dkey1"));
-        assertEquals("value1", tags.getTagValue("key1"));
+        assertEquals("uvalue1", tags.get("ukey1"));
+        assertEquals("dvalue1", tags.get("dkey1"));
+        assertEquals("value1", tags.get("key1"));
     }
 
     @Test

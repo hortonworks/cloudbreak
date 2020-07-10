@@ -4,6 +4,7 @@ import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -33,7 +34,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
@@ -208,21 +208,22 @@ public class CreateFreeIpaRequestToStackConverter {
 
     private Json getTags(CreateFreeIpaRequest source, Stack stack, String userCrn, String userName) {
         try {
-            Tags userDefined = Optional.ofNullable(source.getTags())
-                    .map(Tags::new)
-                    .orElse(new Tags());
+            Map<String, String> userDefined = source.getTags();
+            if (userDefined == null) {
+                userDefined =  new HashMap<>();
+            }
             // userdefined tags comming from environment service
-            return new Json(new StackTags(userDefined, new Tags(), getDefaultTags(stack, userCrn, userName)));
+            return new Json(new StackTags(userDefined, new HashMap<>(), getDefaultTags(stack, userCrn, userName)));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
     }
 
-    private Tags getDefaultTags(Stack stack, String userCrn, String userName) {
-        Tags result = new Tags();
+    private Map<String, String> getDefaultTags(Stack stack, String userCrn, String userName) {
+        Map<String, String> result = new HashMap<>();
         try {
             boolean internalTenant = entitlementService.internalTenant(userCrn, stack.getAccountId());
-            Tags accountTags = accountTagService.list();
+            Map<String, String> accountTags = accountTagService.list();
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                     .withCreatorCrn(userCrn)
                     .withEnvironmentCrn(stack.getEnvironmentCrn())
@@ -234,7 +235,7 @@ public class CreateFreeIpaRequestToStackConverter {
                     .withAccountTags(accountTags)
                     .build();
 
-            result.addTags(costTagging.prepareDefaultTags(request));
+            result.putAll(costTagging.prepareDefaultTags(request));
         } catch (Exception e) {
             LOGGER.debug("Exception during reading default tags.", e);
         }

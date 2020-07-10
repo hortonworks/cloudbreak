@@ -150,7 +150,11 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         } catch (Exception e) {
             LOGGER.info("Failed to convert dynamic tags.", e);
         }
-        return new TagsV4Response();
+        TagsV4Response response = new TagsV4Response();
+        response.setApplication(new HashMap<>());
+        response.setDefaults(new HashMap<>());
+        response.setUserDefined(new HashMap<>());
+        return response;
     }
 
     private void convertTelemetryComponent(StackV4Response response, Stack source) {

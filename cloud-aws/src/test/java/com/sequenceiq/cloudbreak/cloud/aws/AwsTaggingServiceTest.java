@@ -31,11 +31,11 @@ import com.amazonaws.services.ec2.model.EbsInstanceBlockDevice;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
 import com.amazonaws.services.ec2.model.Reservation;
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -58,8 +58,9 @@ public class AwsTaggingServiceTest {
 
     @Test
     public void testWhenUserTagsDefined() {
-        Tags userDefinedTags = new Tags(Map.of("userdefinedkey", "userdefinedvalue"));
-        Collection<Tag> tags = awsTaggingService.prepareCloudformationTags(authenticatedContext(), userDefinedTags);
+        Map<String, String> userDefined = Maps.newHashMap();
+        userDefined.put("userdefinedkey", "userdefinedvalue");
+        Collection<Tag> tags = awsTaggingService.prepareCloudformationTags(authenticatedContext(), userDefined);
         assertEquals(1L, tags.size());
     }
 
@@ -80,7 +81,7 @@ public class AwsTaggingServiceTest {
 
         AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
-        Tags userTags = new Tags(Map.of("key1", "val1", "key2", "val2"));
+        Map<String, String> userTags = Map.of("key1", "val1", "key2", "val2");
 
         awsTaggingService.tagRootVolumes(authenticatedContext(), ec2Client, List.of(instance), userTags);
 
@@ -110,7 +111,7 @@ public class AwsTaggingServiceTest {
         AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
 
-        awsTaggingService.tagRootVolumes(authenticatedContext(), ec2Client, List.of(instance), new Tags());
+        awsTaggingService.tagRootVolumes(authenticatedContext(), ec2Client, List.of(instance), Map.of());
 
         verify(ec2Client, times(0)).createTags(tagRequestCaptor.capture());
     }
@@ -141,7 +142,7 @@ public class AwsTaggingServiceTest {
         AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
 
-        awsTaggingService.tagRootVolumes(authenticatedContext(), ec2Client, instanceList, new Tags());
+        awsTaggingService.tagRootVolumes(authenticatedContext(), ec2Client, instanceList, Map.of());
 
         verify(ec2Client, times(2)).createTags(tagRequestCaptor.capture());
         List<CreateTagsRequest> requests = tagRequestCaptor.getAllValues();
@@ -187,7 +188,7 @@ public class AwsTaggingServiceTest {
         AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
 
-        awsTaggingService.tagRootVolumes(authenticatedContext(), ec2Client, instanceList, new Tags());
+        awsTaggingService.tagRootVolumes(authenticatedContext(), ec2Client, instanceList, Map.of());
 
         verify(ec2Client, times(2)).createTags(tagRequestCaptor.capture());
         List<CreateTagsRequest> requests = tagRequestCaptor.getAllValues();

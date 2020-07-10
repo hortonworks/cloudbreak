@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -99,7 +100,6 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
@@ -531,7 +531,7 @@ public class StackService implements ResourceIdProvider {
     private void setDefaultTags(Stack stack) {
         try {
             StackTags stackTag = stack.getTags().get(StackTags.class);
-            Tags userDefinedTags = stackTag.getUserDefinedTags();
+            Map<String, String> userDefinedTags = stackTag.getUserDefinedTags();
 
             boolean internalTenant = entitlementService.internalTenant(stack.getCreator().getUserCrn(), stack.getCreator().getTenant().getName());
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
@@ -546,8 +546,8 @@ public class StackService implements ResourceIdProvider {
                     .withUserDefinedTags(userDefinedTags)
                     .build();
 
-            Tags defaultTags = new Tags(stackTag.getDefaultTags());
-            defaultTags.addTags(costTagging.prepareDefaultTags(request));
+            Map<String, String> defaultTags = stackTag.getDefaultTags();
+            defaultTags.putAll(costTagging.prepareDefaultTags(request));
             stack.setTags(new Json(new StackTags(userDefinedTags, stackTag.getApplicationTags(), defaultTags)));
         } catch (AccountTagValidationFailed aTVF) {
             throw new BadRequestException(aTVF.getMessage(), aTVF);

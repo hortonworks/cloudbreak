@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import com.sequenceiq.common.api.tag.model.Tags;
+import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
 
 public class DatabaseStack {
 
@@ -10,12 +12,12 @@ public class DatabaseStack {
 
     private final String template;
 
-    private final Tags tags;
+    private final Map<String, String> tags;
 
-    public DatabaseStack(Network network, DatabaseServer databaseServer, Tags tags, String template) {
+    public DatabaseStack(Network network, DatabaseServer databaseServer, Map<String, String> tags, String template) {
         this.network = network;
         this.databaseServer = databaseServer;
-        this.tags = new Tags(tags);
+        this.tags = ImmutableMap.copyOf(tags);
         this.template = template;
     }
 
@@ -31,7 +33,7 @@ public class DatabaseStack {
         return template;
     }
 
-    public Tags getTags() {
+    public Map<String, String> getTags() {
         return tags;
     }
 

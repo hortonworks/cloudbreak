@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
-import com.sequenceiq.common.api.tag.response.TagsResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -24,12 +23,12 @@ class TagsUtilTest {
 
     private static final String TEST_NAME = "testname";
 
-    private static final TagsResponse DEFAULT_TAGS = new TagsResponse(Map.of(
+    private static final Map<String, String> DEFAULT_TAGS = Map.of(
             "owner", "whoever",
             "Cloudera-Environment-Resource-Name", "whatever",
             "Cloudera-Creator-Resource-Name", "whoever",
             "Cloudera-Resource-Name", "whatever"
-    ));
+    );
 
     private final TagsUtil underTest = new TagsUtil();
 
@@ -57,7 +56,7 @@ class TagsUtilTest {
 
         underTest.addTestNameTag(testDto, TEST_NAME);
 
-        assertThat(request.getTags().getTagValue(TagsUtil.TEST_NAME_TAG))
+        assertThat(request.getTags().get(TagsUtil.TEST_NAME_TAG))
                 .isEqualTo(TEST_NAME);
     }
 
@@ -82,7 +81,7 @@ class TagsUtilTest {
         DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
         StackV4Response response = new StackV4Response();
         TagsV4Response tags = new TagsV4Response();
-        tags.setUserDefined(new TagsResponse(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME)));
+        tags.setUserDefined(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME));
         tags.setDefaults(DEFAULT_TAGS);
         response.setTags(tags);
         testDto.setResponse(response);
@@ -96,10 +95,10 @@ class TagsUtilTest {
         DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
         StackV4Response response = new StackV4Response();
         TagsV4Response tags = new TagsV4Response();
-        tags.setUserDefined(new TagsResponse(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME)));
-        Map<String, String> defaultTags = new HashMap<>(DEFAULT_TAGS.getAll());
+        tags.setUserDefined(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME));
+        Map<String, String> defaultTags = new HashMap<>(DEFAULT_TAGS);
         defaultTags.remove("owner");
-        tags.setDefaults(new TagsResponse(defaultTags));
+        tags.setDefaults(defaultTags);
         response.setTags(tags);
         testDto.setResponse(response);
 

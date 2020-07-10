@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
-import com.sequenceiq.common.api.tag.model.Tags;
 
 public class TemplatePreparationObject {
 
@@ -66,7 +65,7 @@ public class TemplatePreparationObject {
 
     private final Map<String, Object> fixInputs;
 
-    private final Tags defaultTags;
+    private final Map<String, String> defaultTags;
 
     private final AccountMappingView accountMappingView;
 
@@ -172,7 +171,7 @@ public class TemplatePreparationObject {
         return placementView;
     }
 
-    public Tags getDefaultTags() {
+    public Map<String, String> getDefaultTags() {
         return defaultTags;
     }
 
@@ -218,7 +217,7 @@ public class TemplatePreparationObject {
 
         private Map<String, Object> fixInputs = new HashMap<>();
 
-        private Tags defaultTags = new Tags();
+        private Map<String, String> defaultTags = new HashMap<>();
 
         private AccountMappingView accountMappingView;
 
@@ -339,8 +338,8 @@ public class TemplatePreparationObject {
             return this;
         }
 
-        public Builder withDefaultTags(Tags defaultTags) {
-            this.defaultTags = defaultTags == null ? new Tags() : defaultTags;
+        public Builder withDefaultTags(Map<String, String> defaultTags) {
+            this.defaultTags = defaultTags == null ? new HashMap<>() : defaultTags;
             return this;
         }
 

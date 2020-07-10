@@ -7,6 +7,7 @@ import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -55,7 +56,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
-import com.sequenceiq.common.api.tag.model.Tags;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -497,7 +497,11 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
 
     private void setTagsSafe(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster) {
         try {
-            sdxCluster.setTags(new Json(Tags.getAll(sdxClusterRequest.getTags())));
+            if (sdxClusterRequest.getTags() == null) {
+                sdxCluster.setTags(new Json(new HashMap<>()));
+            } else {
+                sdxCluster.setTags(new Json(sdxClusterRequest.getTags()));
+            }
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Can not convert tags", e);
         }

@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import com.cloudera.cdp.datahub.model.CreateAzureClusterRequest;
 import com.cloudera.cdp.datahub.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
-import com.sequenceiq.common.api.tag.request.TagsRequest;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
@@ -47,7 +46,7 @@ class DistroXV1RequestToCreateAzureClusterRequestConverterTest {
         assertEquals(request.getImage().getId(), result.getImage().getId());
         assertEquals(request.getNetwork().getAzure().getSubnetId(), result.getSubnetId());
         assertEquals(request.getTags().getUserDefined().size(), result.getTags().size());
-        request.getTags().getUserDefined().getAll().forEach((key, value) ->
+        request.getTags().getUserDefined().forEach((key, value) ->
                 assertTrue(result.getTags().stream().anyMatch(tr -> key.equals(tr.getKey()) && value.equals(tr.getValue()))));
         assertInstanceGroups(request.getInstanceGroups(), result.getInstanceGroups());
     }
@@ -69,7 +68,8 @@ class DistroXV1RequestToCreateAzureClusterRequestConverterTest {
         network.setAzure(azureNetwork);
         request.setNetwork(network);
         TagsV1Request tags = new TagsV1Request();
-        tags.setUserDefined(new TagsRequest(Map.of("k1", "v1", "k2", "v2")));
+        Map<String, String> userDefinedTags = Map.of("k1", "v1", "k2", "v2");
+        tags.setUserDefined(userDefinedTags);
         request.setTags(tags);
         InstanceGroupV1Request instanceGroup1 = getInstanceGroupV1Request("ig1");
         InstanceGroupV1Request instanceGroup2 = getInstanceGroupV1Request("ig2");
