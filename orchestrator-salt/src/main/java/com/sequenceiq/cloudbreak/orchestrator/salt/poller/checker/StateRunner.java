@@ -9,8 +9,9 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 public class StateRunner extends BaseSaltJobRunner {
-
-    private final String state;
+    //CHECKSTYLE:OFF
+    protected final String state;
+    //CHECKSTYLE:ON
 
     public StateRunner(Set<String> targetHostnames, Set<Node> allNode, String state) {
         super(targetHostnames, allNode);
@@ -25,6 +26,10 @@ public class StateRunner extends BaseSaltJobRunner {
 
     @Override
     public String toString() {
-        return "StateAllRunner{" + super.toString() + ", state: " + this.state + "}'";
+        return "StateRunner{" + super.toString() + ", state: " + this.state + "}'";
+    }
+
+    public String getState() {
+        return state;
     }
 }

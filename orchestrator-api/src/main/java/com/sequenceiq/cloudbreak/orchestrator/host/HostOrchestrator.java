@@ -14,14 +14,11 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public interface HostOrchestrator extends HostRecipeExecutor {
 
     String name();
-
-    void init(ExitCriteria exitCriteria);
 
     void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
@@ -86,12 +83,6 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> targets, Set<Node> allNodes,
             ExitCriteriaModel exitModel, String platformVariant) throws CloudbreakOrchestratorFailedException;
 
-    void stopTelemetryAgent(List<GatewayConfig> allGateway, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorFailedException;
-
-    void installAndStartMonitoring(List<GatewayConfig> allGateway, Set<Node> nodes, ExitCriteriaModel exitModel)
-            throws CloudbreakOrchestratorFailedException;
-
     void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel, boolean adJoinable, boolean ipaJoinable,
             boolean forced)
             throws CloudbreakOrchestratorFailedException;
@@ -106,5 +97,9 @@ public interface HostOrchestrator extends HostRecipeExecutor {
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
 
     void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
-                        ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
+
+    void applyDiagnosticsState(List<GatewayConfig> gatewayConfigs, String state, Map<String, Object> parameters,
+            ExitCriteriaModel stackBasedExitCriteriaModel) throws CloudbreakOrchestratorFailedException;
+
 }

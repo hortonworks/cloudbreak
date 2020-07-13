@@ -42,7 +42,7 @@ public class FreeIpaCleanupFlowConfig extends AbstractFlowConfiguration<FreeIpaC
     private static final FlowEdgeConfig<FreeIpaCleanupState, FreeIpaCleanupEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CLEANUP_FAILED_STATE, CLEANUP_FAILURE_HANDLED_EVENT);
 
-    private  static final List<Transition<FreeIpaCleanupState, FreeIpaCleanupEvent>> TRANSITIONS =
+    private static final List<Transition<FreeIpaCleanupState, FreeIpaCleanupEvent>> TRANSITIONS =
             new Builder<FreeIpaCleanupState, FreeIpaCleanupEvent>().defaultFailureEvent(CLEANUP_FAILED_EVENT)
             .from(INIT_STATE).to(REVOKE_CERTS_STATE).event(CLEANUP_EVENT).defaultFailureEvent()
             .from(REVOKE_CERTS_STATE).to(REMOVE_HOSTS_STATE).event(REVOKE_CERTS_FINISHED_EVENT).failureEvent(REVOKE_CERTS_FAILED_EVENT)

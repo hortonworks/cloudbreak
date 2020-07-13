@@ -19,7 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
@@ -255,6 +257,18 @@ public class SaltStates {
 
     public static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target) {
         return sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service);
+    }
+
+    public static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target,
+            Map<String, Object> inlinePillars) throws JsonProcessingException {
+        String inlinePillarsStr = new ObjectMapper().writeValueAsString(inlinePillars);
+        return sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service, String.format("pillar=%s", inlinePillarsStr));
+    }
+
+    public static ApplyResponse applyConcurrentState(SaltConnector sc, String service, Target<String> target,
+            Map<String, Object> inlinePillars) throws JsonProcessingException {
+        String inlinePillarsStr = new ObjectMapper().writeValueAsString(inlinePillars);
+        return sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class,  service, String.format("pillar=%s", inlinePillarsStr), "concurrent=True");
     }
 
     public static ApplyResponse applyStateAll(SaltConnector sc, String service) {

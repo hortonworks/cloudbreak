@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -25,12 +25,12 @@ public class ClusterMonitoringEngine {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterMonitoringEngine.class);
 
-    private final HostOrchestrator hostOrchestrator;
+    private final TelemetryOrchestrator telemetryOrchestrator;
 
     private final GatewayConfigService gatewayConfigService;
 
-    public ClusterMonitoringEngine(HostOrchestrator hostOrchestrator, GatewayConfigService gatewayConfigService) {
-        this.hostOrchestrator = hostOrchestrator;
+    public ClusterMonitoringEngine(TelemetryOrchestrator telemetryOrchestrator, GatewayConfigService gatewayConfigService) {
+        this.telemetryOrchestrator = telemetryOrchestrator;
         this.gatewayConfigService = gatewayConfigService;
     }
 
@@ -44,7 +44,7 @@ public class ClusterMonitoringEngine {
                         .map(im -> new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
                                 im.getInstanceGroup().getTemplate().getInstanceType(), im.getDiscoveryFQDN(), im.getInstanceGroup().getGroupName()))
                         .collect(Collectors.toSet());
-                hostOrchestrator.installAndStartMonitoring(gatewayConfigs, allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+                telemetryOrchestrator.installAndStartMonitoring(gatewayConfigs, allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
             } catch (CloudbreakOrchestratorFailedException ex) {
                 throw new CloudbreakException(ex);
             }

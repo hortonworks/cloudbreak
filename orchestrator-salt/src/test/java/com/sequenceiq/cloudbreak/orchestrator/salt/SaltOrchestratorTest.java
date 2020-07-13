@@ -35,8 +35,6 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
@@ -80,13 +78,12 @@ public class SaltOrchestratorTest {
 
     private Set<Node> targets;
 
-    private ExitCriteria exitCriteria;
-
     private SaltConnector saltConnector;
 
-    @Captor
-    private ArgumentCaptor<Set<String>> ipSet;
+    @Mock
+    private ExitCriteria exitCriteria;
 
+    @Mock
     private ExitCriteriaModel exitCriteriaModel;
 
     @Mock
@@ -100,6 +97,9 @@ public class SaltOrchestratorTest {
 
     @Mock
     private GrainUploader grainUploader;
+
+    @Mock
+    private SaltService saltService;
 
     @InjectMocks
     private SaltOrchestrator saltOrchestrator;
@@ -116,12 +116,12 @@ public class SaltOrchestratorTest {
         saltConnector = mock(SaltConnector.class);
         whenNew(SaltConnector.class).withAnyArguments().thenReturn(saltConnector);
         when(hostDiscoveryService.determineDomain("test", "test", false)).thenReturn(".example.com");
-        exitCriteria = mock(ExitCriteria.class);
-        exitCriteriaModel = mock(ExitCriteriaModel.class);
         Callable<Boolean> callable = mock(Callable.class);
         when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
         when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyInt(), anyBoolean()))
                 .thenReturn(callable);
+        when(saltService.createSaltConnector(any())).thenReturn(saltConnector);
+        when(saltService.getPrimaryGatewayConfig(anyList())).thenReturn(gatewayConfig);
     }
 
     @Test
@@ -131,7 +131,6 @@ public class SaltOrchestratorTest {
                 .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt(), anyInt())
                 .thenReturn(mock(OrchestratorBootstrapRunner.class));
 
-        saltOrchestrator.init(exitCriteria);
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
 
         saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, bootstrapParams, exitCriteriaModel);
@@ -150,7 +149,6 @@ public class SaltOrchestratorTest {
                 .thenReturn(mock(OrchestratorBootstrapRunner.class));
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
 
-        saltOrchestrator.init(exitCriteria);
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
         verify(saltRunner, times(2)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
@@ -191,8 +189,6 @@ public class SaltOrchestratorTest {
         SaltCommandTracker mineUpdateRunnerSaltCommandTracker = mock(SaltCommandTracker.class);
         whenNew(SaltCommandTracker.class).withArguments(eq(saltConnector), eq(mineUpdateRunner)).thenReturn(mineUpdateRunnerSaltCommandTracker);
 
-        saltOrchestrator.init(exitCriteria);
-
         PowerMockito.mockStatic(SaltStates.class);
         PowerMockito.when(SaltStates.getGrains(any(), any(), any())).thenReturn(new HashMap<>());
 
@@ -217,9 +213,6 @@ public class SaltOrchestratorTest {
 
     @Test
     public void tearDownTest() throws Exception {
-        SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
-        saltOrchestrator.init(exitCriteria);
-
         Map<String, String> privateIpsByFQDN = new HashMap<>();
         privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
         privateIpsByFQDN.put("10-0-0-2.example.com", "10.0.0.2");
@@ -249,9 +242,6 @@ public class SaltOrchestratorTest {
 
     @Test
     public void tearDownFailTest() throws Exception {
-        SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
-        saltOrchestrator.init(exitCriteria);
-
         Map<String, String> privateIpsByFQDN = new HashMap<>();
         privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
         privateIpsByFQDN.put("10-0-0-2.example.com", "10.0.0.2");
@@ -271,23 +261,16 @@ public class SaltOrchestratorTest {
 
     @Test
     public void getMissingNodesTest() {
-        SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
-        saltOrchestrator.init(exitCriteria);
         assertThat(saltOrchestrator.getMissingNodes(gatewayConfig, targets), hasSize(0));
     }
 
     @Test
     public void getAvailableNodesTest() {
-        SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
-        saltOrchestrator.init(exitCriteria);
         assertThat(saltOrchestrator.getAvailableNodes(gatewayConfig, targets), hasSize(0));
     }
 
     @Test
     public void isBootstrapApiAvailableTest() {
-        SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
-        saltOrchestrator.init(exitCriteria);
-
         GenericResponse response = new GenericResponse();
         response.setStatusCode(200);
         when(saltConnector.health()).thenReturn(response);
@@ -298,9 +281,6 @@ public class SaltOrchestratorTest {
 
     @Test
     public void isBootstrapApiAvailableFailTest() {
-        SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
-        saltOrchestrator.init(exitCriteria);
-
         GenericResponse response = new GenericResponse();
         response.setStatusCode(404);
         when(saltConnector.health()).thenReturn(response);

@@ -124,4 +124,8 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
                 + "saltJobRunner=" + saltJobRunner
                 + '}';
     }
+
+    public SaltJobRunner getSaltJobRunner() {
+        return saltJobRunner;
+    }
 }

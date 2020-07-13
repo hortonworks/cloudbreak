@@ -15,6 +15,7 @@ import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.controller.ClientTestV1Controller;
+import com.sequenceiq.freeipa.controller.DiagnosticsV1Controller;
 import com.sequenceiq.freeipa.controller.DnsV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaV1Controller;
 import com.sequenceiq.freeipa.controller.OperationV1Controller;
@@ -38,7 +39,7 @@ public class EndpointConfig extends ResourceConfig {
     private static final List<Class<?>> CONTROLLERS = List.of(
             UserV1Controller.class, ClientTestV1Controller.class, FreeIpaV1Controller.class, LdapConfigV1Controller.class,
             KerberosConfigV1Controller.class, KerberosMgmtV1Controller.class, DnsV1Controller.class, OperationV1Controller.class,
-            FlowController.class, AuthorizationInfoController.class);
+            FlowController.class, AuthorizationInfoController.class, DiagnosticsV1Controller.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;

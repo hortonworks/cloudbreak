@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -24,7 +24,7 @@ public class TelemetryAgentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryAgentService.class);
 
-    private final HostOrchestrator hostOrchestrator;
+    private final TelemetryOrchestrator telemetryOrchestrator;
 
     private final GatewayConfigService gatewayConfigService;
 
@@ -32,9 +32,9 @@ public class TelemetryAgentService {
 
     private final InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public TelemetryAgentService(HostOrchestrator hostOrchestrator, GatewayConfigService gatewayConfigService,
+    public TelemetryAgentService(TelemetryOrchestrator telemetryOrchestrator, GatewayConfigService gatewayConfigService,
             StackRepository stackRepository, InstanceMetaDataRepository instanceMetaDataRepository) {
-        this.hostOrchestrator = hostOrchestrator;
+        this.telemetryOrchestrator = telemetryOrchestrator;
         this.gatewayConfigService = gatewayConfigService;
         this.stackRepository = stackRepository;
         this.instanceMetaDataRepository = instanceMetaDataRepository;
@@ -55,7 +55,7 @@ public class TelemetryAgentService {
                             im.getInstanceGroup().getTemplate().getInstanceType(), im.getDiscoveryFQDN(), im.getInstanceGroup().getGroupName()))
                     .collect(Collectors.toSet());
             if (!targetNodes.isEmpty()) {
-                hostOrchestrator.stopTelemetryAgent(gatewayConfigs, targetNodes, new StackBasedExitCriteriaModel(stackId));
+                telemetryOrchestrator.stopTelemetryAgent(gatewayConfigs, targetNodes,  new StackBasedExitCriteriaModel(stackId));
             }
         } catch (CloudbreakOrchestratorFailedException e) {
             LOGGER.warn("Non-critical error during stopping telemetry agent", e);

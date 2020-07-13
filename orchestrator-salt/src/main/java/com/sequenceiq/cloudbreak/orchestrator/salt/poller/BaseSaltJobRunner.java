@@ -94,8 +94,8 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
         return targetHostnames.stream().filter(t -> !resolvedSucceededHostnames.contains(t)).collect(Collectors.toSet());
     }
 
-    protected Set<Node> getAllNode() {
-        return allNode;
+    public Set<Node> getAllNode() {
+        return new HashSet<>(allNode);
     }
 
     private String getShortHostName(String hostName) {

@@ -1,11 +1,5 @@
 package com.sequenceiq.freeipa.configuration;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteria;
 
 @Configuration
@@ -29,9 +23,6 @@ public class AppConfig {
 
     @Value("${freeipa.intermediate.threadpool.capacity.size}")
     private int intermediateQueueCapacity;
-
-    @Inject
-    private List<HostOrchestrator> hostOrchestrators;
 
     @Bean
     @Primary
@@ -46,12 +37,7 @@ public class AppConfig {
     }
 
     @Bean
-    public Map<String, HostOrchestrator> hostOrchestrators() {
-        Map<String, HostOrchestrator> map = new HashMap<>();
-        for (HostOrchestrator hostOrchestrator : hostOrchestrators) {
-            hostOrchestrator.init(new StackBasedExitCriteria());
-            map.put(hostOrchestrator.name(), hostOrchestrator);
-        }
-        return map;
+    public ExitCriteria stackBasedExitCriteria() {
+        return new StackBasedExitCriteria();
     }
 }
