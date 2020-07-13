@@ -6,10 +6,12 @@ After=td-agent.service
 
 [Service]
 Type=simple
-Restart=always
 ExecStart=/opt/metering-heartbeat --configFile /etc/metering/generate_heartbeats.ini
 PIDFile=/var/run/heartbeat_producer.pid
+{% if metering.enabled %}
 RestartSec=5
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
+{% endif %}
