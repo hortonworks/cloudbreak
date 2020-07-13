@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -27,6 +28,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService;
+import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigView;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
@@ -57,6 +60,9 @@ public class TelemetryDecoratorTest {
     @Mock
     private AltusMachineUserService altusMachineUserService;
 
+    @Mock
+    private TelemetryCommonConfigService telemetryCommonConfigService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -64,7 +70,7 @@ public class TelemetryDecoratorTest {
         given(altusMachineUserService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class)))
                 .willReturn(Optional.of(altusCredential));
         underTest = new TelemetryDecorator(databusConfigService, fluentConfigService,
-                meteringConfigService, monitoringConfigService, altusMachineUserService, "1.0.0");
+                meteringConfigService, monitoringConfigService, telemetryCommonConfigService, altusMachineUserService, "1.0.0");
     }
 
     @Test
@@ -169,8 +175,12 @@ public class TelemetryDecoratorTest {
                 .build();
         DatabusConfigView dataConfigView = new DatabusConfigView.Builder()
                 .build();
+        TelemetryCommonConfigView telemetryCommonConfigView = new TelemetryCommonConfigView.Builder()
+                .withClusterDetails(clusterDetails)
+                .build();
         MeteringConfigView meteringConfigView = new MeteringConfigView.Builder().build();
-        mockConfigServiceResults(dataConfigView, new FluentConfigView.Builder().build(), meteringConfigView, monitoringConfigView);
+        mockConfigServiceResults(dataConfigView, new FluentConfigView.Builder().build(), meteringConfigView,
+                monitoringConfigView, telemetryCommonConfigView);
         // WHEN
         Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar,
                 createStack(), new Telemetry());
@@ -195,7 +205,8 @@ public class TelemetryDecoratorTest {
         Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar,
                 createStack(), new Telemetry());
         // THEN
-        assertTrue(result.isEmpty());
+        assertNotNull(result.get("telemetry"));
+        assertNull(result.get("fleunt"));
     }
 
     @Test
@@ -226,6 +237,7 @@ public class TelemetryDecoratorTest {
 
     private Stack createStack() {
         Stack stack = new Stack();
+        stack.setName("my-stack-name");
         stack.setType(StackType.WORKLOAD);
         stack.setCloudPlatform("AWS");
         stack.setResourceCrn("stackCrn");
@@ -243,11 +255,13 @@ public class TelemetryDecoratorTest {
 
     private void mockConfigServiceResults(DatabusConfigView databusConfigView, FluentConfigView fluentConfigView,
             MeteringConfigView meteringConfigView) {
-        mockConfigServiceResults(databusConfigView, fluentConfigView, meteringConfigView, new MonitoringConfigView.Builder().build());
+        mockConfigServiceResults(databusConfigView, fluentConfigView, meteringConfigView,
+                new MonitoringConfigView.Builder().build(), new TelemetryCommonConfigView.Builder().build());
     }
 
     private void mockConfigServiceResults(DatabusConfigView databusConfigView, FluentConfigView fluentConfigView,
-            MeteringConfigView meteringConfigView, MonitoringConfigView monitoringConfigView) {
+            MeteringConfigView meteringConfigView, MonitoringConfigView monitoringConfigView,
+            TelemetryCommonConfigView telemetryCommonConfigView) {
         given(databusConfigService.createDatabusConfigs(anyString(), any(), isNull(), isNull()))
                 .willReturn(databusConfigView);
         given(fluentConfigService.createFluentConfigs(any(TelemetryClusterDetails.class),
@@ -255,8 +269,11 @@ public class TelemetryDecoratorTest {
                 .willReturn(fluentConfigView);
         given(meteringConfigService.createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),
                 anyString())).willReturn(meteringConfigView);
-        given(monitoringConfigService.createMonitoringConfig(any(), any(), any()))
+        given(monitoringConfigService.createMonitoringConfig(any(), any()))
                 .willReturn(monitoringConfigView);
+        given(telemetryCommonConfigService.createTelemetryCommonConfigs(any(), isNull(), anyString(), anyString(),
+                anyString(), anyString(), anyString()))
+                .willReturn(telemetryCommonConfigView);
     }
 
 }

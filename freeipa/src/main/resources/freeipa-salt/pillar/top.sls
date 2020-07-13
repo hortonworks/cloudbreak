@@ -1,5 +1,6 @@
 base:
   '*':
+    - telemetry.init
     - tags
     - databus
     - fluent

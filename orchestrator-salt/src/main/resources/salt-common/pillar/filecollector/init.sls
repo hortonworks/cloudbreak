@@ -1,0 +1,2 @@
+filecollector:
+    destination:

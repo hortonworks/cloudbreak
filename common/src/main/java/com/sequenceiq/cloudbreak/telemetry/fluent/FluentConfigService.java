@@ -1,25 +1,20 @@
 package com.sequenceiq.cloudbreak.telemetry.fluent;
 
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.common.AnonymizationRuleResolver;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
-import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchStreamKey;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -42,9 +37,14 @@ public class FluentConfigService {
 
     private final AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
-    public FluentConfigService(S3ConfigGenerator s3ConfigGenerator, AdlsGen2ConfigGenerator adlsGen2ConfigGenerator) {
+    private final AnonymizationRuleResolver anonymizationRuleResolver;
+
+    public FluentConfigService(S3ConfigGenerator s3ConfigGenerator,
+            AdlsGen2ConfigGenerator adlsGen2ConfigGenerator,
+            AnonymizationRuleResolver anonymizationRuleResolver) {
         this.s3ConfigGenerator = s3ConfigGenerator;
         this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
+        this.anonymizationRuleResolver = anonymizationRuleResolver;
     }
 
     public FluentConfigView createFluentConfigs(TelemetryClusterDetails clusterDetails,
@@ -60,7 +60,7 @@ public class FluentConfigService {
             enabled = determineAndSetLogging(builder, telemetry, databusEnabled, meteringEnabled);
             if (telemetry.isClusterLogsCollectionEnabled()) {
                 LOGGER.debug("Set anonymization rules (only for cluster log collection)");
-                builder.withAnonymizationRules(decodeRules(telemetry.getRules()));
+                builder.withAnonymizationRules(anonymizationRuleResolver.decodeRules(telemetry.getRules()));
             }
         }
         if (!enabled) {
@@ -71,22 +71,6 @@ public class FluentConfigService {
                 .withEnabled(enabled)
                 .withClusterDetails(clusterDetails)
                 .build();
-    }
-
-    @VisibleForTesting
-    List<AnonymizationRule> decodeRules(List<AnonymizationRule> rules) {
-        return Optional.ofNullable(rules)
-                .orElse(new ArrayList<>())
-                .stream()
-                .filter(rule -> StringUtils.isNotBlank(rule.getValue()))
-                .map(rule -> {
-                    AnonymizationRule newRule = new AnonymizationRule();
-                    newRule.setReplacement(rule.getReplacement());
-                    newRule.setValue(new String(Base64.getDecoder().decode(
-                            rule.getValue().getBytes())));
-                    return newRule;
-                })
-                .collect(Collectors.toList());
     }
 
     private boolean determineAndSetLogging(FluentConfigView.Builder builder, Telemetry telemetry, boolean databusEnabled,

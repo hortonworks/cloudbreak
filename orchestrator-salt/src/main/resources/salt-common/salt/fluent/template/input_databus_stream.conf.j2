@@ -1,0 +1,11 @@
+{%- from 'fluent/settings.sls' import fluent with context %}
+# CONFIGURED BY SALT - do not edit
+{% if fluent.dbusClusterLogsCollection %}
+<worker {{ workerIndex }}>
+  <source>
+    @type forward
+    port {{ fluent.forwardPort }}
+    bind 0.0.0.0
+</source>
+</worker>
+{% endif %}
