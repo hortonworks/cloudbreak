@@ -32,6 +32,8 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 public class PackageVersionChecker {
     public static final String SALT_BOOTSTRAP = "salt-bootstrap";
 
+    private static final String SALT = "salt";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageVersionChecker.class);
 
     @Inject
@@ -60,7 +62,7 @@ public class PackageVersionChecker {
         }
 
         for (String packageToCompare : packagesToCompare) {
-            if (!SALT_BOOTSTRAP.equals(packageToCompare)) {
+            if (!SALT_BOOTSTRAP.equals(packageToCompare) && !SALT.equals(packageToCompare)) {
                 String packageVersionInImage = packageVersions.get(packageToCompare);
                 if (StringUtils.isBlank(packageVersionInImage)) {
                     LOGGER.debug("Missing package in image: " + packageToCompare);

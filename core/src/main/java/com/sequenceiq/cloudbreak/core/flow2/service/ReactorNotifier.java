@@ -93,6 +93,7 @@ public class ReactorNotifier {
         try {
             FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             if (accepted == null) {
+                LOGGER.error("Event not accepted: {}", event);
                 reactorReporter.logErrorReport();
                 throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for stack %s.", identifier));
             }

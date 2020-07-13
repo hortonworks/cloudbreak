@@ -11,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.domain.converter.ComponentTypeConverter;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 
@@ -19,6 +18,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.converter.ComponentTypeConverter;
 
 @Entity
 @Audited
@@ -102,7 +102,6 @@ public class Component implements ProvisionEntity {
                 + ", componentType=" + componentType
                 + ", name='" + name + '\''
                 + ", attributes=" + attributes
-
                 + '}';
     }
 }
