@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -95,7 +94,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
         AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
         attachedFreeIpaRequest.setCreate(Boolean.FALSE);
-        return environment.withRegions(Collections.singleton(region()))
+        return environment
                 .withLocation(location())
                 .withFreeIpa(attachedFreeIpaRequest);
     }

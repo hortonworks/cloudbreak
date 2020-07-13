@@ -200,7 +200,7 @@ integrationtest:
 
   # mock parameters
   mock:
-    region: Europe
+    region: London
     location: London
     availabilityZone: London
     vpcId: vpc1

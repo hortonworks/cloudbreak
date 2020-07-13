@@ -18,7 +18,7 @@ public class EnvironmentRegionValidator {
         if (cloudRegions.areRegionsSupported()) {
             validateRegionsWhereSupported(requestedRegions, cloudRegions.getRegionNames(), resultBuilder, cloudPlatform);
         } else if (!requestedRegions.isEmpty()) {
-            resultBuilder.error(String.format("Regions are not supporeted on cloudprovider: [%s].", cloudPlatform));
+            resultBuilder.error(String.format("Regions are not supported on cloudprovider: [%s].", cloudPlatform));
         }
         return resultBuilder;
     }
@@ -27,7 +27,7 @@ public class EnvironmentRegionValidator {
         CloudRegions cloudRegions, String cloudPlatform) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         Set<String> requestedRegionNames = new HashSet<>(requestedRegions);
-        if (!requestedRegionNames.contains(requestedLocation) && cloudRegions.areRegionsSupported()) {
+        if (!requestedRegionNames.isEmpty() && !requestedRegionNames.contains(requestedLocation) && cloudRegions.areRegionsSupported()) {
             if (!CloudPlatform.OPENSTACK.equalsIgnoreCase(cloudPlatform) && !CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform)) {
                 resultBuilder.error(String.format("Location [%s] is not one of the regions: [%s].", requestedLocation,
                         String.join(", ", requestedRegionNames)));

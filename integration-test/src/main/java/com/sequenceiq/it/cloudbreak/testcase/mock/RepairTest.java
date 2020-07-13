@@ -224,10 +224,6 @@ public class RepairTest extends AbstractIntegrationTest {
         return testContext.get(EnvironmentTestDto.class).getName();
     }
 
-    private String getEnvironmentRegion(MockedTestContext testContext) {
-        return testContext.get(EnvironmentTestDto.class).getRequest().getRegions().iterator().next();
-    }
-
     private void addAmbariMocks(MockedTestContext testContext, String clusterName) {
         DynamicRouteStack dynamicRouteStack = testContext.getModel().getAmbariMock().getDynamicRouteStack();
         dynamicRouteStack.get(AMBARI_HOST_COMPONENTS, new AmbariGetHostComponentsReponse(components, clusterName));

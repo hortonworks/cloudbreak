@@ -7,6 +7,7 @@ import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCreden
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -109,7 +110,7 @@ public class EnvironmentApiConverter {
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                         accountTelemetryService.getOrDefault(accountId).getFeatures()))
-                .withRegions(request.getRegions())
+                .withRegions(locationRequestToRegions(request.getLocation(), cloudPlatform))
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
                 .withAdminGroupName(request.getAdminGroupName())
                 .withTags(request.getTags())
@@ -246,6 +247,10 @@ public class EnvironmentApiConverter {
                 .withLongitude(location.getLongitude())
                 .withDisplayName(location.getName())
                 .build();
+    }
+
+    private Set<String> locationRequestToRegions(LocationRequest location, String cloudPlatform) {
+        return Set.of(location.getName());
     }
 
     private AuthenticationDto authenticationRequestToDto(EnvironmentAuthenticationRequest authentication) {
