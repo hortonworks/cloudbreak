@@ -74,7 +74,7 @@ public class CloudIdentitySyncService {
 
     private Optional<String> getOptionalAzureObjectId(List<CloudIdentity> cloudIdentities) {
         List<CloudIdentity> azureCloudIdentities = cloudIdentities.stream()
-                .filter(cloudIdentity -> cloudIdentity.getCloudIdentityDomain().hasAzureCloudIdentityDomain())
+                .filter(cloudIdentity -> cloudIdentity.getCloudIdentityName().hasAzureCloudIdentityName())
                 .collect(Collectors.toList());
         if (azureCloudIdentities.isEmpty()) {
             return Optional.empty();

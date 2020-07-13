@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
+import java.util.Objects;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -41,5 +42,23 @@ public class SetRangerCloudIdentityMappingRequest {
                 "azureUserMapping=" + azureUserMapping +
                 ", azureGroupMapping=" + azureGroupMapping +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SetRangerCloudIdentityMappingRequest that = (SetRangerCloudIdentityMappingRequest) o;
+        return Objects.equals(azureUserMapping, that.azureUserMapping) &&
+                Objects.equals(azureGroupMapping, that.azureGroupMapping);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(azureUserMapping, azureGroupMapping);
     }
 }
