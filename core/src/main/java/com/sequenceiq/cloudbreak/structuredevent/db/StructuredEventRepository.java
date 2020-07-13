@@ -5,13 +5,15 @@ import java.util.List;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspace;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
@@ -36,7 +38,7 @@ public interface StructuredEventRepository extends WorkspaceResourceRepository<S
     StructuredEventEntity findByWorkspaceIdAndId(@Param("workspaceId") Long workspaceId, @Param("id") Long id);
 
     @CheckPermissionsByWorkspace(workspaceIndex = 0)
-    List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceId(Workspace workspace, String resourceType, Long resourceId);
+    Page<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceId(Workspace workspace, String resourceType, Long resourceId, Pageable pageable);
 
     @CheckPermissionsByWorkspace(workspaceIndex = 0)
     List<StructuredEventEntity> findByWorkspaceAndEventType(Workspace workspace, StructuredEventType eventType);

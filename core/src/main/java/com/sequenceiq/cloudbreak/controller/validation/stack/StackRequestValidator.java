@@ -2,18 +2,18 @@ package com.sequenceiq.cloudbreak.controller.validation.stack;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 
-import java.util.Objects;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.model.EncryptionKeyConfigJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformEncryptionKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupBase;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupBase;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.template.EncryptionType;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformEncryptionKeysRequest;
 import com.sequenceiq.cloudbreak.controller.PlatformParameterV1Controller;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
@@ -33,8 +34,8 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
 public class StackRequestValidator implements Validator<StackRequest> {
@@ -151,31 +152,39 @@ public class StackRequestValidator implements Validator<StackRequest> {
             String region, ValidationResultBuilder validationBuilder) {
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         Credential cred = credentialService.getByNameForWorkspaceId(credentialName, workspaceId);
-        Optional<PlatformEncryptionKeysResponse> keys = getEncryptionKeysWithExceptionHandling(cred.getId(), region, cred.getOwner(), cred.getOwner());
-        if (keys.isPresent() && !keys.get().getEncryptionKeyConfigs().isEmpty()) {
-            if (!instanceGroupRequest.getTemplate().getParameters().containsKey(KEY)) {
-                validationBuilder.error("There is no encryption key provided but CUSTOM type is given for encryption.");
-            } else if (keys.get().getEncryptionKeyConfigs().stream().map(EncryptionKeyConfigJson::getName)
-                    .noneMatch(s -> Objects.equals(s, instanceGroupRequest.getTemplate().getParameters().get(KEY)))) {
-                validationBuilder.error("The provided encryption key does not exists in the given region's encryption key list for this credential.");
+        if (!instanceGroupRequest.getTemplate().getParameters().containsKey(KEY)
+                || StringUtils.isEmpty((String) instanceGroupRequest.getTemplate().getParameters().get(KEY))) {
+            validationBuilder.error("There is no encryption key provided but CUSTOM type is given for encryption.");
+        } else {
+            String customKeyId = (String) instanceGroupRequest.getTemplate().getParameters().get(KEY);
+            Optional<PlatformEncryptionKeysResponse> keys = getEncryptionKeysWithKeyId(cred.getId(), region, cred.getOwner(), cred.getOwner(), customKeyId);
+            if (keys.isEmpty()) {
+                String msg = String.format("The provided encryption key '%s' could not be described from the provider side.",
+                        customKeyId);
+                validationBuilder.error(msg);
+            } else if (keys.get().getEncryptionKeyConfigs().isEmpty()) {
+                String msg = String.format("The provided encryption key '%s' does not exists in the given region's encryption key list for this credential.",
+                        customKeyId);
+                validationBuilder.error(msg);
             }
         }
     }
 
-    private Optional<PlatformEncryptionKeysResponse> getEncryptionKeysWithExceptionHandling(Long id, String region, String owner, String account) {
+    private Optional<PlatformEncryptionKeysResponse> getEncryptionKeysWithKeyId(Long id, String region, String owner, String account, String keyId) {
         try {
-            return Optional.ofNullable(parameterV1Controller.getEncryptionKeys(getRequestForEncryptionKeys(id, region, owner, account)));
+            return Optional.ofNullable(parameterV1Controller.getEncryptionKeys(getRequestForEncryptionKeys(id, region, owner, account, keyId)));
         } catch (RuntimeException ignore) {
             return Optional.empty();
         }
     }
 
-    private PlatformResourceRequestJson getRequestForEncryptionKeys(Long credentialId, String region, String owner, String account) {
+    private PlatformResourceRequestJson getRequestForEncryptionKeys(Long credentialId, String region, String owner, String account, String keyId) {
         PlatformResourceRequestJson request = new PlatformResourceRequestJson();
         request.setCredentialId(credentialId);
         request.setRegion(region);
         request.setOwner(owner);
         request.setAccount(account);
+        request.setFilters(Map.of(GetPlatformEncryptionKeysRequest.KEY_ID_FILTER_KEY, keyId));
         return request;
     }
 

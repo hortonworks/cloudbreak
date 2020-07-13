@@ -76,4 +76,14 @@ public abstract class BaseAlert {
         this.cluster = cluster;
     }
 
+    @Override
+    public String toString() {
+        return "BaseAlert{"
+                + "id=" + id
+                + ", cluster=" + cluster
+                + ", name='" + name + '\''
+                + ", description='" + description + '\''
+                + ", scalingPolicy=" + (scalingPolicy == null ? "null" : scalingPolicy.getName())
+                + '}';
+    }
 }

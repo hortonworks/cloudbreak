@@ -92,4 +92,16 @@ public class ScalingPolicy {
     public long getAlertId() {
         return alert.getId();
     }
+
+    @Override
+    public String toString() {
+        return "ScalingPolicy{"
+                + "id=" + id
+                + ", name='" + name + '\''
+                + ", adjustmentType=" + adjustmentType
+                + ", scalingAdjustment=" + scalingAdjustment
+                + ", alert=" + alert
+                + ", hostGroup='" + hostGroup + '\''
+                + '}';
+    }
 }
