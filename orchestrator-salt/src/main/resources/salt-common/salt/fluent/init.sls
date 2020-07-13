@@ -123,7 +123,7 @@ fluent_stop:
     - group: "{{ fluent.group }}"
     - mode: '0640'
     - context:
-        databusClusterLogsCollection: "true"
+        monitorFilesForDbusProcessing: "true"
         numberOfWorkers: {{ fluent.numberOfWorkers }}
 
 /etc/td-agent/td-agent_simple_profile.conf:
@@ -134,12 +134,8 @@ fluent_stop:
     - group: "{{ fluent.group }}"
     - mode: '0640'
     - context:
-        databusClusterLogsCollection: "false"
-{%- if fluent.dbusClusterLogsCollection and (fluent.numberOfWorkers > 1) %}
-        numberOfWorkers: {{ fluent.numberOfWorkers - 1 }}
-{% else %}
+        monitorFilesForDbusProcessing: "false"
         numberOfWorkers: {{ fluent.numberOfWorkers }}
-{% endif %}
 
 copy_td_agent_conf:
   cmd.run:
@@ -189,6 +185,16 @@ copy_td_agent_conf:
     - mode: 640
     - context:
         providerPrefix: "databus"
+        workerIndex: {{ fluent.clusterLogsCollectionWorkerIndex }}
+
+/etc/td-agent/input_databus_stream.conf:
+  file.managed:
+    - source: salt://fluent/template/input_databus_stream.conf.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - mode: 640
+    - context:
         workerIndex: {{ fluent.clusterLogsCollectionWorkerIndex }}
 
 /etc/td-agent/filter_databus.conf:

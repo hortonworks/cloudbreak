@@ -1,0 +1,50 @@
+{%- from 'telemetry/settings.sls' import telemetry with context %}
+{%- from 'filecollector/settings.sls' import filecollector with context %}
+{%- from 'fluent/settings.sls' import fluent with context %}
+collector:
+    useFullPath: true
+    outputLocation: "/var/lib/filecollector"
+    files:{% for logfile in telemetry.logs %}
+    - path: {{ logfile["path"] }}
+      folderPrefix: logs
+      label: "{{ logfile["label"] }}"{% endfor %}
+    - path: /var/log/td-agent/td-agent.log*
+      label: fluentd
+      folderPrefix: logs
+      useFullPath: false
+    - path: /var/lib/cdp/cdp_info.json
+      label: cdp_info
+      mandatory: true
+      skipLabelFromPath: true
+      skipAnonymization: true
+      useFullPath: false
+    - path: /opt/filecollector/bundle_info.json
+      label: bundle_info
+      mandatory: true
+      skipLabelFromPath: true
+      skipAnonymization: true
+      useFullPath: false
+{% if filecollector.additionalLogs %}{% for extra_log in filecollector.additionalLogs %}
+    - path: "{{ extra_log["path"] }}"
+      folderPrefix: logs
+      label: {{ extra_log["label"] }}{% endfor %}{% endif %}
+{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
+    rules:{% for rule in telemetry.anonymizationRules %}{% set regex_value = rule["value"] %}{% set replacement = rule["replacement"] if rule["replacement"] else "[REDACTED]" %}
+    - pattern: {{ regex_value }}
+      replacement: "{{ replacement }}"{% endfor %}
+    compress: true
+    compressFormat: gztar
+    deleteCompressedFile: false
+    requiredDiskSpaceRatio: 1.7{% endif %}
+{% if destination == "ENG" and fluent.dbusClusterLogsCollection %}
+    compress: false
+    deleteProcessedTempFilesOneByOne: true
+    checkDiskSpace: false
+    fluentProcessor:
+        host: "localhost"
+        port: {{ fluent.forwardPort }}
+        additionalFieldsKey: "bundleContext"
+        additionalFields:{% if filecollector.issue %}
+            issue: "{{ filecollector.issue }}"{% endif%}{% if filecollector.description %}
+            description: "{{ filecollector.description }}"{% endif%}
+        tag: databus{% endif %}

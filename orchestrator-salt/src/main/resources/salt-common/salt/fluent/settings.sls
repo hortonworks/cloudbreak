@@ -84,7 +84,7 @@
 {% set cloudera_public_gem_repo = 'https://repository.cloudera.com/cloudera/api/gems/cloudera-gems/' %}
 {% set cloudera_azure_plugin_version = '1.0.1' %}
 {% set cloudera_azure_gen2_plugin_version = '0.3.1' %}
-{% set cloudera_databus_plugin_version = '1.0.4' %}
+{% set cloudera_databus_plugin_version = '1.0.5' %}
 {% set redaction_plugin_version = '0.1.2' %}
 {% set platform = salt['pillar.get']('fluent:platform') %}
 
@@ -140,6 +140,8 @@
   {% set proxy_full_url = None %}
 {% endif %}
 
+{% set forward_port = 24224 %}
+
 {% do fluent.update({
     "enabled": fluent_enabled,
     "is_systemd" : is_systemd,
@@ -183,6 +185,7 @@
     "clusterLogsCollectionWorkerIndex": cluster_logs_collection_worker_index,
     "anonymizationRules": anonymization_rules,
     "dbusIncludeSaltLogs": dbus_include_salt_logs,
+    "forwardPort" : 24224,
     "region": region,
     "platform": platform,
     "proxyUrl": proxy_url,

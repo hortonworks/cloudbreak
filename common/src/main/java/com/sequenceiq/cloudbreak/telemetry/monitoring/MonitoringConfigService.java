@@ -5,15 +5,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
-
 @Service
 public class MonitoringConfigService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MonitoringConfigService.class);
 
     public MonitoringConfigView createMonitoringConfig(MonitoringClusterType clusterType,
-            MonitoringAuthConfig authConfig, TelemetryClusterDetails clusterDetails) {
+            MonitoringAuthConfig authConfig) {
         final MonitoringConfigView.Builder builder = new MonitoringConfigView.Builder();
         boolean enabled = false;
         LOGGER.debug("Tyring to set monitoring configurations.");
@@ -35,7 +33,6 @@ public class MonitoringConfigService {
         }
         return builder
                 .withEnabled(enabled)
-                .withClusterDetails(clusterDetails)
                 .build();
     }
 

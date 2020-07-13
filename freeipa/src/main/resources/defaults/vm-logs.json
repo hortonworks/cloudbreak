@@ -1,0 +1,61 @@
+[
+  {
+    "path": "/var/log/salt/master",
+    "label": "salt_master",
+    "type": "salt"
+  },
+  {
+    "path": "/var/log/salt/minion",
+    "label": "salt_minion",
+    "type": "salt"
+  },
+  {
+    "path": "/var/log/salt/api",
+    "label": "salt_api",
+    "type": "salt"
+  },
+  {
+    "path": "/var/log/saltboot.log",
+    "label": "saltboot"
+  },
+  {
+    "path": "/var/log/messages",
+    "label": "syslog"
+  },
+  {
+    "path": "/var/log/cloud-init.log",
+    "label": "cloud_init"
+  },
+  {
+    "path": "/var/log/nginx/access.log",
+    "label": "NGINX_access"
+  },
+  {
+    "path": "/var/log/nginx/error.log",
+    "label": "NGINX_error"
+  },
+  {
+    "path": "/var/log/httpd/error_log",
+    "label": "HTTPD_error_log"
+  },
+  {
+    "path": "/var/log/krb5kdc.log",
+    "label": "krb5kdc"
+  },
+  {
+    "path": "/var/log/dirsrv/slapd-**/access",
+    "label": "slapd_access"
+  },
+  {
+    "path": "/var/log/dirsrv/slapd-**/errors",
+    "label": "slapd_errors"
+  },
+  {
+    "path": "/var/log/pki/pki-tomcat/ca/transactions",
+    "label": "pki_transactions"
+  },
+  {
+    "path": "/var/log/ipabackup.log",
+    "label": "ipa_backup"
+  }
+]

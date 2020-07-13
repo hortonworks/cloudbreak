@@ -12,11 +12,11 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 @Component
 public class AdlsGen2ConfigGenerator extends CloudStorageConfigGenerator<AdlsGen2Config> {
 
+    public static final String AZURE_DFS_DOMAIN_SUFFIX = ".dfs.core.windows.net";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AdlsGen2ConfigGenerator.class);
 
     private static final String[] ADLS_GEN2_SCHEME_PREFIXES = {"abfs://", "abfss://"};
-
-    private static final String AZURE_DFS_DOMAIN_SUFFIX = ".dfs.core.windows.net";
 
     @Override
     public String generateStoredLocation(String location, String clusterType,
