@@ -21,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -37,7 +37,7 @@ public class TelemetryAgentServiceTest {
     private TelemetryAgentService underTest;
 
     @Mock
-    private HostOrchestrator hostOrchestrator;
+    private TelemetryOrchestrator telemetryOrchestrator;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -50,7 +50,7 @@ public class TelemetryAgentServiceTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new TelemetryAgentService(hostOrchestrator, gatewayConfigService, stackRepository, instanceMetaDataRepository);
+        underTest = new TelemetryAgentService(telemetryOrchestrator, gatewayConfigService, stackRepository, instanceMetaDataRepository);
     }
 
     @Test
@@ -58,11 +58,11 @@ public class TelemetryAgentServiceTest {
         // GIVEN
         given(stackRepository.findById(1L)).willReturn(Optional.of(createStack()));
         given(instanceMetaDataRepository.findNotTerminatedForStack(1L)).willReturn(createInstanceMetadataSet());
-        doNothing().when(hostOrchestrator).stopTelemetryAgent(anyList(), anySet(), any(ExitCriteriaModel.class));
+        doNothing().when(telemetryOrchestrator).stopTelemetryAgent(anyList(), anySet(), any(ExitCriteriaModel.class));
         // WHEN
         underTest.stopTelemetryAgent(1L);
         // THEN
-        verify(hostOrchestrator, times(1)).stopTelemetryAgent(anyList(), anySet(), any(ExitCriteriaModel.class));
+        verify(telemetryOrchestrator, times(1)).stopTelemetryAgent(anyList(), anySet(), any(ExitCriteriaModel.class));
     }
 
     @Test
@@ -70,7 +70,8 @@ public class TelemetryAgentServiceTest {
         // GIVEN
         given(stackRepository.findById(1L)).willReturn(Optional.of(createStack()));
         given(instanceMetaDataRepository.findNotTerminatedForStack(1L)).willReturn(createInstanceMetadataSet());
-        doThrow(new CloudbreakOrchestratorFailedException("error")).when(hostOrchestrator).stopTelemetryAgent(anyList(), anySet(), any(ExitCriteriaModel.class));
+        doThrow(new CloudbreakOrchestratorFailedException("error")).when(telemetryOrchestrator)
+                .stopTelemetryAgent(anyList(), anySet(), any(ExitCriteriaModel.class));
         // WHEN
         underTest.stopTelemetryAgent(1L);
         // THEN

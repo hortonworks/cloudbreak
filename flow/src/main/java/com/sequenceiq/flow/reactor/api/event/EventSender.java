@@ -30,6 +30,10 @@ public class EventSender {
         doSend(event, headers, event.getResourceName());
     }
 
+    public void sendEvent(BaseFlowEvent event, Event.Headers headers) {
+        doSend(event, headers, null);
+    }
+
     private void doSend(BaseFlowEvent event, Event.Headers headers, String resourceName) {
         Event<BaseFlowEvent> eventWithErrHandler = eventFactory.createEventWithErrHandler(new HashMap<>(headers.asMap()), event);
         reactor.notify(event.selector(), eventWithErrHandler);
@@ -37,7 +41,8 @@ public class EventSender {
             try {
                 FlowAcceptResult accepted = (FlowAcceptResult) eventWithErrHandler.getData().accepted().await(TIMEOUT, TimeUnit.SECONDS);
                 if (accepted == null || ResultType.ALREADY_EXISTING_FLOW.equals(accepted.getResultType())) {
-                    throw new IllegalStateException(String.format("Resource %s has flow under operation, request is not allowed.", resourceName));
+                    throw new IllegalStateException(String.format("Resource with name: '%s' and crn: '%s' has flow under operation, request is not allowed.",
+                            resourceName, event.getResourceCrn()));
                 }
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e.getMessage());

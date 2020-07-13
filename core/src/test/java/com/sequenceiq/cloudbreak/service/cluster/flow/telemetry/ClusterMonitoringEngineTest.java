@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -36,7 +36,7 @@ public class ClusterMonitoringEngineTest {
     private ClusterMonitoringEngine underTest;
 
     @Mock
-    private HostOrchestrator hostOrchestrator;
+    private TelemetryOrchestrator telemetryOrchestrator;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -44,24 +44,24 @@ public class ClusterMonitoringEngineTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        underTest = new ClusterMonitoringEngine(hostOrchestrator, gatewayConfigService);
+        underTest = new ClusterMonitoringEngine(telemetryOrchestrator, gatewayConfigService);
     }
 
     @Test
     public void testInstallAndStartMonitoring() throws Exception {
         // GIVEN
-        doNothing().when(hostOrchestrator).installAndStartMonitoring(anyList(), anySet(), any(ExitCriteriaModel.class));
+        doNothing().when(telemetryOrchestrator).installAndStartMonitoring(anyList(), anySet(), any(ExitCriteriaModel.class));
         // WHEN
         underTest.installAndStartMonitoring(createStack(), createTelemetry());
         // THEN
-        verify(hostOrchestrator, times(1)).installAndStartMonitoring(anyList(), anySet(), any(ExitCriteriaModel.class));
+        verify(telemetryOrchestrator, times(1)).installAndStartMonitoring(anyList(), anySet(), any(ExitCriteriaModel.class));
     }
 
     @Test
     public void testInstallAndStartMonitoringThrowsException() throws Exception {
         // GIVEN
         given(gatewayConfigService.getAllGatewayConfigs(any(Stack.class))).willReturn(null);
-        doThrow(new CloudbreakOrchestratorFailedException("error")).when(hostOrchestrator).installAndStartMonitoring(
+        doThrow(new CloudbreakOrchestratorFailedException("error")).when(telemetryOrchestrator).installAndStartMonitoring(
                 anyList(), anySet(), any(ExitCriteriaModel.class));
         // WHEN
         underTest.installAndStartMonitoring(createStack(), createTelemetry());
