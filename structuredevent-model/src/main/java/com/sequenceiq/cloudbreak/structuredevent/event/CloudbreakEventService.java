@@ -14,6 +14,8 @@ public interface CloudbreakEventService {
 
     String DATALAKE_RESOURCE_TYPE = "datalake";
 
+    String LEGACY_RESOURCE_TYPE = "stacks";
+
     void fireCloudbreakEvent(Long entityId, String eventType, ResourceEvent resourceEvent);
 
     void fireCloudbreakEvent(Long entityId, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs);
