@@ -10,6 +10,7 @@ import com.cloudera.api.swagger.model.ApiClusterList;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
@@ -98,6 +99,16 @@ class ClouderaManagerRangerUtilTest {
         when(roleCommandsResourceApi.refreshCommand(eq(CLUSTER), anyString(), any())).thenReturn(apiBulkCommandList);
     }
 
+    private void setupRoleRefreshRequired(boolean roleRefreshNeeded) throws ApiException {
+        ApiRole apiRole = new ApiRole();
+        if (roleRefreshNeeded) {
+            apiRole.setConfigStalenessStatus(ApiConfigStalenessStatus.STALE_REFRESHABLE);
+        } else {
+            apiRole.setConfigStalenessStatus(ApiConfigStalenessStatus.FRESH);
+        }
+        when(rolesResourceApi.readRole(eq(CLUSTER), anyString(), any(), eq("summary"))).thenReturn(apiRole);
+    }
+
     @Test
     public void testSetAzureCloudIdentityMapping() throws ApiException {
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
@@ -106,12 +117,14 @@ class ClouderaManagerRangerUtilTest {
         setupCluster();
         setupRangerUserSyncRole();
         setupRangerUserSyncRoleConig(true);
+        setupRoleRefreshRequired(true);
         setupRoleRefreshResponse(true);
 
         underTest.setAzureCloudIdentityMapping("stackCrn", Map.of("user01", "val01", "user02", "val02"), Map.of("group01", "val"));
 
         ArgumentCaptor<ApiConfigList> apiConfigListCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
         verify(rolesResourceApi, times(1)).updateRoleConfig(eq(CLUSTER), eq(RANGER_USER_SYNC_ROLE), anyString(), anyString(), apiConfigListCaptor.capture());
+        verify(roleCommandsResourceApi, times(1)).refreshCommand(any(), any(), any());
 
         ApiConfig expectedAzureUserMappingConfig = new ApiConfig();
         expectedAzureUserMappingConfig.setName("ranger_usersync_azure_user_mapping");
@@ -125,6 +138,22 @@ class ClouderaManagerRangerUtilTest {
     }
 
     @Test
+    public void testSetAzureCloudIdentityMappingRefreshNotRequired() throws ApiException {
+        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(any())).thenReturn(rolesResourceApi);
+        setupCluster();
+        setupRangerUserSyncRole();
+        setupRangerUserSyncRoleConig(true);
+        setupRoleRefreshRequired(false);
+
+        underTest.setAzureCloudIdentityMapping("stackCrn", Map.of("user01", "val01", "user02", "val02"), Map.of("group01", "val"));
+
+        ArgumentCaptor<ApiConfigList> apiConfigListCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
+        verify(rolesResourceApi, times(1)).updateRoleConfig(eq(CLUSTER), eq(RANGER_USER_SYNC_ROLE), anyString(), anyString(), apiConfigListCaptor.capture());
+        verify(roleCommandsResourceApi, never()).refreshCommand(any(), any(), any());
+    }
+
+    @Test
     public void testSetAzureCloudIdentityMappingUnsuccessfulRefresh() throws ApiException {
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
         when(clouderaManagerApiFactory.getRolesResourceApi(any())).thenReturn(rolesResourceApi);
@@ -132,6 +161,7 @@ class ClouderaManagerRangerUtilTest {
         setupCluster();
         setupRangerUserSyncRole();
         setupRangerUserSyncRoleConig(true);
+        setupRoleRefreshRequired(true);
         setupRoleRefreshResponse(false);
 
         assertThrows(RangerCloudIdentitySyncException.class, () -> underTest.setAzureCloudIdentityMapping("stackCrn",
