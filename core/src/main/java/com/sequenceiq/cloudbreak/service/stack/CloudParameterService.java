@@ -404,7 +404,7 @@ public class CloudParameterService {
             LOGGER.info("Platform encryptionKeys result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.warn("Failed to get platform encryptionKeys", res.getErrorDetails());
-                throw new GetCloudParameterException("Failed to get encryption keys for the cloud provider", res.getErrorDetails());
+                throw new GetCloudParameterException("Failed to get encryption keys from the cloud provider", res.getErrorDetails());
             }
             return res.getCloudEncryptionKeys();
         } catch (InterruptedException e) {
