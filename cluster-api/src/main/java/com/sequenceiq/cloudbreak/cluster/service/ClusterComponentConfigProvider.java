@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.hibernate.envers.AuditReader;
+import org.hibernate.envers.exception.NotAuditedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,9 @@ public class ClusterComponentConfigProvider {
 
     @Inject
     private ClusterComponentRepository componentRepository;
+
+    @Inject
+    private AuditReader auditReader;
 
     public ClusterComponent getComponent(Long clusterId, ComponentType componentType) {
         return getComponent(clusterId, componentType, componentType.name());
@@ -95,6 +100,28 @@ public class ClusterComponentConfigProvider {
         componentRepository.saveAll(components).forEach(ret::add);
         LOGGER.debug("Components saved: stackId: {}, components: {}", cluster.getId(), ret);
         return ret;
+    }
+
+    public void restorePreviousVersion(ClusterComponent clusterComponent) {
+        LOGGER.info("Trying to revert to previous version for {}", clusterComponent);
+        try {
+            List<Number> revisions = auditReader.getRevisions(ClusterComponent.class, clusterComponent.getId());
+            if (!revisions.isEmpty()) {
+                // @see AuditReader: list of revision numbers, at which the entity was modified, sorted in ascending order
+                Number latestRevision = revisions.get(revisions.size() - 1);
+                ClusterComponent previousClusterComponent = auditReader.find(ClusterComponent.class, clusterComponent.getId(), latestRevision);
+                LOGGER.info("Previous version found: {}", previousClusterComponent);
+                componentRepository.save(previousClusterComponent);
+            } else {
+                LOGGER.info("No previous version found for {}", clusterComponent);
+            }
+        } catch (NotAuditedException e) {
+            LOGGER.warn("Not audited class", e);
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("Couldn't fetch revision for {}", clusterComponent, e);
+        } catch (Exception e) {
+            LOGGER.error("Couldn't revert to previous version for {}", clusterComponent, e);
+        }
     }
 
     private <T> T retrieveFromAttribute(ClusterComponent component, Class<T> clazz) {

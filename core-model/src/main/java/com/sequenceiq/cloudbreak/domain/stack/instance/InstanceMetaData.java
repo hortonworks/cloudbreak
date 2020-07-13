@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceStatusConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.converter.InstanceLifeCycleConverter;
 import com.sequenceiq.cloudbreak.domain.converter.InstanceMetadataTypeConverter;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @NamedEntityGraphs({
         @NamedEntityGraph(name = "InstanceMetaData.instanceGroup",
@@ -237,6 +238,11 @@ public class InstanceMetaData implements ProvisionEntity {
     public boolean isAttached() {
         return InstanceStatus.SERVICES_HEALTHY.equals(instanceStatus) || InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus)
                 || InstanceStatus.DECOMMISSION_FAILED.equals(instanceStatus);
+    }
+
+    public boolean isGateway() {
+        return InstanceMetadataType.GATEWAY == instanceMetadataType || InstanceMetadataType.GATEWAY_PRIMARY == instanceMetadataType
+                || (instanceMetadataType == null && instanceGroup != null && InstanceGroupType.GATEWAY == instanceGroup.getInstanceGroupType());
     }
 
     public String getLocalityIndicator() {

@@ -38,8 +38,6 @@ public class ClusterUpgradeImageFilter {
 
     private static final String STACK_PACKAGE_KEY = "stack";
 
-    private static final String SALT_PACKAGE_KEY = "salt";
-
     private static final String CDH_BUILD_NUMBER_KEY = "cdh-build-number";
 
     private static final String CM_BUILD_NUMBER_KEY = "cm-build-number";
@@ -83,7 +81,6 @@ public class ClusterUpgradeImageFilter {
                 .filter(validateCmAndStackVersion(currentImage, lockComponents, activatedParcels))
                 .filter(validateCloudPlatform(cloudPlatform))
                 .filter(validateOsVersion(currentImage))
-                .filter(validateSaltVersion(currentImage))
                 .filter(packageLocationFilter.filterImage(currentImage))
                 .collect(Collectors.toList());
 
@@ -197,15 +194,6 @@ public class ClusterUpgradeImageFilter {
 
     private boolean isOsVersionsMatch(Image currentImage, Image newImage) {
         return newImage.getOs().equalsIgnoreCase(currentImage.getOs()) && newImage.getOsType().equalsIgnoreCase(currentImage.getOsType());
-    }
-
-    private Predicate<Image> validateSaltVersion(Image currentImage) {
-        return image -> {
-            boolean result = upgradePermissionProvider.permitSaltUpgrade(currentImage.getPackageVersions().get(SALT_PACKAGE_KEY),
-                    image.getPackageVersions().get(SALT_PACKAGE_KEY));
-            setReason(result, "There are no images with compatible Salt version.");
-            return result;
-        };
     }
 
     private String getReason(List<Image> images) {

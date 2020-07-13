@@ -176,16 +176,18 @@ public class ClusterBootstrapper {
         return saltComponent;
     }
 
-    private void updateSaltComponent(Stack stack) {
+    public ClusterComponent updateSaltComponent(Stack stack) {
         ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getCluster().getId(), ComponentType.SALT_STATE);
         try {
             byte[] stateConfigZip = hostOrchestrator.getStateConfigZip();
             if (saltComponent == null) {
+                LOGGER.debug("Create new salt component");
                 saltComponent = createSaltComponent(stack, stateConfigZip);
             } else {
+                LOGGER.debug("Overwrite existing salt component attributes");
                 saltComponent.setAttributes(new Json(singletonMap(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip))));
             }
-            clusterComponentProvider.store(saltComponent);
+            return clusterComponentProvider.store(saltComponent);
         } catch (IOException e) {
             throw new CloudbreakServiceException(e);
         }
@@ -246,7 +248,7 @@ public class ClusterBootstrapper {
             if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
                 LOGGER.debug("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
             } else {
-                String generatedHostName = hostDiscoveryService.generateHostname(stack.getCustomHostname(), im.getInstanceGroupName(),
+                String generatedHostName = hostDiscoveryService.calculateHostname(stack.getCustomHostname(), im.getShortHostname(), im.getInstanceGroupName(),
                         im.getPrivateId(), stack.isHostgroupNameAsHostname());
                 String instanceId = im.getInstanceId();
                 String instanceType = im.getInstanceGroup().getTemplate().getInstanceType();

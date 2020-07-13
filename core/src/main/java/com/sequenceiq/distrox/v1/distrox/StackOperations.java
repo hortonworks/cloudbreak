@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
@@ -198,12 +199,7 @@ public class StackOperations implements ResourceBasedCrnProvider {
 
     public FlowIdentifier upgradeOs(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         LOGGER.debug("Starting to upgrade OS: " + nameOrCrn);
-        if (nameOrCrn.hasName()) {
-            return upgradeService.upgradeOsByStackName(workspaceId, nameOrCrn.getName());
-        } else {
-            LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
-            throw new BadRequestException("Please provide a stack name for upgrade");
-        }
+        return upgradeService.upgradeOs(workspaceId, nameOrCrn);
     }
 
     public UpgradeOptionV4Response checkForOsUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
@@ -218,12 +214,7 @@ public class StackOperations implements ResourceBasedCrnProvider {
 
     public FlowIdentifier upgradeCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String imageId) {
         LOGGER.debug("Starting to upgrade cluster: " + nameOrCrn);
-        if (nameOrCrn.hasName()) {
-            return upgradeService.upgradeCluster(workspaceId, nameOrCrn.getName(), imageId);
-        } else {
-            LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
-            throw new BadRequestException("Please provide a stack name for upgrade");
-        }
+        return upgradeService.upgradeCluster(workspaceId, nameOrCrn, imageId);
     }
 
     public FlowIdentifier updateSalt(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
@@ -244,6 +235,7 @@ public class StackOperations implements ResourceBasedCrnProvider {
                     osUpgrade);
             clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request);
             Stack stack = getStackByName(stackName);
+            MDCBuilder.buildMdcContext(stack);
             StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
             clusterUpgradeAvailabilityService.checkForNotAttachedClusters(stackViewV4Responses, upgradeResponse);
             if (!osUpgrade && !request.isDryRun() && !request.isShowAvailableImagesSet()) {

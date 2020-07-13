@@ -29,6 +29,15 @@ public class HostDiscoveryService {
         return result;
     }
 
+    public String calculateHostname(String customHostnamePrefix, String hostname, String instanceGroupName, long privateId,
+            boolean useInstanceGroupName) {
+        if (StringUtils.isNotBlank(hostname)) {
+            return hostname;
+        } else {
+            return generateHostname(customHostnamePrefix, instanceGroupName, privateId, useInstanceGroupName);
+        }
+    }
+
     /*
      * It generates a hostname based on the instance group name and the node's private id.
      */

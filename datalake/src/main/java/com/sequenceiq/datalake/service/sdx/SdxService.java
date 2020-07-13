@@ -648,4 +648,8 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     public AuthorizationResourceType getResourceType() {
         return AuthorizationResourceType.DATALAKE;
     }
+
+    public SdxCluster save(SdxCluster sdxCluster) {
+        return sdxClusterRepository.save(sdxCluster);
+    }
 }

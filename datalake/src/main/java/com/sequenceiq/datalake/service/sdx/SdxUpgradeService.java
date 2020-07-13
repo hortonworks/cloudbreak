@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -33,13 +31,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouder
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
-import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -52,9 +50,6 @@ public class SdxUpgradeService {
     private SdxService sdxService;
 
     @Inject
-    private SdxClusterRepository sdxClusterRepository;
-
-    @Inject
     private SdxStatusService sdxStatusService;
 
     @Inject
@@ -63,52 +58,53 @@ public class SdxUpgradeService {
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
 
+    @Inject
+    private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
+
     public void changeImage(Long id, UpgradeOptionV4Response upgradeOption) {
-        Optional<SdxCluster> cluster = sdxClusterRepository.findById(id);
-        if (cluster.isPresent()) {
-            String targetImageId = upgradeOption.getUpgrade().getImageId();
-            StackImageChangeV4Request stackImageChangeRequest = new StackImageChangeV4Request();
-            stackImageChangeRequest.setImageId(targetImageId);
-            stackImageChangeRequest.setImageCatalogName(upgradeOption.getUpgrade().getImageCatalogName());
-            sdxStatusService.setStatusForDatalakeAndNotify(
-                    DatalakeStatusEnum.CHANGE_IMAGE_IN_PROGRESS,
-                    "Changing image",
-                    cluster.get());
+        SdxCluster cluster = sdxService.getById(id);
+        String targetImageId = upgradeOption.getUpgrade().getImageId();
+        StackImageChangeV4Request stackImageChangeRequest = new StackImageChangeV4Request();
+        stackImageChangeRequest.setImageId(targetImageId);
+        stackImageChangeRequest.setImageCatalogName(upgradeOption.getUpgrade().getImageCatalogName());
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CHANGE_IMAGE_IN_PROGRESS, "Changing image", cluster);
+        try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    stackV4Endpoint.changeImageInternal(0L, cluster.get().getClusterName(), stackImageChangeRequest, initiatorUserCrn));
-            cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster.get(), flowIdentifier);
-        } else {
-            throw new NotFoundException("Not found cluster with id" + id);
+                    stackV4Endpoint.changeImageInternal(0L, cluster.getClusterName(), stackImageChangeRequest, initiatorUserCrn));
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster, flowIdentifier);
+        } catch (WebApplicationException e) {
+            String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Stack change image failed on cluster: [%s]. Message: [%s]", cluster.getClusterName(), exceptionMessage);
+            throw new CloudbreakApiException(message, e);
         }
     }
 
     public void upgradeRuntime(Long id, String imageId) {
-        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found the cluster with id: " + id));
-        sdxStatusService.setStatusForDatalakeAndNotify(
-                DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS,
-                "Upgrading datalake stack",
-                sdxCluster);
+        SdxCluster sdxCluster = sdxService.getById(id);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "Upgrading datalake stack", sdxCluster);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                     stackV4Endpoint.upgradeClusterByNameInternal(0L, sdxCluster.getClusterName(), imageId, initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {
-            String message = String.format("Stack upgrade failed on cluster: [%d]. Message: [%s]", id, e.getMessage());
-            throw new CloudbreakApiException(message);
+            String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Stack upgrade failed on cluster: [%s]. Message: [%s]", sdxCluster.getClusterName(), exceptionMessage);
+            throw new CloudbreakApiException(message, e);
         }
     }
 
     public String getImageId(Long id) {
-        Optional<SdxCluster> cluster = sdxClusterRepository.findById(id);
-        if (cluster.isPresent()) {
+        SdxCluster cluster = sdxService.getById(id);
+        try {
             StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    stackV4Endpoint.get(0L, cluster.get().getClusterName(),
-                    Set.of(), cluster.get().getAccountId()));
+                    stackV4Endpoint.get(0L, cluster.getClusterName(), Set.of(), cluster.getAccountId()));
             return stackV4Response.getImage().getId();
-        } else {
-            throw new NotFoundException("Cluster not found with id" + id);
+        } catch (WebApplicationException e) {
+            String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Couldn't get image id for cluster: [%s]. Message: [%s]", cluster.getClusterName(), exceptionMessage);
+            throw new CloudbreakApiException(message, e);
         }
     }
 
@@ -116,16 +112,22 @@ public class SdxUpgradeService {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         String clusterName = sdxCluster.getClusterName();
         LOGGER.info("Trying to update the runtime version from Cloudbreak for cluster: {}", clusterName);
-        StackV4Response stack = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                stackV4Endpoint.get(0L, clusterName, Set.of(), sdxCluster.getAccountId()));
-        Optional<String> cdpVersionOpt = getCdpVersion(stack);
-        if (cdpVersionOpt.isPresent()) {
-            String version = cdpVersionOpt.get();
-            LOGGER.info("Update Sdx runtime version of {} to {}, previous version: {}", clusterName, version, sdxCluster.getRuntime());
-            sdxCluster.setRuntime(version);
-            sdxClusterRepository.save(sdxCluster);
-        } else {
-            LOGGER.warn("Cannot update the Sdx runtime version for cluster: {}", clusterName);
+        try {
+            StackV4Response stack = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                    stackV4Endpoint.get(0L, clusterName, Set.of(), sdxCluster.getAccountId()));
+            Optional<String> cdpVersionOpt = getCdpVersion(stack);
+            if (cdpVersionOpt.isPresent()) {
+                String version = cdpVersionOpt.get();
+                LOGGER.info("Update Sdx runtime version of {} to {}, previous version: {}", clusterName, version, sdxCluster.getRuntime());
+                sdxCluster.setRuntime(version);
+                sdxService.save(sdxCluster);
+            } else {
+                LOGGER.warn("Cannot update the Sdx runtime version for cluster: {}", clusterName);
+            }
+        } catch (WebApplicationException e) {
+            String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Couldn't describe cluster: [%s]. Message: [%s]", clusterName, exceptionMessage);
+            throw new CloudbreakApiException(message, e);
         }
     }
 
@@ -159,30 +161,36 @@ public class SdxUpgradeService {
     }
 
     public String getCurrentImageCatalogName(Long id) {
-        SdxCluster cluster = sdxClusterRepository.findById(id).orElseThrow(notFound("Cluster", id));
-        StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                stackV4Endpoint.get(0L, cluster.getClusterName(), Set.of(), cluster.getAccountId()));
-        return stackV4Response.getImage().getCatalogName();
+        SdxCluster cluster = sdxService.getById(id);
+        try {
+            StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                    stackV4Endpoint.get(0L, cluster.getClusterName(), Set.of(), cluster.getAccountId()));
+            return stackV4Response.getImage().getCatalogName();
+        } catch (WebApplicationException e) {
+            String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Couldn't fetch image catalog for cluster: [%s]. Message: [%s]", cluster.getClusterName(), exceptionMessage);
+            throw new CloudbreakApiException(message, e);
+        }
     }
 
     public void upgradeOs(Long id) {
-        Optional<SdxCluster> cluster = sdxClusterRepository.findById(id);
-        if (cluster.isPresent()) {
-            sdxStatusService.setStatusForDatalakeAndNotify(
-                    DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS,
-                    "OS upgrade started",
-                    cluster.get());
+        SdxCluster cluster = sdxService.getById(id);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "OS upgrade started", cluster);
+
+        try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.upgradeOsInternal(0L,
-                    cluster.get().getClusterName(), initiatorUserCrn));
-            cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster.get(), flowIdentifier);
-        } else {
-            throw new NotFoundException("Cluster not found with id" + id);
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                    stackV4Endpoint.upgradeOsInternal(0L, cluster.getClusterName(), initiatorUserCrn));
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster, flowIdentifier);
+        } catch (WebApplicationException e) {
+            String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Stack upgrade failed on cluster: [%s]. Message: [%s]", cluster.getClusterName(), exceptionMessage);
+            throw new CloudbreakApiException(message, e);
         }
     }
 
     public void waitCloudbreakFlow(Long id, PollingConfig pollingConfig, String pollingMessage) {
-        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
+        SdxCluster sdxCluster = sdxService.getById(id);
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
@@ -216,7 +224,7 @@ public class SdxUpgradeService {
                 stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();
-        if (stackAndClusterAvailable(stackV4Response, cluster)) {
+        if (isStackAndClusterAvailable(stackV4Response, cluster)) {
             return AttemptResults.finishWith(stackV4Response);
         } else {
             if (Status.UPDATE_FAILED.equals(stackV4Response.getStatus())) {
@@ -243,7 +251,7 @@ public class SdxUpgradeService {
         return AttemptResults.breakFor("SDX " + pollingMessage + " failed '" + sdxCluster.getClusterName() + "', " + statusReason);
     }
 
-    private boolean stackAndClusterAvailable(StackV4Response stackV4Response, ClusterV4Response cluster) {
+    private boolean isStackAndClusterAvailable(StackV4Response stackV4Response, ClusterV4Response cluster) {
         return stackV4Response.getStatus().isAvailable()
                 && cluster != null
                 && cluster.getStatus() != null

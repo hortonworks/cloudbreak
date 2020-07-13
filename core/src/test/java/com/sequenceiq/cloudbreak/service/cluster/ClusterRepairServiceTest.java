@@ -65,7 +65,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 
@@ -95,9 +94,6 @@ public class ClusterRepairServiceTest {
 
     @Mock
     private HostGroupService hostGroupService;
-
-    @Mock
-    private FlowLogService flowLogService;
 
     @Mock
     private ResourceService resourceService;
@@ -148,7 +144,6 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(Collections.emptyList());
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
@@ -168,7 +163,6 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(Collections.emptyList());
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
 
         Result result = underTest.repairWithDryRun(stack.getId());
@@ -187,7 +181,6 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(Collections.emptyList());
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(mock(Image.class));
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
@@ -210,7 +203,6 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(Collections.emptyList());
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(mock(Image.class));
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
@@ -232,7 +224,6 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(Collections.emptyList());
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(mock(Image.class));
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
@@ -269,35 +260,20 @@ public class ClusterRepairServiceTest {
         volumeSet.setAttributes(new Json(attributes));
         volumeSet.setInstanceId("instanceId1");
         volumeSet.setResourceType(ResourceType.AWS_VOLUMESET);
-        stack.setResources(Set.of(volumeSet));
         FlowLog flowLog = new FlowLog();
         flowLog.setStateStatus(StateStatus.SUCCESSFUL);
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(List.of(flowLog));
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(instance1md));
+        when(resourceService.findByStackIdAndType(stack.getId(), volumeSet.getResourceType())).thenReturn(List.of(volumeSet));
 
         underTest.repairNodes(1L, Set.of("instanceId1"), false, false);
-        verify(stack).getDiskResources();
+        verify(resourceService).findByStackIdAndType(stack.getId(), volumeSet.getResourceType());
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceService).saveAll(saveCaptor.capture());
         assertFalse(resourceAttributeUtil.getTypedAttributes(saveCaptor.getValue().get(0), VolumeSetAttributes.class).get().getDeleteOnTermination());
         verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false));
-    }
-
-    @Test
-    public void shouldNotUpdateStackStateWhenHasPendingFlow() {
-        FlowLog flowLog = new FlowLog();
-        flowLog.setStateStatus(StateStatus.PENDING);
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(List.of(flowLog));
-
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            underTest.repairNodes(1L, Set.of("instanceId1"), false, false);
-        });
-        assertEquals("Action cannot be performed because there is an active flow running.", exception.getMessage());
-        verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START, "Action cannot be performed because there is an active flow running.");
-        verifyZeroInteractions(stackUpdater);
     }
 
     @Test
@@ -309,7 +285,6 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(Collections.emptyList());
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
@@ -337,7 +312,6 @@ public class ClusterRepairServiceTest {
         InstanceMetaData host2 = getHost("host2", hostGroup2.getName(), InstanceStatus.STOPPED, InstanceGroupType.CORE);
         hostGroup2.setInstanceGroup(host2.getInstanceGroup());
 
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(Collections.emptyList());
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1, host2));
 

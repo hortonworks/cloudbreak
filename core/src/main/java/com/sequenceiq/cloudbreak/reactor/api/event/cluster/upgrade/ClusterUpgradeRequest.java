@@ -14,9 +14,4 @@ public class ClusterUpgradeRequest extends StackEvent {
     public boolean isPatchUpgrade() {
         return patchUpgrade;
     }
-
-//    @Override
-//    public String selector() {
-//        return CLUSTER_UPGRADE_EVENT.event();
-//    }
 }
