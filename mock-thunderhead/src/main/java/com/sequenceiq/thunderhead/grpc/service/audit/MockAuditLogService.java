@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.audit.AuditGrpc;
@@ -18,17 +20,21 @@ import io.grpc.stub.StreamObserver;
 @Component
 public class MockAuditLogService extends AuditGrpc.AuditImplBase {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockAuditLogService.class);
+
     @Inject
     private AuditStoreService auditStoreService;
 
     @Override
     public void createAttemptAuditEvent(AuditProto.CreateAttemptAuditEventRequest request,
-                                        StreamObserver<AuditProto.CreateAttemptAuditEventResponse> responseObserver) {
+            StreamObserver<AuditProto.CreateAttemptAuditEventResponse> responseObserver) {
+        LOGGER.info("Create attempt audit event, requestid: {}", request.getAuditEvent().getRequestId());
         super.createAttemptAuditEvent(request, responseObserver);
     }
 
     @Override
     public void createAuditEvent(AuditProto.CreateAuditEventRequest request, StreamObserver<AuditProto.CreateAuditEventResponse> responseObserver) {
+        LOGGER.info("Create audit event, requestid: {}", request.getAuditEvent().getRequestId());
         auditStoreService.store(request.getAuditEvent());
         responseObserver.onNext(AuditProto.CreateAuditEventResponse.newBuilder().build());
         responseObserver.onCompleted();
@@ -36,6 +42,7 @@ public class MockAuditLogService extends AuditGrpc.AuditImplBase {
 
     @Override
     public void listEvents(AuditProto.ListEventsRequest request, StreamObserver<AuditProto.ListEventsResponse> responseObserver) {
+        LOGGER.info("List events, requestid: {}", request.getRequestId());
         List<AuditProto.AuditEvent> auditEvents = auditStoreService.filterByRequest(request);
         List<AuditProto.CdpAuditEvent> responseList = auditEvents.stream().map(a -> {
             AuditProto.CdpAuditEvent.Builder builder = AuditProto.CdpAuditEvent.newBuilder()
@@ -62,6 +69,7 @@ public class MockAuditLogService extends AuditGrpc.AuditImplBase {
     }
 
     private AuditProto.CdpServiceEvent serviceEvent(AuditProto.ServiceEventData serviceEventData) {
+        LOGGER.info("Service event, event details: {}", serviceEventData.getEventDetails());
         String clusterCrn = null;
         if (StringUtils.isNotEmpty(serviceEventData.getEventDetails())) {
             clusterCrn = new Json(serviceEventData.getEventDetails()).getValue("clusterCrn");
@@ -75,6 +83,7 @@ public class MockAuditLogService extends AuditGrpc.AuditImplBase {
     }
 
     private AuditProto.ApiRequestEvent apiRequestEvent(AuditProto.ApiRequestData apiRequestData) {
+        LOGGER.info("Api request event, request parameters: {}", apiRequestData.getRequestParameters());
         if (StringUtils.isEmpty(apiRequestData.getRequestParameters())) {
             return null;
         }

@@ -49,6 +49,7 @@ class MockGroupManagementService {
     private final Map<String, Map<String, Group>> accountUserGroups = new ConcurrentHashMap<>();
 
     void listGroups(ListGroupsRequest request, StreamObserver<ListGroupsResponse> responseObserver) {
+        LOGGER.info("List groups for account id: {}", request.getAccountId());
         ListGroupsResponse.Builder groupsBuilder = ListGroupsResponse.newBuilder();
         if (request.getGroupNameOrCrnCount() == 0) {
             if (isNotEmpty(request.getAccountId())) {
@@ -65,6 +66,7 @@ class MockGroupManagementService {
     }
 
     List<Group> getOrCreateWorkloadGroups(String accountId) {
+        LOGGER.info("Get or create workload groups: {}", accountId);
         accountWorkloadGroups.computeIfAbsent(accountId, this::createWorkloadGroups);
         List<Group> groups = new ArrayList<>(accountWorkloadGroups.get(accountId).values());
         groups.sort(Comparator.comparing(Group::getGroupName));
@@ -72,6 +74,7 @@ class MockGroupManagementService {
     }
 
     List<Group> getOrCreateUserGroups(String accountId) {
+        LOGGER.info("Get or create user groups: {}", accountId);
         accountUserGroups.computeIfAbsent(accountId, this::createUserGroups);
         List<Group> groups = new ArrayList<>(accountUserGroups.get(accountId).values());
         groups.sort(Comparator.comparing(Group::getGroupName));
@@ -80,6 +83,7 @@ class MockGroupManagementService {
 
     void getWorkloadAdministrationGroupName(GetWorkloadAdministrationGroupNameRequest request,
             StreamObserver<GetWorkloadAdministrationGroupNameResponse> responseObserver) {
+        LOGGER.info("Get workload administration group name for account: {}", request.getAccountId());
         mockCrnService.ensureInternalActor();
         Builder respBuilder =
                 GetWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
@@ -90,6 +94,7 @@ class MockGroupManagementService {
 
     void setWorkloadAdministrationGroupName(SetWorkloadAdministrationGroupNameRequest request,
             StreamObserver<SetWorkloadAdministrationGroupNameResponse> responseObserver) {
+        LOGGER.info("Set workload administration group name for account: {}", request.getAccountId());
         mockCrnService.ensureInternalActor();
         SetWorkloadAdministrationGroupNameResponse.Builder respBuilder =
                 SetWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
@@ -100,6 +105,7 @@ class MockGroupManagementService {
 
     void deleteWorkloadAdministrationGroupName(DeleteWorkloadAdministrationGroupNameRequest request,
             StreamObserver<DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
+        LOGGER.info("Delete workload administration group name for account: {}", request.getAccountId());
         mockCrnService.ensureInternalActor();
         DeleteWorkloadAdministrationGroupNameResponse.Builder respBuilder =
                 DeleteWorkloadAdministrationGroupNameResponse.getDefaultInstance().toBuilder();
@@ -113,6 +119,7 @@ class MockGroupManagementService {
     }
 
     Group createGroup(String accountId, String groupName) {
+        LOGGER.info("Create group {} for account {}", groupName, accountId);
         String groupId = UUID.randomUUID().toString();
         String groupCrn = mockCrnService.createCrn(accountId, Crn.Service.IAM, ResourceType.GROUP, groupId).toString();
         return Group.newBuilder()
