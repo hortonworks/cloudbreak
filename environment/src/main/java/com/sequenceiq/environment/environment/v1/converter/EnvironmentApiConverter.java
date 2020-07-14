@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
@@ -250,6 +251,9 @@ public class EnvironmentApiConverter {
     }
 
     private Set<String> locationRequestToRegions(LocationRequest location, String cloudPlatform) {
+        if (CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform)) {
+            return Set.of();
+        }
         return Set.of(location.getName());
     }
 
