@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUpload;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUploadWithPermission;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateAllRunner;
@@ -114,6 +115,8 @@ public class SaltOrchestrator implements HostOrchestrator {
     private static final String FLUENT_AGENT_STOP = "fluent.agent-stop";
 
     private static final String SRV_SALT_DISK = "/srv/salt/disk";
+
+    private static final String PERMISSION = "0600";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
 
@@ -1080,13 +1083,25 @@ public class SaltOrchestrator implements HostOrchestrator {
         byte[] recipeBytes = recipe.getBytes(StandardCharsets.UTF_8);
         LOGGER.debug("Upload '{}' recipe: {}", phase.value(), name);
         String folder = phase.isPreRecipe() ? "pre-recipes" : "post-recipes";
-        uploadFileToTargets(sc, targets, exitModel, "/srv/salt/" + folder + "/scripts", name, recipeBytes);
+        uploadFileToTargetsWithPermission(sc, targets, exitModel, "/srv/salt/" + folder + "/scripts", name, recipeBytes);
     }
 
     private void uploadFileToTargets(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel,
             String path, String fileName, byte[] content) throws CloudbreakOrchestratorFailedException {
         try {
             OrchestratorBootstrap saltUpload = new SaltUpload(saltConnector, targets, path, fileName, content);
+            Callable<Boolean> saltUploadRunner = saltRunner.runner(saltUpload, exitCriteria, exitCriteriaModel);
+            saltUploadRunner.call();
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during file distribute to gateway nodes", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    private void uploadFileToTargetsWithPermission(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel,
+            String path, String fileName, byte[] content) throws CloudbreakOrchestratorFailedException {
+        try {
+            OrchestratorBootstrap saltUpload = new SaltUploadWithPermission(saltConnector, targets, path, fileName, PERMISSION, content);
             Callable<Boolean> saltUploadRunner = saltRunner.runner(saltUpload, exitCriteria, exitCriteriaModel);
             saltUploadRunner.call();
         } catch (Exception e) {
