@@ -156,6 +156,7 @@ public class AwsStackRequestHelperTest {
 
         assertContainsParameter(parameters, "AllocatedStorageParameter", "50");
         assertContainsParameter(parameters, "BackupRetentionPeriodParameter", "1");
+        assertContainsParameter(parameters, "DeleteAutomatedBackupsParameter", "false");
         assertContainsParameter(parameters, "DBInstanceClassParameter", "db.m3.medium");
         assertContainsParameter(parameters, "DBInstanceIdentifierParameter", "myserver");
         assertContainsParameter(parameters, "DBSubnetGroupNameParameter", "dsg-myserver");
@@ -197,6 +198,7 @@ public class AwsStackRequestHelperTest {
         assertDoesNotContainParameter(parameters, "MultiAZParameter");
         assertDoesNotContainParameter(parameters, "StorageTypeParameter");
         assertDoesNotContainParameter(parameters, "PortParameter");
+        assertContainsParameter(parameters, "DeleteAutomatedBackupsParameter", "true");
     }
 
     @Test

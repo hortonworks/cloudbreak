@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -11,8 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
-import com.sequenceiq.redbeams.api.model.common.Status;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,8 +33,10 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
+import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -101,7 +102,10 @@ public class DatabaseServiceTest {
         assertThat(dbRequest.getDatabaseServer().getStorageSize(), is(100L));
         assertThat(dbRequest.getClusterCrn(), is(CLUSTER_CRN));
         assertNotNull(dbRequest.getDatabaseServer().getAws());
-        verifyZeroInteractions(sdxClusterRepository);
+                verifyZeroInteractions(sdxClusterRepository);
+        assertNotNull(dbRequest.getDatabaseServer().getAws().getBackupRetentionPeriod());
+        assertEquals(1, dbRequest.getDatabaseServer().getAws().getBackupRetentionPeriod());
+                verifyZeroInteractions(sdxClusterRepository);
         verifyZeroInteractions(sdxStatusService);
         verifyZeroInteractions(notificationService);
     }
@@ -144,7 +148,9 @@ public class DatabaseServiceTest {
         return new DatabaseServerParameterSetter() {
             @Override
             public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType) {
-                request.setAws(new AwsDatabaseServerV4Parameters());
+                AwsDatabaseServerV4Parameters parameters = new AwsDatabaseServerV4Parameters();
+                parameters.setBackupRetentionPeriod(1);
+                request.setAws(parameters);
             }
 
             @Override

@@ -19,6 +19,15 @@
         "MinValue": 0,
         "MaxValue": 8
     },
+    "DeleteAutomatedBackupsParameter": {
+        "AllowedValues": [
+            "true",
+            "false"
+        ],
+        "Type": "String",
+        "Default": "true",
+        "Description": "Value that indicates whether to remove automated backups immediately after the DB instance is deleted.",
+    },
     "DBInstanceClassParameter": {
         "Type": "String",
         "Default": "db.t3.medium",
@@ -157,6 +166,7 @@
             "Properties": {
                 "AllocatedStorage": { "Ref": "AllocatedStorageParameter" },
                 "BackupRetentionPeriod": { "Ref": "BackupRetentionPeriodParameter" },
+                "DeleteAutomatedBackups": { "Ref": "DeleteAutomatedBackupsParameter" },
                 "DBInstanceClass": { "Ref": "DBInstanceClassParameter" },
                 "DBInstanceIdentifier": { "Ref": "DBInstanceIdentifierParameter" },
                 "DBSubnetGroupName": { "Ref": "DBSubnetGroup" },

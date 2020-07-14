@@ -70,6 +70,7 @@ public class AwsStackRequestHelper {
                 .withTags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
                 .withCapabilities(CAPABILITY_IAM)
                 .withParameters(getStackParameters(ac, stack));
+
     }
 
     public UpdateStackRequest createUpdateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String cfTemplate) {
@@ -208,7 +209,12 @@ public class AwsStackRequestHelper {
         addParameterIfNotNull(parameters, "MultiAZParameter", awsRdsInstanceView.getMultiAZ());
         addParameterIfNotNull(parameters, "StorageTypeParameter", awsRdsInstanceView.getStorageType());
         addParameterIfNotNull(parameters, "PortParameter", stack.getDatabaseServer().getPort());
-
+        if(awsRdsInstanceView.getBackupRetentionPeriod() != null &&
+                awsRdsInstanceView.getBackupRetentionPeriod() > 0) {
+            parameters.add(new Parameter().withParameterKey("DeleteAutomatedBackupsParameter").withParameterValue("false"));
+        } else {
+            parameters.add(new Parameter().withParameterKey("DeleteAutomatedBackupsParameter").withParameterValue("true"));
+        }
         if (awsRdsInstanceView.getVPCSecurityGroups().isEmpty()) {
             // VPC-id and VPC cidr should be filled in
             parameters.addAll(

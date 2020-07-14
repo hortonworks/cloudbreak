@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx.database;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
@@ -14,11 +15,18 @@ public class AwsDatabaseServerParameterSetter implements DatabaseServerParameter
     @Value("${sdx.db.aws.engineversion:10.6}")
     private String engineVersion;
 
+    @Value("${sdx.db.aws.backupretentionperiod:1}")
+    private String backupRetentionPeriod;
+
     @Override
     public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType) {
         AwsDatabaseServerV4Parameters parameters = new AwsDatabaseServerV4Parameters();
         if (SdxDatabaseAvailabilityType.HA.equals(availabilityType)) {
-            parameters.setBackupRetentionPeriod(1);
+            if(!Strings.isNullOrEmpty(backupRetentionPeriod)) {
+                parameters.setBackupRetentionPeriod(Integer.parseInt(backupRetentionPeriod));
+            } else {
+                parameters.setBackupRetentionPeriod(1);
+            }
             parameters.setMultiAZ("true");
         } else if (SdxDatabaseAvailabilityType.NON_HA.equals(availabilityType)) {
             parameters.setBackupRetentionPeriod(0);
