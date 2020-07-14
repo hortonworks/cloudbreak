@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,9 +17,13 @@ import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoin
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.converter.DistroXAutoscaleClusterResponseConverter;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.History;
+import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.HistoryService;
 
 @Controller
 @AuthorizationResource
@@ -33,6 +38,9 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     private ClusterService clusterService;
 
     @Inject
+    private HistoryService historyService;
+
+    @Inject
     private AlertController alertController;
 
     @Inject
@@ -40,6 +48,9 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
 
     @Inject
     private DistroXAutoscaleClusterResponseConverter distroXAutoscaleClusterResponseConverter;
+
+    @Inject
+    private HttpNotificationSender notificationSender;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
@@ -119,10 +130,31 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
                 alertController.createTimeAlerts(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
                 asClusterCommonService.setAutoscaleState(clusterId, autoscaleClusterRequest.getEnableAutoscaling());
             });
+            createHistoryAndNotifyConfigChange(clusterId);
         } catch (TransactionService.TransactionExecutionException e) {
             throw e.getCause();
         }
 
         return createClusterJsonResponse(clusterService.findById(clusterId));
+    }
+
+    private void createHistoryAndNotifyConfigChange(long clusterId) {
+        Cluster cluster = clusterService.findById(clusterId);
+        StringBuilder statusMessage = new StringBuilder("Autoscaling config has been updated for the cluster");
+        if (!cluster.getLoadAlerts().isEmpty()) {
+            statusMessage.append(
+                    ", Load-Based Autoscaling HostGroups '" + cluster.getLoadAlerts().stream()
+                            .map(loadAlert -> loadAlert.getScalingPolicy().getHostGroup())
+                            .collect(Collectors.joining(",")) + "'.");
+        }
+        if (!cluster.getTimeAlerts().isEmpty()) {
+            statusMessage.append(
+                    ", Schedule-Based Autoscaling HostGroups '" + cluster.getTimeAlerts().stream()
+                            .map(timeAlert -> timeAlert.getScalingPolicy().getHostGroup())
+                            .collect(Collectors.joining(",")) + "'.");
+        }
+
+        History history = historyService.createEntry(ScalingStatus.CONFIG_UPDATED, statusMessage.toString(), cluster);
+        notificationSender.send(cluster, history);
     }
 }

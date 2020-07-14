@@ -49,8 +49,8 @@ public final class DateService {
 
             boolean triggerReady = interval >= 0L && interval < monitorUpdateRate;
             if (triggerReady) {
-                LOGGER.info("Time alert '{}' firing at '{}' compared to current time '{}' in timezone '{}'",
-                        alert.getName(), zonedNextTime, zonedCurrentTime, timeZone);
+                LOGGER.info("Time alert '{}', cluster '{}' firing at '{}' compared to current time '{}' in timezone '{}'",
+                        alert.getName(), alert.getCluster().getStackCrn(), zonedNextTime, zonedCurrentTime, timeZone);
             }
             return triggerReady;
         } catch (ParseException e) {

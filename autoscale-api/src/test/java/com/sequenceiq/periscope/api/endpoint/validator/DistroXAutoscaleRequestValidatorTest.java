@@ -77,6 +77,17 @@ public class DistroXAutoscaleRequestValidatorTest {
     }
 
     @Test
+    public void testIsValidWhenNegativeTargeTimeAlertsThenFalse() {
+        List<String> timeHostGroups = Arrays.asList("compute2", "hdfs1", "hdfs3");
+        DistroXAutoscaleClusterRequest  request = getTestRequest(timeHostGroups, List.of(), Optional.empty());
+        request.getTimeAlertRequests().stream()
+                .forEach(timeAlertRequest -> timeAlertRequest.getScalingPolicy().setScalingAdjustment(-10));
+
+        boolean underTestValid = underTest.isValid(request, validatorContext);
+        assertFalse("Target for Time Alert with Exact Adjustment cannot be negative.", underTestValid);
+    }
+
+    @Test
     public void testIsValidWhenBothAlertsThenFalse() {
         List<String> timeHostGroups = Arrays.asList("hdfs1", "compute1", "hdfs3");
         List<String> loadHostGroups = Arrays.asList("compute2", "hdfs1", "hdfs3");
@@ -115,7 +126,8 @@ public class DistroXAutoscaleRequestValidatorTest {
                 TimeAlertRequest request = new TimeAlertRequest();
                 ScalingPolicyRequest scalingPolicyRequest = new ScalingPolicyRequest();
                 scalingPolicyRequest.setHostGroup(hostGroup);
-                scalingPolicyRequest.setAdjustmentType(testAdjustmentType.orElse(AdjustmentType.NODE_COUNT));
+                scalingPolicyRequest.setAdjustmentType(testAdjustmentType.orElse(AdjustmentType.EXACT));
+                scalingPolicyRequest.setScalingAdjustment(10);
                 request.setScalingPolicy(scalingPolicyRequest);
                 timeAlertRequests.add(request);
             }

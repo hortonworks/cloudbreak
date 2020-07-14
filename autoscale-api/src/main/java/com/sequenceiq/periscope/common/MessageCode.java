@@ -28,5 +28,7 @@ public class MessageCode {
 
     public static final String CLUSTER_UPDATE_IN_PROGRESS = "autoscale.cluster.update.in.progress";
 
+    public static final String VALIDATION_TIME_NEGATIVE_ADJUSTMENT_FOR_EXACT = "autoscale.validation.time.negative.adjustment";
+
     private MessageCode() { }
 }

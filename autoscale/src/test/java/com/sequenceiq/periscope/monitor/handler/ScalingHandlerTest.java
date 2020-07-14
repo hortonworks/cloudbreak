@@ -4,6 +4,7 @@ import static com.sequenceiq.periscope.api.model.AdjustmentType.EXACT;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.LOAD_BASED;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.NODE_COUNT;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.PERCENTAGE;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -33,13 +34,16 @@ import org.springframework.context.ApplicationContext;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
@@ -71,6 +75,9 @@ public class ScalingHandlerTest {
 
     @Mock
     private ExecutorService executorService;
+
+    @Mock
+    private HistoryService historyService;
 
     @Mock
     private ApplicationContext applicationContext;
@@ -119,6 +126,7 @@ public class ScalingHandlerTest {
         Cluster cluster = getARunningCluster();
         String testHostGroup = "compute";
         TimeAlert timeAlertMock = mock(TimeAlert.class);
+        History historyMock = mock(History.class);
 
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(timeAlertMock.getCluster()).thenReturn(cluster);
@@ -128,6 +136,8 @@ public class ScalingHandlerTest {
         when(scalingPolicyMock.getHostGroup()).thenReturn(testHostGroup);
         when(scalingPolicyMock.getScalingAdjustment()).thenReturn(2);
 
+        when(historyService.createEntry(any(ScalingStatus.class), anyString(), any(Integer.class),
+                any(Integer.class), any(ScalingPolicy.class))).thenReturn(historyMock);
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(stackV4ResponseMock);
         when(stackResponseUtils.getNodeCountForHostGroup(stackV4ResponseMock, testHostGroup))
                 .thenReturn(2);
