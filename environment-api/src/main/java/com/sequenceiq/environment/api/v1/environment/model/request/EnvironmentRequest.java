@@ -1,7 +1,9 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -43,6 +45,15 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ResourceObjectField(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL, variableType = AuthorizationVariableType.NAME)
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_NAME_REQUEST)
     private String credentialName;
+
+    /**
+     * This field is not used anymore
+     * @deprecated As of Environment service 2.27, because this is duplication
+     *             {@link #location} instead.
+     */
+    @ApiModelProperty(EnvironmentModelDescription.REGIONS)
+    @Deprecated(forRemoval = true)
+    private Set<String> regions = new HashSet<>();
 
     @ApiModelProperty(value = EnvironmentModelDescription.LOCATION, required = true)
     @NotNull
@@ -246,5 +257,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setProxyConfigName(String proxyConfigName) {
         this.proxyConfigName = proxyConfigName;
+    }
+
+    public Set<String> getRegions() {
+        return regions;
+    }
+
+    public void setRegions(Set<String> regions) {
+        this.regions = regions == null ? new HashSet<>() : regions;
     }
 }
