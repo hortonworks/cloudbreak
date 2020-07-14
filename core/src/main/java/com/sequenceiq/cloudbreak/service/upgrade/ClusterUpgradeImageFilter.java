@@ -32,6 +32,10 @@ public class ClusterUpgradeImageFilter {
 
     private static final String SALT_PACKAGE_KEY = "salt";
 
+    private static final String CDH_BUILD_NUMBER_KEY = "cdh-build-number";
+
+    private static final String CM_BUILD_NUMBER_KEY = "cm-build-number";
+
     @Inject
     private VersionBasedImageFilter versionBasedImageFilter;
 
@@ -95,8 +99,8 @@ public class ClusterUpgradeImageFilter {
     private Predicate<Image> validateCmAndStackVersion(Image currentImage, boolean lockComponents) {
         return image -> {
             boolean result = lockComponents ? (permitLockedComponentsUpgrade(currentImage, image))
-            : (permitCmAndStackUpgrade(currentImage, image, CM_PACKAGE_KEY)
-                        || permitCmAndStackUpgrade(currentImage, image, STACK_PACKAGE_KEY));
+                    : (permitCmAndStackUpgrade(currentImage, image, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY)
+                            || permitCmAndStackUpgrade(currentImage, image, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY));
 
             setReason(result, "There is no proper Cloudera Manager or CDP version to upgrade.");
             return result;
@@ -109,9 +113,8 @@ public class ClusterUpgradeImageFilter {
         return currentImagePackageVersions.equals(imagePackageVersions);
     }
 
-    private boolean permitCmAndStackUpgrade(Image currentImage, Image image, String key) {
-        return upgradePermissionProvider.permitCmAndStackUpgrade(currentImage.getPackageVersions().get(key),
-                image.getPackageVersions().get(key));
+    private boolean permitCmAndStackUpgrade(Image currentImage, Image image, String versionKey, String buildNumberKey) {
+        return upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, image, versionKey, buildNumberKey);
     }
 
     private Predicate<Image> validateCloudPlatform(String cloudPlatform) {
