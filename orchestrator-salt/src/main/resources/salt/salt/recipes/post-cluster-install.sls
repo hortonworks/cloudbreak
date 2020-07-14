@@ -14,7 +14,7 @@ create_recipe_log_dir_post_cluster:
        - salt://post-recipes/scripts/{{ script_name }}
        - salt://post-recipes/scripts/post-date.sh
      - makedirs: True
-     - mode: 755
+     - mode: 700
 
 run_post_cluster_install_script_{{ script_name }}:
   cmd.run:

@@ -17,7 +17,7 @@ create_recipe_log_dir_pre_start:
        - salt://pre-recipes/scripts/{{ script_name }}
        - salt://pre-recipes/scripts/pre-date.sh
      - makedirs: True
-     - mode: 755
+     - mode: 700
 
 run_pre_cm_start_script_{{ script_name }}:
   cmd.run:
