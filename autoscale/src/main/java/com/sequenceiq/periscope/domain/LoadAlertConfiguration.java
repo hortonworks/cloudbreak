@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.domain;
 
+import static com.sequenceiq.periscope.monitor.evaluator.ScalingConstants.DEFAULT_LOAD_BASED_AUTOSCALING_COOLDOWN_MINS;
+
 import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,7 +12,7 @@ public class LoadAlertConfiguration {
 
     private Integer maxResourceValue;
 
-    private Integer coolDownMinutes;
+    private Integer coolDownMinutes = DEFAULT_LOAD_BASED_AUTOSCALING_COOLDOWN_MINS;
 
     public Integer getMinResourceValue() {
         return minResourceValue;
@@ -38,7 +40,9 @@ public class LoadAlertConfiguration {
     }
 
     public void setCoolDownMinutes(Integer coolDownMinutes) {
-        this.coolDownMinutes = coolDownMinutes;
+        if (null != coolDownMinutes) {
+            this.coolDownMinutes = coolDownMinutes;
+        }
     }
 
     @Override
