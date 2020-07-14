@@ -33,7 +33,6 @@ public class LoadAlertConfigurationRequest implements Json {
     @Min(value = 2)
     @Max(value = 180)
     @Digits(fraction = 0, integer = 3)
-    @NotNull
     private @Valid Integer coolDownMinutes;
 
     public Integer getMinResourceValue() {
