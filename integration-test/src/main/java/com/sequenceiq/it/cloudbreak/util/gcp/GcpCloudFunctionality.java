@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.gcp;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -12,6 +13,11 @@ public class GcpCloudFunctionality implements CloudFunctionality {
 
     @Override
     public List<String> listInstanceVolumeIds(List<String> instanceIds) {
+        throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
+    }
+
+    @Override
+    public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
         throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
     }
 

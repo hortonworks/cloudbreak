@@ -25,6 +25,7 @@ import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
+import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.amazonaws.services.lambda.model.EC2UnexpectedException;
@@ -157,5 +158,18 @@ public class EC2ClientActions extends EC2Client {
                 LOGGER.error("EC2 Instance {} stop has not been successful, because of EC2UnexpectedException: {}", instanceId, e);
             }
         }
+    }
+
+    public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
+        DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
+        DescribeInstancesResult describeInstancesResult = buildEC2Client().describeInstances(describeInstancesRequest);
+        return describeInstancesResult.getReservations().stream()
+                .flatMap(reservation -> reservation.getInstances().stream())
+                .collect(Collectors.toMap(Instance::getInstanceId, this::getTagsForInstance));
+    }
+
+    private Map<String, String> getTagsForInstance(Instance instance) {
+        return instance.getTags().stream()
+                .collect(Collectors.toMap(Tag::getKey, Tag::getValue));
     }
 }

@@ -242,7 +242,7 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends MicroserviceClient> msClientClass) {
+    public <U extends MicroserviceClient> U getMicroserviceClient(Class<U> msClientClass) {
         return wrappedTestContext.getMicroserviceClient(msClientClass);
     }
 

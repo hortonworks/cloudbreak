@@ -64,7 +64,7 @@ public class TagsUtil {
         return tag;
     }
 
-    private void verifyTags(TaggedResponse response) {
+    public void verifyTags(TaggedResponse response) {
         SoftAssert softAssert = new SoftAssert();
         softAssert.assertNotNull(response.getTagValue(TEST_NAME_TAG), MISSING_TEST_NAME_TAG_MESSAGE);
         DEFAULT_TAGS.forEach(tag -> softAssert.assertNotNull(response.getTagValue(tag), String.format(MISSING_DEFAULT_TAG, tag)));
