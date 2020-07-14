@@ -22,6 +22,10 @@ public class GeneralClusterConfigsView {
 
     private String password;
 
+    private String cmUserName;
+
+    private String cmPassword;
+
     private ExecutorType executorType;
 
     private String clusterManagerIp;
@@ -43,6 +47,8 @@ public class GeneralClusterConfigsView {
         uuid = generalClusterConfigs.getUuid();
         userName = generalClusterConfigs.getUserName();
         password = generalClusterConfigs.getPassword();
+        cmUserName = generalClusterConfigs.getCloudbreakAmbariUser();
+        cmPassword = generalClusterConfigs.getCloudbreakAmbariPassword();
         executorType = generalClusterConfigs.getExecutorType();
         clusterManagerIp = generalClusterConfigs.getClusterManagerIp();
         orchestratorType = generalClusterConfigs.getOrchestratorType();
@@ -87,6 +93,14 @@ public class GeneralClusterConfigsView {
         this.password = password;
     }
 
+    public void setCmUserName(String cmUserName) {
+        this.cmUserName = cmUserName;
+    }
+
+    public void setCmPassword(String cmPassword) {
+        this.cmPassword = cmPassword;
+    }
+
     public void setExecutorType(ExecutorType executorType) {
         this.executorType = executorType;
     }
@@ -125,6 +139,14 @@ public class GeneralClusterConfigsView {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getCmUserName() {
+        return cmUserName;
+    }
+
+    public String getCmPassword() {
+        return cmPassword;
     }
 
     public ExecutorType getExecutorType() {
