@@ -19,6 +19,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultInstanceParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultServerParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultTunnelParameters;
+import com.sequenceiq.cloudbreak.ccm.endpoint.BaseServiceEndpoint;
+import com.sequenceiq.cloudbreak.ccm.endpoint.HostEndpoint;
+import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -66,9 +74,26 @@ public class UserDataBuilderTest {
     public void testBuildUserDataAzure() throws IOException {
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
-        // JSA todo add test for CCM parameters
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-            "cloudbreak", getPlatformParameters(), "pass", "cert", null, null);
+                "cloudbreak", getPlatformParameters(), "pass", "cert", null, null);
+        Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
+        Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+    }
+
+    @Test
+    public void testBuildUserDataWithCCM() throws IOException {
+        BaseServiceEndpoint serviceEndpoint = new BaseServiceEndpoint(new HostEndpoint("ccm.cloudera.com"));
+        DefaultServerParameters serverParameters = new DefaultServerParameters(serviceEndpoint, "pub-key", "mina-id");
+        DefaultInstanceParameters instanceParameters = new DefaultInstanceParameters("tunnel-id", "key-id", "private-key");
+        DefaultTunnelParameters nginxTunnel = new DefaultTunnelParameters(KnownServiceIdentifier.GATEWAY, 9443);
+        DefaultTunnelParameters knoxTunnel = new DefaultTunnelParameters(KnownServiceIdentifier.KNOX, 8443);
+        CcmParameters ccmParameters = new DefaultCcmParameters(serverParameters, instanceParameters, List.of(nginxTunnel, knoxTunnel));
+
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", ccmParameters, null);
+
+        String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-ccm-init.sh");
+        String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-ccm-init.sh");
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
@@ -134,7 +159,7 @@ public class UserDataBuilderTest {
         @Override
         public PlatformOrchestrator orchestratorParams() {
             return new PlatformOrchestrator(Collections.singleton(orchestrator(OrchestratorConstants.SALT)),
-                orchestrator(OrchestratorConstants.SALT));
+                    orchestrator(OrchestratorConstants.SALT));
         }
 
         @Override

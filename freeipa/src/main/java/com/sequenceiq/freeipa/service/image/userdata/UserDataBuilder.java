@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -55,7 +56,7 @@ public class UserDataBuilder {
         model.put("customUserData", userDataBuilderParams.getCustomData());
         model.put("saltBootPassword", saltBootPassword);
         model.put("cbCert", cbCert);
-        CcmParameters.addToTemplateModel(ccmParameters, model);
+        CcmParameters.addToTemplateModel(InstanceGroupType.GATEWAY, ccmParameters, model);
         extendModelWithProxyParams(proxyConfig, model);
         return build(model);
     }
