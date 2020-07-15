@@ -12,7 +12,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceActionType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -55,7 +54,6 @@ public class UmsAccountAuthorizationService {
     }
 
     private boolean hasRightOfUser(String userCrn, AuthorizationResourceAction action) {
-        validateAction(action);
         return umsClient.checkRight(userCrn, userCrn, umsRightProvider.getRight(action), getRequestId());
     }
 
@@ -71,18 +69,10 @@ public class UmsAccountAuthorizationService {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
-        validateAction(action);
         if (!umsClient.checkRight(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, actorCrn.toString(), umsRightProvider.getRight(action), getRequestId())) {
             String unauthorizedMessage = String.format("You have no right to perform %s on user %s.", umsRightProvider.getRight(action), targetUserCrnStr);
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
-        }
-    }
-
-    private void validateAction(AuthorizationResourceAction action) {
-        if (umsClient.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getUserCrn(), ThreadBasedUserCrnProvider.getAccountId()) &&
-                umsRightProvider.getActionType(action).equals(AuthorizationResourceActionType.RESOURCE_DEPENDENT)) {
-            throw new UnsupportedOperationException("Action should be resource independent.");
         }
     }
 

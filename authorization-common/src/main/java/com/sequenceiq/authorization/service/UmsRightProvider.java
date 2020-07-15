@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceActionModel;
-import com.sequenceiq.authorization.resource.AuthorizationResourceActionType;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -39,10 +38,6 @@ public class UmsRightProvider {
 
     public AuthorizationResourceType getResourceType(AuthorizationResourceAction action) {
         return getActionModel(action).getResourceType();
-    }
-
-    public AuthorizationResourceActionType getActionType(AuthorizationResourceAction action) {
-        return getActionModel(action).getActionType();
     }
 
     public String getRight(AuthorizationResourceAction action, String actorCrn, String accountId) {
