@@ -5,6 +5,8 @@ public class BootstrapParams {
 
     private String os;
 
+    private boolean saltBootstrapFpSupported;
+
     public String getCloud() {
         return cloud;
     }
@@ -19,5 +21,22 @@ public class BootstrapParams {
 
     public void setOs(String os) {
         this.os = os;
+    }
+
+    public boolean isSaltBootstrapFpSupported() {
+        return saltBootstrapFpSupported;
+    }
+
+    public void setSaltBootstrapFpSupported(boolean saltBootstrapFpSupported) {
+        this.saltBootstrapFpSupported = saltBootstrapFpSupported;
+    }
+
+    @Override
+    public String toString() {
+        return "BootstrapParams{" +
+                "cloud='" + cloud + '\'' +
+                ", os='" + os + '\'' +
+                ", saltBootstrapFpSupported=" + saltBootstrapFpSupported +
+                '}';
     }
 }

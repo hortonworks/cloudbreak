@@ -30,9 +30,9 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 
 @Component
 public class PackageVersionChecker {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PackageVersionChecker.class);
+    public static final String SALT_BOOTSTRAP = "salt-bootstrap";
 
-    private static final String SALT_BOOTSTRAP = "salt-bootstrap";
+    private static final Logger LOGGER = LoggerFactory.getLogger(PackageVersionChecker.class);
 
     @Inject
     private InstanceMetadataUpdater instanceMetadataUpdater;

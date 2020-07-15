@@ -4,7 +4,7 @@ import java.util.List;
 
 public class FingerprintsResponse {
 
-    private List<Fingerprint> fingerprints;
+    private List<Fingerprint> fingerprints = List.of();
 
     private String errorText;
 
