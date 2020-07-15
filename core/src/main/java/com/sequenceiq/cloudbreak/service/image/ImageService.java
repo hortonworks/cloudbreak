@@ -167,7 +167,13 @@ public class ImageService {
             return checkIfBasePermitted(image, baseImageEnabled);
         }
         String clusterVersion = getClusterVersion(blueprint);
-        Set<String> operatingSystems = getSupportedOperationSystems(imageSettings, clusterVersion);
+
+        Set<String> operatingSystems;
+        try {
+            operatingSystems = getSupportedOperationSystems(workspaceId, imageSettings, clusterVersion, platformString);
+        } catch (Exception ex) {
+            throw new CloudbreakImageCatalogException(ex);
+        }
 
         ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(workspaceId, imageSettings, user);
         ImageFilter imageFilter = new ImageFilter(imageCatalog, ImmutableSet.of(platformString), null, baseImageEnabled, operatingSystems, clusterVersion);
@@ -208,8 +214,9 @@ public class ImageService {
         return image;
     }
 
-    private Set<String> getSupportedOperationSystems(ImageSettingsV4Request imageSettings, String clusterVersion) {
-        Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(clusterVersion);
+    private Set<String> getSupportedOperationSystems(Long workspaceId, ImageSettingsV4Request imageSettings, String clusterVersion, String platform) throws Exception {
+        String imageCatalogName = imageSettings != null ? imageSettings.getCatalog() : null;
+        Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(workspaceId, clusterVersion, platform, imageCatalogName);
         if (imageSettings != null && StringUtils.isNotEmpty(imageSettings.getOs())) {
             if (operatingSystems.isEmpty()) {
                 operatingSystems = Collections.singleton(imageSettings.getOs());

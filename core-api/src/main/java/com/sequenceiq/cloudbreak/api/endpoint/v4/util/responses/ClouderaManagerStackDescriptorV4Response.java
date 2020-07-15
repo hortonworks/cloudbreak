@@ -10,13 +10,13 @@ public class ClouderaManagerStackDescriptorV4Response {
 
     private String version;
 
-    private String minCM;
-
     private ClouderaManagerStackRepoDetailsV4Response repository;
 
     private ClouderaManagerInfoV4Response clouderaManager;
 
     private List<ClouderaManagerProductV4Response> products = new ArrayList<>();
+
+    private List<String> productDefinitions = new ArrayList<>();
 
     public String getVersion() {
         return version;
@@ -24,14 +24,6 @@ public class ClouderaManagerStackDescriptorV4Response {
 
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    public String getMinCM() {
-        return minCM;
-    }
-
-    public void setMinCM(String minCM) {
-        this.minCM = minCM;
     }
 
     public ClouderaManagerStackRepoDetailsV4Response getRepository() {
@@ -56,5 +48,13 @@ public class ClouderaManagerStackDescriptorV4Response {
 
     public void setProducts(List<ClouderaManagerProductV4Response> products) {
         this.products = products;
+    }
+
+    public List<String> getProductDefinitions() {
+        return productDefinitions;
+    }
+
+    public void setProductDefinitions(List<String> productDefinitions) {
+        this.productDefinitions = productDefinitions;
     }
 }

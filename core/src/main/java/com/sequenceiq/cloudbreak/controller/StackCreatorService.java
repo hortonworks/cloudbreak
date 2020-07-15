@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
@@ -65,6 +66,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -161,6 +163,9 @@ public class StackCreatorService {
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         long start = System.currentTimeMillis();
@@ -262,7 +267,7 @@ public class StackCreatorService {
                 try {
                     LOGGER.info("Create cluster enity in the database with name {}.", stackName);
                     createClusterIfNeed(user, stackRequest, newStack, stackName, blueprint, environment.getParentEnvironmentCloudPlatform());
-                } catch (CloudbreakImageNotFoundException | IOException | TransactionExecutionException e) {
+                } catch (CloudbreakImageCatalogException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
                 LOGGER.info("Shared service preparation if required with name {}.", stackName);
@@ -384,7 +389,7 @@ public class StackCreatorService {
     }
 
     private void createClusterIfNeed(User user, StackV4Request stackRequest, Stack stack, String stackName,
-            Blueprint blueprint, String parentEnvironmentCloudPlatform) throws CloudbreakImageNotFoundException, IOException, TransactionExecutionException {
+            Blueprint blueprint, String parentEnvironmentCloudPlatform) throws CloudbreakImageCatalogException, IOException, TransactionExecutionException {
         if (stackRequest.getCluster() != null) {
             long start = System.currentTimeMillis();
             Cluster cluster = clusterCreationService.prepare(stackRequest.getCluster(), stack, blueprint, user, parentEnvironmentCloudPlatform);
@@ -422,12 +427,15 @@ public class StackCreatorService {
         boolean shouldUseBaseCMImage = shouldUseBaseCMImage(clusterRequest);
         boolean baseImageEnabled = imageCatalogService.baseImageEnabled();
         Map<String, String> mdcContext = MDCBuilder.getMdcContextMap();
+        CloudbreakUser cbUser = restRequestThreadLocalService.getCloudbreakUser();
+
         return executorService.submit(() -> {
             MDCBuilder.buildMdcContextFromMap(mdcContext);
             LOGGER.info("The stack with name {} has base images enabled: {} and should use base images: {}",
                     stackName, baseImageEnabled, shouldUseBaseCMImage);
             StatedImage statedImage = ThreadBasedUserCrnProvider.doAs(user.getUserCrn(), () -> {
                 try {
+                    restRequestThreadLocalService.setCloudbreakUser(cbUser);
                     return imageService.determineImageFromCatalog(
                             workspace.getId(),
                             stackRequest.getImage(),

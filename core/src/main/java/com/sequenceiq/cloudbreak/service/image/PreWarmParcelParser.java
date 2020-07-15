@@ -32,6 +32,7 @@ public class PreWarmParcelParser {
             String name = substringBefore(nameAndVersion.get(), "-");
             LOGGER.info("The parsed product name for parcel is: '{}'.", name);
             product.setName(name);
+            product.setDisplayName(nameAndVersion.get());
             String version = substringAfter(substringBeforeLast(nameAndVersion.get(), "-"), "-");
             LOGGER.info("The parsed product version for parcel is: '{}'.", version);
             product.setVersion(version);

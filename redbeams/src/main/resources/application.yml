@@ -253,32 +253,6 @@ cb:
     db: ranger
     port: 5432
 
-  clouderamanager:
-    entries:
-      6.1:
-        version: 6.1.1
-        repo:
-          redhat7:
-            baseurl: https://archive.cloudera.com/cm6/6.1.1/redhat7/yum/
-            gpgkey: https://archive.cloudera.com/cm6/6.1.1/redhat7/yum/RPM-GPG-KEY-cloudera
-
-  cdh:
-    entries:
-      "[6.1.0]":
-        version: 6.1.0-1.cdh6.1.0.p0.770702
-        minCM: 6.1
-        repo:
-          stack:
-            repoid: CDH
-            redhat7: https://archive.cloudera.com/cdh6/6.1.0/parcels/
-      "[6.1.1]":
-        version: 6.1.1-1.cdh6.1.1.p0.875250
-        minCM: 6.1
-        repo:
-          stack:
-            repoid: CDH
-            redhat7: https://archive.cloudera.com/cdh6/6.1.1/parcels/
-
   ambari:
     entries:
       2.6:

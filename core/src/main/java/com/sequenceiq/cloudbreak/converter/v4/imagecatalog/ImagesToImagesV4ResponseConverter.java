@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.imagecatalog;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,26 +16,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.Cloudera
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ClouderaManagerStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerRepositoryV4Response;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
-import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHEntries;
-import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
+import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntries;
+import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 
 @Component
 public class ImagesToImagesV4ResponseConverter extends AbstractConversionServiceAwareConverter<Images, ImagesV4Response> {
 
     @Inject
-    private DefaultCDHEntries defaultCDHEntries;
-
-    @Inject
-    private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
+    private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
 
     @Override
     public ImagesV4Response convert(Images source) {
@@ -59,40 +52,31 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
     }
 
     private List<BaseImageV4Response> getBaseImageResponses(Images source) {
-        List<ClouderaManagerStackDetailsV4Response> defaultCdhStacks = getDefaultCdhStackInfo(defaultCDHEntries.getEntries().values());
+        Map<String, ImageBasedDefaultCDHInfo> imageBasedDefaultCDHInfoMap = imageBasedDefaultCDHEntries.getEntries(source);
+        List<ClouderaManagerStackDetailsV4Response> defaultCdhStacks = getDefaultCdhStackInfo(imageBasedDefaultCDHInfoMap);
         List<BaseImageV4Response> baseImages = source.getBaseImages().stream()
-                .filter(image -> defaultClouderaManagerRepoService.getDefault(image.getOsType()) != null)
                 .map(image -> {
                     BaseImageV4Response imgJson = new BaseImageV4Response();
                     copyImageFieldsToJson(image, imgJson);
                     imgJson.setCdhStacks(defaultCdhStacks);
-                    ClouderaManagerRepo clouderaManagerRepo = defaultClouderaManagerRepoService.getDefault(image.getOsType());
-                    if (clouderaManagerRepo != null) {
-                        ClouderaManagerRepositoryV4Response clouderaManagerRepoJson = new ClouderaManagerRepositoryV4Response();
-                        clouderaManagerRepoJson.setBaseUrl(clouderaManagerRepo.getBaseUrl());
-                        clouderaManagerRepoJson.setVersion(clouderaManagerRepo.getVersion());
-                        clouderaManagerRepoJson.setGpgKeyUrl(clouderaManagerRepo.getGpgKeyUrl());
-                        imgJson.setClouderaManagerRepo(clouderaManagerRepoJson);
-                    }
-                    Map<String, String> repoJson = new HashMap<>();
-                    imgJson.setRepository(repoJson);
+                    imgJson.setRepository(new HashMap<>());
                     return imgJson;
                 })
                 .collect(Collectors.toList());
         return baseImages;
     }
 
-    private List<ClouderaManagerStackDetailsV4Response> getDefaultCdhStackInfo(Collection<DefaultCDHInfo> defaultStackInfo) {
+    private List<ClouderaManagerStackDetailsV4Response> getDefaultCdhStackInfo(Map<String, ImageBasedDefaultCDHInfo> defaultStackInfo) {
         List<ClouderaManagerStackDetailsV4Response> result = new ArrayList<>();
-        for (DefaultCDHInfo info : defaultStackInfo) {
+        for (ImageBasedDefaultCDHInfo info : defaultStackInfo.values()) {
             ClouderaManagerStackDetailsV4Response json = new ClouderaManagerStackDetailsV4Response();
             ClouderaManagerStackRepoDetailsV4Response repoJson = new ClouderaManagerStackRepoDetailsV4Response();
-            Map<String, String> stackRepo = info.getRepo().getStack();
+            Map<String, String> stackRepo = info.getDefaultCDHInfo().getRepo().getStack();
             if (stackRepo != null) {
                 repoJson.setStack(stackRepo);
             }
             json.setRepository(repoJson);
-            json.setVersion(info.getVersion());
+            json.setVersion(info.getDefaultCDHInfo().getVersion());
             result.add(json);
         }
         return result;

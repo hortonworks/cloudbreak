@@ -372,6 +372,7 @@ public class ModelDescriptions {
 
     public static class ClouderaManagerProductDescription {
         public static final String NAME = "name of the Cloudera manager product";
+        public static final String DISPLAY_NAME = "display name of the Cloudera manager product - contains the name and the version";
         public static final String VERSION = "version of the Cloudera manager product";
         public static final String PARCEL = "parcel url of the Cloudera manager product";
         public static final String CSD = "CSD (service descriptor) urls for the Cloudera manager product";

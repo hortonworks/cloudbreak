@@ -12,6 +12,8 @@ public class ClouderaManagerProduct implements Serializable {
 
     private String name;
 
+    private String displayName;
+
     private String version;
 
     private String parcel;
@@ -24,6 +26,14 @@ public class ClouderaManagerProduct implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getVersion() {
@@ -52,6 +62,11 @@ public class ClouderaManagerProduct implements Serializable {
 
     public ClouderaManagerProduct withName(String name) {
         this.name = name;
+        return this;
+    }
+
+    public ClouderaManagerProduct withDisplayName(String displayName) {
+        this.displayName = displayName;
         return this;
     }
 

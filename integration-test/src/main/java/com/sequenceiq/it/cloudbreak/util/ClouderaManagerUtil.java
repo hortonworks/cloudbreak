@@ -35,11 +35,11 @@ public class ClouderaManagerUtil {
     private ClouderaManagerUtil() {
     }
 
-    private static ClouderaManagerStackDescriptorV4Response getCMDescriptor(TestContext testContext) {
+    private static ClouderaManagerStackDescriptorV4Response getCMDescriptor(TestContext testContext) throws Exception {
         StackMatrixV4Response stackMatrix = testContext
                 .getCloudbreakClient()
                 .getCloudbreakClient()
-                .utilV4Endpoint().getStackMatrix();
+                .utilV4Endpoint().getStackMatrix(null, null);
         return stackMatrix.getCdh().get(CDH_VERSION);
     }
 
@@ -86,7 +86,7 @@ public class ClouderaManagerUtil {
         return stackTestDto;
     }
 
-    public static String getRepositoryUrl(TestContext testContext, String cloudProvider) {
+    public static String getRepositoryUrl(TestContext testContext, String cloudProvider) throws Exception {
         ClouderaManagerStackDescriptorV4Response clouderaManagerStackDescriptorV4Response = getCMDescriptor(testContext);
         String repositoryUrl = clouderaManagerStackDescriptorV4Response.getClouderaManager().getRepository().get(REDHAT_7).getBaseUrl();
         repositoryUrl = "YARN".equals(cloudProvider) ? repositoryUrl.replace(DEFAULT_REPO_BASE_URL, BASE_URL_FOR_YARN) : repositoryUrl;
@@ -94,12 +94,12 @@ public class ClouderaManagerUtil {
         return repositoryUrl;
     }
 
-    public static String getRepositoryVersion(TestContext testContext) {
+    public static String getRepositoryVersion(TestContext testContext) throws Exception {
         ClouderaManagerStackDescriptorV4Response clouderaManagerStackDescriptorV4Response = getCMDescriptor(testContext);
         return clouderaManagerStackDescriptorV4Response.getClouderaManager().getVersion();
     }
 
-    public static String getProductParcel(TestContext testContext, String cloudProvider) {
+    public static String getProductParcel(TestContext testContext, String cloudProvider) throws Exception {
         ClouderaManagerStackDescriptorV4Response clouderaManagerStackDescriptorV4Response = getCMDescriptor(testContext);
         String productParcel = clouderaManagerStackDescriptorV4Response.getRepository().getStack().get(REDHAT_7);
         productParcel = "YARN".equals(cloudProvider) ? productParcel.replace(DEFAULT_REPO_BASE_URL, BASE_URL_FOR_YARN) : productParcel;
@@ -107,7 +107,7 @@ public class ClouderaManagerUtil {
         return productParcel;
     }
 
-    public static String getProductVersion(TestContext testContext) {
+    public static String getProductVersion(TestContext testContext) throws Exception {
         ClouderaManagerStackDescriptorV4Response clouderaManagerStackDescriptorV4Response = getCMDescriptor(testContext);
         return clouderaManagerStackDescriptorV4Response.getVersion();
     }

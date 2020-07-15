@@ -53,7 +53,6 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -81,7 +80,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
@@ -163,9 +161,6 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
-
-    @Inject
-    private DefaultClouderaManagerRepoService clouderaManagerRepoService;
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
@@ -419,16 +414,16 @@ public class ClusterHostServiceRunner {
 
     private void decoratePillarWithClouderaManagerRepo(Long stackId, Long clusterId, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
-        try {
-            String osType = componentConfigProviderService.getImage(stackId).getOsType();
-            ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
 
-            servicePillar.put("cloudera-manager-repo", new SaltPillarProperties("/cloudera-manager/repo.sls",
-                    singletonMap("cloudera-manager", singletonMap("repo", Objects.nonNull(clouderaManagerRepo)
-                            ? clouderaManagerRepo : clouderaManagerRepoService.getDefault(osType)))));
-        } catch (CloudbreakImageNotFoundException e) {
-            throw new CloudbreakOrchestratorFailedException("Cannot determine image of stack, thus osType and repository information cannot be provided.");
+        ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
+
+        if (clouderaManagerRepo == null) {
+            throw new CloudbreakOrchestratorFailedException("Cloudera Manager repository details are missing.");
         }
+
+        servicePillar.put("cloudera-manager-repo", new SaltPillarProperties("/cloudera-manager/repo.sls",
+                singletonMap("cloudera-manager", singletonMap("repo", clouderaManagerRepo))));
+
     }
 
     private void decoratePillarWithClouderaManagerCsds(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {

@@ -26,6 +26,7 @@ public class PreWarmParcelParserTest {
 
         assertTrue(result.isPresent());
         assertEquals("SCHEMAREGISTRY", result.get().getName());
+        assertEquals(PARCEL_VERSION, result.get().getDisplayName());
         assertEquals(PARCEL_URL, result.get().getParcel());
         assertEquals("0.8.0.3.0.0.0-9", result.get().getVersion());
     }

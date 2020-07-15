@@ -21,6 +21,10 @@ public class ClouderaManagerProductV4Response implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.NAME)
     private String name;
 
+    @NotNull
+    @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.DISPLAY_NAME)
+    private String displayName;
+
     @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.VERSION)
     private String version;
 
@@ -36,6 +40,14 @@ public class ClouderaManagerProductV4Response implements JsonEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getVersion() {
@@ -64,6 +76,11 @@ public class ClouderaManagerProductV4Response implements JsonEntity {
 
     public ClouderaManagerProductV4Response withName(String name) {
         this.name = name;
+        return this;
+    }
+
+    public ClouderaManagerProductV4Response withDisplayName(String displayName) {
+        this.displayName = displayName;
         return this;
     }
 
