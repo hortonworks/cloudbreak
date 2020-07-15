@@ -69,13 +69,20 @@ public class AwsStackRequestHelper {
                 .withTemplateBody(cfTemplate)
                 .withTags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
                 .withCapabilities(CAPABILITY_IAM)
-                .withParameters(getStackParameters(ac, stack));
+                .withParameters(getStackParameters(ac, stack, true));
     }
 
     public UpdateStackRequest createUpdateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String cfTemplate) {
         return new UpdateStackRequest()
                 .withStackName(cFStackName)
                 .withParameters(getStackParameters(ac, stack, cFStackName, null))
+                .withTemplateBody(cfTemplate);
+    }
+
+    public UpdateStackRequest createUpdateStackRequestDisablingDeleteProtection(AuthenticatedContext ac, DatabaseStack stack, String cFStackName, String cfTemplate) {
+        return new UpdateStackRequest()
+                .withStackName(cFStackName)
+                .withParameters(getStackParameters(ac, stack, false))
                 .withTemplateBody(cfTemplate);
     }
 
@@ -187,7 +194,7 @@ public class AwsStackRequestHelper {
     }
 
     @VisibleForTesting
-    Collection<Parameter> getStackParameters(AuthenticatedContext ac, DatabaseStack stack) {
+    Collection<Parameter> getStackParameters(AuthenticatedContext ac, DatabaseStack stack, boolean deleteProtection) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         AwsRdsInstanceView awsRdsInstanceView = new AwsRdsInstanceView(stack.getDatabaseServer());
         AwsRdsDbSubnetGroupView awsRdsDbSubnetGroupView = new AwsRdsDbSubnetGroupView(stack.getDatabaseServer());
@@ -199,7 +206,8 @@ public class AwsStackRequestHelper {
                 new Parameter().withParameterKey("DBSubnetGroupSubnetIdsParameter").withParameterValue(String.join(",", awsNetworkView.getSubnetList())),
                 new Parameter().withParameterKey("EngineParameter").withParameterValue(awsRdsInstanceView.getEngine()),
                 new Parameter().withParameterKey("MasterUsernameParameter").withParameterValue(awsRdsInstanceView.getMasterUsername()),
-                new Parameter().withParameterKey("MasterUserPasswordParameter").withParameterValue(awsRdsInstanceView.getMasterUserPassword()))
+                new Parameter().withParameterKey("MasterUserPasswordParameter").withParameterValue(awsRdsInstanceView.getMasterUserPassword()),
+                new Parameter().withParameterKey("DeletionProtectionParameter").withParameterValue(deleteProtection ? "true" : "false"))
         );
 
         addParameterIfNotNull(parameters, "AllocatedStorageParameter", awsRdsInstanceView.getAllocatedStorage());
