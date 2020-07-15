@@ -26,6 +26,10 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Os;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAuth;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.join.AcceptAllFpMatcher;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.join.DummyFingerprintCollector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.join.EqualMinionFpMatcher;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.join.FingerprintFromSbCollector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.join.MinionAcceptor;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
@@ -99,7 +103,9 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     }
 
     protected MinionAcceptor createMinionAcceptor(SaltAction saltAction) {
-        return new MinionAcceptor(sc, saltAction.getMinions());
+        return params.isSaltBootstrapFpSupported() ?
+                new MinionAcceptor(sc, saltAction.getMinions(), new EqualMinionFpMatcher(), new FingerprintFromSbCollector())
+                : new MinionAcceptor(sc, saltAction.getMinions(), new AcceptAllFpMatcher(), new DummyFingerprintCollector());
     }
 
     private SaltAction createBootstrap() {

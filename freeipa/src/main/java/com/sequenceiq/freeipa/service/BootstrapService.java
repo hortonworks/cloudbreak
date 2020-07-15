@@ -78,6 +78,7 @@ public class BootstrapService {
 
         ImageEntity image = imageService.getByStack(stack);
         params.setOs(image.getOs());
+        params.setSaltBootstrapFpSupported(true);
         try {
             byte[] stateConfigZip = getStateConfigZip();
             hostOrchestrator.bootstrapNewNodes(gatewayConfigs, allNodes, allNodes,

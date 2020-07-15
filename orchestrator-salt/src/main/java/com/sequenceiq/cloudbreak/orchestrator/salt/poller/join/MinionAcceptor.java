@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller.join;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,9 +24,15 @@ public class MinionAcceptor {
 
     private final List<Minion> minions;
 
-    public MinionAcceptor(SaltConnector sc, List<Minion> minions) {
+    private final MinionFingerprintMatcher fingerprintMatcher;
+
+    private final FingerprintCollector fingerprintCollector;
+
+    public MinionAcceptor(SaltConnector sc, List<Minion> minions, MinionFingerprintMatcher fingerprintMatcher, FingerprintCollector fingerprintCollector) {
         this.sc = sc;
         this.minions = minions;
+        this.fingerprintMatcher = fingerprintMatcher;
+        this.fingerprintCollector = fingerprintCollector;
     }
 
     public void acceptMinions() throws CloudbreakOrchestratorFailedException {
@@ -43,17 +48,13 @@ public class MinionAcceptor {
         LOGGER.info("There are unaccepted minions on master: {}", unacceptedMinions);
         Map<String, String> fingerprintsFromMaster = fetchFingerprintsFromMaster(unacceptedMinions);
         List<Minion> minionsToAccept = minions.stream().filter(minion -> unacceptedMinions.contains(minion.getId())).collect(Collectors.toList());
-        FingerprintsResponse fingerprintsResponse = createFingerprintCollector().collectFingerprintFromMinions(sc, minionsToAccept);
+        FingerprintsResponse fingerprintsResponse = fingerprintCollector.collectFingerprintFromMinions(sc, minionsToAccept);
         acceptMatchingFingerprints(fingerprintsFromMaster, fingerprintsResponse, minionsToAccept);
-    }
-
-    protected FingerprintCollector createFingerprintCollector() {
-        return new FingerprintCollector();
     }
 
     private void acceptMatchingFingerprints(Map<String, String> fingerprintsFromMaster, FingerprintsResponse fingerprintsResponse, List<Minion> minions) {
         Map<String, String> fingerprintByMinion = mapFingerprintByMinion(fingerprintsResponse, minions);
-        List<String> minionsToAccept = collectMinionsWithMatchingFp(fingerprintsFromMaster, fingerprintByMinion);
+        List<String> minionsToAccept = fingerprintMatcher.collectMinionsWithMatchingFp(fingerprintsFromMaster, fingerprintByMinion);
         LOGGER.info("Following minions will be accepted: {}", minionsToAccept);
         sc.wheel("key.accept", minionsToAccept, Object.class);
     }
@@ -63,21 +64,6 @@ public class MinionAcceptor {
         List<Fingerprint> fingerprints = fingerprintsResponse.getFingerprints();
         return fingerprints.stream()
                 .collect(Collectors.toMap(fp -> minionIdByAddress.get(fp.getAddress()), Fingerprint::getFingerprint));
-    }
-
-    private List<String> collectMinionsWithMatchingFp(Map<String, String> fingerprintsFromMaster, Map<String, String> fingerprintByMinion) {
-        return fingerprintsFromMaster.entrySet().stream()
-                .filter(entry -> isFingerPrintMatches(fingerprintByMinion, entry))
-                .map(Entry::getKey)
-                .collect(Collectors.toList());
-    }
-
-    private boolean isFingerPrintMatches(Map<String, String> fingerprintByMinion, Entry<String, String> fingerPrintFromMasterByMinion) {
-        String minionId = fingerPrintFromMasterByMinion.getKey();
-        String fingerprintOnMinion = fingerprintByMinion.get(minionId);
-        LOGGER.debug("Minion ID: [{}] Fingerprint on master: [{}] Fingerprint on minion: [{}]",
-                minionId, fingerPrintFromMasterByMinion.getValue(), fingerprintOnMinion);
-        return fingerPrintFromMasterByMinion.getValue().equals(fingerprintOnMinion);
     }
 
     private List<String> fetchUnacceptedMinionsFromMaster(List<Minion> minions) throws CloudbreakOrchestratorFailedException {
