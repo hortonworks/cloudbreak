@@ -304,6 +304,7 @@ cb:
         7.2.1 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-721;
         7.2.1 - Data Discovery and Exploration=cdp-dde-721;
         7.2.1 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light-721;
+        7.2.1 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy-721;
         7.2.2 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-722;
         7.2.2 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-722;
         7.2.2 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-722;
@@ -318,6 +319,7 @@ cb:
         7.2.2 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-722;
         7.2.2 - Data Discovery and Exploration=cdp-dde-722;
         7.2.2 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light-722;
+        7.2.2 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy-722;
 
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
