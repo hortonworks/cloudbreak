@@ -144,11 +144,11 @@ public class MockUserManagementService extends UserManagementImplBase {
     @VisibleForTesting
     static final long PASSWORD_LIFETIME = 31449600000L;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockUserManagementService.class);
+
     private static final String ENV_ACCESS_RIGHT = "environments/accessEnvironment";
 
     private static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
-
-    private static final Logger LOG = LoggerFactory.getLogger(MockUserManagementService.class);
 
     private static final String ALTUS_ACCESS_KEY_ID = "altus_access_key_id";
 
@@ -330,6 +330,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Override
     public void getUser(GetUserRequest request, StreamObserver<GetUserResponse> responseObserver) {
+        LOGGER.info("Get user: {}", request.getUserIdOrCrn());
         String userIdOrCrn = request.getUserIdOrCrn();
         String[] splittedCrn = userIdOrCrn.split(":");
         String userName = splittedCrn[6];
@@ -344,6 +345,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Override
     public void listUsers(ListUsersRequest request, StreamObserver<ListUsersResponse> responseObserver) {
+        LOGGER.info("List users for account: {}", request.getAccountId());
         Builder userBuilder = ListUsersResponse.newBuilder();
         if (request.getUserIdOrCrnCount() == 0) {
             if (isNotEmpty(request.getAccountId())) {
@@ -398,6 +400,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Override
     public void getRights(GetRightsRequest request, StreamObserver<GetRightsResponse> responseObserver) {
+        LOGGER.info("Get rights for: {}", request.getActorCrn());
         String actorCrn = request.getActorCrn();
         String accountId = Crn.fromString(actorCrn).getAccountId();
         responseObserver.onNext(buildGetRightsResponse(accountId));
@@ -407,6 +410,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void listGroupsForMember(ListGroupsForMemberRequest request, StreamObserver<ListGroupsForMemberResponse> responseObserver) {
         String accountId = request.getMember().getAccountId();
+        LOGGER.info("List groups for member: {}", accountId);
         ListGroupsForMemberResponse.Builder responseBuilder = ListGroupsForMemberResponse.newBuilder();
         List<Group> userGroups = List.copyOf(mockGroupManagementService.getOrCreateUserGroups(accountId));
         userGroups.forEach(g -> responseBuilder.addGroupCrn(g.getCrn()));
@@ -419,6 +423,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<ListWorkloadAdministrationGroupsResponse> responseObserver) {
         mockCrnService.ensureInternalActor();
         String accountId = request.getAccountId();
+        LOGGER.info("List workload administration groups: {}", accountId);
 
         ListWorkloadAdministrationGroupsResponse.Builder responseBuilder = ListWorkloadAdministrationGroupsResponse.newBuilder();
         for (UmsRight right : UmsRight.values()) {
@@ -441,6 +446,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<ListWorkloadAdministrationGroupsForMemberResponse> responseObserver) {
         String memberCrn = request.getMemberCrn();
         String accountId = Crn.fromString(memberCrn).getAccountId();
+        LOGGER.info("List workload administration groups for member: {}, accountid: {}", memberCrn, accountId);
         Set<String> groups = mockGroupManagementService.getOrCreateWorkloadGroups(accountId).stream().map(Group::getGroupName).collect(Collectors.toSet());
         ListWorkloadAdministrationGroupsForMemberResponse.Builder responseBuilder = ListWorkloadAdministrationGroupsForMemberResponse.newBuilder();
         responseBuilder.addAllWorkloadAdministrationGroupName(groups);
@@ -471,6 +477,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Override
     public void listMachineUsers(ListMachineUsersRequest request, StreamObserver<ListMachineUsersResponse> responseObserver) {
+        LOGGER.info("List machine users for: {}", request.getAccountId());
         if (request.getMachineUserNameOrCrnCount() == 0) {
             responseObserver.onNext(ListMachineUsersResponse.newBuilder().build());
         } else {
@@ -501,6 +508,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Override
     public void getAccount(GetAccountRequest request, StreamObserver<GetAccountResponse> responseObserver) {
+        LOGGER.info("Get account: {}", request.getAccountId());
         Account.Builder builder = Account.newBuilder();
         if (enableBaseImages) {
             builder.addEntitlements(createEntitlement(CDP_BASE_IMAGE));
@@ -558,6 +566,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void verifyInteractiveUserSessionToken(VerifyInteractiveUserSessionTokenRequest request,
             StreamObserver<VerifyInteractiveUserSessionTokenResponse> responseObserver) {
+        LOGGER.info("Verify interative user session token: {}", request.getSessionToken());
         String sessionToken = request.getSessionToken();
         Jwt token = decodeAndVerify(sessionToken, SIGNATURE_VERIFIER);
         AltusToken introspectResponse = jsonUtil.toObject(token.getClaims(), AltusToken.class);
@@ -577,7 +586,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<AuthenticateResponse> responseObserver) {
         String authHeader = request.getAccessKeyV1AuthRequest().getAuthHeader();
         String crn = CrnHelper.extractCrnFromAuthHeader(authHeader);
-        LOG.info("Crn: {}", crn);
+        LOGGER.info("Crn: {}", crn);
 
         responseObserver.onNext(
                 AuthenticateResponse.newBuilder()
@@ -593,18 +602,21 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Override
     public void unassignResourceRole(UnassignResourceRoleRequest request, StreamObserver<UnassignResourceRoleResponse> responseObserver) {
+        LOGGER.info("Unassign resource role: {}", request.getActor());
         responseObserver.onNext(UnassignResourceRoleResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
     public void assignRole(AssignRoleRequest request, StreamObserver<AssignRoleResponse> responseObserver) {
+        LOGGER.info("Assign role: {}", request.getActor());
         responseObserver.onNext(AssignRoleResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
 
     @Override
     public void unassignRole(UnassignRoleRequest request, StreamObserver<UnassignRoleResponse> responseObserver) {
+        LOGGER.info("Unassign role: {}", request.getActor());
         responseObserver.onNext(UnassignRoleResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
@@ -612,6 +624,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void getAssigneeAuthorizationInformation(GetAssigneeAuthorizationInformationRequest request,
             StreamObserver<GetAssigneeAuthorizationInformationResponse> responseObserver) {
+        LOGGER.info("Get assignee authorization information for crn: {}", request.getAssigneeCrn());
         responseObserver.onNext(GetAssigneeAuthorizationInformationResponse.newBuilder()
                 .setResourceAssignment(0, createResourceAssigment(request.getAssigneeCrn()))
                 .build());
@@ -621,6 +634,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void listResourceAssignees(ListResourceAssigneesRequest request,
             StreamObserver<ListResourceAssigneesResponse> responseObserver) {
+        LOGGER.info("List resource assignees for resource: {}", request.getResourceCrn());
         responseObserver.onNext(ListResourceAssigneesResponse.newBuilder()
                 .setResourceAssignee(0, createResourceAssignee(request.getResourceCrn()))
                 .build());
@@ -630,6 +644,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void notifyResourceDeleted(NotifyResourceDeletedRequest request,
             StreamObserver<NotifyResourceDeletedResponse> responseObserver) {
+        LOGGER.info("Notify resource deleted: {}", request.getResourceCrn());
         responseObserver.onNext(NotifyResourceDeletedResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
@@ -637,6 +652,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void createAccessKey(CreateAccessKeyRequest request,
             StreamObserver<CreateAccessKeyResponse> responseObserver) {
+        LOGGER.info("Create access key for account: {}", request.getAccountId());
         String accessKeyId;
         String privateKey;
         AltusCredential altusCredential = AccessKeyType.Value.UNSET.equals(request.getType())
@@ -659,6 +675,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Override
     public void listAccessKeys(ListAccessKeysRequest request, StreamObserver<ListAccessKeysResponse> responseObserver) {
+        LOGGER.info("List access keys for: {}", request.getAccountId());
         responseObserver.onNext(ListAccessKeysResponse.newBuilder()
                 .addAccessKey(0, AccessKey.newBuilder()
                         .setAccessKeyId(UUID.randomUUID().toString())
@@ -671,6 +688,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void deleteAccessKey(DeleteAccessKeyRequest request,
             StreamObserver<DeleteAccessKeyResponse> responseObserver) {
+        LOGGER.info("Delete access key: {}", request.getAccessKeyIdOrCrn());
         responseObserver.onNext(DeleteAccessKeyResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
@@ -680,6 +698,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<CreateMachineUserResponse> responseObserver) {
         String accountId = Crn.fromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn()).getAccountId();
         String name = request.getMachineUserName();
+        LOGGER.info("Create machine user for account {} with name {}", accountId, name);
         responseObserver.onNext(CreateMachineUserResponse.newBuilder()
                 .setMachineUser(MachineUser.newBuilder()
                         .setMachineUserId(UUID.nameUUIDFromBytes((accountId + '#' + name).getBytes()).toString())
@@ -691,6 +710,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Override
     public void deleteMachineUser(DeleteMachineUserRequest request, StreamObserver<DeleteMachineUserResponse> responseObserver) {
+        LOGGER.info("Delete machine user with name {}", request.getMachineUserNameOrCrn());
         responseObserver.onNext(DeleteMachineUserResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
@@ -700,6 +720,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             GetIdPMetadataForWorkloadSSORequest request,
             StreamObserver<GetIdPMetadataForWorkloadSSOResponse> responseObserver) {
         checkArgument(!Strings.isNullOrEmpty(request.getAccountId()));
+        LOGGER.info("Get IdP Metadata For Workload SSO: {}", request.getAccountId());
         try {
             String metadata = Resources.toString(
                     Resources.getResource("sso/cdp-idp-metadata.xml"),
@@ -721,6 +742,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Override
     public void listRoles(ListRolesRequest request, StreamObserver<ListRolesResponse> responseObserver) {
+        LOGGER.info("List roles for account: {}", request.getAccountId());
         responseObserver.onNext(ListRolesResponse.newBuilder().build());
         responseObserver.onCompleted();
     }
@@ -734,6 +756,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void getActorWorkloadCredentials(GetActorWorkloadCredentialsRequest request,
             io.grpc.stub.StreamObserver<GetActorWorkloadCredentialsResponse> responseObserver) {
+        LOGGER.info("Get actor workload credentials: {}", request.getActorCrn());
         GetActorWorkloadCredentialsResponse.Builder builder = GetActorWorkloadCredentialsResponse.newBuilder(actorWorkloadCredentialsResponse);
         builder.setPasswordHashExpirationDate(System.currentTimeMillis() + PASSWORD_LIFETIME);
         if (sshPublicKey.isPresent()) {
@@ -757,6 +780,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void getEventGenerationIds(GetEventGenerationIdsRequest request, StreamObserver<GetEventGenerationIdsResponse> responseObserver) {
         mockCrnService.ensureInternalActor();
+        LOGGER.info("Get event generation ids for account: {}", request.getAccountId());
         try {
             responseObserver.onNext(eventGenerationIdsCache.get(request.getAccountId()));
             responseObserver.onCompleted();
@@ -772,7 +796,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (Files.exists(Paths.get(cmLicenseFilePath))) {
             try {
                 String license = Files.readString(Path.of(cmLicenseFilePath));
-                LOG.info("Cloudbreak license file successfully loaded.");
+                LOGGER.info("Cloudbreak license file successfully loaded.");
                 return license;
             } catch (IOException e) {
                 throw new RuntimeException("Error during reading license.", e);
@@ -796,7 +820,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                     return new AltusCredential(accessKey, privateKey.toCharArray());
                 }
             } catch (IOException e) {
-                LOG.warn("Error occurred during reading altus credential.", e);
+                LOGGER.warn("Error occurred during reading altus credential.", e);
             }
         }
         return null;
@@ -821,23 +845,23 @@ public class MockUserManagementService extends UserManagementImplBase {
                                     .setPublicKey(publicKey)
                                     .setPublicKeyFingerprint(fingerprint)
                                     .build();
-                            LOG.info("Ssh public key file loaded for mocking");
+                            LOGGER.info("Ssh public key file loaded for mocking");
                             return Optional.of(sshPublicKey);
                         } catch (NoSuchAlgorithmException ex) {
-                            LOG.warn("Unable to calculate public ssh key fingerprint. Proceeding without ssh public key.", ex);
+                            LOGGER.warn("Unable to calculate public ssh key fingerprint. Proceeding without ssh public key.", ex);
                         }
                     } else {
-                        LOG.warn("The provided ssh public key at path '{}' is invalid. It must be an RSA or ED25519 key." +
+                        LOGGER.warn("The provided ssh public key at path '{}' is invalid. It must be an RSA or ED25519 key." +
                                 "Proceeding without ssh public key.", sshPublicKeyFilePath);
                     }
                 } catch (IOException e) {
-                    LOG.warn("Unable to load ssh public key from '{}'. Proceeding without ssh public key", sshPublicKeyFilePath);
+                    LOGGER.warn("Unable to load ssh public key from '{}'. Proceeding without ssh public key", sshPublicKeyFilePath);
                 }
             } else {
-                LOG.warn("ssh public key not available at path '{}'. Proceeding without ssh public key", sshPublicKeyFilePath);
+                LOGGER.warn("ssh public key not available at path '{}'. Proceeding without ssh public key", sshPublicKeyFilePath);
             }
         } else {
-            LOG.warn("ssh public key file path not specified. Proceeding without ssh public key");
+            LOGGER.warn("ssh public key file path not specified. Proceeding without ssh public key");
         }
         return Optional.empty();
     }
