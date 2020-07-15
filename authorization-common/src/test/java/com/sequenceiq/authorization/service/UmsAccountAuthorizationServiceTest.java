@@ -25,7 +25,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationResourceActionType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 
@@ -55,7 +54,6 @@ public class UmsAccountAuthorizationServiceTest {
     @Before
     public void init() {
         when(umsClient.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.TRUE);
-        when(umsRightProvider.getActionType(any())).thenReturn(AuthorizationResourceActionType.RESOURCE_INDEPENDENT);
         when(umsRightProvider.getRight(any())).thenReturn("datalake/read");
         when(umsRightProvider.getByName(eq("datalake/read"))).thenReturn(Optional.of(AuthorizationResourceAction.DATALAKE_READ));
         when(umsRightProvider.getByName(AdditionalMatchers.not(eq("datalake/read")))).thenReturn(Optional.empty());
