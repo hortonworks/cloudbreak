@@ -20,6 +20,7 @@ import org.springframework.security.access.AccessDeniedException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceActionType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 
@@ -48,6 +49,7 @@ public class UmsResourceAuthorizationServiceTest {
 
     @Before
     public void init() {
+        when(umsRightProvider.getActionType(any())).thenReturn(AuthorizationResourceActionType.RESOURCE_DEPENDENT);
         when(umsRightProvider.getRight(any())).thenReturn("environments/describeEnvironment");
         when(umsClient.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.TRUE);
     }
