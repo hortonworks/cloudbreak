@@ -79,4 +79,17 @@ public class Minion {
     public String getId() {
         return hostName + '.' + domain;
     }
+
+    @Override
+    public String toString() {
+        return "Minion{" +
+                "address='" + address + '\'' +
+                ", server='" + server + '\'' +
+                ", servers=" + servers +
+                ", hostGroup='" + hostGroup + '\'' +
+                ", domain='" + domain + '\'' +
+                ", hostName='" + hostName + '\'' +
+                ", id='" + getId() + '\'' +
+                '}';
+    }
 }

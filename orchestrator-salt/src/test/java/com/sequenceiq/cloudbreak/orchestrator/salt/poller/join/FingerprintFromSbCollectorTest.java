@@ -18,9 +18,9 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FingerprintRequest;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FingerprintsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 
-class FingerprintCollectorTest {
+class FingerprintFromSbCollectorTest {
 
-    private FingerprintCollector underTest = new FingerprintCollector();
+    private FingerprintFromSbCollector underTest = new FingerprintFromSbCollector();
 
     private SaltConnector sc = mock(SaltConnector.class);
 

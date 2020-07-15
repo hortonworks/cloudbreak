@@ -256,6 +256,7 @@ public class ClusterCommonService {
 
     public FlowIdentifier updateSalt(NameOrCrn nameOrCrn, Long workspaceId) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        MDCBuilder.buildMdcContext(stack);
         return clusterOperationService.updateSalt(stack);
     }
 }

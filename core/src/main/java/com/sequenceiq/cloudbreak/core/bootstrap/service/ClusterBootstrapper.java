@@ -103,6 +103,9 @@ public class ClusterBootstrapper {
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
 
+    @Inject
+    private SaltBootstrapFingerprintVersionChecker fingerprintVersionChecker;
+
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         bootstrapOnHost(stack);
@@ -196,12 +199,26 @@ public class ClusterBootstrapper {
         orchestratorService.save(orchestrator);
     }
 
-    private BootstrapParams createBootstrapParams(Stack stack) throws CloudbreakImageNotFoundException {
+    private BootstrapParams createBootstrapParams(Stack stack) {
+        LOGGER.debug("Create bootstrap params");
         BootstrapParams params = new BootstrapParams();
         params.setCloud(stack.cloudPlatform());
-        Image image = componentConfigProviderService.getImage(stack.getId());
-        params.setOs(image.getOs());
+        try {
+            Image image = componentConfigProviderService.getImage(stack.getId());
+            params.setOs(image.getOs());
+        } catch (CloudbreakImageNotFoundException e) {
+            LOGGER.warn("Image not found for stack {}", stack.getName(), e);
+        }
+        boolean saltBootstrapFpSupported = isSaltBootstrapFpSupported(stack);
+        params.setSaltBootstrapFpSupported(saltBootstrapFpSupported);
+        LOGGER.debug("Created bootstrap params: {}", params);
         return params;
+    }
+
+    private boolean isSaltBootstrapFpSupported(Stack stack) {
+        return stack.getNotDeletedInstanceMetaDataSet().stream()
+                .map(InstanceMetaData::getImage)
+                .allMatch(i -> fingerprintVersionChecker.isFingerprintingSupported(i));
     }
 
     private List<GatewayConfig> collectAndCheckGateways(Stack stack) {
@@ -304,15 +321,7 @@ public class ClusterBootstrapper {
                 stateZip = Base64.decodeBase64(content);
             }
         }
-        BootstrapParams params = new BootstrapParams();
-        params.setCloud(stack.cloudPlatform());
-        Image image;
-        try {
-            image = componentConfigProviderService.getImage(stack.getId());
-            params.setOs(image.getOs());
-        } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.info("Image not found for stack: {}, err: {}", stack.getId(), e.getMessage());
-        }
+        BootstrapParams params = createBootstrapParams(stack);
 
         hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, stateZip, params, clusterDeletionBasedModel(stack.getId(), null));
 
@@ -320,7 +329,7 @@ public class ClusterBootstrapper {
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, enableKnox);
         PollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService
                 .pollWithAbsoluteTimeoutSingleFailure(hostClusterAvailabilityCheckerTask,
-                new HostOrchestratorClusterContext(stack, hostOrchestrator, gatewayConfig, nodes), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
+                        new HostOrchestratorClusterContext(stack, hostOrchestrator, gatewayConfig, nodes), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
         validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of new nodes availability was cancelled.");
         if (TIMEOUT.equals(allNodesAvailabilityPolling)) {
             clusterBootstrapperErrorHandler.terminateFailedNodes(hostOrchestrator, null, stack, gatewayConfig, nodes);
