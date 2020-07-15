@@ -61,7 +61,7 @@ public class UserDataBuilder {
         model.put("customUserData", userDataBuilderParams.getCustomData());
         model.put("saltBootPassword", saltBootPassword);
         model.put("cbCert", cbCert);
-        CcmParameters.addToTemplateModel(ccmParameters, model);
+        CcmParameters.addToTemplateModel(type, ccmParameters, model);
         extendModelWithProxyParams(type, proxyConfig, model);
         return build(model);
     }

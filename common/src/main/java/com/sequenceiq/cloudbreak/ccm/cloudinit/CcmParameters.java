@@ -1,10 +1,14 @@
 package com.sequenceiq.cloudbreak.ccm.cloudinit;
 
+import static com.sequenceiq.common.api.type.InstanceGroupType.isGateway;
+
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 /**
  * Holds CCM cloud-init parameters, which encapsulate the user data required to configure an instance to
@@ -15,10 +19,12 @@ public interface CcmParameters {
     /**
      * Adds keys and values corresponding to the CCM parameters to the specified template model.
      *
-     * @param model the template model map
+     * @param type          instance group type, CCM is only enabled to GATEWAY type
+     * @param ccmParameters paramters for CCM
+     * @param model         the template model map
      */
-    static void addToTemplateModel(@Nullable CcmParameters ccmParameters, @Nonnull Map<String, Object> model) {
-        if (ccmParameters == null) {
+    static void addToTemplateModel(InstanceGroupType type, @Nullable CcmParameters ccmParameters, @Nonnull Map<String, Object> model) {
+        if (ccmParameters == null || !isGateway(type)) {
             model.put(CcmParameterConstants.CCM_ENABLED_KEY, Boolean.FALSE);
         } else {
             model.put(CcmParameterConstants.CCM_ENABLED_KEY, Boolean.TRUE);
