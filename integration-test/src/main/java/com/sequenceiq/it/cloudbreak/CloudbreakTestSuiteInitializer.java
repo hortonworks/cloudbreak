@@ -209,8 +209,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
             cleanUpService.deleteBlueprint(workspaceId, cloudbreakClient,
                     itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID, Long.class));
-            cleanUpService.deleteRdsConfigs(workspaceId, cloudbreakClient,
-                    itContext.getCleanUpParameter(CloudbreakITContextConstants.RDS_CONFIG_ID, Long.class));
 
         }
     }

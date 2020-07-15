@@ -8,7 +8,7 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
@@ -19,8 +19,14 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
+/**
+ * @deprecated obsolete API, should not be used, redbeams is the new service for database operations.
+ * Decided not to delete in order to keep API  backward compatibility, added only restriction to call it only with
+ * internal actor
+ */
 @Controller
-@DisableCheckPermissions
+@InternalOnly
+@Deprecated
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(RDSConfig.class)
 public class DatabaseV4Controller extends NotificationController implements DatabaseV4Endpoint {
