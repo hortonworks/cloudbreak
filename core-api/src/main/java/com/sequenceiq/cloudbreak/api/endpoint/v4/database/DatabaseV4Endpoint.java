@@ -25,6 +25,12 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+/**
+ * @deprecated obsolete API, should not be used, redbeams is the new service for database operations.
+ * Decided not to delete in order to keep API  backward compatibility, added only restriction to call it only with
+ * internal actor
+ */
+@Deprecated
 @RetryAndMetrics
 @Path("/v4/{workspaceId}/databases")
 @Consumes(MediaType.APPLICATION_JSON)

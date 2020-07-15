@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -14,11 +13,9 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.ActiveDirectoryKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.it.cloudbreak.action.ClusterRepairAction;
-import com.sequenceiq.it.cloudbreak.action.v4.database.DatabaseCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
@@ -28,7 +25,6 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
@@ -196,32 +192,7 @@ public class RepairTest extends AbstractIntegrationTest {
         testContext.given(ClusterTestDto.class)
                 .valid()
                 .withRdsConfigNames(ambariRdsName);
-
-//        if (kerberosConfigName != null && !kerberosConfigName.isEmpty()) {
-//            testContext.given(ClusterTestDto.class).withKerberos(kerberosConfigName);
-//        }
-
         return testContext.given(ClusterTestDto.class);
-    }
-
-    private Set<String> createAmbariRdsConfig(MockedTestContext testContext, String ambariRdsName) {
-
-        testContext
-                .given(DatabaseTestDto.class)
-                .withType(DatabaseType.AMBARI.name())
-                .withName(ambariRdsName)
-                .when(new DatabaseCreateIfNotExistsAction());
-        Set<String> validRds = new HashSet<>();
-        validRds.add(getRdsConfigName(testContext));
-        return validRds;
-    }
-
-    private String getRdsConfigName(MockedTestContext testContext) {
-        return testContext.get(DatabaseTestDto.class).getName();
-    }
-
-    private String getEnvironmentName(MockedTestContext testContext) {
-        return testContext.get(EnvironmentTestDto.class).getName();
     }
 
     private void addAmbariMocks(MockedTestContext testContext, String clusterName) {

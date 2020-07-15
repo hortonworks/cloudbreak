@@ -8,9 +8,9 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
+import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -18,7 +18,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
-import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
@@ -37,7 +37,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     private StackTestClient stackTestClient;
 
     @Inject
-    private DatabaseTestClient databaseTestClient;
+    private RedbeamsDatabaseTestClient databaseTestClient;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -104,8 +104,8 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .given(LdapTestDto.class)
                 .deleteGiven(LdapTestDto.class, ldapTestClient.deleteV1(), RunningParameter.key(forbiddenKey))
-                .given(DatabaseTestDto.class)
-                .deleteGiven(DatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
+                .given(RedbeamsDatabaseTestDto.class)
+                .deleteGiven(RedbeamsDatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
                 .given(EnvironmentTestDto.class)
                 .deleteGiven(EnvironmentTestDto.class, environmentTestClient.delete(), RunningParameter.key(forbiddenKey))
                 .validate();
@@ -168,7 +168,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         createDefaultLdapConfig(testContext);
         createDefaultKerberosConfig(testContext);
         testContext
-                .given(DatabaseTestDto.class)
+                .given(RedbeamsDatabaseTestDto.class)
                 .withName(hiveDb)
                 .when(databaseTestClient.createV4())
                 .withName(rangerDb)
