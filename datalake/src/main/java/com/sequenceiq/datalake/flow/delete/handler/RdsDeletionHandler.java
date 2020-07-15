@@ -14,6 +14,7 @@ import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -86,7 +87,11 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
     }
 
     private void setDeletedStatus(SdxCluster cluster) {
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED, "Datalake External RDS deleted", cluster);
+        try {
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED, "Datalake External RDS deleted", cluster);
+        } catch (NotFoundException notFoundException) {
+            LOGGER.info("Can not set status to DELETED because data lake was not found");
+        }
         grpcUmsClient.notifyResourceDeleted(cluster.getCrn(), MDCUtils.getRequestId());
     }
 }

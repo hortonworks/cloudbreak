@@ -8,8 +8,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -27,6 +30,8 @@ import com.sequenceiq.flow.domain.FlowLog;
 
 @Component
 public class SdxFlowInformation implements ApplicationFlowInformation {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxFlowInformation.class);
 
     private static final List<Class<? extends FlowConfiguration<?>>> RESTARTABLE_FLOWS = Arrays.asList(
             SdxCreateFlowConfig.class,
@@ -68,7 +73,12 @@ public class SdxFlowInformation implements ApplicationFlowInformation {
                 DatalakeStatusEnum status = actualStatusForSdx.getStatus();
                 if (status != null) {
                     DatalakeStatusEnum failedStatus = status.mapToFailedIfInProgress();
-                    sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, "Datalake flow failed", sdxCluster);
+                    try {
+                        sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, "Datalake flow failed", sdxCluster);
+                    } catch (NotFoundException e) {
+                        LOGGER.warn("We tried to handle flow fail, but can't set status to failed because data lake was not found. " +
+                                "Probably another termination flow was terminate this data lake");
+                    }
                 }
             }
         }
