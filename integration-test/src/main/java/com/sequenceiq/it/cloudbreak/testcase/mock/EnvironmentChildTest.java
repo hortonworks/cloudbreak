@@ -101,7 +101,7 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is an available child environment with a referenced available parent environment",
-            when = "a delete request is sent for the parent environment",
+            when = "a delete request is sent for the parent environment without cascading",
             then = "a BadRequestException should be returned")
     public void testDeleteParentEnvironmentWithExistingChild(TestContext testContext) {
         String forbiddenKey = resourcePropertyProvider().getName();
@@ -111,7 +111,7 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.deleteByName(), RunningParameter.key(forbiddenKey))
+                .when(environmentTestClient.deleteByName(false), RunningParameter.key(forbiddenKey))
                 .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
                 .validate();
     }
@@ -133,6 +133,31 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsNotListedByNameAndParentName)
                 .then(verifyFreeIpaRequest("dnszone_del", 1))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is an available child environment with a referenced available parent environment",
+            when = "a delete multiple request is sent for both environments",
+            then = "the child and parent environments should be deleted")
+    public void testDeleteChildAndParentEnvironment(TestContext testContext) {
+        testContext
+                .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
+                    .withParentEnvironment()
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.deleteMultipleByNames(
+                        testContext.get(EnvironmentTestDto.class).getName(),
+                        testContext.get(CHILD_ENVIRONMENT).getName()
+                ))
+                .await(EnvironmentStatus.ARCHIVED)
+                .when(environmentTestClient.list())
+                .then(this::checkEnvIsNotListedByNameAndParentName)
+                .given(EnvironmentTestDto.class)
+                .await(EnvironmentStatus.ARCHIVED)
+                .when(environmentTestClient.list())
+                .then(this::checkEnvIsNotListedByNameAndParentName)
                 .validate();
     }
 
