@@ -46,7 +46,7 @@ import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.service.telemetry.VmLogsService;
+import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 
 @Service
 public class FreeIpaInstallService {

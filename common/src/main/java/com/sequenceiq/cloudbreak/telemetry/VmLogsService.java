@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.telemetry;
+package com.sequenceiq.cloudbreak.telemetry;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.telemetry.VmLogsLoaderService;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
 
 @Service
@@ -32,7 +31,7 @@ public class VmLogsService {
         try {
             this.vmLogs = vmLogsLoaderService.loadVmLogs(VM_LOGS_DESCRIPTOR_LOCATION);
         } catch (IOException e) {
-            LOGGER.error("Static VM Log descriptors could not be initialized!", e);
+            LOGGER.warn("Static VM Log descriptors could not be initialized!", e);
         }
     }
 

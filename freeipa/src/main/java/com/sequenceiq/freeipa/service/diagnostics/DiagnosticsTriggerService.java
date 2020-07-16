@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToMapConverter;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.freeipa.api.v1.diagnostics.model.DiagnosticsCollectionRequest;
-import com.sequenceiq.freeipa.converter.diagnostics.DiagnosticsDataToMapConverter;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors;
@@ -22,9 +22,9 @@ import reactor.bus.Event;
 import reactor.rx.Promise;
 
 @Service
-public class DiagnosticsService {
+public class DiagnosticsTriggerService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsTriggerService.class);
 
     @Inject
     private StackService stackService;
@@ -39,12 +39,13 @@ public class DiagnosticsService {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Starting diagnostics collection for FreeIpa. Crn: '{}'", stack.getResourceCrn());
+        Map<String, Object> parameters = diagnosticsDataToMapConverter.convert(request, stack.getTelemetry());
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceId(stack.getId())
                 .withResourceCrn(stack.getResourceCrn())
                 .withSelector(DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_INIT_EVENT.selector())
-                .withParameters(diagnosticsDataToMapConverter.convert(request, stack))
+                .withParameters(parameters)
                 .build();
         flowManager.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn));
     }

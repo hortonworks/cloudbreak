@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.converter.diagnostics;
+package com.sequenceiq.cloudbreak.telemetry.converter;
 
 import java.util.List;
 import java.util.Optional;

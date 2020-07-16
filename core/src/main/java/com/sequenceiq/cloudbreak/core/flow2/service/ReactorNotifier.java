@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +28,7 @@ import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.EventParameterFactory;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 
 import reactor.bus.Event;
@@ -71,23 +73,33 @@ public class ReactorNotifier {
         return notify(stackId, selector, acceptable, stackService::getByIdWithTransaction);
     }
 
+    public void notify(BaseFlowEvent selectable, Event.Headers headers) {
+        Event<BaseFlowEvent> event = eventFactory.createEventWithErrHandler(new HashMap<>(headers.asMap()), selectable);
+        LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selectable.selector(), event);
+        reactor.notify(selectable.selector(), event);
+        checkFlowStatus(event, selectable.getResourceCrn());
+    }
+
     public FlowIdentifier notify(Long stackId, String selector, Acceptable acceptable, Function<Long, Stack> getStackFn) {
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(eventParameterFactory.createEventParameters(stackId), acceptable);
-
         Stack stack = getStackFn.apply(event.getData().getResourceId());
         Optional.ofNullable(stack).map(Stack::getCluster).map(Cluster::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));
         reactorReporter.logInfoReport();
         reactor.notify(selector, event);
+        return checkFlowStatus(event, stack.getName());
+    }
+
+    private FlowIdentifier checkFlowStatus(Event<? extends Acceptable> event, String identifier) {
         try {
             FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             if (accepted == null) {
                 reactorReporter.logErrorReport();
-                throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for stack %s.", stack.getName()));
+                throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for stack %s.", identifier));
             }
             switch (accepted.getResultType()) {
                 case ALREADY_EXISTING_FLOW:
                     reactorReporter.logErrorReport();
-                    throw new FlowsAlreadyRunningException(String.format("Stack %s has flows under operation, request not allowed.", stack.getName()));
+                    throw new FlowsAlreadyRunningException(String.format("Stack %s has flows under operation, request not allowed.", identifier));
                 case RUNNING_IN_FLOW:
                     return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
                 case RUNNING_IN_FLOW_CHAIN:
@@ -96,7 +108,7 @@ public class ReactorNotifier {
                     throw new IllegalStateException("Unsupported accept result type: " + accepted.getClass());
             }
         } catch (InterruptedException e) {
-            throw new CloudbreakApiException(e.getMessage());
+            throw new CloudbreakApiException(e.getMessage(), e);
         }
     }
 
