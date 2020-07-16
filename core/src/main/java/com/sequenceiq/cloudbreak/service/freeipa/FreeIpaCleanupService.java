@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.service.freeipa;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep.REMOVE_HOSTS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep.REMOVE_ROLES;
+import static com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep.REMOVE_USERS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep.REMOVE_VAULT_ENTRIES;
+import static com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep.REVOKE_CERTS;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
@@ -49,7 +49,11 @@ public class FreeIpaCleanupService {
 
     private static final int WAIT_SEC = 600;
 
-    private static final Set<CleanupStep> STEPS_TO_SKIP_ON_RECOVER = Set.of(REMOVE_HOSTS, REMOVE_VAULT_ENTRIES);
+    private static final Set<CleanupStep> STEPS_TO_SKIP_ON_RECOVER = Set.of(REMOVE_HOSTS, REMOVE_VAULT_ENTRIES, REMOVE_USERS, REMOVE_ROLES);
+
+    private static final Set<CleanupStep> STEPS_TO_SKIP_ON_SCALE = Set.of(REMOVE_USERS, REMOVE_ROLES);
+
+    private static final Set<CleanupStep> STEPS_TO_SKIP_WHEN_DNS_ONLY = Set.of(REMOVE_HOSTS, REMOVE_VAULT_ENTRIES, REMOVE_USERS, REVOKE_CERTS, REMOVE_ROLES);
 
     @Inject
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
@@ -72,12 +76,45 @@ public class FreeIpaCleanupService {
     @Inject
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
-    public void cleanup(Stack stack, boolean hostOnly, boolean recover, Set<String> hostNames, Set<String> ips) {
+    @Inject
+    private InstanceMetadataProcessor instanceMetadataProcessor;
+
+    public void cleanup(Stack stack) {
+        Set<String> hostNames = instanceMetadataProcessor.extractFqdn(stack);
+        Set<String> ips = instanceMetadataProcessor.extractIps(stack);
+        LOGGER.info("Full cleanup invoked with hostnames {} and IPs {}", hostNames, ips);
+        cleanup(stack, Set.of(), hostNames, ips);
+    }
+
+    public void cleanupOnScale(Stack stack, Set<String> hostNames, Set<String> ips) {
+        validateCleanupParametersSet(hostNames, ips);
+        LOGGER.info("Cleanup on scale invoked with hostnames {} and IPs {}", hostNames, ips);
+        cleanup(stack, STEPS_TO_SKIP_ON_SCALE, hostNames, ips);
+    }
+
+    public void cleanupOnRecover(Stack stack, Set<String> hostNames, Set<String> ips) {
+        validateCleanupParametersSet(hostNames, ips);
+        LOGGER.info("Cleanup on recover invoked with hostnames {} and IPs {}", hostNames, ips);
+        cleanup(stack, STEPS_TO_SKIP_ON_RECOVER, hostNames, ips);
+    }
+
+    public void cleanupDnsOnly(Stack stack, Set<String> hostNames, Set<String> ips) {
+        validateCleanupParametersSet(hostNames, ips);
+        LOGGER.info("DNS only cleanup invoked with hostnames {} and IPs {}", hostNames, ips);
+        cleanup(stack, STEPS_TO_SKIP_WHEN_DNS_ONLY, hostNames, ips);
+    }
+
+    private void validateCleanupParametersSet(Set<String> hostNames, Set<String> ips) {
+        Objects.requireNonNull(hostNames, "Hostnames must be set");
+        Objects.requireNonNull(ips, "IPs must be set");
+    }
+
+    private void cleanup(Stack stack, Set<CleanupStep> stepsToSkip, Set<String> hostNames, Set<String> ips) {
         Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         boolean childEnvironment = environmentConfigProvider.isChildEnvironment(stack.getEnvironmentCrn());
 
         if (kerberosDetailService.keytabsShouldBeUpdated(stack.cloudPlatform(), childEnvironment, kerberosConfig)) {
-            OperationStatus operationStatus = sendCleanupRequest(stack, hostOnly, recover, hostNames, ips);
+            OperationStatus operationStatus = sendCleanupRequest(stack, stepsToSkip, hostNames, ips);
             pollCleanupOperation(operationStatus);
         }
     }
@@ -91,25 +128,13 @@ public class FreeIpaCleanupService {
             Exception ex = pollingResult.getRight();
             LOGGER.error("Cleanup failed with state [{}] and message: [{}]", pollingResult.getLeft(), ex.getMessage());
             throw new FreeIpaOperationFailedException(
-                    String.format("Cleanup failed with state [%s] and message: [%s]", pollingResult.getLeft(), ex.getMessage(), ex));
+                    String.format("Cleanup failed with state [%s] and message: [%s]", pollingResult.getLeft(), ex.getMessage()), ex);
         }
     }
 
-    private OperationStatus sendCleanupRequest(Stack stack, boolean hostOnly, boolean recover, Set<String> hostNames, Set<String> ips) {
+    private OperationStatus sendCleanupRequest(Stack stack, Set<CleanupStep> stepsToSkip, Set<String> hostNames, Set<String> ips) {
         try {
-            CleanupRequest cleanupRequest = new CleanupRequest();
-            cleanupRequest.setHosts(hostNames == null ? collectDataFromInstanceMetaDataList(stack, InstanceMetaData::getDiscoveryFQDN) : hostNames);
-            cleanupRequest.setIps(ips == null ? collectDataFromInstanceMetaDataList(stack, InstanceMetaData::getPrivateIp) : ips);
-            cleanupRequest.setEnvironmentCrn(stack.getEnvironmentCrn());
-            if (!hostOnly) {
-                cleanupRequest.setClusterName(stack.getName());
-                cleanupRequest.setUsers(Set.of(KERBEROS_USER_PREFIX + stack.getName(), KEYTAB_USER_PREFIX + stack.getName(),
-                        LDAP_USER_PREFIX + stack.getName()));
-                cleanupRequest.setRoles(Set.of(ROLE_NAME_PREFIX + stack.getName()));
-            }
-            if (recover) {
-                cleanupRequest.setCleanupStepsToSkip(STEPS_TO_SKIP_ON_RECOVER);
-            }
+            CleanupRequest cleanupRequest = createCleanupRequest(stack, stepsToSkip, hostNames, ips);
             LOGGER.info("Sending cleanup request to FreeIPA: [{}]", cleanupRequest);
             OperationStatus cleanup = freeIpaV1Endpoint.cleanup(cleanupRequest);
             LOGGER.info("Cleanup operation started: {}", cleanup);
@@ -125,8 +150,16 @@ public class FreeIpaCleanupService {
         }
     }
 
-    private Set<String> collectDataFromInstanceMetaDataList(Stack stack, Function<InstanceMetaData, String> instanceMetaDataStringFunction) {
-        return stack.getInstanceMetaDataAsList().stream().map(instanceMetaDataStringFunction).filter(s -> StringUtils.isNotBlank(s))
-                .collect(Collectors.toSet());
+    private CleanupRequest createCleanupRequest(Stack stack, Set<CleanupStep> stepsToSkip, Set<String> hostNames, Set<String> ips) {
+        CleanupRequest cleanupRequest = new CleanupRequest();
+        cleanupRequest.setHosts(hostNames);
+        cleanupRequest.setIps(ips);
+        cleanupRequest.setEnvironmentCrn(stack.getEnvironmentCrn());
+        cleanupRequest.setClusterName(stack.getName());
+        cleanupRequest.setUsers(Set.of(KERBEROS_USER_PREFIX + stack.getName(), KEYTAB_USER_PREFIX + stack.getName(),
+                LDAP_USER_PREFIX + stack.getName()));
+        cleanupRequest.setRoles(Set.of(ROLE_NAME_PREFIX + stack.getName()));
+        cleanupRequest.setCleanupStepsToSkip(stepsToSkip);
+        return cleanupRequest;
     }
 }

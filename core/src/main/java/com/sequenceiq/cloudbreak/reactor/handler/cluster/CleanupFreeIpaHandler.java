@@ -44,7 +44,13 @@ public class CleanupFreeIpaHandler implements EventHandler<CleanupFreeIpaEvent> 
         try {
             LOGGER.debug("Handle cleanup request for hosts: {} and IPs: {}", event.getHostNames(), event.getIps());
             Stack stack = stackService.get(event.getResourceId());
-            freeIpaCleanupService.cleanup(stack, true, event.isRecover(), event.getHostNames(), event.getIps());
+            if (event.isRecover()) {
+                LOGGER.debug("Invoke cleanup on recover");
+                freeIpaCleanupService.cleanupOnRecover(stack, event.getHostNames(), event.getIps());
+            } else {
+                LOGGER.debug("Invoke cleanup on scale");
+                freeIpaCleanupService.cleanupOnScale(stack, event.getHostNames(), event.getIps());
+            }
             LOGGER.debug("Cleanup finished for hosts: {} and IPs: {}", event.getHostNames(), event.getIps());
         } catch (Exception e) {
             LOGGER.error("FreeIPA cleanup failed for hosts {} and IPs: {}", event.getHostNames(), event.getIps(), e);

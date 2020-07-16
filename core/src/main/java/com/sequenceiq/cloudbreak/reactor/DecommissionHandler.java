@@ -127,7 +127,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             boolean forced = request.getDetails() != null && request.getDetails().isForced();
             hostOrchestrator.stopClusterManagerAgent(gatewayConfig, decommissionedNodes, clusterDeletionBasedModel(stack.getId(), cluster.getId()),
                     kerberosDetailService.isAdJoinable(kerberosConfig), kerberosDetailService.isIpaJoinable(kerberosConfig), forced);
-            cleanUpFreeIpa(stack, hostsToRemove, forced);
+            cleanUpFreeIpa(stack, hostsToRemove);
             List<InstanceMetaData> decommisionedInstances = decommissionedHostNames.stream()
                     .map(hostsToRemove::get)
                     .filter(Objects::nonNull)
@@ -152,10 +152,10 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
         }
     }
 
-    private void cleanUpFreeIpa(Stack stack, Map<String, InstanceMetaData> hostsToRemove, boolean forced) {
+    private void cleanUpFreeIpa(Stack stack, Map<String, InstanceMetaData> hostsToRemove) {
         try {
             Set<String> ips = hostsToRemove.values().stream().map(InstanceMetaData::getPrivateIp).filter(StringUtils::isNotBlank).collect(Collectors.toSet());
-            freeIpaCleanupService.cleanup(stack, true, false, hostsToRemove.keySet(), ips);
+            freeIpaCleanupService.cleanupOnScale(stack, hostsToRemove.keySet(), ips);
         } catch (FreeIpaOperationFailedException | CloudbreakServiceException e) {
             LOGGER.warn("FreeIPA cleanup has failed during decommission, ignoring error", e);
         }

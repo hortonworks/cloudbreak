@@ -70,7 +70,7 @@ public class TerminationService {
     public void finalizeTermination(Long stackId, boolean force) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Date now = new Date();
-        cleanupFreeIpa(force, stack);
+        cleanupFreeIpa(stack);
         String terminatedName = stack.getName() + DELIMITER + now.getTime();
         if (stack.getType() == StackType.DATALAKE) {
             datalakeResourcesService.deleteWithDependenciesByStackId(stack.getId());
@@ -97,9 +97,9 @@ public class TerminationService {
         }
     }
 
-    private void cleanupFreeIpa(Boolean forcedTermination, Stack stack) {
+    private void cleanupFreeIpa(Stack stack) {
         try {
-            freeIpaCleanupService.cleanup(stack, false, false, null, null);
+            freeIpaCleanupService.cleanup(stack);
         } catch (Exception e) {
             LOGGER.warn("FreeIPA cleanup has failed during termination finalization, ignoring error", e);
         }
