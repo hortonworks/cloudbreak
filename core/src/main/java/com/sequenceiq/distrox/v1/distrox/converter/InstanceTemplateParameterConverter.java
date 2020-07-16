@@ -28,6 +28,7 @@ public class InstanceTemplateParameterConverter {
     private AwsInstanceTemplateV4SpotParameters convert(AwsInstanceTemplateV1SpotParameters source) {
         AwsInstanceTemplateV4SpotParameters target = new AwsInstanceTemplateV4SpotParameters();
         target.setPercentage(source.getPercentage());
+        target.setMaxPrice(source.getMaxPrice());
         return target;
     }
 
@@ -70,6 +71,7 @@ public class InstanceTemplateParameterConverter {
     private AwsInstanceTemplateV1SpotParameters convert(AwsInstanceTemplateV4SpotParameters source) {
         AwsInstanceTemplateV1SpotParameters awsInstanceGroupV1SpotParameters = new AwsInstanceTemplateV1SpotParameters();
         awsInstanceGroupV1SpotParameters.setPercentage(source.getPercentage());
+        awsInstanceGroupV1SpotParameters.setMaxPrice(source.getMaxPrice());
         return awsInstanceGroupV1SpotParameters;
     }
 

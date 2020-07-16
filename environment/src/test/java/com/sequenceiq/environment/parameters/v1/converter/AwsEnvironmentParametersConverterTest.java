@@ -86,6 +86,7 @@ class AwsEnvironmentParametersConverterTest {
         parameters.setS3guardTableName(TABLE_NAME);
         parameters.setS3guardTableCreation(S3GuardTableCreation.CREATE_NEW);
         parameters.setFreeIpaSpotPercentage(null);
+        parameters.setFreeIpaSpotMaxPrice(0.9);
 
         ParametersDto result = underTest.convertToDto(parameters);
 
@@ -95,5 +96,6 @@ class AwsEnvironmentParametersConverterTest {
         assertEquals(TABLE_NAME, result.getAwsParametersDto().getS3GuardTableName());
         assertEquals(S3GuardTableCreation.CREATE_NEW, result.getAwsParametersDto().getDynamoDbTableCreation());
         assertEquals(0, result.getAwsParametersDto().getFreeIpaSpotPercentage());
+        assertEquals(0.9, result.getAwsParametersDto().getFreeIpaSpotMaxPrice());
     }
 }

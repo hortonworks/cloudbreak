@@ -15,6 +15,14 @@ public interface Mappable {
         return null;
     }
 
+    default Double getDouble(Map<String, Object> parameters, String key) {
+        String dbl = getParameterOrNull(parameters, key);
+        if (dbl != null) {
+            return Double.parseDouble(dbl);
+        }
+        return null;
+    }
+
     default boolean getBoolean(Map<String, Object> parameters, String key) {
         String value = getParameterOrNull(parameters, key);
         if (value != null) {

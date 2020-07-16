@@ -34,7 +34,6 @@ import com.sequenceiq.environment.api.v1.environment.model.request.LocationReque
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -184,16 +183,18 @@ public class EnvironmentApiConverter {
     }
 
     private AwsParametersDto awsParamsToAwsParameters(AwsEnvironmentParameters aws, AwsFreeIpaParameters awsFreeIpa) {
-        return AwsParametersDto.builder()
+        AwsParametersDto.Builder builder = AwsParametersDto.builder()
                 .withDynamoDbTableName(Optional.ofNullable(aws)
                         .map(AwsEnvironmentParameters::getS3guard)
                         .map(S3GuardRequestParameters::getDynamoDbTableName)
-                        .orElse(null))
-                .withFreeIpaSpotPercentage(Optional.ofNullable(awsFreeIpa)
-                        .map(AwsFreeIpaParameters::getSpot)
-                        .map(AwsFreeIpaSpotParameters::getPercentage)
-                        .orElse(0))
-                .build();
+                        .orElse(null));
+        Optional.ofNullable(awsFreeIpa)
+                .map(AwsFreeIpaParameters::getSpot)
+                .ifPresent(awsFreeIpaSpotParameters -> {
+                    builder.withFreeIpaSpotPercentage(awsFreeIpaSpotParameters.getPercentage())
+                            .withFreeIpaSpotMaxPrice(awsFreeIpaSpotParameters.getMaxPrice());
+                });
+        return builder.build();
     }
 
     private AzureParametersDto azureParamsToAzureParametersDto(AzureEnvironmentParameters azureEnvironmentParameters) {

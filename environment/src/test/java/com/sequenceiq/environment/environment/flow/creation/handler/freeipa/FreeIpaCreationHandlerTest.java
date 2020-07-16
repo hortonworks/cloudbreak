@@ -41,6 +41,8 @@ import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
@@ -51,6 +53,10 @@ import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 import reactor.bus.Event;
@@ -214,6 +220,48 @@ public class FreeIpaCreationHandlerTest {
                 anyLong(),
                 anyInt(),
                 anyInt());
+    }
+
+    @Test
+    public void testSpotParameters() {
+        EnvironmentDto environmentDto = someEnvironmentWithFreeIpaCreation();
+        Environment environment = new Environment();
+        environment.setCreateFreeIpa(true);
+
+        int spotPercentage = 100;
+        Double spotMaxPrice = 0.9;
+        environmentDto.getFreeIpaCreation().setAws(FreeIpaCreationAwsParametersDto.builder()
+                .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
+                        .withMaxPrice(spotMaxPrice)
+                        .withPercentage(spotPercentage)
+                        .build())
+                .build());
+
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())).thenReturn(true);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(connectors.getDefault(any())).thenReturn(mock(CloudConnector.class));
+        when(freeIpaPollingService.pollWithTimeout(
+                any(FreeIpaCreationRetrievalTask.class),
+                any(FreeIpaPollerObject.class),
+                anyLong(),
+                anyInt(),
+                anyInt()))
+                .thenReturn(Pair.of(PollingResult.SUCCESS, null));
+
+        victim.accept(new Event<>(environmentDto));
+
+        ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
+        verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
+        freeIpaRequest.getInstanceGroups().stream()
+                .map(InstanceGroupRequest::getInstanceTemplate)
+                .map(InstanceTemplateRequest::getAws)
+                .map(AwsInstanceTemplateParameters::getSpot)
+                .forEach(spotParameters -> {
+                    assertEquals(spotMaxPrice, spotParameters.getMaxPrice());
+                    assertEquals(spotPercentage, spotParameters.getPercentage());
+                });
     }
 
     private EnvironmentDto aYarnEnvironmentDtoWithParentEnvironment() {

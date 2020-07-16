@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import java.util.Map;
+import java.util.Objects;
 
 import javax.validation.Valid;
 
@@ -51,7 +52,10 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        doIfNotNull(spot, sp -> putIfValueNotNull(map, AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, sp.getPercentage()));
+        doIfNotNull(spot, sp -> {
+            putIfValueNotNull(map, AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, sp.getPercentage());
+            putIfValueNotNull(map, AwsInstanceTemplate.EC2_SPOT_MAX_PRICE, sp.getMaxPrice());
+        });
         if (encryption != null) {
             putIfValueNotNull(map, InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, encryption.getType());
             putIfValueNotNull(map, AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, encryption.getType() != EncryptionType.NONE);
@@ -81,6 +85,13 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
         doIfNotNull(spotPercentage, sp -> {
             spot = new AwsInstanceTemplateV4SpotParameters();
             spot.setPercentage(sp);
+        });
+        Double spotMaxPrice = getDouble(parameters, AwsInstanceTemplate.EC2_SPOT_MAX_PRICE);
+        doIfNotNull(spotMaxPrice, maxPrice -> {
+            if (Objects.isNull(spot)) {
+                spot = new AwsInstanceTemplateV4SpotParameters();
+            }
+            spot.setMaxPrice(maxPrice);
         });
         AwsEncryptionV4Parameters encryption = new AwsEncryptionV4Parameters();
         encryption.setKey(getParameterOrNull(parameters, InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID));

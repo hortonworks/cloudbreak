@@ -11,10 +11,13 @@ public class AwsParametersDto implements S3GuardParameters {
 
     private int freeIpaSpotPercentage;
 
+    private Double freeIpaSpotMaxPrice;
+
     private AwsParametersDto(Builder builder) {
         dynamoDbTableName = builder.dynamoDbTableName;
         dynamoDbTableCreation = builder.dynamoDbTableCreation;
         freeIpaSpotPercentage = builder.freeIpaSpotPercentage;
+        freeIpaSpotMaxPrice = builder.freeIpaSpotMaxPrice;
     }
 
     @Override
@@ -39,6 +42,14 @@ public class AwsParametersDto implements S3GuardParameters {
         this.freeIpaSpotPercentage = freeIpaSpotPercentage;
     }
 
+    public Double getFreeIpaSpotMaxPrice() {
+        return freeIpaSpotMaxPrice;
+    }
+
+    public void setFreeIpaSpotMaxPrice(Double freeIpaSpotMaxPrice) {
+        this.freeIpaSpotMaxPrice = freeIpaSpotMaxPrice;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -49,6 +60,7 @@ public class AwsParametersDto implements S3GuardParameters {
                 + "dynamoDbTableName='" + dynamoDbTableName + '\''
                 + ", dynamoDbTableCreation=" + dynamoDbTableCreation
                 + ", freeIpaSpotPercentage=" + freeIpaSpotPercentage
+                + ", freeIpaSpotMaxPrice=" + freeIpaSpotMaxPrice
                 + '}';
     }
 
@@ -59,6 +71,8 @@ public class AwsParametersDto implements S3GuardParameters {
         private S3GuardTableCreation dynamoDbTableCreation;
 
         private int freeIpaSpotPercentage;
+
+        private Double freeIpaSpotMaxPrice;
 
         private Builder() {
         }
@@ -75,6 +89,11 @@ public class AwsParametersDto implements S3GuardParameters {
 
         public Builder withFreeIpaSpotPercentage(int freeIpaSpotPercentage) {
             this.freeIpaSpotPercentage = freeIpaSpotPercentage;
+            return this;
+        }
+
+        public Builder withFreeIpaSpotMaxPrice(Double freeIpaSpotMaxPrice) {
+            this.freeIpaSpotMaxPrice = freeIpaSpotMaxPrice;
             return this;
         }
 

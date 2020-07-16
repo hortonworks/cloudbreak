@@ -352,11 +352,10 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     private void useAwsSpotPercentageIfPresent(StackV4Request stackRequest, SdxClusterRequest sdxClusterRequest) {
         Optional.ofNullable(sdxClusterRequest.getAws())
                 .map(SdxAwsBase::getSpot)
-                .map(SdxAwsSpotParameters::getPercentage)
-                .ifPresent(percentage -> updateAwsSpotPercentage(stackRequest, percentage));
+                .ifPresent(spotParameters -> updateAwsSpotParameters(stackRequest, spotParameters));
     }
 
-    private void updateAwsSpotPercentage(StackV4Request stackRequest, Integer percentage) {
+    private void updateAwsSpotParameters(StackV4Request stackRequest, SdxAwsSpotParameters sdxSpotParameters) {
         stackRequest.getInstanceGroups().stream()
                 .map(InstanceGroupV4Request::getTemplate)
                 .peek(template -> {
@@ -371,7 +370,10 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
                     }
                 })
                 .map(AwsInstanceTemplateV4Parameters::getSpot)
-                .forEach(spot -> spot.setPercentage(percentage));
+                .forEach(spot -> {
+                    spot.setPercentage(sdxSpotParameters.getPercentage());
+                    spot.setMaxPrice(sdxSpotParameters.getMaxPrice());
+                });
     }
 
     @Override

@@ -300,6 +300,9 @@
           "InstancesDistribution": {
             "OnDemandBaseCapacity": 0,
             "OnDemandPercentageAboveBaseCapacity": ${group.onDemandPercentage},
+            <#if group.spotMaxPrice??>
+            "SpotMaxPrice": "${group.spotMaxPrice}",
+            </#if>
             "SpotAllocationStrategy": "capacity-optimized"
           }
         },

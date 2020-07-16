@@ -23,6 +23,9 @@ public class AwsParameters extends BaseParameters {
     @Column(name = "freeipa_spot_percentage")
     private Integer freeIpaSpotPercentage;
 
+    @Column(name = "freeipa_spot_max_price")
+    private Double freeIpaSpotMaxPrice;
+
     public String getS3guardTableName() {
         return s3guardTableName;
     }
@@ -45,5 +48,13 @@ public class AwsParameters extends BaseParameters {
 
     public void setFreeIpaSpotPercentage(Integer freeIpaSpotPercentage) {
         this.freeIpaSpotPercentage = Objects.requireNonNullElse(freeIpaSpotPercentage, 0);
+    }
+
+    public Double getFreeIpaSpotMaxPrice() {
+        return freeIpaSpotMaxPrice;
+    }
+
+    public void setFreeIpaSpotMaxPrice(Double freeIpaSpotMaxPrice) {
+        this.freeIpaSpotMaxPrice = freeIpaSpotMaxPrice;
     }
 }

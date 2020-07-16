@@ -38,7 +38,6 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
-import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
@@ -308,10 +307,10 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
         Optional.ofNullable(freeIpaCreation.getAws())
                 .map(FreeIpaCreationAwsParametersDto::getSpot)
-                .map(FreeIpaCreationAwsSpotParametersDto::getPercentage)
-                .ifPresent(spotPercentage -> {
+                .ifPresent(spotParametersDto -> {
                     AwsInstanceTemplateSpotParameters spot = new AwsInstanceTemplateSpotParameters();
-                    spot.setPercentage(spotPercentage);
+                    spot.setPercentage(spotParametersDto.getPercentage());
+                    spot.setMaxPrice(spotParametersDto.getMaxPrice());
                     AwsInstanceTemplateParameters aws = new AwsInstanceTemplateParameters();
                     aws.setSpot(spot);
                     instanceTemplateRequest.setAws(aws);

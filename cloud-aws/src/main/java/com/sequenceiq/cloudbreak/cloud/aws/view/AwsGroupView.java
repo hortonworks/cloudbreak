@@ -52,10 +52,12 @@ public class AwsGroupView {
 
     private final Boolean fastEbsEncryptionEnabled;
 
-    public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, boolean ebsEncrypted, Integer rootVolumeSize,
-            Map<String, Long> volumeCounts, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId, boolean kmsKeyDefined,
+    private final Double spotMaxPrice;
+
+    public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Boolean ebsEncrypted, Integer rootVolumeSize,
+            Map<String, Long> volumeCounts, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId, Boolean kmsKeyDefined,
             String kmsKey, String encryptedAMI, boolean useNetworkCidrAsSourceForDefaultRules, String instanceProfile, int onDemandPercentage,
-            boolean fastEbsEncryptionEnabled) {
+            boolean fastEbsEncryptionEnabled, Double spotMaxPrice) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
@@ -76,6 +78,7 @@ public class AwsGroupView {
         hasInstanceProfile = instanceProfile != null;
         this.onDemandPercentage = onDemandPercentage;
         this.fastEbsEncryptionEnabled = fastEbsEncryptionEnabled;
+        this.spotMaxPrice = spotMaxPrice;
     }
 
     public static String getAutoScalingGroupName(String groupName) {
@@ -182,4 +185,7 @@ public class AwsGroupView {
         return fastEbsEncryptionEnabled;
     }
 
+    public Double getSpotMaxPrice() {
+        return spotMaxPrice;
+    }
 }

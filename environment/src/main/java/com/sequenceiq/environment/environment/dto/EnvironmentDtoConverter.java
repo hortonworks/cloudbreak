@@ -220,6 +220,7 @@ public class EnvironmentDtoConverter {
                 builder.withAws(FreeIpaCreationAwsParametersDto.builder()
                         .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
                                 .withPercentage(awsParameters.getFreeIpaSpotPercentage())
+                                .withMaxPrice(awsParameters.getFreeIpaSpotMaxPrice())
                                 .build())
                         .build());
             }
