@@ -9,6 +9,9 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.authorization.annotation.ResourceObjectField;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
@@ -26,6 +29,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
+    @ResourceObjectField(action = AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB, variableType = AuthorizationVariableType.NAME)
     private String environmentName;
 
     @Valid

@@ -97,8 +97,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATAHUB)
-    public StackV4Response post(@Valid DistroXV1Request request) {
+    @CheckPermissionByResourceObject
+    public StackV4Response post(@Valid @ResourceObject DistroXV1Request request) {
         return stackOperations.post(
                 workspaceService.getForCurrentUser().getId(),
                 stackRequestConverter.convert(request),

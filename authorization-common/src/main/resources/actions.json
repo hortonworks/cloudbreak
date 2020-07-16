@@ -64,6 +64,11 @@
     "resourceType": "ENVIRONMENT",
     "legacyRight": "environments/read"
   },
+  "ENVIRONMENT_CREATE_DATAHUB": {
+    "right": "environments/createDatahub",
+    "resourceType": "ENVIRONMENT",
+    "legacyRight": "datahub/write"
+  },
   "DATAHUB_READ": {
     "right": "datahub/read",
     "resourceType": "DATAHUB",
