@@ -169,7 +169,7 @@ public class UpgradeService {
             StatedImage currentStatedImage =
                     imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), currentImage.getImageId());
             StatedImage targetStatedImage = imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), imageId);
-            imageService.updateComponentsByStackId(stack, targetStatedImage);
+            imageService.updateComponentsByStackId(stack, targetStatedImage, currentImage.getUserdata());
             return Pair.of(currentStatedImage, targetStatedImage);
 
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {

@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImageServiceTest {
@@ -317,7 +318,7 @@ public class ImageServiceTest {
         when(cloudConnector.regionToDisplayName(stack.getRegion())).thenReturn(stack.getRegion());
         when(conversionService.convert(any(), eq(ClouderaManagerRepo.class))).thenReturn(getClouderaManagerRepo());
 
-        underTest.updateComponentsByStackId(stack, targetImage);
+        underTest.updateComponentsByStackId(stack, targetImage, Map.of(InstanceGroupType.GATEWAY, "gw user data"));
 
         ArgumentCaptor<Set<Component>> componentCatcher = ArgumentCaptor.forClass(Set.class);
         verify(componentConfigProviderService, times(1)).store(componentCatcher.capture());
@@ -327,6 +328,15 @@ public class ImageServiceTest {
                     Object version = component.getAttributes().getValue("version");
                     if (Objects.nonNull(version)) {
                         return ((String) version).contains(TARGET_STACK_VERSION);
+                    } else {
+                        return false;
+                    }
+                }));
+        assertTrue(componentCatcher.getValue().stream().anyMatch(
+                component -> {
+                    Object userData = component.getAttributes().getValue("userdata");
+                    if (Objects.nonNull(userData)) {
+                        return ((Map<String, String>) userData).get(InstanceGroupType.GATEWAY.name()).contains("gw user data");
                     } else {
                         return false;
                     }
@@ -384,7 +394,7 @@ public class ImageServiceTest {
         return new ClusterComponent(componentType, name, attributes, cluster);
     }
 
-    private  Set<ClusterComponent> clusterComponentSet(Cluster cluster) {
+    private Set<ClusterComponent> clusterComponentSet(Cluster cluster) {
         ClusterComponent cdhComponent = createClusterComponent(CDH_ATTRIBUTES, CDH, ComponentType.CDH_PRODUCT_DETAILS, cluster);
         ClusterComponent cmComponent = createClusterComponent(CM_ATTRIBUTES, ComponentType.CM_REPO_DETAILS.name(), ComponentType.CM_REPO_DETAILS, cluster);
         return Set.of(cdhComponent, cmComponent);
