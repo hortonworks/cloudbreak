@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
@@ -24,7 +25,6 @@ import javax.ws.rs.core.Response;
 
 import org.apache.http.HttpStatus;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.glassfish.jersey.media.multipart.Boundary;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
@@ -153,7 +153,7 @@ public class SaltConnector implements Closeable {
                     .param("tgt_type", target.getType());
         }
         if ("state.show_sls".equals(fun)) {
-            form.param("full_return",  "True");
+            form.param("full_return", "True");
         }
         if (arg != null) {
             if (clientType.equals(SaltClientType.LOCAL) || clientType.equals(SaltClientType.LOCAL_ASYNC)) {
@@ -198,6 +198,17 @@ public class SaltConnector implements Closeable {
     @Measure(SaltConnector.class)
     public GenericResponses upload(Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
         Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, content);
+        return getGenericResponses(targets, path, fileName, content, distributeResponse);
+    }
+
+    @Measure(SaltConnector.class)
+    public GenericResponses upload(Iterable<String> targets, String path, String fileName, String permission, byte[] content) throws IOException {
+        Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, permission, content);
+        return getGenericResponses(targets, path, fileName, content, distributeResponse);
+    }
+
+    private GenericResponses getGenericResponses(Iterable<String> targets, String path, String fileName, byte[] content, Response distributeResponse)
+            throws IOException {
         if (distributeResponse.getStatus() == HttpStatus.SC_NOT_FOUND) {
             // simple file upload for CB <= 1.14
             distributeResponse.close();
@@ -214,19 +225,57 @@ public class SaltConnector implements Closeable {
     }
 
     private Response upload(String endpoint, Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
+        MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
+        return endpointInvocation(endpoint, content).post(Entity.entity(getBodyPart(targets, path, fileName, content), contentType));
+    }
+
+    private Response upload(String endpoint, Iterable<String> targets, String path, String fileName, String permission, byte[] content) throws IOException {
+        MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
+        return endpointInvocation(endpoint, content)
+                .post(Entity.entity(getBodyPart(targets, path, fileName, permission, content), contentType));
+    }
+
+    private Invocation.Builder endpointInvocation(String endpoint, byte[] content) throws IOException {
+        String signature = PkiUtil.generateSignature(signatureKey, content);
+        return saltTarget.path(endpoint).request().header(SIGN_HEADER, signature);
+    }
+
+    private MultiPart getBodyPart(Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
+        FormDataMultiPart pathPart = path(new FormDataMultiPart(), path);
+        FormDataMultiPart targetsPart = targets(pathPart, targets);
+        return content(targetsPart, fileName, content);
+    }
+
+    private MultiPart getBodyPart(Iterable<String> targets, String path, String fileName, String permission, byte[] content) throws IOException {
+        FormDataMultiPart pathPart = path(new FormDataMultiPart(), path);
+        FormDataMultiPart permissionPart = permissions(pathPart, permission);
+        FormDataMultiPart targetsPart = targets(permissionPart, targets);
+        return content(targetsPart, fileName, content);
+    }
+
+    private FormDataMultiPart path(FormDataMultiPart formDataMultiPart, String path) throws IOException {
+        try (FormDataMultiPart result = formDataMultiPart.field("path", path)) {
+            return result;
+        }
+    }
+
+    private FormDataMultiPart permissions(FormDataMultiPart formDataMultiPart, String permissions) throws IOException {
+        try (FormDataMultiPart result = formDataMultiPart.field("permissions", permissions)) {
+            return result;
+        }
+    }
+
+    private FormDataMultiPart targets(FormDataMultiPart formDataMultiPart, Iterable<String> targets) throws IOException {
+        try (FormDataMultiPart result = formDataMultiPart.field("targets", String.join(",", targets))) {
+            return result;
+        }
+    }
+
+    private MultiPart content(FormDataMultiPart formDataMultiPart, String fileName, byte[] content) throws IOException {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(content)) {
             StreamDataBodyPart streamDataBodyPart = new StreamDataBodyPart("file", inputStream, fileName);
-            try (FormDataMultiPart multiPart = new FormDataMultiPart()) {
-                try (FormDataMultiPart pathField = multiPart.field("path", path)) {
-                    try (FormDataMultiPart targetsField = pathField.field("targets", String.join(",", targets))) {
-                        try (MultiPart bodyPart = targetsField.bodyPart(streamDataBodyPart)) {
-                            MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
-                            contentType = Boundary.addBoundary(contentType);
-                            String signature = PkiUtil.generateSignature(signatureKey, content);
-                            return saltTarget.path(endpoint).request().header(SIGN_HEADER, signature).post(Entity.entity(bodyPart, contentType));
-                        }
-                    }
-                }
+            try (MultiPart bodyPart = formDataMultiPart.bodyPart(streamDataBodyPart)) {
+                return bodyPart;
             }
         }
     }
