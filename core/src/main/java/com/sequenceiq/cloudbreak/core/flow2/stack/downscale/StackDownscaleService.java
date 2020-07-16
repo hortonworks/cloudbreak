@@ -14,14 +14,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -30,9 +28,10 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
+import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
-import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 
 @Service
 public class StackDownscaleService {
@@ -51,10 +50,10 @@ public class StackDownscaleService {
     private StackService stackService;
 
     @Inject
-    private DnsV1Endpoint dnsV1Endpoint;
+    private FreeIpaCleanupService freeIpaCleanupService;
 
     @Inject
-    private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
+    private InstanceMetadataProcessor instanceMetadataProcessor;
 
     public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
         LOGGER.debug("Downscaling of stack {}", context.getStack().getId());
@@ -81,8 +80,7 @@ public class StackDownscaleService {
                 .flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
                 .filter(im -> instanceIds.contains(im.getInstanceId()))
                 .collect(toList());
-        List<String> fqdns = instanceMetaDatas.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
-        cleanupDnsRecords(stack, fqdns);
+        cleanupDnsRecords(stack, instanceMetaDatas);
         List<String> deletedInstanceIds = instanceMetaDatas.stream()
                 .map(instanceMetaData ->
                         instanceMetaData.getInstanceId() != null ? instanceMetaData.getInstanceId() : instanceMetaData.getPrivateId().toString())
@@ -92,15 +90,14 @@ public class StackDownscaleService {
         flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_DOWNSCALE_SUCCESS, String.join(",", deletedInstanceIds));
     }
 
-    private void cleanupDnsRecords(Stack stack, List<String> fqdns) {
+    private void cleanupDnsRecords(Stack stack, Collection<InstanceMetaData> instanceMetaDatas) {
+        Set<String> fqdns = instanceMetadataProcessor.extractFqdn(instanceMetaDatas);
+        Set<String> ips = instanceMetadataProcessor.extractIps(instanceMetaDatas);
         try {
-            LOGGER.info("Cleanup DNS records for FQDNS: [{}]", fqdns);
-            dnsV1Endpoint.deleteDnsRecordsByFqdn(stack.getEnvironmentCrn(), fqdns);
-        } catch (WebApplicationException e) {
-            String errorMessage = exceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("Failed to delete dns records for FQDNS: [{}] with message: '{}'", fqdns, errorMessage, e);
+            LOGGER.info("Cleanup DNS records for FQDNS: {} and IPs {}", fqdns, ips);
+            freeIpaCleanupService.cleanupDnsOnly(stack, fqdns, ips);
         } catch (Exception e) {
-            LOGGER.error("Failed to delete dns records for FQDNS: [{}]", fqdns, e);
+            LOGGER.error("Failed to delete dns records for FQDNS: {} and IPs {}", fqdns, ips, e);
         }
     }
 

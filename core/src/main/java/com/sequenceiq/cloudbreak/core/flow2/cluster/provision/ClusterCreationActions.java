@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -44,6 +43,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterMan
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
+import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.statuschecker.service.JobService;
@@ -55,6 +55,9 @@ public class ClusterCreationActions {
 
     @Inject
     private JobService jobService;
+
+    @Inject
+    private InstanceMetadataProcessor instanceMetadataProcessor;
 
     @Bean(name = "CLUSTER_PROXY_REGISTRATION_STATE")
     public Action<?, ?> clusterProxyRegistrationAction() {
@@ -127,8 +130,8 @@ public class ClusterCreationActions {
             @Override
             protected Selectable createRequest(StackContext context) {
                 Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.findNotTerminatedForStack(context.getStack().getId());
-                Set<String> hostNames = instanceMetaData.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
-                Set<String> ips = instanceMetaData.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toSet());
+                Set<String> hostNames = instanceMetadataProcessor.extractFqdn(instanceMetaData);
+                Set<String> ips = instanceMetadataProcessor.extractIps(instanceMetaData);
                 return new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips, false);
             }
         };

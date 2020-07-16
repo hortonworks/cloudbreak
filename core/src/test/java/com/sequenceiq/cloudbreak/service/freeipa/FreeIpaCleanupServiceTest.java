@@ -1,25 +1,38 @@
 package com.sequenceiq.cloudbreak.service.freeipa;
 
-import static java.util.Collections.emptySet;
+import static com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep.REMOVE_HOSTS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep.REMOVE_ROLES;
+import static com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep.REMOVE_USERS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep.REMOVE_VAULT_ENTRIES;
+import static com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep.REVOKE_CERTS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
@@ -32,7 +45,7 @@ import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FreeIpaCleanupServiceTest {
 
     private static final String ENVIRONMENT_CRN = "envCrn";
@@ -40,6 +53,16 @@ public class FreeIpaCleanupServiceTest {
     private static final String STACK_NAME = "stack name";
 
     private static final String CLOUD_PLATFORM = "cloudPlatform";
+
+    private static final String KERBEROS_USER_PREFIX = "krbbind-";
+
+    private static final String KEYTAB_USER_PREFIX = "kerberosbind-";
+
+    private static final String LDAP_USER_PREFIX = "ldapbind-";
+
+    private static final String ROLE_NAME_PREFIX = "hadoopadminrole-";
+
+    private Pair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.SUCCESS, null);
 
     @Mock
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
@@ -59,29 +82,31 @@ public class FreeIpaCleanupServiceTest {
     @Mock
     private EnvironmentConfigProvider environmentConfigProvider;
 
+    @Spy
+    private InstanceMetadataProcessor instanceMetadataProcessor;
+
     @InjectMocks
     private FreeIpaCleanupService victim;
 
     @Test
-    public void shouldSendCleanupRequestInCaseOfKeytabNeedsToBeUpdated() throws Exception {
+    public void shouldSendCleanupRequestInCaseOfKeytabNeedsToBeUpdated() {
         Stack stack = aStack();
         Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
-        Pair<PollingResult, Exception> pollingResultExceptionPair = new ImmutablePair<>(PollingResult.SUCCESS, null);
         OperationStatus operationStatus = new OperationStatus(null, OperationType.CLEANUP, null, null, null, null, 0L, null);
 
         when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(true);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, true, kerberosConfig)).thenReturn(true);
         when(freeIpaV1Endpoint.cleanup(any(CleanupRequest.class))).thenReturn(operationStatus);
-        when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResultExceptionPair);
+        when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
 
-        victim.cleanup(stack, false, false, emptySet(), emptySet());
+        victim.cleanup(stack);
 
         verify(freeIpaV1Endpoint).cleanup(any());
     }
 
     @Test
-    public void shouldNotSendCleanupRequestInCaseOfKeytabDoesNotNeedToBeUpdated() throws Exception {
+    public void shouldNotSendCleanupRequestInCaseOfKeytabDoesNotNeedToBeUpdated() {
         Stack stack = aStack();
         Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
 
@@ -89,9 +114,159 @@ public class FreeIpaCleanupServiceTest {
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(true);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, true, kerberosConfig)).thenReturn(false);
 
-        victim.cleanup(stack, false, false, emptySet(), emptySet());
+        victim.cleanup(stack);
 
         verifyNoMoreInteractions(freeIpaV1Endpoint);
+    }
+
+    @Test
+    public void testCleanup() {
+        Stack stack = spy(aStack());
+        Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
+
+        when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
+        when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(false);
+        when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
+        when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(createInstanceMetadata("asdf", "1.1.1.1"), createInstanceMetadata("qwer", "1.1.1.2")));
+        OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
+        ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
+        when(freeIpaV1Endpoint.cleanup(captor.capture())).thenReturn(operationStatus);
+        when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
+
+        victim.cleanup(stack);
+
+        CleanupRequest cleanupRequest = captor.getValue();
+        assertEquals(STACK_NAME, cleanupRequest.getClusterName());
+        assertEquals(ENVIRONMENT_CRN, cleanupRequest.getEnvironmentCrn());
+        assertTrue(cleanupRequest.getCleanupStepsToSkip().isEmpty());
+        assertEquals(Set.of(KERBEROS_USER_PREFIX + stack.getName(), KEYTAB_USER_PREFIX + stack.getName(), LDAP_USER_PREFIX + stack.getName()),
+                cleanupRequest.getUsers());
+        assertEquals(Set.of(ROLE_NAME_PREFIX + stack.getName()), cleanupRequest.getRoles());
+        assertEquals(Set.of("1.1.1.1", "1.1.1.2"), cleanupRequest.getIps());
+        assertEquals(Set.of("asdf", "qwer"), cleanupRequest.getHosts());
+    }
+
+    @Test
+    public void testCleanupPollFailed() {
+        Stack stack = spy(aStack());
+        Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
+
+        when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
+        when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(false);
+        when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
+        when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(createInstanceMetadata("asdf", "1.1.1.1"), createInstanceMetadata("qwer", "1.1.1.2")));
+        OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
+        ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
+        when(freeIpaV1Endpoint.cleanup(captor.capture())).thenReturn(operationStatus);
+        Pair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.FAILURE, new Exception("message"));
+        when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
+
+        assertThrows(FreeIpaOperationFailedException.class, () -> victim.cleanup(stack));
+
+        CleanupRequest cleanupRequest = captor.getValue();
+        assertEquals(STACK_NAME, cleanupRequest.getClusterName());
+        assertEquals(ENVIRONMENT_CRN, cleanupRequest.getEnvironmentCrn());
+        assertTrue(cleanupRequest.getCleanupStepsToSkip().isEmpty());
+        assertEquals(Set.of(KERBEROS_USER_PREFIX + stack.getName(), KEYTAB_USER_PREFIX + stack.getName(), LDAP_USER_PREFIX + stack.getName()),
+                cleanupRequest.getUsers());
+        assertEquals(Set.of(ROLE_NAME_PREFIX + stack.getName()), cleanupRequest.getRoles());
+        assertEquals(Set.of("1.1.1.1", "1.1.1.2"), cleanupRequest.getIps());
+        assertEquals(Set.of("asdf", "qwer"), cleanupRequest.getHosts());
+    }
+
+    @Test
+    public void testCleanupOnScale() {
+        Stack stack = spy(aStack());
+        Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
+
+        when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
+        when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(false);
+        when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
+        OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
+        ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
+        when(freeIpaV1Endpoint.cleanup(captor.capture())).thenReturn(operationStatus);
+        when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
+
+        victim.cleanupOnScale(stack, Set.of("asdf", "qwer"), Set.of("1.1.1.1", "1.1.1.2"));
+
+        CleanupRequest cleanupRequest = captor.getValue();
+        assertEquals(STACK_NAME, cleanupRequest.getClusterName());
+        assertEquals(ENVIRONMENT_CRN, cleanupRequest.getEnvironmentCrn());
+        assertEquals(Set.of(REMOVE_USERS, REMOVE_ROLES), cleanupRequest.getCleanupStepsToSkip());
+        assertEquals(Set.of(KERBEROS_USER_PREFIX + stack.getName(), KEYTAB_USER_PREFIX + stack.getName(), LDAP_USER_PREFIX + stack.getName()),
+                cleanupRequest.getUsers());
+        assertEquals(Set.of(ROLE_NAME_PREFIX + stack.getName()), cleanupRequest.getRoles());
+        assertEquals(Set.of("1.1.1.1", "1.1.1.2"), cleanupRequest.getIps());
+        assertEquals(Set.of("asdf", "qwer"), cleanupRequest.getHosts());
+    }
+
+    @Test
+    public void testCleanupOnRecover() {
+        Stack stack = spy(aStack());
+        Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
+
+        when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
+        when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(false);
+        when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
+        OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
+        ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
+        when(freeIpaV1Endpoint.cleanup(captor.capture())).thenReturn(operationStatus);
+        when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
+
+        victim.cleanupOnRecover(stack, Set.of("asdf", "qwer"), Set.of("1.1.1.1", "1.1.1.2"));
+
+        CleanupRequest cleanupRequest = captor.getValue();
+        assertEquals(STACK_NAME, cleanupRequest.getClusterName());
+        assertEquals(ENVIRONMENT_CRN, cleanupRequest.getEnvironmentCrn());
+        assertEquals(Set.of(REMOVE_HOSTS, REMOVE_VAULT_ENTRIES, REMOVE_USERS, REMOVE_ROLES), cleanupRequest.getCleanupStepsToSkip());
+        assertEquals(Set.of(KERBEROS_USER_PREFIX + stack.getName(), KEYTAB_USER_PREFIX + stack.getName(), LDAP_USER_PREFIX + stack.getName()),
+                cleanupRequest.getUsers());
+        assertEquals(Set.of(ROLE_NAME_PREFIX + stack.getName()), cleanupRequest.getRoles());
+        assertEquals(Set.of("1.1.1.1", "1.1.1.2"), cleanupRequest.getIps());
+        assertEquals(Set.of("asdf", "qwer"), cleanupRequest.getHosts());
+    }
+
+    @Test
+    public void testCleanupDnsOnly() {
+        Stack stack = spy(aStack());
+        Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
+
+        when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
+        when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(false);
+        when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
+        OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
+        ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
+        when(freeIpaV1Endpoint.cleanup(captor.capture())).thenReturn(operationStatus);
+        when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
+
+        victim.cleanupDnsOnly(stack, Set.of("asdf", "qwer"), Set.of("1.1.1.1", "1.1.1.2"));
+
+        CleanupRequest cleanupRequest = captor.getValue();
+        assertEquals(STACK_NAME, cleanupRequest.getClusterName());
+        assertEquals(ENVIRONMENT_CRN, cleanupRequest.getEnvironmentCrn());
+        assertEquals(Set.of(REMOVE_HOSTS, REMOVE_VAULT_ENTRIES, REMOVE_USERS, REVOKE_CERTS, REMOVE_ROLES), cleanupRequest.getCleanupStepsToSkip());
+        assertEquals(Set.of(KERBEROS_USER_PREFIX + stack.getName(), KEYTAB_USER_PREFIX + stack.getName(), LDAP_USER_PREFIX + stack.getName()),
+                cleanupRequest.getUsers());
+        assertEquals(Set.of(ROLE_NAME_PREFIX + stack.getName()), cleanupRequest.getRoles());
+        assertEquals(Set.of("1.1.1.1", "1.1.1.2"), cleanupRequest.getIps());
+        assertEquals(Set.of("asdf", "qwer"), cleanupRequest.getHosts());
+    }
+
+    @Test
+    public void testNullChecks() {
+        assertThrows(NullPointerException.class, () -> victim.cleanupOnScale(new Stack(), null, Set.of()));
+        assertThrows(NullPointerException.class, () -> victim.cleanupOnScale(new Stack(), Set.of(), null));
+        assertThrows(NullPointerException.class, () -> victim.cleanupOnRecover(new Stack(), null, Set.of()));
+        assertThrows(NullPointerException.class, () -> victim.cleanupOnRecover(new Stack(), Set.of(), null));
+        assertThrows(NullPointerException.class, () -> victim.cleanupDnsOnly(new Stack(), null, Set.of()));
+        assertThrows(NullPointerException.class, () -> victim.cleanupDnsOnly(new Stack(), Set.of(), null));
+    }
+
+    private InstanceMetaData createInstanceMetadata(String fqdn, String ip) {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN(fqdn);
+        instanceMetaData.setPrivateIp(ip);
+        return instanceMetaData;
     }
 
     private Stack aStack() {
