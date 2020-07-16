@@ -48,7 +48,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -224,36 +223,28 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         String platform = imageFilter.getPlatforms().stream().findFirst().isPresent() ? imageFilter.getPlatforms().stream().findFirst().get() : "";
         StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(imageFilter, imageFilterPredicate);
-        Optional<Image> defaultBaseImage = getLatestBaseImageDefaultPreferred(statedImages);
-        if (defaultBaseImage.isPresent()) {
-            return statedImage(defaultBaseImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
-        } else {
+        List<Image> baseImages = statedImages.getImages().getBaseImages();
+        Optional<Image> defaultBaseImage = getLatestImageDefaultPreferred(baseImages);
+        if (!defaultBaseImage.isPresent()) {
             throw new CloudbreakImageNotFoundException(imageNotFoundErrorMessage(platform));
         }
-    }
-
-    private Optional<Image> getLatestBaseImageDefaultPreferred(StatedImages statedImages) {
-        List<Image> baseImages = statedImages.getImages().getBaseImages();
-        return getLatestImageDefaultPreferred(baseImages);
+        return statedImage(defaultBaseImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
     }
 
     public StatedImage getImagePrewarmedDefaultPreferred(ImageFilter imageFilter, Predicate<Image> imageFilterPredicate)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        Set<String> platforms = imageFilter.getPlatforms();
-        String platform = platforms.stream().findFirst().isPresent() ? platforms.stream().findFirst().get() : "";
         StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(imageFilter, imageFilterPredicate);
         Optional<Image> selectedImage = getLatestPrewarmedImage(imageFilter.getClusterVersion(), statedImages);
         if (selectedImage.isEmpty()) {
-            selectedImage = getLatestBaseImageDefaultPreferred(statedImages);
-        }
-        if (selectedImage.isEmpty()) {
+            Set<String> platforms = imageFilter.getPlatforms();
+            String platform = platforms.stream().findFirst().isPresent() ? platforms.stream().findFirst().get() : "";
             throw new CloudbreakImageNotFoundException(imageNotFoundErrorMessage(platform));
         }
         return statedImage(selectedImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
     }
 
     private Optional<Image> getLatestPrewarmedImage(String clusterVersion, StatedImages statedImages) {
-        List<Image> images = getImagesForClusterType(statedImages, StackType.CDH.name());
+        List<Image> images = statedImages.getImages().getCdhImages();
         Optional<Image> selectedImage = Optional.empty();
         if (!CollectionUtils.isEmpty(images)) {
             List<Image> matchingVersionImages = images.stream().filter(img -> {
@@ -263,18 +254,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             selectedImage = getLatestImageDefaultPreferred(matchingVersionImages);
         }
         return selectedImage;
-    }
-
-    public StatedImage getLatestPrewarmedImageDefaultPreferred(ImageFilter imageFilter, Predicate<Image> imageFilterPredicate)
-            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        StatedImages statedImages = getStatedImagesFilteredByOperatingSystems(imageFilter, imageFilterPredicate);
-        Optional<Image> selectedImage = getLatestPrewarmedImage(imageFilter.getClusterVersion(), statedImages);
-        Set<String> platforms = imageFilter.getPlatforms();
-        String platform = platforms.stream().findFirst().isPresent() ? platforms.stream().findFirst().get() : "";
-        if (selectedImage.isEmpty()) {
-            throw new CloudbreakImageNotFoundException(imageNotFoundErrorMessage(platform));
-        }
-        return statedImage(selectedImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
     }
 
     private String imageNotFoundErrorMessage(String platform) {
@@ -618,15 +597,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     private Comparator<Image> getImageComparing(List<Image> images) {
         return images.stream().map(Image::getCreated).anyMatch(Objects::isNull) ? Comparator.comparing(Image::getDate)
                 : Comparator.comparing(Image::getCreated);
-    }
-
-    private List<Image> getImagesForClusterType(StatedImages statedImages, String clusterType) {
-        switch (clusterType) {
-            case "CDH":
-                return statedImages.getImages().getCdhImages();
-            default:
-                return emptyList();
-        }
     }
 
     @Override
