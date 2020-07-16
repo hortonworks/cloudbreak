@@ -60,6 +60,7 @@ public class StackMatrixService {
         }
 
         stackMatrixV4Response.setCdh(cdhStackDescriptors);
+        
         return stackMatrixV4Response;
     }
 
