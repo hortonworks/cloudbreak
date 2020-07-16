@@ -49,6 +49,7 @@ public class WaitService<T> {
             sleep(interval);
             attempts++;
             timeout = timeoutChecker.checkTimeout();
+            LOGGER.info("Checking if wait can exit.");
             exit = statusChecker.exitWaiting(t);
         }
         if (timeout) {
