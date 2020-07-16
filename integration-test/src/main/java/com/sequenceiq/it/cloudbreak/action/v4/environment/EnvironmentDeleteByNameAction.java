@@ -8,11 +8,21 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class EnvironmentDeleteByNameAction extends AbstractEnvironmentAction {
 
+    private final boolean cascading;
+
+    public EnvironmentDeleteByNameAction(boolean cascading) {
+        this.cascading = cascading;
+    }
+
+    public EnvironmentDeleteByNameAction() {
+        this(true);
+    }
+
     @Override
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception {
         SimpleEnvironmentResponse delete = client.getEnvironmentClient()
                 .environmentV1Endpoint()
-                .deleteByName(testDto.getName(), true, false);
+                .deleteByName(testDto.getName(), cascading, false);
         Log.whenJson("Environment delete response: ", delete);
         return testDto;
     }
