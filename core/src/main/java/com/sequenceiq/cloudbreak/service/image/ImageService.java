@@ -106,11 +106,11 @@ public class ImageService {
         componentConfigProviderService.store(components);
     }
 
-    public void updateComponentsByStackId(Stack stack, StatedImage targetImage)
+    public void updateComponentsByStackId(Stack stack, StatedImage targetImage, Map<InstanceGroupType, String> userData)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         String imageName = determineImageName(stack.cloudPlatform(), stack.getRegion(), targetImage.getImage());
         Set<Component> components = componentConfigProviderService.getComponentsByStackId(stack.getId());
-        Set<Component> targetComponents = getComponents(stack, Map.of(), targetImage.getImage(), imageName,
+        Set<Component> targetComponents = getComponents(stack, userData, targetImage.getImage(), imageName,
                 targetImage.getImageCatalogUrl(),
                 targetImage.getImageCatalogName(),
                 targetImage.getImage().getUuid());
