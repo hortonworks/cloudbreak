@@ -161,9 +161,20 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getSpanContext());
                     }
                 } else {
-                    handleFlowControlEvent(key, payload, flowParameters, flowChainId);
+                    handleFlowControlEventAndTerminateOnFail(key, payload, flowParameters, flowChainId, flowId);
                 }
                 break;
+        }
+    }
+
+    private void handleFlowControlEventAndTerminateOnFail(String key, Payload payload, FlowParameters flowParameters, String flowChainId, String flowId)
+            throws TransactionExecutionException {
+        try {
+            handleFlowControlEvent(key, payload, flowParameters, flowChainId);
+        } catch (Exception e) {
+            LOGGER.error("Flow will be terminated because flow control event handling failed", e);
+            flowLogService.terminate(payload.getResourceId(), flowId);
+            runningFlows.remove(flowId);
         }
     }
 

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.common.exception;
 
 import java.util.function.Supplier;
 
+//TODO: there is another NotFoundException in com.sequenceiq.cloudbreak.exception package, we should to remove one of them
 public class NotFoundException extends RuntimeException {
 
     public NotFoundException(String message) {
@@ -18,5 +19,9 @@ public class NotFoundException extends RuntimeException {
 
     public static Supplier<NotFoundException> notFound(String what, Long which) {
         return () -> new NotFoundException(String.format("%s '%d' not found.", what, which));
+    }
+
+    public static NotFoundException notFoundException(String what, String which) {
+        return new NotFoundException(String.format("%s '%s' not found.", what, which));
     }
 }

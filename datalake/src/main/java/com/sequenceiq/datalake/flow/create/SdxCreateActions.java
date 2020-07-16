@@ -17,6 +17,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -190,9 +191,13 @@ public class SdxCreateActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.PROVISIONING_FAILED,
-                        statusReason, payload.getResourceId());
-                metricService.incrementMetricCounter(MetricType.SDX_CREATION_FAILED, sdxCluster);
+                try {
+                    SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.PROVISIONING_FAILED,
+                            statusReason, payload.getResourceId());
+                    metricService.incrementMetricCounter(MetricType.SDX_CREATION_FAILED, sdxCluster);
+                } catch (NotFoundException notFoundException) {
+                    LOGGER.info("Can not set status to SDX_CREATION_FAILED because data lake was not found");
+                }
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }
 
