@@ -3,10 +3,13 @@ package com.sequenceiq.cloudbreak.cloud.model.component;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -23,6 +26,8 @@ public class ImageBasedDefaultCDHEntries {
     public static final Comparator<Map.Entry<String, ImageBasedDefaultCDHInfo>> IMAGE_BASED_CDH_ENTRY_COMPARATOR =
             Comparator.comparing(Map.Entry::getKey);
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageBasedDefaultCDHEntries.class);
+
     @Inject
     private ImageCatalogService imageCatalogService;
 
@@ -32,6 +37,10 @@ public class ImageBasedDefaultCDHEntries {
     public Map<String, ImageBasedDefaultCDHInfo> getEntries(Long workspaceId, String platform, String imageCatalogName) throws CloudbreakImageCatalogException {
         String catalogName = Optional.ofNullable(imageCatalogName).orElse(ImageCatalogService.CDP_DEFAULT_CATALOG_NAME);
         StatedImages images = imageCatalogService.getImages(workspaceId, catalogName, platform);
+        if (images.getImages().getCdhImages().isEmpty()) {
+            LOGGER.warn("Missing CDH images for cloud platform: {}. Falling back to AWS.", platform);
+            images = imageCatalogService.getImages(workspaceId, catalogName, CloudPlatform.AWS.name());
+        }
 
         return getEntries(images.getImages());
     }

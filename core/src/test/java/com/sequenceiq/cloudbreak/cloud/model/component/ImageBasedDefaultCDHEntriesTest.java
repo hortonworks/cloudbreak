@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
@@ -15,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,12 +40,15 @@ public class ImageBasedDefaultCDHEntriesTest {
 
     private static final List<String> PRE_WARM_CSD = asList("csd");
 
-    private static final String PLATFORM = "aws";
+    private static final String PLATFORM = CloudPlatform.AWS.name();
 
     private static final String IMAGE_CATALOG_NAME = "imageCatalogName";
 
     @Mock
     private Images images;
+
+    @Mock
+    private Images emptyImages;
 
     @Mock
     private ImageCatalogService imageCatalogService;
@@ -79,6 +84,25 @@ public class ImageBasedDefaultCDHEntriesTest {
         when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, PLATFORM)).thenReturn(statedImages);
 
         Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, PLATFORM, IMAGE_CATALOG_NAME);
+
+        Image image = imageList.stream().filter(Image::isDefaultImage).findFirst().get();
+
+        verify(image, actual.get(IMAGE_VERSION));
+    }
+
+    @Test
+    public void shouldFallBackToAwsInCaseOfMissingCdhImages() throws CloudbreakImageCatalogException {
+        List<Image> imageList = getImages();
+        when(images.getCdhImages()).thenReturn(imageList);
+        when(emptyImages.getCdhImages()).thenReturn(Collections.emptyList());
+
+        StatedImages statedImages = StatedImages.statedImages(images, null, null);
+        StatedImages emptyStatedImages = StatedImages.statedImages(emptyImages, null, null);
+
+        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, CloudPlatform.YARN.name())).thenReturn(emptyStatedImages);
+        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, PLATFORM)).thenReturn(statedImages);
+
+        Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, CloudPlatform.YARN.name(), IMAGE_CATALOG_NAME);
 
         Image image = imageList.stream().filter(Image::isDefaultImage).findFirst().get();
 
