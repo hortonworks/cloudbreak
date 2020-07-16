@@ -18,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -107,6 +108,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                     sendEvent(flowParameters, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex), Map.of());
                 } else {
                     LOGGER.error("Missing error handling for " + getClass().getName());
+                    throw new CloudbreakServiceException("Missing error handling for " + getClass().getName());
                 }
             }
         });
