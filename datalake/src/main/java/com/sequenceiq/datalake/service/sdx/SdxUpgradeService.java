@@ -4,14 +4,17 @@ import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -142,6 +147,51 @@ public class SdxUpgradeService {
         } else {
             throw new NotFoundException("Cluster not found with id" + id);
         }
+    }
+
+    public void updateRuntimeVersionFromCloudbreak(Long sdxId) {
+        SdxCluster sdxCluster = sdxService.getById(sdxId);
+        String clusterName = sdxCluster.getClusterName();
+        LOGGER.info("Trying to update the runtime version from Cloudbreak for cluster: {}", clusterName);
+        StackV4Response stack = stackV4Endpoint.get(0L, clusterName, Set.of());
+        Optional<String> cdpVersionOpt = getCdpVersion(stack);
+        if (cdpVersionOpt.isPresent()) {
+            String version = cdpVersionOpt.get();
+            LOGGER.info("Update Sdx runtime version of {} to {}, previous version: {}", clusterName, version, sdxCluster.getRuntime());
+            sdxCluster.setRuntime(version);
+            sdxClusterRepository.save(sdxCluster);
+        } else {
+            LOGGER.warn("Cannot update the Sdx runtime version for cluster: {}", clusterName);
+        }
+    }
+
+    private Optional<String> getCdpVersion(StackV4Response stack) {
+        Optional<String> result = Optional.empty();
+        String stackName = stack.getName();
+        ClusterV4Response cluster = stack.getCluster();
+        if (cluster != null) {
+            ClouderaManagerV4Response cm = cluster.getCm();
+            if (cm != null) {
+                LOGGER.info("Repository details are available for cluster: {}: {}", stackName, cm);
+                List<ClouderaManagerProductV4Response> products = cm.getProducts();
+                if (products != null && !products.isEmpty()) {
+                    Optional<ClouderaManagerProductV4Response> cdpOpt = products.stream().filter(p -> "CDH".equals(p.getName())).findFirst();
+                    if (cdpOpt.isPresent()) {
+                        result = getRuntimeVersionFromCdpVersion(cdpOpt.get().getVersion());
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private Optional<String> getRuntimeVersionFromCdpVersion(String cdpVersion) {
+        Optional<String> result = Optional.empty();
+        if (isNotEmpty(cdpVersion)) {
+            LOGGER.info("Extract runtime version from CDP version: {}", cdpVersion);
+            result = Optional.of(StringUtils.substringBefore(cdpVersion, "-"));
+        }
+        return result;
     }
 
     public String getCurrentImageCatalogName(Long id) {
