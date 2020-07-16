@@ -21,9 +21,9 @@ Every user who would like to do something regarding a resource should get an Res
 4. Add the related action to the `AuthorizationResourceAction` enum list
 5. Fill in the necessary information about the action in [actions.json](src/main/resources/actions.json)
    - key should be the new value of the enum
-   - `right` should be the same value as in UMS code
+   - `right` should be the same value for the desired right as in UMS code
    - `resourceType` should be a value from `AuthorizationResourceType` which controls, what logic should be called during authorization check to find out the CRN of the resource
-   - `actionType` should be a value from `AuthorizationActionType`, which decides, if the action should happen on a resource or in an account
+   - `legacyRight` should be the right (defined in UMS) used in the legacy authorization (where everything were checked on account level with read or write rights)
 6. Annotate your API method in Controller class with desired annotation, detailed explanation below.
 7. If necessary, implement logics needed to find out resource CRNs, detailed explanation below.
 
@@ -151,6 +151,8 @@ Some APIs are used to generate service informations, in this case you can call i
 There are some controller class which used to give service informations (info page, swagger, client version, etc.) and also some APIs used internally only.
 
 If every method of a controller class used internally only, you only need to annotate the class with `@InternalOnly` and every method will be restricted for internal actor.
+
+**Be aware: if your API is internal only, then you have to make sure that every method (which is internal only) can be called with CRN parameter and annotated correctly as described in `Internal calls` chapter or somehow you added account id to your method and it is used in lower layers like service layer.**
 
 Same applies for API's methods which can called without authorization, in that case you need to annotate the class only with `@DisabledCheckPermissions`.
 
