@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 import javax.validation.Valid;
 
@@ -66,5 +67,14 @@ public class ClouderaManagerV4Response implements JsonEntity {
     public ClouderaManagerV4Response withTlsEnabled(Boolean enabled) {
         setEnableAutoTls(enabled);
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ClouderaManagerV4Response.class.getSimpleName() + "[", "]")
+                .add("repository=" + repository)
+                .add("products=" + products)
+                .add("enableAutoTls=" + enableAutoTls)
+                .toString();
     }
 }
