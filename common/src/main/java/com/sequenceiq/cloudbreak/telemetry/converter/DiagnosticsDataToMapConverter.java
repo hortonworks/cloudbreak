@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.converter.diagnostics;
+package com.sequenceiq.cloudbreak.telemetry.converter;
 
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -15,10 +15,9 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
+import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.freeipa.api.v1.diagnostics.model.DiagnosticsCollectionRequest;
-import com.sequenceiq.freeipa.entity.Stack;
 
 @Component
 public class DiagnosticsDataToMapConverter {
@@ -31,7 +30,7 @@ public class DiagnosticsDataToMapConverter {
     @Inject
     private AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
-    public Map<String, Object> convert(DiagnosticsCollectionRequest request, Stack stack) {
+    public Map<String, Object> convert(BaseDiagnosticsCollectionRequest request, Telemetry telemetry) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("destination", request.getDestination().toString());
         parameters.put("issue", request.getIssue());
@@ -41,7 +40,6 @@ public class DiagnosticsDataToMapConverter {
                 .map(Date::getTime).orElse(null));
         parameters.put("endTime", Optional.ofNullable(request.getEndTime())
                 .map(Date::getTime).orElse(null));
-        Telemetry telemetry = stack.getTelemetry();
         if (telemetry != null && telemetry.getLogging() != null) {
             Logging logging = telemetry.getLogging();
             if (logging.getS3() != null) {

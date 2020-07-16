@@ -10,6 +10,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 
@@ -41,15 +43,21 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.core.flow2.service.DiagnosticsTriggerService;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
+import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConverter;
+import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXMaintenanceModeV1ToMainenanceModeV4Converter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXRepairV1RequestToClusterRepairV4RequestConverter;
@@ -62,6 +70,8 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 @InternalReady
 @AuthorizationResource
 public class DistroXV1Controller implements DistroXV1Endpoint {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXV1Controller.class);
 
     @Lazy
     @Inject
@@ -84,6 +94,18 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private DelegatingRequestToCliRequestConverter delegatingRequestToCliRequestConverter;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService crnService;
+
+    @Inject
+    private DiagnosticsTriggerService diagnosticsTriggerService;
+
+    @Inject
+    private VmLogsService vmLogsService;
+
+    @Inject
+    private VmLogsToVmLogsResponseConverter vmlogsConverter;
 
     @Override
     @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
@@ -409,6 +431,21 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     private StackV4Request getStackV4Request(NameOrCrn nameOrCrn) {
         return stackOperations.getRequest(nameOrCrn, workspaceService.getForCurrentUser().getId());
+    }
+
+    @Override
+    @CheckPermissionByResourceObject
+    public void collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionV1Request request) {
+        String userCrn = crnService.getCloudbreakUser().getUserCrn();
+        LOGGER.debug("collectDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
+        diagnosticsTriggerService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn);
+    }
+
+    @Override
+    @DisableCheckPermissions
+    public VmLogsResponse getVmLogs() {
+        LOGGER.debug("collectDiagnostics called");
+        return vmlogsConverter.convert(vmLogsService.getVmLogs());
     }
 
     private Object getCreateAWSClusterRequest(StackV4Request stackV4Request) {
