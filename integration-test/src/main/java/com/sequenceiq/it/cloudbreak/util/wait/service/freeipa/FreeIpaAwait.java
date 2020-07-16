@@ -46,7 +46,7 @@ public class FreeIpaAwait implements Await<FreeIpaTestDto, Status> {
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
-                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatus, ResponseUtil.getErrorMessage(e),
+                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatus, e,
                         entity.getName());
                 Log.await(null, String.format("[%s] is failed for statuses %s: %s, name: %s",
                         entity, desiredStatus, ResponseUtil.getErrorMessage(e), entity.getName()));
