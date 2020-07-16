@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.controller;
+package com.sequenceiq.cloudbreak.controller.v4;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -11,22 +11,22 @@ import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.DiagnosticsV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
+import com.sequenceiq.cloudbreak.core.flow2.service.DiagnosticsTriggerService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConverter;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
-import com.sequenceiq.freeipa.api.v1.diagnostics.DiagnosticsV1Endpoint;
-import com.sequenceiq.freeipa.api.v1.diagnostics.model.DiagnosticsCollectionRequest;
-import com.sequenceiq.freeipa.service.diagnostics.DiagnosticsTriggerService;
-import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
 @AuthorizationResource
-public class DiagnosticsV1Controller implements DiagnosticsV1Endpoint {
+public class DiagnosticsV4Controller implements DiagnosticsV4Endpoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsV1Controller.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsV4Controller.class);
 
     @Inject
-    private CrnService crnService;
+    private CloudbreakRestRequestThreadLocalService crnService;
 
     @Inject
     private DiagnosticsTriggerService diagnosticsTriggerService;
@@ -40,9 +40,9 @@ public class DiagnosticsV1Controller implements DiagnosticsV1Endpoint {
     @Override
     @CheckPermissionByResourceObject
     public void collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionRequest request) {
-        String accountId = crnService.getCurrentAccountId();
-        LOGGER.debug("collectDiagnostics called with accountId '{}'", accountId);
-        diagnosticsTriggerService.startDiagnosticsCollection(request, accountId, crnService.getUserCrn());
+        String userCrn = crnService.getCloudbreakUser().getUserCrn();
+        LOGGER.debug("collectDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
+        diagnosticsTriggerService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn);
     }
 
     @Override

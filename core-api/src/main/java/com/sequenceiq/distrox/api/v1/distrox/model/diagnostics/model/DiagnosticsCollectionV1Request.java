@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.v1.diagnostics.model;
+package com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model;
 
 import javax.validation.constraints.NotNull;
 
@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.authorization.annotation.ResourceObjectField;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
-import com.sequenceiq.service.api.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,18 +16,18 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("DiagnosticsCollectionV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DiagnosticsCollectionRequest extends BaseDiagnosticsCollectionRequest {
+public class DiagnosticsCollectionV1Request extends BaseDiagnosticsCollectionRequest {
 
     @NotNull
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENT_CRN)
-    @ResourceObjectField(action = AuthorizationResourceAction.ENVIRONMENT_READ, variableType = AuthorizationVariableType.CRN)
-    private String environmentCrn;
+    @ApiModelProperty(ModelDescriptions.StackModelDescription.CRN)
+    @ResourceObjectField(action = AuthorizationResourceAction.DATAHUB_READ, variableType = AuthorizationVariableType.CRN)
+    private String stackCrn;
 
-    public String getEnvironmentCrn() {
-        return environmentCrn;
+    public String getStackCrn() {
+        return stackCrn;
     }
 
-    public void setEnvironmentCrn(String environmentCrn) {
-        this.environmentCrn = environmentCrn;
+    public void setStackCrn(String stackCrn) {
+        this.stackCrn = stackCrn;
     }
 }
