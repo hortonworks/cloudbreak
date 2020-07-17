@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -191,7 +192,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public EnvironmentAuthenticationTestDto environmentAuthentication(EnvironmentAuthenticationTestDto environmentAuthenticationEntity) {
-        return environmentAuthenticationEntity.withPublicKey(DUMMY_SSH_KEY);
+        return environmentAuthenticationEntity.withPublicKey(
+                StringUtils.isNotEmpty(commonCloudProperties.getSshPublicKey())
+                        ? commonCloudProperties.getSshPublicKey()
+                        : DUMMY_SSH_KEY
+        );
     }
 
     @Override
