@@ -106,6 +106,43 @@ public final class UserManagementGrpc {
      return getInteractiveLogin3rdPartyMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getInteractiveLoginLocalMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> METHOD_INTERACTIVE_LOGIN_LOCAL = getInteractiveLoginLocalMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> getInteractiveLoginLocalMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> getInteractiveLoginLocalMethod() {
+    return getInteractiveLoginLocalMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> getInteractiveLoginLocalMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> getInteractiveLoginLocalMethod;
+    if ((getInteractiveLoginLocalMethod = UserManagementGrpc.getInteractiveLoginLocalMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getInteractiveLoginLocalMethod = UserManagementGrpc.getInteractiveLoginLocalMethod) == null) {
+          UserManagementGrpc.getInteractiveLoginLocalMethod = getInteractiveLoginLocalMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "InteractiveLoginLocal"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InteractiveLoginLocal"))
+                  .build();
+          }
+        }
+     }
+     return getInteractiveLoginLocalMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getDeleteAccountMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse> METHOD_DELETE_ACCOUNT = getDeleteAccountMethodHelper();
@@ -1066,6 +1103,43 @@ public final class UserManagementGrpc {
         }
      }
      return getRevokeEntitlementMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getEnsureDefaultEntitlementsGrantedMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> METHOD_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED = getEnsureDefaultEntitlementsGrantedMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> getEnsureDefaultEntitlementsGrantedMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> getEnsureDefaultEntitlementsGrantedMethod() {
+    return getEnsureDefaultEntitlementsGrantedMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> getEnsureDefaultEntitlementsGrantedMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> getEnsureDefaultEntitlementsGrantedMethod;
+    if ((getEnsureDefaultEntitlementsGrantedMethod = UserManagementGrpc.getEnsureDefaultEntitlementsGrantedMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getEnsureDefaultEntitlementsGrantedMethod = UserManagementGrpc.getEnsureDefaultEntitlementsGrantedMethod) == null) {
+          UserManagementGrpc.getEnsureDefaultEntitlementsGrantedMethod = getEnsureDefaultEntitlementsGrantedMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "EnsureDefaultEntitlementsGranted"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("EnsureDefaultEntitlementsGranted"))
+                  .build();
+          }
+        }
+     }
+     return getEnsureDefaultEntitlementsGrantedMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getAssignRoleMethod()} instead. 
@@ -3493,6 +3567,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Handles an interactive login for a user in who is logging in using the CDP control plane local
+     * identity provider. We assume that the account had been created.
+     * </pre>
+     */
+    public void interactiveLoginLocal(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getInteractiveLoginLocalMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Deletes the account from Altus tests only.
      * </pre>
      */
@@ -3755,6 +3840,16 @@ public final class UserManagementGrpc {
     public void revokeEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getRevokeEntitlementMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Ensure default entitlements are granted to an Account
+     * </pre>
+     */
+    public void ensureDefaultEntitlementsGranted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getEnsureDefaultEntitlementsGrantedMethodHelper(), responseObserver);
     }
 
     /**
@@ -4405,7 +4500,7 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Assign a cloud identity to a service principal or service principal category.
+     * Assign a cloud identity to a service principal.
      * </pre>
      */
     public void assignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request,
@@ -4415,7 +4510,7 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Unassign a cloud identity from a service principal or service principal category.
+     * Unassign a cloud identity from a service principal.
      * </pre>
      */
     public void unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request,
@@ -4439,6 +4534,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse>(
                   this, METHODID_INTERACTIVE_LOGIN3RD_PARTY)))
+          .addMethod(
+            getInteractiveLoginLocalMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse>(
+                  this, METHODID_INTERACTIVE_LOGIN_LOCAL)))
           .addMethod(
             getDeleteAccountMethodHelper(),
             asyncUnaryCall(
@@ -4621,6 +4723,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse>(
                   this, METHODID_REVOKE_ENTITLEMENT)))
+          .addMethod(
+            getEnsureDefaultEntitlementsGrantedMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse>(
+                  this, METHODID_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED)))
           .addMethod(
             getAssignRoleMethodHelper(),
             asyncUnaryCall(
@@ -5123,6 +5232,18 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Handles an interactive login for a user in who is logging in using the CDP control plane local
+     * identity provider. We assume that the account had been created.
+     * </pre>
+     */
+    public void interactiveLoginLocal(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getInteractiveLoginLocalMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Deletes the account from Altus tests only.
      * </pre>
      */
@@ -5411,6 +5532,17 @@ public final class UserManagementGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getRevokeEntitlementMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Ensure default entitlements are granted to an Account
+     * </pre>
+     */
+    public void ensureDefaultEntitlementsGranted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getEnsureDefaultEntitlementsGrantedMethodHelper(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6123,7 +6255,7 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Assign a cloud identity to a service principal or service principal category.
+     * Assign a cloud identity to a service principal.
      * </pre>
      */
     public void assignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request,
@@ -6134,7 +6266,7 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Unassign a cloud identity from a service principal or service principal category.
+     * Unassign a cloud identity from a service principal.
      * </pre>
      */
     public void unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request,
@@ -6188,6 +6320,17 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse interactiveLogin3rdParty(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest request) {
       return blockingUnaryCall(
           getChannel(), getInteractiveLogin3rdPartyMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Handles an interactive login for a user in who is logging in using the CDP control plane local
+     * identity provider. We assume that the account had been created.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse interactiveLoginLocal(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getInteractiveLoginLocalMethodHelper(), getCallOptions(), request);
     }
 
     /**
@@ -6454,6 +6597,16 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse revokeEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest request) {
       return blockingUnaryCall(
           getChannel(), getRevokeEntitlementMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Ensure default entitlements are granted to an Account
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse ensureDefaultEntitlementsGranted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getEnsureDefaultEntitlementsGrantedMethodHelper(), getCallOptions(), request);
     }
 
     /**
@@ -7104,7 +7257,7 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Assign a cloud identity to a service principal or service principal category.
+     * Assign a cloud identity to a service principal.
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse assignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request) {
@@ -7114,7 +7267,7 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Unassign a cloud identity from a service principal or service principal category.
+     * Unassign a cloud identity from a service principal.
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request) {
@@ -7169,6 +7322,18 @@ public final class UserManagementGrpc {
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getInteractiveLogin3rdPartyMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Handles an interactive login for a user in who is logging in using the CDP control plane local
+     * identity provider. We assume that the account had been created.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> interactiveLoginLocal(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getInteractiveLoginLocalMethodHelper(), getCallOptions()), request);
     }
 
     /**
@@ -7461,6 +7626,17 @@ public final class UserManagementGrpc {
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getRevokeEntitlementMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Ensure default entitlements are granted to an Account
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> ensureDefaultEntitlementsGranted(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getEnsureDefaultEntitlementsGrantedMethodHelper(), getCallOptions()), request);
     }
 
     /**
@@ -8173,7 +8349,7 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Assign a cloud identity to a service principal or service principal category.
+     * Assign a cloud identity to a service principal.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> assignServicePrincipalCloudIdentity(
@@ -8184,7 +8360,7 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
-     * Unassign a cloud identity from a service principal or service principal category.
+     * Unassign a cloud identity from a service principal.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> unassignServicePrincipalCloudIdentity(
@@ -8196,96 +8372,98 @@ public final class UserManagementGrpc {
 
   private static final int METHODID_INTERACTIVE_LOGIN = 0;
   private static final int METHODID_INTERACTIVE_LOGIN3RD_PARTY = 1;
-  private static final int METHODID_DELETE_ACCOUNT = 2;
-  private static final int METHODID_DELETE_ACTOR = 3;
-  private static final int METHODID_DELETE_TRIAL_USER = 4;
-  private static final int METHODID_GET_ACCESS_KEY_VERIFICATION_DATA = 5;
-  private static final int METHODID_VERIFY_INTERACTIVE_USER_SESSION_TOKEN = 6;
-  private static final int METHODID_AUTHENTICATE = 7;
-  private static final int METHODID_ACCESS_KEY_USAGE = 8;
-  private static final int METHODID_CREATE_USER = 9;
-  private static final int METHODID_GET_USER = 10;
-  private static final int METHODID_LIST_USERS = 11;
-  private static final int METHODID_FIND_USERS_BY_EMAIL = 12;
-  private static final int METHODID_FIND_USERS = 13;
-  private static final int METHODID_CREATE_ACCESS_KEY = 14;
-  private static final int METHODID_UPDATE_ACCESS_KEY = 15;
-  private static final int METHODID_DELETE_ACCESS_KEY = 16;
-  private static final int METHODID_GET_ACCESS_KEY = 17;
-  private static final int METHODID_LIST_ACCESS_KEYS = 18;
-  private static final int METHODID_GET_VERSION = 19;
-  private static final int METHODID_GET_ACCOUNT = 20;
-  private static final int METHODID_LIST_ACCOUNTS = 21;
-  private static final int METHODID_GET_RIGHTS = 22;
-  private static final int METHODID_CHECK_RIGHTS = 23;
-  private static final int METHODID_CREATE_ACCOUNT = 24;
-  private static final int METHODID_CREATE_TRIAL_ACCOUNT = 25;
-  private static final int METHODID_GRANT_ENTITLEMENT = 26;
-  private static final int METHODID_REVOKE_ENTITLEMENT = 27;
-  private static final int METHODID_ASSIGN_ROLE = 28;
-  private static final int METHODID_UNASSIGN_ROLE = 29;
-  private static final int METHODID_LIST_ASSIGNED_ROLES = 30;
-  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 31;
-  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 32;
-  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 33;
-  private static final int METHODID_LIST_ROLES = 34;
-  private static final int METHODID_LIST_RESOURCE_ROLES = 35;
-  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 36;
-  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 37;
-  private static final int METHODID_INITIATE_SUPPORT_CASE = 38;
-  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 39;
-  private static final int METHODID_CREATE_MACHINE_USER = 40;
-  private static final int METHODID_LIST_MACHINE_USERS = 41;
-  private static final int METHODID_DELETE_MACHINE_USER = 42;
-  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 43;
-  private static final int METHODID_SET_ACCOUNT_MESSAGES = 44;
-  private static final int METHODID_ACCEPT_TERMS = 45;
-  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 46;
-  private static final int METHODID_DESCRIBE_TERMS = 47;
-  private static final int METHODID_LIST_TERMS = 48;
-  private static final int METHODID_LIST_ENTITLEMENTS = 49;
-  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 50;
-  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 51;
-  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 52;
-  private static final int METHODID_CREATE_GROUP = 53;
-  private static final int METHODID_DELETE_GROUP = 54;
-  private static final int METHODID_LIST_GROUPS = 55;
-  private static final int METHODID_UPDATE_GROUP = 56;
-  private static final int METHODID_ADD_MEMBER_TO_GROUP = 57;
-  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 58;
-  private static final int METHODID_LIST_GROUP_MEMBERS = 59;
-  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 60;
-  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = 61;
-  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 62;
-  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 63;
-  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 64;
-  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 65;
-  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 66;
-  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 67;
-  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 68;
-  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 69;
-  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 70;
-  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 71;
-  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 72;
-  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 73;
-  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 74;
-  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 75;
-  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 76;
-  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 77;
-  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 78;
-  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 79;
-  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 80;
-  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 81;
-  private static final int METHODID_GET_EVENT_GENERATION_IDS = 82;
-  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 83;
-  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 84;
-  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 85;
-  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 86;
-  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 87;
-  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 88;
-  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 89;
-  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 90;
-  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 91;
+  private static final int METHODID_INTERACTIVE_LOGIN_LOCAL = 2;
+  private static final int METHODID_DELETE_ACCOUNT = 3;
+  private static final int METHODID_DELETE_ACTOR = 4;
+  private static final int METHODID_DELETE_TRIAL_USER = 5;
+  private static final int METHODID_GET_ACCESS_KEY_VERIFICATION_DATA = 6;
+  private static final int METHODID_VERIFY_INTERACTIVE_USER_SESSION_TOKEN = 7;
+  private static final int METHODID_AUTHENTICATE = 8;
+  private static final int METHODID_ACCESS_KEY_USAGE = 9;
+  private static final int METHODID_CREATE_USER = 10;
+  private static final int METHODID_GET_USER = 11;
+  private static final int METHODID_LIST_USERS = 12;
+  private static final int METHODID_FIND_USERS_BY_EMAIL = 13;
+  private static final int METHODID_FIND_USERS = 14;
+  private static final int METHODID_CREATE_ACCESS_KEY = 15;
+  private static final int METHODID_UPDATE_ACCESS_KEY = 16;
+  private static final int METHODID_DELETE_ACCESS_KEY = 17;
+  private static final int METHODID_GET_ACCESS_KEY = 18;
+  private static final int METHODID_LIST_ACCESS_KEYS = 19;
+  private static final int METHODID_GET_VERSION = 20;
+  private static final int METHODID_GET_ACCOUNT = 21;
+  private static final int METHODID_LIST_ACCOUNTS = 22;
+  private static final int METHODID_GET_RIGHTS = 23;
+  private static final int METHODID_CHECK_RIGHTS = 24;
+  private static final int METHODID_CREATE_ACCOUNT = 25;
+  private static final int METHODID_CREATE_TRIAL_ACCOUNT = 26;
+  private static final int METHODID_GRANT_ENTITLEMENT = 27;
+  private static final int METHODID_REVOKE_ENTITLEMENT = 28;
+  private static final int METHODID_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED = 29;
+  private static final int METHODID_ASSIGN_ROLE = 30;
+  private static final int METHODID_UNASSIGN_ROLE = 31;
+  private static final int METHODID_LIST_ASSIGNED_ROLES = 32;
+  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 33;
+  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 34;
+  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 35;
+  private static final int METHODID_LIST_ROLES = 36;
+  private static final int METHODID_LIST_RESOURCE_ROLES = 37;
+  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 38;
+  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 39;
+  private static final int METHODID_INITIATE_SUPPORT_CASE = 40;
+  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 41;
+  private static final int METHODID_CREATE_MACHINE_USER = 42;
+  private static final int METHODID_LIST_MACHINE_USERS = 43;
+  private static final int METHODID_DELETE_MACHINE_USER = 44;
+  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 45;
+  private static final int METHODID_SET_ACCOUNT_MESSAGES = 46;
+  private static final int METHODID_ACCEPT_TERMS = 47;
+  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 48;
+  private static final int METHODID_DESCRIBE_TERMS = 49;
+  private static final int METHODID_LIST_TERMS = 50;
+  private static final int METHODID_LIST_ENTITLEMENTS = 51;
+  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 52;
+  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 53;
+  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 54;
+  private static final int METHODID_CREATE_GROUP = 55;
+  private static final int METHODID_DELETE_GROUP = 56;
+  private static final int METHODID_LIST_GROUPS = 57;
+  private static final int METHODID_UPDATE_GROUP = 58;
+  private static final int METHODID_ADD_MEMBER_TO_GROUP = 59;
+  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 60;
+  private static final int METHODID_LIST_GROUP_MEMBERS = 61;
+  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 62;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = 63;
+  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 64;
+  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 65;
+  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 66;
+  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 67;
+  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 68;
+  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 69;
+  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 70;
+  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 71;
+  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 72;
+  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 73;
+  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 74;
+  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 75;
+  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 76;
+  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 77;
+  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 78;
+  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 79;
+  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 80;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 81;
+  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 82;
+  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 83;
+  private static final int METHODID_GET_EVENT_GENERATION_IDS = 84;
+  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 85;
+  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 86;
+  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 87;
+  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 88;
+  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 89;
+  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 90;
+  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 91;
+  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 92;
+  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 93;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -8311,6 +8489,10 @@ public final class UserManagementGrpc {
         case METHODID_INTERACTIVE_LOGIN3RD_PARTY:
           serviceImpl.interactiveLogin3rdParty((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse>) responseObserver);
+          break;
+        case METHODID_INTERACTIVE_LOGIN_LOCAL:
+          serviceImpl.interactiveLoginLocal((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse>) responseObserver);
           break;
         case METHODID_DELETE_ACCOUNT:
           serviceImpl.deleteAccount((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest) request,
@@ -8415,6 +8597,10 @@ public final class UserManagementGrpc {
         case METHODID_REVOKE_ENTITLEMENT:
           serviceImpl.revokeEntitlement((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse>) responseObserver);
+          break;
+        case METHODID_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED:
+          serviceImpl.ensureDefaultEntitlementsGranted((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse>) responseObserver);
           break;
         case METHODID_ASSIGN_ROLE:
           serviceImpl.assignRole((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest) request,
@@ -8735,6 +8921,7 @@ public final class UserManagementGrpc {
               .setSchemaDescriptor(new UserManagementFileDescriptorSupplier())
               .addMethod(getInteractiveLoginMethodHelper())
               .addMethod(getInteractiveLogin3rdPartyMethodHelper())
+              .addMethod(getInteractiveLoginLocalMethodHelper())
               .addMethod(getDeleteAccountMethodHelper())
               .addMethod(getDeleteActorMethodHelper())
               .addMethod(getDeleteTrialUserMethodHelper())
@@ -8761,6 +8948,7 @@ public final class UserManagementGrpc {
               .addMethod(getCreateTrialAccountMethodHelper())
               .addMethod(getGrantEntitlementMethodHelper())
               .addMethod(getRevokeEntitlementMethodHelper())
+              .addMethod(getEnsureDefaultEntitlementsGrantedMethodHelper())
               .addMethod(getAssignRoleMethodHelper())
               .addMethod(getUnassignRoleMethodHelper())
               .addMethod(getListAssignedRolesMethodHelper())
