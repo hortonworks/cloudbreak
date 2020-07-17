@@ -13,14 +13,14 @@ import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("DiagnosticsCollectionV4Request")
+@ApiModel("DiagnosticsCollectionRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiagnosticsCollectionRequest extends BaseDiagnosticsCollectionRequest {
 
     @NotNull
     @ApiModelProperty(ModelDescriptions.StackModelDescription.CRN)
-    @ResourceObjectField(action = AuthorizationResourceAction.ENVIRONMENT_READ, variableType = AuthorizationVariableType.CRN)
+    @ResourceObjectField(action = AuthorizationResourceAction.DATALAKE_READ, variableType = AuthorizationVariableType.CRN)
     private String stackCrn;
 
     public String getStackCrn() {
