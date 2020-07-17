@@ -27,6 +27,11 @@ service UserManagement {
   rpc InteractiveLogin3rdParty (InteractiveLogin3rdPartyRequest)
     returns (InteractiveLogin3rdPartyResponse) {}
 
+  // Handles an interactive login for a user in who is logging in using the CDP control plane local
+  // identity provider. We assume that the account had been created.
+  rpc InteractiveLoginLocal (InteractiveLoginLocalRequest)
+    returns (InteractiveLoginLocalResponse) {}
+
   // Deletes the account from Altus tests only.
   rpc DeleteAccount (DeleteAccountRequest)
     returns (DeleteAccountResponse) {}
@@ -137,6 +142,10 @@ service UserManagement {
   // Revoke Entitlement from an Account
   rpc RevokeEntitlement (RevokeEntitlementRequest)
     returns (RevokeEntitlementResponse) {}
+
+  // Ensure default entitlements are granted to an Account
+  rpc EnsureDefaultEntitlementsGranted (EnsureDefaultEntitlementsGrantedRequest)
+    returns (EnsureDefaultEntitlementsGrantedResponse) {}
 
   // Assign a role to an assignee
   rpc AssignRole (AssignRoleRequest)
@@ -414,11 +423,11 @@ service UserManagement {
   rpc UnassignCloudIdentity (UnassignCloudIdentityRequest)
     returns (UnassignCloudIdentityResponse) {}
 
-  // Assign a cloud identity to a service principal or service principal category.
+  // Assign a cloud identity to a service principal.
   rpc AssignServicePrincipalCloudIdentity (AssignServicePrincipalCloudIdentityRequest)
     returns (AssignServicePrincipalCloudIdentityResponse) {}
 
-  // Unassign a cloud identity from a service principal or service principal category.
+  // Unassign a cloud identity from a service principal.
   rpc UnassignServicePrincipalCloudIdentity (UnassignServicePrincipalCloudIdentityRequest)
     returns (UnassignServicePrincipalCloudIdentityResponse) {}
 }
@@ -631,7 +640,7 @@ message InteractiveLoginRequest {
   // the IdP during an SP-initiated login. For an IdP-initiated login this will
   // be an empty string.
   string inResponseTo = 10;
-  // Optional. The IP address that the request was made from.
+  // The IP address that the request was made from.
   string sourceIpAddress = 11;
 }
 
@@ -660,6 +669,7 @@ message InteractiveLoginResponse {
   reserved 4, 5, 6;
   // The user's CRN.
   string crn = 1;
+  // The console accee key ID.
   string accessKeyId = 2;
   // See AccessKeyKeyPairGenerator.AccessKeyPair.
   // Ed25519 private key is 32 bytes encoded in base64
@@ -697,13 +707,16 @@ message InteractiveLogin3rdPartyRequest {
   // the IdP during an SP-initiated login. For an IdP-initiated or for non-SAML
   // logins this will be an empty string.
   string inResponseTo = 7;
-  // Optional. The IP address that the request was made from.
+  // The IP address that the request was made from.
   string sourceIpAddress = 8;
+  // Optional. The Azure Object Id.
+  string azureObjectId = 9;
 }
 
 message InteractiveLogin3rdPartyResponse {
   // The user's CRN.
   string crn = 1;
+  // The console accee key ID.
   string accessKeyId = 2;
   // See AccessKeyKeyPairGenerator.AccessKeyPair.
   // Ed25519 private key is 32 bytes encoded in base64
@@ -719,7 +732,40 @@ message InteractiveLogin3rdPartyResponse {
   // TTL expired). Will be false if we are not forwarding the user to a workload
   // cluster
   bool unknownInResponseTo = 6;
+}
 
+message InteractiveLoginLocalRequest {
+  // The account ID the user is logging in to.
+  string accountId = 1;
+  // The user's username
+  string username = 2;
+  // The user's password
+  string password = 3 [(options.FieldExtension.sensitive) = true];
+  // Optional. The CDP CP authentication request ID, if any.
+  string inResponseTo = 4;
+  // The IP address that the request was made from.
+  string sourceIpAddress = 5;
+}
+
+message InteractiveLoginLocalResponse {
+  // The user's CRN.
+  string crn = 1;
+  // The console accee key ID.
+  string accessKeyId = 2;
+  // See AccessKeyKeyPairGenerator.AccessKeyPair.
+  // Ed25519 private key is 32 bytes encoded in base64
+  string privateKey = 3 [(options.FieldExtension.sensitive) = true];
+  // A session token that can be used by consoles to authenticate users.
+  string sessionToken = 4 [(options.FieldExtension.sensitive) = true];
+  // Optional. A SAML AuthnResponse that should be sent to the to the workload
+  // cluster. Will be empty if we are not forwarding the user to a workload
+  // cluster.
+  WorkloadSamlAuthnResponse workloadResponse = 5;
+  // True if the InteractiveLoginLocalRequest contained an InResponseTo that
+  // did not exist in the cache (i.e. we got the request back after the cache
+  // TTL expired). Will be false if we are not forwarding the user to a workload
+  // cluster
+  bool unknownInResponseTo = 6;
 }
 
 // Note that this intentionally lacks a request context as this is called during
@@ -805,9 +851,11 @@ message CreateUserRequest {
   string accountId = 1;
   // The identity provider user id for the user. This ID must match the NameId
   // attribute value that will be passed for the user in the SAML response using
-  // the associated IdP.
+  // the associated IdP or the username attribute to use with the local authentication
+  // provider.
   string idpUserId = 2;
-  // The identity provider name or CRN the user belongs to.
+  // The identity provider name or CRN the user belongs to. To create a local user in an
+  // account pass the CDP_LOCAL_IDENTITY_PROVIDER_CRN.
   string identityProviderNameOrCrn = 3;
   // The user's email.
   string email = 4;
@@ -817,6 +865,9 @@ message CreateUserRequest {
   string firstName = 6;
   // This may be an empty string.
   string lastName = 7;
+  // Whether or not the user is an account admin. Users who are
+  // flagged as account admins have all rights within the account.
+  bool accountAdmin = 8;
 }
 
 message CreateUserResponse {
@@ -853,8 +904,12 @@ message ListUsersResponse {
 }
 
 message DeleteActorRequest {
-  // Actor Crn to be deleted.
+  // Actor Crn to be deleted. Deprecated, use Actor instead.
   string actorCrn = 1;
+  // The actor to delete.
+  Actor actor = 2;
+  // If set the 'true' the actor will be deleted from storage.
+  bool forceDelete = 3;
 }
 
 message DeleteActorResponse {
@@ -1288,6 +1343,16 @@ message RevokeEntitlementResponse {
   Account account = 1;
 }
 
+message EnsureDefaultEntitlementsGrantedRequest {
+  // A union containing an sfdc account id or thunderhead account id.
+  AccountId accountId = 1;
+}
+
+message EnsureDefaultEntitlementsGrantedResponse {
+  // Account Details
+  Account account = 1;
+}
+
 // A union containing an actor identifier, a user or a machine-user.
 message Actor {
   // The account the actor belongs to.
@@ -1626,6 +1691,15 @@ message DeleteMachineUserRequest {
 }
 
 message DeleteMachineUserResponse {
+  // A list of all the access key CRNs that were deleted for the actor
+  repeated string accessKeysDeleted = 1;
+  // A list of all group CRNs from which the user were removed.
+  repeated string groupsModified = 2;
+  // A list of all the roles CRNs that the users were unassigned from.
+  repeated string rolesUnassigned = 3;
+  // A list of all resource assignments that were removed. Includes the
+  // resource role CRNs and the resource that were assigned.
+  repeated ResourceAssignment resourceRolesUnassigned = 4;
 }
 
 message WorkloadPasswordPolicyStorage {
@@ -1650,8 +1724,11 @@ message AccountDetails {
 
 // Set Account Messages request object.
 message SetAccountMessagesRequest {
-  // Account id for which messages are stored
-  resources.Id accountId = 1;
+  // The account ID the account messages is for.
+  string accountId = 3;
+  // Deprecated, use accountId above. This will be removed shortly.
+  // The account Resource.id the account message is for.
+  resources.Id accountIdDeprecated = 1;
   // The account messages to set.
   AccountMessages accountMessages = 2;
 }
@@ -1662,8 +1739,11 @@ message SetAccountMessagesResponse {
 
 // Object used to submit a request for terms acceptance.
 message AcceptTermsRequest {
+  // Account ID for which the terms are being accepted
+  string accountId = 3;
+  // Deprecated, use accountId above. This will be removed shortly.
   // Account Resource.id which the terms are being accepted
-  resources.Id accountId = 1;
+  resources.Id accountIdDeprecated = 1;
   // The termsName for the terms being accepted
   string termsName = 2;
 }
@@ -1726,8 +1806,11 @@ message DescribeTermsResponse {
 
 // Object used to submit a request to list entitlements for an account
 message ListEntitlementsRequest {
+  // The account ID to query entitlements of.
+  string accountId = 4;
+  // Deprecated, use accountId above. This will be removed shortly.
   // The account Resource.id to query entitlements of.
-  resources.Id accountId = 1;
+  resources.Id accountIdDeprecated = 1;
   // See the PageToken comment in paging.proto on paging usage.
   int32 pageSize = 2;
   paging.PageToken pageToken = 3;
@@ -1753,8 +1836,11 @@ message ListEntitlementsResponse {
 
 // Object used to submit a request to list terms for an account
 message ListTermsRequest {
-  // The account Resource.id to query entitlements of.
-  resources.Id accountId = 1;
+  // The account ID to query terms for.
+  string accountId = 4;
+  // Deprecated, use accountId above. This will be removed shortly.
+  // The account Resource.id to query terms for.
+  resources.Id accountIdDeprecated = 1;
   // See the PageToken comment in paging.proto on paging usage.
   int32 pageSize = 2;
   paging.PageToken pageToken = 3;
@@ -1906,12 +1992,17 @@ message ListGroupsForMemberResponse {
 message ListWorkloadAdministrationGroupsForMemberRequest {
   // Crn of member for which workload administration groups are requested.
   string memberCrn = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 2;
+  paging.PageToken pageToken = 3;
 }
 
 message ListWorkloadAdministrationGroupsForMemberResponse {
   // A list of workload administration group names the actor
   // is a member of.
   repeated string workloadAdministrationGroupName = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 // Information about a group an actor belongs to. Includes information about
@@ -2083,7 +2174,7 @@ message LdapProviderInfo {
   // where the password is stored. This, when using Vault KV store is a key-value map. `key` is the actual
   // key name inside this map.
   // To enable login via LDAP, console auth service should must have required permissions to read this value.
-  string bindPasswordRef = 3;
+  string bindPasswordRef = 3 [(options.FieldExtension.sensitive) = true];
   // Property of the LDAP user object to use when binding to verify the password.
   // e.g. name, email
   string userBindProperty = 4;
@@ -2130,6 +2221,8 @@ message LdapProviderInfo {
   string lastNameMappingAttribute = 23;
   // Mapping group's LDAP entry into group attribute of UMS
   string groupNameMappingAttribute = 24;
+  // Tells whether this LDAP IDP is enabled for use.
+  bool enabled = 25;
 }
 
 // Local connection attributes used to create a local identity provider connector.
@@ -2275,7 +2368,7 @@ message LdapIdpDetails {
   // where the password is stored. This, when using Vault KV store is a key-value map. `key` is the actual
   // key name inside this map.
   // To enable login via LDAP, console auth service should must have required permissions to read this value.
-  string bindPasswordRef = 3;
+  string bindPasswordRef = 3 [(options.FieldExtension.sensitive) = true];
   // Property of the LDAP user object to use when binding to verify the password.
   // e.g. name, email
   string userBindProperty = 4;
@@ -2322,6 +2415,8 @@ message LdapIdpDetails {
   string lastNameMappingAttribute = 23;
   // Mapping group's LDAP entry into group attribute of UMS
   string groupNameMappingAttribute = 24;
+  // Tells whether this LDAP IDP is enabled for use.
+  bool enabled = 25;
 }
 
 // Local connection attributes used to create a local identity provider connector.
@@ -2605,11 +2700,18 @@ message SshPublicKeyStorage {
 
 // A namespace for cloud identities. All cloud identities exist within a cloud
 // identity domain. At most one cloud identity may be assigned to a given entity
-// within a given domain. The modeling of a cloud identity domain is cloud
-// provider-specific. The following object is used to represent a cloud identity
-// domain in dynamo.
+// within a given domain. Some forms of identity domain are generic across all
+// cloud providers, while others are modeled on a per-cloud provider basis.
+// The following object is used to represent a cloud identity domain in dynamo.
 message CloudIdentityDomainStorage {
   oneof domain {
+    // An environment CRN serves as the identity domain when we want cloud
+    // identity mappings to be scoped to the environment. This is the case,
+    // for example, for service principals. This form of identity domain is
+    // applicable to all cloud providers, which is why we define it here,
+    // rather than in a cloud-specific subtype of CloudIdentityDomain.
+    string environmentCrn = 2;
+    // Azure-specific cloud identity domain.
     AzureCloudIdentityDomainStorage azureCloudIdentityDomain = 1;
   }
 }
@@ -2637,7 +2739,8 @@ message AzureCloudIdentityNameStorage {
 
 // Object used to represent a cloud identity in dynamo.
 message CloudIdentityStorage {
-  // The domain in which the cloud identity exists.
+  // Optional. The domain in which the cloud identity exists. If omitted, the
+  // default domain for the cloud provider and account is assumed.
   CloudIdentityDomainStorage cloudIdentityDomain = 1;
   // The unique name of the cloud identity within the domain.
   CloudIdentityNameStorage cloudIdentityName = 2;
@@ -2654,6 +2757,8 @@ message CloudIdentitiesStorage {
 message ActorDetails {
   // The cdp workload password hash, encrypted.
   string encryptedPasswordHash = 1 [(options.FieldExtension.sensitive) = true];
+  // The salt used to generate the password hash.
+  string passwordHashSalt = 6;
   // The password hash expiration date, in ms from the Java epoch of
   // 1970-01-01T00:00:00Z. The value of 0 means that the password hash does
   // not expire.
@@ -2670,6 +2775,13 @@ message ActorDetails {
 // not indexed.
 message GroupDetails {
   // Cloud identities assigned to the group.
+  CloudIdentitiesStorage cloudIdentities = 1;
+}
+
+// This is used to serialize all the ServicePrincipal dynamoDB related
+// information that is not indexed.
+message ServicePrincipalDetails {
+  // Cloud identities assigned to the service principal.
   CloudIdentitiesStorage cloudIdentities = 1;
 }
 
@@ -2828,11 +2940,19 @@ message SetWorkloadPasswordPolicyResponse {
 
 // A namespace for cloud identities. All cloud identities exist within a cloud
 // identity domain. At most one cloud identity may be assigned to a given entity
-// within a given domain. The modeling of a cloud identity domain is cloud
-// provider-specific. The following object is used to represent a cloud identity
-// domain in the wire protocol.
+// within a given domain. Some forms of identity domain are generic across all
+// cloud providers, while others are modeled on a per-cloud provider basis.
+// The following object is used to represent a cloud identity domain in the
+// wire protocol.
 message CloudIdentityDomain {
   oneof domain {
+    // An environment CRN serves as the identity domain when we want cloud
+    // identity mappings to be scoped to the environment. This is the case,
+    // for example, for service principals. This form of identity domain is
+    // applicable to all cloud providers, which is why we define it here,
+    // rather than in a cloud-specific subtype of CloudIdentityDomain.
+    string environmentCrn = 2;
+    // Azure-specific cloud identity domain.
     AzureCloudIdentityDomain azureCloudIdentityDomain = 1;
   }
 }
@@ -2861,7 +2981,8 @@ message AzureCloudIdentityName {
 
 // Object used to represent a cloud identity in the wire protocol.
 message CloudIdentity {
-  // The domain in which the cloud identity exists.
+  // Optional. The domain in which the cloud identity exists. If omitted, the
+  // default domain for the cloud provider and account is assumed.
   CloudIdentityDomain cloudIdentityDomain = 1;
   // The unique name of the cloud identity within the domain.
   CloudIdentityName cloudIdentityName = 2;
@@ -2890,13 +3011,10 @@ message UnassignCloudIdentityResponse {
 }
 
 message AssignServicePrincipalCloudIdentityRequest {
-  // The account id in which the service principal or service principal category
-  // exists.
+  // The account id in which the service principal exists.
   string accountId = 1;
-  // The service principal or service principal category to which the cloud
-  // identity is to be assigned. Note that the UMS guarantees that there are
-  // no name collisions between service principals and categories.
-  string servicePrincipalOrCategory = 2;
+  // The service principal to which the cloud identity is to be assigned.
+  string servicePrincipal = 2;
   // The cloud identity to assign.
   CloudIdentity cloudIdentity = 3;
 }
@@ -2905,13 +3023,10 @@ message AssignServicePrincipalCloudIdentityResponse {
 }
 
 message UnassignServicePrincipalCloudIdentityRequest {
-  // The account id in which the service principal or service principal category
-  // exists.
+  // The account id in which the service principal exists.
   string accountId = 1;
-  // The service principal or service principal category from which the cloud
-  // identity is to be unassigned. Note that the UMS guarantees that there are
-  // no name collisions between service principals and categories.
-  string servicePrincipalOrCategory = 2;
+  // The service principal from which the cloud identity is to be unassigned.
+  string servicePrincipal = 2;
   // The domain in which the cloud identity to unassign exists. Since there can
   // be at most one identity assigned to the service principal within a given
   // domain, this fully identifies the identity to unassign.
