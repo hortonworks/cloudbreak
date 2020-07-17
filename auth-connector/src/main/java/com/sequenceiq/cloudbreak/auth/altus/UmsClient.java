@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.thunderhead.service.common.paging.PagingProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementBlockingStub;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
@@ -508,12 +509,15 @@ public class UmsClient {
      * @param memberCrn   the member CRN
      * @return the workload administration groups for the member
      */
-    public ListWorkloadAdministrationGroupsForMemberResponse listWorkloadAdministrationGroupsForMember(String requestId, String memberCrn) {
-        return newStub(requestId).listWorkloadAdministrationGroupsForMember(
-                ListWorkloadAdministrationGroupsForMemberRequest.newBuilder()
-                        .setMemberCrn(memberCrn)
-                        .build()
-        );
+    public ListWorkloadAdministrationGroupsForMemberResponse listWorkloadAdministrationGroupsForMember(
+            String requestId, String memberCrn, Optional<PagingProto.PageToken> pageToken) {
+        ListWorkloadAdministrationGroupsForMemberRequest.Builder requestBuilder = ListWorkloadAdministrationGroupsForMemberRequest.newBuilder()
+                .setPageSize(umsClientConfig.getListWorkloadAdministrationGroupsForMemberPageSize())
+                .setMemberCrn(memberCrn);
+        if (pageToken.isPresent()) {
+            requestBuilder.setPageToken(pageToken.get());
+        }
+        return newStub(requestId).listWorkloadAdministrationGroupsForMember(requestBuilder.build());
     }
 
     /**

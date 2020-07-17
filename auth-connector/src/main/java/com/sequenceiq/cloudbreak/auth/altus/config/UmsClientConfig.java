@@ -17,6 +17,9 @@ public class UmsClientConfig {
     @Value("${altus.ums.client.list_workload_administration_groups_page_size:100}")
     private int listWorkloadAdministrationGroupsPageSize;
 
+    @Value("${altus.ums.client.list_workload_administration_groups_for_member_page_size:100}")
+    private int listWorkloadAdministrationGroupsForMemberPageSize;
+
     public int getListGroupsPageSize() {
         return listGroupsPageSize;
     }
@@ -31,5 +34,9 @@ public class UmsClientConfig {
 
     public int getListWorkloadAdministrationGroupsPageSize() {
         return listWorkloadAdministrationGroupsPageSize;
+    }
+
+    public int getListWorkloadAdministrationGroupsForMemberPageSize() {
+        return listWorkloadAdministrationGroupsForMemberPageSize;
     }
 }
