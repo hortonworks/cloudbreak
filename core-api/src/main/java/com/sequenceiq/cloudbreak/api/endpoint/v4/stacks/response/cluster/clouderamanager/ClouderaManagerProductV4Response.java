@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -97,5 +98,15 @@ public class ClouderaManagerProductV4Response implements JsonEntity {
     public ClouderaManagerProductV4Response withCsd(List<String> csd) {
         this.csd = csd;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ClouderaManagerProductV4Response.class.getSimpleName() + "[", "]")
+                .add("name='" + name + "'")
+                .add("version='" + version + "'")
+                .add("parcel='" + parcel + "'")
+                .add("csd=" + csd)
+                .toString();
     }
 }

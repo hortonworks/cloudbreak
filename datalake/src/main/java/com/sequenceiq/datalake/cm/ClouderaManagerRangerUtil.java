@@ -10,6 +10,7 @@ import com.cloudera.api.swagger.model.ApiClusterList;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleNameList;
 import com.google.common.base.Joiner;
@@ -101,9 +102,25 @@ public class ClouderaManagerRangerUtil {
         return configList.getItems().stream().map(ApiConfig::getName).anyMatch(configName -> configName.equals(AZURE_USER_MAPPING));
     }
 
+    private boolean isRoleRefreshNeeded(RolesResourceApi rolesResourceApi, String clusterName, String rangerUserSyncRole) throws ApiException {
+        ApiRole role = rolesResourceApi.readRole(clusterName, rangerUserSyncRole, RANGER_SERVICE_NAME, "summary");
+        ApiConfigStalenessStatus stalenessStatus = role.getConfigStalenessStatus();
+        LOGGER.debug("Ranger user sync ApiConfigStalenessStatus = {}", stalenessStatus);
+        return stalenessStatus.equals(ApiConfigStalenessStatus.STALE_REFRESHABLE);
+    }
+
+    private void refreshRoleIfStale(ApiClient client, RolesResourceApi rolesResourceApi, String clusterName, String rangerUserSyncRoleName)
+            throws ApiException {
+        if (isRoleRefreshNeeded(rolesResourceApi, clusterName, rangerUserSyncRoleName)) {
+            LOGGER.info("Role refresh required, trigerring role refresh");
+            triggerRoleRefresh(client, clusterName, RANGER_SERVICE_NAME, rangerUserSyncRoleName);
+        } else {
+            LOGGER.info("No role refresh required");
+        }
+    }
+
     public void setAzureCloudIdentityMapping(String stackCrn, Map<String, String> azureUserMapping, Map<String, String> azureGroupMapping) throws ApiException {
         // NOTE: The necessary configs changed here are only available in CM7.2-1
-        // TODO Skip setting role and trigerring refresh if the configs haven't changed
         ApiClient client = clouderaManagerProxiedClientFactory.getProxiedClouderaManagerClient(stackCrn);
         String clusterName = getClusterName(client);
         String rangerUserSyncRoleName = getRangerUserSyncRoleName(client, clusterName);
@@ -117,7 +134,7 @@ public class ClouderaManagerRangerUtil {
             rolesResourceApi.updateRoleConfig(clusterName, rangerUserSyncRoleName, RANGER_SERVICE_NAME,
                     "Updating Azure Cloud Identity Mapping through Cloudbreak",
                     configList);
-            triggerRoleRefresh(client, clusterName, RANGER_SERVICE_NAME, rangerUserSyncRoleName);
+            refreshRoleIfStale(client, rolesResourceApi, clusterName, rangerUserSyncRoleName);
         }
     }
 

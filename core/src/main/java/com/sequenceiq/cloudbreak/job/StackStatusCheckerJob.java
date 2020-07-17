@@ -25,9 +25,9 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.gs.collections.impl.factory.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -190,13 +190,22 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .filter(i -> !Set.of(SERVICES_UNHEALTHY, STOPPED).contains(i.getInstanceStatus()))
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(toSet());
-        clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNames, newHealtyHostNames);
-        if (!failedInstances.isEmpty()) {
-            clusterService.updateClusterStatusByStackId(stack.getId(), Status.AMBIGUOUS);
-        } else if (statesFromAvailabeAllowed().contains(stack.getCluster().getStatus())) {
-            clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
-        }
+        ifFlowNotRunning(() -> clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNames, newHealtyHostNames));
+        ifFlowNotRunning(() -> {
+            if (!failedInstances.isEmpty()) {
+                clusterService.updateClusterStatusByStackId(stack.getId(), Status.AMBIGUOUS);
+            } else if (statesFromAvailabeAllowed().contains(stack.getCluster().getStatus())) {
+                clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
+            }
+        });
         syncInstances(stack, runningInstances, failedInstances, defaultState);
+    }
+
+    private void ifFlowNotRunning(Runnable function) {
+        if (flowLogService.isOtherFlowRunning(getStackId())) {
+            return;
+        }
+        function.run();
     }
 
     private EnumSet statesFromAvailabeAllowed() {
@@ -223,7 +232,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             Collection<InstanceMetaData> instanceMetaData, InstanceSyncState defaultState) {
         List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, instanceMetaData);
         LOGGER.debug("Cluster '{}' state check on provider, instances: {}", stack.getId(), instanceStatuses);
-        syncService.autoSync(stack, runningInstances, instanceStatuses, true, defaultState);
+        ifFlowNotRunning(() -> syncService.autoSync(stack, runningInstances, instanceStatuses, true, defaultState));
     }
 
     private ClusterStatusResult queryClusterStatus(ClusterApi connector) {

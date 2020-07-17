@@ -141,6 +141,7 @@ public class DatalakeUpgradeActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradeSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Sdx upgrade was finalized with sdx id: {}", payload.getResourceId());
+                sdxUpgradeService.updateRuntimeVersionFromCloudbreak(payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_UPGRADE_FINISHED,

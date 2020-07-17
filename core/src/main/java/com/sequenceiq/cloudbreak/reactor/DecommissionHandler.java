@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.cluster.service.DecommissionException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -155,7 +156,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
         try {
             Set<String> ips = hostsToRemove.values().stream().map(InstanceMetaData::getPrivateIp).filter(StringUtils::isNotBlank).collect(Collectors.toSet());
             freeIpaCleanupService.cleanup(stack, true, false, hostsToRemove.keySet(), ips);
-        } catch (FreeIpaOperationFailedException e) {
+        } catch (FreeIpaOperationFailedException | CloudbreakServiceException e) {
             LOGGER.warn("FreeIPA cleanup has failed during decommission, ignoring error", e);
         }
     }
