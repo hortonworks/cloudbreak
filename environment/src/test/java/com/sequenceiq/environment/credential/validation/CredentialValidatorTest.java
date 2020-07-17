@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
@@ -106,7 +107,7 @@ class CredentialValidatorTest {
         Credential newCred = new Credential();
         newCred.setCloudPlatform(CloudPlatform.AWS.name());
 
-        ValidationResult result = underTest.validateCredentialUpdate(original, newCred);
+        ValidationResult result = underTest.validateCredentialUpdate(original, newCred, CredentialType.ENVIRONMENT);
         assertFalse(result.hasError());
     }
 
@@ -117,7 +118,7 @@ class CredentialValidatorTest {
         Credential newCred = new Credential();
         newCred.setCloudPlatform(CloudPlatform.AZURE.name());
 
-        ValidationResult result = underTest.validateCredentialUpdate(original, newCred);
+        ValidationResult result = underTest.validateCredentialUpdate(original, newCred, CredentialType.ENVIRONMENT);
         assertEquals(1, result.getErrors().size());
         assertThat(result.getErrors().get(0)).contains("CloudPlatform of the credential cannot be changed! Original: 'AWS' New: 'AZURE'.");
     }

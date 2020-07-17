@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.platformresource;
 
 import static com.sequenceiq.cloudbreak.cloud.service.CloudParameterService.ACCESS_CONFIG_TYPE;
+import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.util.Map;
 import java.util.Objects;
@@ -95,9 +96,9 @@ public class PlatformParameterService {
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
         if (!Strings.isNullOrEmpty(credentialName)) {
-            platformResourceRequest.setCredential(credentialService.getByNameForAccountId(credentialName, accountId));
+            platformResourceRequest.setCredential(credentialService.getByNameForAccountId(credentialName, accountId, ENVIRONMENT));
         } else if (!Strings.isNullOrEmpty(credentialCrn)) {
-            platformResourceRequest.setCredential(credentialService.getByCrnForAccountId(credentialCrn, accountId));
+            platformResourceRequest.setCredential(credentialService.getByCrnForAccountId(credentialCrn, accountId, ENVIRONMENT));
         } else {
             throw new BadRequestException("The credentialId or the credentialName must be specified in the request");
         }

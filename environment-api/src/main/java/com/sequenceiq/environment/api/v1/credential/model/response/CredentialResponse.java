@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.doc.credential.CredentialDescriptor;
 import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.CredentialBase;
@@ -33,6 +34,9 @@ public class CredentialResponse extends CredentialBase implements ResourceCrnAwa
 
     @ApiModelProperty(CredentialModelDescription.CREATED)
     private Long created;
+
+    @ApiModelProperty(value = CredentialModelDescription.CREDENTIAL_TYPE, required = true)
+    private CredentialType type;
 
     public Long getCreated() {
         return created;
@@ -72,6 +76,14 @@ public class CredentialResponse extends CredentialBase implements ResourceCrnAwa
 
     public void setCreator(String creator) {
         this.creator = creator;
+    }
+
+    public CredentialType getType() {
+        return type;
+    }
+
+    public void setType(CredentialType type) {
+        this.type = type;
     }
 
     @Override

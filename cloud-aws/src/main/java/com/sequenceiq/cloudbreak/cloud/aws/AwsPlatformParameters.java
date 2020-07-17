@@ -66,12 +66,15 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private VmRecommendations vmRecommendations;
 
-    private String credentailPoliciesJson;
+    private String credentialPoliciesJson;
+
+    private String auditPoliciesJson;
 
     @PostConstruct
     public void init() {
         vmRecommendations = initVmRecommendations();
-        credentailPoliciesJson = initCBPolicyJson();
+        credentialPoliciesJson = initCBPolicyJson();
+        auditPoliciesJson = initAuditPolicyJson();
     }
 
     @Override
@@ -152,8 +155,12 @@ public class AwsPlatformParameters implements PlatformParameters {
         return true;
     }
 
+    public String getAuditPoliciesJson() {
+        return auditPoliciesJson;
+    }
+
     public String getCredentialPoliciesJson() {
-        return credentailPoliciesJson;
+        return credentialPoliciesJson;
     }
 
     public enum AwsDiskType {
@@ -193,6 +200,15 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private String initCBPolicyJson() {
         String resourceDefinition = resourceDefinition("cb-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
+    private String initAuditPolicyJson() {
+        String resourceDefinition = resourceDefinition("audit-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
+    private String getPolicyJson(String resourceDefinition) {
         String minified = JsonUtil.minify(resourceDefinition);
         if (JsonUtil.INVALID_JSON_CONTENT.equals(minified)) {
             String message = String.format("Cannot initialize Cloudbreak's policies JSON for AWS: %s", minified);

@@ -79,10 +79,13 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private String roleDefJson;
 
+    private String auditRoleDefJson;
+
     @PostConstruct
     public void init() {
         vmRecommendations = initVmRecommendations();
         roleDefJson = initRoleDefJson();
+        auditRoleDefJson = initAuditRoleDefJson();
     }
 
     @Override
@@ -199,6 +202,10 @@ public class AzurePlatformParameters implements PlatformParameters {
         return roleDefJson;
     }
 
+    public String getAuditRoleDefJson() {
+        return auditRoleDefJson;
+    }
+
     private VmRecommendations initVmRecommendations() {
         VmRecommendations result = null;
         String vmRecommendation = resourceDefinition("vm-recommendation");
@@ -211,8 +218,15 @@ public class AzurePlatformParameters implements PlatformParameters {
     }
 
     private String initRoleDefJson() {
-        String roleDef = resourceDefinition("role-def");
-        String minified = JsonUtil.minify(roleDef);
+        return readRoleDef("role-def");
+    }
+
+    private String initAuditRoleDefJson() {
+        return readRoleDef("audit-role-def");
+    }
+
+    private String readRoleDef(String roleDef) {
+        String minified = JsonUtil.minify(resourceDefinition(roleDef));
         if (JsonUtil.INVALID_JSON_CONTENT.equals(minified)) {
             String message = String.format("Cannot initialize Cloudbreak's role def JSON for Azure: %s", minified);
             LOGGER.error(message);

@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.common.model.CredentialType;
 
 /**
  * Manages the credentials e.g public keys on Cloud Plarform side
@@ -60,7 +61,8 @@ public interface CredentialConnector {
      * @param externalId that should be added as prerequisites
      * @return the necessary prerequisites for credential creation
      */
-    default CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
+    default CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress,
+        CredentialType type) {
         String message = String.format("There is no prerequisites for '%s' cloud platform!", cloudContext.getPlatform().value());
         throw new UnsupportedOperationException(message);
     }

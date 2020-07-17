@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.credential.CredentialSender;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.common.model.CredentialType;
 
 public class AzureCredentialConnectorTest {
 
@@ -76,7 +77,8 @@ public class AzureCredentialConnectorTest {
         when(appCreationCommand.generate(anyString())).thenReturn(expectedCommand);
         when(azurePlatformParameters.getRoleDefJson()).thenReturn(expectedRoleDef);
 
-        CredentialPrerequisitesResponse result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", DEPLOYMENT_ADDRESS);
+        CredentialPrerequisitesResponse result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", DEPLOYMENT_ADDRESS,
+                CredentialType.ENVIRONMENT);
 
         assertEquals(PLATFORM, result.getCloudPlatform());
         assertEquals(expectedCommand, new String(Base64.decodeBase64(result.getAzure().getAppCreationCommand())));
@@ -88,7 +90,8 @@ public class AzureCredentialConnectorTest {
         String expected = "someAppCreationCommandValue";
         when(appCreationCommand.generate(anyString())).thenReturn(expected);
 
-        CredentialPrerequisitesResponse result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", DEPLOYMENT_ADDRESS);
+        CredentialPrerequisitesResponse result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", DEPLOYMENT_ADDRESS,
+                CredentialType.ENVIRONMENT);
 
         assertNull(result.getAws());
         assertNull(result.getGcp());

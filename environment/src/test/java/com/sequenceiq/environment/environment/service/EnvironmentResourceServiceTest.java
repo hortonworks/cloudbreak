@@ -81,14 +81,14 @@ class EnvironmentResourceServiceTest {
     @Test
     void getCredentialFromRequest() {
         Credential value = new Credential();
-        when(credentialService.getByNameForAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(value);
+        when(credentialService.getByNameForAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID), any())).thenReturn(value);
         assertEquals(value, environmentResourceServiceUnderTest.getCredentialFromRequest(request, ACCOUNT_ID));
     }
 
     @Test
     void getCredentialFromRequestNotFound() {
         request.setCredentialName(ENVIRONMENT_NAME);
-        when(credentialService.getByNameForAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenThrow(NotFoundException.class);
+        when(credentialService.getByNameForAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID), any())).thenThrow(NotFoundException.class);
         assertThrows(BadRequestException.class, () -> environmentResourceServiceUnderTest.getCredentialFromRequest(request, ACCOUNT_ID));
     }
 

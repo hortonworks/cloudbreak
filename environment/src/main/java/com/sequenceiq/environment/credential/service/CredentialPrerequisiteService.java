@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.user.UserPreferencesService;
@@ -44,10 +45,10 @@ public class CredentialPrerequisiteService {
     @Inject
     private UserPreferencesService userPreferencesService;
 
-    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress, CredentialType type) {
         CloudContext cloudContext = new CloudContext(null, null, cloudPlatform, TEMP_USER_ID, TEMP_WORKSPACE_ID);
         CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(cloudContext,
-                userPreferencesService.getExternalIdForCurrentUser(), deploymentAddress);
+                userPreferencesService.getExternalIdForCurrentUser(), deploymentAddress, type);
         LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         String message = String.format("Failed to get prerequisites for platform '%s': ", cloudPlatform);

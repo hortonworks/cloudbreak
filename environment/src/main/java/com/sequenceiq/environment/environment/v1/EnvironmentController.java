@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.v1;
 
+import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -286,7 +288,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @DisableCheckPermissions
     public Object getCreateEnvironmentForCli(EnvironmentRequest environmentRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        Credential credential = credentialService.getByNameForAccountId(environmentRequest.getCredentialName(), accountId);
+        Credential credential = credentialService.getByNameForAccountId(environmentRequest.getCredentialName(), accountId, ENVIRONMENT);
         return environmentService.getCreateEnvironmentForCli(environmentRequest, credential.getCloudPlatform());
     }
 }

@@ -18,7 +18,7 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 
 @ExtendWith(MockitoExtension.class)
-class CredentialV1ControllerTest {
+class AuditCredentialV1ControllerTest {
 
     private static final String USER_CRN = "USER_CRN";
 
@@ -36,12 +36,12 @@ class CredentialV1ControllerTest {
     private CredentialDeleteService credentialDeleteService;
 
     @InjectMocks
-    private CredentialV1Controller underTest;
+    private AuditCredentialV1Controller underTest;
 
     @Test
     void testGetPrerequisitesForCloudPlatform() {
         CredentialPrerequisitesResponse credentialPrerequisitesResponse = mock(CredentialPrerequisitesResponse.class);
-        when(credentialService.getPrerequisites(PLATFORM, DEPLOYMENT_ADDRESS, USER_CRN, CredentialType.ENVIRONMENT))
+        when(credentialService.getPrerequisites(PLATFORM, DEPLOYMENT_ADDRESS, USER_CRN, CredentialType.AUDIT))
                 .thenReturn(credentialPrerequisitesResponse);
 
         CredentialPrerequisitesResponse response = ThreadBasedUserCrnProvider.doAs(USER_CRN,

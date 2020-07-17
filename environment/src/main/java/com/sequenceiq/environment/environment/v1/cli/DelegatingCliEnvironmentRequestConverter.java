@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.v1.cli;
 
+import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
+
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -29,7 +31,7 @@ public class DelegatingCliEnvironmentRequestConverter {
 
     public Object convertRequest(EnvironmentRequest source) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String cloudPlatform = credentialService.getCloudPlatformByCredential(source.getCredentialName(), accountId);
+        String cloudPlatform = credentialService.getCloudPlatformByCredential(source.getCredentialName(), accountId, ENVIRONMENT);
         return requestConverters.stream()
                 .filter(c -> c.supportedPlatform().name().equals(cloudPlatform))
                 .findFirst()

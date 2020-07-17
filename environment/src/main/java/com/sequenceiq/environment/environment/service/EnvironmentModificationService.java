@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
+import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
+
 import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
@@ -135,7 +137,7 @@ public class EnvironmentModificationService {
         //CHECKSTYLE:OFF
         // TODO: 2019. 06. 03. also we have to check for SDXs and DistroXs what uses the given credential. If there is at least one, we have to update the crn reference through the other services
         //CHECKSTYLE:ON
-        Credential credential = credentialService.getByNameForAccountId(dto.getCredentialName(), accountId);
+        Credential credential = credentialService.getByNameForAccountId(dto.getCredentialName(), accountId, ENVIRONMENT);
         environment.setCredential(credential);
         LOGGER.debug("About to change credential on environment \"{}\"", environmentName);
         Environment saved = environmentService.save(environment);

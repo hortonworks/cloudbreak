@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.service.EnvironmentViewService;
@@ -46,14 +47,14 @@ public class CredentialDeleteService extends AbstractCredentialService {
         this.grpcUmsClient = grpcUmsClient;
     }
 
-    public Set<Credential> deleteMultiple(Set<String> names, String accountId) {
+    public Set<Credential> deleteMultiple(Set<String> names, String accountId, CredentialType type) {
         Set<Credential> deletedOnes = new LinkedHashSet<>();
-        names.forEach(credentialName -> deletedOnes.add(deleteByName(credentialName, accountId)));
+        names.forEach(credentialName -> deletedOnes.add(deleteByName(credentialName, accountId, type)));
         return deletedOnes;
     }
 
-    public Credential deleteByName(String name, String accountId) {
-        Credential credential = credentialService.findByNameAndAccountId(name, accountId, getEnabledPlatforms())
+    public Credential deleteByName(String name, String accountId, CredentialType type) {
+        Credential credential = credentialService.findByNameAndAccountId(name, accountId, getEnabledPlatforms(), type)
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", name);
@@ -63,8 +64,8 @@ public class CredentialDeleteService extends AbstractCredentialService {
         return archived;
     }
 
-    public Credential deleteByCrn(String crn, String accountId) {
-        Credential credential = credentialService.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms())
+    public Credential deleteByCrn(String crn, String accountId, CredentialType type) {
+        Credential credential = credentialService.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms(), type)
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", crn);

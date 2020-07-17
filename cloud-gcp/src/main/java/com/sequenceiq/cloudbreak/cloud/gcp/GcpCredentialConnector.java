@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.response.GcpCredentialPrerequisites;
+import com.sequenceiq.common.model.CredentialType;
 
 @Service
 public class GcpCredentialConnector implements CredentialConnector {
@@ -66,7 +67,7 @@ public class GcpCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress, CredentialType type) {
         String prerequisitesCreationCommand = gcpPlatformParameters.getPrerequisitesCreationCommand();
         GcpCredentialPrerequisites gcpPrereqs = new GcpCredentialPrerequisites(Base64.encodeBase64String(prerequisitesCreationCommand.getBytes()));
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), gcpPrereqs);

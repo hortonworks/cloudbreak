@@ -3,12 +3,15 @@ package com.sequenceiq.environment.credential.domain;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
+import com.sequenceiq.common.model.CredentialType;
+import com.sequenceiq.environment.parameters.dao.converter.CredentialTypeConverter;
 
 @Entity
 @Table(name = "Credential")
@@ -43,6 +46,9 @@ public class CredentialView implements Serializable, AuthResource, AccountIdAwar
 
     @Column
     private String verificationStatusText;
+
+    @Convert(converter = CredentialTypeConverter.class)
+    private CredentialType type;
 
     public String getName() {
         return name;
@@ -118,5 +124,13 @@ public class CredentialView implements Serializable, AuthResource, AccountIdAwar
 
     public void setVerificationStatusText(String verificationStatusText) {
         this.verificationStatusText = verificationStatusText;
+    }
+
+    public CredentialType getType() {
+        return type;
+    }
+
+    public void setType(CredentialType type) {
+        this.type = type;
     }
 }
