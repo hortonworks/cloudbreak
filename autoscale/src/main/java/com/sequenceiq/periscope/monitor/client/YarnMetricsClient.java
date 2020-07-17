@@ -1,10 +1,12 @@
 package com.sequenceiq.periscope.monitor.client;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,8 @@ public class YarnMetricsClient {
 
     private static final String PARAM_UPSCALE_FACTOR_NODE_RESOURCE_TYPE = "upscaling-factor-in-node-resource-types";
 
+    private static final String PARAM_DOWNSCALE_FACTOR_IN_NODE_COUNT = "downscaling-factor-in-node-count";
+
     private static final String DEFAULT_UPSCALE_RESOURCE_TYPE = "memory-mb";
 
     @Inject
@@ -51,10 +55,10 @@ public class YarnMetricsClient {
 
     @Retryable(value = Exception.class, maxAttempts = 2, backoff = @Backoff(delay = 5000))
     public YarnScalingServiceV1Response getYarnMetricsForCluster(Cluster cluster, StackV4Response stackV4Response,
-            String hostGroup) throws Exception {
+            String hostGroup, Optional<Integer> mandatoryDownScaleCount) throws Exception {
         TlsConfiguration tlsConfig = tlsSecurityService.getTls(cluster.getId());
         String clusterProxyUrl = clusterProxyConfigurationService.getClusterProxyUrl()
-                .orElseThrow(() ->  new RuntimeException(String.format("ClusterProxy Not Configured for Cluster {}, " +
+                .orElseThrow(() -> new RuntimeException(String.format("ClusterProxy Not Configured for Cluster {}, " +
                         " cannot query YARN Metrics.", cluster.getStackCrn())));
 
         Client restClient = RestClientUtil.createClient(tlsConfig.getServerCert(),
@@ -68,17 +72,20 @@ public class YarnMetricsClient {
                         instanceConfig.getMemoryInMb().intValue(), instanceConfig.getCoreCPU())));
 
         String clusterCreatorCrn = cluster.getClusterPertain().getUserCrn();
-        YarnScalingServiceV1Response yarnResponse = requestLogging.logResponseTime(() -> {
-            return restClient.target(yarnApiUrl)
-                    .queryParam(PARAM_UPSCALE_FACTOR_NODE_RESOURCE_TYPE, DEFAULT_UPSCALE_RESOURCE_TYPE)
-                    .request()
-                    .accept(MediaType.APPLICATION_JSON_VALUE)
-                    .header(HEADER_ACTOR_CRN, clusterCreatorCrn)
-                    .post(Entity.json(yarnScalingServiceV1Request), YarnScalingServiceV1Response.class);
-        }, String.format("YarnScalingAPI query for cluster crn '%s'", cluster.getStackCrn()));
+        Invocation.Builder restClientBuilder = restClient.target(yarnApiUrl)
+                .queryParam(PARAM_UPSCALE_FACTOR_NODE_RESOURCE_TYPE, DEFAULT_UPSCALE_RESOURCE_TYPE)
+                .request()
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .header(HEADER_ACTOR_CRN, clusterCreatorCrn);
+
+        mandatoryDownScaleCount.ifPresent(
+                scaleDownCount -> restClientBuilder.header(PARAM_DOWNSCALE_FACTOR_IN_NODE_COUNT, stackV4Response.getNodeCount()));
+
+        YarnScalingServiceV1Response yarnResponse = requestLogging.logResponseTime(
+                () -> restClientBuilder.post(Entity.json(yarnScalingServiceV1Request), YarnScalingServiceV1Response.class),
+                String.format("YarnScalingAPI query for cluster crn '%s'", cluster.getStackCrn()));
 
         LOGGER.info("YarnScalingAPI response for cluster crn '{}',  response '{}'", cluster.getStackCrn(), yarnResponse);
         return yarnResponse;
     }
-
 }

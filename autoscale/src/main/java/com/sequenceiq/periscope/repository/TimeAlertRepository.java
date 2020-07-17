@@ -13,5 +13,5 @@ public interface TimeAlertRepository extends CrudRepository<TimeAlert, Long> {
 
     TimeAlert findByCluster(@Param("alertId") Long alertId, @Param("clusterId") Long clusterId);
 
-    List<TimeAlert> findAllByCluster(@Param("clusterId") Long clusterId);
+    List<TimeAlert> findAllByClusterIdOrderById(@Param("clusterId") Long clusterId);
 }
