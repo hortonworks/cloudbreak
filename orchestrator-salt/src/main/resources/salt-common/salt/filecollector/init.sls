@@ -22,18 +22,14 @@ install_pid:
     - name: /opt/filecollector
     - user: "root"
     - group: "root"
-    - mode: 740
-    - recurse:
-      - user
-      - group
-      - mode
+    - mode: 750
 
 /var/lib/filecollector:
   file.directory:
     - name: /var/lib/filecollector
     - user: "root"
     - group: "root"
-    - mode: 740
+    - mode: 750
 
 /opt/filecollector/filecollector.py:
    file.managed:
