@@ -56,6 +56,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private StackViewV4Response internalStackResponse;
 
+    private GeneratedBlueprintV4Response generatedBlueprintV4Response;
+
     @Inject
     private DistroXTestClient distroXTestClient;
 
@@ -226,6 +228,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     public DistroXTestDto withInternalStackResponse(StackViewV4Response internalStackResponse) {
         this.internalStackResponse = internalStackResponse;
+        return this;
+    }
+
+    public DistroXTestDto withGeneratedBlueprintV4Response(GeneratedBlueprintV4Response response) {
+        this.generatedBlueprint = response;
         return this;
     }
 

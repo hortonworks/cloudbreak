@@ -12,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXShowBlueprintAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -57,5 +58,9 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> scale(String hostGroup, Integer count) {
         return new DistroXScaleAction(hostGroup, count);
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> postStackForBlueprint() {
+        return new DistroXShowBlueprintAction();
     }
 }
