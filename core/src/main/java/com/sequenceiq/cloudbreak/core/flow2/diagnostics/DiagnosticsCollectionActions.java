@@ -1,7 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.diagnostics;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FINISHED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+
 import java.util.Map;
 import java.util.Optional;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +23,9 @@ import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollect
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionHandlerSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -27,16 +35,21 @@ public class DiagnosticsCollectionActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsCollectionActions.class);
 
+    @Inject
+    private CloudbreakEventService cloudbreakEventService;
+
     @Bean(name = "DIAGNOSTICS_INIT_STATE")
     public Action<?, ?> diagnosticsInitAction() {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                Long resourceId = payload.getResourceId();
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_INIT_STATE. resourceCrn: '{}'", resourceCrn);
-                InMemoryStateStore.putStack(payload.getResourceId(), PollGroup.POLLABLE);
+                InMemoryStateStore.putStack(resourceId, PollGroup.POLLABLE);
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), ResourceEvent.STACK_DIAGNOSTICS_INIT_RUNNING);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
-                        .withResourceId(payload.getResourceId())
+                        .withResourceId(resourceId)
                         .withResourceCrn(resourceCrn)
                         .withSelector(DiagnosticsCollectionHandlerSelectors.INIT_DIAGNOSTICS_EVENT.selector())
                         .withParameters(payload.getParameters())
@@ -51,10 +64,12 @@ public class DiagnosticsCollectionActions {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                Long resourceId = payload.getResourceId();
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_COLLECTION_STATE. resourceCrn: '{}'", resourceCrn);
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), ResourceEvent.STACK_DIAGNOSTICS_COLLECTION_RUNNING);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
-                        .withResourceId(payload.getResourceId())
+                        .withResourceId(resourceId)
                         .withResourceCrn(payload.getResourceCrn())
                         .withSelector(DiagnosticsCollectionHandlerSelectors.COLLECT_DIAGNOSTICS_EVENT.selector())
                         .withParameters(payload.getParameters())
@@ -69,10 +84,12 @@ public class DiagnosticsCollectionActions {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                Long resourceId = payload.getResourceId();
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_UPLOAD_STATE. resourceCrn: '{}'", resourceCrn);
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), ResourceEvent.STACK_DIAGNOSTICS_UPLOAD_RUNNING);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
-                        .withResourceId(payload.getResourceId())
+                        .withResourceId(resourceId)
                         .withResourceCrn(payload.getResourceCrn())
                         .withSelector(DiagnosticsCollectionHandlerSelectors.UPLOAD_DIAGNOSTICS_EVENT.selector())
                         .withParameters(payload.getParameters())
@@ -87,10 +104,12 @@ public class DiagnosticsCollectionActions {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                Long resourceId = payload.getResourceId();
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_CLEANUP_STATE. resourceCrn: '{}'", resourceCrn);
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), ResourceEvent.STACK_DIAGNOSTICS_CLEANUP_RUNNING);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
-                        .withResourceId(payload.getResourceId())
+                        .withResourceId(resourceId)
                         .withResourceCrn(payload.getResourceCrn())
                         .withSelector(DiagnosticsCollectionHandlerSelectors.CLEANUP_DIAGNOSTICS_EVENT.selector())
                         .withParameters(payload.getParameters())
@@ -105,11 +124,13 @@ public class DiagnosticsCollectionActions {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                Long resourceId = payload.getResourceId();
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_COLLECTION_FINISHED_STATE. resourceCrn: '{}'", resourceCrn);
-                InMemoryStateStore.deleteStack(payload.getResourceId());
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FINISHED.name(), ResourceEvent.STACK_DIAGNOSTICS_COLLECTION_FINISHED);
+                InMemoryStateStore.deleteStack(resourceId);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
-                        .withResourceId(payload.getResourceId())
+                        .withResourceId(resourceId)
                         .withResourceCrn(payload.getResourceCrn())
                         .withSelector(DiagnosticsCollectionStateSelectors.FINALIZE_DIAGNOSTICS_COLLECTION_EVENT.selector())
                         .withParameters(payload.getParameters())
@@ -124,11 +145,13 @@ public class DiagnosticsCollectionActions {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionFailureEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DiagnosticsCollectionFailureEvent payload, Map<Object, Object> variables) {
+                Long resourceId = payload.getResourceId();
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_COLLECTION_FAILED_STATE. resourceCrn: '{}'", resourceCrn);
-                InMemoryStateStore.deleteStack(payload.getResourceId());
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FAILED.name(), ResourceEvent.STACK_DIAGNOSTICS_COLLECTION_FAILED);
+                InMemoryStateStore.deleteStack(resourceId);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
-                        .withResourceId(payload.getResourceId())
+                        .withResourceId(resourceId)
                         .withResourceCrn(payload.getResourceCrn())
                         .withSelector(DiagnosticsCollectionStateSelectors.HANDLED_FAILED_DIAGNOSTICS_COLLECTION_EVENT.selector())
                         .withParameters(payload.getParameters())
