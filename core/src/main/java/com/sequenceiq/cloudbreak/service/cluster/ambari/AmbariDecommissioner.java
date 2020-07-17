@@ -201,7 +201,7 @@ public class AmbariDecommissioner {
         return hostsToRemove;
     }
 
-    public Set<String> decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove) throws IOException, URISyntaxException {
+    public void decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove) throws IOException, URISyntaxException {
         LOGGER.info("Decommission ambari nodes: {}", hostsToRemove);
         AmbariClient ambariClient = getAmbariClient(stack);
         Map<String, HostStatus> hostStatusMap = ambariClientRetryer.getHostsStatuses(ambariClient, new ArrayList<>(hostsToRemove.keySet()));
@@ -237,7 +237,6 @@ public class AmbariDecommissioner {
         }
 
         LOGGER.info("Deleted hosts are: {}", deletedHosts);
-        return deletedHosts;
     }
 
     private AmbariClient getAmbariClient(Stack stack) {
