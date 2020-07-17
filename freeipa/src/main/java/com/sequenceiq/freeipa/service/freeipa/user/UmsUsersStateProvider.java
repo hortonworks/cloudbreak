@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CloudIdentity;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
@@ -175,7 +174,7 @@ public class UmsUsersStateProvider {
                 // Retrieve all information from UMS before modifying to the UmsUsersState or UsersState. This is so that
                 // we don't partially modify the state if the member has been deleted after we started the sync
                 List<String> groupCrnsForMember = grpcUmsClient.listGroupsForMember(INTERNAL_ACTOR_CRN, accountId, memberCrn, requestId);
-                ListWorkloadAdministrationGroupsForMemberResponse workloadAdministrationGroupsForUser =
+                List<String> workloadAdministrationGroupsForUser =
                         grpcUmsClient.listWorkloadAdministrationGroupsForMember(INTERNAL_ACTOR_CRN, memberCrn, requestId);
                 WorkloadCredential workloadCredential = umsCredentialProvider.getCredentials(memberCrn, requestId);
 
@@ -191,7 +190,7 @@ public class UmsUsersStateProvider {
                     }
                 });
 
-                workloadAdministrationGroupsForUser.getWorkloadAdministrationGroupNameList().forEach(groupName -> {
+                workloadAdministrationGroupsForUser.forEach(groupName -> {
                     if (!wagNamesForOtherEnvironments.contains(groupName)) {
                         usersStateBuilder.addGroup(nameToGroup(groupName));
                         usersStateBuilder.addMemberToGroup(groupName, username);

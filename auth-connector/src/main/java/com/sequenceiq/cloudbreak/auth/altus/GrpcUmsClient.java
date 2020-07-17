@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
+import com.cloudera.thunderhead.service.common.paging.PagingProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
@@ -28,17 +30,17 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAc
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
-import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
@@ -103,7 +105,7 @@ public class GrpcUmsClient {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Listing group information for member {} in account {} using request ID {}", memberCrn, accountId, requestId);
             List<String> groups = client.listGroupsForMembers(requestId.orElse(UUID.randomUUID().toString()), accountId, memberCrn);
-            LOGGER.debug("{} Groups found for account {}", groups.size(), accountId);
+            LOGGER.debug("{} Groups found for member {} in account {}", groups.size(), memberCrn, accountId);
             return groups;
         }
     }
@@ -295,13 +297,26 @@ public class GrpcUmsClient {
      * @param requestId      request id for getting rights
      * @return the workload administration groups associated with this user or machine user
      */
-    public ListWorkloadAdministrationGroupsForMemberResponse listWorkloadAdministrationGroupsForMember(
+    public List<String> listWorkloadAdministrationGroupsForMember(
             String actorCrn, String memberCrn, Optional<String> requestId) {
+        requireNonNull(memberCrn);
+
+        List<String> wags = new ArrayList<>();
+
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Getting workload administration groups for member {}", memberCrn);
-            return client.listWorkloadAdministrationGroupsForMember(requestId.orElse(UUID.randomUUID().toString()), memberCrn);
+            UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse response;
+            Optional<PagingProto.PageToken> pageToken = Optional.empty();
+            do {
+                response = client.listWorkloadAdministrationGroupsForMember(
+                        requestId.orElse(UUID.randomUUID().toString()), memberCrn, pageToken);
+                wags.addAll(response.getWorkloadAdministrationGroupNameList());
+                pageToken = Optional.ofNullable(response.getNextPageToken());
+            } while (response.hasNextPageToken());
         }
+        LOGGER.debug("{} workload administration groups found for member {}", wags.size(), memberCrn);
+        return wags;
     }
 
     /**
@@ -555,7 +570,8 @@ public class GrpcUmsClient {
         return new ArrayList<>();
     }
 
-    private ManagedChannelWrapper makeWrapper() {
+    @VisibleForTesting
+    ManagedChannelWrapper makeWrapper() {
         return new ManagedChannelWrapper(
                 ManagedChannelBuilder.forAddress(umsConfig.getEndpoint(), umsConfig.getPort())
                         .usePlaintext()
@@ -563,7 +579,8 @@ public class GrpcUmsClient {
                         .build());
     }
 
-    private UmsClient makeClient(ManagedChannel channel, String actorCrn) {
+    @VisibleForTesting
+    UmsClient makeClient(ManagedChannel channel, String actorCrn) {
         return new UmsClient(channel, actorCrn, umsClientConfig);
     }
 
