@@ -180,6 +180,12 @@ public enum ResourceEvent {
     STACK_DATALAKE_UPDATE("stack.datalake.update"),
     STACK_DATALAKE_UPDATE_FINISHED("stack.datalake.update.finished"),
     STACK_DATALAKE_UPDATE_FAILED("stack.datalake.update.failed"),
+    STACK_DIAGNOSTICS_INIT_RUNNING("stack.diagnostics.init.running"),
+    STACK_DIAGNOSTICS_COLLECTION_RUNNING("stack.diagnostics.collection.running"),
+    STACK_DIAGNOSTICS_UPLOAD_RUNNING("stack.diagnostics.upload.running"),
+    STACK_DIAGNOSTICS_CLEANUP_RUNNING("stack.diagnostics.cleanup.running"),
+    STACK_DIAGNOSTICS_COLLECTION_FINISHED("stack.diagnostics.collection.finished"),
+    STACK_DIAGNOSTICS_COLLECTION_FAILED("stack.diagnostics.collection.failed"),
 
     CLUSTER_BUILDING("cluster.building"),
     CLUSTER_RESET("cluster.reset"),
