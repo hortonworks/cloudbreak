@@ -15,6 +15,7 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -33,7 +34,7 @@ public class StackMatrixServiceTest {
 
     private static final Long WORKSPACE_ID = 0L;
 
-    private static final String PLATFORM = "aws";
+    private static final String PLATFORM = CloudPlatform.AWS.name();
 
     private static final String IMAGE_CATALOG_NAME = "image catalog name";
 
@@ -59,11 +60,9 @@ public class StackMatrixServiceTest {
         assertEquals("6.1.0-1.cdh6.1.0.p0.770702", stackMatrixV4Response.getCdh().get("6.1.0").getVersion());
         assertNull(stackMatrixV4Response.getCdh().get("6.1.0").getClouderaManager().getRepository());
         assertNull(stackMatrixV4Response.getCdh().get("6.1.0").getClouderaManager().getVersion());
-
     }
 
     private void setupStackEntries() throws Exception {
-
         Map<String, ImageBasedDefaultCDHInfo> cdhEntries = new HashMap<>();
 
         DefaultCDHInfo cdhInfo = getDefaultCDHInfo("6.1.0-1.cdh6.1.0.p0.770702");
