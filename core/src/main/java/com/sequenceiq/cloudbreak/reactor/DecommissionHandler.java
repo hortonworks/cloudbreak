@@ -132,11 +132,25 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
                     .map(hostsToRemove::get)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
-            decommisionedInstances.forEach(clusterDecomissionService::deleteHostFromCluster);
-            updateInstanceStatuses(decommisionedInstances, InstanceStatus.DECOMMISSIONED, "instance successfully downscaled");
-            clusterDecomissionService.restartStaleServices();
+            String decommisionResult = decommisionedInstances.parallelStream().map(metaData -> {
+                try {
+                    clusterDecomissionService.deleteHostFromCluster(metaData);
+                } catch (Exception e) {
+                    return e.getMessage();
+                }
+                return null;
+            }).filter(Objects::nonNull).collect(Collectors.joining(","));
 
-            result = new DecommissionResult(request, decommissionedHostNames);
+            if (!decommisionResult.isEmpty()) {
+                String decommisionStatus = String.format("One or more instances failed to decommision : %s", decommisionResult);
+                result = new DecommissionResult(decommisionStatus, new CloudbreakServiceException(decommisionStatus), request, hostNames, UNKNOWN_ERROR_PHASE);
+            } else {
+                clusterDecomissionService.deleteUnusedCredentialsFromCluster();
+                updateInstanceStatuses(decommisionedInstances, InstanceStatus.DECOMMISSIONED, "instance successfully downscaled");
+                clusterDecomissionService.restartStaleServices();
+
+                result = new DecommissionResult(request, decommissionedHostNames);
+            }
         } catch (DecommissionException e) {
             result = new DecommissionResult(e.getMessage(), e, request, hostNames, DECOMMISSION_ERROR_PHASE);
         } catch (Exception e) {
