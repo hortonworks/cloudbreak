@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -74,11 +75,13 @@ public class MetricEvaluator extends EvaluatorExecutor {
             AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
             List<MetricAlert> metricAlerts = alertRepository.findAllWithScalingPolicyByCluster(clusterId);
             LOGGER.info("Metric alerts for cluster [id: {}]: {}", clusterId, metricAlerts);
-            for (MetricAlert metricAlert : metricAlerts) {
-                if (metricCondition.isMetricAlertTriggered(ambariClient, metricAlert)) {
-                    eventPublisher.publishEvent(new ScalingEvent(metricAlert));
-                    break;
-                }
+            List<MetricAlert> alerts = metricAlerts.stream()
+                    .filter(ma -> metricCondition.isMetricAlertTriggered(ambariClient, ma))
+                    .collect(Collectors.toList());
+            if (!alerts.isEmpty()) {
+                eventPublisher.publishEvent(new ScalingEvent(alerts));
+            } else {
+                LOGGER.info("All metric alerts are filtered for cluster: [id: {}]", clusterId);
             }
         } catch (Exception e) {
             LOGGER.error("Failed to retrieve alert history", e);
