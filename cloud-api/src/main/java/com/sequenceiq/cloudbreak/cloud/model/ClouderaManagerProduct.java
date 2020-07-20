@@ -84,4 +84,15 @@ public class ClouderaManagerProduct implements Serializable {
         this.csd = csd;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "ClouderaManagerProduct{" +
+                "name='" + name + '\'' +
+                ", displayName='" + displayName + '\'' +
+                ", version='" + version + '\'' +
+                ", parcel='" + parcel + '\'' +
+                ", csd=" + csd +
+                '}';
+    }
 }
