@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 
+import io.swagger.annotations.ApiModelProperty;
+
 @MutuallyExclusiveNotNull(fieldGroups = {"imageId", "runtime", "lockComponents"},
         message = "Only one of 'imageId', 'runtime' or 'lockComponents' parameter could be specified in the request!",
         allowAllGroupsNull = true)
@@ -49,6 +51,7 @@ public class SdxUpgradeRequest {
         this.dryRun = dryRun;
     }
 
+    @ApiModelProperty(hidden = true)
     public boolean isEmpty() {
         return Objects.isNull(imageId) &&
                 Objects.isNull(runtime) &&
