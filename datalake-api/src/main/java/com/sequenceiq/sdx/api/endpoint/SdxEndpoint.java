@@ -203,8 +203,14 @@ public interface SdxEndpoint {
     @POST
     @Path("/envcrn/{envCrn}/ranger_cloud_identity_mapping")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "set ranger cloud identity mapping", produces = MediaType.APPLICATION_JSON, nickname = "setRangerCloudIdentityMapping")
+    @ApiOperation(value = "Set ranger cloud identity mapping", produces = MediaType.APPLICATION_JSON, nickname = "setRangerCloudIdentityMapping")
     RangerCloudIdentitySyncStatus setRangerCloudIdentityMapping(@PathParam("envCrn") @ValidCrn String envCrn,
             @NotNull @Valid SetRangerCloudIdentityMappingRequest request);
+
+    @GET
+    @Path("/envcrn/{envCrn}/ranger_cloud_identity_sync_status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Get status of a ranger cloud identity sync", produces = MediaType.APPLICATION_JSON, nickname = "getRangerCloudIdentitySyncStatus")
+    RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(@PathParam("envCrn") @ValidCrn String envCrn, long commandId);
 
 }
