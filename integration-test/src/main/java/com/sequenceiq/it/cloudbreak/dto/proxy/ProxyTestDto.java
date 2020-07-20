@@ -11,6 +11,8 @@ public class ProxyTestDto extends AbstractEnvironmentTestDto<ProxyRequest, Proxy
 
     public static final String PROXY_CONFIG = "PROXY_CONFIG";
 
+    private static final String PROXYCONFIG_RESOURCE_NAME = "proxyName";
+
     ProxyTestDto(String newId) {
         super(newId);
     }
@@ -42,6 +44,11 @@ public class ProxyTestDto extends AbstractEnvironmentTestDto<ProxyRequest, Proxy
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return PROXYCONFIG_RESOURCE_NAME;
     }
 
     public ProxyTestDto withDescription(String description) {

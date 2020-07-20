@@ -1,0 +1,85 @@
+package com.sequenceiq.it.cloudbreak.listener;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.IInvokedMethod;
+import org.testng.IInvokedMethodListener;
+import org.testng.ITestResult;
+
+import com.sequenceiq.it.cloudbreak.context.CompareByOrder;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+
+public class TestInvocationListener implements IInvokedMethodListener {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestInvocationListener.class);
+
+    @Override
+    public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
+        LOGGER.info("Before Invocation of: " + method.getTestMethod().getMethodName()
+                + " with parameters: " + Arrays.toString(testResult.getParameters()));
+    }
+
+    /**
+     * Collects all the available test resources to a JSON file based on the:
+     * - Related test DTO: provides a resource name type (eg.: environmentName),
+     * - Test Context: provides the resource's unique name (eg.: aws-test-039df4d8aec04a61965).
+     *
+     * Resource files can be saved based on the test cases (eg.: resource_names_testCreateNewEnvironmentWithNewNetworkAndNoInternet);
+     * because of each test has it's own Test Context, that has been built by the Given test steps for that thread of test execution.
+     */
+    @Override
+    public void afterInvocation(IInvokedMethod method, ITestResult testResult) {
+        TestContext testContext;
+        JSONObject jsonObject = new JSONObject();
+        Object[] parameters = testResult.getParameters();
+        if (parameters == null || parameters.length == 0) {
+            return;
+        }
+        try {
+            testContext = (TestContext) parameters[0];
+        } catch (ClassCastException e) {
+            return;
+        }
+
+        List<CloudbreakTestDto> testDtos = new ArrayList<>(testContext.getResources().values());
+        List<CloudbreakTestDto> orderedTestDtos = testDtos.stream().sorted(new CompareByOrder()).collect(Collectors.toList());
+        for (CloudbreakTestDto testDto : orderedTestDtos) {
+            try {
+                String resourceNameType = Optional.ofNullable(testDto.getResourceNameType()).orElse("");
+                if (!resourceNameType.trim().isEmpty()) {
+                    jsonObject.put(resourceNameType, testDto.getName());
+                }
+            } catch (JSONException e) {
+                LOGGER.info("Appending JSON object throws exception: {}", e.getMessage(), e);
+            } catch (Exception e) {
+                LOGGER.info("Appending JSON object is failing, because of: {}", e.getMessage(), e);
+            }
+        }
+        if (jsonObject.length() != 0) {
+            String fileName = "resource_names_" + testContext.getTestMethodName().orElseGet(() -> getDefaultFileNameTag()) + ".json";
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+                writer.write(jsonObject.toString());
+                LOGGER.info("Resource file have been created with name: {} and content: {}.", fileName, jsonObject);
+            } catch (IOException e) {
+                LOGGER.info("Creating/Appending resource file throws exception: {}", e.getMessage(), e);
+            } catch (Exception e) {
+                LOGGER.info("Creating/Appending resource file is failing, because of: {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    private String getDefaultFileNameTag() {
+        return "unknown";
+    }
+}

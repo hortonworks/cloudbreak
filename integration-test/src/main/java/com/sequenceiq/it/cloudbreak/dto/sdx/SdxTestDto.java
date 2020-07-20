@@ -50,6 +50,8 @@ import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxClusterDetailResponse, SdxTestDto> implements Purgable<SdxClusterResponse, SdxClient>,
         Investigable {
 
+    private static final String SDX_RESOURCE_NAME = "sdxName";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxTestDto.class);
 
     private static final String DEFAULT_SDX_NAME = "test-sdx" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
@@ -232,6 +234,11 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     public SdxTestDto withName(String name) {
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return SDX_RESOURCE_NAME;
     }
 
     @Override

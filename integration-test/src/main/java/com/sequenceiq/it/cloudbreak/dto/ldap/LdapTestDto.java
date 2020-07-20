@@ -16,6 +16,8 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 @Prototype
 public class LdapTestDto extends AbstractFreeIpaTestDto<CreateLdapConfigRequest, DescribeLdapConfigResponse, LdapTestDto> {
 
+    private static final String LDAP_RESOURCE_NAME = "ldapName";
+
     @Inject
     private LdapTestClient ldapTestClient;
 
@@ -69,6 +71,11 @@ public class LdapTestDto extends AbstractFreeIpaTestDto<CreateLdapConfigRequest,
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return LDAP_RESOURCE_NAME;
     }
 
     public LdapTestDto withEnvironmentCrn(String environmentCrn) {

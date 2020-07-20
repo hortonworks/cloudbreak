@@ -63,6 +63,8 @@ import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterRequest, SdxClusterDetailResponse, SdxInternalTestDto>
         implements Purgable<SdxClusterResponse, SdxClient>, Investigable, Searchable {
 
+    private static final String SDX_RESOURCE_NAME = "sdxName";
+
     private static final String DEFAULT_SDX_NAME = "test-sdx" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
 
     private static final String DEFAULT_CM_PASSWORD = "Admin123";
@@ -242,6 +244,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxInternalTestDto withName(String name) {
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return SDX_RESOURCE_NAME;
     }
 
     public SdxInternalTestDto withImageCatalogNameOnly(String imageCatalogName) {

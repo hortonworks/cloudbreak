@@ -1,9 +1,16 @@
 package com.sequenceiq.it;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -34,6 +41,7 @@ import org.uncommons.reportng.JUnitXMLReporter;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 import com.sequenceiq.it.cloudbreak.listener.ReportListener;
+import com.sequenceiq.it.cloudbreak.listener.TestInvocationListener;
 import com.sequenceiq.it.cloudbreak.listener.ThreadLocalTestListener;
 import com.sequenceiq.it.cloudbreak.search.CustomHTMLReporter;
 import com.sequenceiq.it.config.ITProps;
@@ -112,6 +120,7 @@ public class IntegrationTestApp implements CommandLineRunner {
         testng.addListener(new CustomHTMLReporter());
         testng.addListener(new JUnitXMLReporter());
         testng.addListener(new ReportListener());
+        testng.addListener(new TestInvocationListener());
         setupSuites(testng);
         if (!CLEANUP_COMMAND.equals(itCommand)) {
             testng.run();
@@ -131,7 +140,7 @@ public class IntegrationTestApp implements CommandLineRunner {
             case "suiteurls":
                 List<String> suitePathes = itProps.getSuiteFiles();
                 testng.setXmlSuites(loadSuites(suitePathes));
-
+                removeOldResourceFiles();
                 break;
             case CLEANUP_COMMAND:
                 cleanupUtil.cleanupDistroxes();
@@ -184,5 +193,31 @@ public class IntegrationTestApp implements CommandLineRunner {
             result = YAML_PARSER;
         }
         return result;
+    }
+
+    /**
+     * Removes all the collected E2E test resources' files from the test folder (defined by 'outputDirectory') if there is any present.
+     */
+    private void removeOldResourceFiles() {
+        File folder = new File(outputDirectory);
+        Path folderPath = Path.of(folder.getPath()).normalize().toAbsolutePath();
+
+        File[] foundResourceFiles = Optional.ofNullable(folder.listFiles((file, path) -> path.contains("resource_names_"))).orElse(new File[0]);
+        if (foundResourceFiles.length > 0) {
+            Arrays.stream(foundResourceFiles).forEach(file -> {
+                try {
+                    FileTime creationTime = Files.readAttributes(Path.of(file.getName()), BasicFileAttributes.class).creationTime();
+                    if (file.delete()) {
+                        LOG.info("Old resource file: {} (creation time: {}) have been found and deleted at: {}.", file.getName(), creationTime, folderPath);
+                    } else {
+                        LOG.info("Old resource file: {} (creation time: {}) have NOT been deleted at: {}.", file.getName(), creationTime, folderPath);
+                    }
+                } catch (IOException e) {
+                    LOG.info("{} resource file get creation time throws exception: {}", file.getName(), e.getMessage(), e);
+                } catch (Exception e) {
+                    LOG.info("{} resource file cleanup has been failed, because of: {}", e.getMessage(), e);
+                }
+            });
+        }
     }
 }

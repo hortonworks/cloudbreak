@@ -51,6 +51,8 @@ public class EnvironmentTestDto
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
+    private static final String ENVIRONMENT_RESOURCE_NAME = "environmentName";
+
     private static final int ORDER = 600;
 
     @Inject
@@ -120,6 +122,11 @@ public class EnvironmentTestDto
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return ENVIRONMENT_RESOURCE_NAME;
     }
 
     public EnvironmentTestDto withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {

@@ -12,6 +12,9 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 
 @Prototype
 public class DistroXImageTestDto extends AbstractCloudbreakTestDto<DistroXImageV1Request, Response, DistroXImageTestDto> {
+
+    private static final String DISTROXIMAGE_RESOURCE_NAME = "distroxImageName";
+
     private static final String DEFAULT_SETTING_NAME = "test-image-setting" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
 
     public DistroXImageTestDto(TestContext testContext) {
@@ -41,6 +44,11 @@ public class DistroXImageTestDto extends AbstractCloudbreakTestDto<DistroXImageV
     public DistroXImageTestDto withName(String name) {
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return DISTROXIMAGE_RESOURCE_NAME;
     }
 
     @Override

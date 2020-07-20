@@ -23,6 +23,8 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
 
     public static final String IMAGE_CATALOG_URL = "IMAGE_CATALOG_URL";
 
+    private static final String IMAGECATALOG_RESOURCE_NAME = "imagecatalogName";
+
     private ImagesV4Response imagesV4Response;
 
     private Boolean skipCleanup = Boolean.FALSE;
@@ -44,6 +46,11 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return IMAGECATALOG_RESOURCE_NAME;
     }
 
     public ImageCatalogTestDto withUrl(String url) {

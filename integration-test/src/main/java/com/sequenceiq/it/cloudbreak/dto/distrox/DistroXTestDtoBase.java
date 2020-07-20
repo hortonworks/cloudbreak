@@ -26,6 +26,8 @@ import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
 
 public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCloudbreakTestDto<DistroXV1Request, StackV4Response, T> {
 
+    private static final String DISTROX_RESOURCE_NAME = "distroxName";
+
     protected DistroXTestDtoBase(DistroXV1Request request, TestContext testContext) {
         super(request, testContext);
     }
@@ -68,6 +70,11 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return DISTROX_RESOURCE_NAME;
     }
 
     public DistroXTestDtoBase<T> withCluster() {
