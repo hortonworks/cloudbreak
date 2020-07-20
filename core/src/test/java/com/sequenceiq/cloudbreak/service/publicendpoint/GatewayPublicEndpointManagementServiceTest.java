@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.publicendpoint;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -120,22 +121,115 @@ class GatewayPublicEndpointManagementServiceTest {
     }
 
     @Test
-    void testRenewCertificateWhenCertGenerationIsTriggerableButGenerationFails() {
+    void testRenewCertificateWhenCertGenerationIsTriggerableButGenerationFailsAndDnsEntryShouldBeUpdated() {
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setUserFacingCert("CERT");
+        securityConfig.setUserFacingKey(USER_FACING_PRIVATE_KEY);
+        Cluster cluster = TestUtil.cluster();
+        Stack stack = cluster.getStack();
+        stack.setSecurityConfig(securityConfig);
+        stack.setCluster(cluster);
+        String envName = "anEnvName";
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
+                .builder()
+                .withName(envName)
+                .build();
+        when(environmentClientService.getByCrn(Mockito.anyString()))
+                .thenReturn(null)
+                .thenReturn(environment);
+
+        String accountWorkloadSubdomain = "aWorkloadSubdomain";
+        UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
+                .setWorkloadSubdomain(accountWorkloadSubdomain)
+                .build();
+        when(grpcUmsClient.getAccountDetails(USER_CRN, "123", Optional.empty())).thenReturn(umsAccount);
+
+        String endpointName = stack.getPrimaryGatewayInstance().getShortHostname();
+        String fqdn = endpointName + ".anenvname.xcu2-8y8x.dev.cldr.work";
+        when(domainNameProvider.getFullyQualifiedEndpointName(endpointName, envName, accountWorkloadSubdomain)).thenReturn(fqdn);
+        when(dnsManagementService.createOrUpdateDnsEntryWithIp(anyString(), anyString(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
+
+        boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
+
+        verify(environmentClientService, times(2)).getByCrn(anyString());
+        verify(dnsManagementService, times(1)).createOrUpdateDnsEntryWithIp(anyString(), anyString(), anyString(), anyString(),
+                anyBoolean(), any());
+        verify(clusterService, times(1)).save(cluster);
+        Mockito.verifyNoMoreInteractions(environmentClientService);
+        Mockito.verifyNoMoreInteractions(domainNameProvider);
+        Mockito.verifyNoMoreInteractions(dnsManagementService);
+        Mockito.verifyNoMoreInteractions(securityConfigService);
+        Assertions.assertEquals(Boolean.FALSE, result);
+    }
+
+    @Test
+    void testRenewCertificateWhenCertGenerationIsTriggerableButGenerationFailsAndDnsEntryShouldNotBeUpdated() {
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setUserFacingCert("CERT");
         securityConfig.setUserFacingKey("KEY");
         Cluster cluster = TestUtil.cluster();
+        cluster.setFqdn("aNiceShortHostname.testdomain");
         Stack stack = cluster.getStack();
         stack.setSecurityConfig(securityConfig);
         stack.setCluster(cluster);
 
         boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
 
+        verify(environmentClientService, times(1)).getByCrn(anyString());
+        Mockito.verifyNoMoreInteractions(environmentClientService);
+        Mockito.verifyNoMoreInteractions(domainNameProvider);
+        Mockito.verifyNoMoreInteractions(dnsManagementService);
+        Mockito.verifyNoMoreInteractions(securityConfigService);
         Assertions.assertEquals(Boolean.FALSE, result);
     }
 
     @Test
-    void testRenewCertificateWhenCertGenerationIsTriggerable() throws IOException {
+    void testRenewCertificateWhenCertGenerationIsTriggerableAndDnsEntryShouldBeCreated() throws IOException {
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setUserFacingCert("CERT");
+        securityConfig.setUserFacingKey(USER_FACING_PRIVATE_KEY);
+        Cluster cluster = TestUtil.cluster();
+        Stack stack = cluster.getStack();
+        stack.setSecurityConfig(securityConfig);
+        stack.setCluster(cluster);
+
+        String envName = "anEnvName";
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
+                .builder()
+                .withName(envName)
+                .build();
+        when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
+        String accountWorkloadSubdomain = "aWorkloadSubdomain";
+        UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
+                .setWorkloadSubdomain(accountWorkloadSubdomain)
+                .build();
+        when(grpcUmsClient.getAccountDetails(USER_CRN, "123", Optional.empty())).thenReturn(umsAccount);
+        String endpointName = stack.getPrimaryGatewayInstance().getShortHostname();
+        String commonName = "hashofshorthostname.anenvname.xcu2-8y8x.dev.cldr.work";
+        when(domainNameProvider.getCommonName(endpointName, envName, accountWorkloadSubdomain)).thenReturn(commonName);
+        String fqdn = endpointName + ".anenvname.xcu2-8y8x.dev.cldr.work";
+        when(domainNameProvider.getFullyQualifiedEndpointName(endpointName, envName, accountWorkloadSubdomain)).thenReturn(fqdn);
+        when(certificateCreationService.create(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class)))
+                .thenReturn(List.of());
+        when(dnsManagementService.createOrUpdateDnsEntryWithIp(anyString(), anyString(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
+
+        boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
+
+        verify(environmentClientService, times(2)).getByCrn(anyString());
+        verify(grpcUmsClient, times(2)).getAccountDetails(USER_CRN, "123", Optional.empty());
+        verify(domainNameProvider, times(1)).getCommonName(endpointName, envName, accountWorkloadSubdomain);
+        verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(endpointName, envName, accountWorkloadSubdomain);
+        verify(certificateCreationService, times(1))
+                .create(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class));
+        verify(securityConfigService, times(1)).save(any(SecurityConfig.class));
+        verify(dnsManagementService, times(1)).createOrUpdateDnsEntryWithIp(anyString(), anyString(), anyString(), anyString(),
+                anyBoolean(), any());
+        verify(clusterService, times(1)).save(cluster);
+        Assertions.assertEquals(Boolean.TRUE, result);
+    }
+
+    @Test
+    void testRenewCertificateWhenCertGenerationIsTriggerableAndDnsEntryShouldNotBeCreated() throws IOException {
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setUserFacingCert("CERT");
         securityConfig.setUserFacingKey(USER_FACING_PRIVATE_KEY);
@@ -166,6 +260,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         when(certificateCreationService.create(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class)))
                 .thenReturn(List.of());
+        cluster.setFqdn(fqdn);
 
         boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
 

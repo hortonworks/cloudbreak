@@ -40,8 +40,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     public boolean isCertRenewalTriggerable(Stack stack) {
         return manageCertificateAndDnsInPem()
                 && stack != null
-                && stack.getCluster() != null
-                && !StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert());
+                && stack.getCluster() != null;
     }
 
     public boolean generateCertAndSaveForStackAndUpdateDnsEntry(Stack stack) {
@@ -120,6 +119,10 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         if (isCertRenewalTriggerable(stack)) {
             LOGGER.info("Renew certificate for stack: '{}'", stack.getName());
             result = generateCertAndSaveForStack(stack);
+            if (StringUtils.isEmpty(stack.getCluster().getFqdn())) {
+                LOGGER.info("The cluster doesn't have public DNS entry, starting to create one.");
+                updateDnsEntryForCluster(stack);
+            }
         }
         return result;
     }
