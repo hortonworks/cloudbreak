@@ -8,7 +8,6 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEve
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
-import static com.sequenceiq.datalake.flow.upgrade.SdxOsUpgradeEvent.SDX_UPGRADE_EVENT;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -33,7 +31,6 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStar
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
-import com.sequenceiq.datalake.flow.upgrade.event.SdxUpgradeStartEvent;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -41,6 +38,7 @@ import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -66,7 +64,7 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerSdxDeletion(SdxCluster cluster, boolean forced) {
-        LOGGER.info("Trigger Datalake deletion for: {} forced: ", cluster, forced);
+        LOGGER.info("Trigger Datalake deletion for: {} forced: {}", cluster, forced);
         String selector = SDX_DELETE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxDeleteStartEvent(selector, cluster.getId(), userId, forced));
@@ -80,18 +78,11 @@ public class SdxReactorFlowManager {
         return notify(selector, new SdxRepairStartEvent(selector, cluster.getId(), userId, settings));
     }
 
-    public FlowIdentifier triggerDatalakeOsUpgradeFlow(SdxCluster cluster, UpgradeOptionV4Response upgradeOption) {
-        LOGGER.info("Trigger Datalake osUpgrade for: {} with settings: {}", cluster, upgradeOption);
-        String selector = SDX_UPGRADE_EVENT.event();
-        String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new SdxUpgradeStartEvent(selector, cluster.getId(), userId, upgradeOption));
-    }
-
-    public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId) {
-        LOGGER.info("Trigger Datalake runtimeUpgrade for: {} with imageId: {}", cluster, imageId);
+    public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId, SdxUpgradeReplaceVms replaceVms) {
+        LOGGER.info("Trigger Datalake runtimeUpgrade for: {} with imageId: {} and replace vm param: {}", cluster, imageId, replaceVms);
         String selector = DATALAKE_UPGRADE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new DatalakeUpgradeStartEvent(selector, cluster.getId(), userId, imageId));
+        return notify(selector, new DatalakeUpgradeStartEvent(selector, cluster.getId(), userId, imageId, replaceVms.getBooleanValue()));
     }
 
     public FlowIdentifier triggerSdxStartFlow(SdxCluster cluster) {

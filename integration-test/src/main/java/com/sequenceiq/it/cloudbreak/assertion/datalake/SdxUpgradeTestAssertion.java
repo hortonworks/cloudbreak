@@ -1,8 +1,10 @@
 package com.sequenceiq.it.cloudbreak.assertion.datalake;
 
 import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.assertEquals;
-import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.assertTrue;
 import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.expectThrows;
+
+import javax.ws.rs.BadRequestException;
 
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -16,19 +18,18 @@ public class SdxUpgradeTestAssertion {
 
     }
 
-    public static Assertion<SdxInternalTestDto, SdxClient> validateReasonContains(String reason) {
+    public static Assertion<SdxInternalTestDto, SdxClient> validateUnsuccessfulUpgrade() {
         return (testContext, entity, sdxClient) -> {
             SdxUpgradeRequest request = new SdxUpgradeRequest();
+            request.setLockComponents(true);
             request.setDryRun(true);
-            SdxUpgradeResponse upgradeResponse =
-                    sdxClient.getSdxClient().sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request);
-            assertNotNull(upgradeResponse);
-            assertTrue(upgradeResponse.getReason().contains(reason));
+            expectThrows(BadRequestException.class, () ->
+                    sdxClient.getSdxClient().sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request));
             return entity;
         };
     }
 
-    public static Assertion<SdxInternalTestDto, SdxClient> validateSucessfulUpgrade() {
+    public static Assertion<SdxInternalTestDto, SdxClient> validateSuccessfulUpgrade() {
         return (testContext, entity, sdxClient) -> {
             SdxUpgradeRequest request = new SdxUpgradeRequest();
             request.setLockComponents(true);

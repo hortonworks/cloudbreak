@@ -23,8 +23,6 @@ public enum DatalakeStatusEnum {
     REPAIR_IN_PROGRESS(ResourceEvent.SDX_REPAIR_STARTED),
     REPAIR_FAILED(ResourceEvent.SDX_REPAIR_FAILED),
     CHANGE_IMAGE_IN_PROGRESS(ResourceEvent.SDX_CHANGE_IMAGE_STARTED),
-    UPGRADE_IN_PROGRESS(ResourceEvent.SDX_UPGRADE_STARTED),
-    UPGRADE_FAILED(ResourceEvent.SDX_UPGRADE_FAILED),
     DATALAKE_UPGRADE_IN_PROGRESS(ResourceEvent.DATALAKE_UPGRADE_STARTED),
     DATALAKE_UPGRADE_FAILED(ResourceEvent.DATALAKE_UPGRADE_FAILED),
     DELETE_REQUESTED(ResourceEvent.SDX_CLUSTER_DELETION_STARTED),
@@ -73,8 +71,6 @@ public enum DatalakeStatusEnum {
             case REPAIR_IN_PROGRESS:
                 return REPAIR_FAILED;
             case CHANGE_IMAGE_IN_PROGRESS:
-            case UPGRADE_IN_PROGRESS:
-                return UPGRADE_FAILED;
             case DELETE_REQUESTED:
                 return DELETE_FAILED;
             case DATALAKE_UPGRADE_IN_PROGRESS:

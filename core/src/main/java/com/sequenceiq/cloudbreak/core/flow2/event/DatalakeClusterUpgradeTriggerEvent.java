@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import reactor.rx.Promise;
 
 public class DatalakeClusterUpgradeTriggerEvent extends StackEvent {
+
     private final StatedImage currentImage;
 
     private final StatedImage targetImage;

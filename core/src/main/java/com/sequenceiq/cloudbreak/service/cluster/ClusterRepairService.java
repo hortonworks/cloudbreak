@@ -115,7 +115,7 @@ public class ClusterRepairService {
 
     public FlowIdentifier repairAll(Long stackId) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                repair(ManualClusterRepairMode.ALL, stackId, Set.of(), NOT_DELETE_VOLUMES);
+                validateRepair(ManualClusterRepairMode.ALL, stackId, Set.of(), NOT_DELETE_VOLUMES);
         Set<String> repairableHostGroups;
         if (repairStart.isSuccess()) {
             repairableHostGroups = repairStart.getSuccess()
@@ -131,19 +131,19 @@ public class ClusterRepairService {
 
     public FlowIdentifier repairHostGroups(Long stackId, Set<String> hostGroups, boolean removeOnly) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                repair(ManualClusterRepairMode.HOST_GROUP, stackId, hostGroups, NOT_DELETE_VOLUMES);
+                validateRepair(ManualClusterRepairMode.HOST_GROUP, stackId, hostGroups, NOT_DELETE_VOLUMES);
         return triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, hostGroups);
     }
 
     public FlowIdentifier repairNodes(Long stackId, Set<String> nodeIds, boolean deleteVolumes, boolean removeOnly) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                repair(ManualClusterRepairMode.NODE_ID, stackId, nodeIds, deleteVolumes);
+                validateRepair(ManualClusterRepairMode.NODE_ID, stackId, nodeIds, deleteVolumes);
         return triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, nodeIds);
     }
 
     public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairWithDryRun(Long stackId) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                repair(ManualClusterRepairMode.DRY_RUN, stackId, Set.of(), NOT_DELETE_VOLUMES);
+                validateRepair(ManualClusterRepairMode.DRY_RUN, stackId, Set.of(), NOT_DELETE_VOLUMES);
         boolean repairable = repairStart.isSuccess();
         if (!repairable) {
             LOGGER.info("Stack {} is not repairable. {}", stackId, repairStart.getError().getValidationErrors());
@@ -151,7 +151,7 @@ public class ClusterRepairService {
         return repairStart;
     }
 
-    private Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repair(ManualClusterRepairMode repairMode, Long stackId,
+    private Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validateRepair(ManualClusterRepairMode repairMode, Long stackId,
             Set<String> selectedParts, boolean deleteVolumes) {
         try {
             return transactionService.required(() -> {

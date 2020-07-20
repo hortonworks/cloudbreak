@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -63,6 +64,7 @@ public class ClusterUpgradeImageFilter {
                 .filter(filterCurrentImage(currentImage))
                 .filter(filterNonCmImages())
                 .filter(filterIgnoredCmVersion())
+                .filter(filterPreviousImagesForOsUpgrades(currentImage, lockComponents))
                 .filter(validateCmAndStackVersion(currentImage, lockComponents))
                 .filter(validateCloudPlatform(cloudPlatform))
                 .filter(validateOsVersion(currentImage))
@@ -70,6 +72,21 @@ public class ClusterUpgradeImageFilter {
                 .collect(Collectors.toList());
 
         return new ImageFilterResult(new Images(null, images, null), getReason(images));
+    }
+
+    private Predicate<Image> filterPreviousImagesForOsUpgrades(Image currentImage, boolean lockComponents) {
+        return image -> {
+            boolean result = !lockComponents
+                    || filterPreviousImages(currentImage, image);
+            setReason(result, "There are no newer images available than " + currentImage.getDate() + ".");
+            return result;
+        };
+    }
+
+    private boolean filterPreviousImages(Image currentImage, Image image) {
+        return Objects.nonNull(image.getCreated())
+        && Objects.nonNull(currentImage.getCreated())
+        && image.getCreated() > currentImage.getCreated();
     }
 
     private Predicate<Image> filterCurrentImage(Image currentImage) {

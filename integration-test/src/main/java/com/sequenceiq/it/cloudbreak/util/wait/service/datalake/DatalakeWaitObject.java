@@ -7,7 +7,6 @@ import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.REPAIR_FAILE
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.START_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.STOP_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.SYNC_FAILED;
-import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.UPGRADE_FAILED;
 
 import java.util.Set;
 
@@ -42,7 +41,7 @@ public class DatalakeWaitObject {
     }
 
     public boolean isFailed(SdxClusterStatusResponse datalakeStatus) {
-        Set<SdxClusterStatusResponse> failedStatuses = Set.of(PROVISIONING_FAILED, REPAIR_FAILED, UPGRADE_FAILED, DATALAKE_UPGRADE_FAILED,
+        Set<SdxClusterStatusResponse> failedStatuses = Set.of(PROVISIONING_FAILED, REPAIR_FAILED, DATALAKE_UPGRADE_FAILED,
                 DELETE_FAILED, START_FAILED, STOP_FAILED, SYNC_FAILED);
         return failedStatuses.contains(datalakeStatus);
     }
