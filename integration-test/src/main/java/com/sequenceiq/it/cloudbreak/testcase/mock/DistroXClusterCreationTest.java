@@ -107,6 +107,8 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withCluster(CLUSTER_KEY)
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
+                .when(distroXClient.postStackForBlueprint())
+                .then(DistroXClusterCreationTest::distroxClusterGeneratedBlueprintCheck)
                 .when(distroXClient.create())
                 .await(STACK_AVAILABLE)
                 .then(auditGrpcServiceAssertion::distroxCreate)
@@ -313,6 +315,16 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                         .exactTimes(1),
                 key(DISTRO_X_STACK)
         );
+    }
+
+    @SuppressWarnings("unchecked")
+    private static DistroXTestDto distroxClusterGeneratedBlueprintCheck(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
+        if (testDto.getGeneratedBlueprint() == null
+                || testDto.getGeneratedBlueprint().getBlueprintText() == null
+                || testDto.getGeneratedBlueprint().getBlueprintText().isEmpty()) {
+            throw new TestFailException("Template Generation does not work properly because you get empty response");
+        }
+        return testDto;
     }
 
     @SuppressWarnings("unchecked")
