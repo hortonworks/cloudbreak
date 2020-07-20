@@ -53,9 +53,9 @@ public class ClusterCertificateReissueHandler implements EventHandler<ClusterCer
                 LOGGER.info("Certificate of the cluster has been reissued successfully.");
                 response = new ClusterCertificateReissueSuccess(stackId);
             } else {
-                String message = "The certificate of the cluster could not be reissued via PEM service.";
-                LOGGER.warn(message);
-                response = new ClusterCertificateRenewFailed(stackId, new IllegalStateException(message));
+                LOGGER.warn("The certificate of the cluster could not be reissued via PEM service.");
+                response = new ClusterCertificateRenewFailed(stackId,
+                        new IllegalStateException("The certificate of the cluster could not be reissued."));
             }
         } catch (Exception ex) {
             LOGGER.warn("Reissue of certificate has been failed for cluster", ex);
