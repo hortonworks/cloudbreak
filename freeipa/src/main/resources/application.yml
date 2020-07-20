@@ -92,7 +92,10 @@ freeipa:
     threadpool:
       core.size: 100
       capacity.size: 4000
-
+  cloudidsync:
+    poller:
+      timeoutMs: 4000
+      sleepIntervalMs: 400
 
 info:
   app:

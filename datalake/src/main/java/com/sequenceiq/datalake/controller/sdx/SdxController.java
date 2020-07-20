@@ -291,7 +291,13 @@ public class SdxController implements SdxEndpoint {
         if (request.getAzureGroupMapping() != null) {
             throw new IllegalArgumentException("Azure group mappings is unsupported");
         }
-        rangerCloudIdentityService.setAzureCloudIdentityMapping(envCrn, request.getAzureUserMapping());
-        return new RangerCloudIdentitySyncStatus();
+        return rangerCloudIdentityService.setAzureCloudIdentityMapping(envCrn, request.getAzureUserMapping());
     }
+
+    @Override
+    @InternalOnly
+    public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(String envCrn, long commandId) {
+        return rangerCloudIdentityService.getRangerCloudIdentitySyncStatus(envCrn, commandId);
+    }
+
 }

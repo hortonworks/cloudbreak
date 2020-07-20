@@ -610,12 +610,12 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
                 .toString();
     }
 
-    public String getAccountIdFromCrn(String userCrn) {
+    public String getAccountIdFromCrn(String crnStr) {
         try {
-            Crn crn = Crn.safeFromString(userCrn);
+            Crn crn = Crn.safeFromString(crnStr);
             return crn.getAccountId();
         } catch (NullPointerException | CrnParseException e) {
-            throw new BadRequestException("Can not parse CRN to find account ID: " + userCrn);
+            throw new BadRequestException("Can not parse CRN to find account ID: " + crnStr);
         }
     }
 
