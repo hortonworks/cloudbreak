@@ -65,7 +65,7 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1ByName")
     SimpleEnvironmentResponse deleteByName(@PathParam("name") String environmentName,
-        @QueryParam("cascading") @DefaultValue("true") boolean cascading,
+        @QueryParam("cascading") @DefaultValue("false") boolean cascading,
         @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @DELETE
@@ -74,7 +74,7 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentsByName", httpMethod = "DELETE")
     SimpleEnvironmentResponses deleteMultipleByNames(Set<String> names,
-        @QueryParam("cascading") @DefaultValue("true") boolean cascading,
+        @QueryParam("cascading") @DefaultValue("false") boolean cascading,
         @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @PUT
@@ -124,7 +124,7 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1ByCrn")
     SimpleEnvironmentResponse deleteByCrn(@PathParam("crn") String crn,
-        @QueryParam("cascading") @DefaultValue("true") boolean cascading,
+        @QueryParam("cascading") @DefaultValue("false") boolean cascading,
         @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @DELETE
@@ -133,7 +133,7 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_CRN, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentsByCrn", httpMethod = "DELETE")
     SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns,
-        @QueryParam("cascading") @DefaultValue("true") boolean cascading,
+        @QueryParam("cascading") @DefaultValue("false") boolean cascading,
         @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @PUT
