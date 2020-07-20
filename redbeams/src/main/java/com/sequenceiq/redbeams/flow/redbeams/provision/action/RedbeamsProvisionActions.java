@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.flow.redbeams.provision.action;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -96,10 +97,13 @@ public class RedbeamsProvisionActions {
 
             @Override
             protected void prepareExecution(UpdateDatabaseServerRegistrationSuccess payload, Map<Object, Object> variables) {
-                DBStack dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.AVAILABLE);
+                Optional<DBStack> dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.AVAILABLE);
                 metricService.incrementMetricCounter(MetricType.DB_PROVISION_FINISHED, dbStack);
 
-                dbStackJobService.schedule(dbStack);
+                dbStack.ifPresentOrElse(
+                        db -> dbStackJobService.schedule(db),
+                        () -> LOGGER.info("DBStack was not present, could not start autosynch service")
+                );
             }
 
             @Override
@@ -127,7 +131,7 @@ public class RedbeamsProvisionActions {
                 } else {
                     // StackCreationActions / StackCreationService only update status if stack isn't mid-deletion
                     String errorReason = failureException == null ? "Unknown error" : failureException.getMessage();
-                    DBStack dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.PROVISION_FAILED, errorReason);
+                    Optional<DBStack> dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.PROVISION_FAILED, errorReason);
                     metricService.incrementMetricCounter(MetricType.DB_PROVISION_FAILED, dbStack);
                 }
 

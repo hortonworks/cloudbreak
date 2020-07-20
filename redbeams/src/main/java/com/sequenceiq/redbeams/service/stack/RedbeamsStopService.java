@@ -1,15 +1,16 @@
 package com.sequenceiq.redbeams.service.stack;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
 
 @Service
 public class RedbeamsStopService {
@@ -36,7 +37,7 @@ public class RedbeamsStopService {
             return;
         }
 
-        dbStack = dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.STOP_REQUESTED);
+        dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.STOP_REQUESTED);
 
         flowManager.notify(RedbeamsStopEvent.REDBEAMS_STOP_EVENT.selector(),
                 new RedbeamsEvent(RedbeamsStopEvent.REDBEAMS_STOP_EVENT.selector(), dbStack.getId()));

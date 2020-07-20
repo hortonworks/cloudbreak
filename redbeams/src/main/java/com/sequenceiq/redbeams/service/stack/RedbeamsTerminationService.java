@@ -67,7 +67,7 @@ public class RedbeamsTerminationService {
             return server;
         }
 
-        dbStack = dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.DELETE_REQUESTED);
+        dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.DELETE_REQUESTED);
         // re-fetch to see new status
         server = databaseServerConfigService.getByCrn(crn);
 

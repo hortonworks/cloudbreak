@@ -8,6 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -36,6 +38,8 @@ public class DBStackStatusUpdaterTest {
 
     private DBStack dbStack;
 
+    private Optional<DBStack> dbStackOptional;
+
     private long now;
 
     @Before
@@ -44,8 +48,9 @@ public class DBStackStatusUpdaterTest {
 
         dbStack = new DBStack();
         dbStack.setId(1L);
+        dbStackOptional = Optional.of(dbStack);
 
-        when(dbStackService.getById(1L)).thenReturn(dbStack);
+        when(dbStackService.findById(1L)).thenReturn(dbStackOptional);
         when(dbStackService.save(dbStack)).thenReturn(dbStack);
 
         now = System.currentTimeMillis();
@@ -56,7 +61,7 @@ public class DBStackStatusUpdaterTest {
     public void testUpdateStatus() {
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.CREATING_INFRASTRUCTURE, now));
 
-        DBStack savedStack = underTest.updateStatus(1L, DetailedDBStackStatus.PROVISIONED, "because");
+        DBStack savedStack = underTest.updateStatus(1L, DetailedDBStackStatus.PROVISIONED, "because").get();
 
         verify(dbStackService).save(dbStack);
         verify(redbeamsInMemoryStateStoreUpdaterService).update(1L, Status.AVAILABLE);
@@ -73,7 +78,7 @@ public class DBStackStatusUpdaterTest {
     public void testUpdateStatusSkippedWhenDeleteCompleted() {
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.DELETE_COMPLETED, now));
 
-        underTest.updateStatus(1L, DetailedDBStackStatus.PROVISIONED, "because");
+        underTest.updateStatus(1L, DetailedDBStackStatus.PROVISIONED, "because").get();
 
         verify(dbStackService, never()).save(dbStack);
         verify(redbeamsInMemoryStateStoreUpdaterService, never()).update(anyLong(), any());

@@ -1,5 +1,17 @@
 package com.sequenceiq.redbeams.flow.redbeams.start.actions;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -13,15 +25,6 @@ import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerSucc
 import com.sequenceiq.redbeams.metrics.MetricType;
 import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class StartDatabaseServerFinishedActionTest {
@@ -54,14 +57,15 @@ public class StartDatabaseServerFinishedActionTest {
 
     @Test
     public void shouldUpdateStatusOnPrepare() {
-        when(dbStackStatusUpdater.updateStatus(RESOURCE_ID, DetailedDBStackStatus.STARTED)).thenReturn(dbStack);
+        Optional<DBStack> dbStackOptional = Optional.of(dbStack);
+        when(dbStackStatusUpdater.updateStatus(RESOURCE_ID, DetailedDBStackStatus.STARTED)).thenReturn(dbStackOptional);
 
         StartDatabaseServerSuccess event = new StartDatabaseServerSuccess(RESOURCE_ID);
 
         victim.prepareExecution(event, null);
 
         verify(dbStackStatusUpdater).updateStatus(RESOURCE_ID, DetailedDBStackStatus.STARTED);
-        verify(metricService).incrementMetricCounter(MetricType.DB_START_FINISHED, dbStack);
+        verify(metricService).incrementMetricCounter(MetricType.DB_START_FINISHED, dbStackOptional);
     }
 
     @Test
