@@ -1,5 +1,15 @@
 package com.sequenceiq.redbeams.flow.redbeams.stop.actions;
 
+import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.statemachine.StateContext;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -13,13 +23,6 @@ import com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopState;
 import com.sequenceiq.redbeams.metrics.MetricType;
 import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.statemachine.StateContext;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Map;
 
 @Component("REDBEAMS_STOP_FAILED_STATE")
 public class StopDatabaseServerFailedAction extends AbstractRedbeamsStopAction<RedbeamsFailureEvent> {
@@ -42,7 +45,7 @@ public class StopDatabaseServerFailedAction extends AbstractRedbeamsStopAction<R
         LOGGER.info("Error during database server stop flow:", failureException);
 
         String errorReason = failureException == null ? "Unknown error" : failureException.getMessage();
-        DBStack dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.STOP_FAILED, errorReason);
+        Optional<DBStack> dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.STOP_FAILED, errorReason);
         metricService.incrementMetricCounter(MetricType.DB_STOP_FAILED, dbStack);
     }
 

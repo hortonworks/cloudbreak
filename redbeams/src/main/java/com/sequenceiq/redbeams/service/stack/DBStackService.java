@@ -67,4 +67,10 @@ public class DBStackService {
     public void delete(DBStack dbStack) {
         dbStackRepository.delete(dbStack);
     }
+
+    @Transactional
+    public void delete(Long dbStackId) {
+        dbStackRepository.deleteById(dbStackId);
+    }
+
 }

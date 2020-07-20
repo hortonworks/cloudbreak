@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -172,7 +173,7 @@ class RedbeamsTerminationServiceTest {
     private void mockTerminationByCrn(String crn, DBStack dbStack, DatabaseServerConfig server) {
         doReturn(dbStack).when(dbStackService).getByCrn(crn);
         doReturn(server).when(databaseServerConfigService).getByCrn(crn);
-        doReturn(dbStack).when(dbStackStatusUpdater).updateStatus(dbStack.getId(), DetailedDBStackStatus.DELETE_REQUESTED);
+        doReturn(Optional.of(dbStack)).when(dbStackStatusUpdater).updateStatus(dbStack.getId(), DetailedDBStackStatus.DELETE_REQUESTED);
     }
 
     private void verifyTermination(long id) {

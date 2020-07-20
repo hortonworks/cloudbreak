@@ -1,5 +1,12 @@
 package com.sequenceiq.redbeams.flow.redbeams.start.actions;
 
+import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -10,10 +17,6 @@ import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerSucc
 import com.sequenceiq.redbeams.metrics.MetricType;
 import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Map;
 
 @Component("REDBEAMS_START_FINISHED_STATE")
 public class StartDatabaseServerFinishedAction extends AbstractRedbeamsStartAction<StartDatabaseServerSuccess> {
@@ -30,7 +33,7 @@ public class StartDatabaseServerFinishedAction extends AbstractRedbeamsStartActi
 
     @Override
     protected void prepareExecution(StartDatabaseServerSuccess payload, Map<Object, Object> variables) {
-        DBStack dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.STARTED);
+        Optional<DBStack> dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.STARTED);
         metricService.incrementMetricCounter(MetricType.DB_START_FINISHED, dbStack);
     }
 

@@ -1,5 +1,18 @@
 package com.sequenceiq.redbeams.flow.redbeams.stop.actions;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.statemachine.StateContext;
+
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -21,16 +34,6 @@ import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.statemachine.StateContext;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class StopDatabaseServerFailedActionTest {
@@ -114,23 +117,23 @@ public class StopDatabaseServerFailedActionTest {
     @Test
     public void shouldUpdateStatusAndIncrementMetricOnPrepare() {
         RedbeamsFailureEvent event = new RedbeamsFailureEvent(RESOURCE_ID, exception);
-
-        when(dbStackStatusUpdater.updateStatus(RESOURCE_ID, DetailedDBStackStatus.STOP_FAILED, null)).thenReturn(dbStack);
+        Optional<DBStack> dbStackOptional = Optional.of(dbStack);
+        when(dbStackStatusUpdater.updateStatus(RESOURCE_ID, DetailedDBStackStatus.STOP_FAILED, null)).thenReturn(dbStackOptional);
 
         victim.prepareExecution(event, null);
 
-        verify(metricService).incrementMetricCounter(MetricType.DB_STOP_FAILED, dbStack);
+        verify(metricService).incrementMetricCounter(MetricType.DB_STOP_FAILED, dbStackOptional);
     }
 
     @Test
     public void shouldUpdateStatusWithUknownErrorAndIncrementMetricOnPrepare() {
         RedbeamsFailureEvent event = new RedbeamsFailureEvent(RESOURCE_ID, null);
-
-        when(dbStackStatusUpdater.updateStatus(RESOURCE_ID, DetailedDBStackStatus.STOP_FAILED, "Unknown error")).thenReturn(dbStack);
+        Optional<DBStack> dbStackOptional = Optional.of(dbStack);
+        when(dbStackStatusUpdater.updateStatus(RESOURCE_ID, DetailedDBStackStatus.STOP_FAILED, "Unknown error")).thenReturn(Optional.of(dbStack));
 
         victim.prepareExecution(event, null);
 
-        verify(metricService).incrementMetricCounter(MetricType.DB_STOP_FAILED, dbStack);
+        verify(metricService).incrementMetricCounter(MetricType.DB_STOP_FAILED, dbStackOptional);
     }
 
     @Test

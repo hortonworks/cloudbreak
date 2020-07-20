@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.termination.action;
 
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -102,8 +103,8 @@ public class RedbeamsTerminationActions {
             protected Selectable createRequest(RedbeamsContext context) {
                 // Delete the DB stack here instead of deregistration so that we can keep track of its status
                 // through the termination
-                metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FINISHED, context.getDBStack());
-                dbStackService.delete(context.getDBStack());
+                metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FINISHED, Optional.of(context.getDBStack()));
+                dbStackService.delete(context.getDBStack().getId());
 
                 return new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_FINISHED_EVENT.name(), 0L);
             }
@@ -128,7 +129,7 @@ public class RedbeamsTerminationActions {
                 } else {
                     // StackCreationActions / StackCreationService only update status if stack isn't mid-deletion
                     String errorReason = failureException == null ? "Unknown error" : failureException.getMessage();
-                    DBStack dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.DELETE_FAILED, errorReason);
+                    Optional<DBStack> dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.DELETE_FAILED, errorReason);
                     metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FAILED, dbStack);
                 }
 

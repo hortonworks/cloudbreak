@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.metrics;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
@@ -15,9 +17,11 @@ public class RedbeamsMetricService extends AbstractMetricService {
         return METRIC_PREFIX;
     }
 
-    public void incrementMetricCounter(MetricType metricType, DBStack dbStack) {
-        String dbVendorName = dbStack != null ? dbStack.getDatabaseServer()
-                != null ? dbStack.getDatabaseServer().getDatabaseVendor().displayName() : "UNKNOWN" : "UNKNOWN";
+    public void incrementMetricCounter(MetricType metricType, Optional<DBStack> dbStack) {
+        String dbVendorName = dbStack
+                .filter(db -> db.getDatabaseServer() != null)
+                .map(db -> db.getDatabaseServer().getDatabaseVendor().displayName())
+                .orElse("UNKNOWN");
         incrementMetricCounter(metricType,
                 RedbeamsMetricTag.DATABASE_VENDOR.name(), dbVendorName);
     }

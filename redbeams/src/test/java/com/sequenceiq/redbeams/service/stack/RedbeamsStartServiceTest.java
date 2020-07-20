@@ -1,12 +1,13 @@
 package com.sequenceiq.redbeams.service.stack;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
-import com.sequenceiq.redbeams.api.model.common.Status;
-import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
-import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,11 +16,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.api.model.common.Status;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
+import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent;
 
 @ExtendWith(MockitoExtension.class)
 public class RedbeamsStartServiceTest {
@@ -57,7 +60,7 @@ public class RedbeamsStartServiceTest {
     public void shouldSetStartRequestedStatusAndNotifyTheFlowManager() {
         when(dbStack.getId()).thenReturn(1L);
         when(dbStack.getStatus()).thenReturn(Status.STOPPED);
-        when(dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.START_REQUESTED)).thenReturn(dbStack);
+        when(dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.START_REQUESTED)).thenReturn(Optional.of(dbStack));
         ArgumentCaptor<RedbeamsEvent> redbeamsEventArgumentCaptor = ArgumentCaptor.forClass(RedbeamsEvent.class);
 
         victim.startDatabaseServer(CRN_STRING);
