@@ -25,7 +25,7 @@ public class ControllerLogContextAspects {
     @Inject
     private LogContextService logContextService;
 
-    @Pointcut("execution(public * com.sequenceiq.redbeams.controller..*Controller.*(..))")
+    @Pointcut("execution(public * com.sequenceiq.redbeams..*.*Controller.*(..))")
     public void interceptControllerMethodCalls() {
     }
 
