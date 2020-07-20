@@ -157,12 +157,10 @@ public class AzureClient {
     }
 
     public ResourceGroup createResourceGroup(String name, String region, Map<String, String> tags) {
-        return handleAuthException(() ->
-                azure.resourceGroups().define(name)
-                        .withRegion(region)
-                        .withTags(tags)
-                        .create()
-        );
+        return handleAuthException(() -> azure.resourceGroups().define(name)
+                .withRegion(region)
+                .withTags(tags)
+                .create());
     }
 
     public Deployment createTemplateDeployment(String resourceGroupName, String deploymentName, String templateContent, String parameterContent) {
@@ -208,7 +206,8 @@ public class AzureClient {
         handleAuthException(() -> azure.storageAccounts().deleteByResourceGroup(resourceGroup, storageName));
     }
 
-    public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, StorageAccountSkuType accType, Boolean encryted,
+    public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, StorageAccountSkuType accType,
+            Boolean encryted,
             Map<String, String> tags) {
         return handleAuthException(() -> {
             WithCreate withCreate = azure.storageAccounts()
@@ -217,7 +216,8 @@ public class AzureClient {
                     .withExistingResourceGroup(resourceGroup)
                     .withTags(tags)
                     .withSku(accType)
-                    .withOnlyHttpsTraffic();
+                    .withOnlyHttpsTraffic()
+                    .withGeneralPurposeAccountKindV2();
             if (encryted) {
                 withCreate.withBlobEncryption();
             }
@@ -246,10 +246,9 @@ public class AzureClient {
     }
 
     public Optional<StorageAccountInner> getStorageAccountBySubscription(String storageName, String subscriptionId, Kind accountKind) {
-        return
-                azure.storageAccounts().manager().inner().withSubscriptionId(subscriptionId).storageAccounts().list().stream()
-                        .filter(account -> account.kind().equals(accountKind) && account.name().equalsIgnoreCase(storageName))
-                        .findAny();
+        return azure.storageAccounts().manager().inner().withSubscriptionId(subscriptionId).storageAccounts().list().stream()
+                .filter(account -> account.kind().equals(accountKind) && account.name().equalsIgnoreCase(storageName))
+                .findAny();
     }
 
     public void deleteContainerInStorage(String resourceGroup, String storageName, String containerName) {
@@ -325,7 +324,8 @@ public class AzureClient {
     }
 
     public DiskSkuTypes convertAzureDiskTypeToDiskSkuTypes(AzureDiskType diskType) {
-        return Objects.nonNull(diskType) ? DiskSkuTypes.fromStorageAccountType(DiskStorageAccountTypes.fromString(diskType.value())) : DiskSkuTypes.STANDARD_LRS;
+        return Objects.nonNull(diskType) ? DiskSkuTypes.fromStorageAccountType(DiskStorageAccountTypes.fromString(diskType.value()))
+                : DiskSkuTypes.STANDARD_LRS;
     }
 
     public void createContainerInStorage(String resourceGroup, String storageName, String containerName) {
@@ -510,7 +510,8 @@ public class AzureClient {
         Optional<VirtualMachineCustomImage> virtualMachineCustomImage = customImageList.stream()
                 .filter(customImage -> customImage.name().equals(imageName)
                         && (customImage.region().name().equals(region)
-                        || customImage.region().label().equals(region))).findFirst();
+                                || customImage.region().label().equals(region)))
+                .findFirst();
         if (virtualMachineCustomImage.isPresent()) {
             LOGGER.debug("Custom image found in '{}' resource group with name '{}'", resourceGroup, imageName);
             return virtualMachineCustomImage.get().id();
@@ -614,8 +615,8 @@ public class AzureClient {
             Set<VirtualMachineSize> resultList = new HashSet<>();
             if (region == null) {
                 for (Region tmpRegion : Region.values()) {
-                    PagedList<VirtualMachineSize> virtualMachineSizes =
-                            azure.virtualMachines().sizes().listByRegion(Region.findByLabelOrName(tmpRegion.label()));
+                    PagedList<VirtualMachineSize> virtualMachineSizes = azure.virtualMachines().sizes()
+                            .listByRegion(Region.findByLabelOrName(tmpRegion.label()));
                     getAllElement(virtualMachineSizes, resultList);
                 }
             }
@@ -693,8 +694,7 @@ public class AzureClient {
     }
 
     public PagedList<RoleAssignmentInner> listRoleAssignmentsBySubscription(String subscriptionId) {
-        return handleAuthException(() ->
-                getRoleAssignments().manager().roleInner().withSubscriptionId(subscriptionId).roleAssignments().list());
+        return handleAuthException(() -> getRoleAssignments().manager().roleInner().withSubscriptionId(subscriptionId).roleAssignments().list());
     }
 
     public PagedList<RoleAssignmentInner> listRoleAssignmentsByPrincipalId(String principalId) {
