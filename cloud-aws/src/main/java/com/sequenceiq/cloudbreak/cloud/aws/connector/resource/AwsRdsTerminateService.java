@@ -66,29 +66,27 @@ public class AwsRdsTerminateService {
         String cFStackName = cfStackUtil.getCfStackName(ac);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
-        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
         try {
+            AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
+            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
+
             cfRetryClient.describeStacks(describeStacksRequest);
+            cfRetryClient.deleteStack(awsStackRequestHelper.createDeleteStackRequest(cFStackName));
+            LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
+
+            AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
+            Waiter<DescribeStacksRequest> stackDeleteCompleteWaiter = cfClient.waiters().stackDeleteComplete();
+            StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
+            WaiterParameters<DescribeStacksRequest> describeStacksRequestWaiterParameters = new WaiterParameters<>(describeStacksRequest)
+                    .withPollingStrategy(getBackoffCancellablePollingStrategy(stackCancellationCheck));
+            stackDeleteCompleteWaiter.run(describeStacksRequestWaiterParameters);
         } catch (AmazonServiceException e) {
-            if (!e.getErrorMessage().contains(cFStackName + " does not exist")) {
+            if (!e.getErrorMessage().contains(cFStackName + " does not exist") && !force) {
                 throw e;
             }
             LOGGER.warn("Stack " + cFStackName + " does not exist, assuming that it has already been deleted");
             // FIXME
             return List.of();
-        }
-
-        cfRetryClient.deleteStack(awsStackRequestHelper.createDeleteStackRequest(cFStackName));
-        LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
-
-        AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
-        Waiter<DescribeStacksRequest> stackDeleteCompleteWaiter = cfClient.waiters().stackDeleteComplete();
-        try {
-            StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-            WaiterParameters<DescribeStacksRequest> describeStacksRequestWaiterParameters = new WaiterParameters<>(describeStacksRequest)
-                    .withPollingStrategy(getBackoffCancellablePollingStrategy(stackCancellationCheck));
-            stackDeleteCompleteWaiter.run(describeStacksRequestWaiterParameters);
         } catch (Exception e) {
             if (force) {
                 LOGGER.warn("Stack deletion for '{}' failed, continuing because termination is forced", cFStackName, e);
@@ -108,4 +106,7 @@ public class AwsRdsTerminateService {
         return List.of();
     }
 
+    private void wrapExceptionIfNeeded(Exception e) throws Exception {
+
+    }
 }
