@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -118,16 +119,25 @@ public class ClouderaManagerClusterCreationSetupService {
         List<ClouderaManagerProductV4Request> products = Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getProducts)
                 .orElse(Collections.emptyList());
         if (products.isEmpty()) {
-            List<ClusterComponent> cdhProductRepoConfig = determineCdhRepoConfig(cluster, stackCdhRepoConfig, osType, blueprintCdhVersion, imageCatalogName);
-            components.addAll(cdhProductRepoConfig);
+            Set<ClouderaManagerProduct> filteredProducts = determineCdhRepoConfig(cluster, stackCdhRepoConfig, osType,
+                    blueprintCdhVersion, imageCatalogName);
+            components.addAll(convertParcelsToClusterComponents(cluster, filteredProducts));
         } else if (isCdhParcelOnly(products)) {
-            addDefaultProducts(cluster, components, blueprintCdhVersion, osType, cluster.getStack().getCloudPlatform(), imageCatalogName);
+            Set<ClouderaManagerProduct> filteredProducts = addDefaultProducts(cluster, blueprintCdhVersion, osType,
+                    cluster.getStack().getCloudPlatform(), imageCatalogName);
+            components.addAll(convertParcelsToClusterComponents(cluster, filteredProducts));
         }
         if (isCdhParcelMissing(products, components)) {
             throw new BadRequestException("CDH parcel is missing from the cluster. "
                     + "If parcels are provided in the request, CDH parcel must be specified too.");
         }
         components.addAll(cluster.getComponents());
+    }
+
+    private List<ClusterComponent> convertParcelsToClusterComponents(Cluster cluster, Set<ClouderaManagerProduct> filteredProducts) {
+        return filteredProducts.stream()
+                .map(product -> new ClusterComponent(CDH_PRODUCT_DETAILS, product.getName(), new Json(product), cluster))
+                .collect(Collectors.toList());
     }
 
     private void checkCmStackRepositories(ClusterComponent cmRepoConfig, Component imageComponent) throws IOException, CloudbreakImageCatalogException {
@@ -168,7 +178,7 @@ public class ClouderaManagerClusterCreationSetupService {
         return new ClusterComponent(ComponentType.CM_REPO_DETAILS, json, cluster);
     }
 
-    private List<ClusterComponent> determineCdhRepoConfig(Cluster cluster, List<Component> stackCdhRepoConfig,
+    private Set<ClouderaManagerProduct> determineCdhRepoConfig(Cluster cluster, List<Component> stackCdhRepoConfig,
             String osType, String blueprintCdhVersion, String imageCatalogName) throws CloudbreakImageCatalogException {
         if (Objects.isNull(stackCdhRepoConfig) || stackCdhRepoConfig.isEmpty()) {
             DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(cluster.getWorkspace().getId(), blueprintCdhVersion, osType,
@@ -181,14 +191,19 @@ public class ClouderaManagerClusterCreationSetupService {
             List<ClouderaManagerProduct> products = CollectionUtils.isNotEmpty(defaultCDHInfo.getParcels())
                     ? defaultCDHInfo.getParcels() : new ArrayList<>();
             products.add(cmProduct);
-            return products.stream().map(product -> new ClusterComponent(CDH_PRODUCT_DETAILS, product.getName(), new Json(product), cluster))
-                    .collect(Collectors.toList());
+            LOGGER.info("Product list before filter out products by blueprint: {}", products);
+            Set<ClouderaManagerProduct> filteredProducts = parcelService.filterParcelsByBlueprint(products, cluster.getBlueprint());
+            LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
+            return filteredProducts;
         } else {
-            return stackCdhRepoConfig.stream()
+            List<ClouderaManagerProduct> products = stackCdhRepoConfig.stream()
                     .map(Component::getAttributes)
-                    .map(json -> new ClusterComponent(CDH_PRODUCT_DETAILS,
-                            json.getSilent(ClouderaManagerProduct.class).getName(), json, cluster))
+                    .map(json -> json.getSilent(ClouderaManagerProduct.class))
                     .collect(Collectors.toList());
+            LOGGER.info("Product list before filter out products by blueprint: {}", products);
+            Set<ClouderaManagerProduct> filteredProducts = parcelService.filterParcelsByBlueprint(products, cluster.getBlueprint());
+            LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
+            return filteredProducts;
         }
     }
 
@@ -226,20 +241,17 @@ public class ClouderaManagerClusterCreationSetupService {
         return missingFromProducts && missingFromComponents;
     }
 
-    private void addDefaultProducts(Cluster cluster, List<ClusterComponent> components, String blueprintCdhVersion, String osType, String cloudPlatform,
+    private Set<ClouderaManagerProduct>  addDefaultProducts(Cluster cluster, String blueprintCdhVersion, String osType, String cloudPlatform,
             String imageCatalogName) throws CloudbreakImageCatalogException {
         DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(cluster.getWorkspace().getId(), blueprintCdhVersion, osType, cloudPlatform, imageCatalogName);
+        Set<ClouderaManagerProduct> filteredProducts = new HashSet<>();
         if (defaultCDHInfo != null) {
-            Set<ClouderaManagerProduct> parcels = parcelService.filterParcelsByBlueprint(defaultCDHInfo.getParcels(), cluster.getBlueprint());
-            if (CollectionUtils.isNotEmpty(parcels)) {
+            filteredProducts = parcelService.filterParcelsByBlueprint(defaultCDHInfo.getParcels(), cluster.getBlueprint());
+            if (CollectionUtils.isNotEmpty(filteredProducts)) {
                 LOGGER.info("Adding default products to CDH cluster with name '{}'.", cluster.getName());
-                parcels.stream()
-                        .map(product -> {
-                            LOGGER.info("Adding default product '{}' to cluster '{}'.", product.getName(), cluster.getName());
-                            return new ClusterComponent(CDH_PRODUCT_DETAILS, product.getName(), new Json(product), cluster);
-                        })
-                        .forEach(components::add);
+                return filteredProducts;
             }
         }
+        return filteredProducts;
     }
 }
