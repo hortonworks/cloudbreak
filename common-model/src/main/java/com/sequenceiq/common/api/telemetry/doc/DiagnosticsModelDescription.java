@@ -7,4 +7,7 @@ public class DiagnosticsModelDescription {
     public static final String END_TIME = "END time for the time interval of the diagnostic collection request.";
     public static final String DESTINATION = "Destination for the diagnostic collection request.";
     public static final String DESCRIPTION = "description of the diagnostics collection";
+
+    private DiagnosticsModelDescription() {
+    }
 }

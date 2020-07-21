@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.diagnostics.config;
 
-
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_CLEANUP_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_COLLECTION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_COLLECTION_FINISHED_STATE;
@@ -26,7 +25,6 @@ import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsSt
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
-
 
 @Component
 public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors>

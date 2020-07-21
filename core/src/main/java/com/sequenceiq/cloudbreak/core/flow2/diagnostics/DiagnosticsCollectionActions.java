@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.diagnostics;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FINISHED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Map;
@@ -127,7 +127,7 @@ public class DiagnosticsCollectionActions {
                 Long resourceId = payload.getResourceId();
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_COLLECTION_FINISHED_STATE. resourceCrn: '{}'", resourceCrn);
-                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FINISHED.name(), ResourceEvent.STACK_DIAGNOSTICS_COLLECTION_FINISHED);
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, AVAILABLE.name(), ResourceEvent.STACK_DIAGNOSTICS_COLLECTION_FINISHED);
                 InMemoryStateStore.deleteStack(resourceId);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(resourceId)
