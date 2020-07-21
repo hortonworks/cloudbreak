@@ -52,7 +52,7 @@ public class PublicKeyDeleteHandler extends EventSenderAwareHandler<EnvironmentD
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
             if (environmentDeletionDto.isForceDelete()) {
-                LOGGER.warn("The %s was not successful but the environment deletion was requested as force delete so " +
+                LOGGER.warn("The {} was not successful but the environment deletion was requested as force delete so " +
                         "continue the deletion flow", selector());
                 eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
             } else {

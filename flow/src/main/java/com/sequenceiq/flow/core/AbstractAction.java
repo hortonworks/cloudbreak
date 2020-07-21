@@ -121,7 +121,8 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
             long flowElapsed = (System.currentTimeMillis() - (long) flowStartTime) / MS_PER_SEC;
             long execElapsed = (System.currentTimeMillis() - (long) execTime) / MS_PER_SEC;
             long executionTime = Math.max(execElapsed, flowElapsed);
-            LOGGER.debug("Stack: {}, flow state: {}, phase: {}, execution time {} sec", payload.getResourceId(),
+            String resourceId = getResourceId(payload, flowStateName);
+            LOGGER.debug("Resource ID: {}, flow state: {}, phase: {}, execution time {} sec", resourceId,
                     flowStateName, execElapsed > flowElapsed ? "doExec" : "service", executionTime);
             metricService.submit(FlowMetricType.FLOW_STEP, executionTime, Map.of("name", flowStateName.toLowerCase()));
         }
@@ -216,5 +217,16 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     protected String getCurrentFlowStateName(Map<Object, Object> variables) {
         return String.valueOf(variables.get(FLOW_STATE_NAME));
+    }
+
+    private String getResourceId(P payload, String flowStateName) {
+        String resource;
+        if (payload == null) {
+            resource = "no payload!";
+            LOGGER.warn("No payload in flow state {}", flowStateName);
+        } else {
+            resource = payload.getResourceId().toString();
+        }
+        return resource;
     }
 }

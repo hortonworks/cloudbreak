@@ -27,6 +27,7 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -300,7 +301,12 @@ public class EnvDeleteActions {
 
         @Override
         protected Object getFailurePayload(P payload, Optional<CommonContext> flowContext, Exception ex) {
-            return payload;
+            EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
+                    .withException(ex)
+                    .withEnvironmentID(NullUtil.getIfNotNullOtherwise(payload, ResourceCrnPayload::getResourceId, -1L))
+                    .withResourceCrn(NullUtil.getIfNotNullOtherwise(payload, ResourceCrnPayload::getResourceCrn, "null CRN"))
+                    .build();
+            return failedEvent;
         }
 
         @Override
