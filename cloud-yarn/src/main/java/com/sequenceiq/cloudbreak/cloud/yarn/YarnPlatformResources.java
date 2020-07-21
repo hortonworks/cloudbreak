@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
+import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
@@ -122,5 +123,10 @@ public class YarnPlatformResources implements PlatformResources {
     public CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         LOGGER.warn("NoSQL table list is not supported on 'YARN'");
         return new CloudNoSqlTables(new ArrayList<>());
+    }
+
+    @Override
+    public CloudResourceGroups resourceGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return new CloudResourceGroups();
     }
 }

@@ -138,7 +138,7 @@ public class AzureClient {
 
     public boolean resourceGroupExists(String name) {
         try {
-            return getResourceGroups().contain(name);
+                return getResourceGroups().contain(name);
         } catch (CloudException e) {
             if (e.getMessage().contains("Status code 403")) {
                 LOGGER.info("Resource group {} does not exist or insufficient permission to access it, exception: {}", name, e);

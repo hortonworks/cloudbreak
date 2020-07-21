@@ -39,6 +39,8 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequestV2;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsResultV2;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformResourceGroupsRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformResourceGroupsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSecurityGroupsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSecurityGroupsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSshKeysRequest;
@@ -72,6 +74,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
+import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -464,6 +467,27 @@ public class CloudParameterService {
             return result.getNoSqlTables();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting the platform NoSqlTablesResult", e);
+            throw new OperationException(e);
+        }
+    }
+
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
+    public CloudResourceGroups getResourceGroups(ExtendedCloudCredential cloudCredential, String region, String platformVariant, Map<String, String> filters) {
+        LOGGER.debug("Get platform resource groups for credential: [{}]", cloudCredential.getName());
+
+        GetPlatformResourceGroupsRequest request = new GetPlatformResourceGroupsRequest(cloudCredential, cloudCredential, platformVariant, region, null);
+        eventBus.notify(request.selector(), Event.wrap(request));
+        try {
+            GetPlatformResourceGroupsResult result = request.await();
+            LOGGER.debug("Platform ResourceGroupsResult result: {}", result);
+            if (result.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.debug("Failed to get platform ResourceGroupsResult", result.getErrorDetails());
+                throw new GetCloudParameterException(String.format("Failed to get resource groups tables for the cloud provider: %s. %s",
+                        result.getStatusReason(), getCauseMessages(result.getErrorDetails())), result.getErrorDetails());
+            }
+            return result.getResourceGroups();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform ResourceGroupsResult", e);
             throw new OperationException(e);
         }
     }

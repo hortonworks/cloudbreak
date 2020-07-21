@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
+import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 
 /**
  * Platform resources.
@@ -113,6 +114,8 @@ public interface PlatformResources {
      * @return the {@link CloudNoSqlTables} contains every No SQL table for the specified region
      */
     CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters);
+
+    CloudResourceGroups resourceGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     default boolean regionMatch(Region actualRegion, Region expectedRegion) {
         return expectedRegion == null || Strings.isNullOrEmpty(expectedRegion.value()) || actualRegion.value().equals(expectedRegion.value());

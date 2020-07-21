@@ -22,6 +22,7 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGateways
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformIpPoolsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNetworksResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNoSqlTablesResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformResourceGroupsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSecurityGroupsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSshKeysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
@@ -172,6 +173,18 @@ public interface PlatformResourceEndpoint {
             @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") @NotEmpty String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
+
+    @GET
+    @Path("resource_groups")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OpDescription.GET_RESOURCE_GROUPS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
+            nickname = "getResourceGroups")
+    PlatformResourceGroupsResponse getResourceGroups(
+            @QueryParam("credentialName") @NotEmpty String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
             @QueryParam("availabilityZone") String availabilityZone);
 }
