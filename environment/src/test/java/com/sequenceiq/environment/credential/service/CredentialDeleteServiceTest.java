@@ -3,7 +3,6 @@ package com.sequenceiq.environment.credential.service;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -28,10 +27,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.environment.credential.domain.Credential;
-import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 import com.sequenceiq.notification.Notification;
 import com.sequenceiq.notification.NotificationSender;
@@ -98,27 +95,40 @@ class CredentialDeleteServiceTest {
     @Test
     void testMultipleIfOneOfTheCredentialsIsNotExistsThenNotFoundExceptionComes() {
         when(credentialService.findByNameAndAccountId(anyString(), anyString(), any(Set.class), any())).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> underTest.deleteMultiple(Set.of("someCredNameWhichDoesNotExists"), ACCOUNT_ID, ENVIRONMENT));
+        Set<Credential> result = underTest.deleteMultiple(Set.of("someCredNameWhichDoesNotExists"), ACCOUNT_ID, ENVIRONMENT);
 
         verify(credentialService, times(1)).findByNameAndAccountId(anyString(), anyString(), anyCollection(), any());
         verify(environmentViewService, times(0)).findAllByCredentialId(anyLong());
         verify(credentialService, times(0)).save(any());
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void testMultipleWhenEnvironmentStillUsesTheCredentialThenBadRequestShouldCome() {
-        String name = "something";
-        Credential cred = createCredentialWithName(name);
-        cred.setId(1L);
-        when(credentialService.findByNameAndAccountId(eq(name), eq(ACCOUNT_ID), any(Set.class), any())).thenReturn(Optional.of(cred));
-        when(environmentViewService.findAllByCredentialId(cred.getId())).thenReturn(Set.of(new EnvironmentView()));
+    void testMultipleWhenEnvironmentStillUsesTheCredential2ThenBadRequestShouldComeOnSecondButTheFirstDeletionSuccess() {
+        doNothing().when(grpcUmsClient).notifyResourceDeleted(any(), any());
+        String name1 = "something1";
+        Credential cred1 = createCredentialWithName(name1);
+        cred1.setId(1L);
+        when(credentialService.findByNameAndAccountId(eq(name1), eq(ACCOUNT_ID), any(Set.class), any())).thenReturn(Optional.of(cred1));
+        when(credentialService.save(any())).thenReturn(cred1);
 
-        assertThrows(BadRequestException.class, () -> underTest.deleteMultiple(Set.of(name), ACCOUNT_ID, ENVIRONMENT));
+        String name2 = "something2";
+        Credential cred2 = createCredentialWithName(name2);
+        cred2.setId(2L);
+        when(credentialService.findByNameAndAccountId(eq(name2), eq(ACCOUNT_ID), any(Set.class), any()))
+                .thenThrow(new BadRequestException("anything can happen"));
 
-        verify(credentialService, times(1)).findByNameAndAccountId(anyString(), anyString(), anyCollection(), any());
+        when(environmentViewService.findAllByCredentialId(cred1.getId())).thenReturn(Set.of());
+
+        Set<Credential> result = underTest.deleteMultiple(Set.of(name1, name2), ACCOUNT_ID, ENVIRONMENT);
+
+        verify(credentialService, times(2)).findByNameAndAccountId(anyString(), anyString(), anyCollection(), any());
         verify(environmentViewService, times(1)).findAllByCredentialId(anyLong());
-        verify(environmentViewService, times(1)).findAllByCredentialId(cred.getId());
-        verify(credentialService, times(0)).save(any());
+        verify(environmentViewService, times(1)).findAllByCredentialId(cred1.getId());
+        verify(credentialService, times(1)).save(any());
+        verify(grpcUmsClient, times(1)).notifyResourceDeleted(any(), any());
+        assertTrue(result.size() == 1);
+        assertTrue(result.iterator().next().getName().startsWith(name1));
     }
 
     @Test
