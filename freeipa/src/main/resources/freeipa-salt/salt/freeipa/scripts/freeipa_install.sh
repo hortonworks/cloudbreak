@@ -5,6 +5,8 @@ set -e
 FQDN=$(hostname -f)
 IPADDR=$(hostname -i)
 
+ipa-server-install --unattended --uninstall
+
 ipa-server-install \
           --realm $REALM \
           --domain $DOMAIN \
