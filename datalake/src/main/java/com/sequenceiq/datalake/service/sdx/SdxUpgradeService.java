@@ -1,24 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
-import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
@@ -47,6 +28,23 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
+import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
+import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Service
 public class SdxUpgradeService {
@@ -86,6 +84,7 @@ public class SdxUpgradeService {
 
     public SdxUpgradeResponse triggerOsUpgradeByName(String userCrn, String clusterName) {
         UpgradeOptionV4Response upgradeOption = checkForOsUpgradeByName(userCrn, clusterName);
+        validateStackStatusForOsUpgrade(clusterName);
         validateOsUpgradeOption(upgradeOption);
         SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
         return triggerUpgrade(upgradeOption, cluster);
@@ -93,8 +92,9 @@ public class SdxUpgradeService {
 
     public SdxUpgradeResponse triggerOsUpgradeByCrn(String userCrn, String clusterCrn) {
         UpgradeOptionV4Response upgradeOption = checkForOsUpgradeByCrn(userCrn, clusterCrn);
-        validateOsUpgradeOption(upgradeOption);
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
+        validateStackStatusForOsUpgrade(cluster.getClusterName());
+        validateOsUpgradeOption(upgradeOption);
         return triggerUpgrade(upgradeOption, cluster);
     }
 
@@ -220,6 +220,16 @@ public class SdxUpgradeService {
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> checkClusterStatusDuringUpgrade(sdxCluster, pollingMessage));
+    }
+
+    private void validateStackStatusForOsUpgrade(String datalakeName) {
+        if (!isStackAvailable(datalakeName)) {
+            throw new BadRequestException("OS upgrade can't be done because the cluster is not in an available state!");
+        }
+    }
+
+    private boolean isStackAvailable(String stackName) {
+        return stackV4Endpoint.getStatusByName(0L, stackName).getClusterStatus().isAvailable();
     }
 
     private void validateOsUpgradeOption(UpgradeOptionV4Response upgradeOptionV4Response) {
