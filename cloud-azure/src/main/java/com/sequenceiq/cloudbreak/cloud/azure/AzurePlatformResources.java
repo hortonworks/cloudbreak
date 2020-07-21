@@ -26,11 +26,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.msi.Identity;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.Subnet;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
@@ -54,6 +56,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
+import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroup;
+import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
 import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
 
@@ -300,4 +304,11 @@ public class AzurePlatformResources implements PlatformResources {
         return new CloudNoSqlTables(new ArrayList<>());
     }
 
+    @Override
+    public CloudResourceGroups resourceGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        PagedList<ResourceGroup> resourceGroupPagedList = azureClientService.getClient(cloudCredential).getResourceGroups().list();
+        resourceGroupPagedList.loadAll();
+        List<CloudResourceGroup> resourceGroups = resourceGroupPagedList.stream().map(rg -> new CloudResourceGroup(rg.name())).collect(Collectors.toList());
+        return new CloudResourceGroups(resourceGroups);
+    }
 }

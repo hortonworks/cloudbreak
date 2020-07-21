@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
+import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
@@ -323,6 +324,11 @@ public class GcpPlatformResources implements PlatformResources {
     public CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         LOGGER.warn("NoSQL table list is not supported on 'GCP'");
         return new CloudNoSqlTables(new ArrayList<>());
+    }
+
+    @Override
+    public CloudResourceGroups resourceGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return new CloudResourceGroups();
     }
 
     private List<KeyRing> getKeyRingList(CloudKMS cloudKMS, String projectId, String regionName) {

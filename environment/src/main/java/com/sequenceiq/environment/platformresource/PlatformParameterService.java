@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
+import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.CdpResourceType;
@@ -178,6 +179,11 @@ public class PlatformParameterService {
 
     public CloudNoSqlTables getNoSqlTables(PlatformResourceRequest request) {
         return cloudParameterService.getNoSqlTables(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
+                request.getPlatformVariant(), request.getFilters());
+    }
+
+    public CloudResourceGroups getResourceGroups(PlatformResourceRequest request) {
+        return cloudParameterService.getResourceGroups(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
                 request.getPlatformVariant(), request.getFilters());
     }
 

@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.platformresource.v1;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -12,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
+import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
@@ -39,6 +42,8 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGateways
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformIpPoolsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNetworksResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNoSqlTablesResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformResourceGroupResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformResourceGroupsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSecurityGroupsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSshKeysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
@@ -316,6 +321,32 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
         CloudNoSqlTables noSqlTables = platformParameterService.getNoSqlTables(request);
         PlatformNoSqlTablesResponse response = convertersionService.convert(noSqlTables, PlatformNoSqlTablesResponse.class);
         LOGGER.info("Resp /platform_resources/nosql_tables, request: {}, noSqlTables: {}, response: {}", request, noSqlTables, response);
+        return response;
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    public PlatformResourceGroupsResponse getResourceGroups(
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
+            String availabilityZone) {
+        String accountId = getAccountId();
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
+                availabilityZone);
+        LOGGER.info("Get /platform_resources/resource_groups, request: {}", request);
+        CloudResourceGroups resourceGroups = platformParameterService.getResourceGroups(request);
+        List<PlatformResourceGroupResponse> platformResourceGroups = resourceGroups.getResourceGroups().stream()
+                .map(rg -> new PlatformResourceGroupResponse(rg.getName()))
+                .collect(Collectors.toList());
+        PlatformResourceGroupsResponse response = new PlatformResourceGroupsResponse(platformResourceGroups);
+        LOGGER.info("Resp /platform_resources/resource_groups, request: {}, resourceGroups: {}, response: {}", request, resourceGroups, response);
         return response;
     }
 

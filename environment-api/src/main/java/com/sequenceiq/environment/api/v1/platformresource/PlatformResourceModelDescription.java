@@ -30,6 +30,7 @@ public class PlatformResourceModelDescription {
         public static final String GET_ACCESSCONFIGS = "retrieve access configs with properties";
         public static final String GET_ENCRYPTIONKEYS = "retrieve encryption keys with properties";
         public static final String GET_NOSQL_TABLES = "retrieve nosql tables";
+        public static final String GET_RESOURCE_GROUPS = "retrieve resource groups";
     }
 
     private PlatformResourceModelDescription() {

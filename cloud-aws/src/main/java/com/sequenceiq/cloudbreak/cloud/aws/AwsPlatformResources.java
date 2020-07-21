@@ -121,6 +121,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
+import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSshKeyFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceVpcFilterView;
@@ -792,6 +793,11 @@ public class AwsPlatformResources implements PlatformResources {
             noSqlTables.addAll(partialResult);
         }
         return new CloudNoSqlTables(noSqlTables);
+    }
+
+    @Override
+    public CloudResourceGroups resourceGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return new CloudResourceGroups();
     }
 
     private AmazonDynamoDB getAmazonDynamoDB(CloudCredential cloudCredential, Region region) {
