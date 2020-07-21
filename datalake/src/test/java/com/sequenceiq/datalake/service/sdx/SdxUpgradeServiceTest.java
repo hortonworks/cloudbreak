@@ -1,14 +1,17 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-import java.util.Set;
-
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
+import com.sequenceiq.datalake.controller.exception.BadRequestException;
+import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,17 +22,23 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
-import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SdxUpgradeServiceTest {
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
+    private static final String CLUSTER_NAME = "coolStack";
+
+    private static final String OS_UPGRADE_CHECK_EXCEPTION_MESSAGE = "OS upgrade can't be done because the cluster is not in an available state!";
 
     @InjectMocks
     private SdxUpgradeService underTest;
@@ -42,6 +51,9 @@ public class SdxUpgradeServiceTest {
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
+
+    @Mock
+    private StackStatusV4Response mockStackStatusV4Response;
 
     @Captor
     private ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor;
@@ -120,6 +132,32 @@ public class SdxUpgradeServiceTest {
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
         verify(sdxClusterRepository, times(0)).save(any());
+    }
+
+    @Test
+    void testTriggerOsUpgradeByNameCalledWhenStackIsNotAvailableThenBadRequestExceptionComes() {
+        when(sdxService.getSdxByNameInAccount(USER_CRN, sdxCluster.getClusterName())).thenReturn(sdxCluster);
+
+        when(stackV4Endpoint.getStatusByName(0L, sdxCluster.getClusterName())).thenReturn(mockStackStatusV4Response);
+        when(mockStackStatusV4Response.getClusterStatus()).thenReturn(Status.STOPPED);
+
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.triggerOsUpgradeByName(USER_CRN, sdxCluster.getClusterName()));
+
+        Assertions.assertEquals(exception.getMessage(), OS_UPGRADE_CHECK_EXCEPTION_MESSAGE);
+    }
+
+    @Test
+    void testTriggerOsUpgradeByCrnCalledWhenStackIsNotAvailableThenBadRequestExceptionComes() {
+        when(sdxService.getByCrn(USER_CRN, sdxCluster.getCrn())).thenReturn(sdxCluster);
+
+        when(stackV4Endpoint.getStatusByName(0L, sdxCluster.getClusterName())).thenReturn(mockStackStatusV4Response);
+        when(mockStackStatusV4Response.getClusterStatus()).thenReturn(Status.STOPPED);
+
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.triggerOsUpgradeByCrn(USER_CRN, sdxCluster.getCrn()));
+
+        Assertions.assertEquals(exception.getMessage(), OS_UPGRADE_CHECK_EXCEPTION_MESSAGE);
     }
 
     private StackV4Response getStackV4Response() {
