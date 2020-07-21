@@ -17,7 +17,6 @@ public enum Status {
     UPDATE_IN_PROGRESS(StatusKind.PROGRESS),
     UPDATE_REQUESTED(StatusKind.PROGRESS),
     UPDATE_FAILED(StatusKind.FINAL),
-    UPDATE_FINISHED(StatusKind.FINAL),
     BACKUP_IN_PROGRESS(StatusKind.PROGRESS),
     BACKUP_FAILED(StatusKind.FINAL),
     BACKUP_FINISHED(StatusKind.FINAL),
