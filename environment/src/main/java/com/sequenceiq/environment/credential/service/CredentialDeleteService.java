@@ -49,7 +49,13 @@ public class CredentialDeleteService extends AbstractCredentialService {
 
     public Set<Credential> deleteMultiple(Set<String> names, String accountId, CredentialType type) {
         Set<Credential> deletedOnes = new LinkedHashSet<>();
-        names.forEach(credentialName -> deletedOnes.add(deleteByName(credentialName, accountId, type)));
+        names.forEach(credentialName -> {
+            try {
+                deletedOnes.add(deleteByName(credentialName, accountId, type));
+            } catch (Exception ex) {
+                LOGGER.debug("Could not delete Credential with name {} because: {}", credentialName, ex.getMessage());
+            }
+        });
         return deletedOnes;
     }
 
