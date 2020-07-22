@@ -11,16 +11,19 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Par
 @Component
 public class AwsDatabaseServerParameterDecorator implements DatabaseServerParameterDecorator {
 
-    @Value("${cb.aws.externaldatabase.retentionperiod:1}")
-    private int retentionPeriod;
+    @Value("${cb.aws.externaldatabase.ha.retentionperiod}")
+    private int retentionPeriodHa;
 
-    @Value("${cb.aws.externaldatabase.engineversion:10.6}")
+    @Value("${cb.aws.externaldatabase.nonha.retentionperiod}")
+    private int retentionPeriodNonHa;
+
+    @Value("${cb.aws.externaldatabase.engineversion}")
     private String engineVersion;
 
     @Override
     public void setParameters(DatabaseServerV4StackRequest request, DatabaseServerParameter serverParameter) {
         AwsDatabaseServerV4Parameters parameters = new AwsDatabaseServerV4Parameters();
-        parameters.setBackupRetentionPeriod(retentionPeriod);
+        parameters.setBackupRetentionPeriod(serverParameter.isHighlyAvailable() ? retentionPeriodHa : retentionPeriodNonHa);
         parameters.setMultiAZ(Boolean.toString(serverParameter.isHighlyAvailable()));
         parameters.setEngineVersion(engineVersion);
         request.setAws(parameters);

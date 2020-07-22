@@ -25,11 +25,15 @@ public class AzureDatabaseServerParameterSetterTest {
     @Captor
     private ArgumentCaptor<AzureDatabaseServerV4Parameters> captor;
 
-    private DatabaseServerParameterSetter underTest;
+    private AzureDatabaseServerParameterSetter underTest;
 
     @BeforeEach
     public void setUp() {
         underTest = new AzureDatabaseServerParameterSetter();
+        underTest.geoRedundantBackupHa = true;
+        underTest.geoRedundantBackupNonHa = false;
+        underTest.backupRetentionPeriodHa = 30;
+        underTest.backupRetentionPeriodNonHa = 7;
     }
 
     @Test
@@ -39,7 +43,7 @@ public class AzureDatabaseServerParameterSetterTest {
         verify(request).setAzure(captor.capture());
         AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = captor.getValue();
         assertEquals(true, azureDatabaseServerV4Parameters.getGeoRedundantBackup());
-        assertEquals(7, azureDatabaseServerV4Parameters.getBackupRetentionDays());
+        assertEquals(30, azureDatabaseServerV4Parameters.getBackupRetentionDays());
     }
 
     @Test

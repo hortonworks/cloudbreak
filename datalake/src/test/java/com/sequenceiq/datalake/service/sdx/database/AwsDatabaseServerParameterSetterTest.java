@@ -25,11 +25,13 @@ public class AwsDatabaseServerParameterSetterTest {
     @Captor
     private ArgumentCaptor<AwsDatabaseServerV4Parameters> captor;
 
-    private DatabaseServerParameterSetter underTest;
+    private AwsDatabaseServerParameterSetter underTest;
 
     @BeforeEach
     public void setUp() {
         underTest = new AwsDatabaseServerParameterSetter();
+        underTest.backupRetentionPeriodHa = 30;
+        underTest.backupRetentionPeriodNonHa = 0;
     }
 
     @Test
@@ -39,7 +41,7 @@ public class AwsDatabaseServerParameterSetterTest {
         verify(request).setAws(captor.capture());
         AwsDatabaseServerV4Parameters awsDatabaseServerV4Parameters = captor.getValue();
         assertEquals("true", awsDatabaseServerV4Parameters.getMultiAZ());
-        assertEquals(1, awsDatabaseServerV4Parameters.getBackupRetentionPeriod());
+        assertEquals(30, awsDatabaseServerV4Parameters.getBackupRetentionPeriod());
     }
 
     @Test
