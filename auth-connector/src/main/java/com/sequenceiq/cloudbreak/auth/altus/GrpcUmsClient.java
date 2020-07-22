@@ -435,6 +435,9 @@ public class GrpcUmsClient {
     }
 
     public boolean isAuthorizationEntitlementRegistered(String actorCrn, String accountId) {
+        if (StringUtils.equals(accountId, InternalCrnBuilder.INTERNAL_ACCOUNT)) {
+            return false;
+        }
         return getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId()).getEntitlementsList()
                 .stream()
                 .map(e -> e.getEntitlementName().toUpperCase())
