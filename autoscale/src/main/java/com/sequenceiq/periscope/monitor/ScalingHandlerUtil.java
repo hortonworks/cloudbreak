@@ -49,6 +49,7 @@ public class ScalingHandlerUtil {
         int totalNodes = Math.toIntExact(cloudbreakClient.autoscaleEndpoint().getHostMetadataCountForAutoscale(cluster.getStackId(), policy.getHostGroup()));
         int desiredNodeCount = getDesiredNodeCount(cluster, policy, totalNodes);
         if (totalNodes != desiredNodeCount) {
+            LOGGER.info("{} cluster id will be scaled up with {} policy", cluster.getId(), policy.getName());
             cluster.setLastScalingActivityCurrent();
             clusterService.save(cluster);
             scale(cluster, policy);
@@ -65,9 +66,10 @@ public class ScalingHandlerUtil {
         rejectedThreadService.remove(cluster.getId());
     }
 
-    public boolean isCooldownElapsed(Cluster cluster) {
+    public synchronized boolean isCooldownElapsed(Cluster cluster) {
         long remainingTime = getRemainingCooldownTime(cluster);
         if (remainingTime <= 0) {
+            LOGGER.info("Cooldown elapsed for cluster: {}", cluster.getId());
             return true;
         }
         LOGGER.info("Cluster cannot be scaled for {} min(s)",
@@ -101,6 +103,8 @@ public class ScalingHandlerUtil {
         }
         int minSize = cluster.getMinSize();
         int maxSize = cluster.getMaxSize();
+        LOGGER.info("Desired node count calculated by minSize: {} maxSixe: {}, desiredCount {}, total nodes: {} for cluster: {}",
+                minSize, maxSize, desiredNodeCount, totalNodes, cluster.getId());
         return desiredNodeCount < minSize ? minSize : Math.min(desiredNodeCount, maxSize);
     }
 }
