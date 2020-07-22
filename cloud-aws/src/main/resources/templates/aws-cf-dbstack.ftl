@@ -161,6 +161,7 @@
                 "DBInstanceIdentifier": { "Ref": "DBInstanceIdentifierParameter" },
                 "DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
                 "Engine": { "Ref": "EngineParameter" },
+                "CopyTagsToSnapshot":true,
                 "EngineVersion": { "Ref": "EngineVersionParameter" },
                 "MasterUserPassword": { "Ref": "MasterUserPasswordParameter" },
                 "MasterUsername": { "Ref": "MasterUsernameParameter" },
