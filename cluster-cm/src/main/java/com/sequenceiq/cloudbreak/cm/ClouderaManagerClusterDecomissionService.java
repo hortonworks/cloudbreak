@@ -102,6 +102,11 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     }
 
     @Override
+    public void deleteUnusedCredentialsFromCluster() {
+        clouderaManagerDecomissioner.deleteUnusedCredentialsFromCluster(stack, client);
+    }
+
+    @Override
     public void restartStaleServices() throws CloudbreakException {
         try {
             applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig)
