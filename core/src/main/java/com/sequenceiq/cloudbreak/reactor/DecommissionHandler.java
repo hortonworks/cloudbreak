@@ -133,6 +133,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
             decommisionedInstances.forEach(clusterDecomissionService::deleteHostFromCluster);
+            clusterDecomissionService.deleteUnusedCredentialsFromCluster();
             updateInstanceStatuses(decommisionedInstances, InstanceStatus.DECOMMISSIONED, "instance successfully downscaled");
             clusterDecomissionService.restartStaleServices();
 

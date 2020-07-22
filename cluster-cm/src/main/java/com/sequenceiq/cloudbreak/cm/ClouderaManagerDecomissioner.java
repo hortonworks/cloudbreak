@@ -258,17 +258,16 @@ public class ClouderaManagerDecomissioner {
         LOGGER.debug("Deleting host: [{}]", data.getDiscoveryFQDN());
         deleteRolesFromHost(stack, data, client);
         deleteHostFromClouderaManager(stack, data, client);
-        deleteUnusedCredentialsFromCluster(stack, data, client);
     }
 
-    private void deleteUnusedCredentialsFromCluster(Stack stack, InstanceMetaData data, ApiClient client) {
+    public void deleteUnusedCredentialsFromCluster(Stack stack, ApiClient client) {
         LOGGER.debug("Deleting unused credentials");
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
         try {
             ApiCommand command = clouderaManagerResourceApi.deleteCredentialsCommand("unused");
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, command.getId());
         } catch (ApiException e) {
-            LOGGER.error("Failed to delete credentials of host: {}", data.getDiscoveryFQDN(), e);
+            LOGGER.error("Failed to delete unused credentials", e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
