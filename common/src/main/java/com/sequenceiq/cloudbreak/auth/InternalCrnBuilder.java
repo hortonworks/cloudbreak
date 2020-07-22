@@ -17,9 +17,9 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn.Service;
  */
 public class InternalCrnBuilder {
 
-    private static final String INTERNAL_USER_CRN = "__internal__actor__";
+    public static final String INTERNAL_ACCOUNT = "altus";
 
-    private static final String INTERNAL_ACCOUNT = "altus";
+    private static final String INTERNAL_USER_CRN = "__internal__actor__";
 
     private final Service serviceType;
 
