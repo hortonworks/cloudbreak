@@ -17,7 +17,7 @@
         "Default": 3,
         "Description": "Backup retention period, in days",
         "MinValue": 0,
-        "MaxValue": 8
+        "MaxValue": 35
     },
     "DBInstanceClassParameter": {
         "Type": "String",
