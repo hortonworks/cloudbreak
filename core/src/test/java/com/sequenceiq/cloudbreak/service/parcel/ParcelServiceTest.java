@@ -86,7 +86,7 @@ class ParcelServiceTest {
         when(response.getStatusInfo()).thenReturn(Response.Status.OK);
         when(response.readEntity(String.class)).thenReturn(getManifestJson("serv1"));
 
-        List<ClouderaManagerProduct> parcels = getParcels("http://parcel1.com/");
+        Set<ClouderaManagerProduct> parcels = getParcels("http://parcel1.com/");
         Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(parcels, blueprint);
 
         Assertions.assertEquals(1, actual.size());
@@ -113,19 +113,19 @@ class ParcelServiceTest {
         when(response.getStatusInfo()).thenReturn(Response.Status.OK);
         when(response.readEntity(String.class)).thenReturn(null);
 
-        List<ClouderaManagerProduct> parcels = getParcels("http://parcel1.com/", "http://parcel2.com/");
+        Set<ClouderaManagerProduct> parcels = getParcels("http://parcel1.com/", "http://parcel2.com/");
         Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(parcels, blueprint);
 
         Assertions.assertEquals(2, actual.size());
         Assertions.assertEquals(actual, new HashSet<>(parcels));
     }
 
-    private List<ClouderaManagerProduct> getParcels(String... parcelUrls) {
+    private Set<ClouderaManagerProduct> getParcels(String... parcelUrls) {
         return Arrays.stream(parcelUrls).map(s -> {
             ClouderaManagerProduct product = new ClouderaManagerProduct();
             product.setParcel(s);
             return product;
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toSet());
     }
 
     private SupportedServices getSupportedServices(String... componentNames) {

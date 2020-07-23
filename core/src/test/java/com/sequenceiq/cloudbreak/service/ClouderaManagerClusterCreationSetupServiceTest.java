@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -137,13 +137,13 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         clouderaManagerProductSet.add(clouderaManagerProduct("CDH", "1.0.0"));
 
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(OLDER_CDH_VERSION);
-        when(parcelService.filterParcelsByBlueprint(anyList(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
+        when(parcelService.filterParcelsByBlueprint(anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
                 Optional.empty(), List.of(),  Optional.of(imageComponent));
 
         assertVersionsMatch(clusterComponents, DEFAULT_CM_VERSION, OLDER_CDH_VERSION);
-        verify(parcelService, times(1)).filterParcelsByBlueprint(anyList(), any(Blueprint.class));
+        verify(parcelService, times(1)).filterParcelsByBlueprint(anySet(), any(Blueprint.class));
     }
 
     @Test
@@ -152,13 +152,13 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         clouderaManagerProductSet.add(clouderaManagerProduct("CDH", "1.9.0"));
 
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(null);
-        when(parcelService.filterParcelsByBlueprint(anyList(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
+        when(parcelService.filterParcelsByBlueprint(anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
                 Optional.empty(), List.of(),  Optional.of(imageComponent));
 
         assertVersionsMatch(clusterComponents, DEFAULT_CM_VERSION, NEWER_CDH_VERSION);
-        verify(parcelService, times(1)).filterParcelsByBlueprint(anyList(), any(Blueprint.class));
+        verify(parcelService, times(1)).filterParcelsByBlueprint(anySet(), any(Blueprint.class));
     }
 
     @Test(expected = BadRequestException.class)
@@ -180,14 +180,14 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         clouderaManagerProductSet.add(clouderaManagerProduct("CDH", "1.5.0"));
 
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
-        when(parcelService.filterParcelsByBlueprint(anyList(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
+        when(parcelService.filterParcelsByBlueprint(anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster, Optional.of(cmRepoComponent),
                 productComponentList, Optional.of(imageComponent));
 
         assertVersionsMatch(clusterComponents, CM_VERSION, SOME_CDH_VERSION);
-        verify(parcelService, times(1)).filterParcelsByBlueprint(anyList(), any(Blueprint.class));
+        verify(parcelService, times(1)).filterParcelsByBlueprint(anySet(), any(Blueprint.class));
     }
 
     private void assertVersionsMatch(Collection<ClusterComponent> clusterComponents, String cmVersion, String cdhVersion) {
