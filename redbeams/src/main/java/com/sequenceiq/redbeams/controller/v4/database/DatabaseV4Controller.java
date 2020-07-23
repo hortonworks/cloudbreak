@@ -8,13 +8,12 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
@@ -41,7 +40,7 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
     private DatabaseConfigService databaseConfigService;
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_DATABASE)
+    @DisableCheckPermissions
     public DatabaseV4Responses list(String environmentCrn) {
         return new DatabaseV4Responses(converterUtil.convertAllAsSet(databaseConfigService.findAll(environmentCrn),
                 DatabaseV4Response.class));

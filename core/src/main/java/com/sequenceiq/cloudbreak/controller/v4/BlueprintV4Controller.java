@@ -16,7 +16,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
@@ -50,7 +49,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     private ConverterUtil converterUtil;
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
+    @DisableCheckPermissions
     public BlueprintV4ViewResponses list(Long workspaceId, Boolean withSdx) {
         Set<BlueprintView> allAvailableViewInWorkspace = blueprintService.getAllAvailableViewInWorkspaceAndFilterBySdxReady(workspaceId, withSdx);
         return new BlueprintV4ViewResponses(converterUtil.convertAllAsSet(allAvailableViewInWorkspace, BlueprintV4ViewResponse.class));
