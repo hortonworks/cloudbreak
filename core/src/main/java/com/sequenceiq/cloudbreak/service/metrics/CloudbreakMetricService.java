@@ -46,4 +46,11 @@ public class CloudbreakMetricService extends AbstractMetricService {
     protected String getMetricPrefix() {
         return METRIC_PREFIX;
     }
+
+    public void recordImageCopyTime(Stack stack, Runnable checkImage) {
+        recordLongTaskTimer(MetricType.STACK_IMAGE_COPY, checkImage,
+                MetricTag.TENANT.name(), stack.getTenant().getName(),
+                MetricTag.CLOUD_PROVIDER.name(), stack.cloudPlatform(),
+                MetricTag.REGION.name(), stack.getRegion());
+    }
 }

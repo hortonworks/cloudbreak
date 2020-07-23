@@ -10,15 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
-import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.flow.core.PayloadConverter;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.PrepareImageResultToStackEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.PayloadConverter;
 
 import reactor.fn.timer.Timer;
 
@@ -44,29 +44,31 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
 
     @Override
     protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-        CheckImageResult checkImageResult = stackCreationService.checkImage(context);
-        switch (checkImageResult.getImageStatus()) {
-            case IN_PROGRESS:
-                repeat(context);
-                break;
-            case CREATE_FINISHED:
-                sendEvent(context);
-                break;
-            case CREATE_FAILED:
-                LOGGER.info("Error during image status check: {}", payload);
-                int faultNum = getFaultNum(variables) + 1;
-                if (faultNum == FAULT_TOLERANCE) {
-                    removeFaultNum(variables);
-                    throw new CloudbreakServiceException("Image copy failed.");
-                } else {
-                    setFaultNum(variables, faultNum);
+        getMetricService().recordImageCopyTime(context.getStack(), () -> {
+            CheckImageResult checkImageResult = stackCreationService.checkImage(context);
+            switch (checkImageResult.getImageStatus()) {
+                case IN_PROGRESS:
                     repeat(context);
-                }
-                break;
-            default:
-                LOGGER.error("Unknown imagestatus: {}", checkImageResult.getImageStatus());
-                break;
-        }
+                    break;
+                case CREATE_FINISHED:
+                    sendEvent(context);
+                    break;
+                case CREATE_FAILED:
+                    LOGGER.info("Error during image status check: {}", payload);
+                    int faultNum = getFaultNum(variables) + 1;
+                    if (faultNum == FAULT_TOLERANCE) {
+                        removeFaultNum(variables);
+                        throw new CloudbreakServiceException("Image copy failed.");
+                    } else {
+                        setFaultNum(variables, faultNum);
+                        repeat(context);
+                    }
+                    break;
+                default:
+                    LOGGER.error("Unknown imagestatus: {}", checkImageResult.getImageStatus());
+                    break;
+            }
+        });
     }
 
     @Override
