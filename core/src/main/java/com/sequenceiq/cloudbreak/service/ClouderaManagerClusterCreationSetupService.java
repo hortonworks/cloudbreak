@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
@@ -188,18 +189,18 @@ public class ClouderaManagerClusterCreationSetupService {
                     .withVersion(defaultCDHInfo.getVersion())
                     .withName(stack.get("repoid").split("-")[0])
                     .withParcel(stack.get(osType));
-            List<ClouderaManagerProduct> products = CollectionUtils.isNotEmpty(defaultCDHInfo.getParcels())
-                    ? defaultCDHInfo.getParcels() : new ArrayList<>();
+            Set<ClouderaManagerProduct> products = CollectionUtils.isNotEmpty(defaultCDHInfo.getParcels())
+                    ? Sets.newHashSet(defaultCDHInfo.getParcels()) : new HashSet<>();
             products.add(cmProduct);
             LOGGER.info("Product list before filter out products by blueprint: {}", products);
             Set<ClouderaManagerProduct> filteredProducts = parcelService.filterParcelsByBlueprint(products, cluster.getBlueprint());
             LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
             return filteredProducts;
         } else {
-            List<ClouderaManagerProduct> products = stackCdhRepoConfig.stream()
+            Set<ClouderaManagerProduct> products = stackCdhRepoConfig.stream()
                     .map(Component::getAttributes)
                     .map(json -> json.getSilent(ClouderaManagerProduct.class))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
             LOGGER.info("Product list before filter out products by blueprint: {}", products);
             Set<ClouderaManagerProduct> filteredProducts = parcelService.filterParcelsByBlueprint(products, cluster.getBlueprint());
             LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
@@ -246,7 +247,7 @@ public class ClouderaManagerClusterCreationSetupService {
         DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(cluster.getWorkspace().getId(), blueprintCdhVersion, osType, cloudPlatform, imageCatalogName);
         Set<ClouderaManagerProduct> filteredProducts = new HashSet<>();
         if (defaultCDHInfo != null) {
-            filteredProducts = parcelService.filterParcelsByBlueprint(defaultCDHInfo.getParcels(), cluster.getBlueprint());
+            filteredProducts = parcelService.filterParcelsByBlueprint(Sets.newHashSet(defaultCDHInfo.getParcels()), cluster.getBlueprint());
             if (CollectionUtils.isNotEmpty(filteredProducts)) {
                 LOGGER.info("Adding default products to CDH cluster with name '{}'.", cluster.getName());
                 return filteredProducts;

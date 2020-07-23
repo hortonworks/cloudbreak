@@ -240,6 +240,7 @@
     {
       "name": "SPARK3_ON_YARN",
       "displayName": "Spark 3",
+      "componentNameInParcel": "spark3",
       "components": [
         {
           "name": "GATEWAY",
@@ -531,6 +532,7 @@
     {
       "name": "FLINK",
       "displayName": "Flink",
+      "componentNameInParcel": "flink",
       "components": [
         {
           "name": "GATEWAY",

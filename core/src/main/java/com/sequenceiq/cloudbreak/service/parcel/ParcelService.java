@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.parcel;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,9 +34,13 @@ public class ParcelService {
     @Inject
     private RestClientFactory restClientFactory;
 
-    public Set<ClouderaManagerProduct> filterParcelsByBlueprint(List<ClouderaManagerProduct> parcels, Blueprint blueprint) {
+    public Set<ClouderaManagerProduct> filterParcelsByBlueprint(Set<ClouderaManagerProduct> parcels, Blueprint blueprint) {
         Set<String> serviceNamesInBlueprint = getAllServiceNameInBlueprint(blueprint);
         Set<ClouderaManagerProduct> ret = new HashSet<>();
+        if (serviceNamesInBlueprint.contains(null)) {
+            // We can not identify one of the service from the blueprint so to stay on the safe side we will add every parcel
+            return parcels;
+        }
         parcels.forEach(parcel -> {
             Manifest manifest = readRepoManifest(parcel.getParcel());
             if (manifest != null) {
@@ -64,6 +67,7 @@ public class ParcelService {
         return manifest.getParcels().stream()
                 .flatMap(it -> it.getComponents().stream())
                 .map(Component::getName)
+                .map(String :: trim)
                 .collect(Collectors.toSet());
     }
 
