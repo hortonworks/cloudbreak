@@ -21,6 +21,8 @@ without-build: download-cbd runtest
 
 build-with-docker: download-cbd docker-build runtest
 
+swagger-check: swagger-compare
+
 download-jar-from-s3:
 	curl ${REPO_URL}/com/sequenceiq/cloudbreak/$(VERSION)/cloudbreak-$(VERSION).jar -o ../core/build/libs/cloudbreak.jar --create-dirs
 	curl ${REPO_URL}/com/sequenceiq/cloudbreak-integration-test/$(VERSION)/cloudbreak-integration-test-$(VERSION).jar -o ../integration-test/build/libs/cloudbreak-integration-test.jar --create-dirs
@@ -60,3 +62,6 @@ cbd-delete:
 
 upload-s3:
 	aws s3 cp ./apidefinitions/new.json s3://cloudbreak-swagger/swagger-$(VERSION).json --acl public-read
+
+swagger-compare:
+	./scripts/swagger-check.sh
