@@ -22,7 +22,8 @@ public interface AuthorizationInfoEndpoint {
     @GET
     @Path("info")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "list of required permissions for APIs", produces = MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "list of required permissions for APIs", produces = MediaType.APPLICATION_JSON,
+            nickname = "authorizationInfo")
     Set<ApiAuthorizationInfo> info();
 
 }
