@@ -10,7 +10,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -38,7 +37,6 @@ import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
-import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -124,9 +122,6 @@ public class CredentialAuthorizationIntegrationTest {
         credentialRepository.save(getAwsCredential(FIRST_CRED_NAME, ACCOUNT_ID, FIRST_USER_CRN));
         credentialRepository.save(getAwsCredential(SECOND_CRED_NAME, ACCOUNT_ID, SECOND_USER_CRN));
 
-        testListFiltering(firstUserClient, FIRST_CRED_NAME);
-        testListFiltering(secondUserClient, SECOND_CRED_NAME);
-
         testUnhappyPaths(firstUserClient, SECOND_CRED_NAME);
         testUnhappyPaths(secondUserClient, FIRST_CRED_NAME);
 
@@ -135,12 +130,6 @@ public class CredentialAuthorizationIntegrationTest {
 
         assertEquals(0, credentialRepository.findAll().stream()
                 .filter(cred -> !cred.isArchived()).collect(Collectors.toList()).size());
-    }
-
-    private void testListFiltering(EnvironmentServiceCrnEndpoints client, String credentialName) {
-        Collection<CredentialResponse> listResponse = client.credentialV1Endpoint().list().getResponses();
-        assertEquals(1, listResponse.size());
-        assertEquals(credentialName, listResponse.iterator().next().getName());
     }
 
     private void testHappyPaths(EnvironmentServiceCrnEndpoints client, String credentialName) {

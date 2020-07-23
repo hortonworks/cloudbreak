@@ -16,7 +16,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
@@ -49,7 +48,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
     private ConverterUtil converterUtil;
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_RECIPE)
+    @DisableCheckPermissions
     public RecipeViewV4Responses list(Long workspaceId) {
         Set<RecipeView> allViewByWorkspaceId = recipeService.findAllViewByWorkspaceId(workspaceId);
         return new RecipeViewV4Responses(converterUtil.convertAllAsSet(allViewByWorkspaceId, RecipeViewV4Response.class));

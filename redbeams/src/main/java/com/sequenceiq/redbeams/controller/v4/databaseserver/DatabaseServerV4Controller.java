@@ -17,7 +17,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
@@ -74,7 +73,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private ConverterUtil converterUtil;
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER)
+    @DisableCheckPermissions
     public DatabaseServerV4Responses list(String environmentCrn) {
         Set<DatabaseServerConfig> all = databaseServerConfigService.findAll(DEFAULT_WORKSPACE, environmentCrn);
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(all, DatabaseServerV4Response.class));

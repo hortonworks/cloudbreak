@@ -7,9 +7,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
-import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.datalake.cm.RangerCloudIdentityService;
-import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Controller;
 
@@ -17,7 +14,8 @@ import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -26,6 +24,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
+import com.sequenceiq.datalake.cm.RangerCloudIdentityService;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
@@ -47,6 +46,7 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 
 @Controller
 @AuthorizationResource
@@ -127,7 +127,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
+    @DisableCheckPermissions
     public List<SdxClusterResponse> list(String envName) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<SdxCluster> sdxClusters = sdxService.listSdx(userCrn, envName);
@@ -137,7 +137,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
+    @DisableCheckPermissions
     public List<SdxClusterResponse> getByEnvCrn(@ValidCrn String envCrn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<SdxCluster> sdxClusters = sdxService.listSdxByEnvCrn(userCrn, envCrn);

@@ -16,7 +16,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
@@ -52,7 +51,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     private ConverterUtil converterUtil;
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
+    @DisableCheckPermissions
     public ImageCatalogV4Responses list(Long workspaceId) {
         Set<ImageCatalog> allByWorkspaceId = imageCatalogService.findAllByWorkspaceId(workspaceId);
         return new ImageCatalogV4Responses(converterUtil.convertAllAsSet(allByWorkspaceId, ImageCatalogV4Response.class));

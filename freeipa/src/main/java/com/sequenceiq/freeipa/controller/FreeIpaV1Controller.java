@@ -15,7 +15,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
-import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -142,7 +142,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    @DisableCheckPermissions
     public List<ListFreeIpaResponse> list() {
         String accountId = crnService.getCurrentAccountId();
         return freeIpaListService.list(accountId);
