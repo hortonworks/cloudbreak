@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 
 import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Tag;
 
@@ -53,6 +54,11 @@ public abstract class AbstractMetricService implements MetricService {
 
     protected boolean gaugeMetric(Metric metric) {
         return metric.getMetricName().contains("state") || metric.getMetricName().contains("leader") || metric.getMetricName().contains("threadpool");
+    }
+
+    protected void recordLongTaskTimer(Metric metric, Runnable func, String... tags) {
+        LongTaskTimer longTaskTimer = Metrics.more().longTaskTimer(getMetricName(metric), tags);
+        longTaskTimer.record(func);
     }
 
     private String getMetricName(Metric metric) {

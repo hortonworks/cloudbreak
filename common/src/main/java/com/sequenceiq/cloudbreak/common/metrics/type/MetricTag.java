@@ -7,5 +7,7 @@ public enum MetricTag {
     CLOUD_PROVIDER,
     TUNNEL_TYPE,
     TARGET_API,
-    TARGET_METHOD
+    TARGET_METHOD,
+    TENANT,
+    REGION;
 }

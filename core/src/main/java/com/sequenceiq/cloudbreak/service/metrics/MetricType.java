@@ -14,6 +14,8 @@ public enum MetricType implements Metric {
     STACK_TERMINATION_SUCCESSFUL("stack.termination.successful"),
     STACK_TERMINATION_FAILED("stack.termination.failed"),
 
+    STACK_IMAGE_COPY("stack.image.copy"),
+
     CLUSTER_CREATION_SUCCESSFUL("cluster.creation.successful"),
     CLUSTER_CREATION_FAILED("cluster.creation.failed"),
     CLUSTER_UPSCALE_SUCCESSFUL("cluster.upscale.successful"),
