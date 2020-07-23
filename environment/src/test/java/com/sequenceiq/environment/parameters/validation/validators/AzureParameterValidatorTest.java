@@ -164,7 +164,8 @@ public class AzureParameterValidatorTest {
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. Resource group name 'myResourceGroup' cannot not be specified if MULTIPLE usage is defined.",
+        assertEquals("1. You specified to use multiple resource groups for your resources, " +
+                        "but then the single resource group name 'myResourceGroup' cannot not be specified.",
                 validationResult.getFormattedErrors());
     }
 
@@ -232,7 +233,7 @@ public class AzureParameterValidatorTest {
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. 'SINGLE' usage pattern for Resource Groups could not be specified, as feature is disabled",
+        assertEquals("1. You specified to use a single resource group for all of your resources, but that feature is currently disabled",
                 validationResult.getFormattedErrors());
     }
 

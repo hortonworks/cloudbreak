@@ -59,7 +59,8 @@ public class AzureParameterValidator implements ParameterValidator {
         if (!singleResourceGroupDeploymentEnabled) {
             if (Objects.nonNull(azureParametersDto.getAzureResourceGroupDto())
                     && USE_SINGLE.equals(azureParametersDto.getAzureResourceGroupDto().getResourceGroupUsagePattern())) {
-                return validationResultBuilder.error("'SINGLE' usage pattern for Resource Groups could not be specified, as feature is disabled").build();
+                return validationResultBuilder.error(
+                        "You specified to use a single resource group for all of your resources, but that feature is currently disabled").build();
             } else {
                 return validationResultBuilder.build();
             }
@@ -72,7 +73,9 @@ public class AzureParameterValidator implements ParameterValidator {
         }
         if (USE_MULTIPLE.equals(azureResourceGroupDto.getResourceGroupUsagePattern())) {
             if (StringUtils.isNotBlank(azureResourceGroupDto.getName())) {
-                return validationResultBuilder.error(String.format("Resource group name '%s' cannot not be specified if MULTIPLE usage is defined.",
+                return validationResultBuilder.error(
+                        String.format("You specified to use multiple resource groups for your resources, " +
+                                        "but then the single resource group name '%s' cannot not be specified.",
                         azureResourceGroupDto.getName())).build();
             } else {
                 return validationResultBuilder.build();
