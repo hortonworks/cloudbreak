@@ -39,8 +39,8 @@ public class DatahubRestResourceAuditEventConverter implements RestResourceAudit
 
     private AuditEventName deletionRest(String resourceEvent, OperationDetails operationDetails) {
         if (StringUtils.isEmpty(resourceEvent)
-                || operationDetails.getResourceName().equals(resourceEvent)
-                || operationDetails.getResourceCrn().equals(resourceEvent)) {
+                || resourceEvent.equals(operationDetails.getResourceName())
+                || resourceEvent.equals(operationDetails.getResourceCrn())) {
             return AuditEventName.DELETE_DATAHUB_CLUSTER;
         } else if ("instance".equals(resourceEvent) || "instances".equals(resourceEvent)) {
             return AuditEventName.INSTANCE_DELETE_DATAHUB_CLUSTER;

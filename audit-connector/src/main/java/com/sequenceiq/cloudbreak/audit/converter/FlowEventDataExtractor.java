@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +23,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 
 @Component
 public class FlowEventDataExtractor implements EventDataExtractor<StructuredFlowEvent> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowEventDataExtractor.class);
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -59,6 +63,7 @@ public class FlowEventDataExtractor implements EventDataExtractor<StructuredFlow
             eventName = flowResourceAuditEventConverter.auditEventName(structuredEvent);
         }
         if (eventName != null) {
+            LOGGER.info("Flow event name: {}", eventName);
             return eventName;
         }
         String flowState = flow.getFlowState();
