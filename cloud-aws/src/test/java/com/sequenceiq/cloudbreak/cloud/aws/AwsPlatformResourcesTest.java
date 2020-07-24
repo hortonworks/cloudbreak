@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -11,6 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
@@ -36,7 +39,12 @@ import com.amazonaws.services.ec2.model.AvailabilityZone;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.amazonaws.services.ec2.model.DescribeRegionsResult;
+import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
+import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
+import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Region;
+import com.amazonaws.services.ec2.model.Subnet;
+import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesRequest;
@@ -56,8 +64,9 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
-import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 
@@ -67,6 +76,10 @@ public class AwsPlatformResourcesTest {
     private static final String AZ_NAME = "eu-central-1a";
 
     private static final String REGION_NAME = "eu-central-1";
+
+    private static final String NOT_ENABLED_REGION_NAME = "not-enabled-region";
+
+    private static final String NOT_ENABLED_AZ_NAME = "not-enabled-az";
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -93,6 +106,9 @@ public class AwsPlatformResourcesTest {
     private AmazonEC2Client amazonEC2Client;
 
     @Mock
+    private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
+
+    @Mock
     private DescribeRegionsResult describeRegionsResult;
 
     @Mock
@@ -114,15 +130,17 @@ public class AwsPlatformResourcesTest {
 
         when(awsDefaultZoneProvider.getDefaultZone(any(CloudCredential.class))).thenReturn(REGION_NAME);
         when(awsClient.createAccess(any(CloudCredential.class))).thenReturn(amazonEC2Client);
+        when(awsClient.createAccess(any(AwsCredentialView.class), any())).thenReturn(amazonEC2Client);
         when(amazonEC2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(describeRegionsResult);
         when(describeRegionsResult.getRegions()).thenReturn(Collections.singletonList(region));
         when(awsAvailabilityZoneProvider.describeAvailabilityZones(any(), any(), any(), any()))
                 .thenReturn(List.of(availabilityZone));
 
         ReflectionTestUtils.setField(underTest, "vmTypes",
-                Collections.singletonMap(region(REGION_NAME), Collections.singleton(VmType.vmType("m5.2xlarge"))));
+                Collections.singletonMap(region(REGION_NAME), Collections.singleton(vmType("m5.2xlarge"))));
         ReflectionTestUtils.setField(underTest, "fetchMaxItems", 500);
-        ReflectionTestUtils.setField(underTest, "deniedAZs", List.of("us-east-1e"));
+        ReflectionTestUtils.setField(underTest, "enabledRegions", Set.of(region(REGION_NAME)));
+        ReflectionTestUtils.setField(underTest, "enabledAvailabilityZones", Set.of(availabilityZone(AZ_NAME)));
     }
 
     @Test
@@ -308,5 +326,65 @@ public class AwsPlatformResourcesTest {
                 new CloudNoSqlTable("b"),
                 new CloudNoSqlTable("c"),
                 new CloudNoSqlTable("d")));
+    }
+
+    @Test
+    public void networksSubnetsShouldBeFilteredByEnabledRegions() {
+        DescribeRouteTablesResult routeTables = new DescribeRouteTablesResult();
+        when(amazonEC2Client.describeRouteTables()).thenReturn(routeTables);
+        DescribeVpcsResult vpcs = new DescribeVpcsResult().withVpcs(new Vpc());
+        when(amazonEC2Client.describeVpcs(any())).thenReturn(vpcs);
+        DescribeSubnetsResult subnets = new DescribeSubnetsResult();
+        String availabilityZone = "not-enabled-az";
+        subnets.setSubnets(List.of(new Subnet().withAvailabilityZone(availabilityZone).withMapPublicIpOnLaunch(true)));
+        when(amazonEC2Client.describeSubnets(any())).thenReturn(subnets);
+        CloudNetworks cloudNetworks = underTest.networks(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Map.of());
+
+        assertThat(cloudNetworks.getCloudNetworkResponses().get(REGION_NAME))
+                .allMatch(cloudNetwork -> cloudNetwork.getSubnets().isEmpty());
+    }
+
+    @Test
+    public void regionsShouldBeFilteredByEnabledRegionsAndEnabledAvailabilityZones() {
+        setUpRegions();
+
+        CloudRegions cloudRegions = underTest.regions(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Map.of(), true);
+        assertThat(cloudRegions.getCloudRegions())
+                .containsKey(region(REGION_NAME))
+                .doesNotContainKey(region(NOT_ENABLED_REGION_NAME));
+        assertThat(cloudRegions.getCloudRegions().get(region(REGION_NAME)))
+                .contains(availabilityZone(AZ_NAME))
+                .doesNotContain(availabilityZone(NOT_ENABLED_AZ_NAME));
+    }
+
+    private void setUpRegions() {
+        DescribeRegionsResult regions = new DescribeRegionsResult().withRegions(
+                new Region().withRegionName(NOT_ENABLED_REGION_NAME),
+                new Region().withRegionName(REGION_NAME));
+        when(amazonEC2Client.describeRegions(any())).thenReturn(regions);
+        when(awsDefaultZoneProvider.getDefaultZone(any(CloudCredential.class))).thenReturn(REGION_NAME);
+        when(awsAvailabilityZoneProvider.describeAvailabilityZones(any(), any(), any(), any())).thenReturn(List.of(
+                new AvailabilityZone().withZoneName(NOT_ENABLED_AZ_NAME),
+                new AvailabilityZone().withZoneName(AZ_NAME)));
+    }
+
+    @Test
+    public void virtualMachinesShouldBeFilteredByEnabledAvailabilityZones() {
+        setUpRegions();
+        ReflectionTestUtils.setField(underTest, "vmTypes", Map.of(
+                region(REGION_NAME), Set.of(vmType("vm1")),
+                region(NOT_ENABLED_REGION_NAME), Set.of(vmType("vm2"))));
+        ReflectionTestUtils.setField(underTest, "defaultVmTypes", Map.of(
+                region(REGION_NAME), vmType("vm1"),
+                region(NOT_ENABLED_REGION_NAME), vmType("vm2")));
+        ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", List.of());
+
+        CloudVmTypes cloudVmTypes = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Map.of());
+        assertThat(cloudVmTypes.getCloudVmResponses())
+                .containsKey(AZ_NAME)
+                .doesNotContainKey(NOT_ENABLED_AZ_NAME);
+        assertThat(cloudVmTypes.getDefaultCloudVmResponses())
+                .containsKey(AZ_NAME)
+                .doesNotContainKey(NOT_ENABLED_AZ_NAME);
     }
 }

@@ -110,6 +110,8 @@ import com.sequenceiq.cloudbreak.cloud.model.PropertySpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
+import com.sequenceiq.cloudbreak.cloud.model.RegionSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.RegionsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
@@ -140,6 +142,8 @@ public class AwsPlatformResources implements PlatformResources {
 
     private static final String OPEN_CIDR_BLOCK = "0.0.0.0/0";
 
+    private static final String ENABLED_AVAILABILITY_ZONES_FILE = "enabled-availability-zones";
+
     @Inject
     private AwsClient awsClient;
 
@@ -163,9 +167,6 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Value("${cb.aws.distrox.enabled.instance.types:}")
     private List<String> enabledDistroxInstanceTypes;
-
-    @Value("${cb.aws.denied.azs: us-east-1e}")
-    private List<String> deniedAZs;
 
     @Value("${cb.aws.fetch.max.items:500}")
     private Integer fetchMaxItems;
@@ -191,14 +192,16 @@ public class AwsPlatformResources implements PlatformResources {
 
     private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
 
+    private Set<Region> enabledRegions;
+
+    private Set<AvailabilityZone> enabledAvailabilityZones;
+
     @PostConstruct
     public void init() {
+        readEnabledRegionsAndAvailabilityZones();
         regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-coordinates"));
         regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
         readVmTypes();
-        if (deniedAZs == null) {
-            deniedAZs = new ArrayList<>();
-        }
     }
 
     private String getDefinition(String parameter, String type) {
@@ -229,6 +232,10 @@ public class AwsPlatformResources implements PlatformResources {
             }
             ZoneVmSpecifications zoneVmSpecifications = JsonUtil.readValue(zoneVms, ZoneVmSpecifications.class);
             for (ZoneVmSpecification zvs : zoneVmSpecifications.getItems()) {
+                Region region = region(zvs.getZone());
+                if (!enabledRegions.contains(region)) {
+                    continue;
+                }
                 Set<VmType> regionVmTypes = new HashSet<>();
                 for (String vmTypeString : zvs.getVmTypes()) {
                     VmType vmType = vmTypeMap.get(vmTypeString);
@@ -236,18 +243,18 @@ public class AwsPlatformResources implements PlatformResources {
                         regionVmTypes.add(vmType);
                     }
                 }
-                vmTypes.put(region(zvs.getZone()), regionVmTypes);
+                vmTypes.put(region, regionVmTypes);
                 Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
                         .filter(enabledInstanceTypeFilter)
-                        .ifPresent(vmType -> defaultVmTypes.put(region(zvs.getZone()), vmType));
+                        .ifPresent(vmType -> defaultVmTypes.put(region, vmType));
                 if (restrictInstanceTypes) {
                     Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
                             .filter(enabledDistroxInstanceTypeFilter)
-                            .ifPresent(vmType -> defaultDistroxVmTypes.put(region(zvs.getZone()), vmType));
+                            .ifPresent(vmType -> defaultDistroxVmTypes.put(region, vmType));
                 } else {
                     Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
                             .filter(enabledInstanceTypeFilter)
-                            .ifPresent(vmType -> defaultDistroxVmTypes.put(region(zvs.getZone()), vmType));
+                            .ifPresent(vmType -> defaultDistroxVmTypes.put(region, vmType));
                 }
             }
         } catch (IOException e) {
@@ -285,7 +292,11 @@ public class AwsPlatformResources implements PlatformResources {
         try {
             RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
             for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
-                regionDisplayNames.put(region(regionCoordinateSpecification.getName()),
+                Region region = region(regionCoordinateSpecification.getName());
+                if (!enabledRegions.contains(region)) {
+                    continue;
+                }
+                regionDisplayNames.put(region,
                         displayName(regionCoordinateSpecification.getDisplayName()));
             }
         } catch (IOException ignored) {
@@ -299,24 +310,47 @@ public class AwsPlatformResources implements PlatformResources {
         try {
             RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
             for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
-                Optional<Entry<Region, DisplayName>> region = regionDisplayNames
+                Region region = region(regionCoordinateSpecification.getName());
+                if (!enabledRegions.contains(region)) {
+                    continue;
+                }
+                Optional<Entry<Region, DisplayName>> regionEntry = regionDisplayNames
                         .entrySet()
                         .stream()
                         .filter(e -> e.getKey().getRegionName().equalsIgnoreCase(regionCoordinateSpecification.getName()))
                         .findFirst();
 
-                regionCoordinates.put(region(regionCoordinateSpecification.getName()),
+                regionCoordinates.put(region,
                         coordinate(
                                 regionCoordinateSpecification.getLongitude(),
                                 regionCoordinateSpecification.getLatitude(),
                                 regionCoordinateSpecification.getDisplayName(),
-                                region.isPresent() ? region.get().getKey().value() : regionCoordinateSpecification.getDisplayName(),
+                                regionEntry.isPresent() ? regionEntry.get().getKey().value() : regionCoordinateSpecification.getDisplayName(),
                                 regionCoordinateSpecification.isK8sSupported()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;
         }
         return regionCoordinates;
+    }
+
+    private void readEnabledRegionsAndAvailabilityZones() {
+        try {
+            String fileName = resourceDefinition(ENABLED_AVAILABILITY_ZONES_FILE);
+            RegionsSpecification regionCoordinateSpecifications = JsonUtil.readValue(fileName, RegionsSpecification.class);
+            enabledRegions = regionCoordinateSpecifications.getItems().stream()
+                    .map(RegionSpecification::getName)
+                    .map(Region::region)
+                    .collect(Collectors.toSet());
+            enabledAvailabilityZones = regionCoordinateSpecifications.getItems().stream()
+                    .flatMap(region -> region.getZones().stream())
+                    .map(AvailabilityZone::availabilityZone)
+                    .collect(Collectors.toSet());
+        } catch (IOException e) {
+            LOGGER.error("Failed to read enabled AWS regions and availability zones from file.", e);
+            enabledRegions = new HashSet<>();
+            enabledAvailabilityZones = new HashSet<>();
+        }
     }
 
     @Override
@@ -381,18 +415,16 @@ public class AwsPlatformResources implements PlatformResources {
     private List<Subnet> getSubnets(AmazonEC2Client ec2Client, Vpc vpc) {
         List<Subnet> awsSubnets = new ArrayList<>();
         DescribeSubnetsResult describeSubnetsResult = null;
-        boolean first = true;
-        while (first || !isNullOrEmpty(describeSubnetsResult.getNextToken())) {
-            LOGGER.debug("Describing subnets for VPC {}{}", vpc.getVpcId(), first ? "" : " (continuation)");
-            first = false;
+        do {
+            LOGGER.debug("Describing subnets for VPC {}{}", vpc.getVpcId(), describeSubnetsResult == null ? "" : " (continuation)");
             DescribeSubnetsRequest describeSubnetsRequest = createSubnetsDescribeRequest(vpc, describeSubnetsResult == null
                     ? null
                     : describeSubnetsResult.getNextToken());
             describeSubnetsResult = ec2Client.describeSubnets(describeSubnetsRequest);
-            awsSubnets.addAll(describeSubnetsResult.getSubnets());
-            awsSubnets = awsSubnets.stream().filter(subnet -> !deniedAZs.contains(subnet.getAvailabilityZone()))
-                    .collect(Collectors.toList());
-        }
+            describeSubnetsResult.getSubnets().stream()
+                    .filter(subnet -> enabledAvailabilityZones.contains(availabilityZone(subnet.getAvailabilityZone())))
+                    .forEach(awsSubnets::add);
+        } while (!isNullOrEmpty(describeSubnetsResult.getNextToken()));
         return awsSubnets;
     }
 
@@ -529,6 +561,9 @@ public class AwsPlatformResources implements PlatformResources {
         String defaultRegion = awsDefaultZoneProvider.getDefaultZone(cloudCredential);
 
         for (com.amazonaws.services.ec2.model.Region awsRegion : describeRegionsResult.getRegions()) {
+            if (!enabledRegions.contains(region(awsRegion.getRegionName()))) {
+                continue;
+            }
             if (region == null || Strings.isNullOrEmpty(region.value()) || awsRegion.getRegionName().equals(region.value())) {
                 try {
                     fetchAZsIfNeeded(availabilityZonesNeeded, ec2Client, regionListMap, awsRegion, cloudCredential);
@@ -553,11 +588,11 @@ public class AwsPlatformResources implements PlatformResources {
             LOGGER.debug("Describing AZs in region {}", awsRegion.getRegionName());
             List<com.amazonaws.services.ec2.model.AvailabilityZone> availabilityZones
                     = awsAvailabilityZoneProvider.describeAvailabilityZones(cloudCredential, describeAvailabilityZonesRequest, ec2Client, awsRegion);
-            for (com.amazonaws.services.ec2.model.AvailabilityZone availabilityZone : availabilityZones) {
-                if (!deniedAZs.contains(availabilityZone.getZoneName())) {
-                    collectedAZs.add(availabilityZone(availabilityZone.getZoneName()));
-                }
-            }
+            availabilityZones.stream()
+                    .map(com.amazonaws.services.ec2.model.AvailabilityZone::getZoneName)
+                    .map(AvailabilityZone::availabilityZone)
+                    .filter(enabledAvailabilityZones::contains)
+                    .forEach(collectedAZs::add);
         }
         regionListMap.put(region(awsRegion.getRegionName()), collectedAZs);
     }
