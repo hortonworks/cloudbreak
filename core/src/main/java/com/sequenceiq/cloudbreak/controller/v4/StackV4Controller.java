@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -243,11 +244,20 @@ public class StackV4Controller extends NotificationController implements StackV4
         return stackOperations.updateSalt(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
     }
 
+    /**
+     * @deprecated Use updatePillarConfigurationByCrn instead
+     */
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public FlowIdentifier updatePillarConfigurationByName(Long workspaceId, String name,
-            @AccountId String accountId) {
-        return stackOperations.updatePillarConfiguration(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+    @Deprecated
+    public FlowIdentifier updatePillarConfigurationByName(Long workspaceId, String name) {
+        throw new BadRequestException("Updating pillar config information by name is deprecated.  Please use update pillar config by CRN.");
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public FlowIdentifier updatePillarConfigurationByCrn(Long workspaceId, @TenantAwareParam String crn) {
+        return stackOperations.updatePillarConfiguration(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
     }
 
     @Override

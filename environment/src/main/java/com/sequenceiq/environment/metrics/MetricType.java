@@ -14,7 +14,10 @@ public enum MetricType implements Metric {
 
     ENV_DELETION_FINISHED("environment.deletion.finished"),
     ENV_DELETION_FAILED("environment.deletion.failed"),
-    ENV_CLUSTERS_DELETION_FAILED("environment.clusters.deletion.failed");
+    ENV_CLUSTERS_DELETION_FAILED("environment.clusters.deletion.failed"),
+
+    ENV_STACK_CONFIG_UPDATE_FINISHED("environment.stack.config.update.finished"),
+    ENV_STACK_CONFIG_UPDATE_FAILED("environment.stack.config.update.failed");
 
     private final String metricName;
 

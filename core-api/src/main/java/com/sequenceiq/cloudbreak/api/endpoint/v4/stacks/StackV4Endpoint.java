@@ -292,12 +292,21 @@ public interface StackV4Endpoint {
     FlowIdentifier updateSaltByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @AccountId @QueryParam("accountId") String accountId);
 
+    /**
+     * @deprecated Use updatePillarConfigurationByCrn instead
+     */
     @PUT
     @Path("{name}/pillar_config_update")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UPDATE_PILLAR_CONFIG, nickname = "updatePillarConfigurationByName")
-    FlowIdentifier updatePillarConfigurationByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @AccountId @QueryParam("accountId") String accountId);
+    @Deprecated
+    FlowIdentifier updatePillarConfigurationByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @PUT
+    @Path("crn/{crn}/pillar_config_update")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UPDATE_PILLAR_CONFIG, nickname = "updatePillarConfigurationByCrn")
+    FlowIdentifier updatePillarConfigurationByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
 
     @POST
     @Path("{name}/database_backup")

@@ -21,6 +21,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
@@ -52,6 +53,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentCreationService
 import com.sequenceiq.environment.environment.service.EnvironmentDeletionService;
 import com.sequenceiq.environment.environment.service.EnvironmentModificationService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.EnvironmentStackConfigUpdateService;
 import com.sequenceiq.environment.environment.service.EnvironmentStartService;
 import com.sequenceiq.environment.environment.service.EnvironmentStopService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
@@ -83,6 +85,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final CredentialToCredentialV1ResponseConverter credentialConverter;
 
+    private final EnvironmentStackConfigUpdateService stackConfigUpdateService;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
@@ -93,7 +97,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentStartService environmentStartService,
             EnvironmentStopService environmentStopService,
             CredentialService credentialService,
-            CredentialToCredentialV1ResponseConverter credentialConverter) {
+            CredentialToCredentialV1ResponseConverter credentialConverter,
+            EnvironmentStackConfigUpdateService stackConfigUpdateService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -104,6 +109,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentStopService = environmentStopService;
         this.credentialService = credentialService;
         this.credentialConverter = credentialConverter;
+        this.stackConfigUpdateService = stackConfigUpdateService;
     }
 
     @Override
@@ -304,5 +310,11 @@ public class EnvironmentController implements EnvironmentEndpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByNameForAccountId(environmentRequest.getCredentialName(), accountId, ENVIRONMENT);
         return environmentService.getCreateEnvironmentForCli(environmentRequest, credential.getCloudPlatform());
+    }
+
+    @Override
+    @InternalOnly
+    public void updateConfigsInEnvironmentByCrn(@ResourceCrn @TenantAwareParam String crn) {
+        stackConfigUpdateService.updateAllStackConfigsByCrn(crn);
     }
 }

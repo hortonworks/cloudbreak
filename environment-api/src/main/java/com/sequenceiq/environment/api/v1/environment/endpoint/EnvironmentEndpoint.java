@@ -205,4 +205,11 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.CLI_COMMAND, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "getCreateEnvironmentForCli")
     Object getCreateEnvironmentForCli(@NotNull @Valid EnvironmentRequest environmentRequest);
+
+    @POST
+    @Path("/crn/{crn}/update_config")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.UPDATE_CONFIG_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+        nickname = "updateConfigsInEnvironmentByCrnV1")
+    void updateConfigsInEnvironmentByCrn(@PathParam("crn") String crn);
 }
