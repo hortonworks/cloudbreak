@@ -27,6 +27,8 @@ build-with-docker: download-cbd docker-build runtest
 
 bring-up-schema: download-cbd create-image create-cloudbreak-context schema-migration
 
+swagger-check: swagger-compare
+
 download-jar-from-s3:
 	./scripts/download-artifacts.sh
 
@@ -79,6 +81,9 @@ config-ums:
 
 schema-migration:
 	./scripts/schema-migration.sh
+
+swagger-compare:
+	./scripts/swagger-check.sh
 
 upload-s3:
 	aws s3 cp ./apidefinitions/cb.json s3://cloudbreak-swagger/swagger-$(VERSION).json --acl public-read
