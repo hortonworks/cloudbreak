@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.audit.AuditClient;
 
 @Configuration()
 @ComponentScan(basePackages = {
+        "com.sequenceiq.cloudbreak.structuredevent.conf",
         "com.sequenceiq.cloudbreak.audit.config",
         "com.sequenceiq.cloudbreak.audit.converter",
         "com.sequenceiq.cloudbreak.audit.model",
