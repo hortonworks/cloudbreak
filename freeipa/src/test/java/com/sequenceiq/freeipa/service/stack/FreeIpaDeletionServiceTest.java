@@ -93,7 +93,7 @@ class FreeIpaDeletionServiceTest {
         when(stackService.findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID))).thenReturn(Collections.singletonList(stack));
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(STACK_ID)).thenReturn(List.of());
 
-        underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID);
+        underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID, false);
 
         verify(stackService, times(1)).findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID));
         ArgumentCaptor<TerminationEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(TerminationEvent.class);
@@ -113,7 +113,7 @@ class FreeIpaDeletionServiceTest {
         stack.getStackStatus().setStatus(Status.DELETE_COMPLETED);
         when(stackService.findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID))).thenReturn(Collections.singletonList(stack));
 
-        underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID);
+        underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID, false);
 
         verify(flowManager, never()).notify(anyString(), any(Acceptable.class));
         verify(flowCancelService, never()).cancelRunningFlows(stack.getId());
@@ -128,7 +128,7 @@ class FreeIpaDeletionServiceTest {
         flowLog.setCurrentState(StackTerminationState.INIT_STATE.name());
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(stack.getId())).thenReturn(List.of(flowLog));
 
-        underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID);
+        underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID, false);
 
         verify(flowManager, never()).notify(anyString(), any(Acceptable.class));
         verify(flowCancelService, never()).cancelRunningFlows(stack.getId());
@@ -139,7 +139,7 @@ class FreeIpaDeletionServiceTest {
         when(stackService.findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID))).thenReturn(Collections.singletonList(stack));
         when(childEnvironmentService.findChildEnvironments(stack, ACCOUNT_ID)).thenReturn(Collections.singletonList(new ChildEnvironment()));
 
-        assertThrows(BadRequestException.class, () -> underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID));
+        assertThrows(BadRequestException.class, () -> underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID, false));
         verify(stackService, times(1)).findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID));
         verify(childEnvironmentService, times(1)).findChildEnvironments(stack, ACCOUNT_ID);
     }

@@ -290,7 +290,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     @Override
     public void delete(TestContext testContext, ListFreeIpaResponse entity, FreeIpaClient client) {
-        client.getFreeIpaClient().getFreeIpaV1Endpoint().delete(entity.getEnvironmentCrn());
+        client.getFreeIpaClient().getFreeIpaV1Endpoint().delete(entity.getEnvironmentCrn(), false);
     }
 
     @Override

@@ -71,7 +71,7 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
                 if (Objects.nonNull(environment.getParentEnvironment())) {
                     detachChildEnvironmentFromFreeIpa(environment);
                 } else {
-                    deleteFreeIpa(environment);
+                    deleteFreeIpa(environment, environmentDeletionDto.isForceDelete());
                 }
             }
             eventSender().sendEvent(getNextStepObject(environmentDeletionDto), environmentDtoEvent.getHeaders());
@@ -134,8 +134,8 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
         return Objects.equals(sibling.getNetwork().getNetworkCidr(), environment.getNetwork().getNetworkCidr());
     }
 
-    private void deleteFreeIpa(Environment environment) {
-        freeIpaService.delete(environment.getResourceCrn());
+    private void deleteFreeIpa(Environment environment, boolean forced) {
+        freeIpaService.delete(environment.getResourceCrn(), forced);
         Pair<PollingResult, Exception> result = freeIpaPollingService.pollWithTimeout(
                 new FreeIpaDeletionRetrievalTask(freeIpaService),
                 new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn()),

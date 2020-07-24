@@ -55,9 +55,9 @@ public class FreeIpaService {
         }
     }
 
-    public void delete(String environmentCrn) {
+    public void delete(String environmentCrn, boolean forced) {
         try {
-            freeIpaV1Endpoint.delete(environmentCrn);
+            freeIpaV1Endpoint.delete(environmentCrn, forced);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to delete FreeIpa cluster for environment '%s' due to: '%s'", environmentCrn, errorMessage), e);
