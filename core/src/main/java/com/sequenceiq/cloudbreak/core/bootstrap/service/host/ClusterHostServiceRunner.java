@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -109,8 +108,6 @@ public class ClusterHostServiceRunner {
     private static final int CM_HTTP_PORT = 7180;
 
     private static final int CM_HTTPS_PORT = 7183;
-
-    private static final Map<Long, ClouderaManagerRepo> clusterComponentConfigProviderMap = new ConcurrentHashMap();
 
     @Value("${cb.cm.heartbeat.interval}")
     private String cmHeartbeatInterval;
@@ -266,6 +263,7 @@ public class ClusterHostServiceRunner {
     private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs,
             Set<Node> nodes)
             throws IOException, CloudbreakOrchestratorException {
+        ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         saveCustomNameservers(stack, kerberosConfig, servicePillar);
@@ -280,12 +278,12 @@ public class ClusterHostServiceRunner {
         Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
-        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, virtualGroupRequest, connector, kerberosConfig, serviceLocations);
+        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, virtualGroupRequest, connector, kerberosConfig, serviceLocations, clouderaManagerRepo);
 
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
         if (blueprintService.isClouderaManagerTemplate(cluster.getBlueprint())) {
-            addClouderaManagerConfig(stack, cluster, servicePillar);
+            addClouderaManagerConfig(stack, cluster, servicePillar, clouderaManagerRepo);
         }
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
@@ -325,7 +323,7 @@ public class ClusterHostServiceRunner {
                 && !kerberosDetailService.isClusterManagerManagedKrb5Config(kerberosConfig);
     }
 
-    private void addClouderaManagerConfig(Stack stack, Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
+    private void addClouderaManagerConfig(Stack stack, Cluster cluster, Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo)
             throws CloudbreakOrchestratorFailedException {
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
         telemetryDecorator.decoratePillar(servicePillar, stack, telemetry);
@@ -337,7 +335,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
         decoratePillarWithClouderaManagerCsds(cluster, servicePillar);
-        decoratePillarWithClouderaManagerSettings(servicePillar, cluster.getId());
+        decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo);
     }
 
     private void saveSssdAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
@@ -451,8 +449,7 @@ public class ClusterHostServiceRunner {
                         singletonMap("csd-urls", csdUrls))));
     }
 
-    private void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar, Long clusterId) {
-        ClouderaManagerRepo clouderaManagerRepo = getClouderaManagerRepo(clusterId);
+    private void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo) {
         boolean deterministicUidGid = isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_1);
         servicePillar.put("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
                 singletonMap("cloudera-manager", singletonMap("settings", Map.of(
@@ -499,11 +496,15 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar,
-            VirtualGroupRequest virtualGroupRequest, ClusterPreCreationApi connector, KerberosConfig kerberosConfig, Map<String, List<String>> serviceLocations)
-            throws IOException {
-        final ClouderaManagerRepo clouderaManagerRepo = getClouderaManagerRepo(cluster.getId());
-        final boolean enableKnoxRangerAuthorizer = isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
+    @SuppressWarnings("ParameterNumber")
+    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster,
+        Map<String, SaltPillarProperties> servicePillar,
+        VirtualGroupRequest virtualGroupRequest,
+        ClusterPreCreationApi connector, KerberosConfig kerberosConfig,
+        Map<String, List<String>> serviceLocations,
+        ClouderaManagerRepo clouderaManagerRepo) throws IOException {
+        final boolean enableKnoxRangerAuthorizer = isVersionNewerOrEqualThanLimited(
+            clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
 
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
@@ -685,9 +686,5 @@ public class ClusterHostServiceRunner {
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-    }
-
-    private ClouderaManagerRepo getClouderaManagerRepo(final Long clusterId) {
-       return clusterComponentConfigProviderMap.computeIfAbsent(clusterId, k -> clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId));
     }
 }
