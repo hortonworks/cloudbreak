@@ -177,9 +177,9 @@ class FreeIpaV1ControllerTest {
 
     @Test
     void delete() {
-        underTest.delete(ENVIRONMENT_CRN);
+        underTest.delete(ENVIRONMENT_CRN, true);
 
-        verify(deletionService, times(1)).delete(ENVIRONMENT_CRN, ACCOUNT_ID);
+        verify(deletionService, times(1)).delete(ENVIRONMENT_CRN, ACCOUNT_ID, true);
     }
 
     @Test

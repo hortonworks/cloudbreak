@@ -144,7 +144,7 @@ class FreeIpaDeletionHandlerTest {
 
         victim.accept(new Event<>(environmentDeletionDto));
 
-        verify(freeIpaService).delete(ENVIRONMENT_CRN);
+        verify(freeIpaService).delete(ENVIRONMENT_CRN, true);
         verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
         verifyNoMoreInteractions(freeIpaService);
     }
@@ -163,7 +163,7 @@ class FreeIpaDeletionHandlerTest {
 
         victim.accept(new Event<>(environmentDeletionDto));
 
-        verify(freeIpaService, never()).delete(ENVIRONMENT_CRN);
+        verify(freeIpaService, never()).delete(ENVIRONMENT_CRN, true);
         verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
     }
 

@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -104,7 +105,7 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.DELETE_BY_ENVID, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "deleteFreeIpaByEnvironmentV1")
-    void delete(@QueryParam("environment") @NotEmpty String environmentCrn);
+    void delete(@QueryParam("environment") @NotEmpty String environmentCrn, @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @POST
     @Path("cleanup")

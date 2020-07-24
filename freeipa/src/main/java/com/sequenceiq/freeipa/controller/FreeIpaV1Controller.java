@@ -176,9 +176,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_ENVIRONMENT)
-    public void delete(@ResourceCrn String environmentCrn) {
+    public void delete(@ResourceCrn String environmentCrn, boolean forced) {
         String accountId = crnService.getCurrentAccountId();
-        freeIpaDeletionService.delete(environmentCrn, accountId);
+        freeIpaDeletionService.delete(environmentCrn, accountId, forced);
     }
 
     @Override

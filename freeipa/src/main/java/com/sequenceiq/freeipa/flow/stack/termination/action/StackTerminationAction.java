@@ -23,6 +23,11 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Termi
     }
 
     @Override
+    protected void prepareExecution(TerminationEvent payload, Map<Object, Object> variables) {
+        variables.put("FORCEDTERMINATION", payload.getForced());
+    }
+
+    @Override
     protected void doExecute(StackTerminationContext context, TerminationEvent payload, Map<Object, Object> variables) {
         stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DELETE_IN_PROGRESS, "Terminating FreeIPA and its infrastructure.");
         TerminateStackRequest<?> terminateRequest = createRequest(context);
