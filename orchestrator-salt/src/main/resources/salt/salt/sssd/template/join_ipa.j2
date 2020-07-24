@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
+ipa-client-install --unattended --uninstall
+
+set -e
+ipa-client-install \
+  --realm={{ pillar['sssd-ipa']['realm'] }} \
+  --domain={{ pillar['sssd-ipa']['domain'] }} \
+  --mkhomedir \
+  --principal={{ pillar['sssd-ipa']['principal'] }} \
+  {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
+    --no-sshd \
+    --no-ssh \
+  {%- endif %}
+  --password "$PW" \
+  --unattended \
+  --force-join \
+  --ssh-trust-dns \
+  --no-ntp
+
+echo "$PW" | kinit {{ pillar['sssd-ipa']['principal'] }}
+
+ipa env
+
+set +e

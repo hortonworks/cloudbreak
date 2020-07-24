@@ -1,5 +1,11 @@
 #!/bin/bash
 
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
 set -e
 
 # auth to remove the Service Account

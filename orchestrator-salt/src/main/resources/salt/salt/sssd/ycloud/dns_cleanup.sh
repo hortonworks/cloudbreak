@@ -1,5 +1,11 @@
 #!/bin/bash
 
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
 echo {{salt['pillar.get']('sssd-ipa:password')}} | kinit {{salt['pillar.get']('sssd-ipa:principal')}}
 
 set -x

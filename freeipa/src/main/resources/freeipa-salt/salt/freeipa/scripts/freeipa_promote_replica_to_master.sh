@@ -2,6 +2,12 @@
 
 set -e
 
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
 FQDN=$(hostname -f)
 
 echo "$FPW" | kinit $ADMIN_USER
@@ -12,6 +18,5 @@ if [[ "$CURRENT_CA_MASTER" != "$FQDN" ]]; then
   ccho "The current CA renewal master was changed to $FQDN"
 fi
 ipa-crlgen-manage enable
-kdestroy
 
 set +e

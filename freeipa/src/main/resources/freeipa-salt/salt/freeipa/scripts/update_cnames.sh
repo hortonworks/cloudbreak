@@ -2,6 +2,12 @@
 
 set -e
 
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
 FQDN=$(hostname -f)
 
 getCertRequestIdFromDir() {
@@ -131,7 +137,5 @@ addService HTTP/kerberos.$DOMAIN
 addHostToService HTTP/kerberos.$DOMAIN $FQDN
 HTTP_CERT_REQUEST_ID=`getCertRequestIdFromDir /etc/httpd/alias Server-Cert`
 setDomainsForCert $HTTP_CERT_REQUEST_ID "freeipa.$DOMAIN kdc.$DOMAIN kerberos.$DOMAIN"
-
-kdestroy
 
 set +e

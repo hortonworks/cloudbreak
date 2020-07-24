@@ -4,6 +4,12 @@
 
 set -ex
 
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
 HOSTNAME={{ manager_server_hostname }}
 FQDN={{ manager_server_fqdn }}
 CM_KEYTAB_FILE={{ cm_keytab.path }}
@@ -37,7 +43,5 @@ echo "# Auto-tls related configurations" >> /etc/cloudera-scm-server/cm.settings
 cat $CERTMANAGER_DIR/auto-tls.init.txt >> /etc/cloudera-scm-server/cm.settings
 
 echo "Auto-TLS initialization completed successfully."
-
-kdestroy
 
 echo $(date +%Y-%m-%d:%H:%M:%S) >> $CERTMANAGER_DIR/autotls_setup_success

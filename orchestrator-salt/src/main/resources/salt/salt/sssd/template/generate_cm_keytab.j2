@@ -2,6 +2,12 @@
 
 set -e
 
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
 # auth to generate the keytab
 echo "$password" | kinit {{ ipa.principal }}
 
@@ -29,6 +35,3 @@ chown cloudera-scm:cloudera-scm /etc/cloudera-scm-server/cmf.principal
 sed -i "s/ipa env host/ipa env server/g" /opt/cloudera/cm/bin/gen_credentials_ipa.sh
 grep "MAX_RENEW_LIFE=0" /opt/cloudera/cm/bin/gen_credentials_ipa.sh || sed -i '/MAX_RENEW_LIFE=.*/a MAX_RENEW_LIFE=0' /opt/cloudera/cm/bin/gen_credentials_ipa.sh
 grep "MAX_RENEW_LIFE=0" /opt/cloudera/cm/bin/gen_credentials.sh || sed -i '/MAX_RENEW_LIFE=.*/a MAX_RENEW_LIFE=0' /opt/cloudera/cm/bin/gen_credentials.sh
-
-# Destroy the admin krbtgt
-kdestroy

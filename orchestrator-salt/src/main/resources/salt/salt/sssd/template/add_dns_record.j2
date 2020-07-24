@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+set -e
+
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
+echo "$PW" | kinit {{ pillar['sssd-ipa']['principal'] }}
+
+set -x
+
+HOSTNAME=$(hostname)
+FQDN=$(hostname -f)
+IPADDR=$(hostname -i)
+REVERSE_IP=$(hostname -i | awk -F. '{print $4"."$3"." $2"."$1}')
+
+# dnsrecord-add must either add the record or modify it
+if ! ipa dnsrecord-find {{ pillar['sssd-ipa']['domain'] }}. "--name=${HOSTNAME}" "--a-rec=${IPADDR}"  --ttl {{ pillar['sssd-ipa']['dns_ttl'] }} --all; then
+  ipa dnsrecord-add {{ pillar['sssd-ipa']['domain'] }}. "${HOSTNAME}" "--a-rec=${IPADDR}" --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}
+fi
+if ! ipa dnsrecord-find {{ pillar['sssd-ipa']['domain'] }}. "--name=${HOSTNAME}" "--a-rec=${IPADDR}"  --ttl {{ pillar['sssd-ipa']['dns_ttl'] }} --all; then
+  echo "Failed to set DNS A-record for ${HOSTNAME}"
+  false
+fi
+
+for zone in $(ipa dnszone-find --raw | grep "idnsname:.*\.in-addr\.arpa\." | cut -d':' -f2 | awk '{ print length, $0 }' | sort -n -r | awk '{ print $2 }' | xargs)
+do
+    ZONE_NET=${zone//.in-addr.arpa./}
+    if echo "$REVERSE_IP" | grep -qE "$ZONE_NET$"; then
+        REVERSE_RECORD_NAME=$(echo "$REVERSE_IP" | sed "s/.$ZONE_NET$//g")
+        # dnsrecord-add must either add the record or modify it
+        if ! ipa dnsrecord-find "$zone" "--name=$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}; then
+          ipa dnsrecord-add "$zone" "$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}
+        fi
+        if ipa dnsrecord-find "$zone" "--name=$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}; then
+          break
+        else
+          echo "Failed to set Reverse DNS PTR-record for ${FQDN}"
+          false
+        fi
+    fi
+done
+
+set +x
+set +e
