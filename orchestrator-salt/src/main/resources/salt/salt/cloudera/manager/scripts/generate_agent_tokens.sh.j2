@@ -3,20 +3,32 @@
 set -ex
 
 CERTMANAGER_DIR="/etc/cloudera-scm-server/certs"
-AGENT_FQDNS={%- for ip, args in pillar.get('hosts', {}).items() %}{{ args['fqdn'] }}{{ "," if not loop.last else "" }}{%- endfor %}
+declare -A AGENT_FQDN_TOKENDIR_MAP=( {%- for ip, args in pillar.get('hosts', {}).items() %}["{{ args['fqdn'] }}"]="{{ args['fqdn'] }}-{{ args['instance_id'] }}" {% endfor %})
 TOKEN_DIR="/srv/salt/agent-tls-tokens"
 
 source /bin/activate_salt_env
 
-for fqdn in ${AGENT_FQDNS//,/ }
+for fqdn in "${!AGENT_FQDN_TOKENDIR_MAP[@]}"
 do
-  #host=$(echo ${fqdn} | cut -d"." -f1)
-  mkdir -p $TOKEN_DIR/${fqdn}
-  /opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR gen_cert_request_token --output $TOKEN_DIR/${fqdn}/cmagent.token --hostname ${fqdn} --lifetime 3600
+  tokendir=$TOKEN_DIR/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}
+  if [[ ! -e ${tokendir}/agent_token_generated ]]; then
+    #host=$(echo ${fqdn} | cut -d"." -f1)
+    mkdir -p ${tokendir}
+    /opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR gen_cert_request_token --output ${tokendir}/cmagent.token --hostname ${fqdn} --lifetime 3600
+    echo $(date +%Y-%m-%d:%H:%M:%S) >> ${tokendir}/agent_token_generated
+  else
+    echo "CM agnet token generation for ${fqdn} will be skipped as it was already generated in ${tokendir}."
+  fi
 done
 
-for fqdn in ${AGENT_FQDNS//,/ }
+for fqdn in "${!AGENT_FQDN_TOKENDIR_MAP[@]}"
 do
-  # This can be fairly slow, for large clusters
-  salt ${fqdn} cp.get_file salt://agent-tls-tokens/${fqdn}/cmagent.token /etc/cloudera-scm-agent/cmagent.token
+  tokendir=$TOKEN_DIR/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}
+  if [[ ! -e ${tokendir}/agent_token_copied_to_client ]]; then
+    # This can be fairly slow, for large clusters
+    salt ${fqdn} cp.get_file salt://agent-tls-tokens/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}/cmagent.token /etc/cloudera-scm-agent/cmagent.token
+    echo $(date +%Y-%m-%d:%H:%M:%S) >> ${tokendir}/agent_token_copied_to_client
+  else
+    echo "CM agent token copy to ${fqdn} will be skipped as it was already copied to the agent instance."
+  fi
 done
