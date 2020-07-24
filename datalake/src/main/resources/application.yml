@@ -32,6 +32,21 @@ management:
         "[http.server.requests]": "0.5, 0.95"
 
 sdx:
+  db:
+    aws:
+      engineversion: 10.6
+      ha:
+        backupretentionperiod: 30
+      nonha:
+        backupretentionperiod: 0
+    azure:
+      ha:
+        backupretentionperiod: 30
+        georedundantbackup: true
+      nonha:
+        backupretentionperiod: 7
+        georedundantbackup: false
+
   gateway:
     topology:
       name: cdp-proxy

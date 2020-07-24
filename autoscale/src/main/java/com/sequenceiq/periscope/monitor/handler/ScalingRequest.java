@@ -199,6 +199,7 @@ public class ScalingRequest implements Runnable {
                 return messagesService.getMessage(MessageCode.CLUSTER_UPDATE_IN_PROGRESS, List.of(action, cluster.getStackName()));
             case "HTTP 400 Bad Request":
             case "HTTP 500 Internal Server Error":
+            case "HTTP 404 Not Found":
                 return messagesService.getMessage(MessageCode.CLUSTER_NOT_AVAILABLE, List.of(action, cluster.getStackName()));
             default:
                 return cbMessage;
