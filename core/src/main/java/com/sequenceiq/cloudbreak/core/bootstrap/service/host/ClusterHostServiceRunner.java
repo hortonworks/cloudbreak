@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -108,6 +109,8 @@ public class ClusterHostServiceRunner {
     private static final int CM_HTTP_PORT = 7180;
 
     private static final int CM_HTTPS_PORT = 7183;
+
+    private static final Map<Long, ClouderaManagerRepo> clusterComponentConfigProviderMap = new ConcurrentHashMap();
 
     @Value("${cb.cm.heartbeat.interval}")
     private String cmHeartbeatInterval;
@@ -449,15 +452,13 @@ public class ClusterHostServiceRunner {
     }
 
     private void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar, Long clusterId) {
-        ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
+        ClouderaManagerRepo clouderaManagerRepo = getClouderaManagerRepo(clusterId);
         boolean deterministicUidGid = isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_1);
-        boolean enableKnoxRangerAuthorizer = isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
         servicePillar.put("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
                 singletonMap("cloudera-manager", singletonMap("settings", Map.of(
                         "heartbeat_interval", cmHeartbeatInterval,
                         "missed_heartbeat_interval", cmMissedHeartbeatInterval,
-                        "deterministic_uid_gid", deterministicUidGid,
-                        "enable_knox_ranger_authorizer", enableKnoxRangerAuthorizer)))));
+                        "deterministic_uid_gid", deterministicUidGid)))));
     }
 
     private void decoratePillarWithTags(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
@@ -501,10 +502,14 @@ public class ClusterHostServiceRunner {
     private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar,
             VirtualGroupRequest virtualGroupRequest, ClusterPreCreationApi connector, KerberosConfig kerberosConfig, Map<String, List<String>> serviceLocations)
             throws IOException {
+        final ClouderaManagerRepo clouderaManagerRepo = getClouderaManagerRepo(cluster.getId());
+        final boolean enableKnoxRangerAuthorizer = isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
+
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
+        gateway.put("enable_knox_ranger_authorizer", enableKnoxRangerAuthorizer);
 
         // for cloudbreak upgradeability
         gateway.put("ssotype", SSOType.NONE);
@@ -680,5 +685,9 @@ public class ClusterHostServiceRunner {
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
+    }
+
+    private ClouderaManagerRepo getClouderaManagerRepo(final Long clusterId) {
+       return clusterComponentConfigProviderMap.computeIfAbsent(clusterId, k -> clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId));
     }
 }
