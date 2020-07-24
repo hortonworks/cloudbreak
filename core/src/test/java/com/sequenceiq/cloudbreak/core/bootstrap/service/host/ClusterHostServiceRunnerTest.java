@@ -1,8 +1,15 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,6 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
@@ -22,6 +30,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -38,10 +48,13 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterHostServiceRunnerTest {
+
+    private static final Long CLUSTER_ID = 1L;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -142,6 +155,66 @@ public class ClusterHostServiceRunnerTest {
             verify(stackUtil).collectReachableNodes(stack);
             throw e;
         }
+    }
+
+    @Test
+    public void testDecoratePillarWithClouderaManagerRepo() throws IOException, CloudbreakOrchestratorFailedException {
+        String license = FileReaderUtils.readFileFromClasspath("cm-license.txt");
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.2.0");
+        clouderaManagerRepo.setBaseUrl("https://archive.cloudera.com/cm/7.2.0/");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+
+        Map<String, SaltPillarProperties> pillar = new HashMap<>();
+        underTest.decoratePillarWithClouderaManagerRepo(CLUSTER_ID, pillar, Optional.of(license));
+
+        SaltPillarProperties resultPillar = pillar.get("cloudera-manager-repo");
+        Map<String, Object> properties = resultPillar.getProperties();
+        Map<String, Object> values = (Map<String, Object>) properties.get("cloudera-manager");
+        assertEquals("7.2.0", ((ClouderaManagerRepo) values.get("repo")).getVersion());
+        assertEquals("https://archive.cloudera.com/cm/7.2.0/", ((ClouderaManagerRepo) values.get("repo")).getBaseUrl());
+        assertEquals("d2834876-30fe-4000-ba85-6e99e537897e", values.get("paywall_username"));
+        assertEquals("db5d119ac130", values.get("paywall_password"));
+    }
+
+    @Test
+    public void testDecoratePillarWithClouderaManagerRepoWithNoJsonLicense() throws IOException, CloudbreakOrchestratorFailedException {
+        String license = FileReaderUtils.readFileFromClasspath("cm-license-nojson.txt");
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.2.0");
+        clouderaManagerRepo.setBaseUrl("https://archive.cloudera.com/cm/7.2.0/");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+
+        Map<String, SaltPillarProperties> pillar = new HashMap<>();
+        underTest.decoratePillarWithClouderaManagerRepo(CLUSTER_ID, pillar, Optional.of(license));
+
+        SaltPillarProperties resultPillar = pillar.get("cloudera-manager-repo");
+        Map<String, Object> properties = resultPillar.getProperties();
+        Map<String, Object> values = (Map<String, Object>) properties.get("cloudera-manager");
+        assertEquals("7.2.0", ((ClouderaManagerRepo) values.get("repo")).getVersion());
+        assertEquals("https://archive.cloudera.com/cm/7.2.0/", ((ClouderaManagerRepo) values.get("repo")).getBaseUrl());
+        assertNull(values.get("paywall_username"));
+        assertNull(values.get("paywall_password"));
+    }
+
+    @Test
+    public void testDecoratePillarWithClouderaManagerRepoWithEmptyLicense() throws IOException, CloudbreakOrchestratorFailedException {
+        String license = FileReaderUtils.readFileFromClasspath("cm-license-empty.txt");
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.2.0");
+        clouderaManagerRepo.setBaseUrl("https://archive.cloudera.com/cm/7.2.0/");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+
+        Map<String, SaltPillarProperties> pillar = new HashMap<>();
+        underTest.decoratePillarWithClouderaManagerRepo(CLUSTER_ID, pillar, Optional.of(license));
+
+        SaltPillarProperties resultPillar = pillar.get("cloudera-manager-repo");
+        Map<String, Object> properties = resultPillar.getProperties();
+        Map<String, Object> values = (Map<String, Object>) properties.get("cloudera-manager");
+        assertEquals("7.2.0", ((ClouderaManagerRepo) values.get("repo")).getVersion());
+        assertEquals("https://archive.cloudera.com/cm/7.2.0/", ((ClouderaManagerRepo) values.get("repo")).getBaseUrl());
+        assertNull(values.get("paywall_username"));
+        assertNull(values.get("paywall_password"));
     }
 
 }

@@ -11,3 +11,7 @@ enabled=1
 skip_if_unavailable=1
 autorefresh=0
 type=rpm-md
+{%- if salt['pillar.get']('cloudera-manager:paywall_username') %}
+username={{ salt['pillar.get']('cloudera-manager:paywall_username') }}
+password={{ salt['pillar.get']('cloudera-manager:paywall_password') }}
+{%- endif %}
