@@ -21,6 +21,7 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -183,6 +184,13 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.STOP_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "stopEnvironmentByCrnV1")
     void postStopByCrn(@PathParam("crn") String crn);
+
+    @GET
+    @Path("/crn/{crn}/verify_credential")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.VERIFY_CREDENTIAL_BY_CRN, notes = ENVIRONMENT_NOTES,
+            nickname = "verifyCredentialByEnvCrn", httpMethod = "GET")
+    CredentialResponse verifyCredentialByEnvCrn(@PathParam("crn") String crn);
 
     @POST
     @Path("/crn/{crn}/cli_create")
