@@ -59,6 +59,7 @@ public class RestEventDataExtractor implements EventDataExtractor<StructuredRest
     public AuditEventName eventName(StructuredRestCallEvent structuredEvent) {
         AuditEventName auditEventName = determineEventName(structuredEvent);
         if (auditEventName != null) {
+            LOGGER.info("Determined event name: {}", auditEventName);
             return auditEventName;
         }
         String resourceType = structuredEvent.getOperation().getResourceType();
@@ -72,7 +73,9 @@ public class RestEventDataExtractor implements EventDataExtractor<StructuredRest
         if (resourceType != null) {
             RestResourceAuditEventConverter restResourceAuditEventConverter = getConverter(resourceType);
             if (restResourceAuditEventConverter != null) {
-                return restResourceAuditEventConverter.eventSource(structuredEvent);
+                Crn.Service service = restResourceAuditEventConverter.eventSource(structuredEvent);
+                LOGGER.info("Determined event source service: {}", service.getName());
+                return service;
             }
         }
         return null;
