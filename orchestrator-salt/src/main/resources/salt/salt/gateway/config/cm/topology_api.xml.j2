@@ -33,7 +33,7 @@
     {% set aclsauthz_prefix = '' %}
 {%- endif -%}
 
-{% if salt['pillar.get']('gateway:envAccessGroup') is defined and salt['pillar.get']('gateway:envAccessGroup') | length > 0 and salt['pillar.get']('cloudera-manager:settings:enable_knox_ranger_authorizer') == True %}
+{% if salt['pillar.get']('gateway:envAccessGroup') is defined and salt['pillar.get']('gateway:envAccessGroup') | length > 0 and salt['pillar.get']('gateway:enable_knox_ranger_authorizer') == True %}
         <provider>
             <role>identity-assertion</role>
             <name>HadoopGroupProvider</name>
