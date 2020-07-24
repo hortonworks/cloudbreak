@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
@@ -30,6 +31,12 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
 public class SdxUpgradeServiceTest {
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
+    private static final String CLUSTER_NAME = "coolStack";
+
+    private static final String OS_UPGRADE_CHECK_EXCEPTION_MESSAGE = "OS upgrade can't be done because the cluster is not in an available state!";
 
     @InjectMocks
     private SdxUpgradeService underTest;
@@ -42,6 +49,9 @@ public class SdxUpgradeServiceTest {
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
+
+    @Mock
+    private StackStatusV4Response mockStackStatusV4Response;
 
     @Captor
     private ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor;

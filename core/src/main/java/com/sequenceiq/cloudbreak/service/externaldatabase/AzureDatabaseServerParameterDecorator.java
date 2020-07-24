@@ -11,17 +11,30 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV
 @Component
 public class AzureDatabaseServerParameterDecorator implements DatabaseServerParameterDecorator {
 
-    @Value("${cb.azure.externaldatabase.retentionperiod:7}")
-    private int retentionPeriod;
+    @Value("${cb.azure.externaldatabase.ha.retentionperiod}")
+    private int retentionPeriodHa;
 
-    @Value("${cb.azure.externaldatabase.geoRedundantBackup:true}")
-    private Boolean geoRedundantBackup;
+    @Value("${cb.azure.externaldatabase.ha.georedundantbackup}")
+    private Boolean geoRedundantBackupHa;
+
+    @Value("${cb.azure.externaldatabase.nonha.retentionperiod}")
+    private int retentionPeriodNonHa;
+
+    @Value("${cb.azure.externaldatabase.nonha.georedundantbackup}")
+    private Boolean geoRedundantBackupNonHa;
 
     @Override
     public void setParameters(DatabaseServerV4StackRequest request, DatabaseServerParameter serverParameter) {
         AzureDatabaseServerV4Parameters parameters = new AzureDatabaseServerV4Parameters();
-        parameters.setBackupRetentionDays(retentionPeriod);
-        parameters.setGeoRedundantBackup(geoRedundantBackup);
+        if (serverParameter.isHighlyAvailable()) {
+            parameters.setBackupRetentionDays(retentionPeriodHa);
+            parameters.setGeoRedundantBackup(geoRedundantBackupHa);
+        } else {
+            parameters.setBackupRetentionDays(retentionPeriodNonHa);
+            parameters.setGeoRedundantBackup(geoRedundantBackupNonHa);
+        }
+        parameters.setBackupRetentionDays(retentionPeriodHa);
+        parameters.setGeoRedundantBackup(geoRedundantBackupHa);
         request.setAzure(parameters);
     }
 

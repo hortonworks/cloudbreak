@@ -197,12 +197,24 @@ cb:
     vpc:
     vpcendpoints:
       enabled.gateway.services: s3,dynamodb
-    externaldatabase.retentionperiod: 0
+    externaldatabase:
+      engineversion: 10.6
+      ha:
+        retentionperiod: 30
+      nonha:
+        retentionperiod: 0
     credential.cache.ttl: 60
 
   azure:
     host.name.prefix.length: 255
     database.template.batchSize: 1
+    externaldatabase:
+      ha:
+        retentionperiod: 30
+        georedundantbackup: true
+      nonha:
+        retentionperiod: 7
+        georedundantbackup: false
     distrox:
       enabled.instance.types: >
         Standard_D8_v3,

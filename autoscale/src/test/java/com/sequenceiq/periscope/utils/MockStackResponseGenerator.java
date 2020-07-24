@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -14,16 +15,32 @@ public class MockStackResponseGenerator {
     private MockStackResponseGenerator() {
     }
 
-    public static StackV4Response getMockStackV4Response(String clusterCrn, Set<String> hostGroups,
-            Set<InstanceMetaDataV4Response> instanceMetaDataV4Responses) {
-        StackV4Response mockReponse = new StackV4Response();
-
+    public static StackV4Response getMockStackV4Response(String clusterCrn, String hostGroup, String fqdnBase, int currentHostGroupCount) {
         List<InstanceGroupV4Response> instanceGroupV4Responses = new ArrayList<>();
-        hostGroups.stream().forEach(hostGroup -> {
-            instanceGroupV4Responses.add(instanceGroup(hostGroup, awsTemplate(),
-                    instanceMetaDataV4Responses));
-        });
 
+        InstanceMetaDataV4Response master1 = new InstanceMetaDataV4Response();
+        master1.setDiscoveryFQDN("master1");
+        master1.setInstanceId("test_instanceid" + "master1");
+        instanceGroupV4Responses.add(instanceGroup("master", awsTemplate(), Set.of(master1)));
+
+        InstanceMetaDataV4Response worker1 = new InstanceMetaDataV4Response();
+        worker1.setDiscoveryFQDN("worker1");
+        worker1.setInstanceId("test_instanceid" + "worker1");
+        InstanceMetaDataV4Response worker2 = new InstanceMetaDataV4Response();
+        worker2.setDiscoveryFQDN("worker2");
+        worker2.setInstanceId("test_instanceid" + "worker2");
+        instanceGroupV4Responses.add(instanceGroup("worker", awsTemplate(), Set.of(worker1, worker2)));
+
+        Set fqdnToInstanceIds = new HashSet();
+        for (int i = 1; i <= currentHostGroupCount; i++) {
+            InstanceMetaDataV4Response metadata1 = new InstanceMetaDataV4Response();
+            metadata1.setDiscoveryFQDN(fqdnBase + i);
+            metadata1.setInstanceId("test_instanceid_" + hostGroup + i);
+            fqdnToInstanceIds.add(metadata1);
+        }
+        instanceGroupV4Responses.add(instanceGroup(hostGroup, awsTemplate(), fqdnToInstanceIds));
+
+        StackV4Response mockReponse = new StackV4Response();
         mockReponse.setCrn(clusterCrn);
         mockReponse.setInstanceGroups(instanceGroupV4Responses);
         mockReponse.setCloudPlatform(CloudPlatform.AWS);

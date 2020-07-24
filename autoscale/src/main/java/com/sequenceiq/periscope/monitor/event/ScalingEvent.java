@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.monitor.event;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.context.ApplicationEvent;
 
@@ -13,9 +12,9 @@ public class ScalingEvent extends ApplicationEvent {
 
     private List<String> decommissionNodeIds;
 
-    private transient Optional<Integer> scalingNodeCount = Optional.empty();
+    private transient Integer hostGroupNodeCount;
 
-    private transient Optional<Integer> hostGroupNodeCount = Optional.empty();
+    private transient Integer desiredAbsoluteHostGroupNodeCount;
 
     public ScalingEvent(BaseAlert alert) {
         super(alert);
@@ -33,19 +32,19 @@ public class ScalingEvent extends ApplicationEvent {
         this.decommissionNodeIds = decommissionNodeIds;
     }
 
-    public Optional<Integer> getScalingNodeCount() {
-        return scalingNodeCount;
-    }
-
-    public void setScalingNodeCount(Optional<Integer> scalingNodeCount) {
-        this.scalingNodeCount = scalingNodeCount;
-    }
-
-    public Optional<Integer> getHostGroupNodeCount() {
+    public Integer getHostGroupNodeCount() {
         return hostGroupNodeCount;
     }
 
-    public void setHostGroupNodeCount(Optional<Integer> hostGroupNodeCount) {
+    public void setHostGroupNodeCount(Integer hostGroupNodeCount) {
         this.hostGroupNodeCount = hostGroupNodeCount;
+    }
+
+    public Integer getDesiredAbsoluteHostGroupNodeCount() {
+        return desiredAbsoluteHostGroupNodeCount;
+    }
+
+    public void setDesiredAbsoluteHostGroupNodeCount(Integer desiredAbsoluteHostGroupNodeCount) {
+        this.desiredAbsoluteHostGroupNodeCount = desiredAbsoluteHostGroupNodeCount;
     }
 }
