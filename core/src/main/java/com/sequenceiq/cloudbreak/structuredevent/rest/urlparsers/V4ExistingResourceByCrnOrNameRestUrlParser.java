@@ -18,11 +18,11 @@ public class V4ExistingResourceByCrnOrNameRestUrlParser extends RestUrlParser {
     // v4/{workspaceId}/blueprints/name/{name}
     // v4/{workspaceId}/blueprints/crn/{name}
     private static final Pattern PATTERN = Pattern
-            .compile("v4/(\\d+)/(blueprints|image_catalogs|recipes|stacks|distrox|cluster_templates)/(?:name|crn)/([^/]+)");
+            .compile("v4/(\\d+)/(blueprints|image_catalogs|recipes|stacks|distrox|cluster_templates)/(?:name|crn)/([^/]+)(/\\w+)?");
 
     @Override
     protected List<String> parsedMethods() {
-        return List.of("DELETE", "GET");
+        return List.of("DELETE", "GET", "PUT");
     }
 
     @Override

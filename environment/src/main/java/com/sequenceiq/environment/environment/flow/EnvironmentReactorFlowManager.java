@@ -11,12 +11,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent;
+import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent.EnvStackConfigUpdatesEventBuilder;
+import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
+import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -33,9 +37,13 @@ public class EnvironmentReactorFlowManager {
 
     private final FlowCancelService flowCancelService;
 
-    public EnvironmentReactorFlowManager(EventSender eventSender, FlowCancelService flowCancelService) {
+    private final StackService stackService;
+
+    public EnvironmentReactorFlowManager(EventSender eventSender,
+        FlowCancelService flowCancelService, StackService stackService) {
         this.eventSender = eventSender;
         this.flowCancelService = flowCancelService;
+        this.stackService = stackService;
     }
 
     public void triggerCreationFlow(long envId, String envName, String userCrn, String envCrn) {
@@ -105,5 +113,23 @@ public class EnvironmentReactorFlowManager {
                 .build();
 
         eventSender.sendEvent(envSrartEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+    }
+
+    public void triggerStackConfigUpdatesFlow(Environment environment, String userCrn) {
+        stackService.cancelRunningStackConfigUpdates(environment);
+
+        LOGGER.info("Environment stack configurations update flow triggered.");
+        EnvStackConfigUpdatesEvent envStackConfigUpdatesEvent = EnvStackConfigUpdatesEventBuilder
+            .anEnvStackConfigUpdatesEvent()
+            .withAccepted(new Promise<>())
+            .withSelector(
+                EnvStackConfigUpdatesStateSelectors.ENV_STACK_CONFIG_UPDATES_START_EVENT.selector())
+            .withResourceId(environment.getId())
+            .withResourceName(environment.getName())
+            .withResourceCrn(environment.getResourceCrn())
+            .build();
+
+        eventSender.sendEvent(envStackConfigUpdatesEvent,
+            new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 }
