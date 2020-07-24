@@ -6,6 +6,9 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVer
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -34,6 +37,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -54,6 +58,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -329,8 +334,8 @@ public class ClusterHostServiceRunner {
         telemetryDecorator.decoratePillar(servicePillar, stack, telemetry);
         decoratePillarWithTags(stack, servicePillar);
         decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
-        decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
-        decoratePillarWithClouderaManagerRepo(stack.getId(), cluster.getId(), servicePillar);
+        Optional<String> licenseOpt = decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
+        decoratePillarWithClouderaManagerRepo(cluster.getId(), servicePillar, licenseOpt);
         decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
         decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
@@ -414,32 +419,61 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
+    private Optional<String> decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
         String userCrn = stackService.get(stackId).getCreator().getUserCrn();
-
         Account account = umsClient.getAccountDetails(userCrn, Crn.safeFromString(userCrn).getAccountId(), Optional.empty());
-
-        if (StringUtils.isNotEmpty(account.getClouderaManagerLicenseKey())) {
-            LOGGER.debug("Got license key from UMS: {}", account.getClouderaManagerLicenseKey());
+        Optional<String> licenseOpt = Optional.ofNullable(account.getClouderaManagerLicenseKey());
+        if (licenseOpt.isPresent() && isNotEmpty(licenseOpt.get())) {
+            String license = licenseOpt.get();
+            LOGGER.debug("Got license key from UMS: {}", license);
             servicePillar.put("cloudera-manager-license",
                     new SaltPillarProperties("/cloudera-manager/license.sls",
                             singletonMap("cloudera-manager",
-                                    singletonMap("license", account.getClouderaManagerLicenseKey()))));
+                                    singletonMap("license", license))));
         }
+        return licenseOpt;
     }
 
-    private void decoratePillarWithClouderaManagerRepo(Long stackId, Long clusterId, Map<String, SaltPillarProperties> servicePillar)
+    @VisibleForTesting
+    void decoratePillarWithClouderaManagerRepo(Long clusterId, Map<String, SaltPillarProperties> servicePillar, Optional<String> license)
             throws CloudbreakOrchestratorFailedException {
-
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
-
         if (clouderaManagerRepo == null) {
             throw new CloudbreakOrchestratorFailedException("Cloudera Manager repository details are missing.");
         }
-
         servicePillar.put("cloudera-manager-repo", new SaltPillarProperties("/cloudera-manager/repo.sls",
-                singletonMap("cloudera-manager", singletonMap("repo", clouderaManagerRepo))));
+                singletonMap("cloudera-manager", createCMRepoPillar(clouderaManagerRepo, license))));
 
+    }
+
+    private Map<String, Object> createCMRepoPillar(ClouderaManagerRepo clouderaManagerRepo, Optional<String> license) {
+        Map<String, Object> pillarValues = new HashMap<>();
+        pillarValues.put("repo", clouderaManagerRepo);
+        parseLicense(license).ifPresent(jsonLicense -> {
+            String username = jsonLicense.getPaywallUsername();
+            String password = jsonLicense.getPaywallPassword();
+            if (isNotEmpty(username) && isNotEmpty(password)) {
+                pillarValues.put("paywall_username", username);
+                pillarValues.put("paywall_password", password);
+            }
+        });
+        return pillarValues;
+    }
+
+    private Optional<JsonCMLicense> parseLicense(Optional<String> licenseOpt) {
+        Optional<JsonCMLicense> result = Optional.empty();
+        if (licenseOpt.isPresent() && isNotEmpty(licenseOpt.get())) {
+            String license = licenseOpt.get();
+            try {
+                String json = '{' + substringBeforeLast(substringAfter(license, "{"), "}") + '}';
+                JsonCMLicense jsonCMLicense = JsonUtil.readValue(json, JsonCMLicense.class);
+                result = Optional.of(jsonCMLicense);
+                LOGGER.info("Parsed CM licence: {}", jsonCMLicense);
+            } catch (IOException e) {
+                LOGGER.warn("Cannot parse CM license, paywall authentication will not work", e);
+            }
+        }
+        return result;
     }
 
     private void decoratePillarWithClouderaManagerCsds(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
@@ -560,15 +594,15 @@ public class ClusterHostServiceRunner {
     }
 
     private void addGatewayUserFacingCertAndFqdn(GatewayConfig gatewayConfig, Cluster cluster, Map<String, Object> gateway) {
-        boolean userFacingCertHasBeenGenerated = StringUtils.isNotEmpty(gatewayConfig.getUserFacingCert())
-                && StringUtils.isNotEmpty(gatewayConfig.getUserFacingKey());
+        boolean userFacingCertHasBeenGenerated = isNotEmpty(gatewayConfig.getUserFacingCert())
+                && isNotEmpty(gatewayConfig.getUserFacingKey());
         if (userFacingCertHasBeenGenerated) {
             gateway.put("userfacingcert_configured", Boolean.TRUE);
             gateway.put("userfacingkey", cluster.getStack().getSecurityConfig().getUserFacingKey());
             gateway.put("userfacingcert", cluster.getStack().getSecurityConfig().getUserFacingCert());
         }
         String fqdn = cluster.getFqdn();
-        if (StringUtils.isNotEmpty(fqdn)) {
+        if (isNotEmpty(fqdn)) {
             gateway.put("userfacingfqdn", fqdn);
             String[] fqdnParts = fqdn.split("\\.", 2);
             if (fqdnParts.length == 2) {
@@ -616,7 +650,7 @@ public class ClusterHostServiceRunner {
         Map<String, Object> topology = new HashMap<>();
         topology.put("name", gt.getTopologyName());
         Json exposedJson = gt.getExposedServices();
-        if (exposedJson != null && StringUtils.isNotEmpty(exposedJson.getValue())) {
+        if (exposedJson != null && isNotEmpty(exposedJson.getValue())) {
             ExposedServices exposedServicesDomain = exposedJson.get(ExposedServices.class);
             Set<String> exposedServices = exposedServiceCollector.getFullServiceListBasedOnList(exposedServicesDomain.getServices());
             topology.put("exposed", exposedServices);
@@ -666,7 +700,7 @@ public class ClusterHostServiceRunner {
         Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId());
         Map<String, Object> connectorJarUrlsByVendor = new HashMap<>();
         rdsConfigs.stream()
-                .filter(rds -> StringUtils.isNotEmpty(rds.getConnectorJarUrl()))
+                .filter(rds -> isNotEmpty(rds.getConnectorJarUrl()))
                 .forEach(rdsConfig -> {
                     connectorJarUrlsByVendor.put("databaseType", rdsConfig.getDatabaseEngine().databaseType());
                     connectorJarUrlsByVendor.put("connectorJarUrl", rdsConfig.getConnectorJarUrl());

@@ -1,0 +1,14 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+{
+  "deactivationDate" : "2020-01-01",
+  "features" : [ ],
+  "name" : "",
+  "uuid" : "",
+  "version" : 1,
+  "startDate" : "2019-02-25",
+  "expirationDate" : "2020-01-01"
+}
+-----BEGIN PGP SIGNATURE-----
+-----END PGP SIGNATURE-----

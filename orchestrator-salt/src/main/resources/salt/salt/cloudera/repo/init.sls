@@ -4,6 +4,7 @@
   file.managed:
     - source: salt://cloudera/repo/clustermanager.repo
     - template: jinja
+    - mode: 640
 
 {% elif grains['os_family'] == 'Debian' %}
 
