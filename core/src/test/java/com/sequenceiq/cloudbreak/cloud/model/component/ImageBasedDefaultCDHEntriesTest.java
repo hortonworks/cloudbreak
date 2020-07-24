@@ -123,7 +123,9 @@ public class ImageBasedDefaultCDHEntriesTest {
         Image nonDefaultImage = mock(Image.class);
         when(nonDefaultImage.isDefaultImage()).thenReturn(false);
 
-        return asList(defaultImage, nonDefaultImage);
+        //Default image added double times to test
+        //the algorithm is not failing on multiple default images for the same version
+        return asList(defaultImage, defaultImage, nonDefaultImage);
     }
 
     private Map<String, String> getRepo() {

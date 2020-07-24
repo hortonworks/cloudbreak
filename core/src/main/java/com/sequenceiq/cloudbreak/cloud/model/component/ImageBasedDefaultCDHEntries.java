@@ -48,7 +48,10 @@ public class ImageBasedDefaultCDHEntries {
     public Map<String, ImageBasedDefaultCDHInfo> getEntries(Images images) {
         return images.getCdhImages().stream()
                 .filter(Image::isDefaultImage)
-                .collect(Collectors.toMap(Image::getVersion, i -> new ImageBasedDefaultCDHInfo(getDefaultCDHInfo(i), i)));
+                .collect(Collectors.toMap(Image::getVersion, i -> new ImageBasedDefaultCDHInfo(getDefaultCDHInfo(i), i),
+                        //The generated CDHInfo should be the same for the same version so it does not matter which one is used.
+                        //It can happend when calling for an image catalog with images.
+                        (i1, i2) -> i1));
     }
 
     private DefaultCDHInfo getDefaultCDHInfo(Image image) {
