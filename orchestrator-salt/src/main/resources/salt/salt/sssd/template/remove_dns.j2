@@ -1,5 +1,11 @@
 #!/bin/bash
 
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
 reverse_ip=$(hostname -i | awk -F. '{OFS="."; print $4,$3,$2,$1}')
 FQDN=$(hostname -f)
 

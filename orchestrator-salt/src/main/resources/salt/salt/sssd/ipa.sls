@@ -12,32 +12,31 @@ ipa_packages_install:
     - unless:
       - rpm -q ipa-client openldap openldap-clients
 
+/opt/salt/scripts/join_ipa.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://sssd/template/join_ipa.j2
+    - template: jinja
+
 join_ipa:
   cmd.run:
 {% if metadata.platform != 'YARN' %}
-    - name: |
-        ipa-client-install --unattended --uninstall
-        ipa-client-install --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
-          --domain={{salt['pillar.get']('sssd-ipa:domain')}} --mkhomedir --principal={{salt['pillar.get']('sssd-ipa:principal')}} \
-          {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
-          --no-sshd --no-ssh \
-          {%- endif %}
-          --password $PW --unattended --force-join --ssh-trust-dns --no-ntp && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/ipa-join-executed
+    - name: /opt/salt/scripts/join_ipa.sh && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/ipa-join-executed
 {% else %}
-    - name: |
-        runuser -l root -c 'ipa-client-install --unattended --uninstall'
-        runuser -l root -c 'ipa-client-install --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
-          --domain={{salt['pillar.get']('sssd-ipa:domain')}} --mkhomedir --principal={{salt['pillar.get']('sssd-ipa:principal')}} \
-          {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
-          --no-sshd --no-ssh \
-          {%- endif %}
-          --password "{{salt['pillar.get']('sssd-ipa:password')}}" --unattended --force-join --ssh-trust-dns --no-ntp && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/ipa-join-executed'
+    - name: runuser -l root -c 'export PW="{{salt['pillar.get']('sssd-ipa:password')}}" && /opt/salt/scripts/join_ipa.sh && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/ipa-join-executed'
 {% endif %}
-    - unless: test -f /var/log/ipa-join-executed || { echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa env; }
+    - unless: test -f /var/log/ipa-join-executed
     - runas: root
     - failhard: True
+    - require:
+        - file: /opt/salt/scripts/join_ipa.sh
+{% if metadata.platform != 'YARN' %}
     - env:
         - PW: "{{salt['pillar.get']('sssd-ipa:password')}}"
+{% endif %}
 
 {% if metadata.platform == 'YARN' and not metadata.cluster_in_childenvironment %}
 dns_remove_script:
@@ -55,10 +54,23 @@ removing_dns_entries:
     - unless: test -f /var/log/dns_cleanup.log
 {% endif %}
 
+/opt/salt/scripts/add_dns_record.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://sssd/template/add_dns_record.j2
+    - template: jinja
+
 add_dns_record:
   cmd.run:
-    - name: echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa dnsrecord-add {{salt['pillar.get']('sssd-ipa:domain')}}. $(hostname) --a-rec=$(hostname -i) --a-create-reverse --ttl {{salt['pillar.get']('sssd-ipa:dns_ttl')}} && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/dnsrecord-add-executed
-    - unless: test -f /var/log/dnsrecord-add-executed || { echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa dnsrecord-find {{salt['pillar.get']('sssd-ipa:domain')}} --a-rec=$(hostname -i); }
+    - name: /opt/salt/scripts/add_dns_record.sh && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/dnsrecord-add-executed
+    - runas: root
+    - failhard: True
+    - unless: test -f /var/log/dnsrecord-add-executed
+    - require:
+        - file: /opt/salt/scripts/add_dns_record.sh
     - env:
         - PW: "{{salt['pillar.get']('sssd-ipa:password')}}"
 
