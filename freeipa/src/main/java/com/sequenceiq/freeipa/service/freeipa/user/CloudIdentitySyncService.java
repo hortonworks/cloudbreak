@@ -45,11 +45,9 @@ public class CloudIdentitySyncService {
             Map<String, List<CloudIdentity>> userCloudIdentites = getUserCloudIdentitiesToSync(umsUsersState);
 
             Map<String, String> userToAzureObjectIdMap = getAzureObjectIdMap(userCloudIdentites);
-            Map<String, String> groupToAzureObjectIdMap = getAzureObjectIdMap(umsUsersState.getGroupToCloudIdentityMap());
 
             SetRangerCloudIdentityMappingRequest setRangerCloudIdentityMappingRequest = new SetRangerCloudIdentityMappingRequest();
             setRangerCloudIdentityMappingRequest.setAzureUserMapping(userToAzureObjectIdMap);
-            setRangerCloudIdentityMappingRequest.setAzureGroupMapping(groupToAzureObjectIdMap);
             // TODO The SDX endpoint currently sets the config and triggers refresh. The SDX endpoint should also be updated
             //      to allow polling the status of the refresh.
             LOGGER.debug("Setting ranger cloud identity mapping: {}", setRangerCloudIdentityMappingRequest);

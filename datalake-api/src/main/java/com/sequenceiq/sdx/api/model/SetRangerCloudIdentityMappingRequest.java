@@ -16,8 +16,11 @@ public class SetRangerCloudIdentityMappingRequest {
     @NotNull
     private Map<String, String> azureUserMapping;
 
+    /**
+     * @deprecated azureGroupMapping is not unsupported
+     */
+    @Deprecated
     @ApiModelProperty
-    @NotNull
     private Map<String, String> azureGroupMapping;
 
     public Map<String, String> getAzureUserMapping() {

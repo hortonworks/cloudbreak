@@ -37,9 +37,8 @@ class RangerCloudIdentityServiceTest {
         when(cluster.getStackCrn()).thenReturn("stack-crn");
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(cluster));
         Map<String, String> userMapping = Map.of("user", "val1");
-        Map<String, String> groupMapping = Map.of("group", "val2");
-        underTest.setAzureCloudIdentityMapping("env-crn", userMapping, groupMapping);
-        verify(clouderaManagerRangerUtil, times(1)).setAzureCloudIdentityMapping(eq("stack-crn"), eq(userMapping), eq(groupMapping));
+        underTest.setAzureCloudIdentityMapping("env-crn", userMapping);
+        verify(clouderaManagerRangerUtil, times(1)).setAzureCloudIdentityMapping(eq("stack-crn"), eq(userMapping));
     }
 
 }
