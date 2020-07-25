@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.flow;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.RDS_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
+import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsEvent.SDX_DIAGNOSTICS_COLLECTION_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeDatabaseBackupEvent.DATALAKE_DATABASE_BACKUP_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_EVENT;
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVENT;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
+import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
@@ -60,14 +62,14 @@ public class SdxReactorFlowManager {
         LOGGER.info("Trigger Datalake creation for: {}", cluster);
         String selector = RDS_WAIT_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new SdxEvent(selector, cluster.getId(), userId));
+        return notify(selector, new SdxEvent(selector, cluster.getId(), userId), "SDX Creation");
     }
 
     public FlowIdentifier triggerSdxDeletion(SdxCluster cluster, boolean forced) {
         LOGGER.info("Trigger Datalake deletion for: {} forced: {}", cluster, forced);
         String selector = SDX_DELETE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new SdxDeleteStartEvent(selector, cluster.getId(), userId, forced));
+        return notify(selector, new SdxDeleteStartEvent(selector, cluster.getId(), userId, forced), "SDX Deletion");
     }
 
     public FlowIdentifier triggerSdxRepairFlow(SdxCluster cluster, SdxRepairRequest repairRequest) {
@@ -75,41 +77,47 @@ public class SdxReactorFlowManager {
         SdxRepairSettings settings = SdxRepairSettings.from(repairRequest);
         String selector = SDX_REPAIR_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new SdxRepairStartEvent(selector, cluster.getId(), userId, settings));
+        return notify(selector, new SdxRepairStartEvent(selector, cluster.getId(), userId, settings), "SDX Repair");
     }
 
     public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId, SdxUpgradeReplaceVms replaceVms) {
         LOGGER.info("Trigger Datalake runtimeUpgrade for: {} with imageId: {} and replace vm param: {}", cluster, imageId, replaceVms);
         String selector = DATALAKE_UPGRADE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new DatalakeUpgradeStartEvent(selector, cluster.getId(), userId, imageId, replaceVms.getBooleanValue()));
+        return notify(selector, new DatalakeUpgradeStartEvent(selector, cluster.getId(),
+                userId, imageId, replaceVms.getBooleanValue()), "SDX runtime upgrade");
     }
 
     public FlowIdentifier triggerSdxStartFlow(SdxCluster cluster) {
         LOGGER.info("Trigger Datalake start for: {}", cluster);
         String selector = SDX_START_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new SdxStartStartEvent(selector, cluster.getId(), userId));
+        return notify(selector, new SdxStartStartEvent(selector, cluster.getId(), userId), "SDX Start");
     }
 
     public FlowIdentifier triggerSdxStopFlow(SdxCluster cluster) {
         LOGGER.info("Trigger Datalake start for: {}", cluster);
         String selector = SDX_STOP_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new SdxStartStopEvent(selector, cluster.getId(), userId));
+        return notify(selector, new SdxStartStopEvent(selector, cluster.getId(), userId), "SDX Stop");
     }
 
     public FlowIdentifier triggerDatalakeDatabaseBackupFlow(DatalakeDatabaseBackupStartEvent startEvent) {
         String selector = DATALAKE_DATABASE_BACKUP_EVENT.event();
-        return notify(selector, startEvent);
+        return notify(selector, startEvent, "SDX DB backup");
     }
 
     public FlowIdentifier triggerDatalakeDatabaseRestoreFlow(DatalakeDatabaseRestoreStartEvent startEvent) {
         String selector = DATALAKE_DATABASE_RESTORE_EVENT.event();
-        return notify(selector, startEvent);
+        return notify(selector, startEvent, "SDX DB restore");
     }
 
-    private FlowIdentifier notify(String selector, SdxEvent acceptable) {
+    public FlowIdentifier triggerDiagnosticsCollection(SdxDiagnosticsCollectionEvent startEvent) {
+        String selector = SDX_DIAGNOSTICS_COLLECTION_EVENT.event();
+        return notify(selector, startEvent, "SDX diagnostics collection");
+    }
+
+    private FlowIdentifier notify(String selector, SdxEvent acceptable, String flowName) {
         Map<String, Object> flowTriggerUserCrnHeader = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, acceptable.getUserId());
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(flowTriggerUserCrnHeader, acceptable);
 
@@ -125,9 +133,9 @@ public class SdxReactorFlowManager {
                         throw new FlowsAlreadyRunningException(String.format("Sdx cluster %s has flows under operation, request not allowed.",
                                 event.getData().getResourceId()));
                     case RUNNING_IN_FLOW:
-                        return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
+                        return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId(), flowName);
                     case RUNNING_IN_FLOW_CHAIN:
-                        return new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId());
+                        return new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId(), flowName);
                     default:
                         throw new IllegalStateException("Unsupported accept result type: " + accepted.getClass());
                 }

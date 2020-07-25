@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.controller.validation.diagnostics.DiagnosticsCollectionValidator;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -40,11 +41,15 @@ public class DiagnosticsTriggerService {
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
 
+    @Inject
+    private DiagnosticsCollectionValidator diagnosticsCollectionValidator;
+
     public void startDiagnosticsCollection(BaseDiagnosticsCollectionRequest request, String stackCrn, String userCrn) {
         Stack stack = stackService.getByCrn(stackCrn);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Starting diagnostics collection for Stack. Crn: '{}'", stack.getResourceCrn());
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
+        diagnosticsCollectionValidator.validate(request, telemetry, stackCrn);
         Map<String, Object> parameters = diagnosticsDataToMapConverter.convert(request, telemetry);
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())

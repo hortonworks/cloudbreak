@@ -11,7 +11,7 @@ public class DiagnosticsCollectionFailureEvent extends DiagnosticsCollectionEven
     private final Exception exception;
 
     public DiagnosticsCollectionFailureEvent(Long resourceId, Exception exception, String resourceCrn, Map<String, Object> parameters) {
-        super(FAILED_DIAGNOSTICS_COLLECTION_EVENT.name(), resourceId, resourceCrn, parameters);
+        super(FAILED_DIAGNOSTICS_COLLECTION_EVENT.name(), resourceId, resourceCrn, parameters, null, null);
         this.exception = exception;
     }
 
