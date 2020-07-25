@@ -42,9 +42,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.OnFailureActionConverter;
-import com.sequenceiq.cloudbreak.domain.converter.DatabaseAvailabilityTypeConverter;
-import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -52,8 +49,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.OnFailureActionConverter;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -64,6 +63,8 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
+import com.sequenceiq.cloudbreak.domain.converter.DatabaseAvailabilityTypeConverter;
+import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
@@ -199,6 +201,23 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     @Convert(converter = DatabaseAvailabilityTypeConverter.class)
     private DatabaseAvailabilityType externalDatabaseCreationType;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json flowIdentifier;
+
+    public FlowIdentifier getFlowIdentifier() {
+        if (flowIdentifier != null && flowIdentifier.getValue() != null) {
+            return JsonUtil.readValueOpt(flowIdentifier.getValue(), FlowIdentifier.class).orElse(null);
+        }
+        return null;
+    }
+
+    public void setFlowIdentifier(FlowIdentifier flowIdentifier) {
+        if (flowIdentifier != null) {
+            this.flowIdentifier = new Json(flowIdentifier);
+        }
+    }
 
     public String getResourceCrn() {
         return resourceCrn;

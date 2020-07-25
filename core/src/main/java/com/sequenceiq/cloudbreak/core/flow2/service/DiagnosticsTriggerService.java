@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToMapConverter;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 
 import reactor.bus.Event;
@@ -51,8 +52,12 @@ public class DiagnosticsTriggerService {
                 .withResourceCrn(stack.getResourceCrn())
                 .withSelector(DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_INIT_EVENT.selector())
                 .withParameters(parameters)
+                .withHosts(request.getHosts())
+                .withInstanceGroups(request.getInstaceGroups())
                 .build();
-        reactorNotifier.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn));
+        FlowIdentifier flowIdentifier = reactorNotifier.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn), "CM Diagnostic collection");
+        stack.setFlowIdentifier(flowIdentifier);
+        stackService.save(stack);
     }
 
     private Event.Headers getFlowHeaders(String userCrn) {

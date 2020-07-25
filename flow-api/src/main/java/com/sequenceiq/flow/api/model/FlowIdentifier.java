@@ -14,8 +14,11 @@ public class FlowIdentifier implements JsonEntity {
 
     private final String pollableId;
 
+    private final String flowName;
+
     @JsonCreator
-    public FlowIdentifier(@JsonProperty("type") FlowType type, @JsonProperty("pollableId") String pollableId) {
+    public FlowIdentifier(@JsonProperty("type") FlowType type, @JsonProperty("pollableId") String pollableId, @JsonProperty("flowName") String flowName) {
+        this.flowName = flowName;
         this.type = Objects.requireNonNull(type);
         if (!FlowType.NOT_TRIGGERED.equals(type)) {
             this.pollableId = Validate.notBlank(pollableId, "pollableId must not be empty");
@@ -28,7 +31,7 @@ public class FlowIdentifier implements JsonEntity {
     }
 
     public static FlowIdentifier notTriggered() {
-        return new FlowIdentifier(FlowType.NOT_TRIGGERED, null);
+        return new FlowIdentifier(FlowType.NOT_TRIGGERED, null, null);
     }
 
     public FlowType getType() {
@@ -37,6 +40,10 @@ public class FlowIdentifier implements JsonEntity {
 
     public String getPollableId() {
         return pollableId;
+    }
+
+    public String getFlowName() {
+        return flowName;
     }
 
     @Override

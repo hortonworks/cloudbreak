@@ -107,7 +107,7 @@ public class SdxRetryServiceTest {
 
         FlowIdentifier flowIdentifier = sdxRetryService.retrySdx(sdxCluster);
 
-        assertEquals(new FlowIdentifier(FlowType.FLOW, "FLOW_ID_1"), flowIdentifier);
+        assertEquals(new FlowIdentifier(FlowType.FLOW, "FLOW_ID_1", "flowName"), flowIdentifier);
         verify(stackV4Endpoint, times(1)).retry(any(), eq("sdxclustername"));
         verify(flow2Handler, times(1)).restartFlow(any(FlowLog.class));
     }
@@ -136,7 +136,7 @@ public class SdxRetryServiceTest {
 
         FlowIdentifier flowIdentifier = sdxRetryService.retrySdx(sdxCluster);
 
-        assertEquals(new FlowIdentifier(FlowType.FLOW, "FLOW_ID_1"), flowIdentifier);
+        assertEquals(new FlowIdentifier(FlowType.FLOW, "FLOW_ID_1", "flowName"), flowIdentifier);
         verify(stackV4Endpoint, times(0)).retry(any(), any());
         verify(flow2Handler, times(1)).restartFlow(any(FlowLog.class));
     }

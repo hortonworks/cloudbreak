@@ -73,9 +73,9 @@ public class OperationRetryService {
         if (lastSuccessfulStateFlowLog.isPresent()) {
             flow2Handler.restartFlow(lastSuccessfulStateFlowLog.get());
             if (lastSuccessfulStateFlowLog.get().getFlowChainId() != null) {
-                return new FlowIdentifier(FlowType.FLOW_CHAIN, lastSuccessfulStateFlowLog.get().getFlowChainId());
+                return new FlowIdentifier(FlowType.FLOW_CHAIN, lastSuccessfulStateFlowLog.get().getFlowChainId(), name);
             } else {
-                return new FlowIdentifier(FlowType.FLOW, lastSuccessfulStateFlowLog.get().getFlowId());
+                return new FlowIdentifier(FlowType.FLOW, lastSuccessfulStateFlowLog.get().getFlowId(), name);
             }
         } else {
             LOGGER.info("Cannot restart previous flow because there is no successful state in the flow. stackId: {}", stackId);

@@ -69,7 +69,7 @@ class SdxControllerTest {
     void createTest() throws NoSuchFieldException {
         SdxCluster sdxCluster = getValidSdxCluster();
         when(sdxService.createSdx(anyString(), anyString(), any(SdxClusterRequest.class), nullable(StackV4Request.class)))
-                .thenReturn(Pair.of(sdxCluster, new FlowIdentifier(FlowType.FLOW, "FLOW_ID")));
+                .thenReturn(Pair.of(sdxCluster, new FlowIdentifier(FlowType.FLOW, "FLOW_ID", "flowName")));
 
         SdxClusterRequest createSdxClusterRequest = new SdxClusterRequest();
         createSdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);

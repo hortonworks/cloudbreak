@@ -73,11 +73,11 @@ public class ReactorNotifier {
         return notify(stackId, selector, acceptable, stackService::getByIdWithTransaction);
     }
 
-    public void notify(BaseFlowEvent selectable, Event.Headers headers) {
+    public FlowIdentifier notify(BaseFlowEvent selectable, Event.Headers headers, String flowName) {
         Event<BaseFlowEvent> event = eventFactory.createEventWithErrHandler(new HashMap<>(headers.asMap()), selectable);
         LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selectable.selector(), event);
         reactor.notify(selectable.selector(), event);
-        checkFlowStatus(event, selectable.getResourceCrn());
+        return checkFlowStatus(event, selectable.getResourceCrn(), flowName);
     }
 
     public FlowIdentifier notify(Long stackId, String selector, Acceptable acceptable, Function<Long, Stack> getStackFn) {
@@ -86,10 +86,10 @@ public class ReactorNotifier {
         Optional.ofNullable(stack).map(Stack::getCluster).map(Cluster::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));
         reactorReporter.logInfoReport();
         reactor.notify(selector, event);
-        return checkFlowStatus(event, stack.getName());
+        return checkFlowStatus(event, stack.getName(), selector);
     }
 
-    private FlowIdentifier checkFlowStatus(Event<? extends Acceptable> event, String identifier) {
+    private FlowIdentifier checkFlowStatus(Event<? extends Acceptable> event, String identifier, String flowName) {
         try {
             FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             if (accepted == null) {
@@ -101,9 +101,9 @@ public class ReactorNotifier {
                     reactorReporter.logErrorReport();
                     throw new FlowsAlreadyRunningException(String.format("Stack %s has flows under operation, request not allowed.", identifier));
                 case RUNNING_IN_FLOW:
-                    return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
+                    return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId(), flowName);
                 case RUNNING_IN_FLOW_CHAIN:
-                    return new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId());
+                    return new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId(), flowName);
                 default:
                     throw new IllegalStateException("Unsupported accept result type: " + accepted.getClass());
             }

@@ -227,7 +227,7 @@ public class CloudbreakFlowServiceTest {
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
-        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, FLOW_ID);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, FLOW_ID, "flowName");
 
         underTest.saveLastCloudbreakFlowChainId(cluster, flowIdentifier);
 
@@ -243,7 +243,7 @@ public class CloudbreakFlowServiceTest {
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
-        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID, "flowName");
 
         underTest.saveLastCloudbreakFlowChainId(cluster, flowIdentifier);
 
