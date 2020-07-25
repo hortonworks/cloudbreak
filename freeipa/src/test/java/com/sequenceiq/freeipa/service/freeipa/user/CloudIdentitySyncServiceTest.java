@@ -67,7 +67,6 @@ class CloudIdentitySyncServiceTest {
                 .addUserCloudIdentities("user1", List.of(newAzureObjectId("object-id-1")))
                 .addUserCloudIdentities("user2", List.of(newAzureObjectId("object-id-2")))
                 .addUserCloudIdentities("user3", List.of(newAzureObjectId("object-id-3")))
-                .addGroupCloudIdentities("group1", List.of(newAzureObjectId("object-id-4")))
                 .setUsersState(usersState)
                 .build();
 
@@ -75,7 +74,6 @@ class CloudIdentitySyncServiceTest {
 
         SetRangerCloudIdentityMappingRequest expectedRequest = new SetRangerCloudIdentityMappingRequest();
         expectedRequest.setAzureUserMapping(Map.of("user1", "object-id-1", "user2", "object-id-2"));
-        expectedRequest.setAzureGroupMapping(Map.of("group1", "object-id-4"));
         verify(sdxEndpoint, times(1)).setRangerCloudIdentityMapping(eq("envcrn"), eq(expectedRequest));
     }
 

@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CloudIdentity;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
@@ -68,9 +67,6 @@ public class UmsUsersStateProvider {
             Map<String, FmsGroup> crnToFmsGroup = grpcUmsClient.listGroups(actorCrn, accountId, List.of(), requestIdOptional).stream()
                     .collect(Collectors.toMap(Group::getCrn, this::umsGroupToGroup));
 
-            Map<String, List<CloudIdentity>> groupCloudIdentityMap = grpcUmsClient.listGroups(actorCrn, accountId, List.of(), requestIdOptional).stream()
-                    .collect(Collectors.toMap(Group::getGroupName, Group::getCloudIdentitiesList));
-
             Map<WorkloadAdministrationGroup, FmsGroup> wags = grpcUmsClient.listWorkloadAdministrationGroups(INTERNAL_ACTOR_CRN, accountId, requestIdOptional)
                     .stream()
                     .collect(Collectors.toMap(wag -> wag, wag -> nameToGroup(wag.getWorkloadAdministrationGroupName())));
@@ -82,8 +78,6 @@ public class UmsUsersStateProvider {
                 Set<String> wagNamesForOtherEnvironments = new HashSet<>();
 
                 crnToFmsGroup.values().forEach(usersStateBuilder::addGroup);
-
-                groupCloudIdentityMap.forEach(umsUsersStateBuilder::addGroupCloudIdentities);
 
                 // Only add workload admin groups that belong to this environment.
                 // At the same time, build a set of workload admin groups that are

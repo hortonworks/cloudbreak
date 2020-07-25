@@ -40,8 +40,6 @@ public class ClouderaManagerRangerUtil {
 
     private static final String AZURE_USER_MAPPING = "ranger_usersync_azure_user_mapping";
 
-    private static final String AZURE_GROUP_MAPPING = "ranger_usersync_azure_group_mapping";
-
     private static final MapJoiner CLOUD_IDENTITY_CONFIG_MAP_JOINER =
             Joiner.on(";").withKeyValueSeparator("=");
 
@@ -119,7 +117,7 @@ public class ClouderaManagerRangerUtil {
         }
     }
 
-    public void setAzureCloudIdentityMapping(String stackCrn, Map<String, String> azureUserMapping, Map<String, String> azureGroupMapping) throws ApiException {
+    public void setAzureCloudIdentityMapping(String stackCrn, Map<String, String> azureUserMapping) throws ApiException {
         // NOTE: The necessary configs changed here are only available in CM7.2-1
         ApiClient client = clouderaManagerProxiedClientFactory.getProxiedClouderaManagerClient(stackCrn);
         String clusterName = getClusterName(client);
@@ -130,7 +128,6 @@ public class ClouderaManagerRangerUtil {
         } else {
             ApiConfigList configList = new ApiConfigList();
             configList.addItemsItem(newCloudIdentityConfig(AZURE_USER_MAPPING, azureUserMapping));
-            configList.addItemsItem(newCloudIdentityConfig(AZURE_GROUP_MAPPING, azureGroupMapping));
             rolesResourceApi.updateRoleConfig(clusterName, rangerUserSyncRoleName, RANGER_SERVICE_NAME,
                     "Updating Azure Cloud Identity Mapping through Cloudbreak",
                     configList);

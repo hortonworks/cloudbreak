@@ -24,21 +24,21 @@ public class RangerCloudIdentityService {
     @Inject
     private SdxService sdxService;
 
-    private void setAzureCloudIdentityMapping(SdxCluster sdxCluster, Map<String, String> azureUserMapping, Map<String, String> azureGroupMapping) {
+    private void setAzureCloudIdentityMapping(SdxCluster sdxCluster, Map<String, String> azureUserMapping) {
         String stackCrn = sdxCluster.getStackCrn();
         LOGGER.info("Updating azure cloud id mappings for datalake stack crn = {}", stackCrn);
         try {
-            clouderaManagerRangerUtil.setAzureCloudIdentityMapping(stackCrn, azureUserMapping, azureGroupMapping);
+            clouderaManagerRangerUtil.setAzureCloudIdentityMapping(stackCrn, azureUserMapping);
         } catch (ApiException e) {
             LOGGER.error("Encountered api exception", e);
             throw new RangerCloudIdentitySyncException("Encountered api exception", e);
         }
     }
 
-    public void setAzureCloudIdentityMapping(String environmentCrn, Map<String, String> azureUserMapping, Map<String, String> azureGroupMapping) {
+    public void setAzureCloudIdentityMapping(String environmentCrn, Map<String, String> azureUserMapping) {
         List<SdxCluster> sdxClusters = sdxService.listSdxByEnvCrn(environmentCrn);
         List<String> sdxClusterCrns = sdxClusters.stream().map(SdxCluster::getCrn).collect(Collectors.toList());
         LOGGER.info("Setting Azure cloud id mappings for datalake clusters = {}, environment = {}", sdxClusterCrns, environmentCrn);
-        sdxClusters.forEach(sdxCluster -> setAzureCloudIdentityMapping(sdxCluster, azureUserMapping, azureGroupMapping));
+        sdxClusters.forEach(sdxCluster -> setAzureCloudIdentityMapping(sdxCluster, azureUserMapping));
     }
 }
