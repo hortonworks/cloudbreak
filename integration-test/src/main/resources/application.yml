@@ -88,7 +88,7 @@ integrationtest:
     publicKeyId: api-e2e-test
     credential:
       type: role
-      roleArn: 
+      roleArn:
       accessKeyId:
       secretKey:
     instance:
@@ -240,6 +240,8 @@ integrationtest:
     url: https://logs-dev.sre.cloudera.com/app/kibana#/discover
     cluster:
     app:
+
 altus:
   audit:
     endpoint: localhost:8982
+    enabled: false

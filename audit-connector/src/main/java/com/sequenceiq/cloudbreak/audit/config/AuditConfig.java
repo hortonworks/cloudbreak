@@ -1,7 +1,15 @@
 package com.sequenceiq.cloudbreak.audit.config;
 
-import com.sequenceiq.cloudbreak.audit.converter.AttemptAuditEventResultBuilderUpdater;
-import com.sequenceiq.cloudbreak.audit.converter.AuditEventBuilderUpdater;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -10,14 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import com.sequenceiq.cloudbreak.audit.converter.AttemptAuditEventResultBuilderUpdater;
+import com.sequenceiq.cloudbreak.audit.converter.AuditEventBuilderUpdater;
+import com.sequenceiq.cloudbreak.structuredevent.conf.StructuredEventEnablementConfig;
 
 @Configuration
 public class AuditConfig {
@@ -32,6 +35,9 @@ public class AuditConfig {
     private String host;
 
     private int port;
+
+    @Inject
+    private StructuredEventEnablementConfig structuredEventEnablementConfig;
 
     @Inject
     private List<AuditEventBuilderUpdater> auditEventBuilderUpdaters;
@@ -50,6 +56,8 @@ public class AuditConfig {
             port = parts.length == 2
                     ? Integer.parseInt(parts[1])
                     : DEFAULT_AUDIT_PORT;
+        } else if (structuredEventEnablementConfig.isAuditServiceEnabled()) {
+            throw new IllegalStateException("Audit service is enabled, but altus.audit.endpoint is not configured");
         }
     }
 
