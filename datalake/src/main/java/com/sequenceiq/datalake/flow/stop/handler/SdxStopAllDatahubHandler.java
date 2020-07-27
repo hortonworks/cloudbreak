@@ -38,7 +38,7 @@ public class SdxStopAllDatahubHandler extends ExceptionCatcherEventHandler<SdxSt
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         SdxStopAllDatahubRequest stopAllDatahubRequest = event.getData();
         Long sdxId = stopAllDatahubRequest.getResourceId();
         String userId = stopAllDatahubRequest.getUserId();
@@ -58,6 +58,6 @@ public class SdxStopAllDatahubHandler extends ExceptionCatcherEventHandler<SdxSt
             LOGGER.error("Polling failed for stack: {}", sdxId);
             response = new SdxStopFailedEvent(sdxId, userId, exception);
         }
-        sendEvent(response, event);
+        return response;
     }
 }

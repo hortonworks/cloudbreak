@@ -1,5 +1,16 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale.handler;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -10,15 +21,6 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleFailureEvent
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesResponse;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class CollectAdditionalHostnamesHandler extends ExceptionCatcherEventHandler<CollectAdditionalHostnamesRequest> {
@@ -39,7 +41,7 @@ public class CollectAdditionalHostnamesHandler extends ExceptionCatcherEventHand
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         CollectAdditionalHostnamesRequest request = event.getData();
         Selectable result;
         try {
@@ -52,7 +54,7 @@ public class CollectAdditionalHostnamesHandler extends ExceptionCatcherEventHand
             result = new DownscaleFailureEvent(request.getResourceId(), "Downscale Collect Additional Hostnames",
                     Set.of(), Map.of(), e);
         }
-        sendEvent(result, event);
+        return result;
     }
 
     private Set<String> getHostnamesFromFreeIpaServers(Long stackId) throws FreeIpaClientException {

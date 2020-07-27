@@ -37,7 +37,7 @@ public class SdxStopWaitHandler extends ExceptionCatcherEventHandler<SdxStopWait
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         SdxStopWaitRequest waitRequest = event.getData();
         Long sdxId = waitRequest.getResourceId();
         String userId = waitRequest.getUserId();
@@ -58,7 +58,7 @@ public class SdxStopWaitHandler extends ExceptionCatcherEventHandler<SdxStopWait
             LOGGER.error("Stop polling failed for stack: {}", sdxId);
             response = new SdxStopFailedEvent(sdxId, userId, exception);
         }
-        sendEvent(response, event);
+        return response;
     }
 
     @Override

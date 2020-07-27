@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.reactor.api.handler;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
-import org.springframework.stereotype.Component;
 
 @Component
 class ExceptionCatcherEventHandlerTestHelper extends ExceptionCatcherEventHandler<Payload> {
@@ -22,13 +23,11 @@ class ExceptionCatcherEventHandlerTestHelper extends ExceptionCatcherEventHandle
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         if (throwException) {
             throw new RuntimeException("Expected exception");
         }
-        if (sendEventObject != null) {
-            sendEvent(sendEventObject, event);
-        }
+        return sendEventObject;
     }
 
     @Override

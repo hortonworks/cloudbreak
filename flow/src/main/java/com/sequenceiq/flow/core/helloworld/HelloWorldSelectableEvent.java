@@ -1,26 +1,19 @@
 package com.sequenceiq.flow.core.helloworld;
 
-import org.springframework.util.StringUtils;
-
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 
-public class HelloWorldSelectableEvent implements Selectable {
+import reactor.rx.Promise;
+
+public abstract class HelloWorldSelectableEvent implements Selectable, Acceptable {
+
     private Long resourceId;
 
-    private String selector;
+    private final Promise<AcceptResult> accepted = new Promise<>();
 
     public HelloWorldSelectableEvent(Long resourceId) {
-        this(resourceId, null);
-    }
-
-    public HelloWorldSelectableEvent(Long resourceId, String selector) {
         this.resourceId = resourceId;
-        this.selector = selector;
-    }
-
-    @Override
-    public String selector() {
-        return StringUtils.isEmpty(selector) ? selector(getClass()) : selector;
     }
 
     @Override
@@ -28,11 +21,14 @@ public class HelloWorldSelectableEvent implements Selectable {
         return resourceId;
     }
 
-    public static String selector(Class<?> clazz) {
-        return clazz.getSimpleName().toUpperCase();
+    @Override
+    public Promise<AcceptResult> accepted() {
+        return accepted;
     }
 
-    public static String failureSelector(Class<?> clazz) {
-        return clazz.getSimpleName().toUpperCase() + "_ERROR";
+    @Override
+    public String selector() {
+        return getClass().getSimpleName();
     }
+
 }

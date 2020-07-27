@@ -1,5 +1,14 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.backup;
 
+import java.util.Collections;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
@@ -19,15 +28,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
-
-import java.util.Collections;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 @Component
 public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<DatabaseBackupRequest> {
@@ -59,7 +59,7 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         DatabaseBackupRequest request = event.getData();
         Selectable result;
         Long stackId = request.getResourceId();
@@ -79,6 +79,6 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
             LOGGER.error("Database backup event failed", e);
             result = new DatabaseBackupFailedEvent(stackId, e, DetailedStackStatus.DATABASE_BACKUP_FAILED);
         }
-        sendEvent(result, event);
+        return result;
     }
 }

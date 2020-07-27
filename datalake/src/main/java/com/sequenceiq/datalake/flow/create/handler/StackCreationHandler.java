@@ -50,7 +50,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
     }
 
     @Override
-    protected void doAccept(HandlerEvent handlerEvent) {
+    protected Selectable doAccept(HandlerEvent handlerEvent) {
         StackCreationWaitRequest stackCreationWaitRequest = handlerEvent.getData();
         Long sdxId = stackCreationWaitRequest.getResourceId();
         String userId = stackCreationWaitRequest.getUserId();
@@ -75,7 +75,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
             LOGGER.error("Something wrong happened in stack creation wait phase", anotherException);
             response = new SdxCreateFailedEvent(sdxId, userId, anotherException);
         }
-        sendEvent(response, handlerEvent);
+        return response;
     }
 
     private void setStackCreatedStatus(Long datalakeId) {

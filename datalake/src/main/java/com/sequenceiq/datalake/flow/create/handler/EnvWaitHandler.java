@@ -43,7 +43,7 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         EnvWaitRequest envWaitRequest = event.getData();
         Long datalakeId = envWaitRequest.getResourceId();
         String userId = envWaitRequest.getUserId();
@@ -67,7 +67,7 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
             LOGGER.error("Something wrong happened in sdx creation wait phase", anotherException);
             response = new SdxCreateFailedEvent(datalakeId, userId, anotherException);
         }
-        sendEvent(response, event);
+        return response;
     }
 
     private void setEnvCreatedStatus(Long datalakeId) {

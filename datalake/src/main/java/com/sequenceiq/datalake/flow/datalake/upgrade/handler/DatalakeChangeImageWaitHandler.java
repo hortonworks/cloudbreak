@@ -43,7 +43,7 @@ public class DatalakeChangeImageWaitHandler extends ExceptionCatcherEventHandler
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         DatalakeChangeImageWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
@@ -73,6 +73,6 @@ public class DatalakeChangeImageWaitHandler extends ExceptionCatcherEventHandler
             LOGGER.error("Change image polling failed for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId, exception);
         }
-        sendEvent(response, event);
+        return response;
     }
 }

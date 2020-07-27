@@ -33,7 +33,7 @@ public class ClusterManagerUpgradeHandler extends ExceptionCatcherEventHandler<C
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         LOGGER.debug("Accepting Cluster Manager upgrade event..");
         ClusterManagerUpgradeRequest request = event.getData();
         Selectable result;
@@ -44,6 +44,6 @@ public class ClusterManagerUpgradeHandler extends ExceptionCatcherEventHandler<C
             LOGGER.info("Cluster Manager upgrade event failed", e);
             result = new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED);
         }
-        sendEvent(result, event);
+        return result;
     }
 }

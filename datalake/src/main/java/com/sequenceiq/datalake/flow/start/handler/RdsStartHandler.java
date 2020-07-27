@@ -50,7 +50,7 @@ public class RdsStartHandler extends ExceptionCatcherEventHandler<RdsWaitingToSt
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         RdsWaitingToStartRequest rdsWaitRequest = event.getData();
         Long sdxId = rdsWaitRequest.getResourceId();
         String userId = rdsWaitRequest.getUserId();
@@ -83,6 +83,6 @@ public class RdsStartHandler extends ExceptionCatcherEventHandler<RdsWaitingToSt
             LOGGER.error("Something wrong happened in sdx database start wait phase", anotherException);
             response = new SdxStartFailedEvent(sdxId, userId, anotherException);
         }
-        sendEvent(response, event);
+        return response;
     }
 }
