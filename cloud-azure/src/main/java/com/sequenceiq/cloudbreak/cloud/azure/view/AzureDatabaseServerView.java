@@ -97,4 +97,8 @@ public class AzureDatabaseServerView {
     public Integer getPort() {
         return databaseServer.getPort();
     }
+
+    public String getLocation() {
+        return databaseServer.getLocation();
+    }
 }

@@ -119,7 +119,7 @@
         },
         "location": {
             "type": "string",
-            "defaultValue": "[resourceGroup().location]",
+            "defaultValue": "${location}",
             "metadata": {
                 "description": "The location in which the database should be deployed."
             }

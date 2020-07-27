@@ -154,6 +154,7 @@ public class AzureTemplateBuilder {
             model.put("subnets", azureNetworkView.getSubnets());
             // if subnet number is 1 then Azure does not create the endpoints if the batchsize is 5
             model.put("batchSize", azureNetworkView.getSubnets().split(",").length >= defaultBatchSize ? defaultBatchSize : 1);
+            model.put("location", azureDatabaseServerView.getLocation());
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(databaseStack), model);
             LOGGER.debug("Generated ARM database template: {}", AnonymizerUtil.anonymize(generatedTemplate));
             return generatedTemplate;

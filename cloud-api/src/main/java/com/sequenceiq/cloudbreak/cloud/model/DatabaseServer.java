@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class DatabaseServer extends DynamicModel {
 
@@ -29,9 +29,11 @@ public class DatabaseServer extends DynamicModel {
 
     private final InstanceStatus status;
 
+    private final String location;
+
     private DatabaseServer(String serverId, String flavor, DatabaseEngine engine, String connectionDriver,
             String connectorJarUrl, String rootUserName, String rootPassword,
-            Integer port, Long storageSize, Security security, InstanceStatus status, Map<String, Object> parameters) {
+            Integer port, Long storageSize, Security security, InstanceStatus status, String location, Map<String, Object> parameters) {
         super(parameters);
         this.serverId = serverId;
         this.flavor = flavor;
@@ -44,6 +46,7 @@ public class DatabaseServer extends DynamicModel {
         this.storageSize = storageSize;
         this.security = security;
         this.status = status;
+        this.location = location;
     }
 
     public String getServerId() {
@@ -90,6 +93,10 @@ public class DatabaseServer extends DynamicModel {
         return status;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
     @Override
     public String toString() {
         return "DatabaseServer{"
@@ -133,6 +140,8 @@ public class DatabaseServer extends DynamicModel {
         private Security security;
 
         private InstanceStatus status;
+
+        private String location;
 
         private Map<String, Object> params = new HashMap<>();
 
@@ -191,6 +200,11 @@ public class DatabaseServer extends DynamicModel {
             return this;
         }
 
+        public Builder location(String location) {
+            this.location = location;
+            return this;
+        }
+
         public Builder params(Map<String, Object> params) {
             this.params = params;
             return this;
@@ -198,7 +212,7 @@ public class DatabaseServer extends DynamicModel {
 
         public DatabaseServer build() {
             return new DatabaseServer(serverId, flavor, engine, connectionDriver, connectorJarUrl, rootUserName, rootPassword,
-                port, storageSize, security, status, params);
+                port, storageSize, security, status, location, params);
         }
 
     }
