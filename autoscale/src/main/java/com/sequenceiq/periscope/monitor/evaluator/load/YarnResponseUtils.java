@@ -2,11 +2,9 @@ package com.sequenceiq.periscope.monitor.evaluator.load;
 
 import static com.sequenceiq.periscope.monitor.evaluator.ScalingConstants.DEFAULT_MAX_SCALE_UP_STEP_SIZE;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -23,32 +21,16 @@ public class YarnResponseUtils {
 
     public List<String> getYarnRecommendedDecommissionHostsForHostGroup(String clusterCrn, YarnScalingServiceV1Response yarnResponse,
             Map<String, String> hostFqdnsToInstanceId, int maxAllowedDownScale, Optional<Integer> mandatoryDownScaleCount) {
-        Set<String> consideredNodeIds = new HashSet<>();
-        Integer allowedDownscale = Math.max(maxAllowedDownScale, mandatoryDownScaleCount.orElse(0));
+        // yarnResponse may not have maxAllowedDownscale candidates. This is expected when using LoadBasedDownscaling
+        // where a force downscale is not required. In this case downscaling is done based on yarn recommended count.
+        Integer allowedDownscale = mandatoryDownScaleCount.orElse(maxAllowedDownScale);
         List<String> decommissionNodes = yarnResponse.getScaleDownCandidates().orElse(List.of()).stream()
                 .map(YarnScalingServiceV1Response.DecommissionCandidate::getNodeId)
                 .map(nodeFqdn -> nodeFqdn.split(":")[0])
                 .filter(s -> hostFqdnsToInstanceId.keySet().contains(s))
                 .map(nodeFqdn -> hostFqdnsToInstanceId.get(nodeFqdn))
                 .limit(allowedDownscale)
-                .map(nodeId -> {
-                    consideredNodeIds.add(nodeId);
-                    return nodeId;
-                })
                 .collect(Collectors.toList());
-
-        //HostGroup candidates if mandatoryDownScaleCount is not met based on yarnResponse.
-        int forcedCandidatesCount = mandatoryDownScaleCount.orElse(0) - decommissionNodes.size();
-        if (forcedCandidatesCount > 0) {
-            List forcedCandidates = hostFqdnsToInstanceId.keySet().stream()
-                    .filter(nodeId -> !consideredNodeIds.contains(nodeId))
-                    .limit(forcedCandidatesCount).collect(Collectors.toList());
-
-            LOGGER.info("Forced downscaling candidates count '{}', candidates '{}' in cluster '{}' to achieve mandatory " +
-                            "downscaletarget '{}'.", forcedCandidates.size(), forcedCandidates, clusterCrn,
-                    mandatoryDownScaleCount.orElse(0));
-            decommissionNodes.addAll(forcedCandidates);
-        }
 
         return decommissionNodes;
     }
