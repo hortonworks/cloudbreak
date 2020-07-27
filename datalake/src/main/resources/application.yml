@@ -59,6 +59,7 @@ altus:
     host: localhost
   audit:
     enabled: true
+    endpoint: localhost:8982
 
 datalake:
   cert.dir: /certs/
