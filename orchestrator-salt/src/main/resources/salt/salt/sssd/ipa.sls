@@ -16,6 +16,7 @@ join_ipa:
   cmd.run:
 {% if metadata.platform != 'YARN' %}
     - name: |
+        ipa-client-install --unattended --uninstall
         ipa-client-install --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
           --domain={{salt['pillar.get']('sssd-ipa:domain')}} --mkhomedir --principal={{salt['pillar.get']('sssd-ipa:principal')}} \
           {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
@@ -24,6 +25,7 @@ join_ipa:
           --password $PW --unattended --force-join --ssh-trust-dns --no-ntp && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/ipa-join-executed
 {% else %}
     - name: |
+        runuser -l root -c 'ipa-client-install --unattended --uninstall
         runuser -l root -c 'ipa-client-install --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
           --domain={{salt['pillar.get']('sssd-ipa:domain')}} --mkhomedir --principal={{salt['pillar.get']('sssd-ipa:principal')}} \
           {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
