@@ -143,10 +143,9 @@ public class YarnLoadEvaluatorTest {
         return Stream.of(
                 //TestCase,CurrentHostGroupCount,YarnRecommendedDecommissionCount,ExpectedDecommissionCount
                 Arguments.of("DOWN_SCALE_ALLOWED", 7, 5, 7 - TEST_HOSTGROUP_MIN_SIZE),
-                Arguments.of("DOWN_SCALE_FORCED", TEST_HOSTGROUP_MAX_SIZE + 20, 0, 20),
-                Arguments.of("DOWN_SCALE_MAX_RECOMMENDED", TEST_HOSTGROUP_MAX_SIZE + 20, 30, 30),
-                Arguments.of("DOWN_SCALE_BEYOND_MAX_LIMIT", TEST_HOSTGROUP_MAX_SIZE + 20, 5, 20),
-                Arguments.of("DOWN_SCALE_AT_YARN_LIMIT", TEST_HOSTGROUP_MAX_SIZE + 20, 10, 20),
+                Arguments.of("DOWN_SCALE_FORCED", TEST_HOSTGROUP_MAX_SIZE + 20, 20, 20),
+                Arguments.of("DOWN_SCALE_FORCED_AND_EXTRA", TEST_HOSTGROUP_MAX_SIZE + 20, 30, 20),
+                Arguments.of("DOWN_SCALE_RECOMMENDED", TEST_HOSTGROUP_MAX_SIZE, 100, 100),
                 Arguments.of("DOWN_SCALE_ALLOWED_MIN_LIMIT", 10, 10, 10 - TEST_HOSTGROUP_MIN_SIZE),
                 Arguments.of("DOWN_SCALE_ALLOWED_AT_MIN_LIMIT", 20, 20 - TEST_HOSTGROUP_MIN_SIZE, 20 - TEST_HOSTGROUP_MIN_SIZE),
                 Arguments.of("DOWN_SCALE_BEYOND_MIN_LIMIT", 10, 52, 10 - TEST_HOSTGROUP_MIN_SIZE),
