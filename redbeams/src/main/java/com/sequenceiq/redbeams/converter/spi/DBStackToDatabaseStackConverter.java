@@ -96,6 +96,7 @@ public class DBStackToDatabaseStackConverter {
             .security(securityGroup == null ? null : new Security(Collections.emptyList(), securityGroup.getSecurityGroupIds()))
             // TODO / FIXME converter caller decides this?
             .status(CREATE_REQUESTED)
+                .location(dbStack.getRegion())
             .params(params);
 
         return builder.build();
