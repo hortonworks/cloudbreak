@@ -50,8 +50,7 @@ public interface PlatformResourceEndpoint {
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
             @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("resourceType") CdpResourceType resourceType,
-            @QueryParam("environmentCrn") String environmentCrn);
+            @QueryParam("resourceType") CdpResourceType resourceType);
 
     @GET
     @Path("regions")
@@ -64,8 +63,7 @@ public interface PlatformResourceEndpoint {
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
             @QueryParam("availabilityZone") String availabilityZone,
-            @DefaultValue("true") @QueryParam("availabilityZonesNeeded") boolean availabilityZonesNeeded,
-            @QueryParam("environmentCrn") String environmentCrn);
+            @DefaultValue("true") @QueryParam("availabilityZonesNeeded") boolean availabilityZonesNeeded);
 
     @GET
     @Path("disk_types")
@@ -84,8 +82,7 @@ public interface PlatformResourceEndpoint {
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("environmentCrn") String environmentCrn);
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("ip_pools")
@@ -97,8 +94,7 @@ public interface PlatformResourceEndpoint {
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("environmentCrn") String environmentCrn);
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("gateways")
@@ -110,8 +106,7 @@ public interface PlatformResourceEndpoint {
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("environmentCrn") String environmentCrn);
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("encryption_keys")
@@ -123,8 +118,7 @@ public interface PlatformResourceEndpoint {
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("environmentCrn") String environmentCrn);
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("security_groups")
@@ -136,8 +130,7 @@ public interface PlatformResourceEndpoint {
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("environmentCrn") String environmentCrn);
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("ssh_keys")
@@ -149,8 +142,7 @@ public interface PlatformResourceEndpoint {
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("environmentCrn") String environmentCrn);
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("access_configs")
@@ -163,8 +155,7 @@ public interface PlatformResourceEndpoint {
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
             @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("accessConfigType") @DefaultValue("INSTANCE_PROFILE") AccessConfigTypeQueryParam accessConfigType,
-            @QueryParam("environmentCrn") String environmentCrn);
+            @QueryParam("accessConfigType") @DefaultValue("INSTANCE_PROFILE") AccessConfigTypeQueryParam accessConfigType);
 
     @GET
     @Path("tag_specifications")
@@ -183,8 +174,7 @@ public interface PlatformResourceEndpoint {
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") @NotEmpty String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("environmentCrn") String environmentCrn);
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("resource_groups")
@@ -196,6 +186,5 @@ public interface PlatformResourceEndpoint {
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("environmentCrn") String environmentCrn);
+            @QueryParam("availabilityZone") String availabilityZone);
 }

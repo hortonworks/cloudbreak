@@ -31,6 +31,10 @@ class PlatformParameterServiceTest {
 
     public static final String ACCOUNT_ID = "accid";
 
+    public static final String CREDENTIAL_NAME = "credname";
+
+    public static final String CREDENTIAL_CRN = "crn";
+
     public static final String REGION = "region";
 
     public static final String PLATFORM_VARIANT = "variant";
@@ -38,8 +42,6 @@ class PlatformParameterServiceTest {
     public static final String AVAILIBILTY_ZONE = "availabilityZone";
 
     public static final String EMPTY = "";
-
-    public static final String ENV_CRN = "envCrn";
 
     @MockBean
     private CloudParameterService cloudParameterService;
@@ -63,17 +65,27 @@ class PlatformParameterServiceTest {
     }
 
     @Test
-    void getPlatformResourceRequestWithoutEnv() {
+    void getPlatformResourceRequestWithoutCred() {
         assertThrows(BadRequestException.class, () -> platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID,
-                null, REGION, PLATFORM_VARIANT, AVAILIBILTY_ZONE));
+                null, null, REGION, PLATFORM_VARIANT, AVAILIBILTY_ZONE));
     }
 
     @Test
-    void getPlatformResourceRequestCredentialByEnvCrn() {
+    void getPlatformResourceRequestCredentialByName() {
         final Credential credential = new Credential();
         credential.setCloudPlatform("anotherVariant");
-        when(credentialService.getByEnvironmentCrnAndAccountId(eq(ENV_CRN), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(credential);
-        PlatformResourceRequest result = platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID, ENV_CRN,
+        when(credentialService.getByNameForAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(credential);
+        PlatformResourceRequest result = platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID, CREDENTIAL_NAME, null,
+                REGION, PLATFORM_VARIANT, AVAILIBILTY_ZONE);
+        assertEquals(credential, result.getCredential());
+    }
+
+    @Test
+    void getPlatformResourceRequestCredentialByCrn() {
+        final Credential credential = new Credential();
+        credential.setCloudPlatform("anotherVariant");
+        when(credentialService.getByCrnForAccountId(eq(CREDENTIAL_CRN), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(credential);
+        PlatformResourceRequest result = platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID, null, CREDENTIAL_CRN,
                 REGION, PLATFORM_VARIANT, AVAILIBILTY_ZONE);
         assertEquals(credential, result.getCredential());
     }
@@ -83,8 +95,8 @@ class PlatformParameterServiceTest {
         final Credential credential = new Credential();
         String platformFromCredential = "anotherVariant";
         credential.setCloudPlatform(platformFromCredential);
-        when(credentialService.getByEnvironmentCrnAndAccountId(eq(ENV_CRN), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(credential);
-        PlatformResourceRequest result = platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID, ENV_CRN,
+        when(credentialService.getByNameForAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(credential);
+        PlatformResourceRequest result = platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID, CREDENTIAL_NAME, null,
                 null, EMPTY, null);
         assertEquals(platformFromCredential, result.getCloudPlatform());
         assertEquals(platformFromCredential, result.getPlatformVariant());
@@ -97,8 +109,8 @@ class PlatformParameterServiceTest {
         final Credential credential = new Credential();
         String platformFromCredential = "anotherVariant";
         credential.setCloudPlatform(platformFromCredential);
-        when(credentialService.getByEnvironmentCrnAndAccountId(eq(ENV_CRN), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(credential);
-        PlatformResourceRequest result = platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID, ENV_CRN,
+        when(credentialService.getByNameForAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(credential);
+        PlatformResourceRequest result = platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID, CREDENTIAL_NAME, null,
                 REGION, PLATFORM_VARIANT, AVAILIBILTY_ZONE);
         assertEquals(platformFromCredential, result.getCloudPlatform());
         assertEquals(null, result.getPlatformVariant());

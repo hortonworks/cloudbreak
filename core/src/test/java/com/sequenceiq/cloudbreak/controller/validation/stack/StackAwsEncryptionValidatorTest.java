@@ -46,7 +46,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 @RunWith(MockitoJUnitRunner.class)
 public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBase {
 
-    private static final String ENV_CRN = "envCrn";
+    private static final String CREDENTIAL_NAME = "someCred";
 
     private static final String TEST_ENCRYPTION_KEY = "arn:aws:kms:eu-west-2:123456789012:key/1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p";
 
@@ -110,13 +110,12 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     @Before
     public void setup() {
         credentialResponse = new CredentialResponse();
-        credentialResponse.setName("cred");
+        credentialResponse.setName(CREDENTIAL_NAME);
         when(templateRequestValidator.validate(any())).thenReturn(ValidationResult.builder().build());
-        when(subject.getEnvironmentCrn()).thenReturn("credCrn");
+        when(subject.getEnvironmentCrn()).thenReturn("envCrn");
         when(subject.getPlacement()).thenReturn(placementSettingsRequest);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredential(credentialResponse);
-        environmentResponse.setCrn(ENV_CRN);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
     }
 
@@ -154,7 +153,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(platformResourceClientService, times(1)).getEncryptionKeys(ENV_CRN, null);
+        verify(platformResourceClientService, times(1)).getEncryptionKeys(CREDENTIAL_NAME, null);
     }
 
     @Test
@@ -167,7 +166,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(platformResourceClientService, times(1)).getEncryptionKeys(ENV_CRN, null);
+        verify(platformResourceClientService, times(1)).getEncryptionKeys(CREDENTIAL_NAME, null);
     }
 
     @Test
@@ -179,7 +178,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         ValidationResult result = underTest.validate(subject);
 
         assertValidationErrorIsEmpty(result.getErrors());
-        verify(platformResourceClientService, times(1)).getEncryptionKeys(ENV_CRN, null);
+        verify(platformResourceClientService, times(1)).getEncryptionKeys(CREDENTIAL_NAME, null);
     }
 
     private InstanceGroupV4Request createRequestWithParameters(AwsInstanceTemplateV4Parameters parameters) {

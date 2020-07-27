@@ -48,13 +48,15 @@ public class PlatformParameterService {
 
     public PlatformResourceRequest getPlatformResourceRequest(
             String accountId,
-            String environmentCrn,
+            String credentialName,
+            String credentialCrn,
             String region,
             String platformVariant,
             String availabilityZone) {
         return getPlatformResourceRequest(
                 accountId,
-                environmentCrn,
+                credentialName,
+                credentialCrn,
                 region,
                 platformVariant,
                 availabilityZone,
@@ -64,14 +66,16 @@ public class PlatformParameterService {
 
     public PlatformResourceRequest getPlatformResourceRequest(
             String accountId,
-            String environmentCrn,
+            String credentialName,
+            String credentialCrn,
             String region,
             String platformVariant,
             String availabilityZone,
             AccessConfigTypeQueryParam accessConfigType) {
         return getPlatformResourceRequest(
                 accountId,
-                environmentCrn,
+                credentialName,
+                credentialCrn,
                 region,
                 platformVariant,
                 availabilityZone,
@@ -82,7 +86,8 @@ public class PlatformParameterService {
     //CHECKSTYLE:OFF
     public PlatformResourceRequest getPlatformResourceRequest(
             String accountId,
-            String environmentCrn,
+            String credentialName,
+            String credentialCrn,
             String region,
             String platformVariant,
             String availabilityZone,
@@ -91,10 +96,12 @@ public class PlatformParameterService {
     //CHECKSTYLE:ON
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
-        if (!Strings.isNullOrEmpty(environmentCrn)) {
-            platformResourceRequest.setCredential(credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId, ENVIRONMENT));
+        if (!Strings.isNullOrEmpty(credentialName)) {
+            platformResourceRequest.setCredential(credentialService.getByNameForAccountId(credentialName, accountId, ENVIRONMENT));
+        } else if (!Strings.isNullOrEmpty(credentialCrn)) {
+            platformResourceRequest.setCredential(credentialService.getByCrnForAccountId(credentialCrn, accountId, ENVIRONMENT));
         } else {
-            throw new BadRequestException("The environmentCrn must be specified in the request");
+            throw new BadRequestException("The credentialId or the credentialName must be specified in the request");
         }
 
         if (!Strings.isNullOrEmpty(platformVariant)) {
