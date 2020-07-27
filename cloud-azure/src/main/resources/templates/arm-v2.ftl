@@ -98,7 +98,7 @@
                 "type": "Microsoft.Compute/availabilitySets",
                 "name": "[variables('${group.compressedName}AsName')]",
                 "apiVersion": "2018-04-01",
-                "location": "[resourceGroup().location]",
+                "location": "[parameters('region')]",
                 "sku": {
                     "name": "Aligned"
                 },
