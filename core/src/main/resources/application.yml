@@ -89,6 +89,7 @@ datalake:
 altus:
   audit:
     enabled: true
+    endpoint: localhost:8982
 
 cb:
   enabledplatforms: AZURE,AWS,GCP,OPENSTACK
