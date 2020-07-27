@@ -8,9 +8,19 @@ public class MessageCode {
 
     public static final String AUTOSCALING_CONFIG_NOT_FOUND = "autoscale.config.not.found";
 
+    public static final String AUTOSCALING_CONFIG_UPDATED = "autoscale.config.updated";
+
+    public static final String AUTOSCALING_ENABLED = "autoscale.enabled";
+
+    public static final String AUTOSCALING_DISABLED = "autoscale.disabled";
+
     public static final String AUTOSCALING_ENTITLEMENT_NOT_ENABLED = "autoscale.entitlement.not.enabled";
 
-    public static final String LOAD_CONFIG_ALREADY_DEFINED = "autoscale.load.config.already.defined";
+    public static final String AUTOSCALING_ACTIVITY_NOT_REQUIRED = "autoscale.activity.not.required";
+
+    public static final String AUTOSCALING_ACTIVITY_SUCCESS = "autoscale.activity.success";
+
+    public static final String SCHEDULE_CONFIG_OVERLAPS = "autoscale.schedule.config.overlap";
 
     public static final String CLUSTER_EXISTS_FOR_CRN = "autoscale.cluster.exists.for.crn";
 

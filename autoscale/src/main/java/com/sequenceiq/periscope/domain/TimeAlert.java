@@ -7,6 +7,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
+import com.sequenceiq.periscope.api.model.AlertType;
+
 @Entity
 @DiscriminatorValue("TIME")
 @NamedQueries({
@@ -46,5 +48,9 @@ public class TimeAlert extends BaseAlert {
 
     public void setCluster(Cluster cluster) {
         this.cluster = cluster;
+    }
+
+    public AlertType getAlertType() {
+        return AlertType.TIME;
     }
 }

@@ -1,9 +1,13 @@
 package com.sequenceiq.periscope.monitor.handler;
 
 import static com.sequenceiq.periscope.api.model.AdjustmentType.LOAD_BASED;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,7 +29,9 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
@@ -55,6 +61,9 @@ public class ScalingHandlerTest {
 
     @Mock
     private HistoryService historyService;
+
+    @Mock
+    private CloudbreakMessagesService messagesService;
 
     @Mock
     private ApplicationContext applicationContext;
@@ -105,13 +114,19 @@ public class ScalingHandlerTest {
         when(scalingEventMock.getAlert()).thenReturn(timeAlertMock);
         when(scalingEventMock.getHostGroupNodeCount()).thenReturn(2);
         when(scalingEventMock.getDesiredAbsoluteHostGroupNodeCount()).thenReturn(2);
-
+        when(scalingPolicyMock.getHostGroup()).thenReturn("compute");
         when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(messagesService.getMessage(anyString(), any(List.class))).thenReturn("");
+
         when(timeAlertMock.getCluster()).thenReturn(cluster);
         when(timeAlertMock.getScalingPolicy()).thenReturn(scalingPolicyMock);
+        when(timeAlertMock.getName()).thenReturn("testalert");
+        when(timeAlertMock.getAlertType()).thenCallRealMethod();
 
         underTest.onApplicationEvent(scalingEventMock);
 
+        verify(historyService, times(1)).createEntry(
+                eq(ScalingStatus.SUCCESS), anyString(), eq(2), eq(0), eq(scalingPolicyMock));
         verify(clusterService, never()).save(cluster);
         verify(applicationContext, never()).getBean("ScalingRequest");
     }

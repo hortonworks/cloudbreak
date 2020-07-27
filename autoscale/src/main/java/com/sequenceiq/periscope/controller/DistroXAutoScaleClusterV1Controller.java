@@ -13,11 +13,14 @@ import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
+import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
+import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.converter.DistroXAutoscaleClusterResponseConverter;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
@@ -51,6 +54,9 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
 
     @Inject
     private HttpNotificationSender notificationSender;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
@@ -141,21 +147,27 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
 
     private void createHistoryAndNotifyConfigChange(long clusterId) {
         Cluster cluster = clusterService.findById(clusterId);
-        StringBuilder statusMessage = new StringBuilder("Autoscaling config has been updated for the cluster");
+        ScalingStatus scalingStatus = ScalingStatus.DISABLED;
+        String statusMessage = messagesService.getMessage(MessageCode.AUTOSCALING_DISABLED);
+
         if (!cluster.getLoadAlerts().isEmpty()) {
-            statusMessage.append(
-                    ", Load-Based Autoscaling HostGroups '" + cluster.getLoadAlerts().stream()
-                            .map(loadAlert -> loadAlert.getScalingPolicy().getHostGroup())
-                            .collect(Collectors.joining(",")) + "'.");
-        }
-        if (!cluster.getTimeAlerts().isEmpty()) {
-            statusMessage.append(
-                    ", Schedule-Based Autoscaling HostGroups '" + cluster.getTimeAlerts().stream()
-                            .map(timeAlert -> timeAlert.getScalingPolicy().getHostGroup())
-                            .collect(Collectors.joining(",")) + "'.");
+            String loadBasedHostGroups = cluster.getLoadAlerts().stream()
+                    .map(loadAlert -> loadAlert.getScalingPolicy().getHostGroup())
+                    .collect(Collectors.joining(","));
+            statusMessage = messagesService.getMessage(MessageCode.AUTOSCALING_CONFIG_UPDATED,
+                    List.of(AlertType.LOAD, loadBasedHostGroups));
+            scalingStatus = ScalingStatus.CONFIG_UPDATED;
+        } else if (!cluster.getTimeAlerts().isEmpty()) {
+            String timeBasedHostGroups = cluster.getTimeAlerts().stream()
+                    .map(timeAlert -> timeAlert.getScalingPolicy().getHostGroup())
+                    .distinct()
+                    .collect(Collectors.joining(","));
+            statusMessage = messagesService.getMessage(MessageCode.AUTOSCALING_CONFIG_UPDATED,
+                    List.of(AlertType.TIME, timeBasedHostGroups));
+            scalingStatus = ScalingStatus.CONFIG_UPDATED;
         }
 
-        History history = historyService.createEntry(ScalingStatus.CONFIG_UPDATED, statusMessage.toString(), cluster);
+        History history = historyService.createEntry(scalingStatus, statusMessage, cluster);
         notificationSender.send(cluster, history);
     }
 }

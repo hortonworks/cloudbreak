@@ -12,6 +12,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.periscope.api.model.AlertType;
+
 @Entity
 @DiscriminatorColumn(name = "alert_type")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -75,4 +77,6 @@ public abstract class BaseAlert implements Clustered {
     public void setCluster(Cluster cluster) {
         this.cluster = cluster;
     }
+
+    public abstract AlertType getAlertType();
 }
