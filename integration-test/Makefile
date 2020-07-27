@@ -25,6 +25,8 @@ without-build-with-ums: download-cbd runtest-ums
 
 build-with-docker: download-cbd docker-build runtest
 
+swagger-check: download-cbd buildswagger create-cloudbreak-context swagger-compare
+
 bring-up-schema: download-cbd create-image create-cloudbreak-context schema-migration
 
 swagger-check: swagger-compare
@@ -37,6 +39,9 @@ download-cbd:
 
 buildcb:
 	./scripts/build-cb.sh
+
+buildswagger:
+	./scripts/build-swagger.sh
 
 create-image:
 	./scripts/create-image.sh
@@ -83,7 +88,7 @@ schema-migration:
 	./scripts/schema-migration.sh
 
 swagger-compare:
-	./scripts/swagger-check.sh
+	CB_VERSION=$(CB_VERSION) CB_TARGET_BRANCH=$(CB_TARGET_BRANCH) ./scripts/swagger-check.sh
 
 upload-s3:
 	aws s3 cp ./apidefinitions/cb.json s3://cloudbreak-swagger/swagger-$(VERSION).json --acl public-read

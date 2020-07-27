@@ -19,11 +19,6 @@ if [[ "$CIRCLECI" ]]; then
         fi
     fi
 
-    # Check swagger validation results
-    if ! grep -q "is valid against swagger specification 2.0" swagger-validation-result.out; then
-        echo -e "\033[0;91m--- !!! THE SWAGGER SPECIFICATION IS INVALID, CHECK \033[1;93mswagger-validation-result.out\033[0;91m FOR RESULTS !!! ---\n"; status_code=1;
-    fi
-
     if [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]] && [[ "$AWS" != true ]]; then
       docker run --rm \
        -v "$(pwd)"/scripts/analyse_postgres_stat.jsh:/opt/analyse_postgres_stat.jsh \
@@ -46,5 +41,4 @@ if [[ "$CIRCLECI" ]]; then
     fi
 
     echo -e "\n\033[0;92m+++ INTEGRATION TEST SUCCESSFULLY FINISHED +++\n";
-    echo -e "\n\033[0;92m+++ THE SWAGGER SPECIFICATION IS VALID +++\n";
 fi
