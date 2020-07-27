@@ -5,15 +5,12 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DE
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -27,8 +24,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.MapBindingResult;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
@@ -41,12 +39,9 @@ import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralBlueprintParameterQueryService;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.projection.BlueprintStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -62,10 +57,8 @@ import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
-import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -76,9 +69,6 @@ import com.sequenceiq.common.api.type.CdpResourceType;
 public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> implements ResourceBasedCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintService.class);
-
-    private static final String MULTI_HOSTNAME_EXCEPTION_MESSAGE_FORMAT = "Host %s names must be unique! The following host %s names are invalid due to " +
-            "their multiple occurrence: %s";
 
     @Inject
     private TransactionService transactionService;
@@ -99,9 +89,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     private ClusterService clusterService;
 
     @Inject
-    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
-
-    @Inject
     private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
     @Inject
@@ -116,16 +103,15 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     @Inject
     private BlueprintListFilters blueprintListFilters;
 
+    @Inject
+    private BlueprintValidator blueprintValidator;
+
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Cluster definition", id));
     }
 
     public Blueprint createForLoggedInUser(Blueprint blueprint, Long workspaceId, String accountId, String creator) {
-        if (getVersionForCmWithBlueprintProcessingExceptionHandling(blueprint.getBlueprintText()).isPresent()) {
-            validateHostNames(cmTemplateProcessorFactory.get(blueprint.getBlueprintText()));
-        } else {
-            throw new BadRequestException("Invalid CM template!");
-        }
+        validate(blueprint);
         decorateWithCrn(blueprint, accountId, creator);
         try {
             return transactionService.required(() -> {
@@ -135,6 +121,16 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             });
         } catch (TransactionService.TransactionExecutionException e) {
             throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    private void validate(Blueprint blueprint) {
+        MapBindingResult errors = new MapBindingResult(new HashMap(), "blueprint");
+        blueprintValidator.validate(blueprint, errors);
+        if (errors.hasErrors()) {
+            throw new BadRequestException(errors.getAllErrors().stream()
+                    .map(e -> (e instanceof FieldError ? ((FieldError) e).getField() + ": " : "") + e.getDefaultMessage())
+                    .collect(Collectors.joining("; ")));
         }
     }
 
@@ -156,36 +152,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     public void decorateWithCrn(Blueprint bp, String accountId, String creator) {
         bp.setResourceCrn(createCRN(accountId));
         bp.setCreator(creator);
-    }
-
-    public Blueprint create(Workspace workspace, Blueprint blueprint, Collection<Map<String, Map<String, String>>> properties,
-            User user) {
-        LOGGER.debug("Creating blueprint: Workspace: {} ({})", workspace.getId(), workspace.getName());
-        Blueprint savedBlueprint;
-        if (properties != null && !properties.isEmpty()) {
-            LOGGER.debug("Extend blueprint with the following properties: {}", properties);
-            Map<String, Map<String, String>> configs = new HashMap<>(properties.size());
-            for (Map<String, Map<String, String>> property : properties) {
-                for (Entry<String, Map<String, String>> entry : property.entrySet()) {
-                    Map<String, String> configValues = configs.get(entry.getKey());
-                    if (configValues != null) {
-                        configValues.putAll(entry.getValue());
-                    } else {
-                        configs.put(entry.getKey(), entry.getValue());
-                    }
-                }
-            }
-            String blueprintText = blueprint.getBlueprintText();
-            LOGGER.debug("Extended blueprint result: {}", AnonymizerUtil.anonymize(blueprintText));
-            blueprint.setBlueprintText(blueprintText);
-        }
-        try {
-            savedBlueprint = create(blueprint, workspace.getId(), user);
-        } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], %s", APIResourceType.BLUEPRINT, getProperSqlErrorMessage(ex));
-            throw new BadRequestException(msg, ex);
-        }
-        return savedBlueprint;
     }
 
     public PlatformRecommendation getRecommendation(Long workspaceId, String blueprintName, String credentialName,
@@ -402,35 +368,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             result = cmCloudStorageConfigProvider.queryParameters(fileSystemConfigQueryObject);
         }
         return result;
-    }
-
-    private void validateHostNames(BlueprintTextProcessor blueprintTextProcessor) {
-        LOGGER.debug("Validating CM template host names...");
-        List<String> hostTemplateNames = blueprintTextProcessor.getHostTemplateNames();
-        if (hostNamesAreNotUnique(hostTemplateNames)) {
-            String nonUniqueHostTemplateNames = String.join(", ", findHostTemplateNameDuplicates(hostTemplateNames));
-            String hostSectionIdentifier = blueprintTextProcessor.getHostGroupPropertyIdentifier();
-            String message = String.format(MULTI_HOSTNAME_EXCEPTION_MESSAGE_FORMAT, hostSectionIdentifier, hostSectionIdentifier, nonUniqueHostTemplateNames);
-            throw new BadRequestException(message);
-        }
-    }
-
-    private Optional<String> getVersionForCmWithBlueprintProcessingExceptionHandling(String bpText) {
-        try {
-            return cmTemplateProcessorFactory.get(bpText).getVersion();
-        } catch (BlueprintProcessingException ignore) {
-            LOGGER.info("Unable to serialize blueprint text as a CM template!");
-            return Optional.empty();
-        }
-    }
-
-    private Set<String> findHostTemplateNameDuplicates(List<String> hostTemplateNames) {
-        Set<String> temp = new LinkedHashSet<>();
-        return hostTemplateNames.stream().filter(hostTemplateName -> !temp.add(hostTemplateName)).collect(Collectors.toSet());
-    }
-
-    private boolean hostNamesAreNotUnique(List<String> hostGroupNames) {
-        return new HashSet<>(hostGroupNames).size() != hostGroupNames.size();
     }
 
     private Blueprint getByCrnAndWorkspaceIdAndAddToMdc(String crn, Long workspaceId) {
