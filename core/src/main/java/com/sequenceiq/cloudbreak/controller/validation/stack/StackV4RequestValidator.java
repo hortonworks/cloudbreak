@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
@@ -13,12 +21,6 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-
-import javax.inject.Inject;
-import java.util.Optional;
 
 @Component
 public class StackV4RequestValidator implements Validator<StackV4Request> {
@@ -64,7 +66,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
                     return EncryptionType.CUSTOM.equals(valueForTypeKey);
                 })
                 .forEach(request -> {
-                    checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, environment.getCredential().getName(),
+                    checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, environment.getCrn(),
                             stackRequest.getPlacement().getRegion(), validationBuilder);
                 });
     }
@@ -80,8 +82,8 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     }
 
     private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupV4Request instanceGroupRequest,
-        String credentialName, String region, ValidationResultBuilder validationBuilder) {
-        Optional<CloudEncryptionKeys> keys = getEncryptionKeysWithExceptionHandling(credentialName, region);
+        String environmentCrn, String region, ValidationResultBuilder validationBuilder) {
+        Optional<CloudEncryptionKeys> keys = getEncryptionKeysWithExceptionHandling(environmentCrn, region);
         if (keys.isPresent() && !keys.get().getCloudEncryptionKeys().isEmpty()) {
             if (getEncryptionKey(instanceGroupRequest.getTemplate()) == null) {
                 validationBuilder.error("There is no encryption key provided but CUSTOM type is given for encryption.");
@@ -102,9 +104,9 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         return null;
     }
 
-    private Optional<CloudEncryptionKeys> getEncryptionKeysWithExceptionHandling(String credentialName, String region) {
+    private Optional<CloudEncryptionKeys> getEncryptionKeysWithExceptionHandling(String environmentCrn, String region) {
         try {
-            CloudEncryptionKeys cloudEncryptionKeys = platformResourceClientService.getEncryptionKeys(credentialName, region);
+            CloudEncryptionKeys cloudEncryptionKeys = platformResourceClientService.getEncryptionKeys(environmentCrn, region);
             return Optional.ofNullable(cloudEncryptionKeys);
         } catch (RuntimeException ignore) {
             return Optional.empty();

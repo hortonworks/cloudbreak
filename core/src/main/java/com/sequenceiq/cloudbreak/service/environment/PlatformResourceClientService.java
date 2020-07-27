@@ -22,9 +22,9 @@ public class PlatformResourceClientService {
     @Inject
     private PlatformResourceEndpoint platformResourceEndpoint;
 
-    public CloudEncryptionKeys getEncryptionKeys(String credentialName, String region) {
-        LOGGER.info("Fetch encryption keys by credential name: {} and region: {}", credentialName, region);
-        PlatformEncryptionKeysResponse encryptionKeys = platformResourceEndpoint.getEncryptionKeys(credentialName, null, region, null, null);
+    public CloudEncryptionKeys getEncryptionKeys(String environmentCrn, String region) {
+        LOGGER.info("Fetch encryption keys by environment crn: {} and region: {}", environmentCrn, region);
+        PlatformEncryptionKeysResponse encryptionKeys = platformResourceEndpoint.getEncryptionKeys(null, null, region, null, null, environmentCrn);
         Set<CloudEncryptionKey> keys = encryptionKeys.getEncryptionKeyConfigs().stream()
                 .map(response -> new CloudEncryptionKey(response.getName(), response.getId(),
                         response.getDescription(), response.getDisplayName(), response.getProperties()))
