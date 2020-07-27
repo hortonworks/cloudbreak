@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -25,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -41,13 +41,12 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.reflect.Whitebox;
+import org.springframework.validation.Errors;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -70,9 +69,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintServiceTest {
-
-    private static final List<String> INVALID_HOST_GROUP_NAME_LIST = List.of("master", "worker", "master");
-
     private static final String ACCOUNT_ID = "ACCOUNT_ID";
 
     private static final String CREATOR = "CREATOR";
@@ -108,10 +104,7 @@ public class BlueprintServiceTest {
     private User user;
 
     @Mock
-    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
-
-    @Mock
-    private CmTemplateProcessor cmTemplateProcessor;
+    private BlueprintValidator blueprintValidator;
 
     @Mock
     private GrpcUmsClient grpcUmsClient;
@@ -131,7 +124,6 @@ public class BlueprintServiceTest {
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
         when(workspaceService.get(1L, user)).thenReturn(getWorkspace());
-        when(cmTemplateProcessor.getHostGroupPropertyIdentifier()).thenReturn("template");
         doNothing().when(grpcUmsClient).notifyResourceDeleted(anyString(), any());
     }
 
@@ -411,46 +403,19 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testIfHostTemplateNamesAreNotUniqueThenBadRequestExceptionShouldCome() {
+    public void testBadRequestExceptionRaisedWhenValidationIsFailing() {
         String someBlueprintText = "someText";
 
-        when(cmTemplateProcessorFactory.get(someBlueprintText)).thenReturn(cmTemplateProcessor);
-        when(cmTemplateProcessor.getVersion()).thenReturn(Optional.of("7.0.0"));
-        when(cmTemplateProcessor.getHostTemplateNames()).thenReturn(INVALID_HOST_GROUP_NAME_LIST);
-
+        doAnswer(invocation -> {
+            invocation.getArgument(1, Errors.class).reject("test");
+            return null;
+        })
+                .when(blueprintValidator).validate(any(), any());
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(someBlueprintText);
 
         exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage("Host template names must be unique! The following host template names are invalid due to their multiple " +
-                "occurrence: master");
         underTest.createForLoggedInUser(blueprint, 1L, "someAccountId", "someone");
-
-        verify(cmTemplateProcessorFactory, times(1)).get(anyString());
-        verify(cmTemplateProcessorFactory, times(1)).get(someBlueprintText);
-        verify(cmTemplateProcessor, times(1)).getVersion();
-        verify(cmTemplateProcessor, times(1)).getHostTemplateNames();
-    }
-
-    @Test
-    public void testIfUnableToDefineCMTemplateVersionThenBadRequestExceptionShouldCome() {
-        String someBlueprintText = "someText";
-
-        when(cmTemplateProcessorFactory.get(someBlueprintText)).thenReturn(cmTemplateProcessor);
-        when(cmTemplateProcessor.getVersion()).thenReturn(Optional.empty());
-
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(someBlueprintText);
-
-        exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage("Invalid CM template!");
-
-        underTest.createForLoggedInUser(blueprint, 1L, "someAccountId", "someone");
-
-        verify(cmTemplateProcessorFactory, times(1)).get(anyString());
-        verify(cmTemplateProcessorFactory, times(1)).get(someBlueprintText);
-        verify(cmTemplateProcessor, times(1)).getVersion();
-        verify(cmTemplateProcessor, times(0)).getHostTemplateNames();
     }
 
     private Cluster getCluster(String name, Long id, Blueprint blueprint, Status clusterStatus, Status stackStatus) {
