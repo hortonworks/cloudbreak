@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId.jobId;
 
 import java.util.Collection;
 
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,9 +99,10 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
     private void checkJobFinishedWithSuccess() throws CloudbreakOrchestratorFailedException {
         String jobId = saltJobRunner.getJid().getJobId();
         try {
-            Multimap<String, String> missingNodesWithReason = SaltStates.jidInfo(
+            Multimap<String, Map<String, String>> missingNodesWithReason = SaltStates.jidInfo(
                     saltConnector, jobId, new HostList(saltJobRunner.getTargetHostnames()), saltJobRunner.stateType());
-            Multimap<String, String> missingNodesWithReplacedReasons = saltConnector.getSaltErrorResolver().resolveErrorMessages(missingNodesWithReason);
+            Multimap<String, String> missingNodesWithReplacedReasons =
+                saltConnector.getSaltErrorResolver().resolveErrorMessages(missingNodesWithReason);
             if (!missingNodesWithReplacedReasons.isEmpty()) {
                 LOGGER.debug("There are missing nodes after the job (jid: {}) completion: {}",
                         jobId, String.join(",", missingNodesWithReplacedReasons.keySet()));

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RunnerInfo {
@@ -46,13 +47,23 @@ public class RunnerInfo {
         return String.valueOf(changes.get("stdout"));
     }
 
-    public String getErrorResultSummary() {
-        StringBuilder summary = new StringBuilder();
-        appendIfPresent(summary, "Name: ", name);
-        appendIfPresent(summary, "Comment: ", comment);
-        appendIfPresent(summary, "Stdout: ", getStdout());
-        appendIfPresent(summary, "Stderr: ", getStderr());
-        return summary.toString();
+    public Map<String, String> getErrorResultSummary() {
+        String stdout = getStdout();
+        String stderr = getStderr();
+        Map<String, String> summary = new HashMap<>();
+        if (name != null && !"null".equals(name)) {
+            summary.put("Name", name);
+        }
+        if (comment != null && !"null".equals(comment)) {
+            summary.put("Comment", comment);
+        }
+        if (stdout != null && !"null".equals(stdout)) {
+            summary.put("Stdout", stdout);
+        }
+        if (stderr != null && !"null".equals(stderr)) {
+            summary.put("Stderr", stderr);
+        }
+        return summary;
     }
 
     private void appendIfPresent(StringBuilder sb, String key, String value) {
