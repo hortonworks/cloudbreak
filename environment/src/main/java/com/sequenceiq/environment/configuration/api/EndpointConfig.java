@@ -14,7 +14,8 @@ import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.credential.v1.AuditCredentialV1Controller;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
 import com.sequenceiq.environment.environment.v1.EnvironmentController;
-import com.sequenceiq.environment.platformresource.v1.PlatformResourceController;
+import com.sequenceiq.environment.platformresource.v1.CredentialPlatformResourceController;
+import com.sequenceiq.environment.platformresource.v1.EnvironmentPlatformResourceController;
 import com.sequenceiq.environment.proxy.v1.controller.ProxyController;
 import com.sequenceiq.environment.tags.v1.controller.AccountTagController;
 import com.sequenceiq.environment.telemetry.v1.controller.AccountTelemetryController;
@@ -38,7 +39,8 @@ public class EndpointConfig extends ResourceConfig {
             AccountTelemetryController.class,
             ProxyController.class,
             EnvironmentController.class,
-            PlatformResourceController.class,
+            CredentialPlatformResourceController.class,
+            EnvironmentPlatformResourceController.class,
             UtilController.class,
             FlowController.class,
             AuthorizationInfoController.class);
