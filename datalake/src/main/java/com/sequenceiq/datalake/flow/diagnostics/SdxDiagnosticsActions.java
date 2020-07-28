@@ -22,7 +22,7 @@ import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsCollectionEv
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsSuccessEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
-import com.sequenceiq.datalake.service.sdx.diagnostics.DiagnosticsService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -33,7 +33,7 @@ public class SdxDiagnosticsActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxDiagnosticsActions.class);
 
     @Inject
-    private DiagnosticsService diagnosticsService;
+    private SdxDiagnosticsFlowService diagnosticsFlowService;
 
     @Bean(name = "DIAGNOSTICS_COLLECTION_START_STATE")
     public Action<?, ?> startDiagnosticsCollection() {
@@ -45,10 +45,12 @@ public class SdxDiagnosticsActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxDiagnosticsCollectionEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, SdxDiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Start diagnostics collection for sdx cluster with id: {}", context.getSdxId());
-                diagnosticsService.startDiagnosticsCollection(payload.getProperties());
-                sendEvent(context, SDX_DIAGNOSTICS_COLLECTION_IN_PROGRESS_EVENT.event(), payload);
+                FlowIdentifier flowIdentifier = diagnosticsFlowService.startDiagnosticsCollection(payload.getProperties());
+                SdxDiagnosticsCollectionEvent event = new SdxDiagnosticsCollectionEvent(payload.getResourceId(),
+                        payload.getUserId(), payload.getProperties(), flowIdentifier);
+                sendEvent(context, SDX_DIAGNOSTICS_COLLECTION_IN_PROGRESS_EVENT.event(), event);
             }
 
             @Override
@@ -69,7 +71,7 @@ public class SdxDiagnosticsActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxDiagnosticsCollectionEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, SdxDiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Diagnostics collection is in progress for sdx cluster");
                 sendEvent(context, SdxDiagnosticsWaitRequest.from(context, payload));
             }
@@ -92,8 +94,7 @@ public class SdxDiagnosticsActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxDiagnosticsSuccessEvent payload,
-                    Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, SdxDiagnosticsSuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Diagnostics collection is finished for sdx cluster");
                 sendEvent(context, SDX_DIAGNOSTICS_COLLECTION_FINALIZED_EVENT.event(), payload);
             }
@@ -116,7 +117,7 @@ public class SdxDiagnosticsActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxDiagnosticsFailedEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, SdxDiagnosticsFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Diagnostics collection failed for sdx cluster");
                 sendEvent(context, SDX_DIAGNOSTICS_COLLECTION_FAILED_HANDLED_EVENT.event(), payload);
             }

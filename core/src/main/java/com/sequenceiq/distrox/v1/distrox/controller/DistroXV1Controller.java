@@ -435,10 +435,10 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceObject
-    public void collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionV1Request request) {
+    public FlowIdentifier collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionV1Request request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();
         LOGGER.debug("collectDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
-        diagnosticsTriggerService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn);
+        return diagnosticsTriggerService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn);
     }
 
     @Override

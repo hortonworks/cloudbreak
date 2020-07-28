@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.service.sdx.diagnostics;
+package com.sequenceiq.datalake.converter;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -36,7 +36,7 @@ public class DiagnosticsParamsConverter {
 
     private static final String PARAMS_STACK_CRN = "stackCrn";
 
-    Map<String, Object> convertFromRequest(DiagnosticsCollectionRequest request) {
+    public Map<String, Object> convertFromRequest(DiagnosticsCollectionRequest request) {
         Map<String, Object> props = new HashMap<>();
         props.put(PARAMS_STACK_CRN, request.getStackCrn());
         props.put(PARAM_DESTINATION, request.getDestination());
@@ -51,7 +51,7 @@ public class DiagnosticsParamsConverter {
         return props;
     }
 
-    DiagnosticsCollectionRequest convertToRequest(Map<String, Object> props) {
+    public DiagnosticsCollectionRequest convertToRequest(Map<String, Object> props) {
         DiagnosticsCollectionRequest request = new DiagnosticsCollectionRequest();
         request.setDestination(Optional.ofNullable(props.get(PARAM_DESTINATION))
                 .map(v -> DiagnosticsDestination.valueOf(v.toString())).orElse(null));

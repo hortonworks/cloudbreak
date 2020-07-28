@@ -44,7 +44,7 @@ public class DiagnosticsTriggerService {
     @Inject
     private DiagnosticsCollectionValidator diagnosticsCollectionValidator;
 
-    public void startDiagnosticsCollection(BaseDiagnosticsCollectionRequest request, String stackCrn, String userCrn) {
+    public FlowIdentifier startDiagnosticsCollection(BaseDiagnosticsCollectionRequest request, String stackCrn, String userCrn) {
         Stack stack = stackService.getByCrn(stackCrn);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Starting diagnostics collection for Stack. Crn: '{}'", stack.getResourceCrn());
@@ -57,12 +57,8 @@ public class DiagnosticsTriggerService {
                 .withResourceCrn(stack.getResourceCrn())
                 .withSelector(DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_INIT_EVENT.selector())
                 .withParameters(parameters)
-                .withHosts(request.getHosts())
-                .withInstanceGroups(request.getInstaceGroups())
                 .build();
-        FlowIdentifier flowIdentifier = reactorNotifier.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn), "CM Diagnostic collection");
-        stack.setFlowIdentifier(flowIdentifier);
-        stackService.save(stack);
+        return reactorNotifier.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn));
     }
 
     private Event.Headers getFlowHeaders(String userCrn) {

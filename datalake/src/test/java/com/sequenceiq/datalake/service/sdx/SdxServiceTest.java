@@ -446,7 +446,7 @@ class SdxServiceTest {
     void testDeleteSdxWhenNameIsProvidedShouldInitiateSdxDeletionFlow() {
         SdxCluster sdxCluster = getSdxClusterForDeletionTest();
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID", "flowName"));
+        when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         mockCBCallForDistroXClusters(Sets.newHashSet());
         underTest.deleteSdx(USER_CRN, "sdx-cluster-name", true);
         verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
@@ -500,7 +500,7 @@ class SdxServiceTest {
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID", "flowName"));
+        when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setRuntime("7.2.1");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);

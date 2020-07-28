@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.docs.DiagnosticsOpe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,7 +28,7 @@ public interface DiagnosticsV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
             nickname = "collectStackCmDiagnostics")
-    void collectDiagnostics(@Valid DiagnosticsCollectionRequest request);
+    FlowIdentifier collectDiagnostics(@Valid DiagnosticsCollectionRequest request);
 
     @GET
     @Path("logs")

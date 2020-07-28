@@ -14,17 +14,17 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsFlowService;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsFailedEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsSuccessEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsWaitRequest;
-import com.sequenceiq.datalake.service.sdx.diagnostics.DiagnosticsService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Component
-public class SdxDiagnosticsHandler extends ExceptionCatcherEventHandler<SdxDiagnosticsWaitRequest> {
+public class SdxDiagnosticsCollectionHandler extends ExceptionCatcherEventHandler<SdxDiagnosticsWaitRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxDiagnosticsHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxDiagnosticsCollectionHandler.class);
 
     @Value("${sdx.diagnostics.collection.sleeptime_sec:5}")
     private int sleepTimeInSec;
@@ -33,7 +33,7 @@ public class SdxDiagnosticsHandler extends ExceptionCatcherEventHandler<SdxDiagn
     private int durationInMinutes;
 
     @Inject
-    private DiagnosticsService diagnosticsService;
+    private SdxDiagnosticsFlowService diagnosticsFlowService;
 
     @Override
     protected void doAccept(HandlerEvent event) {
@@ -44,7 +44,7 @@ public class SdxDiagnosticsHandler extends ExceptionCatcherEventHandler<SdxDiagn
         Selectable response;
         try {
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
-            diagnosticsService.waitForDiagnosticsCollection(sdxId, pollingConfig, properties);
+            diagnosticsFlowService.waitForDiagnosticsCollection(sdxId, pollingConfig, request.getFlowIdentifier());
             response = new SdxDiagnosticsSuccessEvent(sdxId, userId, properties);
             LOGGER.debug("SDX diagnostics collection event finished");
         } catch (UserBreakException userBreakException) {

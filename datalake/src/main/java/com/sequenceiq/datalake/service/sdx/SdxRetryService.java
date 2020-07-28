@@ -55,9 +55,9 @@ public class SdxRetryService {
                     LOGGER.info("Sdx flow restarted: " + lastSuccessfulStateLog);
                     flow2Handler.restartFlow(lastSuccessfulStateLog);
                     if (lastSuccessfulStateLog.getFlowChainId() != null) {
-                        return new FlowIdentifier(FlowType.FLOW_CHAIN, lastSuccessfulStateLog.getFlowChainId(), null);
+                        return new FlowIdentifier(FlowType.FLOW_CHAIN, lastSuccessfulStateLog.getFlowChainId());
                     } else {
-                        return new FlowIdentifier(FlowType.FLOW, lastSuccessfulStateLog.getFlowId(), null);
+                        return new FlowIdentifier(FlowType.FLOW, lastSuccessfulStateLog.getFlowId());
                     }
                 })
                 .orElseThrow(() -> new BadRequestException("Retry cannot be performed, because the last action was successful"));

@@ -66,7 +66,7 @@ public class SdxDatabaseDrServiceTest {
             ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
             userCrn = USER_CRN;
         }
-        flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID, "flowName");
+        flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
     }
 
     @Before

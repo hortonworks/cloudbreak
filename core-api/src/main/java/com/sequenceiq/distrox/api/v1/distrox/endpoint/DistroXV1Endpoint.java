@@ -328,7 +328,7 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
             nickname = "collectDistroxCmDiagnosticsV4")
-    void collectDiagnostics(@Valid DiagnosticsCollectionV1Request request);
+    FlowIdentifier collectDiagnostics(@Valid DiagnosticsCollectionV1Request request);
 
     @GET
     @Path("diagnostics/logs")
