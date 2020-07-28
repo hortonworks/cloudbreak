@@ -10,6 +10,22 @@ add_knox_settings_to_cm:
     - context:
         knox_address: {{ salt['pillar.get']('gateway:address') }}
 
+{% if salt['pillar.get']('gateway:userfacingfqdn') is defined and salt['pillar.get']('gateway:userfacingfqdn')|length > 1 %}
+update_frontend_url_of_cm:
+  file.replace:
+      - name: /etc/cloudera-scm-server/cm.settings
+      - pattern: 'setsettings FRONTEND_URL.*'
+      - repl: 'setsettings FRONTEND_URL https://{{ salt['pillar.get']('gateway:userfacingfqdn') }}/'
+      - unless: grep "^setsettings FRONTEND_URL https://{{ salt['pillar.get']('gateway:userfacingfqdn') }}/$" /etc/cloudera-scm-server/cm.settings
+
+restart_cm_after_fronted_url_change:
+  service.running:
+    - name: cloudera-scm-server
+    - enable: True
+    - watch:
+      - file: update_frontend_url_of_cm
+{% endif %}
+
 cloudera_manager_setup_knox:
   file.replace:
     - name: /etc/default/cloudera-scm-server
