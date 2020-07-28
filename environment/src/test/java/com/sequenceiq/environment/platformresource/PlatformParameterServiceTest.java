@@ -71,16 +71,6 @@ class PlatformParameterServiceTest {
     }
 
     @Test
-    void getPlatformResourceRequestCredentialByName() {
-        final Credential credential = new Credential();
-        credential.setCloudPlatform("anotherVariant");
-        when(credentialService.getByNameForAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(credential);
-        PlatformResourceRequest result = platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID, CREDENTIAL_NAME, null,
-                REGION, PLATFORM_VARIANT, AVAILIBILTY_ZONE);
-        assertEquals(credential, result.getCredential());
-    }
-
-    @Test
     void getPlatformResourceRequestCredentialByCrn() {
         final Credential credential = new Credential();
         credential.setCloudPlatform("anotherVariant");
@@ -95,8 +85,8 @@ class PlatformParameterServiceTest {
         final Credential credential = new Credential();
         String platformFromCredential = "anotherVariant";
         credential.setCloudPlatform(platformFromCredential);
-        when(credentialService.getByNameForAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(credential);
-        PlatformResourceRequest result = platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID, CREDENTIAL_NAME, null,
+        when(credentialService.getByCrnForAccountId(eq(CREDENTIAL_CRN), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(credential);
+        PlatformResourceRequest result = platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID, null, CREDENTIAL_CRN,
                 null, EMPTY, null);
         assertEquals(platformFromCredential, result.getCloudPlatform());
         assertEquals(platformFromCredential, result.getPlatformVariant());
@@ -109,8 +99,8 @@ class PlatformParameterServiceTest {
         final Credential credential = new Credential();
         String platformFromCredential = "anotherVariant";
         credential.setCloudPlatform(platformFromCredential);
-        when(credentialService.getByNameForAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(credential);
-        PlatformResourceRequest result = platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID, CREDENTIAL_NAME, null,
+        when(credentialService.getByCrnForAccountId(eq(CREDENTIAL_CRN), eq(ACCOUNT_ID), eq(ENVIRONMENT))).thenReturn(credential);
+        PlatformResourceRequest result = platformParameterServiceUnderTest.getPlatformResourceRequest(ACCOUNT_ID, null, CREDENTIAL_CRN,
                 REGION, PLATFORM_VARIANT, AVAILIBILTY_ZONE);
         assertEquals(platformFromCredential, result.getCloudPlatform());
         assertEquals(null, result.getPlatformVariant());

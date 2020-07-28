@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
-import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceEndpoint;
+import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformEncryptionKeysResponse;
 
 @Service
@@ -20,11 +20,11 @@ public class PlatformResourceClientService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatformResourceClientService.class);
 
     @Inject
-    private PlatformResourceEndpoint platformResourceEndpoint;
+    private EnvironmentPlatformResourceEndpoint environmentPlatformResourceEndpoint;
 
-    public CloudEncryptionKeys getEncryptionKeys(String credentialName, String region) {
-        LOGGER.info("Fetch encryption keys by credential name: {} and region: {}", credentialName, region);
-        PlatformEncryptionKeysResponse encryptionKeys = platformResourceEndpoint.getEncryptionKeys(credentialName, null, region, null, null);
+    public CloudEncryptionKeys getEncryptionKeys(String envCrn, String region) {
+        LOGGER.info("Fetch encryption keys by environment crn: {} and region: {}", envCrn, region);
+        PlatformEncryptionKeysResponse encryptionKeys = environmentPlatformResourceEndpoint.getEncryptionKeys(envCrn, region, null, null);
         Set<CloudEncryptionKey> keys = encryptionKeys.getEncryptionKeyConfigs().stream()
                 .map(response -> new CloudEncryptionKey(response.getName(), response.getId(),
                         response.getDescription(), response.getDisplayName(), response.getProperties()))
