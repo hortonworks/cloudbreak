@@ -121,11 +121,12 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     private DistroXAutoscaleClusterResponse updateClusterAutoScaleConfig(Long clusterId,
             DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
 
+        alertController.validateLoadAlertRequests(clusterId, autoscaleClusterRequest.getLoadAlertRequests());
+        alertController.validateTimeAlertRequests(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
+
         try {
             transactionService.required(() -> {
                 clusterService.deleteAlertsForCluster(clusterId);
-                alertController.validateLoadAlertRequests(clusterId, autoscaleClusterRequest.getLoadAlertRequests());
-                alertController.validateTimeAlertRequests(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
                 alertController.createLoadAlerts(clusterId, autoscaleClusterRequest.getLoadAlertRequests());
                 alertController.createTimeAlerts(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
                 asClusterCommonService.setAutoscaleState(clusterId, autoscaleClusterRequest.getEnableAutoscaling());

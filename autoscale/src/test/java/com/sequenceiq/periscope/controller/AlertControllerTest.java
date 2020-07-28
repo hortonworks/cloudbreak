@@ -2,8 +2,6 @@ package com.sequenceiq.periscope.controller;
 
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_CONFIG_NOT_FOUND;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENTITLEMENT_NOT_ENABLED;
-import static com.sequenceiq.periscope.common.MessageCode.CLUSTER_PROXY_NOT_CONFIGURED;
-import static com.sequenceiq.periscope.common.MessageCode.LOAD_CONFIG_ALREADY_DEFINED;
 import static com.sequenceiq.periscope.common.MessageCode.UNSUPPORTED_AUTOSCALING_HOSTGROUP;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -164,24 +162,9 @@ public class AlertControllerTest {
         LoadAlertRequest request = getALoadAlertRequest();
 
         when(loadAlertRequestConverter.convert(request)).thenReturn(getALoadAlert());
-        when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("http://clusterproxy"));
 
         underTest.createLoadAlert(clusterId, request);
         verify(alertService).createLoadAlert(anyLong(), any(LoadAlert.class));
-    }
-
-    @Test
-    public void testLoadAlertCreateWhenClusterProxyNotRegistered() {
-        LoadAlertRequest request = getALoadAlertRequest();
-
-        when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.empty());
-        when(messagesService.getMessage(CLUSTER_PROXY_NOT_CONFIGURED,
-                List.of(aCluster.getStackName()))).thenReturn("clusterproxy.not.registered");
-
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("clusterproxy.not.registered");
-
-        underTest.createLoadAlert(clusterId, request);
     }
 
     @Test
@@ -212,22 +195,6 @@ public class AlertControllerTest {
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("account.not.entitled.for.platform");
-
-        underTest.createLoadAlert(clusterId, request);
-    }
-
-    @Test
-    public void testLoadAlertCreateDuplicate() {
-        LoadAlertRequest request = getALoadAlertRequest();
-
-        aCluster.setLoadAlerts(Set.of(getALoadAlert()));
-
-        when(restRequestThreadLocalService.getCloudbreakTenant()).thenReturn(tenant);
-        when(messagesService.getMessage(LOAD_CONFIG_ALREADY_DEFINED,
-                List.of(aCluster.getStackName(), request.getScalingPolicy().getHostGroup()))).thenReturn("load.config.already.defined");
-
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("load.config.already.defined");
 
         underTest.createLoadAlert(clusterId, request);
     }
