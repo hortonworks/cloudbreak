@@ -136,13 +136,9 @@ public class CronTimeEvaluatorTest {
         return Stream.of(
                 //TestCase, CurrentHostGroupCount,DesiredNodeCount,YarnGivenDecommissionCount,ExpectedNodeCount
                 Arguments.of("SCALE_DOWN_YARN_NODE_COUNT_MATCH  ", 10, 6, 4, 6),
-                Arguments.of("SCALE_DOWN_YARN_NODE_COUNT_PARTIAL", 10, 6, 2, 6),
-                Arguments.of("SCALE_DOWN_YARN_NODE_COUNT_ZERO   ", 10, 6, 0, 6),
                 Arguments.of("SCALE_DOWN_YARN_NODE_COUNT_EXTRA  ", 12, 6, 12, 6),
 
-                Arguments.of("SCALE_DOWN_YARN_NODE_COUNT_MATCH  ", 25, 22, 2, 22),
-                Arguments.of("SCALE_DOWN_YARN_NODE_COUNT_PARTIAL", 25, 10, 5, 10),
-                Arguments.of("SCALE_DOWN_YARN_NODE_COUNT_ZERO   ", 25, 12, 0, 12),
+                Arguments.of("SCALE_DOWN_YARN_NODE_COUNT_MATCH  ", 25, 22, 3, 22),
                 Arguments.of("SCALE_DOWN_YARN_NODE_COUNT_EXTRA  ", 25, 20, 25, 20)
         );
     }

@@ -6,7 +6,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.UriBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,17 +72,17 @@ public class YarnMetricsClient {
                         instanceConfig.getMemoryInMb().intValue(), instanceConfig.getCoreCPU())));
 
         String clusterCreatorCrn = cluster.getClusterPertain().getUserCrn();
-        Invocation.Builder restClientBuilder = restClient.target(yarnApiUrl)
-                .queryParam(PARAM_UPSCALE_FACTOR_NODE_RESOURCE_TYPE, DEFAULT_UPSCALE_RESOURCE_TYPE)
-                .request()
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .header(HEADER_ACTOR_CRN, clusterCreatorCrn);
+        UriBuilder yarnMetricsURI = UriBuilder.fromPath(yarnApiUrl)
+                .queryParam(PARAM_UPSCALE_FACTOR_NODE_RESOURCE_TYPE, DEFAULT_UPSCALE_RESOURCE_TYPE);
 
         mandatoryDownScaleCount.ifPresent(
-                scaleDownCount -> restClientBuilder.header(PARAM_DOWNSCALE_FACTOR_IN_NODE_COUNT, stackV4Response.getNodeCount()));
+                scaleDownCount -> yarnMetricsURI.queryParam(PARAM_DOWNSCALE_FACTOR_IN_NODE_COUNT, stackV4Response.getNodeCount()));
 
         YarnScalingServiceV1Response yarnResponse = requestLogging.logResponseTime(
-                () -> restClientBuilder.post(Entity.json(yarnScalingServiceV1Request), YarnScalingServiceV1Response.class),
+                () -> restClient.target(yarnMetricsURI).request()
+                        .accept(MediaType.APPLICATION_JSON_VALUE)
+                        .header(HEADER_ACTOR_CRN, clusterCreatorCrn)
+                        .post(Entity.json(yarnScalingServiceV1Request), YarnScalingServiceV1Response.class),
                 String.format("YarnScalingAPI query for cluster crn '%s'", cluster.getStackCrn()));
 
         LOGGER.info("YarnScalingAPI response for cluster crn '{}',  response '{}'", cluster.getStackCrn(), yarnResponse);
