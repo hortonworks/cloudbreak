@@ -179,17 +179,18 @@ public class CredentialService extends AbstractCredentialService implements Reso
         credential.setResourceCrn(credentialCrn);
         credential.setCreator(creatorUserCrn);
         credential.setAccountId(accountId);
+        Credential verifiedCredential = credentialAdapter.verify(credential, accountId).getCredential();
+        if (verifiedCredential.getVerificationStatusText() != null) {
+            throw new BadRequestException(verifiedCredential.getVerificationStatusText());
+        }
         try {
-            return transactionService.required(() -> {
-                Credential verifiedCredential = credentialAdapter.verify(credential, accountId).getCredential();
-                if (verifiedCredential.getVerificationStatusText() != null) {
-                    throw new BadRequestException(verifiedCredential.getVerificationStatusText());
-                }
+            Credential createdCredential = transactionService.required(() -> {
                 Credential created = repository.save(verifiedCredential);
                 grpcUmsClient.assignResourceOwnerRoleIfEntitled(creatorUserCrn, credentialCrn, accountId);
-                sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
                 return created;
             });
+            sendCredentialNotification(createdCredential, ResourceEvent.CREDENTIAL_CREATED);
+            return createdCredential;
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Error happened during credential creation: ", e);
             throw new InternalServerErrorException(e);
