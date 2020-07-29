@@ -50,7 +50,7 @@ public class DiagnosticsTriggerService {
         LOGGER.debug("Starting diagnostics collection for Stack. Crn: '{}'", stack.getResourceCrn());
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
         diagnosticsCollectionValidator.validate(request, telemetry, stackCrn);
-        Map<String, Object> parameters = diagnosticsDataToMapConverter.convert(request, telemetry);
+        Map<String, Object> parameters = diagnosticsDataToMapConverter.convert(request, telemetry, stack.getRegion());
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceId(stack.getId())

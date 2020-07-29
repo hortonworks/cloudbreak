@@ -2,27 +2,29 @@
 {%- from 'filecollector/settings.sls' import filecollector with context %}
 {%- from 'fluent/settings.sls' import fluent with context %}
 
-install_fluent_logger:
-  cmd.run:
-    - name: pip install fluent-logger>=0.9.6 --ignore-installed
-    - unless: pip list --no-index | grep -E 'fluent-logger'
+{% set cdp_telemetry_version = '0.1.0' %}
+{% set cdp_telemetry_rpm_location = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-telemetry/'%}
+{% set cdp_telemetry_rpm_repo_url = cdp_telemetry_rpm_location + 'cdp_telemetry-' + cdp_telemetry_version + '.x86_64.rpm' %}
+{% set cdp_telemetry_package_name = 'cdp-telemetry' %}
 
-install_yaml:
+{% if filecollector.updatePackage %}
+uninstall_telemetry_rpm_if_wrong_version:
   cmd.run:
-    - name: pip install PyYAML --ignore-installed
-    - unless: pip list --no-index | grep -E 'PyYAML'
-
-install_pid:
+    - name: rpm -e {{ cdp_telemetry_package_name }}
+    - onlyif: rpm -qa {{ cdp_telemetry_package_name }} | grep -v {{ cdp_telemetry_version }}
+    - failhard: True
+install_telemetry_rpm_manually:
   cmd.run:
-    - name: pip install pid --ignore-installed
-    - unless: pip list --no-index | grep -E 'pid'
-
-/opt/filecollector:
-  file.directory:
-    - name: /opt/filecollector
-    - user: "root"
-    - group: "root"
-    - mode: 750
+    - name: "rpm -i {{ cdp_telemetry_rpm_repo_url }}"
+    - onlyif: "! rpm -q {{ cdp_telemetry_package_name }}"
+    - failhard: True
+{% else %}
+fail_if_telemetry_rpm_is_not_installed:
+  cmd.run:
+    - name: echo "Cdp telemetry is not installed, it is required for using filecollector"; exit 1
+    - onlyif: "! rpm -q {{ cdp_telemetry_package_name }}"
+    - failhard: True
+{% endif %}
 
 /var/lib/filecollector:
   file.directory:
@@ -30,55 +32,37 @@ install_pid:
     - user: "root"
     - group: "root"
     - mode: 750
+    - failhard: True
 
-/opt/filecollector/filecollector.py:
-   file.managed:
-    - source: salt://filecollector/scripts/filecollector.py
-    - user: "root"
-    - group: "root"
-    - mode: '0750'
-
-/opt/filecollector/filecollector-collect.yaml:
+/opt/cdp-telemetry/conf/filecollector-collect.yaml:
    file.managed:
     - source: salt://filecollector/template/filecollector.yaml.j2
     - template: jinja
     - user: "root"
     - group: "root"
     - mode: '0640'
+    - failhard: True
     - context:
         destination: "LOCAL"
 
 {% if fluent.dbusClusterLogsCollection %}
-/opt/filecollector/filecollector-eng.yaml:
+/opt/cdp-telemetry/conf/filecollector-eng.yaml:
    file.managed:
     - source: salt://filecollector/template/filecollector.yaml.j2
     - template: jinja
     - user: "root"
     - group: "root"
     - mode: '0640'
+    - failhard: True
     - context:
         destination: "ENG"
 {% endif %}
 
-/opt/filecollector/bundle_info.json:
+/opt/cdp-telemetry/conf/bundle_info.json:
    file.managed:
     - source: salt://filecollector/template/bundle_info.json.j2
     - template: jinja
     - user: "root"
     - group: "root"
     - mode: '0750'
-
-/opt/filecollector/cloud_storage_upload.sh:
-   file.managed:
-    - source: salt://filecollector/template/cloud_storage_upload.sh.j2
-    - template: jinja
-    - user: "root"
-    - group: "root"
-    - mode: '0750'
-
-/opt/filecollector/cleanup.sh:
-   file.managed:
-    - source: salt://filecollector/scripts/cleanup.sh
-    - user: "root"
-    - group: "root"
-    - mode: '0750'
+    - failhard: True

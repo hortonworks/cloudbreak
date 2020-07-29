@@ -1,32 +1,42 @@
 {% set filecollector = {} %}
 
-{% set s3_base_url = salt['pillar.get']('filecollector:s3BaseUrl') %}
-{% set adlsv2_base_url = salt['pillar.get']('filecollector:adlsV2BaseUrl') %}
+{% set s3_bucket = salt['pillar.get']('filecollector:s3_bucket') %}
+{% set s3_location = salt['pillar.get']('filecollector:s3_location') %}
+{% set s3_region = salt['pillar.get']('filecollector:s3_region') %}
+{% set adlsv2_storage_account = salt['pillar.get']('filecollector:adlsv2_storage_account') %}
+{% set adlsv2_storage_container = salt['pillar.get']('filecollector:adlsv2_storage_container') %}
+{% set adlsv2_storage_location = salt['pillar.get']('filecollector:adlsv2_storage_location') %}
 {% set destination = salt['pillar.get']('filecollector:destination') %}
 {% set issue = salt['pillar.get']('filecollector:issue') %}
 {% set description = salt['pillar.get']('filecollector:description') %}
 {% set start_time = salt['pillar.get']('filecollector:startTime') %}
 {% set end_time = salt['pillar.get']('filecollector:endTime') %}
-{% set description = salt['pillar.get']('filecollector:description') %}
 {% set label_filter = salt['pillar.get']('filecollector:labelFilter') %}
+{% set include_salt_logs = salt['pillar.get']('filecollector:includeSaltLogs') %}
+{% set update_package = salt['pillar.get']('filecollector:updatePackage') %}
 {% set additional_logs = salt['pillar.get']('filecollector:additionalLogs') %}
-{% set azure_storage_instance_msi = salt['pillar.get']('filecollector:azureInstanceMsi') %}
-{% if salt['pillar.get']('filecollector:azureIdBrokerInstanceMsi') %}
-    {% set azure_storage_idbroker_instance_msi = salt['pillar.get']('filecollector:azureIdBrokerInstanceMsi') %}
-{% else %}
-    {% set azure_storage_idbroker_instance_msi = salt['pillar.get']('filecollector:azureInstanceMsi') %}
+
+{% if s3_location and not s3_region %}
+  {%- set instanceDetails = salt.cmd.run('curl -s http://169.254.169.254/latest/dynamic/instance-identity/document') | load_json %}
+  {%- set s3_region = instanceDetails['region'] %}
+{% endif %}
+
+{% set cloud_storage_upload_params = None %}
+{% if s3_location %}
+  {% set cloud_storage_upload_params = "s3 upload -e -p '/var/lib/filecollector/*.gz' --location " + s3_location + " --bucket " + s3_bucket +  " --region " + s3_region %}
+{% elif adlsv2_storage_location %}
+  {% set cloud_storage_upload_params = "abfs upload -p '/var/lib/filecollector/*.gz' --location " + adlsv2_storage_location + " --account " + adlsv2_storage_account + " --container " + adlsv2_storage_container%}
 {% endif %}
 
 {% do filecollector.update({
     "destination": destination,
-    "azureInstanceMsi": azure_storage_instance_msi,
-    "azureIdBrokerInstanceMsi": azure_storage_idbroker_instance_msi,
-    "adlsV2BaseUrl": adlsv2_base_url,
-    "s3BaseUrl": s3_base_url,
+    "cloudStorageUploadParams": cloud_storage_upload_params,
     "startTime": start_time,
     "endTime": end_time,
     "issue": issue,
     "description": description,
     "labelFilter": label_filter,
-    "additionalLogs": additional_logs
+    "additionalLogs": additional_logs,
+    "includeSaltLogs": include_salt_logs,
+    "updatePackage" : update_package
 }) %}

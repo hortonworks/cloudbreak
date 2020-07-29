@@ -38,11 +38,20 @@ public class BaseDiagnosticsCollectionRequest {
     @ApiModelProperty(DiagnosticsModelDescription.DESTINATION)
     private DiagnosticsDestination destination;
 
+    @ApiModelProperty(DiagnosticsModelDescription.HOST_GROUPS)
     private Set<String> hostGroups = new HashSet<>();
 
+    @ApiModelProperty(DiagnosticsModelDescription.HOSTS)
     private Set<String> hosts = new HashSet<>();
 
+    @ApiModelProperty(DiagnosticsModelDescription.ADDITIONAL_LOGS)
     private List<VmLog> additionalLogs = List.of();
+
+    @ApiModelProperty(DiagnosticsModelDescription.INCLUDE_SALT_LOGS)
+    private Boolean includeSaltLogs = Boolean.FALSE;
+
+    @ApiModelProperty(DiagnosticsModelDescription.UPDATE_PACKAGE)
+    private Boolean updatePackage = Boolean.FALSE;
 
     public List<String> getLabels() {
         return labels;
@@ -114,5 +123,21 @@ public class BaseDiagnosticsCollectionRequest {
 
     public void setHosts(Set<String> hosts) {
         this.hosts = hosts;
+    }
+
+    public Boolean getIncludeSaltLogs() {
+        return includeSaltLogs;
+    }
+
+    public void setIncludeSaltLogs(Boolean includeSaltLogs) {
+        this.includeSaltLogs = includeSaltLogs;
+    }
+
+    public Boolean getUpdatePackage() {
+        return updatePackage;
+    }
+
+    public void setUpdatePackage(Boolean updatePackage) {
+        this.updatePackage = updatePackage;
     }
 }

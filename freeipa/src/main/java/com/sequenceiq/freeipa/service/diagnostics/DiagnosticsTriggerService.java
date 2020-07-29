@@ -39,7 +39,7 @@ public class DiagnosticsTriggerService {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Starting diagnostics collection for FreeIpa. Crn: '{}'", stack.getResourceCrn());
-        Map<String, Object> parameters = diagnosticsDataToMapConverter.convert(request, stack.getTelemetry());
+        Map<String, Object> parameters = diagnosticsDataToMapConverter.convert(request, stack.getTelemetry(), stack.getRegion());
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceId(stack.getId())
