@@ -13,9 +13,9 @@ import javax.validation.Payload;
 @Constraint(validatedBy = UpgradeRequestValidator.class)
 public @interface ValidUpgradeRequest {
 
-    String message() default "Upgrade request is invalid. "
+    String message() default "Invalid upgrade request: "
             + "Either one of 'runtime', 'imageId', 'lockComponents' parameters "
-            + "or both 'imageId' and 'lockComponents' parameter must be specified in the request";
+            + "or both 'imageId' and 'lockComponents' parameter or none must be specified in the request";
 
     Class<?>[] groups() default { };
 

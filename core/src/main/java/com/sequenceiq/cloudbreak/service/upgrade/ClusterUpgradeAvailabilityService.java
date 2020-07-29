@@ -77,17 +77,17 @@ public class ClusterUpgradeAvailabilityService {
     private GatewayConfigService gatewayConfigService;
 
     public UpgradeV4Response checkForUpgradesByName(Long workspaceId, String stackName, boolean lockComponents) {
-        UpgradeV4Response upgradeOptions = new UpgradeV4Response();
         Stack stack = stackService.getByNameInWorkspace(stackName, workspaceId);
-        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.repairWithDryRun(stack.getId());
-        if (!stack.getStatus().isAvailable()) {
-            upgradeOptions.setReason(String.format("Cannot upgrade cluster because it is in %s state.", stack.getStatus()));
-            LOGGER.warn(upgradeOptions.getReason());
-        } else if (validationResult.isError()) {
-            upgradeOptions.setReason(String.join(",", validationResult.getError().getValidationErrors()));
-            LOGGER.warn(String.format("Cannot upgrade cluster because: %s", upgradeOptions.getReason()));
-        } else {
-            upgradeOptions = checkForUpgrades(stack, lockComponents);
+        UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents);
+        if (StringUtils.isEmpty(upgradeOptions.getReason())) {
+            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.repairWithDryRun(stack.getId());
+            if (!stack.getStatus().isAvailable()) {
+                upgradeOptions.setReason(String.format("Cannot upgrade cluster because it is in %s state.", stack.getStatus()));
+                LOGGER.warn(upgradeOptions.getReason());
+            } else if (validationResult.isError()) {
+                upgradeOptions.setReason(String.join(",", validationResult.getError().getValidationErrors()));
+                LOGGER.warn(String.format("Cannot upgrade cluster because: %s", upgradeOptions.getReason()));
+            }
         }
         return upgradeOptions;
     }

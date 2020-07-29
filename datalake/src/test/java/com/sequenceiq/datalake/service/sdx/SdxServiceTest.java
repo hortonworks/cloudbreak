@@ -164,7 +164,7 @@ class SdxServiceTest {
         sdxCluser.setClusterName(CLUSTER_NAME);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(eq("hortonworks"), eq(CLUSTER_NAME)))
                 .thenReturn(Optional.of(sdxCluser));
-        SdxCluster returnedSdxCluster = underTest.getSdxByNameInAccount(USER_CRN, CLUSTER_NAME);
+        SdxCluster returnedSdxCluster = underTest.getByNameInAccount(USER_CRN, CLUSTER_NAME);
         assertEquals(sdxCluser, returnedSdxCluster);
     }
 
@@ -181,7 +181,7 @@ class SdxServiceTest {
     @Test
     void testGetSdxClusterByAccountIdWhenNoDeployedClusterShouldThrowSdxNotFoundException() {
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.empty());
-        NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.getSdxByNameInAccount(USER_CRN, "sdxcluster"));
+        NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.getByNameInAccount(USER_CRN, "sdxcluster"));
         assertEquals("SDX cluster 'sdxcluster' not found.", notFoundException.getMessage());
     }
 

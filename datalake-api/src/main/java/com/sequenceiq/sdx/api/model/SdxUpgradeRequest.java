@@ -17,6 +17,8 @@ public class SdxUpgradeRequest {
 
     private Boolean dryRun;
 
+    private SdxUpgradeShowAvailableImages showAvailableImages;
+
     private SdxUpgradeReplaceVms replaceVms;
 
     public String getImageId() {
@@ -43,16 +45,24 @@ public class SdxUpgradeRequest {
         this.lockComponents = lockComponents;
     }
 
-    public Boolean isDryRun() {
+    public Boolean getDryRun() {
         return dryRun;
     }
 
-    public boolean isDryRun(SdxUpgradeRequest request) {
-        return Boolean.TRUE.equals(request.isDryRun());
+    public boolean isDryRun() {
+        return Boolean.TRUE.equals(dryRun);
     }
 
     public void setDryRun(Boolean dryRun) {
         this.dryRun = dryRun;
+    }
+
+    public SdxUpgradeShowAvailableImages getShowAvailableImages() {
+        return showAvailableImages;
+    }
+
+    public void setShowAvailableImages(SdxUpgradeShowAvailableImages showAvailableImages) {
+        this.showAvailableImages = showAvailableImages;
     }
 
     public SdxUpgradeReplaceVms getReplaceVms() {
@@ -65,10 +75,32 @@ public class SdxUpgradeRequest {
 
     @ApiModelProperty(hidden = true)
     public boolean isEmpty() {
+        return isUnspecifiedUpgradeType() &&
+                !Boolean.TRUE.equals(dryRun) &&
+                !isShowAvailableImagesSet();
+    }
+
+    @ApiModelProperty(hidden = true)
+    public boolean isDryRunOnly() {
+        return isUnspecifiedUpgradeType() &&
+                Boolean.TRUE.equals(dryRun);
+    }
+
+    @ApiModelProperty(hidden = true)
+    public boolean isShowAvailableImagesOnly() {
+        return isUnspecifiedUpgradeType() &&
+                isShowAvailableImagesSet();
+    }
+
+    @ApiModelProperty(hidden = true)
+    public boolean isShowAvailableImagesSet() {
+        return Objects.nonNull(showAvailableImages) && !SdxUpgradeShowAvailableImages.DO_NOT_SHOW.equals(showAvailableImages);
+    }
+
+    private boolean isUnspecifiedUpgradeType() {
         return Objects.isNull(imageId) &&
                 Objects.isNull(runtime) &&
-                !Boolean.TRUE.equals(lockComponents) &&
-                !Boolean.TRUE.equals(dryRun);
+                !Boolean.TRUE.equals(lockComponents);
     }
 
     @Override

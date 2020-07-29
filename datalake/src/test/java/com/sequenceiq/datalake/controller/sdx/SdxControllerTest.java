@@ -97,7 +97,7 @@ class SdxControllerTest {
     @Test
     void getTest() throws NoSuchFieldException {
         SdxCluster sdxCluster = getValidSdxCluster();
-        when(sdxService.getSdxByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
 
         SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
         sdxStatusEntity.setStatus(DatalakeStatusEnum.REQUESTED);
