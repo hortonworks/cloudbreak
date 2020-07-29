@@ -419,6 +419,7 @@ public class GrpcUmsClient {
         }
     }
 
+    @Cacheable(cacheNames = "umsAuthorizationEntitlementRegisteredCache", key = "{ #actorCrn, #accountId }")
     public boolean isAuthorizationEntitlementRegistered(String actorCrn, String accountId) {
         if (StringUtils.equals(accountId, InternalCrnBuilder.INTERNAL_ACCOUNT)) {
             return false;
