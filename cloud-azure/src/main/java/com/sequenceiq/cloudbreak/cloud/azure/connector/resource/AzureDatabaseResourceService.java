@@ -77,6 +77,7 @@ public class AzureDatabaseResourceService {
                 client.createResourceGroup(resourceGroupName, region, stack.getTags());
             }
         }
+        Deployment deployment;
         try {
             String parametersMapAsString = new Json(Map.of()).getValue();
             client.createTemplateDeployment(resourceGroupName, stackName, template, parametersMapAsString);
@@ -91,17 +92,15 @@ public class AzureDatabaseResourceService {
             }
         } catch (Exception e) {
             throw new CloudConnectorException(String.format("Error in provisioning database stack %s: %s", stackName, e.getMessage()), e);
+        } finally {
+            deployment = client.getTemplateDeployment(resourceGroupName, stackName);
+            List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
+            cloudResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, cloudContext));
         }
 
-        Deployment deployment = client.getTemplateDeployment(resourceGroupName, stackName);
         String fqdn = (String) ((Map) ((Map) deployment.outputs()).get(DATABASE_SERVER_FQDN)).get("value");
-
         List<CloudResource> databaseResources = createCloudResources(resourceGroupName, fqdn);
         databaseResources.forEach(dbr -> persistenceNotifier.notifyAllocation(dbr, cloudContext));
-
-        List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
-        cloudResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, cloudContext));
-
         return databaseResources.stream()
                 .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
                 .collect(Collectors.toList());
