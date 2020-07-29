@@ -182,7 +182,7 @@ public interface PlatformResourceEndpoint {
     @ApiOperation(value = OpDescription.GET_RESOURCE_GROUPS, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
             nickname = "getResourceGroups")
     PlatformResourceGroupsResponse getResourceGroups(
-            @QueryParam("credentialName") @NotEmpty String credentialName,
+            @QueryParam("credentialName") String credentialName,
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
