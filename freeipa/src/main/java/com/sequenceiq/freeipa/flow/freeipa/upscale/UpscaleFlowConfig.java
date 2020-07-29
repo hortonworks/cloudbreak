@@ -30,6 +30,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_ADD_INSTANCES_STATE;
@@ -47,6 +49,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_F
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_SAVE_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_STARTING_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_TLS_SETUP_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_VALIDATE_INSTANCES_STATE;
 
@@ -122,9 +125,13 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
                     .event(UPSCALE_UPDATE_METADATA_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(UPSCALE_ENABLE_STATUS_CHECKER_STATE).to(UPSCALE_FINISHED_STATE)
+                    .from(UPSCALE_ENABLE_STATUS_CHECKER_STATE).to(UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE)
                     .event(UPSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT)
                     .failureEvent(UPSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT)
+
+                    .from(UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE).to(UPSCALE_FINISHED_STATE)
+                    .event(UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT)
+                    .failureEvent(UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT)
 
                     .from(UPSCALE_FINISHED_STATE).to(FINAL_STATE)
                     .event(UPSCALE_FINISHED_EVENT)
