@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.Diagnostics
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.FINISH_DIAGNOSTICS_COLLECTION_EVENT;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -43,12 +44,16 @@ public class DiagnosticsCleanupHandler extends EventSenderAwareHandler<Diagnosti
         Map<String, Object> parameters = data.getParameters();
         try {
             LOGGER.debug("Diagnostics cleanup started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameters);
-            diagnosticsFlowService.cleanup(resourceId, parameters);
+            Set<String> hosts = data.getHosts();
+            Set<String> hostGroups = data.getHostGroups();
+            diagnosticsFlowService.cleanup(resourceId, parameters, hosts, hostGroups);
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
                     .withSelector(FINISH_DIAGNOSTICS_COLLECTION_EVENT.selector())
                     .withParameters(parameters)
+                    .withHosts(hosts)
+                    .withHostGroups(hostGroups)
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {

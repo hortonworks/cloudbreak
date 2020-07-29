@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConverter;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
 @AuthorizationResource
@@ -39,10 +40,10 @@ public class DiagnosticsV4Controller implements DiagnosticsV4Endpoint {
 
     @Override
     @CheckPermissionByResourceObject
-    public void collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionRequest request) {
+    public FlowIdentifier collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionRequest request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();
         LOGGER.debug("collectDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
-        diagnosticsTriggerService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn);
+        return diagnosticsTriggerService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn);
     }
 
     @Override

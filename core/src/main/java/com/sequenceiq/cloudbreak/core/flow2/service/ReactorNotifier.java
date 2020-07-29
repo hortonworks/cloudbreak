@@ -73,11 +73,11 @@ public class ReactorNotifier {
         return notify(stackId, selector, acceptable, stackService::getByIdWithTransaction);
     }
 
-    public void notify(BaseFlowEvent selectable, Event.Headers headers) {
+    public FlowIdentifier notify(BaseFlowEvent selectable, Event.Headers headers) {
         Event<BaseFlowEvent> event = eventFactory.createEventWithErrHandler(new HashMap<>(headers.asMap()), selectable);
         LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selectable.selector(), event);
         reactor.notify(selectable.selector(), event);
-        checkFlowStatus(event, selectable.getResourceCrn());
+        return checkFlowStatus(event, selectable.getResourceCrn());
     }
 
     public FlowIdentifier notify(Long stackId, String selector, Acceptable acceptable, Function<Long, Stack> getStackFn) {

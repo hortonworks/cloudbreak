@@ -1,7 +1,9 @@
 package com.sequenceiq.common.api.diagnostics;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -35,6 +37,10 @@ public class BaseDiagnosticsCollectionRequest {
     @NotNull
     @ApiModelProperty(DiagnosticsModelDescription.DESTINATION)
     private DiagnosticsDestination destination;
+
+    private Set<String> hostGroups = new HashSet<>();
+
+    private Set<String> hosts = new HashSet<>();
 
     private List<VmLog> additionalLogs = List.of();
 
@@ -92,5 +98,21 @@ public class BaseDiagnosticsCollectionRequest {
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    public Set<String> getHostGroups() {
+        return hostGroups;
+    }
+
+    public void setHostGroups(Set<String> hostGroups) {
+        this.hostGroups = hostGroups;
+    }
+
+    public Set<String> getHosts() {
+        return hosts;
+    }
+
+    public void setHosts(Set<String> hosts) {
+        this.hosts = hosts;
     }
 }

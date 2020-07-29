@@ -40,8 +40,9 @@ declare -A zone=( ["cloudbreak"]="eu-central-1" ["environment"]="us-east-2" ["da
 Field_Separator=$IFS
 IFS=,
 set +e
+echo "Target branch for swagger check: ${CB_TARGET_BRANCH}"
 for service in $Services; do
-  if verlte 2.26.0-b50 $PREVIOUS_BUILD ; then
+  if [ "${CB_TARGET_BRANCH}" != "master" ] && verlte 2.26.0-b50 $PREVIOUS_BUILD ; then
     echo Downloading ${service} ${PREVIOUS_BUILD} swagger definition, if possible
     STATUSCODE=$(curl -kfSs --write-out "%{http_code}" https://${service}-swagger.s3.${zone[$service]}.amazonaws.com/swagger-${PREVIOUS_BUILD}.json -o ./apidefinitions/${service}-swagger-${PREVIOUS_BUILD}.json)
     if [ $STATUSCODE -ne 200 ]; then

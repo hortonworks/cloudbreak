@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.diagnostics.event;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
@@ -11,14 +12,24 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
 
     private final Map<String, Object> parameters;
 
-    public DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Map<String, Object> parameters) {
+    private final Set<String> hosts;
+
+    private final Set<String> hostGroups;
+
+    DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Map<String, Object> parameters,
+            Set<String> hosts, Set<String> hostGroups) {
         super(selector, resourceId, resourceCrn);
         this.parameters = parameters;
+        this.hosts = hosts;
+        this.hostGroups = hostGroups;
     }
 
-    public DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted, Map<String, Object> parameters) {
+    DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted,
+            Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups) {
         super(selector, resourceId, resourceCrn, accepted);
         this.parameters = parameters;
+        this.hosts = hosts;
+        this.hostGroups = hostGroups;
     }
 
     public static DiagnosticsCollectionEventBuilder builder() {
@@ -27,6 +38,14 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
 
     public Map<String, Object> getParameters() {
         return parameters;
+    }
+
+    public Set<String> getHosts() {
+        return hosts;
+    }
+
+    public Set<String> getHostGroups() {
+        return hostGroups;
     }
 
     public static final class DiagnosticsCollectionEventBuilder {
@@ -40,6 +59,10 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
         private Promise<AcceptResult> accepted;
 
         private Map<String, Object> parameters;
+
+        private Set<String> hosts;
+
+        private Set<String> hostGroups;
 
         private DiagnosticsCollectionEventBuilder() {
         }
@@ -69,8 +92,19 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
             return this;
         }
 
+        public DiagnosticsCollectionEventBuilder withHosts(Set<String> hosts) {
+            this.hosts = hosts;
+            return this;
+        }
+
+        public DiagnosticsCollectionEventBuilder withHostGroups(Set<String> hostGroups) {
+            this.hostGroups = hostGroups;
+            return this;
+        }
+
         public DiagnosticsCollectionEvent build() {
-            return new DiagnosticsCollectionEvent(selector, resourceId, resourceCrn, accepted, parameters);
+            return new DiagnosticsCollectionEvent(selector, resourceId, resourceCrn, accepted,
+                    parameters, hosts, hostGroups);
         }
     }
 }

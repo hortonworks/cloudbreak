@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.controller.validation.diagnostics.DiagnosticsCollectionValidator;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToMapConverter;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 
 import reactor.bus.Event;
@@ -39,11 +41,15 @@ public class DiagnosticsTriggerService {
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
 
-    public void startDiagnosticsCollection(BaseDiagnosticsCollectionRequest request, String stackCrn, String userCrn) {
+    @Inject
+    private DiagnosticsCollectionValidator diagnosticsCollectionValidator;
+
+    public FlowIdentifier startDiagnosticsCollection(BaseDiagnosticsCollectionRequest request, String stackCrn, String userCrn) {
         Stack stack = stackService.getByCrn(stackCrn);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Starting diagnostics collection for Stack. Crn: '{}'", stack.getResourceCrn());
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
+        diagnosticsCollectionValidator.validate(request, telemetry, stackCrn);
         Map<String, Object> parameters = diagnosticsDataToMapConverter.convert(request, telemetry);
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
@@ -52,7 +58,7 @@ public class DiagnosticsTriggerService {
                 .withSelector(DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_INIT_EVENT.selector())
                 .withParameters(parameters)
                 .build();
-        reactorNotifier.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn));
+        return reactorNotifier.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn));
     }
 
     private Event.Headers getFlowHeaders(String userCrn) {
