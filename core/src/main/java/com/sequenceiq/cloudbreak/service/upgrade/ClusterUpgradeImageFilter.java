@@ -86,7 +86,7 @@ public class ClusterUpgradeImageFilter {
     private boolean filterPreviousImages(Image currentImage, Image image) {
         return Objects.nonNull(image.getCreated())
         && Objects.nonNull(currentImage.getCreated())
-        && image.getCreated() > currentImage.getCreated();
+        && image.getCreated() >= currentImage.getCreated();
     }
 
     private Predicate<Image> filterCurrentImage(Image currentImage) {

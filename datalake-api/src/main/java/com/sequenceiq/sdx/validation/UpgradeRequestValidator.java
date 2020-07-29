@@ -13,10 +13,32 @@ public class UpgradeRequestValidator implements ConstraintValidator<ValidUpgrade
 
     @Override
     public boolean isValid(SdxUpgradeRequest value, ConstraintValidatorContext context) {
-        if (Objects.isNull(value)) {
+        if (!validateEmptyRequest(value, context)) {
             return false;
         }
-        return isOsUpgrade(value) || isRuntimeUpgrade(value);
+        if (!mutuallyExclusiveDryRunOrShowImages(value, context)) {
+            return false;
+        }
+        return isOsUpgrade(value) || isRuntimeUpgrade(value) || value.isDryRunOnly() || value.isShowAvailableImagesOnly() || value.isEmpty();
+    }
+
+    private boolean validateEmptyRequest(SdxUpgradeRequest value, ConstraintValidatorContext context) {
+        if (Objects.isNull(value)) {
+            String msg = "Invalid upgrade request: empty content";
+            context.buildConstraintViolationWithTemplate(msg).addConstraintViolation().disableDefaultConstraintViolation();
+            return false;
+        }
+        return true;
+    }
+
+    private boolean mutuallyExclusiveDryRunOrShowImages(SdxUpgradeRequest request, ConstraintValidatorContext context) {
+        if (request.isDryRun()  && request.isShowAvailableImagesSet()) {
+            String msg = "Invalid upgrade request: 'dry-run' cannot be used in parallel with  'show-available-images' or "
+                    + "'show-latest-available-image-per-runtime' in the request";
+            context.buildConstraintViolationWithTemplate(msg).addConstraintViolation().disableDefaultConstraintViolation();
+            return false;
+        }
+        return true;
     }
 
     private boolean isOsUpgrade(SdxUpgradeRequest request) {

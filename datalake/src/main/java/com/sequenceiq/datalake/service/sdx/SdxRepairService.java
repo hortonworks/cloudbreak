@@ -73,7 +73,7 @@ public class SdxRepairService {
     }
 
     public FlowIdentifier triggerRepairByName(String userCrn, String clusterName, SdxRepairRequest clusterRepairRequest) {
-        SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
+        SdxCluster cluster = sdxService.getByNameInAccount(userCrn, clusterName);
         MDCBuilder.buildMdcContext(cluster);
         return sdxReactorFlowManager.triggerSdxRepairFlow(cluster, clusterRepairRequest);
     }

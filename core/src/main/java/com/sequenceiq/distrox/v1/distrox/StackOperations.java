@@ -9,7 +9,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -240,14 +239,12 @@ public class StackOperations implements ResourceBasedCrnProvider {
             boolean osUpgrade = upgradeService.isOsUpgrade(request);
             UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(workspaceId, stackName,
                     osUpgrade);
-            if (StringUtils.isEmpty(upgradeResponse.getReason())) {
-                clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request);
-                String environmentCrn = getResourceCrnByResourceName(stackName);
-                StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, environmentCrn, List.of(StackType.WORKLOAD));
-                clusterUpgradeAvailabilityService.checkForNotAttachedClusters(stackViewV4Responses, upgradeResponse);
-                if (!osUpgrade) {
-                    clusterUpgradeAvailabilityService.checkIfClusterRuntimeUpgradable(workspaceId, stackName, upgradeResponse);
-                }
+            clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request);
+            String environmentCrn = getResourceCrnByResourceName(stackName);
+            StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, environmentCrn, List.of(StackType.WORKLOAD));
+            clusterUpgradeAvailabilityService.checkForNotAttachedClusters(stackViewV4Responses, upgradeResponse);
+            if (!osUpgrade && !request.isDryRun() && !request.isShowAvailableImagesSet()) {
+                clusterUpgradeAvailabilityService.checkIfClusterRuntimeUpgradable(workspaceId, stackName, upgradeResponse);
             }
             return upgradeResponse;
         } else {

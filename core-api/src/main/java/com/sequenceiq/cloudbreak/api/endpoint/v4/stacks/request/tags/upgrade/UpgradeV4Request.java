@@ -5,6 +5,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.validation.ValidUpgradeRequest;
+import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -25,6 +26,9 @@ public class UpgradeV4Request {
 
     @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.DRY_RUN)
     private Boolean dryRun;
+
+    @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.SHOW_AVAILABLE_IMAGES)
+    private UpgradeShowAvailableImages showAvailableImages = UpgradeShowAvailableImages.DO_NOT_SHOW;
 
     public String getImageId() {
         return imageId;
@@ -50,19 +54,53 @@ public class UpgradeV4Request {
         this.lockComponents = lockComponents;
     }
 
-    public Boolean isDryRun() {
+    public Boolean getDryRun() {
         return dryRun;
+    }
+
+    public boolean isDryRun() {
+        return Boolean.TRUE.equals(dryRun);
     }
 
     public void setDryRun(Boolean dryRun) {
         this.dryRun = dryRun;
     }
 
+    public UpgradeShowAvailableImages getShowAvailableImages() {
+        return showAvailableImages;
+    }
+
+    public void setShowAvailableImages(UpgradeShowAvailableImages showAvailableImages) {
+        this.showAvailableImages = showAvailableImages;
+    }
+
     public boolean isEmpty() {
+        return isUnspecifiedUpgradeType() &&
+                !Boolean.TRUE.equals(dryRun) &&
+                !isShowAvailableImagesSet();
+    }
+
+    @ApiModelProperty(hidden = true)
+    public boolean isDryRunOnly() {
+        return isUnspecifiedUpgradeType() &&
+                Boolean.TRUE.equals(dryRun);
+    }
+
+    @ApiModelProperty(hidden = true)
+    public boolean isShowAvailableImagesOnly() {
+        return isUnspecifiedUpgradeType() &&
+                isShowAvailableImagesSet();
+    }
+
+    @ApiModelProperty(hidden = true)
+    public boolean isShowAvailableImagesSet() {
+        return Objects.nonNull(showAvailableImages) && !UpgradeShowAvailableImages.DO_NOT_SHOW.equals(showAvailableImages);
+    }
+
+    private boolean isUnspecifiedUpgradeType() {
         return Objects.isNull(imageId) &&
                 Objects.isNull(runtime) &&
-                !Boolean.TRUE.equals(lockComponents) &&
-                !Boolean.TRUE.equals(dryRun);
+                !Boolean.TRUE.equals(lockComponents);
     }
 
     @Override
@@ -72,6 +110,7 @@ public class UpgradeV4Request {
                 ", runtime='" + runtime + '\'' +
                 ", lockComponents=" + lockComponents +
                 ", dryRun=" + dryRun +
+                ", showAvailableImages=" + showAvailableImages +
                 '}';
     }
 }

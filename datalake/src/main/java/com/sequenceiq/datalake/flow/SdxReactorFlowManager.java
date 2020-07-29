@@ -81,7 +81,7 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId, SdxUpgradeReplaceVms replaceVms) {
-        LOGGER.info("Trigger Datalake runtimeUpgrade for: {} with imageId: {} and replace vm param: {}", cluster, imageId, replaceVms);
+        LOGGER.info("Trigger Datalake runtime upgrade for: {} with imageId: {} and replace vm param: {}", cluster, imageId, replaceVms);
         String selector = DATALAKE_UPGRADE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new DatalakeUpgradeStartEvent(selector, cluster.getId(),

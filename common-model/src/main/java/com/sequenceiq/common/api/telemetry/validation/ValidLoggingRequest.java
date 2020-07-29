@@ -15,7 +15,7 @@ import javax.validation.Payload;
 @Constraint(validatedBy = LoggingRequestValidator.class)
 public @interface ValidLoggingRequest {
 
-    String message() default "LoggingV4Request contains one or more invalid data.";
+    String message() default "LoggingV4Request contains one or more invalid input field.";
 
     Class<?>[] groups() default {};
 

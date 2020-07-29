@@ -165,7 +165,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         }
     }
 
-    public SdxCluster getSdxByNameInAccount(String userCrn, String name) {
+    public SdxCluster getByNameInAccount(String userCrn, String name) {
         LOGGER.info("Searching for SDX cluster by name {}", name);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         Optional<SdxCluster> sdxCluster = measure(() -> sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name), LOGGER,
@@ -385,7 +385,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     @Override
     public Long getResourceIdByResourceName(String resourceName) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return getSdxByNameInAccount(userCrn, resourceName).getId();
+        return getByNameInAccount(userCrn, resourceName).getId();
     }
 
     private void validateCloudStorageRequest(SdxCloudStorageRequest cloudStorage, DetailedEnvironmentResponse environment) {
@@ -593,13 +593,13 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
 
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
-        return getSdxByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), resourceName).getCrn();
+        return getByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), resourceName).getCrn();
     }
 
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
         return resourceNames.stream()
-                .map(resourceName -> getSdxByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), resourceName).getCrn())
+                .map(resourceName -> getByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), resourceName).getCrn())
                 .collect(Collectors.toList());
     }
 

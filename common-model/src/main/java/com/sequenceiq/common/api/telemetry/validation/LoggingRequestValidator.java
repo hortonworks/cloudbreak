@@ -20,17 +20,17 @@ public class LoggingRequestValidator implements ConstraintValidator<ValidLogging
     public boolean isValid(LoggingRequest value, ConstraintValidatorContext context) {
         if (value != null) {
             if (StringUtils.isEmpty(value.getStorageLocation())) {
-                String msg = "Storage location paramater is empty in logging request";
+                String msg = "Storage location parameter is empty in logging request";
                 context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
                 return false;
             }
             if (value.getS3() != null && !isValidPath(value.getStorageLocation())) {
-                String msg = "Storage location paramater is invalid (s3) in logging request";
+                String msg = "Storage location parameter is invalid (s3) in logging request";
                 context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
                 return false;
             }
             if (value.getS3() == null && value.getAdlsGen2() == null) {
-                String msg = "Provide at least 1 cloud storage details in logging request";
+                String msg = "Provide at least 1 cloud storage detail in logging request";
                 context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
                 return false;
             }

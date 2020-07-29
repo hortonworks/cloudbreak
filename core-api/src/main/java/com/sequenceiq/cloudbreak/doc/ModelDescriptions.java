@@ -730,5 +730,6 @@ public class ModelDescriptions {
         public static final String RUNTIME = "Cloudera Runtime version";
         public static final String LOCK_COMPONENTS = "Upgrades to image with the same version of stack and clustermanager, if available";
         public static final String DRY_RUN = "Checks the eligibility of an image to upgrade";
+        public static final String SHOW_AVAILABLE_IMAGES = "Returns the list of images that are eligible for the upgrade";
     }
 }

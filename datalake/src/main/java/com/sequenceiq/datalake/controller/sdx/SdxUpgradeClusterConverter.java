@@ -1,18 +1,17 @@
 package com.sequenceiq.datalake.controller.sdx;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Objects;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
 @Service
 public class SdxUpgradeClusterConverter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeClusterConverter.class);
 
     public SdxUpgradeResponse upgradeResponseToSdxUpgradeResponse(UpgradeV4Response upgradeV4Response) {
         return new SdxUpgradeResponse(
@@ -28,6 +27,9 @@ public class SdxUpgradeClusterConverter {
         upgradeV4Request.setRuntime(sdxUpgradeRequest.getRuntime());
         upgradeV4Request.setDryRun(sdxUpgradeRequest.isDryRun());
         upgradeV4Request.setLockComponents(sdxUpgradeRequest.getLockComponents());
+        if (Objects.nonNull(sdxUpgradeRequest.getShowAvailableImages())) {
+            upgradeV4Request.setShowAvailableImages(UpgradeShowAvailableImages.valueOf(sdxUpgradeRequest.getShowAvailableImages().name()));
+        }
         return upgradeV4Request;
     }
 }

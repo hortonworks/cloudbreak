@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.upgrade;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +37,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
 
 @ExtendWith(MockitoExtension.class)
 public class SdxRuntimeUpgradeServiceTest {
@@ -42,6 +45,8 @@ public class SdxRuntimeUpgradeServiceTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final String STACK_CRN = "crn:cdp:sdx:us-west-1:1234:sdxcluster:mystack";
+
+    private static final String STACK_NAME = "mystack";
 
     private static final String IMAGE_ID = "image-id-first";
 
@@ -275,11 +280,107 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
+    public void testDryRunShouldReturnOneUpgradeCandidate() {
+        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
+        imageInfo.setImageId(IMAGE_ID);
+        imageInfo.setCreated(1);
+        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
+        lastImageInfo.setImageId(IMAGE_ID_LAST);
+        lastImageInfo.setCreated(2);
+        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
+        upgradeV4Response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+        sdxUpgradeRequest.setDryRun(true);
+
+        underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response);
+
+        assertEquals(1, upgradeV4Response.getUpgradeCandidates().size());
+        assertEquals(IMAGE_ID_LAST, upgradeV4Response.getUpgradeCandidates().get(0).getImageId());
+    }
+
+    @Test
+    public void testShowLatestOnlyShouldReturnLatestUpgradeCandidatesPerRuntime() {
+
+        ImageComponentVersions imageComponentVersionsFor702 = new ImageComponentVersions();
+        imageComponentVersionsFor702.setCm(V_7_0_2);
+        imageComponentVersionsFor702.setCdp(V_7_0_2);
+
+        ImageComponentVersions imageComponentVersionsFor703 = new ImageComponentVersions();
+        imageComponentVersionsFor703.setCm(V_7_0_3);
+        imageComponentVersionsFor703.setCdp(V_7_0_3);
+
+        ImageInfoV4Response imageInfo1 = new ImageInfoV4Response();
+        imageInfo1.setImageId(IMAGE_ID + 1);
+        imageInfo1.setCreated(1);
+        imageInfo1.setComponentVersions(imageComponentVersionsFor702);
+
+        ImageInfoV4Response imageInfo2 = new ImageInfoV4Response();
+        imageInfo2.setImageId(IMAGE_ID + 2);
+        imageInfo2.setCreated(2);
+        imageInfo2.setComponentVersions(imageComponentVersionsFor702);
+
+        ImageInfoV4Response imageInfo3 = new ImageInfoV4Response();
+        imageInfo3.setImageId(IMAGE_ID + 3);
+        imageInfo3.setCreated(3);
+        imageInfo3.setComponentVersions(imageComponentVersionsFor703);
+
+        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
+        upgradeV4Response.setUpgradeCandidates(List.of(imageInfo1, imageInfo2, imageInfo3));
+        sdxUpgradeRequest.setShowAvailableImages(SdxUpgradeShowAvailableImages.LATEST_ONLY);
+
+        underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response);
+
+        assertEquals(2, upgradeV4Response.getUpgradeCandidates().size());
+        assertFalse(upgradeV4Response.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 1)));
+        assertTrue(upgradeV4Response.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 2)));
+        assertTrue(upgradeV4Response.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 3)));
+    }
+
+    @Test
+    public void testShowAvailableImagesShouldReturnAllUpgradeCandidates() {
+
+        ImageComponentVersions imageComponentVersionsFor702 = new ImageComponentVersions();
+        imageComponentVersionsFor702.setCm(V_7_0_2);
+        imageComponentVersionsFor702.setCdp(V_7_0_2);
+
+        ImageComponentVersions imageComponentVersionsFor703 = new ImageComponentVersions();
+        imageComponentVersionsFor703.setCm(V_7_0_3);
+        imageComponentVersionsFor703.setCdp(V_7_0_3);
+
+        ImageInfoV4Response imageInfo1 = new ImageInfoV4Response();
+        imageInfo1.setImageId(IMAGE_ID + 1);
+        imageInfo1.setCreated(1);
+        imageInfo1.setComponentVersions(imageComponentVersionsFor702);
+
+        ImageInfoV4Response imageInfo2 = new ImageInfoV4Response();
+        imageInfo2.setImageId(IMAGE_ID + 2);
+        imageInfo2.setCreated(2);
+        imageInfo2.setComponentVersions(imageComponentVersionsFor702);
+
+        ImageInfoV4Response imageInfo3 = new ImageInfoV4Response();
+        imageInfo3.setImageId(IMAGE_ID + 3);
+        imageInfo3.setCreated(3);
+        imageInfo3.setComponentVersions(imageComponentVersionsFor703);
+
+        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
+        upgradeV4Response.setUpgradeCandidates(List.of(imageInfo1, imageInfo2, imageInfo3));
+        sdxUpgradeRequest.setShowAvailableImages(SdxUpgradeShowAvailableImages.SHOW);
+
+        underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response);
+
+        assertEquals(3, upgradeV4Response.getUpgradeCandidates().size());
+        assertTrue(upgradeV4Response.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 1)));
+        assertTrue(upgradeV4Response.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 2)));
+        assertTrue(upgradeV4Response.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 3)));
+    }
+
+    @Test
     public void testCheckForRuntimeUpgradeByNameWhenNotEnabled() {
         when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(false);
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.checkForUpgradeByName(USER_CRN, "stackName", sdxUpgradeRequest));
+                () -> underTest.checkForUpgradeByName(USER_CRN, STACK_NAME, sdxUpgradeRequest));
 
         assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
     }
@@ -309,12 +410,12 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Test
     public void testTriggerRuntimeUpgradeByNameWhenNotEnabled() {
-        when(sdxService.getSdxByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
         when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(false);
 
         BadRequestException exception = Assertions.assertThrows(
                 BadRequestException.class,
-                () -> underTest.triggerUpgradeByName(USER_CRN, "stackName", sdxUpgradeRequest));
+                () -> underTest.triggerUpgradeByName(USER_CRN, STACK_NAME, sdxUpgradeRequest));
 
         assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
     }
