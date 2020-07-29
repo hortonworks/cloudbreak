@@ -38,6 +38,8 @@ When you are planning an API endpoint you should specify one of these parameter 
 - environment CRN
 - environment name
 
+If it is possible, please use CRN of a resource instead of name, since generally CRN is used in the whole platform to identify a resource and also during authorization it requires additional database query to find out the CRN based on the name, because we need CRN to authorize a call in UMS.
+
 ### Follow these steps to add authorization for the method in controller class
 #### Resource CRN
 - add `@CheckPermissionByResourceCrn(action = [a value from AuthorizationResourceAction])` annotation to the method
