@@ -14,22 +14,22 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
 
     private final Set<String> hosts;
 
-    private final Set<String> instanceGroups;
+    private final Set<String> hostGroups;
 
     DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Map<String, Object> parameters,
-            Set<String> hosts, Set<String> instanceGroups) {
+            Set<String> hosts, Set<String> hostGroups) {
         super(selector, resourceId, resourceCrn);
         this.parameters = parameters;
         this.hosts = hosts;
-        this.instanceGroups = instanceGroups;
+        this.hostGroups = hostGroups;
     }
 
     DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted,
-            Map<String, Object> parameters, Set<String> hosts, Set<String> instanceGroups) {
+            Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups) {
         super(selector, resourceId, resourceCrn, accepted);
         this.parameters = parameters;
         this.hosts = hosts;
-        this.instanceGroups = instanceGroups;
+        this.hostGroups = hostGroups;
     }
 
     public static DiagnosticsCollectionEventBuilder builder() {
@@ -44,8 +44,8 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
         return hosts;
     }
 
-    public Set<String> getInstanceGroups() {
-        return instanceGroups;
+    public Set<String> getHostGroups() {
+        return hostGroups;
     }
 
     public static final class DiagnosticsCollectionEventBuilder {
@@ -62,7 +62,7 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
 
         private Set<String> hosts;
 
-        private Set<String> instanceGroups;
+        private Set<String> hostGroups;
 
         private DiagnosticsCollectionEventBuilder() {
         }
@@ -97,14 +97,14 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
             return this;
         }
 
-        public DiagnosticsCollectionEventBuilder withInstanceGroups(Set<String> instanceGroups) {
-            this.instanceGroups = instanceGroups;
+        public DiagnosticsCollectionEventBuilder withHostGroups(Set<String> hostGroups) {
+            this.hostGroups = hostGroups;
             return this;
         }
 
         public DiagnosticsCollectionEvent build() {
             return new DiagnosticsCollectionEvent(selector, resourceId, resourceCrn, accepted,
-                    parameters, hosts, instanceGroups);
+                    parameters, hosts, hostGroups);
         }
     }
 }

@@ -74,7 +74,7 @@ public class DiagnosticsCollectionActions {
                         .withSelector(DiagnosticsCollectionHandlerSelectors.COLLECT_DIAGNOSTICS_EVENT.selector())
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
-                        .withInstanceGroups(payload.getInstanceGroups())
+                        .withHostGroups(payload.getHostGroups())
                         .build();
                 sendEvent(context, event);
             }
@@ -96,7 +96,7 @@ public class DiagnosticsCollectionActions {
                         .withSelector(DiagnosticsCollectionHandlerSelectors.UPLOAD_DIAGNOSTICS_EVENT.selector())
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
-                        .withInstanceGroups(payload.getInstanceGroups())
+                        .withHostGroups(payload.getHostGroups())
                         .build();
                 sendEvent(context, event);
             }
@@ -118,7 +118,7 @@ public class DiagnosticsCollectionActions {
                         .withSelector(DiagnosticsCollectionHandlerSelectors.CLEANUP_DIAGNOSTICS_EVENT.selector())
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
-                        .withInstanceGroups(payload.getInstanceGroups())
+                        .withHostGroups(payload.getHostGroups())
                         .build();
                 sendEvent(context, event);
             }
@@ -141,7 +141,7 @@ public class DiagnosticsCollectionActions {
                         .withSelector(DiagnosticsCollectionStateSelectors.FINALIZE_DIAGNOSTICS_COLLECTION_EVENT.selector())
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
-                        .withInstanceGroups(payload.getInstanceGroups())
+                        .withHostGroups(payload.getHostGroups())
                         .build();
                 sendEvent(context, event);
             }
@@ -164,7 +164,7 @@ public class DiagnosticsCollectionActions {
                         .withSelector(DiagnosticsCollectionStateSelectors.HANDLED_FAILED_DIAGNOSTICS_COLLECTION_EVENT.selector())
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
-                        .withInstanceGroups(payload.getInstanceGroups())
+                        .withHostGroups(payload.getHostGroups())
                         .build();
                 sendEvent(context, event);
             }

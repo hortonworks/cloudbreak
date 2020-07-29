@@ -40,7 +40,7 @@ public class DiagnosticsDataToMapConverter {
                 .map(Date::getTime).orElse(null));
         parameters.put("endTime", Optional.ofNullable(request.getEndTime())
                 .map(Date::getTime).orElse(null));
-        parameters.put("instanceGroups", Optional.ofNullable(request.getInstaceGroups()).orElse(null));
+        parameters.put("hostGroups", Optional.ofNullable(request.getHostGroups()).orElse(null));
         parameters.put("hosts", Optional.ofNullable(request.getHosts()).orElse(null));
         if (telemetry != null && telemetry.getLogging() != null) {
             Logging logging = telemetry.getLogging();

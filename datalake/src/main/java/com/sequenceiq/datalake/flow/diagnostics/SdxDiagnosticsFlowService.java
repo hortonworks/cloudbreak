@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.flow.diagnostics;
 
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -19,13 +20,15 @@ import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxClusterService;
 import com.sequenceiq.datalake.service.sdx.diagnostics.DiagnosticsService;
 import com.sequenceiq.flow.api.FlowEndpoint;
-import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
 
 @Service
 public class SdxDiagnosticsFlowService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsService.class);
+
+    private static final String DIAGNOSTICS_COLLECTION_FAILED_STATE = "DIAGNOSTICS_COLLECTION_FAILED_STATE";
 
     @Inject
     private DiagnosticsV4Endpoint diagnosticsV4Endpoint;
@@ -52,8 +55,11 @@ public class SdxDiagnosticsFlowService {
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                     .run(() -> {
-                        FlowCheckResponse flowCheckResponse = flowEndpoint.hasFlowRunningByFlowId(flowIdentifier.getPollableId());
-                        if (!flowCheckResponse.getHasActiveFlow()) {
+                        List<FlowLogResponse> flowLogs = flowEndpoint.getFlowLogsByFlowId(flowIdentifier.getPollableId());
+                        if (hasFlowFailed(flowLogs)) {
+                            return AttemptResults.breakFor("Diagnostic collection flow failed in Cloudbreak.");
+                        }
+                        if (!flowLogs.isEmpty() && flowLogs.get(0).getFinalized()) {
                             return AttemptResults.justFinish();
                         }
                         return AttemptResults.justContinue();
@@ -61,5 +67,9 @@ public class SdxDiagnosticsFlowService {
         }, () -> {
             throw notFound("SDX cluster", sdxId).get();
         });
+    }
+
+    private boolean hasFlowFailed(List<FlowLogResponse> flowLogs) {
+        return flowLogs.stream().map(FlowLogResponse::getCurrentState).anyMatch(DIAGNOSTICS_COLLECTION_FAILED_STATE::equals);
     }
 }

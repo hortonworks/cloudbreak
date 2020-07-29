@@ -38,7 +38,7 @@ public class BaseDiagnosticsCollectionRequest {
     @ApiModelProperty(DiagnosticsModelDescription.DESTINATION)
     private DiagnosticsDestination destination;
 
-    private Set<String> instaceGroups = new HashSet<>();
+    private Set<String> hostGroups = new HashSet<>();
 
     private Set<String> hosts = new HashSet<>();
 
@@ -100,12 +100,12 @@ public class BaseDiagnosticsCollectionRequest {
         this.endTime = endTime;
     }
 
-    public Set<String> getInstaceGroups() {
-        return instaceGroups;
+    public Set<String> getHostGroups() {
+        return hostGroups;
     }
 
-    public void setInstaceGroups(Set<String> instaceGroups) {
-        this.instaceGroups = instaceGroups;
+    public void setHostGroups(Set<String> hostGroups) {
+        this.hostGroups = hostGroups;
     }
 
     public Set<String> getHosts() {

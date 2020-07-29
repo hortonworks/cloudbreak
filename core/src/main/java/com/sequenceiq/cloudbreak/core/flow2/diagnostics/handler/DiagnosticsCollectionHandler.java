@@ -45,17 +45,18 @@ public class DiagnosticsCollectionHandler extends EventSenderAwareHandler<Diagno
         try {
             LOGGER.debug("Diagnostics collection started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameters);
             Set<String> hosts = data.getHosts();
-            Set<String> instanceGroups = data.getInstanceGroups();
-            diagnosticsService.collect(resourceId, parameters, hosts, instanceGroups);
+            Set<String> hostGroups = data.getHostGroups();
+            diagnosticsService.collect(resourceId, parameters, hosts, hostGroups);
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
                     .withSelector(START_DIAGNOSTICS_UPLOAD_EVENT.selector())
                     .withParameters(parameters)
-                    .withHosts(data.getHosts())
-                    .withInstanceGroups(data.getInstanceGroups())
+                    .withHosts(hosts)
+                    .withHostGroups(hostGroups)
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
+            throw new RuntimeException("Shit failed");
         } catch (Exception e) {
             LOGGER.debug("Diagnostics collection failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameters, e);
             DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters);

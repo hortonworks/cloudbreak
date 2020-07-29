@@ -45,15 +45,15 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
         try {
             LOGGER.debug("Diagnostics collection initialization started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameters);
             Set<String> hosts = data.getHosts();
-            Set<String> instanceGroups = data.getInstanceGroups();
-            diagnosticsFlowService.init(resourceId, parameters, hosts, instanceGroups);
+            Set<String> hostGroups = data.getHostGroups();
+            diagnosticsFlowService.init(resourceId, parameters, hosts, hostGroups);
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
                     .withSelector(START_DIAGNOSTICS_COLLECTION_EVENT.selector())
                     .withParameters(parameters)
                     .withHosts(hosts)
-                    .withInstanceGroups(instanceGroups)
+                    .withHostGroups(hostGroups)
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {

@@ -45,15 +45,15 @@ public class DiagnosticsUploadHandler extends EventSenderAwareHandler<Diagnostic
         try {
             LOGGER.debug("Diagnostics upload started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameters);
             Set<String> hosts = data.getHosts();
-            Set<String> instanceGroups = data.getInstanceGroups();
-            diagnosticsFlowService.upload(resourceId, parameters, hosts, instanceGroups);
+            Set<String> hostGroups = data.getHostGroups();
+            diagnosticsFlowService.upload(resourceId, parameters, hosts, hostGroups);
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
                     .withSelector(START_DIAGNOSTICS_CLEANUP_EVENT.selector())
                     .withParameters(parameters)
-                    .withHosts(data.getHosts())
-                    .withInstanceGroups(data.getInstanceGroups())
+                    .withHosts(hosts)
+                    .withHostGroups(hostGroups)
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {

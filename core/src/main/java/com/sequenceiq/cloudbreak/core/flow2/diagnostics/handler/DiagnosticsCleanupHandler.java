@@ -45,15 +45,15 @@ public class DiagnosticsCleanupHandler extends EventSenderAwareHandler<Diagnosti
         try {
             LOGGER.debug("Diagnostics cleanup started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameters);
             Set<String> hosts = data.getHosts();
-            Set<String> instanceGroups = data.getInstanceGroups();
-            diagnosticsFlowService.cleanup(resourceId, parameters, hosts, instanceGroups);
+            Set<String> hostGroups = data.getHostGroups();
+            diagnosticsFlowService.cleanup(resourceId, parameters, hosts, hostGroups);
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
                     .withSelector(FINISH_DIAGNOSTICS_COLLECTION_EVENT.selector())
                     .withParameters(parameters)
-                    .withHosts(data.getHosts())
-                    .withInstanceGroups(data.getInstanceGroups())
+                    .withHosts(hosts)
+                    .withHostGroups(hostGroups)
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {
