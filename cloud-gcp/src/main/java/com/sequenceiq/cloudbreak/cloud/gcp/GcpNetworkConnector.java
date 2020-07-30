@@ -104,7 +104,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements N
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), GCP_NETWORK, networkCreationRequest.getEnvName());
         } catch (IOException e) {
-            throw new GcpResourceException("sdfsdfsdfsdfsdf", GCP_NETWORK, networkCreationRequest.getEnvName());
+            throw new GcpResourceException("Network creation failed due to IO exception", GCP_NETWORK, networkCreationRequest.getEnvName());
         }
     }
 
@@ -123,7 +123,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements N
         } catch (GoogleJsonResponseException e) {
             exceptionHandler(e, networkDeletionRequest.getStackName(), GCP_NETWORK);
         } catch (IOException e) {
-            throw new GcpResourceException("sdfsdfsdfsdfsdf", GCP_NETWORK, networkDeletionRequest.getStackName());
+            throw new GcpResourceException("Network deletion failed due to IO exception", GCP_NETWORK, networkDeletionRequest.getStackName());
         }
     }
 
