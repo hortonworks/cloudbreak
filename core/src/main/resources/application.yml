@@ -219,8 +219,11 @@ cb:
     distrox:
       enabled.instance.types: >
         Standard_D8_v3,
+        Standard_D8s_v3,
         Standard_D16_v3,
+        Standard_D16s_v3,
         Standard_D32_v3,
+        Standard_D32s_v3,
         Standard_E8_v3,
         Standard_E16_v3,
         Standard_E32_v3,
