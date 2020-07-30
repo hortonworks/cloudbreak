@@ -46,6 +46,16 @@ public class GcpParams {
         return new GcpParams.Builder();
     }
 
+    @Override
+    public String toString() {
+        return "GcpParams{" +
+                "networkId='" + networkId + '\'' +
+                ", sharedProjectId='" + sharedProjectId + '\'' +
+                ", noFirewallRules='" + noFirewallRules + '\'' +
+                ", noPublicIp=" + noPublicIp +
+                '}';
+    }
+
     public static final class Builder {
 
         private String networkId;

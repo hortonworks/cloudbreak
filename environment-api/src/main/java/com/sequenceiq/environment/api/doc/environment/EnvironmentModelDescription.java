@@ -17,6 +17,7 @@ public class EnvironmentModelDescription {
     public static final String OUTBOUND_INTERNET_TRAFFIC = "A flag to enable or disable the outbound internet traffic from the instances.";
     public static final String AWS_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
     public static final String AZURE_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
+    public static final String GCP_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
     public static final String YARN_SPECIFIC_PARAMETERS = "Yarn parameters";
     public static final String MOCK_PARAMETERS = "Mock parameters";
     public static final String AWS_VPC_ID = "Subnet ids of the specified networks";
