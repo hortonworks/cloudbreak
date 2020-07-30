@@ -57,7 +57,7 @@ public abstract class EnvironmentNetworkBase {
     @ApiModelProperty(EnvironmentModelDescription.MOCK_PARAMETERS)
     private EnvironmentNetworkMockParams mock;
 
-    @ApiModelProperty(EnvironmentModelDescription.AWS_SPECIFIC_PARAMETERS)
+    @ApiModelProperty(EnvironmentModelDescription.GCP_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkGcpParams gcp;
 
     @ApiModelProperty(EnvironmentModelDescription.AZURE_SPECIFIC_PARAMETERS)
