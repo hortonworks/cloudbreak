@@ -15,9 +15,10 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
-import com.sequenceiq.flow.core.model.ResultType;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
@@ -50,11 +51,11 @@ public class FreeIpaFlowManager {
         reactor.notify(selectable.selector(), event);
     }
 
-    public void notify(BaseFlowEvent selectable, Event.Headers headers) {
+    public FlowIdentifier notify(BaseFlowEvent selectable, Event.Headers headers) {
         Event<BaseFlowEvent> event = eventFactory.createEventWithErrHandler(new HashMap<>(headers.asMap()), selectable);
         LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selectable.selector(), event);
         reactor.notify(selectable.selector(), event);
-        checkFlowOperationForResource(event);
+        return checkFlowOperationForResource(event);
     }
 
     private void notify(String selector, Event<Acceptable> event) {
@@ -63,12 +64,22 @@ public class FreeIpaFlowManager {
         checkFlowOperationForResource(event);
     }
 
-    private void checkFlowOperationForResource(Event<? extends Acceptable> event) {
+    private FlowIdentifier checkFlowOperationForResource(Event<? extends Acceptable> event) {
         try {
             Promise<AcceptResult> acceptPromise = event.getData().accepted();
             FlowAcceptResult accepted = (FlowAcceptResult) acceptPromise.await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
-            if (accepted == null || ResultType.ALREADY_EXISTING_FLOW.equals(accepted.getResultType())) {
-                throw new RuntimeException("Flows under operation, request not allowed.");
+            if (accepted == null) {
+                throw new RuntimeException("FlowAcceptResult was null. Maybe flow is under operation, request not allowed.");
+            }
+            switch (accepted.getResultType()) {
+                case RUNNING_IN_FLOW:
+                    return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
+                case RUNNING_IN_FLOW_CHAIN:
+                    return new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId());
+                case ALREADY_EXISTING_FLOW:
+                    throw new RuntimeException("Flow is under operation, request not allowed.");
+                default:
+                    throw new IllegalStateException("Illegal resultType: " + accepted.getResultType());
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e.getMessage());

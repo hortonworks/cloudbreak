@@ -12,6 +12,7 @@ import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.datalake.service.sdx.diagnostics.DiagnosticsService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.DiagnosticsEndpoint;
 
 @Controller
@@ -23,8 +24,8 @@ public class DiagnosticsController implements DiagnosticsEndpoint {
 
     @Override
     @CheckPermissionByResourceObject
-    public void collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionRequest request) {
-        diagnosticsService.collectDiagnostics(request);
+    public FlowIdentifier collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionRequest request) {
+        return diagnosticsService.collectDiagnostics(request);
     }
 
     @Override
