@@ -45,7 +45,7 @@ public class NetworkDtoToResponseConverterTest {
         NetworkDto network = createNetworkDto().withAws(createAwsParams()).build();
         when(subnetIdProvider.provide(network, TUNNEL, network.getCloudPlatform())).thenReturn(PREFERRED_SUBNET_ID);
 
-        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL);
+        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
 
         assertCommonFields(network, actual);
         assertEquals(network.getAws().getVpcId(), actual.getAws().getVpcId());
@@ -59,7 +59,7 @@ public class NetworkDtoToResponseConverterTest {
         NetworkDto network = createNetworkDto().withAzure(createAzureParams()).build();
         when(subnetIdProvider.provide(network, TUNNEL, network.getCloudPlatform())).thenReturn(PREFERRED_SUBNET_ID);
 
-        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL);
+        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
 
         assertCommonFields(network, actual);
         assertEquals(network.getAzure().isNoPublicIp(), actual.getAzure().getNoPublicIp());
@@ -75,7 +75,7 @@ public class NetworkDtoToResponseConverterTest {
         NetworkDto network = createNetworkDto().withMock(createMockParams()).build();
         when(subnetIdProvider.provide(network, TUNNEL, network.getCloudPlatform())).thenReturn(PREFERRED_SUBNET_ID);
 
-        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL);
+        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
 
         assertCommonFields(network, actual);
         assertEquals(network.getMock().getVpcId(), actual.getMock().getVpcId());
@@ -91,7 +91,7 @@ public class NetworkDtoToResponseConverterTest {
 
         when(subnetIdProvider.provide(network, TUNNEL, network.getCloudPlatform())).thenReturn(PREFERRED_SUBNET_ID);
 
-        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL);
+        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
 
         assertCommonFields(network, actual);
         assertEquals(network.getYarn().getQueue(), actual.getYarn().getQueue());
