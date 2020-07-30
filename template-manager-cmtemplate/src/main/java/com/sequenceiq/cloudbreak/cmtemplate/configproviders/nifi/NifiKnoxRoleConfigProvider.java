@@ -48,7 +48,9 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
         if (!topologyNames.isEmpty()) {
             String clusterName = source.getGeneralClusterConfigs().getClusterName();
             String proxyContextPath = topologyNames.stream()
-                    .map(topologyName -> String.format("%s/%s/nifi-app", clusterName, topologyName))
+                    .map(topologyName -> String.format("%s/%s/nifi-app,%s/%s/nifi-app",
+                            clusterName, topologyName,
+                            clusterName, topologyName + "-api"))
                     .collect(Collectors.joining(","));
             LOGGER.debug("{} = {} added to template", PROXY_CONTEXT_PATH, proxyContextPath);
             configs.add(config(PROXY_CONTEXT_PATH, proxyContextPath));
