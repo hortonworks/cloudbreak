@@ -17,7 +17,7 @@ public class SdxUpgradeRequest {
 
     private Boolean dryRun;
 
-    private SdxUpgradeReplaceVms replaceVms = SdxUpgradeReplaceVms.DISABLED;
+    private SdxUpgradeReplaceVms replaceVms;
 
     public String getImageId() {
         return imageId;
