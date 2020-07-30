@@ -47,6 +47,16 @@ public class NetworkRequestToDtoConverter {
             builder.withAzure(azureParams);
             builder.withNetworkId(network.getAzure().getNetworkId());
         }
+        if (network.getGcp() != null) {
+            LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "GCP");
+            GcpParams gcpParams = new GcpParams();
+            gcpParams.setNetworkId(network.getGcp().getNetworkId());
+            gcpParams.setSharedProjectId(network.getGcp().getSharedProjectId());
+            gcpParams.setNoFirewallRules(network.getGcp().getNoFirewallRules());
+            gcpParams.setNoPublicIp(network.getGcp().getNoPublicIp());
+            builder.withGcp(gcpParams);
+            builder.withNetworkId(network.getGcp().getNetworkId());
+        }
         if (network.getYarn() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Yarn");
             YarnParams yarnParams = new YarnParams();
