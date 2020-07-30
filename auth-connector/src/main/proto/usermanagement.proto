@@ -430,6 +430,10 @@ service UserManagement {
   // Unassign a cloud identity from a service principal.
   rpc UnassignServicePrincipalCloudIdentity (UnassignServicePrincipalCloudIdentityRequest)
     returns (UnassignServicePrincipalCloudIdentityResponse) {}
+
+  // List cloud identity mappings for service principals.
+  rpc ListServicePrincipalCloudIdentities (ListServicePrincipalCloudIdentitiesRequest)
+    returns (ListServicePrincipalCloudIdentitiesResponse) {}
 }
 
 // The state of the actor.
@@ -2716,10 +2720,18 @@ message CloudIdentityDomainStorage {
   }
 }
 
+// An object that represents the default domain for a given cloud provider.
+message DefaultCloudIdentityDomainStorage {
+}
+
 // Object used to represent an Azure cloud identity domain in dynamo.
 message AzureCloudIdentityDomainStorage {
-  // A unique identifier for an Azure AD instance.
-  string azureAdIdentifier = 1;
+  oneof azureDomain {
+    // A unique identifier for an Azure AD instance.
+    string azureAdIdentifier = 1;
+    // The default Azure domain.
+    DefaultCloudIdentityDomainStorage defaultAzureDomain = 2;
+  }
 }
 
 // An identifier for a cloud identity that is unique within the enclosing
@@ -2957,10 +2969,18 @@ message CloudIdentityDomain {
   }
 }
 
+// An object that represents the default domain for a given cloud provider.
+message DefaultCloudIdentityDomain {
+}
+
 // Object used to represent an Azure cloud identity domain in the wire protocol.
 message AzureCloudIdentityDomain {
-  // A unique identifier for an Azure AD instance.
-  string azureAdIdentifier = 1;
+  oneof azureDomain {
+    // A unique identifier for an Azure AD instance.
+    string azureAdIdentifier = 1;
+    // The default Azure domain.
+    DefaultCloudIdentityDomain defaultAzureDomain = 2;
+  }
 }
 
 // An identifier for a cloud identity that is unique within the enclosing
@@ -3034,4 +3054,33 @@ message UnassignServicePrincipalCloudIdentityRequest {
 }
 
 message UnassignServicePrincipalCloudIdentityResponse {
+}
+
+message ListServicePrincipalCloudIdentitiesRequest {
+  // The account id in which the service principal cloud identity mappings exist.
+  string accountId = 1;
+  // Optional list of service principals for which mappings should be listed.
+  // The default is to return cloud identity mappings for all service principals.
+  repeated string servicePrincipal = 2;
+  // Optional environment CRN. If provided, the response will contain service
+  // principal cloud identity mappings only for the given environment. By default,
+  // mappings for all environments are returned.
+  string environmentCrn = 3;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 4;
+  paging.PageToken pageToken = 5;
+}
+
+message ServicePrincipalCloudIdentities {
+  // The service principal.
+  string servicePrincipal = 1;
+  // List of cloud identities for the service principal.
+  repeated CloudIdentity cloudIdentities = 2;
+}
+
+message ListServicePrincipalCloudIdentitiesResponse {
+  // The list of service principal cloud identity mappings.
+  repeated ServicePrincipalCloudIdentities servicePrincipalCloudIdentities = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }

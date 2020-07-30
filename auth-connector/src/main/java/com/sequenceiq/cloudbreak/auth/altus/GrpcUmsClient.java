@@ -31,6 +31,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEv
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
@@ -270,6 +271,35 @@ public class GrpcUmsClient {
             LOGGER.debug("Deleting machine user {} by {} using request ID {}", machineUserName, userCrn, generatedRequestId);
             client.deleteMachineUser(generatedRequestId, userCrn, machineUserName);
         }
+    }
+
+    /**
+     * Retrieves list of service principal cloud identities for an environment from UMS.
+     *
+     * @param accountId       the account Id
+     * @param environmentCrn  the environment crn
+     * @param requestId       an optional request Id
+     * @return list of service principal cloud identities for an environment
+     */
+    public List<ServicePrincipalCloudIdentities> listServicePrincipalCloudIdentities(
+            String actorCrn, String accountId, String environmentCrn, Optional<String> requestId) {
+
+        List<ServicePrincipalCloudIdentities> spCloudIds = new ArrayList<>();
+
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Listing service principal cloud identities for account {} using request ID {}", accountId, requestId);
+            UserManagementProto.ListServicePrincipalCloudIdentitiesResponse response;
+            Optional<PagingProto.PageToken> pageToken = Optional.empty();
+            do {
+                response = client.listServicePrincipalCloudIdentities(
+                        requestId.orElse(UUID.randomUUID().toString()), accountId, environmentCrn, pageToken);
+                spCloudIds.addAll(response.getServicePrincipalCloudIdentitiesList());
+                pageToken = Optional.ofNullable(response.getNextPageToken());
+            } while (response.hasNextPageToken());
+        }
+        LOGGER.debug("{} ServicePrincipalCloudIdentities found for account {}", spCloudIds.size(), accountId);
+        return spCloudIds;
     }
 
     /**

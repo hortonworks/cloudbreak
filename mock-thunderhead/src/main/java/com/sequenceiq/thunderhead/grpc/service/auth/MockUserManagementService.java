@@ -85,6 +85,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListM
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
@@ -437,6 +439,16 @@ public class MockUserManagementService extends UserManagementImplBase {
             );
         }
 
+        responseObserver.onNext(responseBuilder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listServicePrincipalCloudIdentities(ListServicePrincipalCloudIdentitiesRequest request,
+        StreamObserver<ListServicePrincipalCloudIdentitiesResponse> responseObserver) {
+        mockCrnService.ensureInternalActor();
+        LOGGER.info("List service principal cloud identities for account: {}, environment: {}", request.getAccountId(), request.getEnvironmentCrn());
+        ListServicePrincipalCloudIdentitiesResponse.Builder responseBuilder = ListServicePrincipalCloudIdentitiesResponse.newBuilder();
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
