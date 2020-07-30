@@ -205,6 +205,7 @@ public class NetworkDto {
                 ", resourceCrn='" + resourceCrn + '\'' +
                 ", aws=" + aws +
                 ", azure=" + azure +
+                ", gcp=" + gcp +
                 ", yarn=" + yarn +
                 ", mock=" + mock +
                 ", networkCidr='" + networkCidr + '\'' +

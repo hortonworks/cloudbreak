@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -48,6 +49,13 @@ public class NetworkDtoToResponseConverter {
                         .withNetworkId(p.getNetworkId())
                         .withResourceGroupName(p.getResourceGroupName())
                         .withNoPublicIp(p.isNoPublicIp())
+                        .build()))
+                .withGcp(getIfNotNull(network.getGcp(), p -> EnvironmentNetworkGcpParams.EnvironmentNetworkGcpParamsBuilder
+                        .anEnvironmentNetworkGcpParamsBuilder()
+                        .withNetworkId(p.getNetworkId())
+                        .withSharedProjectId(p.getSharedProjectId())
+                        .withNoFirewallRules(p.getNoFirewallRules())
+                        .withNoPublicIp(p.getNoPublicIp())
                         .build()))
                 .withYarn(getIfNotNull(network.getYarn(), p -> EnvironmentNetworkYarnParams.EnvironmentNetworkYarnParamsBuilder
                         .anEnvironmentNetworkYarnParams()
