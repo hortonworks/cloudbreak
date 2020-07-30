@@ -14,6 +14,7 @@ import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConverter;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.diagnostics.DiagnosticsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.freeipa.service.diagnostics.DiagnosticsTriggerService;
@@ -39,10 +40,10 @@ public class DiagnosticsV1Controller implements DiagnosticsV1Endpoint {
 
     @Override
     @CheckPermissionByResourceObject
-    public void collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionRequest request) {
+    public FlowIdentifier collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionRequest request) {
         String accountId = crnService.getCurrentAccountId();
         LOGGER.debug("collectDiagnostics called with accountId '{}'", accountId);
-        diagnosticsTriggerService.startDiagnosticsCollection(request, accountId, crnService.getUserCrn());
+        return diagnosticsTriggerService.startDiagnosticsCollection(request, accountId, crnService.getUserCrn());
     }
 
     @Override

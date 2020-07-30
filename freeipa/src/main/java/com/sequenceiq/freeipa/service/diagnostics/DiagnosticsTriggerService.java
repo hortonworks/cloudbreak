@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToMapConverter;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.freeipa.api.v1.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -35,7 +36,7 @@ public class DiagnosticsTriggerService {
     @Inject
     private DiagnosticsDataToMapConverter diagnosticsDataToMapConverter;
 
-    public void startDiagnosticsCollection(DiagnosticsCollectionRequest request, String accountId, String userCrn) {
+    public FlowIdentifier startDiagnosticsCollection(DiagnosticsCollectionRequest request, String accountId, String userCrn) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Starting diagnostics collection for FreeIpa. Crn: '{}'", stack.getResourceCrn());
@@ -47,7 +48,7 @@ public class DiagnosticsTriggerService {
                 .withSelector(DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_INIT_EVENT.selector())
                 .withParameters(parameters)
                 .build();
-        flowManager.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn));
+        return flowManager.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn));
     }
 
     private Event.Headers getFlowHeaders(String userCrn) {

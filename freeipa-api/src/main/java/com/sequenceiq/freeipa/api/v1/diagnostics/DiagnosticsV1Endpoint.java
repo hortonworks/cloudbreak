@@ -10,6 +10,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.diagnostics.docs.DiagnosticsOperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
@@ -28,7 +29,7 @@ public interface DiagnosticsV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_FREEIPA_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
             notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "collectFreeIpaDiagnosticsV1")
-    void collectDiagnostics(@Valid DiagnosticsCollectionRequest request);
+    FlowIdentifier collectDiagnostics(@Valid DiagnosticsCollectionRequest request);
 
     @GET
     @Path("logs")
