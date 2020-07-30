@@ -30,7 +30,7 @@ public class DiagnosticsDataToMapConverter {
     @Inject
     private AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
-    public Map<String, Object> convert(BaseDiagnosticsCollectionRequest request, Telemetry telemetry) {
+    public Map<String, Object> convert(BaseDiagnosticsCollectionRequest request, Telemetry telemetry, String region) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("destination", request.getDestination().toString());
         parameters.put("issue", request.getIssue());
@@ -42,18 +42,21 @@ public class DiagnosticsDataToMapConverter {
                 .map(Date::getTime).orElse(null));
         parameters.put("hostGroups", Optional.ofNullable(request.getHostGroups()).orElse(null));
         parameters.put("hosts", Optional.ofNullable(request.getHosts()).orElse(null));
+        parameters.put("includeSaltLogs", Optional.ofNullable(request.getIncludeSaltLogs()).orElse(false));
+        parameters.put("updatePackage", Optional.ofNullable(request.getUpdatePackage()).orElse(false));
         if (telemetry != null && telemetry.getLogging() != null) {
             Logging logging = telemetry.getLogging();
             if (logging.getS3() != null) {
                 S3Config s3Config = s3ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
-                parameters.put("s3BaseUrl", "s3://" + Paths.get(s3Config.getBucket(), s3Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
+                parameters.put("s3_bucket", s3Config.getBucket());
+                parameters.put("s3_location", Paths.get(s3Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
+                parameters.put("s3_region", region);
             }
             if (logging.getAdlsGen2() != null) {
                 AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
-                parameters.put("adlsV2BaseUrl", "https://" + Paths.get(String.format("%s%s", adlsGen2Config.getAccount(),
-                        AdlsGen2ConfigGenerator.AZURE_DFS_DOMAIN_SUFFIX), adlsGen2Config.getFileSystem(),
-                        adlsGen2Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
-                parameters.put("azureInstanceMsi", logging.getAdlsGen2().getManagedIdentity());
+                parameters.put("adlsv2_storage_account", adlsGen2Config.getAccount());
+                parameters.put("adlsv2_storage_container", adlsGen2Config.getFileSystem());
+                parameters.put("adlsv2_storage_location", Paths.get(adlsGen2Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
             }
         }
         parameters.put("additionalLogs", request.getAdditionalLogs());

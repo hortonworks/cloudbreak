@@ -42,7 +42,7 @@ public class VmLogsService {
 
     private List<VmLog> loadVmLogs() throws IOException {
         ClassPathResource classPathResource = new ClassPathResource(VM_LOGS_DESCRIPTOR_LOCATION);
-        if (!classPathResource.exists()) {
+        if (classPathResource.exists()) {
             String json = FileReaderUtils.readFileFromClasspath(VM_LOGS_DESCRIPTOR_LOCATION);
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(json, new TypeReference<>() {

@@ -36,6 +36,10 @@ public class DiagnosticsParamsConverter {
 
     private static final String PARAMS_STACK_CRN = "stackCrn";
 
+    private static final String PARAMS_INCLUDE_SALT_LOGS = "includeSaltLogs";
+
+    private static final String PARAMS_UPDATE_PACKAGE = "updatePackage";
+
     public Map<String, Object> convertFromRequest(DiagnosticsCollectionRequest request) {
         Map<String, Object> props = new HashMap<>();
         props.put(PARAMS_STACK_CRN, request.getStackCrn());
@@ -48,6 +52,8 @@ public class DiagnosticsParamsConverter {
         props.put(PARAMS_START_TIME, request.getStartTime());
         props.put(PARAMS_END_TIME, request.getEndTime());
         props.put(PARAMS_ADDITIONAL_LOGS, request.getAdditionalLogs());
+        props.put(PARAMS_INCLUDE_SALT_LOGS, request.getIncludeSaltLogs());
+        props.put(PARAMS_UPDATE_PACKAGE, request.getUpdatePackage());
         return props;
     }
 
@@ -64,6 +70,8 @@ public class DiagnosticsParamsConverter {
         request.setIssue(Optional.ofNullable(props.get(PARAMS_ISSUE)).map(Object::toString).orElse(null));
         request.setStartTime((Date) Optional.ofNullable(props.get(PARAMS_START_TIME)).orElse(null));
         request.setEndTime((Date) Optional.ofNullable(props.get(PARAMS_END_TIME)).orElse(null));
+        request.setIncludeSaltLogs((Boolean) Optional.ofNullable(props.get(PARAMS_INCLUDE_SALT_LOGS)).orElse(false));
+        request.setIncludeSaltLogs((Boolean) Optional.ofNullable(props.get(PARAMS_UPDATE_PACKAGE)).orElse(false));
         return request;
     }
 

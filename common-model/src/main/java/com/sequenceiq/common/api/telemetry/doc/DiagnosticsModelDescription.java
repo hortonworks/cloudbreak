@@ -7,6 +7,12 @@ public class DiagnosticsModelDescription {
     public static final String END_TIME = "END time for the time interval of the diagnostic collection request.";
     public static final String DESTINATION = "Destination for the diagnostic collection request.";
     public static final String DESCRIPTION = "description of the diagnostics collection";
+    public static final String HOSTS = "Host (fqdn) filter, use it to run diagnostics collection on only specific hosts";
+    public static final String HOST_GROUPS = "Host groups (instance groups), used it to run diagnostics collection only those " +
+            "hosts that are included the specific host groups";
+    public static final String ADDITIONAL_LOGS = "Additional log path and label pairs that will be sent in the diagnostics collection";
+    public static final String INCLUDE_SALT_LOGS = "Include salt logs in the diagnostic collections";
+    public static final String UPDATE_PACKAGE = "Upgrade or install required telemetry cli tool on the nodes (works only with network)";
 
     private DiagnosticsModelDescription() {
     }

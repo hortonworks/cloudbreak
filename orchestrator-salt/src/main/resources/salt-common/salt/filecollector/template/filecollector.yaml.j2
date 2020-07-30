@@ -4,10 +4,10 @@
 collector:
     useFullPath: true
     outputLocation: "/var/lib/filecollector"
-    files:{% for logfile in telemetry.logs %}
+    files:{% for logfile in telemetry.logs %}{% if not ("type" in logfile and logfile["type"] == "salt" and not filecollector.includeSaltLogs) %}
     - path: {{ logfile["path"] }}
       folderPrefix: logs
-      label: "{{ logfile["label"] }}"{% endfor %}
+      label: "{{ logfile["label"] }}"{% endif %}{% endfor %}
     - path: /var/log/td-agent/td-agent.log*
       label: fluentd
       folderPrefix: logs
@@ -18,7 +18,7 @@ collector:
       skipLabelFromPath: true
       skipAnonymization: true
       useFullPath: false
-    - path: /opt/filecollector/bundle_info.json
+    - path: /opt/cdp-telemetry/conf/bundle_info.json
       label: bundle_info
       mandatory: true
       skipLabelFromPath: true
