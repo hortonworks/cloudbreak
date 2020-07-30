@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -29,15 +30,32 @@ public class EnvironmentServiceDecorator {
     @Inject
     private EnvironmentClientService environmentClientService;
 
-    public void prepareEnvironmentsAndCredentialName(Set<StackViewV4Response> stackViewResponses) {
-        Collection<SimpleEnvironmentResponse> responses = environmentClientService.list().getResponses();
+    public void prepareEnvironmentsAndCredentialName(Set<StackViewV4Response> stackViewResponses, NameOrCrn nameOrCrn) {
+        if (nameOrCrn.hasCrn()) {
+            prepareEnvironmentAndCredential(stackViewResponses, environmentClientService.getByCrn(nameOrCrn.getCrn()));
+        } else if (nameOrCrn.hasName()) {
+            prepareEnvironmentAndCredential(stackViewResponses, environmentClientService.getByName(nameOrCrn.getName()));
+        } else {
+            Collection<SimpleEnvironmentResponse> responses = environmentClientService.list().getResponses();
+            for (StackViewV4Response stackViewResponse : stackViewResponses) {
+                Optional<SimpleEnvironmentResponse> first = responses.stream()
+                        .filter(x -> x.getCrn().equals(stackViewResponse.getEnvironmentCrn()))
+                        .findFirst();
+                if (first.isPresent()) {
+                    stackViewResponse.setCredentialName(first.get().getCredential().getName());
+                    stackViewResponse.setEnvironmentName(first.get().getName());
+                }
+            }
+        }
+
+    }
+
+    public void prepareEnvironmentAndCredential(Set<StackViewV4Response> stackViewResponses,
+        DetailedEnvironmentResponse detailedEnvironmentResponse) {
         for (StackViewV4Response stackViewResponse : stackViewResponses) {
-            Optional<SimpleEnvironmentResponse> first = responses.stream()
-                    .filter(x -> x.getCrn().equals(stackViewResponse.getEnvironmentCrn()))
-                    .findFirst();
-            if (first.isPresent()) {
-                stackViewResponse.setCredentialName(first.get().getCredential().getName());
-                stackViewResponse.setEnvironmentName(first.get().getName());
+            if (detailedEnvironmentResponse != null) {
+                stackViewResponse.setCredentialName(detailedEnvironmentResponse.getCredential().getName());
+                stackViewResponse.setEnvironmentName(detailedEnvironmentResponse.getName());
             }
         }
     }

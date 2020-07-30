@@ -107,7 +107,8 @@ public class StackOperations implements ResourceBasedCrnProvider {
                 stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentName(workspaceId, environmentName, stackTypes),
                 StackViewV4Response.class);
         LOGGER.info("Adding environment name and credential to the responses.");
-        environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses);
+        NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentName) ? NameOrCrn.empty() : NameOrCrn.ofName(environmentName);
+        environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
         LOGGER.info("Adding SDX CRN and name to the responses.");
         sdxServiceDecorator.prepareMultipleSdxAttributes(stackViewResponses);
         return new StackViewV4Responses(stackViewResponses);
@@ -120,7 +121,8 @@ public class StackOperations implements ResourceBasedCrnProvider {
                 stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackTypes),
                 StackViewV4Response.class);
         LOGGER.info("Adding environment name and credential to the responses.");
-        environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses);
+        NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentCrn) ? NameOrCrn.empty() : NameOrCrn.ofCrn(environmentCrn);
+        environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
         LOGGER.info("Adding SDX CRN and name to the responses.");
         sdxServiceDecorator.prepareMultipleSdxAttributes(stackViewResponses);
         return new StackViewV4Responses(stackViewResponses);
