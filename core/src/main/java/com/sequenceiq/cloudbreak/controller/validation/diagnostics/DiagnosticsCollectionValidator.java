@@ -17,8 +17,7 @@ public class DiagnosticsCollectionValidator {
             validationBuilder.error(String.format("Telemetry is not enabled for stack '%s'", stackCrn));
         } else if (DiagnosticsDestination.CLOUD_STORAGE.equals(request.getDestination())) {
             validateCloudStorageSettings(telemetry, stackCrn, validationBuilder);
-        } else if (DiagnosticsDestination.ENG.equals(request.getDestination()) &&
-                telemetry.getFeatures() == null || !telemetry.getFeatures().getClusterLogsCollection().isEnabled()) {
+        } else if (DiagnosticsDestination.ENG.equals(request.getDestination()) && isClusterLogCollectionDisabled(telemetry)) {
             validationBuilder.error(
                     String.format("Cluster log collection is not enabled for this stack '%s'", stackCrn));
         } else if (DiagnosticsDestination.SUPPORT.equals(request.getDestination())) {
@@ -29,6 +28,10 @@ public class DiagnosticsCollectionValidator {
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+    }
+
+    private boolean isClusterLogCollectionDisabled(Telemetry telemetry) {
+        return !telemetry.isClusterLogsCollectionEnabled();
     }
 
     private void validateCloudStorageSettings(Telemetry telemetry, String stackCrn,

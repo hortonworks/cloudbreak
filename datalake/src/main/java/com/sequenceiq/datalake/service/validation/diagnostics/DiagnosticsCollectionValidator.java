@@ -2,9 +2,9 @@ package com.sequenceiq.datalake.service.validation.diagnostics;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
@@ -12,15 +12,14 @@ import com.sequenceiq.datalake.controller.exception.BadRequestException;
 @Component
 public class DiagnosticsCollectionValidator {
 
-    public void validate(DiagnosticsCollectionRequest request, StackV4Response stackV4Response) {
+    public void validate(BaseDiagnosticsCollectionRequest request, StackV4Response stackV4Response) {
         ValidationResult.ValidationResultBuilder validationBuilder = new ValidationResult.ValidationResultBuilder();
         TelemetryResponse telemetry = stackV4Response.getTelemetry();
         if (telemetry == null) {
             validationBuilder.error(String.format("Telemetry is not enabled for stack '%s'", stackV4Response.getName()));
         } else if (DiagnosticsDestination.CLOUD_STORAGE.equals(request.getDestination())) {
             validateCloudStorageSettings(stackV4Response, validationBuilder, telemetry);
-        } else if (DiagnosticsDestination.ENG.equals(request.getDestination()) &&
-                telemetry.getFeatures() == null || !telemetry.getFeatures().getClusterLogsCollection().isEnabled()) {
+        } else if (DiagnosticsDestination.ENG.equals(request.getDestination()) && isClusterLogCollectionDisabled(telemetry)) {
             validationBuilder.error(
                     String.format("Cluster log collection is not enabled for this stack '%s'", stackV4Response.getName()));
         } else if (DiagnosticsDestination.SUPPORT.equals(request.getDestination())) {
@@ -31,6 +30,11 @@ public class DiagnosticsCollectionValidator {
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+    }
+
+    private boolean isClusterLogCollectionDisabled(TelemetryResponse telemetry) {
+        return !(telemetry.getFeatures() != null && telemetry.getFeatures().getClusterLogsCollection() != null
+                && telemetry.getFeatures().getClusterLogsCollection().isEnabled());
     }
 
     private void validateCloudStorageSettings(StackV4Response stackV4Response,
