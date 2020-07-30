@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AzureCloudIdentityName;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CloudIdentity;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CloudIdentityName;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
 import com.google.common.collect.HashMultimap;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -18,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,6 +56,13 @@ class CloudIdentitySyncServiceTest {
                 .build();
     }
 
+    private ServicePrincipalCloudIdentities newServicePrincipalAzureObjectId(String servicePrincipal, String azureObjectId) {
+        return ServicePrincipalCloudIdentities.newBuilder()
+                .setServicePrincipal(servicePrincipal)
+                .addCloudIdentities(newAzureObjectId(azureObjectId))
+                .build();
+    }
+
     @Test
     void testSyncAzureIdentites() {
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AZURE.toString());
@@ -63,17 +72,21 @@ class CloudIdentitySyncServiceTest {
                 Set.of(new FmsUser().withName("user1"), new FmsUser().withName("user2")),
                 HashMultimap.create()
         );
-        UmsUsersState umsUsersState = new UmsUsersState.Builder()
-                .addUserCloudIdentities("user1", List.of(newAzureObjectId("object-id-1")))
-                .addUserCloudIdentities("user2", List.of(newAzureObjectId("object-id-2")))
-                .addUserCloudIdentities("user3", List.of(newAzureObjectId("object-id-3")))
-                .setUsersState(usersState)
-                .build();
+        UmsUsersState.Builder umsUsersStateBuilder = new UmsUsersState.Builder()
+                .addUserCloudIdentities("user1", List.of(newAzureObjectId("user-oid-1")))
+                .addUserCloudIdentities("user2", List.of(newAzureObjectId("user-oid-2")))
+                .addUserCloudIdentities("user3", List.of(newAzureObjectId("user-oid-3")))
+                .setUsersState(usersState);
 
-        cloudIdentitySyncService.syncCloudIdentites(stack, umsUsersState, mock(BiConsumer.class));
+        List<ServicePrincipalCloudIdentities> spCloudIds = new ArrayList<>();
+        spCloudIds.add(newServicePrincipalAzureObjectId("sp01", "sp-oid-1"));
+        spCloudIds.add(newServicePrincipalAzureObjectId("sp02", "sp-oid-2"));
+        umsUsersStateBuilder.addServicePrincipalCloudIdentities(spCloudIds);
+
+        cloudIdentitySyncService.syncCloudIdentites(stack, umsUsersStateBuilder.build(), mock(BiConsumer.class));
 
         SetRangerCloudIdentityMappingRequest expectedRequest = new SetRangerCloudIdentityMappingRequest();
-        expectedRequest.setAzureUserMapping(Map.of("user1", "object-id-1", "user2", "object-id-2"));
+        expectedRequest.setAzureUserMapping(Map.of("user1", "user-oid-1", "user2", "user-oid-2", "sp01", "sp-oid-1", "sp02", "sp-oid-2"));
         verify(sdxEndpoint, times(1)).setRangerCloudIdentityMapping(eq("envcrn"), eq(expectedRequest));
     }
 

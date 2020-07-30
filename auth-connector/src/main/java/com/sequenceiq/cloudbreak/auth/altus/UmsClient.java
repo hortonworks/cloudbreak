@@ -33,6 +33,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListG
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest;
@@ -327,6 +329,26 @@ public class UmsClient {
                 throw e;
             }
         }
+    }
+
+    /**
+     * Wraps a call to ListServicePrincipalCloudIdentities.
+     *
+     * @param requestId   the request ID for the request
+     * @param accountId   the account id
+     * @param environmentCrn   the environment crn
+     * @return the list of service principal cloud identities
+     */
+    public ListServicePrincipalCloudIdentitiesResponse listServicePrincipalCloudIdentities(
+            String requestId, String accountId, String environmentCrn, Optional<PagingProto.PageToken> pageToken) {
+        ListServicePrincipalCloudIdentitiesRequest.Builder requestBuilder = ListServicePrincipalCloudIdentitiesRequest.newBuilder()
+                .setAccountId(accountId)
+                .setEnvironmentCrn(environmentCrn)
+                .setPageSize(umsClientConfig.getListServicePrincipalCloudIdentitiesPageSize());
+        if (pageToken.isPresent()) {
+            requestBuilder.setPageToken(pageToken.get());
+        }
+        return newStub(requestId).listServicePrincipalCloudIdentities(requestBuilder.build());
     }
 
     private <T> void checkSingleUserResponse(List<T> users, String crnResource) {

@@ -24,6 +24,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.thunderhead.service.common.paging.PagingProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
@@ -117,5 +118,40 @@ public class GrpcUmsClientTest {
         verify(umsClient, times(2)).listWorkloadAdministrationGroupsForMember(anyString(), eq(memberCrn), any(Optional.class));
         assertTrue(wags.containsAll(wags1));
         assertTrue(wags.containsAll(wags2));
+    }
+
+    @Test
+    public void testListServicePrincipalCloudIdentities() {
+        String accountId = "accountId";
+        String envCrn = "envCrn";
+        ServicePrincipalCloudIdentities spIds01 = ServicePrincipalCloudIdentities.newBuilder().build();
+        ServicePrincipalCloudIdentities spIds02 = ServicePrincipalCloudIdentities.newBuilder().build();
+        ServicePrincipalCloudIdentities spIds03 = ServicePrincipalCloudIdentities.newBuilder().build();
+        ServicePrincipalCloudIdentities spIds04 = ServicePrincipalCloudIdentities.newBuilder().build();
+
+        List<ServicePrincipalCloudIdentities> spIdsList01 = List.of(spIds01, spIds02);
+        List<ServicePrincipalCloudIdentities> spIdsList02 = List.of(spIds03, spIds04);
+
+        PagingProto.PageToken pageToken = PagingProto.PageToken.getDefaultInstance();
+        UserManagementProto.ListServicePrincipalCloudIdentitiesResponse response1 =
+                UserManagementProto.ListServicePrincipalCloudIdentitiesResponse.newBuilder()
+                        .addAllServicePrincipalCloudIdentities(spIdsList01)
+                        .setNextPageToken(pageToken)
+                        .build();
+        UserManagementProto.ListServicePrincipalCloudIdentitiesResponse response2 =
+                UserManagementProto.ListServicePrincipalCloudIdentitiesResponse.newBuilder()
+                        .addAllServicePrincipalCloudIdentities(spIdsList02)
+                        .build();
+        when(umsClient.listServicePrincipalCloudIdentities(anyString(), eq(accountId), eq(envCrn), eq(Optional.empty())))
+                .thenReturn(response1);
+        when(umsClient.listServicePrincipalCloudIdentities(anyString(), eq(accountId), eq(envCrn), eq(Optional.of(pageToken))))
+                .thenReturn(response2);
+
+        List<ServicePrincipalCloudIdentities> spCloudIds = underTestWithMockUmsClient.listServicePrincipalCloudIdentities("actor-crn", accountId, envCrn,
+                Optional.empty());
+
+        verify(umsClient, times(2)).listServicePrincipalCloudIdentities(anyString(), eq(accountId), eq(envCrn), any(Optional.class));
+        assertTrue(spCloudIds.containsAll(spIdsList01));
+        assertTrue(spCloudIds.containsAll(spIdsList02));
     }
 }

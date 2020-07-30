@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
 import com.sequenceiq.authorization.service.UmsRightProvider;
@@ -124,6 +125,10 @@ public class UmsUsersStateProvider {
                     handleUser(umsUsersStateBuilder, usersStateBuilder, crnToFmsGroup, mu.getCrn(), fmsUser,
                             environmentAccessChecker.hasAccess(mu.getCrn(), requestIdOptional), requestIdOptional, wagNamesForOtherEnvironments);
                 });
+
+                List<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities =
+                        grpcUmsClient.listServicePrincipalCloudIdentities(INTERNAL_ACTOR_CRN, accountId, environmentCrn, requestIdOptional);
+                umsUsersStateBuilder.addServicePrincipalCloudIdentities(servicePrincipalCloudIdentities);
 
                 umsUsersStateBuilder.setUsersState(usersStateBuilder.build());
                 envUsersStateMap.put(environmentCrn, umsUsersStateBuilder.build());

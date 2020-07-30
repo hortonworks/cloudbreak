@@ -3509,6 +3509,43 @@ public final class UserManagementGrpc {
      }
      return getUnassignServicePrincipalCloudIdentityMethod;
   }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getListServicePrincipalCloudIdentitiesMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> METHOD_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = getListServicePrincipalCloudIdentitiesMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> getListServicePrincipalCloudIdentitiesMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> getListServicePrincipalCloudIdentitiesMethod() {
+    return getListServicePrincipalCloudIdentitiesMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> getListServicePrincipalCloudIdentitiesMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> getListServicePrincipalCloudIdentitiesMethod;
+    if ((getListServicePrincipalCloudIdentitiesMethod = UserManagementGrpc.getListServicePrincipalCloudIdentitiesMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getListServicePrincipalCloudIdentitiesMethod = UserManagementGrpc.getListServicePrincipalCloudIdentitiesMethod) == null) {
+          UserManagementGrpc.getListServicePrincipalCloudIdentitiesMethod = getListServicePrincipalCloudIdentitiesMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "ListServicePrincipalCloudIdentities"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListServicePrincipalCloudIdentities"))
+                  .build();
+          }
+        }
+     }
+     return getListServicePrincipalCloudIdentitiesMethod;
+  }
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -4518,6 +4555,16 @@ public final class UserManagementGrpc {
       asyncUnimplementedUnaryCall(getUnassignServicePrincipalCloudIdentityMethodHelper(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * List cloud identity mappings for service principals.
+     * </pre>
+     */
+    public void listServicePrincipalCloudIdentities(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getListServicePrincipalCloudIdentitiesMethodHelper(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -5178,6 +5225,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse>(
                   this, METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY)))
+          .addMethod(
+            getListServicePrincipalCloudIdentitiesMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse>(
+                  this, METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES)))
           .build();
     }
   }
@@ -6274,6 +6328,17 @@ public final class UserManagementGrpc {
       asyncUnaryCall(
           getChannel().newCall(getUnassignServicePrincipalCloudIdentityMethodHelper(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * List cloud identity mappings for service principals.
+     * </pre>
+     */
+    public void listServicePrincipalCloudIdentities(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getListServicePrincipalCloudIdentitiesMethodHelper(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -7273,6 +7338,16 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request) {
       return blockingUnaryCall(
           getChannel(), getUnassignServicePrincipalCloudIdentityMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List cloud identity mappings for service principals.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse listServicePrincipalCloudIdentities(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getListServicePrincipalCloudIdentitiesMethodHelper(), getCallOptions(), request);
     }
   }
 
@@ -8368,6 +8443,17 @@ public final class UserManagementGrpc {
       return futureUnaryCall(
           getChannel().newCall(getUnassignServicePrincipalCloudIdentityMethodHelper(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * List cloud identity mappings for service principals.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> listServicePrincipalCloudIdentities(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getListServicePrincipalCloudIdentitiesMethodHelper(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_INTERACTIVE_LOGIN = 0;
@@ -8464,6 +8550,7 @@ public final class UserManagementGrpc {
   private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 91;
   private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 92;
   private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 93;
+  private static final int METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = 94;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -8858,6 +8945,10 @@ public final class UserManagementGrpc {
           serviceImpl.unassignServicePrincipalCloudIdentity((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse>) responseObserver);
           break;
+        case METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES:
+          serviceImpl.listServicePrincipalCloudIdentities((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -9013,6 +9104,7 @@ public final class UserManagementGrpc {
               .addMethod(getUnassignCloudIdentityMethodHelper())
               .addMethod(getAssignServicePrincipalCloudIdentityMethodHelper())
               .addMethod(getUnassignServicePrincipalCloudIdentityMethodHelper())
+              .addMethod(getListServicePrincipalCloudIdentitiesMethodHelper())
               .build();
         }
       }

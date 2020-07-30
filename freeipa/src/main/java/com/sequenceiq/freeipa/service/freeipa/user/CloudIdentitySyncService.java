@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CloudIdentity;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,12 +44,9 @@ public class CloudIdentitySyncService {
         LOGGER.info("Syncing Azure Object IDs for environment {}", envCrn);
 
         try {
-            Map<String, List<CloudIdentity>> userCloudIdentites = getUserCloudIdentitiesToSync(umsUsersState);
-
-            Map<String, String> userToAzureObjectIdMap = getAzureObjectIdMap(userCloudIdentites);
-
+            Map<String, String> azureUserMapping = getAzureUserMapping(umsUsersState);
             SetRangerCloudIdentityMappingRequest setRangerCloudIdentityMappingRequest = new SetRangerCloudIdentityMappingRequest();
-            setRangerCloudIdentityMappingRequest.setAzureUserMapping(userToAzureObjectIdMap);
+            setRangerCloudIdentityMappingRequest.setAzureUserMapping(azureUserMapping);
             // TODO The SDX endpoint currently sets the config and triggers refresh. The SDX endpoint should also be updated
             //      to allow polling the status of the refresh.
             LOGGER.debug("Setting ranger cloud identity mapping: {}", setRangerCloudIdentityMappingRequest);
@@ -58,6 +57,17 @@ public class CloudIdentitySyncService {
         }
     }
 
+    private Map<String, String> getAzureUserMapping(UmsUsersState umsUsersState) {
+        Map<String, List<CloudIdentity>> userCloudIdentites = getUserCloudIdentitiesToSync(umsUsersState);
+        Map<String, String> userToAzureObjectIdMap = getAzureObjectIdMap(userCloudIdentites);
+        Map<String, String> servicePrincipalObjectIdMap = getAzureObjectIdMap(umsUsersState.getServicePrincipalCloudIdentities());
+
+        Map<String, String> azureUserMapping = new HashMap<>();
+        azureUserMapping.putAll(userToAzureObjectIdMap);
+        azureUserMapping.putAll(servicePrincipalObjectIdMap);
+        return azureUserMapping;
+    }
+
     private Map<String, String> getAzureObjectIdMap(Map<String, List<CloudIdentity>> cloudIdentityMapping) {
         LOGGER.debug("Exracting Azure Object ID mapping from {}", cloudIdentityMapping);
         ImmutableMap.Builder<String, String> azureObjectIdMap = ImmutableMap.builder();
@@ -65,6 +75,18 @@ public class CloudIdentitySyncService {
             Optional<String> azureObjectId = getOptionalAzureObjectId(cloudIdentities);
             if (azureObjectId.isPresent()) {
                 azureObjectIdMap.put(key, azureObjectId.get());
+            }
+        });
+        return azureObjectIdMap.build();
+    }
+
+    private Map<String, String> getAzureObjectIdMap(List<ServicePrincipalCloudIdentities> servicePrincipalCloudIds) {
+        LOGGER.debug("Extracting service principal Azure Object ID mapping from {}", servicePrincipalCloudIds);
+        ImmutableMap.Builder<String, String> azureObjectIdMap = ImmutableMap.builder();
+        servicePrincipalCloudIds.forEach(spCloudId -> {
+            Optional<String> azureObjectId = getOptionalAzureObjectId(spCloudId.getCloudIdentitiesList());
+            if (azureObjectId.isPresent()) {
+                azureObjectIdMap.put(spCloudId.getServicePrincipal(), azureObjectId.get());
             }
         });
         return azureObjectIdMap.build();
