@@ -188,6 +188,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_RAZ_ENABLEMENT = "CDP_RAZ";
 
+    private static final String CDP_MEDIUM_DUTY_SDX = "CDP_MEDIUM_DUTY_SDX";
+
     private static final String CDP_FREEIPA_DL_EBS_ENCRYPTION = "CDP_FREEIPA_DL_EBS_ENCRYPTION";
 
     private static final String DATAHUB_AWS_AUTOSCALING = "DATAHUB_AWS_AUTOSCALING";
@@ -251,6 +253,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.raz.enable}")
     private boolean razEnabled;
+
+    @Value("${auth.mock.mediumdutysdx.enable}")
+    private boolean mediumDutySdxEnabled;
 
     @Value("${auth.mock.freeipadlebsencryption.enable}")
     private boolean enableFreeIpaDlEbsEncryption;
@@ -527,6 +532,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (razEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RAZ_ENABLEMENT));
+        }
+        if (mediumDutySdxEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_MEDIUM_DUTY_SDX));
         }
         if (enableFreeIpaDlEbsEncryption) {
             builder.addEntitlements(createEntitlement(CDP_FREEIPA_DL_EBS_ENCRYPTION));
