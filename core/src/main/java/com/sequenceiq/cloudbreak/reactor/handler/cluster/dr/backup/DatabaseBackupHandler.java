@@ -71,7 +71,7 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.hasGateway());
             Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
             ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, cluster.getId());
-            SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), stack.getCloudPlatform());
+            SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), stack);
             hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stack), saltConfig, exitModel);
 
             result = new DatabaseBackupSuccess(stackId);

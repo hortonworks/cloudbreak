@@ -17,9 +17,11 @@ if [[ $# -ne 5 && $# -ne 6 ]]; then
   echo "  3. PostgreSQL host name."
   echo "  4. PostgreSQL port."
   echo "  5. PostgreSQL user name."
-  echo "  6. (optional) Log file location"
+  echo "  6. AWS Region option."
+  echo "  7. (optional) Log file location."
   exit 1
 fi
+# todo: this argument chain is getting long and messy, consider using flags or a configuration object
 
 CLOUD_PROVIDER=$(echo "$1" | tr '[:upper:]' '[:lower:]')
 BACKUP_LOCATION=$(echo "$2" | sed 's/\/\+$//g') # Clear trailng '/' (if present) for later path joining.
@@ -27,7 +29,13 @@ HOST="$3"
 PORT="$4"
 USERNAME="$5"
 
-LOGFILE=${6:-/var/log/}/dl_postgres_backup.log
+REGION_OPTION=${6:-''}
+if [[ -n $REGION_OPTION ]]; then
+  # todo: This only works with AWS!
+  REGION_OPTION="--region ${REGION_OPTION}"
+fi
+
+LOGFILE=${7:-/var/log/}/dl_postgres_backup.log
 echo "Logs at ${LOGFILE}"
 
 doLog() {
@@ -79,11 +87,15 @@ dump_to_s3() {
   doLog "INFO Dumping ${SERVICE} to ${S3_LOCATION}"
 
   doLog "INFO Try to upload with AES256 encryption"
-  ret_code=$(pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2> >(tee -a $LOGFILE >&2) | /usr/bin/aws s3 cp --sse AES256 --no-progress - "${S3_LOCATION}" 2> >(tee -a $LOGFILE >&2) || echo $?)
+  # shellcheck disable=SC2086
+  # We don't want the expanded value in REGION_OPTION to be quoted since it will cause either an empty string '' or the region flag to be quoted
+  ret_code=$(pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2> >(tee -a $LOGFILE >&2) | /usr/bin/aws ${REGION_OPTION} s3 cp --sse AES256 --no-progress - "${S3_LOCATION}" 2> >(tee -a $LOGFILE >&2) || echo $?)
 
   if [[ -n "$ret_code" ]] && [[ "$ret_code" -ne 0 ]]; then
     doLog "INFO Try to upload with aws:kms encryption"
-    ret_code=$(pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2> >(tee -a $LOGFILE >&2) | /usr/bin/aws s3 cp --sse aws:kms --no-progress - "${S3_LOCATION}" 2> >(tee -a $LOGFILE >&2) || echo $?)
+    # shellcheck disable=SC2086
+    # We don't want the expanded value in REGION_OPTION to be quoted since it will cause either an empty string '' or the region flag to be quoted
+    ret_code=$(pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="${SERVICE}" --format=plain 2> >(tee -a $LOGFILE >&2) | /usr/bin/aws ${REGION_OPTION} s3 cp --sse aws:kms --no-progress - "${S3_LOCATION}" 2> >(tee -a $LOGFILE >&2) || echo $?)
   fi
 
   if [[ -n "$ret_code" ]] && [[ "$ret_code" -ne 0 ]]; then
