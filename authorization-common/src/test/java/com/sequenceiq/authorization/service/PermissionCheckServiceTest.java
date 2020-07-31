@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.Before;
@@ -34,6 +35,8 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 public class PermissionCheckServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
+    private static final String INTERNAL_ACTOR_CRN = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -111,6 +114,30 @@ public class PermissionCheckServiceTest {
         verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
     }
 
+    @Test
+    public void testInternalOnlyIfNotInternalActor() throws NoSuchMethodException {
+        when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
+        when(permissionChecker.supportedAnnotation()).thenReturn(InternalOnly.class);
+
+        thrown.expect(AccessDeniedException.class);
+        thrown.expectMessage("You have no access to this resource.");
+
+        underTest.populatePermissionCheckMap();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+    }
+
+    @Test
+    public void testInternalOnlyIfInternalActor() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
+        when(permissionChecker.supportedAnnotation()).thenReturn(InternalOnly.class);
+
+        underTest.populatePermissionCheckMap();
+        ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+
+        verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
+    }
+
     private static class ExampleClass {
 
         @DisableCheckPermissions
@@ -126,6 +153,11 @@ public class PermissionCheckServiceTest {
 
         @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
         public void correctMethod() {
+
+        }
+
+        @InternalOnly
+        public void internalOnlyMethod() {
 
         }
     }
