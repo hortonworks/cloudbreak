@@ -107,7 +107,7 @@ public class PermissionCheckService {
     private void checkPrerequisitesOnMethod(MethodSignature methodSignature, List<? extends Annotation> annotations) {
         if (annotations.stream().anyMatch(annotation -> annotation instanceof InternalOnly) &&
             !InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
-            getAccessDeniedAndLogInternalActorRestriction(methodSignature);
+            throw getAccessDeniedAndLogInternalActorRestriction(methodSignature);
         }
     }
 
