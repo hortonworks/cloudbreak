@@ -11,6 +11,7 @@ import javax.ws.rs.BadRequestException;
 import org.apache.commons.lang3.NotImplementedException;
 
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -43,6 +44,10 @@ public abstract class AbstractEnvironmentTestDto<R, S, T extends CloudbreakTestD
     @Override
     public T when(Action<T, EnvironmentClient> action) {
         return getTestContext().when((T) this, EnvironmentClient.class, action, emptyRunningParameter());
+    }
+
+    public T assignRole(Action<T, UmsClient> action) {
+        return getTestContext().when((T) this, UmsClient.class, action, emptyRunningParameter());
     }
 
     @Override

@@ -38,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
+import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
@@ -372,10 +373,12 @@ public abstract class TestContext implements ApplicationContextAware {
             FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, acting);
             EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, acting);
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, acting);
+            UmsClient umsClient = UmsClient.createProxyUmsClient(testParameter, acting);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, acting);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
                     FreeIpaClient.class, freeIpaClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient,
-                    RedbeamsClient.class, redbeamsClient);
+                    RedbeamsClient.class, redbeamsClient,
+                    UmsClient.class, umsClient);
             clients.put(acting.getAccessKey(), clientMap);
             clients.put(INTERNAL_ACTOR_ACCESS_KEY, clientMap);
             cloudbreakClient.setWorkspaceId(0L);

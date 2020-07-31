@@ -1,14 +1,9 @@
 package com.sequenceiq.it.cloudbreak.actor;
 
-import java.io.IOException;
 import java.util.Base64;
-import java.util.List;
 
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 
@@ -40,17 +35,7 @@ public interface Actor {
     }
 
     static Actor useRealUmsUser(String key) {
-        return testParameter -> {
-            String userConfigPath = "ums-users/api-credentials.json";
-            try {
-                List<CloudbreakUser> users = JsonUtil.readValue(
-                        FileReaderUtils.readFileFromClasspathQuietly(userConfigPath), new TypeReference<List<CloudbreakUser>>() {
-                });
-                return users.stream().filter(u -> u.getDisplayName().equals(key)).findFirst().get();
-            } catch (IOException e) {
-                throw new RuntimeException("Cannot get UMS user with key: " + key + " from file " + userConfigPath);
-            }
-        };
+        return testParameter -> CloudbreakUserCache.getInstance().getByName(key);
     }
 
     CloudbreakUser acting(TestParameter testParameter);

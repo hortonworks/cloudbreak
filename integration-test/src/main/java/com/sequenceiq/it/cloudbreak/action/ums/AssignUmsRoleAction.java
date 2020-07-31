@@ -1,0 +1,33 @@
+package com.sequenceiq.it.cloudbreak.action.ums;
+
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sequenceiq.it.cloudbreak.UmsClient;
+import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakUserCache;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
+
+public class AssignUmsRoleAction implements Action<UmsTestDto, UmsClient> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AssignUmsRoleAction.class);
+
+    private final String userKey;
+
+    public AssignUmsRoleAction(String userKey) {
+        this.userKey = userKey;
+    }
+
+    @Override
+    public UmsTestDto action(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
+        CloudbreakUser user = CloudbreakUserCache.getInstance().getByName(userKey);
+        LOGGER.info(String.format("Assigning resourceRole %s over resource %s for user ",
+                testDto.getRequest().getRoleCrn(), testDto.getRequest().getResourceCrn()), user.getCrn());
+        client.getUmsClient().assignResourceRole(user.getCrn(), testDto.getRequest().getResourceCrn(), testDto.getRequest().getRoleCrn(), Optional.of(""));
+        return testDto;
+    }
+}
