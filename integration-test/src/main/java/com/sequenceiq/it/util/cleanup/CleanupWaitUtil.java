@@ -47,7 +47,7 @@ public class CleanupWaitUtil {
     public WaitResult waitForDistroxesCleanup(CloudbreakClient cloudbreak, EnvironmentClient environment) {
         int retryCount = 0;
         Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
-                .collect(Collectors.toMap(response -> response.getCrn(), response -> response.getName()));
+                .collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
 
         while (retryCount < maxRetry && checkDistroxesAreAvailable(cloudbreak, environments) && !checkDistroxesDeleteFailedStatus(cloudbreak, environments)) {
             sleep(pollingInterval);
@@ -82,7 +82,7 @@ public class CleanupWaitUtil {
     public WaitResult waitForSdxesCleanup(SdxClient sdx, EnvironmentClient environment) {
         int retryCount = 0;
         Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
-                .collect(Collectors.toMap(response -> response.getCrn(), response -> response.getName()));
+                .collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
 
         while (retryCount < maxRetry && checkSdxesAreAvailable(sdx, environments) && !checkSdxesDeleteFailedStatus(sdx, environments)) {
             sleep(pollingInterval);
@@ -180,9 +180,8 @@ public class CleanupWaitUtil {
     private boolean checkSdxesAreAvailable(SdxClient sdx, Map<String, String> environments) {
         try {
             return environments.entrySet().stream().anyMatch(env ->
-                    !sdx.sdxEndpoint().list(env.getValue()).stream()
-                            .map(SdxClusterResponse::getName)
-                            .collect(Collectors.toList()).isEmpty()
+                    !(sdx.sdxEndpoint().list(env.getValue()).stream()
+                            .map(SdxClusterResponse::getName).count() == 0)
             );
         } catch (Exception e) {
             LOG.warn("Exception has been occurred during check sdxes are available: {}", e.getMessage(), e);
@@ -202,9 +201,8 @@ public class CleanupWaitUtil {
      */
     private boolean checkEnvironmentsAreAvailable(EnvironmentClient environment) {
         try {
-            return !environment.environmentV1Endpoint().list().getResponses().stream()
-                    .map(EnvironmentBaseResponse::getName)
-                    .collect(Collectors.toList()).isEmpty();
+            return !(environment.environmentV1Endpoint().list().getResponses().stream()
+                    .map(EnvironmentBaseResponse::getName).count() == 0);
         } catch (Exception e) {
             LOG.warn("Exception has been occurred during check environments are available: {}", e.getMessage(), e);
             return false;
