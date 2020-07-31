@@ -111,7 +111,7 @@ public class SdxRuntimeUpgradeService {
     void filterSdxUpgradeResponse(SdxUpgradeRequest upgradeSdxClusterRequest, UpgradeV4Response upgradeV4Response) {
         List<ImageInfoV4Response> upgradeCandidates = upgradeV4Response.getUpgradeCandidates();
         if (CollectionUtils.isNotEmpty(upgradeCandidates) && Objects.nonNull(upgradeSdxClusterRequest)) {
-            if (SdxUpgradeShowAvailableImages.LATEST_ONLY.equals(upgradeSdxClusterRequest.getShowAvailableImages())) {
+            if (SdxUpgradeShowAvailableImages.LATEST_ONLY == upgradeSdxClusterRequest.getShowAvailableImages()) {
                 Map<String, Optional<ImageInfoV4Response>> latestImageByRuntime = upgradeCandidates.stream()
                         .collect(Collectors.groupingBy(imageInfoV4Response -> imageInfoV4Response.getComponentVersions().getCdp(),
                                 Collectors.maxBy(Comparator.comparingLong(ImageInfoV4Response::getCreated))));
@@ -120,10 +120,13 @@ public class SdxRuntimeUpgradeService {
                         .flatMap(Optional::stream)
                         .collect(Collectors.toList());
                 upgradeV4Response.setUpgradeCandidates(latestImages);
+                LOGGER.debug("Filtering for latest image per runtimes {}", latestImageByRuntime.keySet());
 
             } else if (upgradeSdxClusterRequest.isDryRun()) {
                 ImageInfoV4Response latestImage = upgradeCandidates.stream().max(getComparator()).orElseThrow();
                 upgradeV4Response.setUpgradeCandidates(List.of(latestImage));
+                LOGGER.debug("Choosing latest image with id {} as dry-run is specified", latestImage.getImageId());
+
             }
         }
     }
@@ -156,14 +159,17 @@ public class SdxRuntimeUpgradeService {
         if (Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty() || Boolean.TRUE.equals(upgradeRequest.getLockComponents())) {
             ImageInfoV4Response imageInfoV4Response = upgradeCandidates.stream().max(getComparator()).orElseThrow();
             imageId = imageInfoV4Response.getImageId();
+            LOGGER.debug("Choosing latest image with id {} as either upgrade request is empty or lockComponents is true", imageId);
         } else {
             String requestImageId = upgradeRequest.getImageId();
             String runtime = upgradeRequest.getRuntime();
 
             if (StringUtils.isNotEmpty(requestImageId)) {
                 imageId = validateImageId(upgradeCandidates, requestImageId);
+                LOGGER.debug("Chosen image with id {} as it was specified in the request", imageId);
             } else if (StringUtils.isNotEmpty(runtime)) {
                 imageId = validateRuntime(upgradeCandidates, runtime);
+                LOGGER.debug("Chosen image with id {} for {} runtime specified in the request", imageId, runtime);
             } else {
                 throw new BadRequestException(String.format("Invalid upgrade request, please validate the contents: %s", upgradeRequest.toString()));
             }

@@ -94,7 +94,7 @@ public class UpgradeV4Request {
 
     @ApiModelProperty(hidden = true)
     public boolean isShowAvailableImagesSet() {
-        return Objects.nonNull(showAvailableImages) && !UpgradeShowAvailableImages.DO_NOT_SHOW.equals(showAvailableImages);
+        return Objects.nonNull(showAvailableImages) && UpgradeShowAvailableImages.DO_NOT_SHOW != showAvailableImages;
     }
 
     private boolean isUnspecifiedUpgradeType() {

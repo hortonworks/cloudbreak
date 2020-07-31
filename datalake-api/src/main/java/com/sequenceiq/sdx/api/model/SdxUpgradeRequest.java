@@ -94,7 +94,7 @@ public class SdxUpgradeRequest {
 
     @ApiModelProperty(hidden = true)
     public boolean isShowAvailableImagesSet() {
-        return Objects.nonNull(showAvailableImages) && !SdxUpgradeShowAvailableImages.DO_NOT_SHOW.equals(showAvailableImages);
+        return Objects.nonNull(showAvailableImages) && SdxUpgradeShowAvailableImages.DO_NOT_SHOW != showAvailableImages;
     }
 
     private boolean isUnspecifiedUpgradeType() {
