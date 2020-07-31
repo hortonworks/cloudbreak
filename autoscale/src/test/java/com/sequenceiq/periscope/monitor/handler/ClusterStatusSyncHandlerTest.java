@@ -79,6 +79,54 @@ public class ClusterStatusSyncHandlerTest {
     }
 
     @Test
+    public void testOnApplicationEventWhenCBStackStatusActiveCBClusterStatusInactive() {
+        Cluster cluster = getACluster(ClusterState.SUSPENDED);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+
+        StackStatusV4Response stackStatusV4Response = new StackStatusV4Response();
+        stackStatusV4Response.setStatus(Status.AVAILABLE);
+        stackStatusV4Response.setClusterStatus(Status.UPDATE_IN_PROGRESS);
+        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(stackStatusV4Response);
+
+        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
+
+        verify(clusterService, never()).setState(anyLong(), any(ClusterState.class));
+        verify(cloudbreakCommunicator).getStackStatusByCrn(CLOUDBREAK_STACK_CRN);
+    }
+
+    @Test
+    public void testOnApplicationEventWhenCBStackStatusInActiveCBClusterStatusActive() {
+        Cluster cluster = getACluster(ClusterState.SUSPENDED);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+
+        StackStatusV4Response stackStatusV4Response = new StackStatusV4Response();
+        stackStatusV4Response.setStatus(Status.UPDATE_IN_PROGRESS);
+        stackStatusV4Response.setClusterStatus(Status.AVAILABLE);
+        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(stackStatusV4Response);
+
+        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
+
+        verify(clusterService, never()).setState(anyLong(), any(ClusterState.class));
+        verify(cloudbreakCommunicator).getStackStatusByCrn(CLOUDBREAK_STACK_CRN);
+    }
+
+    @Test
+    public void testOnApplicationEventWhenCBStackStatusActiveCBClusterStatusActive() {
+        Cluster cluster = getACluster(ClusterState.SUSPENDED);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+
+        StackStatusV4Response stackStatusV4Response = new StackStatusV4Response();
+        stackStatusV4Response.setStatus(Status.AVAILABLE);
+        stackStatusV4Response.setClusterStatus(Status.AVAILABLE);
+        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(stackStatusV4Response);
+
+        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
+
+        verify(clusterService).setState(AUTOSCALE_CLUSTER_ID, ClusterState.RUNNING);
+        verify(cloudbreakCommunicator).getStackStatusByCrn(CLOUDBREAK_STACK_CRN);
+    }
+
+    @Test
     public void testOnApplicationEventWhenCBStatusRunningAndPeriscopeClusterRunning() {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
@@ -141,6 +189,7 @@ public class ClusterStatusSyncHandlerTest {
 
     private StackStatusV4Response getStackResponse(Status clusterStatus) {
         StackStatusV4Response stackResponse = new StackStatusV4Response();
+        stackResponse.setStatus(clusterStatus);
         stackResponse.setClusterStatus(clusterStatus);
         return stackResponse;
     }

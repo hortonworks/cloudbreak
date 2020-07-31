@@ -33,7 +33,6 @@ import com.sequenceiq.periscope.converter.TimeAlertRequestConverter;
 import com.sequenceiq.periscope.converter.TimeAlertResponseConverter;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
-import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.service.AlertService;
 import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
@@ -229,16 +228,6 @@ public class AlertController implements AlertEndpoint {
                 () -> {
                     validateAccountEntitlement(cluster);
                     validateSupportedHostGroup(cluster, json.getScalingPolicy().getHostGroup(), AlertType.LOAD);
-                    String requestHostGroup = json.getScalingPolicy().getHostGroup();
-                    cluster.getLoadAlerts().stream().map(LoadAlert::getScalingPolicy).map(ScalingPolicy::getHostGroup)
-                            .filter(hostGroup -> hostGroup.equalsIgnoreCase(requestHostGroup)).findAny()
-                            .ifPresent(hostGroup -> {
-                                throw new BadRequestException(messagesService
-                                        .getMessage(MessageCode.LOAD_CONFIG_ALREADY_DEFINED, List.of(cluster.getStackName(), requestHostGroup)));
-                            });
-                    clusterProxyConfigurationService.getClusterProxyUrl()
-                            .orElseThrow(() ->  new BadRequestException(
-                                    messagesService.getMessage(MessageCode.CLUSTER_PROXY_NOT_CONFIGURED, List.of(cluster.getStackName()))));
                 });
     }
 

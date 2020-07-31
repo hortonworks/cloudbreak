@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -39,19 +40,22 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         }
         MDCBuilder.buildMdcContext(cluster);
 
-        Status cbClusterStatus = Optional.ofNullable(cloudbreakCommunicator
-                .getStackStatusByCrn(cluster.getStackCrn()).getClusterStatus()).orElse(Status.AMBIGUOUS);
-        LOGGER.debug("Analysing CBCluster Status '{}' for Cluster '{}' ", cbClusterStatus, cluster.getStackCrn());
+        StackStatusV4Response statusResponse = cloudbreakCommunicator.getStackStatusByCrn(cluster.getStackCrn());
+        boolean clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false)
+                && Optional.ofNullable(statusResponse.getClusterStatus()).map(Status::isAvailable).orElse(false);
+        LOGGER.debug("Analysing CBCluster Status '{}' for Cluster '{}' ", statusResponse, cluster.getStackCrn());
 
-        if (DELETE_COMPLETED.equals(cbClusterStatus)) {
+        if (DELETE_COMPLETED.equals(statusResponse.getStatus())) {
             clusterService.removeById(autoscaleClusterId);
-            LOGGER.debug("Deleted cluster '{}', CB Cluster status '{}'.", cluster.getStackCrn(), cbClusterStatus);
-        } else if (cbClusterStatus.isAvailable() && !RUNNING.equals(cluster.getState())) {
+            LOGGER.info("Deleted cluster '{}', CB Stack Status '{}'.", cluster.getStackCrn(), statusResponse.getStatus());
+        } else if (clusterAvailable && !RUNNING.equals(cluster.getState())) {
             clusterService.setState(cluster.getId(), ClusterState.RUNNING);
-            LOGGER.debug("Updated cluster '{}' to running, CB Cluster status '{}'.", cluster.getStackCrn(), cbClusterStatus);
-        } else if (!cbClusterStatus.isAvailable() && RUNNING.equals(cluster.getState())) {
+            LOGGER.info("Updated cluster '{}' to Running, CB Stack Status '{}', CB Cluster Status '{}'.",
+                    cluster.getStackCrn(), statusResponse.getStatus(), statusResponse.getClusterStatus());
+        } else if (!clusterAvailable && RUNNING.equals(cluster.getState())) {
             clusterService.setState(cluster.getId(), ClusterState.SUSPENDED);
-            LOGGER.debug("Suspended cluster '{}', CB Cluster status '{}'", cluster.getStackCrn(), cbClusterStatus);
+            LOGGER.info("Suspended cluster '{}', CB Stack Status '{}', CB Cluster Status '{}'",
+                    cluster.getStackCrn(), statusResponse.getStatus(), statusResponse.getClusterStatus());
         }
     }
 }
