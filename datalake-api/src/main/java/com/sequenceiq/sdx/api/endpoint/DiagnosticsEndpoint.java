@@ -27,13 +27,13 @@ public interface DiagnosticsEndpoint {
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
-            nickname = "collectSdxDiagnostics")
+            nickname = "collectSdxCmDiagnostics")
     FlowIdentifier collectDiagnostics(@Valid DiagnosticsCollectionRequest request);
 
     @GET
     @Path("logs")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS, produces = MediaType.APPLICATION_JSON,
-            nickname = "getSdxVmLogs")
+            nickname = "getSdxCmVmLogs")
     VmLogsResponse getVmLogs();
 }

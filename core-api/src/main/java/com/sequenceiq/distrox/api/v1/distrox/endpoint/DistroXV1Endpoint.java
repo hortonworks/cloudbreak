@@ -327,13 +327,13 @@ public interface DistroXV1Endpoint {
     @Path("diagnostics")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
-            nickname = "collectDistroxDiagnosticsV4")
+            nickname = "collectDistroxCmDiagnosticsV4")
     FlowIdentifier collectDiagnostics(@Valid DiagnosticsCollectionV1Request request);
 
     @GET
     @Path("diagnostics/logs")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS, produces = MediaType.APPLICATION_JSON,
-            nickname = "getDistroxVmLogsV4")
+            nickname = "getDistroxCmVmLogsV4")
     VmLogsResponse getVmLogs();
 }
