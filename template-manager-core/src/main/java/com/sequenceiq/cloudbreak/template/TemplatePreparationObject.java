@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
+import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
@@ -79,6 +80,8 @@ public class TemplatePreparationObject {
 
     private final VirtualGroupRequest virtualGroupRequest;
 
+    private final Optional<DatalakeView> datalakeView;
+
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
         rdsConfigs = builder.rdsConfigs.stream().collect(Collectors.toMap(
@@ -102,6 +105,7 @@ public class TemplatePreparationObject {
         exposedServices = builder.exposedServices;
         stackType = builder.stackType;
         virtualGroupRequest = builder.virtualGroupRequest;
+        datalakeView = builder.datalakeView;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -191,6 +195,10 @@ public class TemplatePreparationObject {
         return virtualGroupRequest;
     }
 
+    public Optional<DatalakeView> getDatalakeView() {
+        return datalakeView;
+    }
+
     public static class Builder {
 
         private CloudPlatform cloudPlatform;
@@ -230,6 +238,8 @@ public class TemplatePreparationObject {
         private Map<String, Collection<ClusterExposedServiceView>> exposedServices = new HashMap<>();
 
         private VirtualGroupRequest virtualGroupRequest;
+
+        private Optional<DatalakeView> datalakeView;
 
         public static Builder builder() {
             return new Builder();
@@ -350,6 +360,11 @@ public class TemplatePreparationObject {
 
         public Builder withVirtualGroupView(VirtualGroupRequest virtualGroupRequest) {
             this.virtualGroupRequest = virtualGroupRequest;
+            return this;
+        }
+
+        public Builder withDataLakeView(DatalakeView dataLakeView) {
+            this.datalakeView = Optional.ofNullable(dataLakeView);
             return this;
         }
 

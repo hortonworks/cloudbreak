@@ -8,25 +8,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Component;
-
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-/**
- * Enables the Ranger Raz service.
- */
-@Component
-public class RangerRazConfigProvider extends AbstractRoleConfigProvider {
+public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
@@ -53,14 +44,6 @@ public class RangerRazConfigProvider extends AbstractRoleConfigProvider {
     @Override
     public List<String> getRoleTypes() {
         return List.of(RANGER_RAZ_SERVER);
-    }
-
-    @Override
-    public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return StackType.DATALAKE == source.getStackType()
-                && CloudPlatform.AZURE == source.getCloudPlatform()
-                && CMRepositoryVersionUtil.isRazConfigurationSupported(source.getProductDetailsView().getCm())
-                && source.getGeneralClusterConfigs().isEnableRangerRaz();
     }
 
     @Override

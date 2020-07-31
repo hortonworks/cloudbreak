@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
@@ -62,6 +63,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProv
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -69,6 +71,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class StackV4RequestToTemplatePreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV4Request, TemplatePreparationObject> {
@@ -127,6 +130,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
 
+    @Inject
+    private SdxClientService sdxClientService;
+
     @Override
     public TemplatePreparationObject convert(StackV4Request source) {
         try {
@@ -167,7 +173,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             decorateBuilderWithPlacement(source, builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder);
             decorateBuilderWithProductDetails(source, builder);
-
+            decorateDatalakeView(source, builder);
             return builder.build();
         } catch (BlueprintProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
@@ -282,6 +288,17 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             // prewarm image
         }
         // TODO: implement else {} branch for prewarm images
+    }
+
+    private void decorateDatalakeView(StackV4Request source, TemplatePreparationObject.Builder builder) {
+        DatalakeView datalakeView = null;
+        if (StringUtils.isNotEmpty(source.getEnvironmentCrn()) && StackType.WORKLOAD.equals(source.getType())) {
+            List<SdxClusterResponse> datalakes = sdxClientService.getByEnvironmentCrn(source.getEnvironmentCrn());
+            if (!datalakes.isEmpty()) {
+                datalakeView = new DatalakeView(datalakes.get(0).getRangerRazEnabled());
+            }
+        }
+        builder.withDataLakeView(datalakeView);
     }
 
     private static ClouderaManagerProduct convertProduct(ClouderaManagerProductV4Request productRequest) {

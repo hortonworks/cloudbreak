@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
@@ -66,10 +67,12 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProv
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
+import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class StackToTemplatePreparationObjectConverter extends AbstractConversionServiceAwareConverter<Stack, TemplatePreparationObject> {
@@ -149,6 +152,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private GatewayConfigService gatewayConfigService;
 
+    @Inject
+    private SdxClientService sdxClientService;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -209,6 +215,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
             decorateBuilderWithPlacement(source, builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder, virtualGroupRequest);
+            decorateDatalakeView(source, builder);
 
             return builder.build();
         } catch (AccountTagValidationFailed aTVF) {
@@ -292,6 +299,17 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                 builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings));
             }
         }
+    }
+
+    private void decorateDatalakeView(Stack source, TemplatePreparationObject.Builder builder) {
+        DatalakeView datalakeView = null;
+        if (StringUtils.isNotEmpty(source.getEnvironmentCrn()) && StackType.WORKLOAD.equals(source.getType())) {
+            List<SdxClusterResponse> datalakes = sdxClientService.getByEnvironmentCrn(source.getEnvironmentCrn());
+            if (!datalakes.isEmpty()) {
+                datalakeView = new DatalakeView(datalakes.get(0).getRangerRazEnabled());
+            }
+        }
+        builder.withDataLakeView(datalakeView);
     }
 
     private String getMockVirtualGroup(VirtualGroupRequest virtualGroupRequest) {
