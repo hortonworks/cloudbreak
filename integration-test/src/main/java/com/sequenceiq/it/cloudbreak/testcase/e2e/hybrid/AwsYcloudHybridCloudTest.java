@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -144,13 +145,20 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                     }
                     return dto;
                 })
+                .validate();
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void tearDown(Object[] data) {
+        TestContext testContext = (TestContext) data[0];
+
+        testContext
                 .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
                 .when(environmentTestClient.forceDelete(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .await(EnvironmentStatus.ARCHIVED, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .validate();
-        //Cleaned up during the test case by forced environment delete
-        testContext.getResources().remove(sdxInternal);
-        testContext.getResources().remove(CHILD_ENVIRONMENT_KEY);
+
+        testContext.cleanupTestContext();
     }
 
     private void testShhAuthenticationSuccessfull(String username, String host) throws IOException, UserAuthException {
