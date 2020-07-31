@@ -7,6 +7,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.U
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +16,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesRequest;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,11 +129,50 @@ public class FreeIpaDownscaleActions {
         };
     }
 
-    @Bean(name = "DOWNSCALE_STOP_TELEMETRY_STATE")
-    public Action<?, ?> stopTelemetryAction() {
+    @Bean(name = "DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_STATE")
+    public Action<?, ?> downscaleCollectAdditionalHostnamesAction() {
         return new AbstractDownscaleAction<>(ClusterProxyUpdateRegistrationSuccess.class) {
             @Override
-            protected void doExecute(StackContext context, ClusterProxyUpdateRegistrationSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, ClusterProxyUpdateRegistrationSuccess payload, Map<Object, Object> variables) throws Exception {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Collecting additional hostnames.");
+                CollectAdditionalHostnamesRequest request = new CollectAdditionalHostnamesRequest(stack.getId());
+                sendEvent(context, request.selector(), request);
+            }
+        };
+    }
+
+    @Bean(name = "DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_STATE")
+    public Action<?, ?> downscaleAddAdditionalHostnamesAction() {
+        return new AbstractDownscaleAction<>(CollectAdditionalHostnamesResponse.class) {
+            @Override
+            protected void doExecute(StackContext context, CollectAdditionalHostnamesResponse payload, Map<Object, Object> variables) throws Exception {
+                Stack stack = context.getStack();
+                Set<String> knownHostnamesFromStack = stack.getNotDeletedInstanceMetaDataList().stream()
+                        .map(InstanceMetaData::getDiscoveryFQDN)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+                List<String> currentHostsToRemove = getDownscaleHosts(variables);
+                Set<String> newHostsToRemove = payload.getHostnames().stream()
+                        .filter(hostname -> !currentHostsToRemove.contains(hostname))
+                        .filter(hostname -> !knownHostnamesFromStack.contains(hostname))
+                        .collect(Collectors.toSet());
+                if (isRepair(variables) && !newHostsToRemove.isEmpty()) {
+                    LOGGER.info("Adding hostnames [{}] to the list of hostnames to remove", newHostsToRemove);
+                    List<String> allHostnamesToRemove = new LinkedList<>(currentHostsToRemove);
+                    allHostnamesToRemove.addAll(newHostsToRemove);
+                    setDownscaleHosts(variables, allHostnamesToRemove);
+                }
+                sendEvent(context, DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+            }
+        };
+    }
+
+    @Bean(name = "DOWNSCALE_STOP_TELEMETRY_STATE")
+    public Action<?, ?> stopTelemetryAction() {
+        return new AbstractDownscaleAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Stopping telemetry");
                 List<String> repairInstanceIds = getInstanceIds(variables);
