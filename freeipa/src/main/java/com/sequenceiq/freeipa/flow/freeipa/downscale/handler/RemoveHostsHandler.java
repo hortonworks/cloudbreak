@@ -102,12 +102,19 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
             Set<InstanceMetaData> remainingInstanceMetaDatas = stack.getNotDeletedInstanceMetaDataList().stream()
                     .filter(instanceMetaData -> !removeNodePrivateIPsByFQDN.containsValue(instanceMetaData.getPrivateIp()))
                     .collect(Collectors.toSet());
-            Set<Node> remainingNodes = remainingInstanceMetaDatas.stream()
+            Set<InstanceMetaData> invalidInstanceMetadata = remainingInstanceMetaDatas.stream()
+                    .filter(instanceMetaData -> Objects.isNull(instanceMetaData.getDiscoveryFQDN()))
+                    .collect(Collectors.toSet());
+            Set<InstanceMetaData> validRemainingNodes = remainingInstanceMetaDatas.stream()
+                    .filter(instanceMetaData -> Objects.nonNull(instanceMetaData.getDiscoveryFQDN()))
+                    .collect(Collectors.toSet());
+            Set<Node> remainingNodes = validRemainingNodes.stream()
                     .map(im -> new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
                             im.getInstanceGroup().getTemplate().getInstanceType(), im.getDiscoveryFQDN(), im.getInstanceGroup().getGroupName()))
                     .collect(Collectors.toSet());
-            List<GatewayConfig> remainingGatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, remainingInstanceMetaDatas);
-            LOGGER.debug("Tearing down [{}]. The remaining nodes are [{}].", removeNodePrivateIPsByFQDN, remainingNodes);
+            List<GatewayConfig> remainingGatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, validRemainingNodes);
+            LOGGER.debug("Tearing down [{}]. The following were dropped because they did not contain a FQDN [{}]. The remaining nodes are [{}].",
+                    removeNodePrivateIPsByFQDN, invalidInstanceMetadata, remainingNodes);
             hostOrchestrator.tearDown(remainingGatewayConfigs, removeNodePrivateIPsByFQDN, remainingNodes, new StackBasedExitCriteriaModel(stack.getId()));
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.info("Failed to delete orchestrator components while decommissioning: ", e);
