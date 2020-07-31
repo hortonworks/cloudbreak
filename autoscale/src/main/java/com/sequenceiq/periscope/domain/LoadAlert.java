@@ -8,6 +8,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
+import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.converter.db.LoadAlertConfigAttributeConverter;
 
 @Entity
@@ -40,5 +41,9 @@ public class LoadAlert extends BaseAlert {
 
     public void setLoadAlertConfiguration(LoadAlertConfiguration loadAlertConfiguration) {
         this.loadAlertConfiguration = loadAlertConfiguration;
+    }
+
+    public AlertType getAlertType() {
+        return AlertType.LOAD;
     }
 }

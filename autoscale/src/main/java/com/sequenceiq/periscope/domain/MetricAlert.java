@@ -8,6 +8,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import com.sequenceiq.periscope.api.model.AlertState;
+import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.converter.AlertStateConverter;
 
 @Entity
@@ -49,5 +50,9 @@ public class MetricAlert extends BaseAlert {
 
     public void setAlertState(AlertState alertState) {
         this.alertState = alertState;
+    }
+
+    public AlertType getAlertType() {
+        return AlertType.METRIC;
     }
 }

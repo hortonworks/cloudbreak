@@ -9,6 +9,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import com.sequenceiq.periscope.api.model.AlertState;
+import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.converter.AlertStateConverter;
 import com.sequenceiq.periscope.model.json.Json;
 import com.sequenceiq.periscope.model.json.JsonToString;
@@ -75,5 +76,9 @@ public class PrometheusAlert extends BaseAlert {
 
     public void setParameters(Json parameters) {
         this.parameters = parameters;
+    }
+
+    public AlertType getAlertType() {
+        return AlertType.PROMETHEUS;
     }
 }

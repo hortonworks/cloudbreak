@@ -2,6 +2,8 @@ package com.sequenceiq.periscope.controller;
 
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_DISABLED;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENABLED;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +16,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.api.model.StateJson;
@@ -45,6 +48,9 @@ public class AutoScaleClusterCommonService {
 
     @Inject
     private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
 
     public List<Cluster> getClusters() {
         return clusterService.findAllByUser(restRequestThreadLocalService.getCloudbreakUser());
@@ -94,8 +100,8 @@ public class AutoScaleClusterCommonService {
     private void createHistoryAndNotification(Cluster cluster) {
         History history;
         history = cluster.isAutoscalingEnabled()
-                ? historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", cluster)
-                : historyService.createEntry(ScalingStatus.DISABLED, "Autoscaling has been disabled for the cluster.", cluster);
+                ? historyService.createEntry(ScalingStatus.ENABLED, messagesService.getMessage(AUTOSCALING_ENABLED), cluster)
+                : historyService.createEntry(ScalingStatus.DISABLED, messagesService.getMessage(AUTOSCALING_DISABLED), cluster);
         notificationSender.send(cluster, history);
     }
 

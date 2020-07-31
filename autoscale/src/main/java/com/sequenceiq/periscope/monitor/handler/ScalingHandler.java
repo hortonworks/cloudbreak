@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -12,7 +13,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
+import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
@@ -47,6 +50,9 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     @Inject
     private ScalingPolicyTargetCalculator scalingPolicyTargetCalculator;
 
+    @Inject
+    private CloudbreakMessagesService messagesService;
+
     @Override
     public void onApplicationEvent(ScalingEvent event) {
         BaseAlert alert = event.getAlert();
@@ -65,10 +71,11 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
             cluster.setLastScalingActivityCurrent();
             clusterService.save(cluster);
         } else {
-            String noScalingActivityMsg = String.format("Scaling activity not required for config '%s', cluster '%s'.", alert.getName(), cluster.getStackCrn());
-            LOGGER.info(noScalingActivityMsg);
+            LOGGER.info("Autoscaling activity not required for config '{}', cluster '{}'.", alert.getName(), cluster.getStackCrn());
             if (alert instanceof TimeAlert) {
-                historyService.createEntry(ScalingStatus.SUCCESS, noScalingActivityMsg, hostGroupNodeCount, 0, policy);
+                historyService.createEntry(ScalingStatus.SUCCESS, messagesService.getMessage(MessageCode.AUTOSCALING_ACTIVITY_NOT_REQUIRED,
+                                        List.of(alert.getAlertType(), alert.getName(), alert.getScalingPolicy().getHostGroup(), hostGroupNodeCount)),
+                        hostGroupNodeCount, 0, policy);
             }
         }
     }

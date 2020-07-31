@@ -16,7 +16,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
+import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
@@ -73,6 +75,9 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     @Inject
     private ScalingPolicyTargetCalculator scalingPolicyTargetCalculator;
 
+    @Inject
+    private CloudbreakMessagesService messagesService;
+
     private long clusterId;
 
     @Override
@@ -120,8 +125,8 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
                 publish(alert);
                 triggeredAlert = alert;
             } else if (alertTriggerable && triggeredAlert != null) {
-                historyService.createEntry(ScalingStatus.TRIGGER_FAILED, String.format(
-                        "Autoscaling Schedule '%s' overlaps with '%s'.", alert.getName(), triggeredAlert.getName()),
+                historyService.createEntry(ScalingStatus.TRIGGER_FAILED,
+                        messagesService.getMessage(MessageCode.SCHEDULE_CONFIG_OVERLAPS, List.of(alert.getName(), triggeredAlert.getName())),
                         alert.getCluster());
             }
         }
