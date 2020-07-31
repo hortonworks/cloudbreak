@@ -1,22 +1,21 @@
 package com.sequenceiq.freeipa.flow.freeipa.diagnostics.event;
 
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
 import reactor.rx.Promise;
 
 public class DiagnosticsCollectionEvent extends BaseFlowEvent {
 
-    private final Map<String, Object> parameters;
+    private final DiagnosticParameters parameters;
 
-    public DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Map<String, Object> parameters) {
+    public DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, DiagnosticParameters parameters) {
         super(selector, resourceId, resourceCrn);
         this.parameters = parameters;
     }
 
-    public DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted, Map<String, Object> parameters) {
+    public DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted, DiagnosticParameters parameters) {
         super(selector, resourceId, resourceCrn, accepted);
         this.parameters = parameters;
     }
@@ -25,7 +24,7 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
         return new DiagnosticsCollectionEventBuilder();
     }
 
-    public Map<String, Object> getParameters() {
+    public DiagnosticParameters getParameters() {
         return parameters;
     }
 
@@ -39,7 +38,7 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
 
         private Promise<AcceptResult> accepted;
 
-        private Map<String, Object> parameters;
+        private DiagnosticParameters parameters;
 
         private DiagnosticsCollectionEventBuilder() {
         }
@@ -64,7 +63,7 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
             return this;
         }
 
-        public DiagnosticsCollectionEventBuilder withParameters(Map<String, Object> parameters) {
+        public DiagnosticsCollectionEventBuilder withParameters(DiagnosticParameters parameters) {
             this.parameters = parameters;
             return this;
         }

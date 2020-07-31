@@ -20,20 +20,20 @@ import io.swagger.annotations.ApiOperation;
 @Path("/diagnostics")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/diagnostics", description = "Diagnostics in Cloudera Manager for SDX", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Api(value = "/diagnostics", description = "Diagnostics for SDX", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface DiagnosticsEndpoint {
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
-            nickname = "collectSdxCmDiagnostics")
+    @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
+            nickname = "collectSdxDiagnostics")
     FlowIdentifier collectDiagnostics(@Valid DiagnosticsCollectionRequest request);
 
     @GET
     @Path("logs")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS, produces = MediaType.APPLICATION_JSON,
-            nickname = "getSdxCmVmLogs")
+            nickname = "getSdxVmLogs")
     VmLogsResponse getVmLogs();
 }
