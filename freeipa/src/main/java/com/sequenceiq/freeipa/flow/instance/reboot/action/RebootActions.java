@@ -153,7 +153,7 @@ public class RebootActions {
                 Long stackId = payload.getResourceId();
                 Stack stack = stackService.getStackById(stackId);
                 return new RebootContext(flowParameters, stack, instances, null, null);
-                }
+            }
         };
     }
 
