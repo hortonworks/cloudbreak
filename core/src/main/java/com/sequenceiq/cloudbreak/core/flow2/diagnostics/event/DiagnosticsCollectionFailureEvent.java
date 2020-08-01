@@ -2,15 +2,14 @@ package com.sequenceiq.cloudbreak.core.flow2.diagnostics.event;
 
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.FAILED_DIAGNOSTICS_COLLECTION_EVENT;
 
-import java.util.Map;
-
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 
 public class DiagnosticsCollectionFailureEvent extends DiagnosticsCollectionEvent implements Selectable {
 
     private final Exception exception;
 
-    public DiagnosticsCollectionFailureEvent(Long resourceId, Exception exception, String resourceCrn, Map<String, Object> parameters) {
+    public DiagnosticsCollectionFailureEvent(Long resourceId, Exception exception, String resourceCrn, DiagnosticParameters parameters) {
         super(FAILED_DIAGNOSTICS_COLLECTION_EVENT.name(), resourceId, resourceCrn, parameters, null, null);
         this.exception = exception;
     }

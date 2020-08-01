@@ -15,9 +15,10 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToMapConverter;
+import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToParameterConverter;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 
@@ -36,7 +37,7 @@ public class DiagnosticsTriggerService {
     private ReactorNotifier reactorNotifier;
 
     @Inject
-    private DiagnosticsDataToMapConverter diagnosticsDataToMapConverter;
+    private DiagnosticsDataToParameterConverter diagnosticsDataToParameterConverter;
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
@@ -50,7 +51,7 @@ public class DiagnosticsTriggerService {
         LOGGER.debug("Starting diagnostics collection for Stack. Crn: '{}'", stack.getResourceCrn());
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
         diagnosticsCollectionValidator.validate(request, telemetry, stackCrn);
-        Map<String, Object> parameters = diagnosticsDataToMapConverter.convert(request, telemetry, stack.getRegion());
+        DiagnosticParameters parameters = diagnosticsDataToParameterConverter.convert(request, telemetry, stack.getRegion());
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceId(stack.getId())

@@ -1,16 +1,15 @@
 package com.sequenceiq.freeipa.flow.freeipa.diagnostics.event;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
-
-import java.util.Map;
-
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.FAILED_DIAGNOSTICS_COLLECTION_EVENT;
+
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 
 public class DiagnosticsCollectionFailureEvent extends DiagnosticsCollectionEvent implements Selectable {
 
     private final Exception exception;
 
-    public DiagnosticsCollectionFailureEvent(Long resourceId, Exception exception, String resourceCrn, Map<String, Object> parameters) {
+    public DiagnosticsCollectionFailureEvent(Long resourceId, Exception exception, String resourceCrn, DiagnosticParameters parameters) {
         super(FAILED_DIAGNOSTICS_COLLECTION_EVENT.name(), resourceId, resourceCrn, parameters);
         this.exception = exception;
     }
