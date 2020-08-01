@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.cdp.shaded.org.apache.commons.lang3.StringUtils;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
