@@ -8,11 +8,11 @@ IPADDR=$(hostname -i)
 ipa-server-install --unattended --uninstall
 
 ipa-server-install \
-          --realm $REALM \
-          --domain $DOMAIN \
-          --hostname $FQDN \
-          -a $FPW \
-          -p $FPW \
+          --realm "$REALM" \
+          --domain "$DOMAIN" \
+          --hostname "$FQDN" \
+          -a "$FPW" \
+          -p "$FPW" \
           --setup-dns \
           --auto-reverse \
 {%- for zone in salt['pillar.get']('freeipa:reverseZones').split(',') %}

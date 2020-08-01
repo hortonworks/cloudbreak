@@ -61,7 +61,7 @@ public class FreeIpaConfigService {
                 .withDnssecValidationEnabled(isDnsSecValidationEnabled(stack.getCloudPlatform()))
                 .withReverseZones(reverseZones)
                 .withAdminUser(freeIpaClientFactory.getAdminUser())
-                .withFreeIpaToReplicate(gatewayConfigService.getPrimaryGatewayConfig(stack).getHostname())
+                .withFreeIpaToReplicate(gatewayConfigService.getPrimaryGatewayConfig(stack))
                 .withHosts(hosts)
                 .withBackupConfig(determineAndSetBackup(stack, proxyConfig))
                 .build();

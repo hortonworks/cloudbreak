@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -31,6 +32,8 @@ public class FreeIpaConfigView {
 
     private final String freeipaToReplicate;
 
+    private final String freeipaToReplicateIp;
+
     private final Set<Object> hosts;
 
     private final FreeIpaBackupConfigView backup;
@@ -46,6 +49,7 @@ public class FreeIpaConfigView {
         this.reverseZones = builder.reverseZones;
         this.adminUser = builder.adminUser;
         this.freeipaToReplicate = builder.freeipaToReplicate;
+        this.freeipaToReplicateIp = builder.freeipaToReplicateIp;
         this.hosts = builder.hosts;
         this.backup = builder.backup;
     }
@@ -78,6 +82,10 @@ public class FreeIpaConfigView {
         return freeipaToReplicate;
     }
 
+    public String getFreeipaToReplicateIp() {
+        return freeipaToReplicateIp;
+    }
+
     public Set<Object> getHosts() {
         return hosts;
     }
@@ -96,6 +104,7 @@ public class FreeIpaConfigView {
         map.put("reverseZones", ObjectUtils.defaultIfNull(this.reverseZones, EMPTY_CONFIG_DEFAULT));
         map.put("admin_user", ObjectUtils.defaultIfNull(this.adminUser, EMPTY_CONFIG_DEFAULT));
         map.put("freeipa_to_replicate", ObjectUtils.defaultIfNull(this.freeipaToReplicate, EMPTY_CONFIG_DEFAULT));
+        map.put("freeipa_to_replicate_ip", ObjectUtils.defaultIfNull(this.freeipaToReplicateIp, EMPTY_CONFIG_DEFAULT));
         if (MapUtils.isNotEmpty(backup.toMap())) {
             map.put("backup", this.backup.toMap());
         }
@@ -118,6 +127,8 @@ public class FreeIpaConfigView {
         private String adminUser;
 
         private String freeipaToReplicate;
+
+        private String freeipaToReplicateIp;
 
         private Set<Object> hosts;
 
@@ -159,12 +170,14 @@ public class FreeIpaConfigView {
             return this;
         }
 
-        public Builder withFreeIpaToReplicate(String freeipaToReplicate) {
-            this.freeipaToReplicate = freeipaToReplicate;
+        public Builder withFreeIpaToReplicate(GatewayConfig freeipaToReplicate) {
+            this.freeipaToReplicate = freeipaToReplicate.getHostname();
+            this.freeipaToReplicateIp = freeipaToReplicate.getPrivateAddress();
             return this;
         }
 
         public Builder withHosts(Set<Node> hosts) {
+            // IP is needed for backwards compatibility with FreeIPA HA prior to 2.28.0
             this.hosts = hosts.stream().map(n ->
                     Map.of("ip", n.getPrivateIp(),
                             "fqdn", n.getHostname()))

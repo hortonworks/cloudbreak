@@ -8,15 +8,6 @@ net.ipv6.conf.lo.disable_ipv6:
   sysctl.present:
     - value: 0
 
-{% for host in salt['pillar.get']('freeipa:hosts') %}
-/etc/hosts/{{ host['fqdn'] }}:
-  host.present:
-    - ip:
-      - {{ host['ip'] }}
-    - names:
-      - {{ host['fqdn'] }}
-{% endfor %}
-
 {% if salt['pillar.get']('freeipa:hosts') | length > 1 %}
 /cdp/ipahealthagent/freeipa_cluster_node:
   file.managed:
