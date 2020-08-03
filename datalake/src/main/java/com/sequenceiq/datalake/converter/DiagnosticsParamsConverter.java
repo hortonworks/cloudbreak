@@ -71,7 +71,7 @@ public class DiagnosticsParamsConverter {
         request.setStartTime((Date) Optional.ofNullable(props.get(PARAMS_START_TIME)).orElse(null));
         request.setEndTime((Date) Optional.ofNullable(props.get(PARAMS_END_TIME)).orElse(null));
         request.setIncludeSaltLogs((Boolean) Optional.ofNullable(props.get(PARAMS_INCLUDE_SALT_LOGS)).orElse(false));
-        request.setIncludeSaltLogs((Boolean) Optional.ofNullable(props.get(PARAMS_UPDATE_PACKAGE)).orElse(false));
+        request.setUpdatePackage((Boolean) Optional.ofNullable(props.get(PARAMS_UPDATE_PACKAGE)).orElse(false));
         return request;
     }
 
