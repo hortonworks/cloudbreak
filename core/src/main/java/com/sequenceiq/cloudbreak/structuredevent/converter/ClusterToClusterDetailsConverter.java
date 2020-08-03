@@ -1,22 +1,21 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 
 @Component
 public class ClusterToClusterDetailsConverter {
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private ConverterUtil converterUtil;
 
     public ClusterDetails convert(Cluster source) {
         ClusterDetails clusterDetails = new ClusterDetails();
@@ -32,13 +31,8 @@ public class ClusterToClusterDetailsConverter {
     }
 
     private void addDatabaseInfo(ClusterDetails clusterDetails, Cluster source) {
-        RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(source.getId(), DatabaseType.AMBARI);
-        if (rdsConfig == null || DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine()) {
-            clusterDetails.setDatabaseType(DatabaseVendor.EMBEDDED.name());
-            clusterDetails.setExternalDatabase(Boolean.FALSE);
-        } else {
-            clusterDetails.setDatabaseType(rdsConfig.getDatabaseEngine().name());
-            clusterDetails.setExternalDatabase(Boolean.TRUE);
+        if (source.getRdsConfigs() != null && !source.getRdsConfigs().isEmpty()) {
+            clusterDetails.setDatabases(converterUtil.convertAll(source.getRdsConfigs(), RdsDetails.class));
         }
     }
 
