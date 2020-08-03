@@ -13,7 +13,8 @@ public class DiagnosticsModelDescription {
     public static final String ADDITIONAL_LOGS = "Additional log path and label pairs that will be sent in the diagnostics collection";
     public static final String INCLUDE_SALT_LOGS = "Include salt logs in the diagnostic collections";
     public static final String UPDATE_PACKAGE = "Upgrade or install required telemetry cli tool on the nodes (works only with network)";
-    public static final String SKIP_VALIDATION = "Skip cloud storage write operation testing or databus connection check (depends on the destination) during init stage.";
+    public static final String SKIP_VALIDATION = "Skip cloud storage write operation testing or databus connection " +
+            "check (depends on the destination) during init stage.";
 
     private DiagnosticsModelDescription() {
     }

@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,6 +28,9 @@ import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollect
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.common.model.diagnostics.AwsDiagnosticParameters;
+import com.sequenceiq.common.model.diagnostics.AzureDiagnosticParameters;
+import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -34,6 +39,8 @@ import com.sequenceiq.flow.core.FlowParameters;
 public class DiagnosticsCollectionActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsCollectionActions.class);
+
+    private static final String LOCAL_LOG_PATH = "/var/lib/filecollector";
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
@@ -47,7 +54,10 @@ public class DiagnosticsCollectionActions {
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_INIT_STATE. resourceCrn: '{}'", resourceCrn);
                 InMemoryStateStore.putStack(resourceId, PollGroup.POLLABLE);
-                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), ResourceEvent.STACK_DIAGNOSTICS_INIT_RUNNING);
+                String hosts = payload.getHosts() == null ? "[ALL]" : String.format("[%s]", String.join(",", payload.getHosts()));
+                String hostGroups = payload.getHostGroups() == null ? "[ALL]" : String.format("[%s]", String.join(",", payload.getHostGroups()));
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
+                        ResourceEvent.STACK_DIAGNOSTICS_INIT_RUNNING, List.of(hosts, hostGroups));
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(resourceId)
                         .withResourceCrn(resourceCrn)
@@ -67,7 +77,8 @@ public class DiagnosticsCollectionActions {
                 Long resourceId = payload.getResourceId();
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_COLLECTION_STATE. resourceCrn: '{}'", resourceCrn);
-                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), ResourceEvent.STACK_DIAGNOSTICS_COLLECTION_RUNNING);
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
+                        ResourceEvent.STACK_DIAGNOSTICS_COLLECTION_RUNNING, List.of(payload.getParameters().getDestination().toString()));
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(resourceId)
                         .withResourceCrn(payload.getResourceCrn())
@@ -89,7 +100,7 @@ public class DiagnosticsCollectionActions {
                 Long resourceId = payload.getResourceId();
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_UPLOAD_STATE. resourceCrn: '{}'", resourceCrn);
-                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), ResourceEvent.STACK_DIAGNOSTICS_UPLOAD_RUNNING);
+                fireUploadEvent(resourceId, payload);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(resourceId)
                         .withResourceCrn(payload.getResourceCrn())
@@ -99,6 +110,42 @@ public class DiagnosticsCollectionActions {
                         .withHostGroups(payload.getHostGroups())
                         .build();
                 sendEvent(context, event);
+            }
+
+            private void fireUploadEvent(Long resourceId, DiagnosticsCollectionEvent payload) {
+                DiagnosticParameters parameters = payload.getParameters();
+                String message;
+                switch (parameters.getDestination()) {
+                    case CLOUD_STORAGE:
+                        String storageLocation = getStorageLocation(parameters);
+                        message = "Upload location: " + storageLocation;
+                        break;
+                    case ENG:
+                        message = "Engineering will receive the logs.";
+                        break;
+                    case SUPPORT:
+                        message = String.format("Support ticket will be created for the logs. Issue: '%s' Description '%s'",
+                                parameters.getIssue(), parameters.getDescription());
+                        break;
+                    default:
+                        message = "Location for logs on each node: " + LOCAL_LOG_PATH;
+                        break;
+                }
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
+                        ResourceEvent.STACK_DIAGNOSTICS_UPLOAD_RUNNING, List.of(message));
+            }
+
+            private String getStorageLocation(DiagnosticParameters parameters) {
+                String storageLocation;
+                if (parameters instanceof AwsDiagnosticParameters) {
+                    AwsDiagnosticParameters awsParameters = (AwsDiagnosticParameters) parameters;
+                    storageLocation = "s3://" + Paths.get(awsParameters.getS3Bucket(), awsParameters.getS3Location()).toString();
+                } else {
+                    AzureDiagnosticParameters azureParameters = (AzureDiagnosticParameters) parameters;
+                    storageLocation = "abfs://" + Paths.get(azureParameters.getAdlsv2StorageContainer(),
+                            azureParameters.getAdlsv2StorageLocation()).toString();
+                }
+                return storageLocation;
             }
         };
     }
@@ -156,7 +203,8 @@ public class DiagnosticsCollectionActions {
                 Long resourceId = payload.getResourceId();
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_COLLECTION_FAILED_STATE. resourceCrn: '{}'", resourceCrn);
-                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FAILED.name(), ResourceEvent.STACK_DIAGNOSTICS_COLLECTION_FAILED);
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FAILED.name(),
+                        ResourceEvent.STACK_DIAGNOSTICS_COLLECTION_FAILED, List.of(payload.getException().getMessage()));
                 InMemoryStateStore.deleteStack(resourceId);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(resourceId)
