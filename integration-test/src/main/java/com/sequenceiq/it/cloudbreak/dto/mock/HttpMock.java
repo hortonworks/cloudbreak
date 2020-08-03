@@ -55,6 +55,8 @@ public class HttpMock implements CloudbreakTestDto {
 
     private String name;
 
+    private String resourceNameType;
+
     private TestContext testContext;
 
     private List<RequestData> requestList = new LinkedList<>();
@@ -75,6 +77,10 @@ public class HttpMock implements CloudbreakTestDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getResourceNameType() {
+        return resourceNameType;
     }
 
     public TestParameter getTestParameter() {

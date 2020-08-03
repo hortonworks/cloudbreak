@@ -24,6 +24,8 @@ public interface CloudbreakTestDto extends Orderable {
 
     String getName();
 
+    String getResourceNameType();
+
     CloudPlatform getCloudPlatform();
 
     default void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
