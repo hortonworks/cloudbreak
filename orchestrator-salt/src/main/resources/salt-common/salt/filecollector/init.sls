@@ -1,6 +1,7 @@
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {%- from 'filecollector/settings.sls' import filecollector with context %}
 {%- from 'fluent/settings.sls' import fluent with context %}
+{%- from 'databus/settings.sls' import databus with context %}
 
 {% set cdp_telemetry_version = '0.1.0' %}
 {% set cdp_telemetry_rpm_location = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-telemetry/'%}
@@ -18,6 +19,10 @@ install_telemetry_rpm_manually:
     - name: "rpm -i {{ cdp_telemetry_rpm_repo_url }}"
     - onlyif: "! rpm -q {{ cdp_telemetry_package_name }}"
     - failhard: True
+{% if filecollector.proxyUrl %}
+    - env:{% if filecollector.proxyProtocol == "https" %}
+      - https_proxy: {{ filecollector.proxyUrl }}{% else %}
+      - http_proxy: {{ filecollector.proxyUrl }}{% endif %}{% endif %}
 {% else %}
 fail_if_telemetry_rpm_is_not_installed:
   cmd.run:
@@ -66,3 +71,34 @@ fail_if_telemetry_rpm_is_not_installed:
     - group: "root"
     - mode: '0750'
     - failhard: True
+{% if not filecollector.skipValidation and filecollector.destination == "CLOUD_STORAGE" %}
+create_test_cloud_storage_file:
+  cmd.run:
+    - name: echo testcloudstorage > /tmp/.test_cloud_storage_upload.txt
+    - failhard: True
+
+{% if "s3" in filecollector.cloudStorageUploadParams %}
+test_s3_put:
+  cmd.run:
+    - name: "cdp-telemetry storage {{ filecollector.testCloudStorageUploadParams }}"
+    - failhard: True
+{% elif "abfs" in filecollector.cloudStorageUploadParams %}
+test_abfs_put:
+  cmd.run:
+    - name: "cdp-telemetry storage {{ filecollector.testCloudStorageUploadParams }}"
+    - failhard: True
+{% endif %}
+
+delete_test_cloud_storage_file:
+  cmd.run:
+    - name: rm -rf /tmp/.test_cloud_storage_upload.txt
+{% elif not filecollector.skipValidation and filecollector.destination == "ENG" and fluent.dbusClusterLogsCollection and databus.endpoint %}
+check_dbus_connection:
+  cmd.run:
+    - name: "cdp-telemetry utils check-connection --url {{ databus.endpoint }}"
+    - failhard: True
+check_td_agent_running_systemctl:
+  cmd.run:
+    - name: "systemctl is-active --quiet td-agent"
+    - failhard: True
+{% endif %}

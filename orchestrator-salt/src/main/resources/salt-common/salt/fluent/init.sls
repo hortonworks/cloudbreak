@@ -291,12 +291,23 @@ fluentd_start_with_update_systemd_units:
   module.wait:
     - name: service.systemctl_reload
     - watch:
-      - file: /etc/systemd/system/td-agent.service
+      - file: /etc/systemd/system/td-agent.service{% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
+      - file: /etc/td-agent/input.conf
+      - file: /etc/td-agent/output.conf{% endif %}
+      - file: /etc/td-agent/input_databus.conf
+      - file: /etc/td-agent/filter_databus.conf
+      - file: /etc/td-agent/output_databus.conf
+
   service.running:
     - enable: True
     - name: td-agent
     - watch:
-       - file: /etc/systemd/system/td-agent.service
+       - file: /etc/systemd/system/td-agent.service{% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
+       - file: /etc/td-agent/input.conf
+       - file: /etc/td-agent/output.conf{% endif %}
+       - file: /etc/td-agent/input_databus.conf
+       - file: /etc/td-agent/filter_databus.conf
+       - file: /etc/td-agent/output_databus.conf
 {% else %}
 
 fs.file-max:

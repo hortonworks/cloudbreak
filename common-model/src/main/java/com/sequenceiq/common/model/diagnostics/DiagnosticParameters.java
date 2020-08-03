@@ -37,6 +37,8 @@ public class DiagnosticParameters {
 
     private Boolean updatePackage = Boolean.FALSE;
 
+    private Boolean skipValidation = Boolean.FALSE;
+
     public Map<String, Object> toMap() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("destination", destination.toString());
@@ -51,6 +53,7 @@ public class DiagnosticParameters {
         parameters.put("hosts", Optional.ofNullable(hosts).orElse(null));
         parameters.put("includeSaltLogs", Optional.ofNullable(includeSaltLogs).orElse(false));
         parameters.put("updatePackage", Optional.ofNullable(updatePackage).orElse(false));
+        parameters.put("skipValidation", Optional.ofNullable(skipValidation).orElse(false));
         parameters.put("additionalLogs", additionalLogs);
         Map<String, Object> fileCollector = new HashMap<>();
         fileCollector.put(FILECOLLECTOR_ROOT, parameters);
@@ -101,6 +104,10 @@ public class DiagnosticParameters {
         this.updatePackage = updatePackage;
     }
 
+    public void setSkipValidation(Boolean skipValidation) {
+        this.skipValidation = skipValidation;
+    }
+
     public String getIssue() {
         return issue;
     }
@@ -143,6 +150,10 @@ public class DiagnosticParameters {
 
     public Boolean getUpdatePackage() {
         return updatePackage;
+    }
+
+    public Boolean getSkipValidation() {
+        return skipValidation;
     }
 
     public static DiagnosticParametersBuilder builder() {
@@ -212,6 +223,11 @@ public class DiagnosticParameters {
 
         public DiagnosticParametersBuilder withUpdatePackage(Boolean updatePackage) {
             diagnosticParameters.setUpdatePackage(updatePackage);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withSkipValidation(Boolean skipValidation) {
+            diagnosticParameters.setSkipValidation(skipValidation);
             return this;
         }
 
