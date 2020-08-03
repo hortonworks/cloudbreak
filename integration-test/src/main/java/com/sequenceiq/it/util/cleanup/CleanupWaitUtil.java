@@ -134,6 +134,40 @@ public class CleanupWaitUtil {
         }
     }
 
+    /**
+     * Wait till the environment is going to be deleted (archived). However not more than the "integrationtest.testsuite.maxRetry"
+     *
+     * Returns with:
+     * FAILED:     The environment gets in DELETE_FAILED state
+     * TIMEOUT:    The environment is still available. However the "maxRetry" has been reached.
+     * SUCCESSFUL: The environments have been terminated successfully.
+     *
+     * @param environmentClient com.sequenceiq.environment.client.EnvironmentClient
+     * @param environmentName   Provided environment name
+     * @return                  FAILED, TIMEOUT, SUCCESSFUL com.sequenceiq.it.cloudbreak.util.WaitResult
+     */
+    public WaitResult waitForEnvironmentCleanup(EnvironmentClient environmentClient, String environmentName) {
+        int retryCount = 0;
+
+        while (retryCount < maxRetry && checkEnvironmentIsAvailable(environmentClient, environmentName)
+                && !checkEnvironmentDeleteFailedStatus(environmentClient, environmentName)) {
+            sleep(pollingInterval);
+            retryCount++;
+        }
+
+        if (checkEnvironmentDeleteFailedStatus(environmentClient, environmentName)) {
+            LOG.info("Failed: {} environment cannot be terminated", environmentName);
+            return WaitResult.FAILED;
+        } else if (checkEnvironmentIsAvailable(environmentClient, environmentName)) {
+            LOG.info("Timeout: {} environment cannot be terminated during {} retries", environmentName, maxRetry);
+            return WaitResult.TIMEOUT;
+        } else {
+            sleep(DELETE_SLEEP);
+            LOG.info("Success: {} environment has been terminated", environmentName);
+            return WaitResult.SUCCESSFUL;
+        }
+    }
+
     private void sleep(long pollingInterval) {
         try {
             Thread.sleep(pollingInterval);
@@ -210,6 +244,27 @@ public class CleanupWaitUtil {
     }
 
     /**
+     * Checking the environment is still available.
+     *
+     * Returns with:
+     * TRUE:    The environment is still available.
+     * FALSE:   The environment cannot be found.
+     *
+     * @param environmentClient   com.sequenceiq.environment.client.EnvironmentClient
+     * @param environmentName     Provided environment name
+     * @return                    TRUE or FALSE based on environments availability
+     */
+    private boolean checkEnvironmentIsAvailable(EnvironmentClient environmentClient, String environmentName) {
+        try {
+            return environmentClient.environmentV1Endpoint().list().getResponses().stream()
+                    .anyMatch(response -> response.getName().equalsIgnoreCase(environmentName));
+        } catch (Exception e) {
+            LOG.warn("Exception has been occurred while checking {} environment is available: {}", environmentName, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
      * Checking DELETE_FAILED state of available distroxes across all the environments.
      *
      * Returns with:
@@ -271,6 +326,32 @@ public class CleanupWaitUtil {
                     .anyMatch(response -> response.getEnvironmentStatus().equals(EnvironmentStatus.DELETE_FAILED));
         } catch (Exception e) {
             LOG.warn("Exception has been occurred during check environments DELETE_FAILED state: {}", e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Checking the environment is in DELETE_FAILED state.
+     *
+     * Returns with:
+     * TRUE:  DELETE_FAILED state is available.
+     * FALSE: DELETE_FAILED state is not available.
+     *
+     * @param environmentClient com.sequenceiq.environment.client.EnvironmentClient
+     * @param environmentName   Provided environment name
+     * @return                  TRUE or FALSE based on existing DELETE_FAILED status
+     */
+    private boolean checkEnvironmentDeleteFailedStatus(EnvironmentClient environmentClient, String environmentName) {
+        try {
+            EnvironmentStatus environmentStatus = environmentClient.environmentV1Endpoint().list().getResponses().stream()
+                    .filter(response -> response.getName().equalsIgnoreCase(environmentName))
+                    .findFirst()
+                    .map(EnvironmentBaseResponse::getEnvironmentStatus)
+                    .orElse(EnvironmentStatus.ARCHIVED);
+            LOG.info("{} environment actual state is: {}", environmentName, environmentStatus);
+            return environmentStatus.equals(EnvironmentStatus.DELETE_FAILED);
+        } catch (Exception e) {
+            LOG.warn("Exception has been occurred while checking {} environment's DELETE_FAILED state: {}", environmentName, e.getMessage(), e);
             return false;
         }
     }

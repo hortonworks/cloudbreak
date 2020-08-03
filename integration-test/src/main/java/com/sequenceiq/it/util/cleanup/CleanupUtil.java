@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -89,14 +88,17 @@ public class CleanupUtil extends CleanupClientUtil {
     }
 
     public void cleanupEnvironments() {
-        EnvironmentClient environment = createEnvironmentClient();
-        Set<String> deletableChildEnvironmentNames = new HashSet<>(getChildEnvironments(environment).values());
-        Set<String> deletableEnvironmentNames = new HashSet<>(getEnvironments(environment).values());
+        EnvironmentClient environmentClient = createEnvironmentClient();
+        Set<String> deletableChildEnvironmentNames = new HashSet<>(getChildEnvironments(environmentClient).values());
+        Set<String> deletableEnvironmentNames = new HashSet<>(getEnvironments(environmentClient).values());
 
         if (!deletableChildEnvironmentNames.isEmpty()) {
-            deleteEnvironments(deletableChildEnvironmentNames, environment);
-        } else if (!deletableEnvironmentNames.isEmpty()) {
-            deleteEnvironments(deletableEnvironmentNames, environment);
+            LOG.info("Deletable child environments: {}", deletableChildEnvironmentNames);
+            deleteEnvironments(deletableChildEnvironmentNames, environmentClient);
+        }
+        if (!deletableEnvironmentNames.isEmpty()) {
+            LOG.info("Deletable environments: {}", deletableEnvironmentNames);
+            deleteEnvironments(deletableEnvironmentNames, environmentClient);
         } else {
             LOG.info("Cannot find any deletable environment!");
         }
@@ -125,20 +127,19 @@ public class CleanupUtil extends CleanupClientUtil {
     }
 
     public Map<String, String> getEnvironments(EnvironmentClient environmentClient) {
-        return environmentClient.environmentV1Endpoint().list().getResponses().stream()
-                .filter(environment -> {
-                    String parentEnvironment = Optional.ofNullable(environment.getParentEnvironmentCrn()).orElse("");
-                    return parentEnvironment.trim().isEmpty();
-                }).collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
+        Map<String, String> parentEnvironments =  environmentClient.environmentV1Endpoint().list().getResponses().stream()
+                .filter(response -> response.getParentEnvironmentName() == null)
+                .collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
+        parentEnvironments.forEach((crn, name) -> LOG.info("Found deletable environment CRN: {} and NAME: {}", crn, name));
+        return parentEnvironments;
     }
 
     public Map<String, String> getChildEnvironments(EnvironmentClient environmentClient) {
-        return environmentClient.environmentV1Endpoint().list().getResponses().stream()
-                .filter(environment -> {
-                    String parentEnvironment = Optional.ofNullable(environment.getParentEnvironmentCrn()).orElse("");
-                    return !parentEnvironment.trim().isEmpty();
-                })
+        Map<String, String> childEnvironments = environmentClient.environmentV1Endpoint().list().getResponses().stream()
+                .filter(response -> response.getParentEnvironmentName() != null)
                 .collect(Collectors.toMap(EnvironmentBaseResponse::getCrn, EnvironmentBaseResponse::getName));
+        childEnvironments.forEach((crn, name) -> LOG.info("Found deletable child environment CRN: {} and NAME: {}", crn, name));
+        return childEnvironments;
     }
 
     public Set<String> getCredentials(EnvironmentClient environment) {
@@ -171,21 +172,21 @@ public class CleanupUtil extends CleanupClientUtil {
         return sdxNames;
     }
 
-    private void deleteEnvironments(Set<String> environmentNames, EnvironmentClient environment) {
+    private void deleteEnvironments(Set<String> environmentNames, EnvironmentClient environmentClient) {
         environmentNames.forEach(environmentName -> LOG.info("Environment with name: {} will be deleted!", environmentName));
         try {
-            environment.environmentV1Endpoint().deleteMultipleByNames(environmentNames, true, true);
+            environmentClient.environmentV1Endpoint().deleteMultipleByNames(environmentNames, true, true);
         } catch (Exception e) {
-            LOG.error("One or more environment cannot be deleted, because of: ", e);
+            LOG.error("One or more environment cannot be deleted, because of: {}", e.getMessage(), e);
         }
-        for (int i = 0; i < 3; i++) {
-            WaitResult waitResult = waitUtil.waitForEnvironmentsCleanup(environment);
+        environmentNames.forEach(environmentName -> {
+            WaitResult waitResult = waitUtil.waitForEnvironmentCleanup(environmentClient, environmentName);
             if (waitResult == WaitResult.FAILED) {
-                throw new RuntimeException("Environment deletion has been failed!");
+                throw new RuntimeException(String.format("Deleting %s environment has been failed!", environmentName));
             }
             if (waitResult == WaitResult.TIMEOUT) {
-                throw new RuntimeException("Timeout happened during the wait for environments deletion!");
+                throw new RuntimeException(String.format("Timeout happened during the wait for deleting %s environment!", environmentName));
             }
-        }
+        });
     }
 }
