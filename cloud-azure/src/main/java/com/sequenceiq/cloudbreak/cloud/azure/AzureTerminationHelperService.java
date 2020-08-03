@@ -81,7 +81,7 @@ public class AzureTerminationHelperService {
         List<String> networkInterfaceNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_NETWORK_INTERFACE);
         azureUtils.waitForDetachNetworkInterfaces(ac, client, resourceGroupName, networkInterfaceNames);
         azureUtils.deleteNetworkInterfaces(client, resourceGroupName, networkInterfaceNames);
-        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_INSTANCE);
+        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_NETWORK_INTERFACE);
 
 
         List<String> publicAddressNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
