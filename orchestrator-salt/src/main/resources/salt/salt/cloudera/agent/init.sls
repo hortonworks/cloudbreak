@@ -48,7 +48,7 @@ generate_host_id:
     - name: /opt/scripts/generate-host-id.sh
     - shell: /bin/bash
 
-{% if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True %}
+{% if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True and not "manager_upgrade" in grains.get('roles', []) %}
 /opt/cloudera/cm-agent/service/inituids:
   file.directory:
     - user: cloudera-scm

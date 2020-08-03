@@ -483,7 +483,7 @@ public class ClusterHostServiceRunner {
                         singletonMap("csd-urls", csdUrls))));
     }
 
-    private void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo) {
+    public void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo) {
         boolean deterministicUidGid = isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_1);
         servicePillar.put("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
                 singletonMap("cloudera-manager", singletonMap("settings", Map.of(

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -50,6 +51,9 @@ public class ClusterManagerUpgradeServiceTest {
     @Mock
     private HostOrchestrator hostOrchestrator;
 
+    @Mock
+    private ClusterHostServiceRunner clusterHostServiceRunner;
+
     @InjectMocks
     private ClusterManagerUpgradeService underTest;
 
@@ -66,15 +70,15 @@ public class ClusterManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testUpgradeClusterManagerWithHostOrchestrator() throws CloudbreakOrchestratorException, CloudbreakException {
+    public void testUpgradeClusterManager() throws CloudbreakOrchestratorException, CloudbreakException {
         Cluster cluster = stack.getCluster();
 
         underTest.upgradeClusterManager(STACK_ID);
 
-        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getPrimaryGatewayInstance(),  cluster.getGateway() != null);
+        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getPrimaryGatewayInstance(), cluster.getGateway() != null);
         verify(clusterComponentConfigProvider, times(1)).getClouderaManagerRepoDetails(cluster.getId());
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);
-
+        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any());
     }
 }
