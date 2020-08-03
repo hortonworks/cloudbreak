@@ -52,6 +52,15 @@ public class EnvironmentNetworkAzureParams {
         this.noPublicIp = noPublicIp;
     }
 
+    @Override
+    public String toString() {
+        return "EnvironmentNetworkAzureParams{" +
+                "networkId='" + networkId + '\'' +
+                ", resourceGroupName='" + resourceGroupName + '\'' +
+                ", noPublicIp=" + noPublicIp +
+                '}';
+    }
+
     public static final class EnvironmentNetworkAzureParamsBuilder {
         private String networkId;
 

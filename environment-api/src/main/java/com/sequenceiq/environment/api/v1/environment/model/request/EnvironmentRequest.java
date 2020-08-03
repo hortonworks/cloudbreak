@@ -266,4 +266,29 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     public void setRegions(Set<String> regions) {
         this.regions = regions == null ? new HashSet<>() : regions;
     }
+
+    @Override
+    public String toString() {
+        return "EnvironmentRequest{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", credentialName='" + credentialName + '\'' +
+                ", regions=" + regions +
+                ", location=" + location +
+                ", network=" + network +
+                ", telemetry=" + telemetry +
+                ", authentication=" + authentication +
+                ", freeIpa=" + freeIpa +
+                ", securityAccess=" + securityAccess +
+                ", tunnel=" + tunnel +
+                ", idBrokerMappingSource=" + idBrokerMappingSource +
+                ", cloudStorageValidation=" + cloudStorageValidation +
+                ", adminGroupName='" + adminGroupName + '\'' +
+                ", proxyConfigName='" + proxyConfigName + '\'' +
+                ", aws=" + aws +
+                ", azure=" + azure +
+                ", tags=" + tags +
+                ", parentEnvironmentName='" + parentEnvironmentName + '\'' +
+                '}';
+    }
 }

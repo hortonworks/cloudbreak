@@ -21,4 +21,11 @@ public class AwsFreeIpaParameters {
     public void setSpot(AwsFreeIpaSpotParameters spot) {
         this.spot = spot;
     }
+
+    @Override
+    public String toString() {
+        return "AwsFreeIpaParameters{" +
+                "spot=" + spot +
+                '}';
+    }
 }

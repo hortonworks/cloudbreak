@@ -34,6 +34,14 @@ public class AzureResourceGroup {
         return new Builder();
     }
 
+    @Override
+    public String toString() {
+        return "AzureResourceGroup{" +
+                "name='" + name + '\'' +
+                ", resourceGroupUsage=" + resourceGroupUsage +
+                '}';
+    }
+
     public static class Builder {
         private String name;
 

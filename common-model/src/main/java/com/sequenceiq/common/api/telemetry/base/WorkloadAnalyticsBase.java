@@ -26,4 +26,11 @@ public abstract class WorkloadAnalyticsBase implements Serializable {
     public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
+
+    @Override
+    public String toString() {
+        return "WorkloadAnalyticsBase{" +
+                "attributes=" + attributes +
+                '}';
+    }
 }

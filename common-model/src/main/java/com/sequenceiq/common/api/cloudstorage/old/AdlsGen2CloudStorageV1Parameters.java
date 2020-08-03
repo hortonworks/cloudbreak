@@ -82,4 +82,14 @@ public class AdlsGen2CloudStorageV1Parameters implements FileSystemAwareCloudSto
     public int hashCode() {
         return Objects.hash(accountKey, accountName, secure, managedIdentity);
     }
+
+    @Override
+    public String toString() {
+        return "AdlsGen2CloudStorageV1Parameters{" +
+                "accountKey='" + accountKey + '\'' +
+                ", accountName='" + accountName + '\'' +
+                ", managedIdentity='" + managedIdentity + '\'' +
+                ", secure=" + secure +
+                '}';
+    }
 }

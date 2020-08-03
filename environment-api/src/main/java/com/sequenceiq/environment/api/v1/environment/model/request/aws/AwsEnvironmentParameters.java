@@ -29,6 +29,13 @@ public class AwsEnvironmentParameters {
         this.s3guard = s3guard;
     }
 
+    @Override
+    public String toString() {
+        return "AwsEnvironmentParameters{" +
+                "s3guard=" + s3guard +
+                '}';
+    }
+
     public static Builder builder() {
         return new Builder();
     }
