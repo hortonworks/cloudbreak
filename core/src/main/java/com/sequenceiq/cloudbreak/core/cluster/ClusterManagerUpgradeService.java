@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -50,6 +51,9 @@ public class ClusterManagerUpgradeService {
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
+    @Inject
+    private ClusterHostServiceRunner clusterHostServiceRunner;
+
     public void upgradeClusterManager(Long stackId) throws CloudbreakOrchestratorException, CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         stopClusterServices(stack);
@@ -75,6 +79,7 @@ public class ClusterManagerUpgradeService {
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
         servicePillar.put("cloudera-manager-repo", new SaltPillarProperties("/cloudera-manager/repo.sls",
                 singletonMap("cloudera-manager", singletonMap("repo", clouderaManagerRepo))));
+        clusterHostServiceRunner.decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo);
         return new SaltConfig(servicePillar);
     }
 }
