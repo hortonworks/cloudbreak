@@ -59,6 +59,7 @@ public class DiagnosticsDataToParameterConverter {
         builder.withHosts(request.getHosts());
         builder.withIncludeSaltLogs(request.getIncludeSaltLogs());
         builder.withUpdatePackage(request.getUpdatePackage());
+        builder.withSkipValidation(request.getSkipValidation());
         builder.withAdditionalLogs(request.getAdditionalLogs());
         return builder.build();
     }

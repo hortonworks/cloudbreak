@@ -40,6 +40,8 @@ public class DiagnosticsParamsConverter {
 
     private static final String PARAMS_UPDATE_PACKAGE = "updatePackage";
 
+    private static final String PARAMS_SKIP_VALIDATION = "skipValidation";
+
     public Map<String, Object> convertFromRequest(DiagnosticsCollectionRequest request) {
         Map<String, Object> props = new HashMap<>();
         props.put(PARAMS_STACK_CRN, request.getStackCrn());
@@ -54,6 +56,7 @@ public class DiagnosticsParamsConverter {
         props.put(PARAMS_ADDITIONAL_LOGS, request.getAdditionalLogs());
         props.put(PARAMS_INCLUDE_SALT_LOGS, request.getIncludeSaltLogs());
         props.put(PARAMS_UPDATE_PACKAGE, request.getUpdatePackage());
+        props.put(PARAMS_SKIP_VALIDATION, request.getSkipValidation());
         return props;
     }
 
@@ -72,6 +75,7 @@ public class DiagnosticsParamsConverter {
         request.setEndTime((Date) Optional.ofNullable(props.get(PARAMS_END_TIME)).orElse(null));
         request.setIncludeSaltLogs((Boolean) Optional.ofNullable(props.get(PARAMS_INCLUDE_SALT_LOGS)).orElse(false));
         request.setUpdatePackage((Boolean) Optional.ofNullable(props.get(PARAMS_UPDATE_PACKAGE)).orElse(false));
+        request.setSkipValidation((Boolean) Optional.ofNullable(props.get(PARAMS_SKIP_VALIDATION)).orElse(false));
         return request;
     }
 

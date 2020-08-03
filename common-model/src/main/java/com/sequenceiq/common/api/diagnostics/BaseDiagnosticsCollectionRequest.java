@@ -53,6 +53,9 @@ public class BaseDiagnosticsCollectionRequest {
     @ApiModelProperty(DiagnosticsModelDescription.UPDATE_PACKAGE)
     private Boolean updatePackage = Boolean.FALSE;
 
+    @ApiModelProperty(DiagnosticsModelDescription.SKIP_VALIDATION)
+    private Boolean skipValidation = Boolean.FALSE;
+
     public List<String> getLabels() {
         return labels;
     }
@@ -139,5 +142,13 @@ public class BaseDiagnosticsCollectionRequest {
 
     public void setUpdatePackage(Boolean updatePackage) {
         this.updatePackage = updatePackage;
+    }
+
+    public Boolean getSkipValidation() {
+        return skipValidation;
+    }
+
+    public void setSkipValidation(Boolean skipValidation) {
+        this.skipValidation = skipValidation;
     }
 }
