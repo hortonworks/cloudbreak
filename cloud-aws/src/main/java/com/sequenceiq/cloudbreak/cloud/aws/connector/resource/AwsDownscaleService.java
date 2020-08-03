@@ -79,7 +79,7 @@ public class AwsDownscaleService {
                     auth.getCloudContext().getLocation().getRegion().value());
             AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(credentialView,
                     auth.getCloudContext().getLocation().getRegion().value());
-            detachInstances(asGroupName, instanceIds, amazonASClient);
+            detachInstances(asGroupName, instanceIds, amazonASClient, true);
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView,
                     auth.getCloudContext().getLocation().getRegion().value());
             terminateInstances(instanceIds, amazonEC2Client);
@@ -102,7 +102,8 @@ public class AwsDownscaleService {
         return awsResourceConnector.check(auth, resources);
     }
 
-    private void detachInstances(String asGroupName, List<String> instanceIds, AmazonAutoScalingRetryClient amazonASClient) {
+    private void detachInstances(String asGroupName, List<String> instanceIds, AmazonAutoScalingRetryClient amazonASClient,
+            boolean retryIfUnattachedInstancesPresent) {
         try {
             for (int i = 0; i < instanceIds.size(); i += MAX_DETACH_INSTANCE_SIZE) {
                 List<String> idPartition = instanceIds.subList(i, i + Math.min(instanceIds.size() - i, MAX_DETACH_INSTANCE_SIZE));
@@ -111,12 +112,18 @@ public class AwsDownscaleService {
                 amazonASClient.detachInstances(detachInstancesRequest);
             }
         } catch (AmazonServiceException e) {
-            if (!"ValidationError".equals(e.getErrorCode())
-                    || !e.getErrorMessage().contains("not part of Auto Scaling")
-                    || instanceIds.stream().anyMatch(id -> !e.getErrorMessage().contains(id))) {
-                throw e;
+            LOGGER.info("Detach instances failed: {}", instanceIds, e);
+            // it is good enough to check with string contains, because AWS instance ids are unique and the lengths are fix
+            if (retryIfUnattachedInstancesPresent &&
+                    ("ValidationError".equals(e.getErrorCode()) && e.getErrorMessage().contains("not part of Auto Scaling"))) {
+                List<String> attachedInstances = instanceIds.stream().filter(id -> !e.getErrorMessage().contains(id)).collect(Collectors.toList());
+                if (!attachedInstances.isEmpty()) {
+                    LOGGER.info("Attached instances from AWS error response: {}", attachedInstances);
+                    detachInstances(asGroupName, attachedInstances, amazonASClient, false);
+                    return;
+                }
             }
-            LOGGER.info(e.getErrorMessage());
+            throw e;
         }
     }
 
