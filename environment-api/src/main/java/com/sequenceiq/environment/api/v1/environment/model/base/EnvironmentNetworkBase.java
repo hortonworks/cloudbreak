@@ -127,4 +127,18 @@ public abstract class EnvironmentNetworkBase {
         this.mock = mock;
     }
 
+    @Override
+    public String toString() {
+        return "EnvironmentNetworkBase{" +
+                "subnetIds=" + subnetIds +
+                ", networkCidr='" + networkCidr + '\'' +
+                ", privateSubnetCreation=" + privateSubnetCreation +
+                ", serviceEndpointCreation=" + serviceEndpointCreation +
+                ", outboundInternetTraffic=" + outboundInternetTraffic +
+                ", aws=" + aws +
+                ", azure=" + azure +
+                ", yarn=" + yarn +
+                ", mock=" + mock +
+                '}';
+    }
 }

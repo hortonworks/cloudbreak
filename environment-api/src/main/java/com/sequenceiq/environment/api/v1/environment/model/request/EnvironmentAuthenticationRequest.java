@@ -52,4 +52,13 @@ public class EnvironmentAuthenticationRequest {
     public void setLoginUserName(String loginUserName) {
         this.loginUserName = ObjectUtils.defaultIfNull(loginUserName, DEFAULT_USER_NAME);
     }
+
+    @Override
+    public String toString() {
+        return "EnvironmentAuthenticationRequest{" +
+                "publicKey='" + publicKey + '\'' +
+                ", publicKeyId='" + publicKeyId + '\'' +
+                ", loginUserName='" + loginUserName + '\'' +
+                '}';
+    }
 }

@@ -30,6 +30,13 @@ public class S3GuardRequestParameters {
         this.dynamoDbTableName = dynamoDbTableName;
     }
 
+    @Override
+    public String toString() {
+        return "S3GuardRequestParameters{" +
+                "dynamoDbTableName='" + dynamoDbTableName + '\'' +
+                '}';
+    }
+
     public static Builder builder() {
         return new Builder();
     }

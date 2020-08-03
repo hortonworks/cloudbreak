@@ -27,6 +27,13 @@ public class EnvironmentNetworkAwsParams {
         this.vpcId = vpcId;
     }
 
+    @Override
+    public String toString() {
+        return "EnvironmentNetworkAwsParams{" +
+                "vpcId='" + vpcId + '\'' +
+                '}';
+    }
+
     public static final class EnvironmentNetworkAwsParamsBuilder {
         private String vpcId;
 

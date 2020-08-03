@@ -20,4 +20,11 @@ public abstract class TelemetryBase implements Serializable {
     public void setFluentAttributes(Map<String, Object> fluentAttributes) {
         this.fluentAttributes = fluentAttributes;
     }
+
+    @Override
+    public String toString() {
+        return "TelemetryBase{" +
+                "fluentAttributes=" + fluentAttributes +
+                '}';
+    }
 }

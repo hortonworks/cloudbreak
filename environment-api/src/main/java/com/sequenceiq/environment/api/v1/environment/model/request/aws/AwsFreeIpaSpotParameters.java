@@ -40,4 +40,12 @@ public class AwsFreeIpaSpotParameters {
     public void setMaxPrice(Double maxPrice) {
         this.maxPrice = maxPrice;
     }
+
+    @Override
+    public String toString() {
+        return "AwsFreeIpaSpotParameters{" +
+                "percentage=" + percentage +
+                ", maxPrice=" + maxPrice +
+                '}';
+    }
 }
