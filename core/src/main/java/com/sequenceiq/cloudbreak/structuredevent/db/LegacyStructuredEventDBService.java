@@ -18,8 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -41,6 +39,8 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyStructuredEventDBService.class);
 
+    private static final String STRUCTURED_EVENT_MDC_NAME = "structuredEventType";
+
     @Inject
     private ConversionService conversionService;
 
@@ -55,8 +55,6 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     @Override
     public void create(StructuredEvent structuredEvent) {
-        LOGGER.info("Stored StructuredEvent type: {}, payload: {}", structuredEvent.getType(),
-                AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(structuredEvent)));
         StructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, StructuredEventEntity.class);
         create(structuredEventEntityEntity, structuredEventEntityEntity.getWorkspace(), null);
     }
@@ -70,6 +68,7 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     @Override
     public StructuredEventEntity create(StructuredEventEntity resource, Workspace workspace, User user) {
         resource.setWorkspace(workspace);
+        LOGGER.info("Stored StructuredEvent type: {}, payload: {}", resource.getEventType().name(), resource.getStructuredEventJson().getValue());
         return repository().save(resource);
     }
 

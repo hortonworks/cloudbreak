@@ -3,11 +3,13 @@ package com.sequenceiq.cloudbreak.structuredevent.event;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.structuredevent.json.AnonymizingBase64Serializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BlueprintDetails implements Serializable {
     private Long id;
