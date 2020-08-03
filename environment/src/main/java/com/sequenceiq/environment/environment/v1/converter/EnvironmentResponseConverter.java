@@ -98,13 +98,13 @@ public class EnvironmentResponseConverter {
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));
         NullUtil.doIfNotNull(environmentDto.getNetwork(),
-                network -> builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel())));
+                network -> builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel(), true)));
         NullUtil.doIfNotNull(environmentDto.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessDtoToResponse(securityAccess)));
         return builder.build();
     }
 
-    private EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network, Tunnel tunnel) {
-        return networkDtoToResponseConverter.convert(network, tunnel);
+    private EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {
+        return networkDtoToResponseConverter.convert(network, tunnel, detailedResponse);
     }
 
     public SimpleEnvironmentResponse dtoToSimpleResponse(EnvironmentDto environmentDto) {
@@ -133,7 +133,7 @@ public class EnvironmentResponseConverter {
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())));
         NullUtil.doIfNotNull(environmentDto.getNetwork(),
-                network -> builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel())));
+                network -> builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel(), false)));
         return builder.build();
     }
 

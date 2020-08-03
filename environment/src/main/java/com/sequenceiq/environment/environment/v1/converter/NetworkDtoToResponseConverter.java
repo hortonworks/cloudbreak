@@ -23,7 +23,7 @@ public class NetworkDtoToResponseConverter {
         this.subnetIdProvider = subnetIdProvider;
     }
 
-    public EnvironmentNetworkResponse convert(NetworkDto network, Tunnel tunnel) {
+    public EnvironmentNetworkResponse convert(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {
         return EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
                 .withCrn(network.getResourceCrn())
                 .withSubnetIds(network.getSubnetIds())
@@ -34,7 +34,7 @@ public class NetworkDtoToResponseConverter {
                 .withDwxSubnets(network.getDwxSubnets())
                 .withMlxSubnets(network.getMlxSubnets())
                 .withLiftieSubnets(network.getMlxSubnets())
-                .withPreferedSubnetId(subnetIdProvider.provide(network, tunnel, network.getCloudPlatform()))
+                .withPreferedSubnetId(getPreferedSubnetId(network, tunnel, detailedResponse))
                 .withPrivateSubnetCreation(network.getPrivateSubnetCreation())
                 .withServiceEndpointCreation(network.getServiceEndpointCreation())
                 .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
@@ -60,5 +60,9 @@ public class NetworkDtoToResponseConverter {
                         .withInternetGatewayId(p.getInternetGatewayId())
                         .build()))
                 .build();
+    }
+
+    public String getPreferedSubnetId(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {
+        return detailedResponse ? subnetIdProvider.provide(network, tunnel, network.getCloudPlatform()) : null;
     }
 }
