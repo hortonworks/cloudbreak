@@ -138,19 +138,28 @@ public class SaltStatesTest {
         Map<?, ?> responseMap = new ObjectMapper().readValue(response, Map.class);
         when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
 
-        Multimap<String, String> jidInfo = SaltStates.jidInfo(saltConnector, jobId, target, StateType.HIGH);
+        Multimap<String, Map<String, String>> jidInfo = SaltStates.jidInfo(saltConnector, jobId, target, StateType.HIGH);
         verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
 
         assertThat(jidInfo.keySet(), hasSize(1));
         assertThat(jidInfo.entries(), hasSize(4));
         String hostName = jidInfo.keySet().iterator().next();
-        Collection<String> hostErrors = jidInfo.get(hostName);
+        Collection<Map<String, String>> hostErrors = jidInfo.get(hostName);
 
-        assertThat(hostErrors, containsInAnyOrder(
-                "\nName: /opt/ambari-server/ambari-server-init.sh\nComment: Source file salt://ambari/scripts/ambari-server-initttt.sh not found",
-                "\nName: ambari-server\nComment: Service ambari-server is already enabled, and is dead",
-                "\nComment: Command \"/opt/ambari-server/install-mpack-1.sh\" run\nStderr: + ARGS= + echo yes + ambari-server install-mpack --",
-                "\nName: haveged\nComment: Package haveged is already installed."));
+        Map<String, String> expectedMap1 = Map.of(
+            "Name", "/opt/ambari-server/ambari-server-init.sh",
+            "Comment", "Source file salt://ambari/scripts/ambari-server-initttt.sh not found");
+        Map<String, String> expectedMap2 = Map.of(
+            "Name", "ambari-server",
+            "Comment", "Service ambari-server is already enabled, and is dead");
+        Map<String, String> expectedMap3 = Map.of(
+            "Comment", "Command \"/opt/ambari-server/install-mpack-1.sh\" run",
+            "Stderr", "+ ARGS= + echo yes + ambari-server install-mpack --");
+        Map<String, String> expectedMap4 = Map.of(
+            "Name", "haveged",
+            "Comment", "Package haveged is already installed.");
+
+        assertThat(hostErrors, containsInAnyOrder(expectedMap1, expectedMap2, expectedMap3, expectedMap4));
     }
 
     @Test
@@ -163,18 +172,25 @@ public class SaltStatesTest {
 
         when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
 
-        Multimap<String, String> jidInfo = SaltStates.jidInfo(saltConnector, jobId, target, StateType.SIMPLE);
+        Multimap<String, Map<String, String>> jidInfo = SaltStates.jidInfo(saltConnector, jobId, target, StateType.SIMPLE);
         verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
 
         assertThat(jidInfo.keySet(), hasSize(1));
         assertThat(jidInfo.entries(), hasSize(3));
         String hostName = jidInfo.keySet().iterator().next();
-        Collection<String> hostErrors = jidInfo.get(hostName);
+        Collection<Map<String, String>> hostErrors = jidInfo.get(hostName);
 
-        assertThat(hostErrors, containsInAnyOrder(
-                "\nName: /opt/ambari-server/ambari-server-init.sh\nComment: Source file salt://ambari/scripts/ambari-server-initttt.sh not found",
-                "\nName: ambari-server\nComment: Service ambari-server is already enabled, and is dead",
-                "\nName: haveged\nComment: Package haveged is already installed."));
+        Map<String, String> expectedMap1 = Map.of(
+            "Name", "/opt/ambari-server/ambari-server-init.sh",
+            "Comment", "Source file salt://ambari/scripts/ambari-server-initttt.sh not found");
+        Map<String, String> expectedMap2 = Map.of(
+            "Name", "ambari-server",
+            "Comment", "Service ambari-server is already enabled, and is dead");
+        Map<String, String> expectedMap3 = Map.of(
+            "Name", "haveged",
+            "Comment", "Package haveged is already installed.");
+
+        assertThat(hostErrors, containsInAnyOrder(expectedMap1, expectedMap2, expectedMap3));
     }
 
     @Test

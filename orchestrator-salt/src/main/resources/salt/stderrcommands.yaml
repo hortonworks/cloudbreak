@@ -1,0 +1,2 @@
+- /opt/salt/scripts/backup_db.sh
+- /opt/salt/scripts/restore_db.sh

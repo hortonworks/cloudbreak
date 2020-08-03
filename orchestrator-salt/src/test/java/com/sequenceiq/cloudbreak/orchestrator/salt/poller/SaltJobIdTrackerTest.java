@@ -16,8 +16,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
@@ -189,9 +191,10 @@ public class SaltJobIdTrackerTest {
         PowerMockito.mockStatic(SaltStates.class);
         PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
 
-        Multimap<String, String> missingNodesWithReason = ArrayListMultimap.create();
+        Multimap<String, Map<String, String>> missingNodesWithReason = ArrayListMultimap.create();
+        Multimap<String, String> missingNodesWithResolvedReason = ArrayListMultimap.create();
         PowerMockito.when(SaltStates.jidInfo(any(), any(), any(), any())).thenReturn(missingNodesWithReason);
-        when(saltErrorResolver.resolveErrorMessages(missingNodesWithReason)).thenReturn(missingNodesWithReason);
+        when(saltErrorResolver.resolveErrorMessages(missingNodesWithReason)).thenReturn(missingNodesWithResolvedReason);
 
         SaltJobIdTracker underTest = new SaltJobIdTracker(saltConnector, saltJobRunner);
         assertTrue(underTest.call());
@@ -225,11 +228,12 @@ public class SaltJobIdTrackerTest {
             targets.add("10.0.0.3");
             when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
 
-            Multimap<String, String> missingNodesWithReason = ArrayListMultimap.create();
+            Multimap<String, Map<String, String>> missingNodesWithReason = ArrayListMultimap.create();
+            Multimap<String, String> missingNodesWithResolvedReason = ArrayListMultimap.create();
             String missingMachine = "10.0.0.1";
-            String errorMessage = "Name: some-script.sh";
-            missingNodesWithReason.put(missingMachine, errorMessage);
-            when(saltErrorResolver.resolveErrorMessages(missingNodesWithReason)).thenReturn(missingNodesWithReason);
+            missingNodesWithReason.put(missingMachine, Collections.singletonMap("Name", "some-script.sh"));
+            missingNodesWithResolvedReason.put(missingMachine, "Failed to execute: {Name=some-script.sh}");
+            when(saltErrorResolver.resolveErrorMessages(missingNodesWithReason)).thenReturn(missingNodesWithResolvedReason);
 
             PowerMockito.mockStatic(SaltStates.class);
             PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
@@ -239,8 +243,57 @@ public class SaltJobIdTrackerTest {
                 new SaltJobIdTracker(saltConnector, saltJobRunner).call();
                 fail("should throw exception");
             } catch (CloudbreakOrchestratorFailedException e) {
-                assertThat(e.getMessage(), allOf(containsString("Node: 10.0.0.1 Error(s): Name: some-script.sh"), containsString("Target:"),
-                        containsString("10.0.0.1"), containsString("10.0.0.2"), containsString("10.0.0.3")));
+                assertThat(e.getMessage(), allOf(containsString("Node: 10.0.0.1 Error(s): Failed to execute: {Name=some-script.sh}"),
+                        containsString("Target:"), containsString("10.0.0.1"), containsString("10.0.0.2"),
+                        containsString("10.0.0.3")));
+            }
+
+            PowerMockito.verifyStatic(SaltStates.class);
+            SaltStates.jobIsRunning(any(), eq(jobId));
+            checkTargets(targets, targetCaptor.getAllValues());
+        }
+    }
+
+    @Test
+    public void callWithMissingNodesUsingStderrFailures() throws Exception {
+        String jobId = "1";
+        try (SaltConnector saltConnector = Mockito.mock(SaltConnector.class)) {
+
+            SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
+            when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
+            when(saltJobRunner.getJobState()).thenCallRealMethod();
+            doCallRealMethod().when(saltJobRunner).setJobState(any());
+            when(saltJobRunner.getNodesWithError()).thenCallRealMethod();
+            doCallRealMethod().when(saltJobRunner).setNodesWithError(any());
+            when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
+            SaltErrorResolver saltErrorResolver = Mockito.mock(SaltErrorResolver.class);
+            when(saltConnector.getSaltErrorResolver()).thenReturn(saltErrorResolver);
+            saltJobRunner.setJobState(JobState.IN_PROGRESS);
+
+            Set<String> targets = new HashSet<>();
+            targets.add("10.0.0.1");
+            targets.add("10.0.0.2");
+            targets.add("10.0.0.3");
+            when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
+
+            Multimap<String, Map<String, String>> missingNodesWithReason = ArrayListMultimap.create();
+            Multimap<String, String> missingNodesWithResolvedReason = ArrayListMultimap.create();
+            String missingMachine = "10.0.0.1";
+            missingNodesWithReason.put(missingMachine, Map.of("Name", "/opt/salt/scripts/backup_db.sh", "Stderr", "Could not create backup"));
+            missingNodesWithResolvedReason.put(missingMachine, "Could not create backup");
+            when(saltErrorResolver.resolveErrorMessages(missingNodesWithReason)).thenReturn(missingNodesWithResolvedReason);
+
+            PowerMockito.mockStatic(SaltStates.class);
+            PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
+            PowerMockito.when(SaltStates.jidInfo(any(SaltConnector.class), anyString(), any(Target.class), any())).thenReturn(missingNodesWithReason);
+
+            try {
+                new SaltJobIdTracker(saltConnector, saltJobRunner).call();
+                fail("should throw exception");
+            } catch (CloudbreakOrchestratorFailedException e) {
+                assertThat(e.getMessage(), allOf(containsString("Node: 10.0.0.1 Error(s): Could not create backup"),
+                    containsString("Target:"), containsString("10.0.0.1"), containsString("10.0.0.2"),
+                    containsString("10.0.0.3")));
             }
 
             PowerMockito.verifyStatic(SaltStates.class);

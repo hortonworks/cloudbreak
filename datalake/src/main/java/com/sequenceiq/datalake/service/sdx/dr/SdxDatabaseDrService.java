@@ -205,7 +205,7 @@ public class SdxDatabaseDrService {
 
     private AttemptResult<StackV4Response> sdxDrFailed(SdxCluster sdxCluster, String statusReason, String pollingMessage) {
         LOGGER.info("{} failed, statusReason: {}", pollingMessage, statusReason);
-        return AttemptResults.breakFor("SDX " + pollingMessage + " failed '" + sdxCluster.getClusterName() + "', " + statusReason);
+        return AttemptResults.breakFor(statusReason);
     }
 
     private AttemptResult<StackV4Response> sdxDrSucceeded(StackV4Response stackV4Response) {
