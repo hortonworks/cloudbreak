@@ -10,11 +10,8 @@ import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.api.endpoint.v1.AlertEndpoint;
-import com.sequenceiq.periscope.api.endpoint.v1.AutoScaleClusterV1Endpoint;
-import com.sequenceiq.periscope.api.endpoint.v1.ConfigurationEndpoint;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
-import com.sequenceiq.periscope.api.endpoint.v1.PolicyEndpoint;
 
 public class AutoscaleUserCrnClient extends AbstractUserCrnServiceClient<AutoscaleUserCrnClient.AutoscaleEndpoint> {
 
@@ -43,20 +40,8 @@ public class AutoscaleUserCrnClient extends AbstractUserCrnServiceClient<Autosca
             return getEndpoint(DistroXAutoScaleClusterV1Endpoint.class);
         }
 
-        public AutoScaleClusterV1Endpoint clusterEndpoint() {
-            return getEndpoint(AutoScaleClusterV1Endpoint.class);
-        }
-
-        public ConfigurationEndpoint configurationEndpoint() {
-            return getEndpoint(ConfigurationEndpoint.class);
-        }
-
         public HistoryEndpoint historyEndpoint() {
             return getEndpoint(HistoryEndpoint.class);
-        }
-
-        public PolicyEndpoint policyEndpoint() {
-            return getEndpoint(PolicyEndpoint.class);
         }
     }
 }

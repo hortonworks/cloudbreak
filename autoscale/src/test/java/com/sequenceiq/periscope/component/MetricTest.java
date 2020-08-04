@@ -61,6 +61,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.vault.core.VaultTemplate;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
@@ -75,11 +76,9 @@ import com.sequenceiq.periscope.PeriscopeApplication;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.config.DatabaseConfig;
-import com.sequenceiq.periscope.controller.AutoScaleClusterV1Controller;
 import com.sequenceiq.periscope.controller.AutoScaleClusterV2Controller;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
@@ -87,9 +86,7 @@ import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.monitor.handler.UpdateFailedHandler;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.HistoryRepository;
-import com.sequenceiq.periscope.repository.MetricAlertRepository;
 import com.sequenceiq.periscope.repository.PeriscopeNodeRepository;
-import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
 import com.sequenceiq.periscope.repository.ScalingPolicyRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.repository.SubscriptionRepository;
@@ -173,9 +170,6 @@ public class MetricTest {
             THREADPOOL_TASKS_COMPLETED,
             THREADPOOL_THREADS_TOTAL
     );
-
-    @Inject
-    private AutoScaleClusterV1Controller autoScaleClusterV1Controller;
 
     @Inject
     private AutoScaleClusterV2Controller autoScaleClusterV2Controller;
@@ -469,13 +463,7 @@ public class MetricTest {
         private ClusterRepository clusterRepository;
 
         @MockBean
-        private MetricAlertRepository metricAlertRepository;
-
-        @MockBean
         private TimeAlertRepository timeAlertRepository;
-
-        @MockBean
-        private PrometheusAlertRepository prometheusAlertRepository;
 
         @MockBean
         private SecurityConfigRepository securityConfigRepository;

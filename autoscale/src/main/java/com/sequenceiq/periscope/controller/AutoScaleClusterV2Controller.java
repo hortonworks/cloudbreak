@@ -14,7 +14,11 @@ import com.sequenceiq.periscope.converter.ClusterConverter;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.service.ClusterService;
 
+/**
+ * @deprecated Database ID based endpoints are deprecated for removal.
+ */
 @Component
+@Deprecated(since = "CB 2.26.0", forRemoval = true)
 public class AutoScaleClusterV2Controller implements AutoScaleClusterV2Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoScaleClusterV2Controller.class);

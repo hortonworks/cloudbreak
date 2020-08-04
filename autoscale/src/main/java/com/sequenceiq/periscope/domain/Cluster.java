@@ -49,17 +49,11 @@ public class Cluster implements Monitored, Clustered {
     @Enumerated(EnumType.STRING)
     private ClusterState state = ClusterState.PENDING;
 
-    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<MetricAlert> metricAlerts = new HashSet<>();
-
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<TimeAlert> timeAlerts = new HashSet<>();
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<LoadAlert> loadAlerts = new HashSet<>();
-
-    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<PrometheusAlert> prometheusAlerts = new HashSet<>();
 
     @Column(name = "min_size")
     private Integer minSize = ScalingConstants.DEFAULT_CLUSTER_MIN_SIZE;
@@ -172,14 +166,6 @@ public class Cluster implements Monitored, Clustered {
         this.state = state;
     }
 
-    public Set<MetricAlert> getMetricAlerts() {
-        return metricAlerts;
-    }
-
-    public void setMetricAlerts(Set<MetricAlert> metricAlerts) {
-        this.metricAlerts = metricAlerts;
-    }
-
     public Set<TimeAlert> getTimeAlerts() {
         return timeAlerts;
     }
@@ -244,28 +230,12 @@ public class Cluster implements Monitored, Clustered {
         return ClusterState.RUNNING == state;
     }
 
-    public void addMetricAlert(MetricAlert alert) {
-        metricAlerts.add(alert);
-    }
-
     public void addTimeAlert(TimeAlert alert) {
         timeAlerts.add(alert);
     }
 
     public void addLoadAlert(LoadAlert alert) {
         loadAlerts.add(alert);
-    }
-
-    public Set<PrometheusAlert> getPrometheusAlerts() {
-        return prometheusAlerts;
-    }
-
-    public void setPrometheusAlerts(Set<PrometheusAlert> prometheusAlerts) {
-        this.prometheusAlerts = prometheusAlerts;
-    }
-
-    public void addPrometheusAlert(PrometheusAlert alert) {
-        prometheusAlerts.add(alert);
     }
 
     public Boolean isAutoscalingEnabled() {

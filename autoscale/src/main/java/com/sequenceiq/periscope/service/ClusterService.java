@@ -38,7 +38,6 @@ import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.repository.ClusterPertainRepository;
 import com.sequenceiq.periscope.repository.ClusterRepository;
-import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.security.SecurityConfigService;
@@ -50,9 +49,6 @@ public class ClusterService implements ResourceBasedCrnProvider {
 
     @Inject
     private ClusterRepository clusterRepository;
-
-    @Inject
-    private FailedNodeRepository failedNodeRepository;
 
     @Inject
     private SecurityConfigRepository securityConfigRepository;
@@ -67,7 +63,7 @@ public class ClusterService implements ResourceBasedCrnProvider {
     private PeriscopeNodeConfig periscopeNodeConfig;
 
     @Inject
-    private PeriscopeMetricService metricService;
+    private PeriscopeMetricService periscopeMetricService;
 
     @Inject
     private SecurityConfigService securityConfigService;
@@ -137,7 +133,6 @@ public class ClusterService implements ResourceBasedCrnProvider {
             }
         }
         cluster = save(cluster);
-        addPrometheusAlertsToConsul(cluster);
         calculateClusterStateMetrics();
         return cluster;
     }
@@ -179,7 +174,6 @@ public class ClusterService implements ResourceBasedCrnProvider {
     public void removeById(Long clusterId) {
         Cluster cluster = findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
-        failedNodeRepository.deleteByClusterId(clusterId);
         clusterRepository.delete(cluster);
         calculateClusterStateMetrics();
     }
@@ -206,7 +200,6 @@ public class ClusterService implements ResourceBasedCrnProvider {
         MDCBuilder.buildMdcContext(cluster);
         cluster.setState(state);
         calculateClusterStateMetrics();
-        addPrometheusAlertsToConsul(cluster);
         return clusterRepository.save(cluster);
     }
 
@@ -214,7 +207,6 @@ public class ClusterService implements ResourceBasedCrnProvider {
         Cluster cluster = findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
         cluster.setAutoscalingEnabled(enableAutoscaling);
-        addPrometheusAlertsToConsul(cluster);
         cluster = clusterRepository.save(cluster);
         calculateClusterStateMetrics();
         return cluster;
@@ -275,16 +267,10 @@ public class ClusterService implements ResourceBasedCrnProvider {
         save(cluster);
     }
 
-    private void addPrometheusAlertsToConsul(Cluster cluster) {
-        if (RUNNING.equals(cluster.getState())) {
-            alertService.addPrometheusAlertsToConsul(cluster);
-        }
-    }
-
     private void calculateClusterStateMetrics() {
-        metricService.submit(MetricType.CLUSTER_STATE_ACTIVE,
+        periscopeMetricService.submit(MetricType.CLUSTER_STATE_ACTIVE,
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(RUNNING, true, periscopeNodeConfig.getId()));
-        metricService.submit(MetricType.CLUSTER_STATE_SUSPENDED,
+        periscopeMetricService.submit(MetricType.CLUSTER_STATE_SUSPENDED,
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(SUSPENDED, true, periscopeNodeConfig.getId()));
     }
 }
