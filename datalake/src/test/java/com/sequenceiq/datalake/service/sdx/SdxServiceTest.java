@@ -694,7 +694,8 @@ class SdxServiceTest {
         when(entitlementService.mediumDutySdxEnabled(anyString(), anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        assertEquals("1. Provisioning a Medium Duty SDX shape is only valid for CM version >= 7.2.2 and not " + invalidRuntime, badRequestException.getMessage());
+        assertEquals("1. Provisioning a Medium Duty SDX shape is only valid for CM version >= 7.2.2 and not "
+                + invalidRuntime, badRequestException.getMessage());
     }
 
     @Test
@@ -713,7 +714,8 @@ class SdxServiceTest {
         when(entitlementService.mediumDutySdxEnabled(anyString(), anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        assertEquals("1. Provisioning a Medium Duty SDX shape is only valid for CM version >= 7.2.2 and not " + invalidRuntime, badRequestException.getMessage());
+        assertEquals("1. Provisioning a Medium Duty SDX shape is only valid for CM version >= 7.2.2 and not "
+                + invalidRuntime, badRequestException.getMessage());
     }
 
     private void setSpot(SdxClusterRequest sdxClusterRequest) {
