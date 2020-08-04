@@ -49,7 +49,7 @@ public class BasicEnvironmentTests extends AbstractE2ETest {
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))
-                .when(environmentTestClient.forceDelete())
+                .when(environmentTestClient.cascadingDelete())
                 .validate();
     }
 }

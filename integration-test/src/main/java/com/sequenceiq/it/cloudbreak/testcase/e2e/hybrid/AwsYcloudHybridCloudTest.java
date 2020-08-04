@@ -154,7 +154,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
         testContext
                 .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
-                .when(environmentTestClient.forceDelete(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
+                .when(environmentTestClient.cascadingDelete(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .await(EnvironmentStatus.ARCHIVED, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .validate();
 

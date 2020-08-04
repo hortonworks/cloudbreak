@@ -106,7 +106,7 @@ public class EnvironmentResponseConverterTest {
         when(regionConverter.convertRegions(environment.getRegions())).thenReturn(compactRegionResponse);
         when(telemetryApiConverter.convert(environment.getTelemetry())).thenReturn(telemetryResponse);
         when(proxyConfigToProxyResponseConverter.convert(environment.getProxyConfig())).thenReturn(proxyResponse);
-        when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel()))
+        when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true))
                 .thenReturn(environmentNetworkResponse);
 
         DetailedEnvironmentResponse actual = underTest.dtoToDetailedResponse(environment);
@@ -145,7 +145,7 @@ public class EnvironmentResponseConverterTest {
         verify(regionConverter).convertRegions(environment.getRegions());
         verify(telemetryApiConverter).convert(environment.getTelemetry());
         verify(proxyConfigToProxyResponseConverter).convert(environment.getProxyConfig());
-        verify(networkDtoToResponseConverter).convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel());
+        verify(networkDtoToResponseConverter).convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true);
     }
 
     @ParameterizedTest
@@ -164,7 +164,7 @@ public class EnvironmentResponseConverterTest {
         when(regionConverter.convertRegions(environment.getRegions())).thenReturn(compactRegionResponse);
         when(telemetryApiConverter.convert(environment.getTelemetry())).thenReturn(telemetryResponse);
         when(proxyConfigToProxyResponseConverter.convertToView(environment.getProxyConfig())).thenReturn(proxyResponse);
-        when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel()))
+        when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), false))
                 .thenReturn(environmentNetworkResponse);
 
         SimpleEnvironmentResponse actual = underTest.dtoToSimpleResponse(environment);
@@ -197,7 +197,7 @@ public class EnvironmentResponseConverterTest {
         verify(regionConverter).convertRegions(environment.getRegions());
         verify(telemetryApiConverter).convert(environment.getTelemetry());
         verify(proxyConfigToProxyResponseConverter).convertToView(environment.getProxyConfig());
-        verify(networkDtoToResponseConverter).convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel());
+        verify(networkDtoToResponseConverter).convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), false);
     }
 
     private void assertParameters(EnvironmentDto environment, EnvironmentBaseResponse actual, CloudPlatform cloudPlatform) {

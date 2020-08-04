@@ -35,25 +35,25 @@ public class EnvironmentNetworkTestAssertion {
             throw new IllegalArgumentException("Private subnet creation must be enabled!");
         }
         if (environment.getNetwork().getSubnetIds().size() != 6) {
-            throw new IllegalArgumentException("Subnets count must be 6!");
+            throw new IllegalArgumentException("Subnets count must be 6! Created subnets: " + environment.getNetwork().getSubnetIds().size());
         }
         if (environment.getNetwork().getCbSubnets().size() != 6) {
-            throw new IllegalArgumentException("Cb Subnets count must be 6!");
+            throw new IllegalArgumentException("Cb Subnets count must be 6! Created subnets: " + environment.getNetwork().getCbSubnets().size());
         }
         if (environment.getNetwork().getDwxSubnets().size() != 6) {
-            throw new IllegalArgumentException("Dwx Subnets count must be 6!");
+            throw new IllegalArgumentException("Dwx Subnets count must be 6! Created subnets: " + environment.getNetwork().getDwxSubnets().size());
         }
         if (environment.getNetwork().getMlxSubnets().size() != 6) {
-            throw new IllegalArgumentException("Mlx Subnets count must be 6!");
+            throw new IllegalArgumentException("Mlx Subnets count must be 6! Created subnets: " + environment.getNetwork().getMlxSubnets().size());
         }
         if (environment.getNetwork().getLiftieSubnets().size() != 6) {
-            throw new IllegalArgumentException("Liftie Subnets count must be 6!");
+            throw new IllegalArgumentException("Liftie Subnets count must be 6! Created subnets: " + environment.getNetwork().getLiftieSubnets().size());
         }
         if (getSubnetsCountByType(environment, SubnetType.PUBLIC) != 3) {
-            throw new IllegalArgumentException("Public Subnets count must be 3!");
+            throw new IllegalArgumentException("Public Subnets count must be 3! Created subnets: " + getSubnetsCountByType(environment, SubnetType.PUBLIC));
         }
         if (getSubnetsCountByType(environment, SubnetType.PRIVATE) != 3) {
-            throw new IllegalArgumentException("Private Subnets count must be 3!");
+            throw new IllegalArgumentException("Private Subnets count must be 3! Created subnets: " + getSubnetsCountByType(environment, SubnetType.PRIVATE));
         }
     }
 

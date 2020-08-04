@@ -11,6 +11,24 @@
     </record>
 </filter>
 
+# handles CM command stdout logs if produced with databus.* label by filecollector - override raw tag
+<filter {{providerPrefix}}.var.run.cloudera-scm-agent.process.**.stdout.log>
+    @type record_transformer
+    enable_ruby true
+    <record>
+      raw_tag ${tag.sub('{{providerPrefix}}', '{{providerPrefix}}_CM_COMMAND.OUT')}
+    </record>
+</filter>
+
+# handles CM command stderr logs if produced with databus.* label by filecollector - override raw tag
+<filter {{providerPrefix}}.var.run.cloudera-scm-agent.process.**.stderr.log>
+    @type record_transformer
+    enable_ruby true
+    <record>
+      raw_tag ${tag.sub('{{providerPrefix}}', '{{providerPrefix}}_CM_COMMAND.ERROR')}
+    </record>
+</filter>
+
 <match {{providerPrefix}}**>
    @type rewrite_tag_filter
    <rule>

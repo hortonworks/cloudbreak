@@ -10,17 +10,17 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class EnvironmentForceDeleteAction implements Action<EnvironmentTestDto, EnvironmentClient> {
+public class EnvironmentCascadingDeleteAction implements Action<EnvironmentTestDto, EnvironmentClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentForceDeleteAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCascadingDeleteAction.class);
 
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient environmentClient) throws Exception {
-        Log.when(LOGGER, "Environment forced delete request, crn: " +  testDto.getResponse().getCrn());
+        Log.when(LOGGER, "Environment cascading delete request, crn: " +  testDto.getResponse().getCrn());
         SimpleEnvironmentResponse delete = environmentClient.getEnvironmentClient()
                 .environmentV1Endpoint()
                 .deleteByCrn(testDto.getResponse().getCrn(), true, false);
-        Log.whenJson(LOGGER, " Environment forced delete response: ", delete);
+        Log.whenJson(LOGGER, " Environment cascading delete response: ", delete);
         return testDto;
     }
 }
