@@ -8,3 +8,5 @@ openssl pkcs12 -in $CERT_FILE -nocerts -out $BASE_PATH/privateKey.pem -nodes -pa
 openssl pkcs12 -in $CERT_FILE -clcerts -nokeys -out $BASE_PATH/publicCert.pem -passin pass:
 rm -f $CERT_FILE
 chmod 600 $BASE_PATH/privateKey.pem $BASE_PATH/publicCert.pem
+
+systemctl restart cdp-freeipa-healthagent
