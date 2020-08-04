@@ -160,6 +160,13 @@ public class EC2ClientActions extends EC2Client {
         }
     }
 
+    public Map<String, Boolean> enaSupport(List<String> instanceIds) {
+        AmazonEC2 ec2Client = buildEC2Client();
+        DescribeInstancesResult describeInstanceResult = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
+        return describeInstanceResult.getReservations().stream().flatMap(it -> it.getInstances().stream())
+                .collect(Collectors.toMap(Instance::getInstanceId, Instance::getEnaSupport));
+    }
+
     public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
         DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
         DescribeInstancesResult describeInstancesResult = buildEC2Client().describeInstances(describeInstancesRequest);

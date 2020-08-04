@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.util.azure;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -63,5 +64,10 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     @Override
     public void cloudStorageDeleteContainer(String baseLocation) {
         azureCloudBlobUtil.cleanupContainer(baseLocation);
+    }
+
+    @Override
+    public Map<String, Boolean> enaSupport(List<String> instanceIds) {
+        return Collections.emptyMap();
     }
 }
