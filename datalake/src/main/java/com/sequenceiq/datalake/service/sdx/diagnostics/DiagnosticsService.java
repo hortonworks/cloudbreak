@@ -45,7 +45,7 @@ public class DiagnosticsService {
     public FlowIdentifier collectDiagnostics(DiagnosticsCollectionRequest request) {
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster cluster = sdxService.getByCrn(userId, request.getStackCrn());
-        StackV4Response stackV4Response = sdxService.getDetail(cluster.getClusterName(), new HashSet<>());
+        StackV4Response stackV4Response = sdxService.getDetail(cluster.getClusterName(), new HashSet<>(), cluster.getAccountId());
         diagnosticsCollectionValidator.validate(request, stackV4Response);
         Map<String, Object> properties = diagnosticsParamsConverter.convertFromRequest(request);
         SdxDiagnosticsCollectionEvent event = new SdxDiagnosticsCollectionEvent(cluster.getId(), userId, properties, null);

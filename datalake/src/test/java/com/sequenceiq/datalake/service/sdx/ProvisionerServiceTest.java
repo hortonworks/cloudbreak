@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
@@ -91,7 +92,7 @@ class ProvisionerServiceTest {
         SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
         StackV4Response stackV4Response = new StackV4Response();
         when(stackV4Endpoint.getByCrn(anyLong(), nullable(String.class), nullable(Set.class))).thenThrow(new NotFoundException());
-        when(stackV4Endpoint.post(anyLong(), any(StackV4Request.class))).thenReturn(stackV4Response);
+        when(stackV4Endpoint.post(anyLong(), any(StackV4Request.class), anyString())).thenReturn(stackV4Response);
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
 
         underTest.startStackProvisioning(clusterId, getEnvironmentResponse());
@@ -123,7 +124,6 @@ class ProvisionerServiceTest {
         sdxCluster.setTags(Json.silent(new HashMap<>()));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.REQUESTED);
-        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenReturn(stackV4Response);
 
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 100, TimeUnit.MILLISECONDS);
@@ -140,7 +140,7 @@ class ProvisionerServiceTest {
         SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
-        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString())).thenReturn(stackV4Response);
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
 
@@ -163,7 +163,7 @@ class ProvisionerServiceTest {
         when(cloudbreakFlowService.getLastKnownFlowState(sdxCluster))
                 .thenReturn(FlowState.RUNNING)
                 .thenReturn(FlowState.FINISHED);
-        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString())).thenReturn(stackV4Response);
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 1000, TimeUnit.MILLISECONDS);
 
@@ -183,11 +183,11 @@ class ProvisionerServiceTest {
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
-        doThrow(new NotFoundException()).when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE));
+        doThrow(new NotFoundException()).when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE), anyString());
 
         underTest.startStackDeletion(clusterId, false);
 
-        verify(stackV4Endpoint).delete(0L, null, false);
+        verify(stackV4Endpoint).delete(eq(0L), eq(null), eq(false), anyString());
     }
 
     @Test
@@ -200,7 +200,7 @@ class ProvisionerServiceTest {
 
         underTest.startStackDeletion(clusterId, true);
 
-        verify(stackV4Endpoint).delete(0L, null, true);
+        verify(stackV4Endpoint).delete(eq(0L), eq(null), eq(true), anyString());
     }
 
     @Test
@@ -211,13 +211,14 @@ class ProvisionerServiceTest {
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
         WebApplicationException webApplicationException = new WebApplicationException();
-        doThrow(webApplicationException).when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE));
+        doThrow(webApplicationException).when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()),
+                eq(Boolean.FALSE), anyString());
         when(webApplicationExceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("web-error");
 
         RuntimeException actual = Assertions.assertThrows(RuntimeException.class, () -> underTest.startStackDeletion(clusterId, false));
         Assertions.assertEquals("Cannot delete stack, some error happened on Cloudbreak side: web-error", actual.getMessage());
 
-        verify(stackV4Endpoint).delete(0L, null, false);
+        verify(stackV4Endpoint).delete(eq(0L), eq(null), eq(false), anyString());
     }
 
     @Test
@@ -227,7 +228,7 @@ class ProvisionerServiceTest {
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         StackV4Response firstStackV4Response = new StackV4Response();
         firstStackV4Response.setStatus(Status.AVAILABLE);
-        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenReturn(firstStackV4Response);
+        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString())).thenReturn(firstStackV4Response);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
 
         Assertions.assertThrows(PollerStoppedException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig));
@@ -242,7 +243,7 @@ class ProvisionerServiceTest {
         firstStackV4Response.setStatus(Status.AVAILABLE);
         StackV4Response secondStackV4Response = new StackV4Response();
         secondStackV4Response.setStatus(Status.DELETE_FAILED);
-        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenReturn(firstStackV4Response)
+        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString())).thenReturn(firstStackV4Response)
                 .thenReturn(secondStackV4Response);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
 
@@ -254,7 +255,7 @@ class ProvisionerServiceTest {
         long clusterId = CLUSTER_ID.incrementAndGet();
         SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
-        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet())).thenThrow(new NotFoundException());
+        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString())).thenThrow(new NotFoundException());
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
 
         underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig);
@@ -291,7 +292,7 @@ class ProvisionerServiceTest {
         thirdClusterResponse.setStatusReason("delete failed");
         thirdStackV4Response.setCluster(thirdClusterResponse);
 
-        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet()))
+        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString()))
                 .thenReturn(firstStackV4Response)
                 .thenReturn(secondStackV4Response)
                 .thenReturn(thirdStackV4Response);
@@ -300,7 +301,7 @@ class ProvisionerServiceTest {
 
         Assertions.assertThrows(UserBreakException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig),
                 "Data lake deletion failed 'sdxcluster1', delete failed");
-        verify(stackV4Endpoint, times(5)).get(anyLong(), eq(sdxCluster.getClusterName()), anySet());
+        verify(stackV4Endpoint, times(5)).get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString());
     }
 
     @Test
@@ -322,7 +323,7 @@ class ProvisionerServiceTest {
         secondClusterResponse.setStatus(Status.DELETE_COMPLETED);
         secondStackV4Response.setCluster(secondClusterResponse);
 
-        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet()))
+        when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString()))
                 .thenReturn(firstStackV4Response)
                 .thenReturn(secondStackV4Response)
                 .thenThrow(new NotFoundException());
@@ -333,7 +334,7 @@ class ProvisionerServiceTest {
 
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED, "Datalake stack deleted", sdxCluster);
-        verify(stackV4Endpoint, times(3)).get(anyLong(), eq(sdxCluster.getClusterName()), anySet());
+        verify(stackV4Endpoint, times(3)).get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString());
     }
 
     private DetailedEnvironmentResponse getEnvironmentResponse() {
@@ -384,6 +385,12 @@ class ProvisionerServiceTest {
         sdxCluster.setTags(Json.silent(new HashMap<>()));
         sdxCluster.setEnvCrn("");
         sdxCluster.setStackRequestToCloudbreak("{}");
+        sdxCluster.setCrn(Crn.builder().setAccountId("asd")
+                .setResource("asd")
+                .setResourceType(Crn.ResourceType.DATALAKE)
+                .setService(Crn.Service.DATALAKE)
+                .setPartition(Crn.Partition.CDP)
+                .build().toString());
         return sdxCluster;
     }
 }

@@ -151,7 +151,7 @@ public class SdxController implements SdxEndpoint {
     public SdxClusterDetailResponse getDetail(@ResourceName String name, Set<String> entries) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
-        StackV4Response stackV4Response = sdxService.getDetail(name, entries);
+        StackV4Response stackV4Response = sdxService.getDetail(name, entries, sdxCluster.getAccountId());
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);
     }
@@ -161,7 +161,7 @@ public class SdxController implements SdxEndpoint {
     public SdxClusterDetailResponse getDetailByCrn(@ResourceCrn String clusterCrn, Set<String> entries) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
-        StackV4Response stackV4Response = sdxService.getDetail(sdxCluster.getClusterName(), entries);
+        StackV4Response stackV4Response = sdxService.getDetail(sdxCluster.getClusterName(), entries, sdxCluster.getAccountId());
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);
     }
@@ -183,7 +183,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SYNC_DATALAKE)
     public void sync(@ResourceName String name) {
-        sdxService.sync(name);
+        sdxService.sync(name, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override

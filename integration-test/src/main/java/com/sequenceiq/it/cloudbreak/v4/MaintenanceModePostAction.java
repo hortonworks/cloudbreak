@@ -41,7 +41,8 @@ public class MaintenanceModePostAction implements Action<StackTestDto, Cloudbrea
 
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .setClusterMaintenanceMode(client.getWorkspaceId(), testDto.getName(), request);
+                .setClusterMaintenanceMode(client.getWorkspaceId(), testDto.getName(), request,
+                        testContext.getActingUserCrn().getAccountId());
 
         return testDto;
     }

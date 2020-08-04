@@ -30,12 +30,13 @@ public class CloudbreakUtil {
     private CloudbreakUtil() {
     }
 
-    public static WaitResult waitForStackStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
-        return waitForStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("status", desiredStatus));
+    public static WaitResult waitForStackStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName,
+            String desiredStatus, String accountId) {
+        return waitForStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("status", desiredStatus), accountId);
     }
 
     private static WaitResult waitForStatuses(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName,
-            Map<String, String> desiredStatuses) {
+            Map<String, String> desiredStatuses, String accountId) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Map<String, String> currentStatuses = new HashMap<>();
 
@@ -46,7 +47,7 @@ public class CloudbreakUtil {
             sleep();
             StackV4Endpoint stackV4Endpoint = cloudbreakClient.stackV4Endpoint();
             try {
-                StackStatusV4Response statusResult = stackV4Endpoint.getStatusByName(workspaceId, stackName);
+                StackStatusV4Response statusResult = stackV4Endpoint.getStatusByName(workspaceId, stackName, accountId);
                 for (String statusPath : desiredStatuses.keySet()) {
                     currentStatuses.put(statusPath, statusResult.getStatus().name());
                 }

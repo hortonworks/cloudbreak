@@ -34,14 +34,14 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
-import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
+import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
-import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -110,7 +110,7 @@ public class SdxDatabaseDrService {
             sdxOperationRepository.save(drStatus);
             sdxClusterRepository.findById(clusterId).ifPresentOrElse(sdxCluster -> {
                 BackupV4Response backupV4Response = stackV4Endpoint.backupDatabaseByName(0L, sdxCluster.getClusterName(),
-                        backupLocation, backupId);
+                        backupLocation, backupId, sdxCluster.getAccountId());
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, backupV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
             }, () -> {
@@ -128,7 +128,7 @@ public class SdxDatabaseDrService {
             sdxOperationRepository.save(drStatus);
             sdxClusterRepository.findById(clusterId).ifPresentOrElse(sdxCluster -> {
                 RestoreV4Response restoreV4Response = stackV4Endpoint.restoreDatabaseByName(0L, sdxCluster.getClusterName(),
-                        backupLocation, backupId);
+                        backupLocation, backupId, sdxCluster.getAccountId());
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, restoreV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
             }, () -> {
@@ -172,7 +172,8 @@ public class SdxDatabaseDrService {
 
     private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster, String pollingMessage, CloudbreakFlowService.FlowState flowState)
             throws JsonProcessingException {
-        StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
+        StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(),
+                sdxCluster.getAccountId());
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();
         if (isStackOrClusterDrStatusComplete(stackV4Response.getStatus()) && isStackOrClusterDrStatusComplete(cluster.getStatus())) {

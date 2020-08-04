@@ -80,7 +80,7 @@ public class SdxStopService {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         try {
             LOGGER.info("Triggering stop flow for cluster {}", sdxCluster.getClusterName());
-            FlowIdentifier flowIdentifier = stackV4Endpoint.putStop(0L, sdxCluster.getClusterName());
+            FlowIdentifier flowIdentifier = stackV4Endpoint.putStop(0L, sdxCluster.getClusterName(), sdxCluster.getAccountId());
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, "Datalake stop in progress", sdxCluster);
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (NotFoundException e) {
@@ -126,7 +126,7 @@ public class SdxStopService {
     }
 
     private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster, FlowState flowState) throws JsonProcessingException {
-        StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
+        StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId());
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();
         if (stackAndClusterStopped(stackV4Response, cluster)) {

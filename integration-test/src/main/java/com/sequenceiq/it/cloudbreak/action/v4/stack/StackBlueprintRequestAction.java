@@ -20,7 +20,8 @@ public class StackBlueprintRequestAction implements Action<StackTestDto, Cloudbr
         GeneratedBlueprintV4Response bp = client.getCloudbreakClient().stackV4Endpoint().postStackForBlueprint(
                 client.getWorkspaceId(),
                 testDto.getName(),
-                testDto.getRequest());
+                testDto.getRequest(),
+                testContext.getActingUserCrn().getAccountId());
         testDto.withGeneratedBlueprint(bp);
         Log.whenJson(LOGGER, " get generated blueprint was successfully:\n", testDto.getGeneratedBlueprint());
         return testDto;
