@@ -295,7 +295,7 @@ public class EnvironmentTestDto
     public void cleanUp(TestContext context, CloudbreakClient client) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         if (getResponse() != null) {
-            when(environmentTestClient.forceDelete(), key("delete-environment-" + getName()).withSkipOnFail(false));
+            when(environmentTestClient.cascadingDelete(), key("delete-environment-" + getName()).withSkipOnFail(false));
             await(ARCHIVED, new RunningParameter().withSkipOnFail(true));
         } else {
             LOGGER.info("Response field is null for env: {}", getName());
