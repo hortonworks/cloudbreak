@@ -2,9 +2,14 @@ package com.sequenceiq.cloudbreak.common.anonymizer;
 
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class AnonymizerUtil {
 
     public static final String REPLACEMENT = "$1****";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AnonymizerUtil.class);
 
     private static final ReplacePattern[] PATTERNS = {
             //common PW
@@ -26,6 +31,7 @@ public class AnonymizerUtil {
     public static String anonymize(String content) {
         String ret = content;
         if (ret != null) {
+            LOGGER.info("Anonymize the content with length: {}", content.length());
             for (ReplacePattern pattern : PATTERNS) {
                 ret = pattern.replaceAll(ret);
             }

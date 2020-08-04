@@ -337,6 +337,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     }
 
     private RestRequestDetails createRequestDetails(ContainerRequestContext requestContext, String body) {
+        LOGGER.debug("Request body length: {}", body.length());
         RestRequestDetails restRequest = new RestRequestDetails();
         restRequest.setRequestUri(requestContext.getUriInfo().getRequestUri().toString());
         restRequest.setBody(body);
