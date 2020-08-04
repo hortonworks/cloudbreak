@@ -1,14 +1,33 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.hybrid;
 
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
+import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
+import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
+import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
+import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
+import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
@@ -19,19 +38,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
-import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
-import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
@@ -56,13 +66,17 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
     private static final String MOCK_UMS_PASSWORD_INVALID = "Invalid password";
 
-    private static final String MASTER_INSTANCE_TEMPLATE_ID = "InstanceGroupTestDtomaster";
+    private static final String MASTER_INSTANCE_GROUP = "master";
 
-    private static final String IDBROKER_INSTANCE_TEMPLATE_ID = "InstanceGroupTestDtoidbroker";
+    private static final String IDBROKER_INSTANCE_GROUP = "idbroker";
 
     private static final int SSH_PORT = 22;
 
     private static final int SSH_CONNECT_TIMEOUT = 120000;
+
+    private static final String CDH = "CDH";
+
+    private static final String REDHAT7 = "redhat7";
 
     private static final Map<String, InstanceStatus> INSTANCES_HEALTHY = new HashMap<>() {{
         put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
@@ -83,6 +97,9 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
     @Inject
     private BlueprintTestClient blueprintTestClient;
+
+    @Inject
+    private UtilTestClient utilTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -123,12 +140,44 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
     )
     public void testCreateSdxOnChildEnvironment(TestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
+        String clouderaManager = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
+        String cluster = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
+        String cmProduct = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
+        String stack = resourcePropertyProvider().getName(CHILD_CLOUD_PLATFORM);
 
-        testContext.given(InstanceTemplateV4TestDto.class, CHILD_CLOUD_PLATFORM)
-                .given(MASTER_INSTANCE_TEMPLATE_ID, InstanceTemplateV4TestDto.class, CHILD_CLOUD_PLATFORM)
-                .given(IDBROKER_INSTANCE_TEMPLATE_ID, InstanceTemplateV4TestDto.class, CHILD_CLOUD_PLATFORM)
+        AtomicReference<String> cdhVersion = new AtomicReference<>();
+        AtomicReference<String> cdhParcel = new AtomicReference<>();
+        String runtimeVersion = commonClusterManagerProperties().getRuntimeVersion();
+
+        testContext
+                .given(StackMatrixTestDto.class, CHILD_CLOUD_PLATFORM)
+                .when(utilTestClient.stackMatrixV4())
+                .then((tc, dto, client) -> {
+                    ClouderaManagerStackDescriptorV4Response response = dto.getResponse().getCdh().get(runtimeVersion);
+                    cdhVersion.set(response.getVersion());
+                    cdhParcel.set(response.getRepository().getStack().get(REDHAT7));
+                    return dto;
+                })
+                .validate();
+
+        testContext
+                .given(cmProduct, ClouderaManagerProductTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withName(CDH)
+                    .withVersion(cdhVersion.get())
+                    .withParcel(cdhParcel.get())
+                .given(clouderaManager, ClouderaManagerTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withClouderaManagerProduct(cmProduct)
+                .given(cluster, ClusterTestDto.class, CHILD_CLOUD_PLATFORM)
+                    .withBlueprintName(getDefaultSDXBlueprintName())
+                    .withValidateBlueprint(Boolean.FALSE)
+                    .withClouderaManager(clouderaManager)
+                .given(MASTER_INSTANCE_GROUP, InstanceGroupTestDto.class, CHILD_CLOUD_PLATFORM).withHostGroup(MASTER).withNodeCount(1)
+                .given(IDBROKER_INSTANCE_GROUP, InstanceGroupTestDto.class, CHILD_CLOUD_PLATFORM).withHostGroup(IDBROKER).withNodeCount(1)
+                .given(stack, StackTestDto.class, CHILD_CLOUD_PLATFORM).withCluster(cluster)
+                    .withInstanceGroups(MASTER_INSTANCE_GROUP, IDBROKER_INSTANCE_GROUP)
                 .given(sdxInternal, SdxInternalTestDto.class, CHILD_CLOUD_PLATFORM)
-                .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT_KEY))
+                    .withStackRequest(key(cluster), key(stack))
+                    .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -159,6 +208,10 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .validate();
 
         testContext.cleanupTestContext();
+    }
+
+    private String getDefaultSDXBlueprintName() {
+        return commonClusterManagerProperties().getInternalSdxBlueprintName();
     }
 
     private void testShhAuthenticationSuccessfull(String username, String host) throws IOException, UserAuthException {
