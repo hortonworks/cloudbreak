@@ -65,12 +65,15 @@ public class DnsRecord {
     }
 
     public boolean isHostRelatedRecord(String fqdn, String domain) {
+        String hostname = StringUtils.substringBefore(fqdn, domain);
         if (isARecord()) {
-            String hostname = StringUtils.substringBefore(fqdn, domain);
             return idnsname.equalsIgnoreCase(StringUtils.removeEnd(hostname, "."));
         }
         if (isPtrRecord()) {
             return ptrrecord.contains(StringUtils.appendIfMissing(fqdn, "."));
+        }
+        if (isSshfpRecord()) {
+            return idnsname.equalsIgnoreCase(StringUtils.removeEnd(hostname, "."));
         }
         return false;
     }
@@ -118,6 +121,10 @@ public class DnsRecord {
 
     public boolean isPtrRecord() {
         return ptrrecord != null && !ptrrecord.isEmpty();
+    }
+
+    public boolean isSshfpRecord() {
+        return sshfprecord != null && !sshfprecord.isEmpty();
     }
 
     public boolean isSrvRecord() {

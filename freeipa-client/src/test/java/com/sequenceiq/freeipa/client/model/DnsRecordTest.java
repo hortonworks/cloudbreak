@@ -82,6 +82,19 @@ public class DnsRecordTest {
     }
 
     @Test
+    public void testIsSshfpRecordTrue() {
+        underTest.setIdnsname("server");
+        underTest.setSshfprecord(List.of("1 1 ABCDEF"));
+        assertTrue(underTest.isSshfpRecord());
+    }
+
+    @Test
+    public void testIsSshfpRecordFalse() {
+        underTest.setArecord(List.of("192.168.1.2"));
+        assertFalse(underTest.isSshfpRecord());
+    }
+
+    @Test
     public void testIsHostRelatedRecordFalseIfSrvRecrod() {
         underTest.setSrvrecord(List.of("0 5 5060 example.com."));
         assertFalse(underTest.isHostRelatedRecord("example.com.", "example.com"));
@@ -107,5 +120,28 @@ public class DnsRecordTest {
         underTest.setSrvrecord(List.of("0 5 5060 example.com.", "0 5 5060 example1.com."));
         assertTrue(underTest.isHostRelatedSrvRecord("example.com."));
         assertTrue(underTest.isHostRelatedSrvRecord("example1.com."));
+    }
+
+    @Test
+    public void testIsHostRelatedRecordWhenARecord() {
+        underTest.setIdnsname("server");
+        underTest.setArecord(List.of("192.168.1.2"));
+        assertTrue(underTest.isHostRelatedRecord("server.example.com", "example.com"));
+        assertFalse(underTest.isHostRelatedRecord("server1.example.com", "example.com"));
+    }
+
+    @Test
+    public void testIsHostRelatedRecordWhenPtrRecord() {
+        underTest.setPtrrecord(List.of("server.example.com."));
+        assertTrue(underTest.isHostRelatedRecord("server.example.com", "example.com"));
+        assertFalse(underTest.isHostRelatedRecord("server1.example.com", "example.com"));
+    }
+
+    @Test
+    public void testIsHostRelatedRecordWhenSshfpRecord() {
+        underTest.setIdnsname("server");
+        underTest.setSshfprecord(List.of("1 1 ABCDEF"));
+        assertTrue(underTest.isHostRelatedRecord("server.example.com", "example.com"));
+        assertFalse(underTest.isHostRelatedRecord("server1.example.com", "example.com"));
     }
 }
