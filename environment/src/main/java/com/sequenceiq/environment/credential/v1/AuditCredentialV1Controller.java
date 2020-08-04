@@ -13,6 +13,7 @@ import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
@@ -59,6 +60,13 @@ public class AuditCredentialV1Controller extends NotificationController implemen
     public CredentialResponse getByResourceCrn(@TenantAwareParam String credentialCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return credentialConverter.convert(credentialService.getByCrnForAccountId(credentialCrn, accountId, AUDIT));
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_AUDIT_CREDENTIAL)
+    public CredentialResponse getByResourceName(String credentialName, @AccountId String accountId) {
+        String userAccountId = ThreadBasedUserCrnProvider.getAccountId();
+        return credentialConverter.convert(credentialService.getByNameForAccountId(credentialName, userAccountId, AUDIT));
     }
 
     @Override
