@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -50,6 +53,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -117,7 +121,21 @@ public class ClusterUpgradeAvailabilityServiceTest {
     @Mock
     private GatewayConfig gatewayConfig;
 
+    @Mock
+    private ClusterApiConnectors clusterApiConnectors;
+
+    @Mock
+    private ClusterApi clusterApi;
+
     private boolean lockComponents;
+
+    private Map<String, String> activatedParcels;
+
+    @Before
+    public void setUp() {
+        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
+        activatedParcels = new HashMap<>();
+    }
 
     @Test
     public void testCheckForUpgradesByNameShouldReturnsImagesWhenThereAreAvailableImages()
@@ -138,7 +156,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(clusterUpgradeImageFilter.filter(imageCatalog.getImages().getCdhImages(), imageCatalog.getVersions(), currentImageFromCatalog,
-                stack.getCloudPlatform(), lockComponents)).thenReturn(filteredImages);
+                stack.getCloudPlatform(), lockComponents, activatedParcels)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
@@ -150,7 +168,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         verify(imageService).getImage(stack.getId());
         verify(imageCatalogProvider).getImageCatalogV3(CATALOG_URL);
         verify(clusterUpgradeImageFilter).filter(imageCatalog.getImages().getCdhImages(), imageCatalog.getVersions(), currentImageFromCatalog,
-                stack.getCloudPlatform(), lockComponents);
+                stack.getCloudPlatform(), lockComponents, activatedParcels);
         verify(upgradeOptionsResponseFactory).createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName());
     }
@@ -190,7 +208,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(clusterUpgradeImageFilter.filter(imageCatalog.getImages().getCdhImages(), imageCatalog.getVersions(), currentImageFromCatalog,
-                stack.getCloudPlatform(), lockComponents)).thenReturn(filteredImages);
+                stack.getCloudPlatform(), lockComponents, activatedParcels)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
@@ -230,7 +248,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(clusterUpgradeImageFilter.filter(imageCatalog.getImages().getCdhImages(), imageCatalog.getVersions(), currentImageFromCatalog,
-                stack.getCloudPlatform(), lockComponents)).thenReturn(filteredImages);
+                stack.getCloudPlatform(), lockComponents, activatedParcels)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
@@ -387,7 +405,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.filterUpgradeOptions(response, request));
-        Assert.assertEquals("The given image (another-image-id) is not eligible for upgrading the cluster. "
+        Assert.assertEquals("The given image (another-image-id) is not eligible for the cluster upgrade. "
                 + "Please choose an id from the following image(s): image-id-first,image-id-last", e.getMessage());
     }
 
@@ -428,8 +446,8 @@ public class ClusterUpgradeAvailabilityServiceTest {
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.filterUpgradeOptions(response, request));
-        Assert.assertEquals("There is no image eligible for upgrading the cluster with runtime: 7.2.0. "
-                + "Please choose a runtime from the following image(s): 7.0.2", e.getMessage());
+        Assert.assertEquals("There is no image eligible for the cluster upgrade with runtime: 7.2.0. "
+                + "Please choose a runtime from the following: 7.0.2", e.getMessage());
     }
 
     @Test

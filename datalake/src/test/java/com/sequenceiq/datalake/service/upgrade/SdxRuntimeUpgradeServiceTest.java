@@ -132,8 +132,8 @@ public class SdxRuntimeUpgradeServiceTest {
                 BadRequestException.class,
                 () -> underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest));
 
-        assertEquals(String.format("The given image (%s) is not eligible for upgrading the cluster. "
-                + "Please choose an id from the following image(s): %s", IMAGE_ID, ANOTHER_IMAGE_ID), exception.getMessage());
+        assertEquals(String.format("The given image (%s) is not eligible for the cluster upgrade. "
+                + "Please choose an id from the following: %s", IMAGE_ID, ANOTHER_IMAGE_ID), exception.getMessage());
     }
 
     @Test
@@ -179,8 +179,8 @@ public class SdxRuntimeUpgradeServiceTest {
                 BadRequestException.class,
                 () -> underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest));
 
-        assertEquals(String.format("There is no image eligible for upgrading the cluster with runtime: %s. "
-                + "Please choose a runtime from the following image(s): %s", ANOTHER_TARGET_RUNTIME, MATCHING_TARGET_RUNTIME), exception.getMessage());
+        assertEquals(String.format("There is no image eligible for the cluster upgrade with runtime: %s. "
+                + "Please choose a runtime from the following: %s", ANOTHER_TARGET_RUNTIME, MATCHING_TARGET_RUNTIME), exception.getMessage());
     }
 
     @Test
