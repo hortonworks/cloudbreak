@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,15 @@ public class AwsDefaultZoneProvider {
     }
 
     public String getDefaultZone(AwsCredentialView awsCredentialView) {
-        return awsCredentialView.isGovernmentCloudEnabled() ? awsGovZoneParameterDefault : awsZoneParameterDefault;
+        return awsCredentialView.isGovernmentCloudEnabled() ? awsGovZoneParameterDefault : getCredentialOrGlobalDefault(awsCredentialView);
+    }
+
+    private String getCredentialOrGlobalDefault(AwsCredentialView credentialView) {
+        String credentialDefaultRegion = credentialView.getDefaultRegion();
+        if (StringUtils.isNoneEmpty(credentialDefaultRegion)) {
+            return credentialDefaultRegion;
+        }
+        return awsZoneParameterDefault;
     }
 
 }
