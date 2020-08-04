@@ -178,19 +178,14 @@ public class ImageService {
         ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(workspaceId, imageSettings, user);
         ImageFilter imageFilter = new ImageFilter(imageCatalog, ImmutableSet.of(platformString), null, baseImageEnabled, operatingSystems, clusterVersion);
         LOGGER.info("Image id is not specified for the stack.");
-        if (baseImageEnabled) {
-            LOGGER.info("Base image usage is enabled.");
-            if (useBaseImage) {
-                LOGGER.debug("Falling back to a base imageSettings, because repo information is provided");
-                return imageCatalogService.getLatestBaseImageDefaultPreferred(imageFilter, imagePredicate);
-            }
-            LOGGER.debug("Falling back to a prewarmed imageSettings of CDH-{} or to a base imageSettings if prewarmed doesn't exist", clusterVersion);
-            return imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilter, imagePredicate);
-        } else {
-            LOGGER.info("Base image usage is disabled.");
-            LOGGER.debug("Falling back to a prewarmed imageSettings of CDH-{}", clusterVersion);
-            return imageCatalogService.getLatestPrewarmedImageDefaultPreferred(imageFilter, imagePredicate);
+        if (baseImageEnabled && useBaseImage)
+        {
+            LOGGER.info("Trying to select a base image.");
+            return imageCatalogService.getLatestBaseImageDefaultPreferred(imageFilter, imagePredicate);
         }
+
+        LOGGER.info("Trying to select a prewarmed image.");
+        return imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilter, imagePredicate);
     }
 
     private String getClusterVersion(Blueprint blueprint) {

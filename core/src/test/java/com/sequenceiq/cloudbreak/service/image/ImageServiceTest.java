@@ -283,7 +283,7 @@ public class ImageServiceTest {
     @Test
     public void testDisabledBaseImageShouldReturnCorrectImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         imageSettingsV4Request.setId(null);
-        when(imageCatalogService.getLatestPrewarmedImageDefaultPreferred(any(), any())).thenReturn(getImageFromCatalog(true, "uuid", STACK_VERSION));
+        when(imageCatalogService.getImagePrewarmedDefaultPreferred(any(), any())).thenReturn(getImageFromCatalog(true, "uuid", STACK_VERSION));
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
