@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_FAILE
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -96,7 +97,7 @@ public class SdxStopServiceTest {
 
         underTest.stop(CLUSTER_ID);
 
-        verify(stackV4Endpoint).putStop(0L, CLUSTER_NAME);
+        verify(stackV4Endpoint).putStop(eq(0L), eq(CLUSTER_NAME), anyString());
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, "Datalake stop in progress", sdxCluster);
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(eq(sdxCluster), any());
     }
@@ -104,7 +105,7 @@ public class SdxStopServiceTest {
     @Test
     public void testStopWhenNotFoundException() {
         SdxCluster sdxCluster = sdxCluster();
-        doThrow(NotFoundException.class).when(stackV4Endpoint).putStop(0L, CLUSTER_NAME);
+        doThrow(NotFoundException.class).when(stackV4Endpoint).putStop(eq(0L), eq(CLUSTER_NAME), anyString());
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         underTest.stop(CLUSTER_ID);
@@ -119,7 +120,7 @@ public class SdxStopServiceTest {
         SdxCluster sdxCluster = sdxCluster();
         ClientErrorException clientErrorException = mock(ClientErrorException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
-        doThrow(clientErrorException).when(stackV4Endpoint).putStop(0L, CLUSTER_NAME);
+        doThrow(clientErrorException).when(stackV4Endpoint).putStop(eq(0L), eq(CLUSTER_NAME), anyString());
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.stop(CLUSTER_ID));
@@ -131,7 +132,7 @@ public class SdxStopServiceTest {
         SdxCluster sdxCluster = sdxCluster();
         WebApplicationException clientErrorException = mock(WebApplicationException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("error");
-        doThrow(clientErrorException).when(stackV4Endpoint).putStop(0L, CLUSTER_NAME);
+        doThrow(clientErrorException).when(stackV4Endpoint).putStop(eq(0L), eq(CLUSTER_NAME), anyString());
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.stop(CLUSTER_ID));
@@ -148,7 +149,7 @@ public class SdxStopServiceTest {
         clusterV4Response.setStatus(STOPPED);
         stackV4Response.setCluster(clusterV4Response);
 
-        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString())).thenReturn(stackV4Response);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStop(sdxCluster);
 
@@ -165,7 +166,8 @@ public class SdxStopServiceTest {
         clusterV4Response.setStatus(STOP_REQUESTED);
         stackV4Response.setCluster(clusterV4Response);
 
-        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
+                .thenReturn(stackV4Response);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStop(sdxCluster);
 
@@ -180,7 +182,8 @@ public class SdxStopServiceTest {
         stackV4Response.setStatusReason("reason");
         stackV4Response.setStatus(STOP_FAILED);
 
-        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
+                .thenReturn(stackV4Response);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStop(sdxCluster);
 
@@ -200,7 +203,8 @@ public class SdxStopServiceTest {
         clusterV4Response.setStatusReason("cluster reason");
         stackV4Response.setCluster(clusterV4Response);
 
-        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
+                .thenReturn(stackV4Response);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStop(sdxCluster);
 
@@ -216,7 +220,8 @@ public class SdxStopServiceTest {
         stackV4Response.setStatusReason("reason");
         stackV4Response.setStatus(START_FAILED);
 
-        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
+                .thenReturn(stackV4Response);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStop(sdxCluster);
 
@@ -236,7 +241,8 @@ public class SdxStopServiceTest {
         clusterV4Response.setStatusReason("cluster reason");
         stackV4Response.setCluster(clusterV4Response);
 
-        when(stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
+                .thenReturn(stackV4Response);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStop(sdxCluster);
 
@@ -249,6 +255,7 @@ public class SdxStopServiceTest {
         sdxCluster.setId(CLUSTER_ID);
         sdxCluster.setClusterName(CLUSTER_NAME);
         sdxCluster.setEnvName(ENV_NAME);
+        sdxCluster.setAccountId("accountid");
         return sdxCluster;
     }
 }

@@ -49,4 +49,11 @@ public class S3CloudStorageV1Parameters implements FileSystemAwareCloudStorage {
     public int hashCode() {
         return Objects.hash(instanceProfile);
     }
+
+    @Override
+    public String toString() {
+        return "S3CloudStorageV1Parameters{" +
+                "instanceProfile='" + instanceProfile + '\'' +
+                '}';
+    }
 }

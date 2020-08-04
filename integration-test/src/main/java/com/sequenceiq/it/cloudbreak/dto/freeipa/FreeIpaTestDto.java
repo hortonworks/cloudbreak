@@ -62,6 +62,8 @@ import com.sequenceiq.it.cloudbreak.search.Searchable;
 public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIpaTestDto>
         implements Purgable<ListFreeIpaResponse, FreeIpaClient>, Searchable, Investigable {
 
+    private static final String FREEIPA_RESOURCE_NAME = "freeipaName";
+
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
@@ -102,6 +104,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return FREEIPA_RESOURCE_NAME;
     }
 
     public FreeIpaTestDto withTelemetry(String telemetry) {
@@ -283,7 +290,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     @Override
     public void delete(TestContext testContext, ListFreeIpaResponse entity, FreeIpaClient client) {
-        client.getFreeIpaClient().getFreeIpaV1Endpoint().delete(entity.getEnvironmentCrn());
+        client.getFreeIpaClient().getFreeIpaV1Endpoint().delete(entity.getEnvironmentCrn(), false);
     }
 
     @Override

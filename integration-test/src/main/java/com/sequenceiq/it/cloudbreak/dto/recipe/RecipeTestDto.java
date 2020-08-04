@@ -21,6 +21,8 @@ import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 @Prototype
 public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Response, RecipeTestDto, RecipeViewV4Response> {
 
+    private static final String RECIPE_RESOURCE_NAME = "recipeName";
+
     private RecipeViewV4Responses simpleResponses;
 
     public RecipeTestDto(TestContext testContext) {
@@ -53,6 +55,11 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return RECIPE_RESOURCE_NAME;
     }
 
     public RecipeTestDto withDescription(String description) {

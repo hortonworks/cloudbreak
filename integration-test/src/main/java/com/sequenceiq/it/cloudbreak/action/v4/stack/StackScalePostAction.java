@@ -36,7 +36,8 @@ public class StackScalePostAction implements Action<StackTestDto, CloudbreakClie
         Log.whenJson(" StackScale post request:\n", request);
         FlowIdentifier flowIdentifier = client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .putScaling(client.getWorkspaceId(), testDto.getName(), request);
+                .putScaling(client.getWorkspaceId(), testDto.getName(), request,
+                        testContext.getActingUserCrn().getAccountId());
         testDto.setFlow("Stack scale", flowIdentifier);
         return testDto;
     }

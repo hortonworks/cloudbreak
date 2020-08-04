@@ -9,7 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToMapConverter;
+import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToParameterConverter;
+import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.freeipa.api.v1.diagnostics.model.DiagnosticsCollectionRequest;
@@ -34,13 +35,13 @@ public class DiagnosticsTriggerService {
     private FreeIpaFlowManager flowManager;
 
     @Inject
-    private DiagnosticsDataToMapConverter diagnosticsDataToMapConverter;
+    private DiagnosticsDataToParameterConverter diagnosticsDataToParameterConverter;
 
     public FlowIdentifier startDiagnosticsCollection(DiagnosticsCollectionRequest request, String accountId, String userCrn) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Starting diagnostics collection for FreeIpa. Crn: '{}'", stack.getResourceCrn());
-        Map<String, Object> parameters = diagnosticsDataToMapConverter.convert(request, stack.getTelemetry(), stack.getRegion());
+        DiagnosticParameters parameters = diagnosticsDataToParameterConverter.convert(request, stack.getTelemetry(), stack.getRegion());
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceId(stack.getId())

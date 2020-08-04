@@ -67,6 +67,7 @@ public enum AuthorizationResourceAction {
     CREATE_AUDIT_CREDENTIAL,
     DESCRIBE_AUDIT_CREDENTIAL,
     MODIFY_AUDIT_CREDENTIAL,
+    USE_INTERNALLY,
     // deprecated actions, please do not use them
     ENVIRONMENT_READ,
     ENVIRONMENT_WRITE,

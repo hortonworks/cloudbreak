@@ -55,9 +55,9 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
-import com.sequenceiq.it.cloudbreak.util.ErrorLogMessageProvider;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
+import com.sequenceiq.it.cloudbreak.util.ErrorLogMessageProvider;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
@@ -939,7 +939,7 @@ public abstract class TestContext implements ApplicationContextAware {
             try {
                 testDto.cleanUp(this, getCloudbreakClient(getActingUserAccessKey()));
             } catch (Exception e) {
-                LOGGER.error("Was not able to cleanup resource [{}]., {}", testDto.getName(), ResponseUtil.getErrorMessage(e), e);
+                LOGGER.error("Cleaning up of {} resource is failing, because of: {}", testDto.getName(), e.getMessage(), e);
             }
         }
         shutdown();

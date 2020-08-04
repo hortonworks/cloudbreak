@@ -326,7 +326,7 @@ public interface DistroXV1Endpoint {
     @POST
     @Path("diagnostics")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
+    @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
             nickname = "collectDistroxCmDiagnosticsV4")
     FlowIdentifier collectDiagnostics(@Valid DiagnosticsCollectionV1Request request);
 

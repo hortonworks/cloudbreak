@@ -60,4 +60,13 @@ public class CloudwatchParams implements Serializable {
         }
         return newCloudwatchParams;
     }
+
+    @Override
+    public String toString() {
+        return "CloudwatchParams{" +
+                "instanceProfile='" + instanceProfile + '\'' +
+                ", region='" + region + '\'' +
+                ", streamKey=" + streamKey +
+                '}';
+    }
 }

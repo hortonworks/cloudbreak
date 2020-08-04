@@ -140,9 +140,10 @@ Some APIs are used internal only between services, in this case we are using int
 
 We are using account id in service layer heavily, but internal actor CRN doesn't have that information, so there are specific requirements for APIs which can called with internal actor:
 
-- you should annotate controller with `@InternalReady`
-- your method should have at least one parameter which is some kind of resource CRN
-- annotate a CRN parameter with `@TenantAwareParam`, which will extract the account id from CRN parameter and use that in lower layers
+You should annotate controller with `@InternalReady`.
+Your method should have at least one parameter:
+- which is some kind of resource CRN -> annotate the parameter with `@TenantAwareParam`, which will extract the account id from CRN parameter and use that in lower layers
+- or it is an accound id parameter -> annotate a CRN parameter with `@AccountId` and we'll use that in lower layers
 
 ### APIs without authorization
 

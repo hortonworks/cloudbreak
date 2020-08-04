@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.cdp.shaded.org.apache.commons.lang3.StringUtils;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -106,7 +107,8 @@ public class StackOperations implements ResourceBasedCrnProvider {
                 stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentName(workspaceId, environmentName, stackTypes),
                 StackViewV4Response.class);
         LOGGER.info("Adding environment name and credential to the responses.");
-        environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses);
+        NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentName) ? NameOrCrn.empty() : NameOrCrn.ofName(environmentName);
+        environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
         LOGGER.info("Adding SDX CRN and name to the responses.");
         sdxServiceDecorator.prepareMultipleSdxAttributes(stackViewResponses);
         return new StackViewV4Responses(stackViewResponses);
@@ -119,7 +121,8 @@ public class StackOperations implements ResourceBasedCrnProvider {
                 stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackTypes),
                 StackViewV4Response.class);
         LOGGER.info("Adding environment name and credential to the responses.");
-        environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses);
+        NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentCrn) ? NameOrCrn.empty() : NameOrCrn.ofCrn(environmentCrn);
+        environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
         LOGGER.info("Adding SDX CRN and name to the responses.");
         sdxServiceDecorator.prepareMultipleSdxAttributes(stackViewResponses);
         return new StackViewV4Responses(stackViewResponses);
@@ -240,8 +243,8 @@ public class StackOperations implements ResourceBasedCrnProvider {
             UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(workspaceId, stackName,
                     osUpgrade);
             clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request);
-            String environmentCrn = getResourceCrnByResourceName(stackName);
-            StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, environmentCrn, List.of(StackType.WORKLOAD));
+            Stack stack = getStackByName(stackName);
+            StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
             clusterUpgradeAvailabilityService.checkForNotAttachedClusters(stackViewV4Responses, upgradeResponse);
             if (!osUpgrade && !request.isDryRun() && !request.isShowAvailableImagesSet()) {
                 clusterUpgradeAvailabilityService.checkIfClusterRuntimeUpgradable(workspaceId, stackName, upgradeResponse);

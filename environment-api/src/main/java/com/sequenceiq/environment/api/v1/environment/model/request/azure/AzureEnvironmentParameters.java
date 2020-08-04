@@ -22,6 +22,13 @@ public class AzureEnvironmentParameters {
         this.resourceGroup = resourceGroup;
     }
 
+    @Override
+    public String toString() {
+        return "AzureEnvironmentParameters{" +
+                "resourceGroup=" + resourceGroup +
+                '}';
+    }
+
     public static Builder builder() {
         return new Builder();
     }

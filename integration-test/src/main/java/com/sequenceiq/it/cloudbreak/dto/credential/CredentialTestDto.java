@@ -25,6 +25,8 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
 
     public static final String CREDENTIAL = "CREDENTIAL";
 
+    private static final String CREDENTIAL_RESOURCE_NAME = "credentialName";
+
     @Inject
     private CredentialTestClient credentialTestClient;
 
@@ -47,6 +49,11 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return CREDENTIAL_RESOURCE_NAME;
     }
 
     public CredentialTestDto withDescription(String description) {

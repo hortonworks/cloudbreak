@@ -19,7 +19,7 @@ public class StackCreateAction implements Action<StackTestDto, CloudbreakClient>
         Log.whenJson(LOGGER, " Stack post request:\n", testDto.getRequest());
         StackV4Response response = client.getCloudbreakClient()
                         .stackV4Endpoint()
-                        .post(client.getWorkspaceId(), testDto.getRequest());
+                        .post(client.getWorkspaceId(), testDto.getRequest(), testContext.getActingUserCrn().getAccountId());
         testDto.setResponse(response);
         testDto.setFlow("Stack create", response.getFlowIdentifier());
         Log.whenJson(LOGGER, " Stack created was successfully:\n", testDto.getResponse());

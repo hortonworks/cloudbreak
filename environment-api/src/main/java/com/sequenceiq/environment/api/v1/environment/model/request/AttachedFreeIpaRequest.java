@@ -46,4 +46,13 @@ public class AttachedFreeIpaRequest {
     public void setAws(AwsFreeIpaParameters aws) {
         this.aws = aws;
     }
+
+    @Override
+    public String toString() {
+        return "AttachedFreeIpaRequest{" +
+                "create=" + create +
+                ", instanceCountByGroup=" + instanceCountByGroup +
+                ", aws=" + aws +
+                '}';
+    }
 }

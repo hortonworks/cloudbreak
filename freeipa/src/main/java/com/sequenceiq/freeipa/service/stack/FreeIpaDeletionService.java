@@ -51,39 +51,39 @@ public class FreeIpaDeletionService {
     @Inject
     private ApplicationFlowInformation applicationFlowInformation;
 
-    public void delete(String environmentCrn, String accountId) {
+    public void delete(String environmentCrn, String accountId, boolean forced) {
         List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stacks.isEmpty()) {
             throw new NotFoundException("No FreeIpa found in environment");
         }
         stacks.forEach(stack -> validateDeletion(stack, accountId));
-        stacks.forEach(this::unscheduleAndTriggerTerminate);
+        stacks.forEach(stack -> unscheduleAndTriggerTerminate(stack, forced));
     }
 
-    private void unscheduleAndTriggerTerminate(Stack stack) {
+    private void unscheduleAndTriggerTerminate(Stack stack, boolean forced) {
         flowCancelService.cancelTooOldTerminationFlowForResource(stack.getId(), stack.getName());
         freeipaJobService.unschedule(stack);
         if (!stack.isDeleteCompleted()) {
-            handleIfStackIsNotTerminated(stack);
+            handleIfStackIsNotTerminated(stack, forced);
         } else {
             LOGGER.debug("Stack is already deleted.");
         }
     }
 
-    private void handleIfStackIsNotTerminated(Stack stack) {
+    private void handleIfStackIsNotTerminated(Stack stack, boolean forced) {
         LOGGER.info("Stack {} in environment {} is not deleted.", stack.getName(), stack.getEnvironmentCrn());
         Optional<FlowLog> optionalFlowLog = findLatestTerminationFlowLogWithInitState(stack);
         if (optionalFlowLog.isPresent()) {
             FlowLog flowLog = optionalFlowLog.get();
             LOGGER.debug("Found termination flowlog with id [{}] and payload [{}]", flowLog.getFlowId(), flowLog.getPayload());
         } else {
-            fireTerminationEvent(stack);
+            fireTerminationEvent(stack, forced);
         }
     }
 
-    private void fireTerminationEvent(Stack stack) {
+    private void fireTerminationEvent(Stack stack, boolean forced) {
         LOGGER.debug("Couldn't find termination FlowLog with 'INIT_STATE'. Triggering termination");
-        flowManager.notify(TERMINATION_EVENT.event(), new TerminationEvent(TERMINATION_EVENT.event(), stack.getId(), false));
+        flowManager.notify(TERMINATION_EVENT.event(), new TerminationEvent(TERMINATION_EVENT.event(), stack.getId(), forced));
         flowCancelService.cancelRunningFlows(stack.getId());
     }
 

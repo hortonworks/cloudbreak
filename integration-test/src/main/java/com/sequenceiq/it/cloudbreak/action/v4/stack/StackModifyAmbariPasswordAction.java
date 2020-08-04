@@ -22,7 +22,7 @@ public class StackModifyAmbariPasswordAction implements Action<StackTestDto, Clo
         userNamePasswordV4Request.setUserName(testDto.getRequest().getCluster().getUserName());
         userNamePasswordV4Request.setPassword("testnewambaripassword");
         client.getCloudbreakClient().stackV4Endpoint().putPassword(client.getWorkspaceId(),
-                testDto.getName(), userNamePasswordV4Request);
+                testDto.getName(), userNamePasswordV4Request, testContext.getActingUserCrn().getAccountId());
         Log.when(LOGGER, " user's password modified successfully");
         return testDto;
     }

@@ -19,6 +19,8 @@ public class RedbeamsDatabaseTestDto extends DeletableRedbeamsTestDto<DatabaseV4
 
     public static final String DATABASE = "DATABASE";
 
+    private static final String REDBEAMS_RESOURCE_NAME = "redbeamsName";
+
     public RedbeamsDatabaseTestDto(TestContext testContext) {
         super(new DatabaseV4Request(), testContext);
     }
@@ -48,6 +50,11 @@ public class RedbeamsDatabaseTestDto extends DeletableRedbeamsTestDto<DatabaseV4
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return REDBEAMS_RESOURCE_NAME;
     }
 
     public RedbeamsDatabaseTestDto withDescription(String description) {

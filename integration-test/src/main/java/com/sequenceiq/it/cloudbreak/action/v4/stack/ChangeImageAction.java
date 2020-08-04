@@ -39,7 +39,7 @@ public class ChangeImageAction implements Action<StackTestDto, CloudbreakClient>
 
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .changeImage(client.getWorkspaceId(), testDto.getName(), request);
+                .changeImage(client.getWorkspaceId(), testDto.getName(), request, testContext.getActingUserCrn().getAccountId());
 
         return testDto;
     }

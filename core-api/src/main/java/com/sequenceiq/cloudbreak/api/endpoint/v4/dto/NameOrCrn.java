@@ -39,6 +39,10 @@ public class NameOrCrn {
         return new NameOrCrn(null, crn);
     }
 
+    public static NameOrCrn empty() {
+        return new NameOrCrn(null, null);
+    }
+
     public String getName() {
         if (StringUtils.isEmpty(name)) {
             throw new IllegalArgumentException("Request to get name when crn was provided on " + this);

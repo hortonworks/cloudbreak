@@ -28,7 +28,7 @@ public class CloudbreakTerminationChecker<T extends CloudbreakWaitObject> extend
         String name = waitObject.getName();
         Map<String, Status> desiredStatuses = waitObject.getDesiredStatuses();
         try {
-            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name);
+            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name, waitObject.getAccountId());
             Map<String, Status> actualStatuses = Map.of("status", stackStatus.getStatus(), "clusterStatus", stackStatus.getClusterStatus());
             LOGGER.info("Waiting for the '{}' state of '{}' cluster. Actual state is: '{}'", desiredStatuses, name, actualStatuses);
             if (isDeleteFailed(actualStatuses)) {
@@ -54,7 +54,7 @@ public class CloudbreakTerminationChecker<T extends CloudbreakWaitObject> extend
     public void handleTimeout(T waitObject) {
         String name = waitObject.getName();
         try {
-            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name);
+            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name, waitObject.getAccountId());
             Map<String, Status> actualStatuses = Map.of("status", stackStatus.getStatus(), "clusterStatus", stackStatus.getClusterStatus());
             Map<String, String> actualStatusReasons = Map.of("stackStatusReason", stackStatus.getStatusReason(), "clusterStatusReason", stackStatus
                     .getClusterStatusReason());
@@ -75,7 +75,7 @@ public class CloudbreakTerminationChecker<T extends CloudbreakWaitObject> extend
     public boolean exitWaiting(T waitObject) {
         String name = waitObject.getName();
         try {
-            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name);
+            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name, waitObject.getAccountId());
             Map<String, Status> actualStatuses = Map.of("status", stackStatus.getStatus(), "clusterStatus", stackStatus.getClusterStatus());
             if (isDeleteFailed(actualStatuses)) {
                 return true;
@@ -96,7 +96,7 @@ public class CloudbreakTerminationChecker<T extends CloudbreakWaitObject> extend
         Long workspaceId = waitObject.getWorkspaceId();
         try {
             return Map.of("status", waitObject.getStackEndpoint().get(workspaceId, name,
-                    Collections.emptySet()).getStatus().name(), "clusterStatus", waitObject.getDistroxEndpoint()
+                    Collections.emptySet(), waitObject.getAccountId()).getStatus().name(), "clusterStatus", waitObject.getDistroxEndpoint()
                     .getByName(name, Collections.emptySet()).getStatus().name());
         } catch (NotFoundException e) {
             LOGGER.warn("No cluster found with name '{}'! It has been deleted successfully.", name, e);

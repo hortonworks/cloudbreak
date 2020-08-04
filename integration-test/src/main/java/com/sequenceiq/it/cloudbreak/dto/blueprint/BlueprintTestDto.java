@@ -16,7 +16,10 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 
 @Prototype
 public class BlueprintTestDto extends AbstractCloudbreakTestDto<BlueprintV4Request, BlueprintV4Response, BlueprintTestDto> {
+
     public static final String BLUEPRINT = "BLUEPRINT";
+
+    private static final String BLUEPRINT_RESOURCE_NAME = "blueprintName";
 
     private Collection<BlueprintV4ViewResponse> viewResponses;
 
@@ -43,6 +46,11 @@ public class BlueprintTestDto extends AbstractCloudbreakTestDto<BlueprintV4Reque
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return BLUEPRINT_RESOURCE_NAME;
     }
 
     public String getDescription() {

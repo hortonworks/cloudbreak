@@ -23,7 +23,7 @@
               "pid": 12624,
               "retcode": 1,
               "stdout": "Logs at /var/log/dl_postgres_backup.log",
-              "stderr": ""
+              "stderr": "backup failure"
             },
             "result": false,
             "comment": "Command /opt/salt/scripts/backup_db.sh AWS s3://hreeve-test/20200610/cloudbreak10-4_database_backup dbsvr-21ca19c9-a5bd-4d8b-8b9e-89d0351ac0c7.czhkrnzwtcwb.us-west-2.rds.amazonaws.com 5432 xiyvqefroz run",

@@ -4,6 +4,9 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.C
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.CLUSTERPROXY_REGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.COLLECT_RESOURCES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.COLLECT_RESOURCES_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.FAILURE_EVENT;
@@ -21,6 +24,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.R
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.STARTING_DOWNSCALE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.STOP_TELEMETRY_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.UPDATE_METADATA_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_COLLECT_RESOURCES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_DNS_ENTRIES_STATE;
@@ -56,9 +61,17 @@ public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleStat
                     .event(STARTING_DOWNSCALE_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(DOWNSCALE_CLUSTERPROXY_REGISTRATION_STATE).to(DOWNSCALE_STOP_TELEMETRY_STATE)
+                    .from(DOWNSCALE_CLUSTERPROXY_REGISTRATION_STATE).to(DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_STATE)
                     .event(CLUSTERPROXY_REGISTRATION_FINISHED_EVENT)
                     .failureEvent(CLUSTERPROXY_REGISTRATION_FAILED_EVENT)
+
+                    .from(DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_STATE).to(DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_STATE)
+                    .event(DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FINISHED_EVENT)
+                    .failureEvent(DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT)
+
+                    .from(DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_STATE).to(DOWNSCALE_STOP_TELEMETRY_STATE)
+                    .event(DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT)
+                    .defaultFailureEvent()
 
                     .from(DOWNSCALE_STOP_TELEMETRY_STATE).to(DOWNSCALE_COLLECT_RESOURCES_STATE)
                     .event(STOP_TELEMETRY_FINISHED_EVENT)

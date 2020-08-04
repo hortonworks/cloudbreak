@@ -32,13 +32,12 @@ public abstract class ExceptionCatcherEventHandler<T extends Payload> implements
             doAccept(handlerEvent);
             if (handlerEvent.getCounter() < 1) {
                 LOGGER.error("No event has been sent from {}", handlerName);
-                IllegalStateException noEventHasBeenSentException = new IllegalStateException("No event has been sent from " + handlerName);
-                eventBus.notify(defaultFailureEvent(event.getData().getResourceId(), noEventHasBeenSentException).selector(),
-                        new Event<>(event.getHeaders(), event));
+                throw new IllegalStateException("No event has been sent from " + handlerName);
             }
         } catch (Exception e) {
             LOGGER.error("Something unexpected happened in handler {}", handlerName, e);
-            eventBus.notify(defaultFailureEvent(event.getData().getResourceId(), e).selector(), new Event<>(event.getHeaders(), event));
+            Selectable failureEvent = defaultFailureEvent(event.getData().getResourceId(), e);
+            eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
         }
     }
 

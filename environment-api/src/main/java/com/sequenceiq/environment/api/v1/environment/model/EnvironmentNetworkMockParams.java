@@ -34,6 +34,14 @@ public class EnvironmentNetworkMockParams {
         this.vpcId = vpcId;
     }
 
+    @Override
+    public String toString() {
+        return "EnvironmentNetworkMockParams{" +
+                "vpcId='" + vpcId + '\'' +
+                ", internetGatewayId='" + internetGatewayId + '\'' +
+                '}';
+    }
+
     public static final class EnvironmentNetworkMockParamsBuilder {
 
         private String vpcId;

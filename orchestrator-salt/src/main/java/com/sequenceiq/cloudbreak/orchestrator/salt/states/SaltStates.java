@@ -97,7 +97,7 @@ public class SaltStates {
         return sc.run(Glob.ALL, "state.show_sls", LOCAL, ApplyFullResponse.class, state);
     }
 
-    public static Multimap<String, String> jidInfo(SaltConnector sc, String jid, Target<String> target, StateType stateType) {
+    public static Multimap<String, Map<String, String>> jidInfo(SaltConnector sc, String jid, Target<String> target, StateType stateType) {
         if (StateType.HIGH.equals(stateType)) {
             return highStateJidInfo(sc, jid);
         } else if (StateType.SIMPLE.equals(stateType)) {
@@ -106,21 +106,21 @@ public class SaltStates {
         return ArrayListMultimap.create();
     }
 
-    private static Multimap<String, String> applyStateJidInfo(SaltConnector sc, String jid) {
+    private static Multimap<String, Map<String, String>> applyStateJidInfo(SaltConnector sc, String jid) {
         Map<?, ?> jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         LOGGER.debug("Salt apply state jid info: {}", jidInfo);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
         return collectMissingTargets(states);
     }
 
-    private static Multimap<String, String> highStateJidInfo(SaltConnector sc, String jid) {
+    private static Multimap<String, Map<String, String>> highStateJidInfo(SaltConnector sc, String jid) {
         Map<String, List<Map<String, Object>>> jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
     }
 
-    private static Multimap<String, String> collectMissingTargets(Map<String, List<RunnerInfo>> stringRunnerInfoObjectMap) {
-        Multimap<String, String> missingTargetsWithErrors = ArrayListMultimap.create();
+    private static Multimap<String, Map<String, String>> collectMissingTargets(Map<String, List<RunnerInfo>> stringRunnerInfoObjectMap) {
+        Multimap<String, Map<String, String>> missingTargetsWithErrors = ArrayListMultimap.create();
         for (Entry<String, List<RunnerInfo>> stringMapEntry : stringRunnerInfoObjectMap.entrySet()) {
             LOGGER.debug("Collect missing targets from host: {}", stringMapEntry.getKey());
             if  (stringMapEntry.getValue() != null) {

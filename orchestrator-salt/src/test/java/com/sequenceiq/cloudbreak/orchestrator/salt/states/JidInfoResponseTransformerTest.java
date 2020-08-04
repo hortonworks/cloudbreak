@@ -51,19 +51,28 @@ public class JidInfoResponseTransformerTest {
     public void testResultSummaryWithStderr() {
         Map<String, List<RunnerInfo>> res = JidInfoResponseTransformer.getHighStates(saltResponseData);
         RunnerInfo extraInfo = res.get("host-10-0-0-6.openstacklocal").get(18);
+        Map<String, String> expectedErrorResultSummary = Map.of(
+            "Comment", "Command \"/opt/ambari-server/install-mpack-1.sh\" run",
+            "Stderr", "+ ARGS= + echo yes + ambari-server install-mpack --"
+        );
+
         assertEquals("Command \"/opt/ambari-server/install-mpack-1.sh\" run", extraInfo.getComment());
         assertEquals("+ ARGS= + echo yes + ambari-server install-mpack --", extraInfo.getStderr());
-        assertEquals("\nComment: Command \"/opt/ambari-server/install-mpack-1.sh\" run\nStderr: + ARGS= + echo yes + ambari-server install-mpack --",
-                extraInfo.getErrorResultSummary());
+        assertEquals(expectedErrorResultSummary, extraInfo.getErrorResultSummary());
     }
 
     @Test
     public void testResultSummary() {
         Map<String, List<RunnerInfo>> res = JidInfoResponseTransformer.getHighStates(saltResponseData);
         RunnerInfo noExtraInfo = res.get("host-10-0-0-6.openstacklocal").get(0);
+        Map<String, String> expectedErrorResultSummary = Map.of(
+            "Name", "/etc/hosts",
+            "Comment", "No changes needed to be made"
+        );
+
         assertEquals("No changes needed to be made", noExtraInfo.getComment());
         assertEquals("null", noExtraInfo.getStderr());
-        assertEquals("\nName: /etc/hosts\nComment: No changes needed to be made", noExtraInfo.getErrorResultSummary());
+        assertEquals(expectedErrorResultSummary, noExtraInfo.getErrorResultSummary());
     }
 
     @Test

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowService;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionFailureEvent;
+import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -41,12 +42,13 @@ public class DiagnosticsUploadHandler extends EventSenderAwareHandler<Diagnostic
         DiagnosticsCollectionEvent data = event.getData();
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
-        Map<String, Object> parameters = data.getParameters();
+        DiagnosticParameters parameters = data.getParameters();
+        Map<String, Object> parameterMap = parameters.toMap();
         try {
-            LOGGER.debug("Diagnostics upload started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameters);
+            LOGGER.debug("Diagnostics upload started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
             Set<String> hosts = data.getHosts();
             Set<String> hostGroups = data.getHostGroups();
-            diagnosticsFlowService.upload(resourceId, parameters, hosts, hostGroups);
+            diagnosticsFlowService.upload(resourceId, parameterMap, hosts, hostGroups);
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
@@ -57,7 +59,7 @@ public class DiagnosticsUploadHandler extends EventSenderAwareHandler<Diagnostic
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {
-            LOGGER.debug("Diagnostics upload failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameters, e);
+            LOGGER.debug("Diagnostics upload failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameterMap, e);
             DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters);
             eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
         }

@@ -30,7 +30,7 @@ public class CloudbreakOperationChecker<T extends CloudbreakWaitObject> extends 
         String name = waitObject.getName();
         Map<String, Status> desiredStatuses = waitObject.getDesiredStatuses();
         try {
-            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name);
+            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name, waitObject.getAccountId());
             if (stackStatus == null) {
                 throw new TestFailException(String.format("'%s' stack was not found.", name));
             }
@@ -63,7 +63,7 @@ public class CloudbreakOperationChecker<T extends CloudbreakWaitObject> extends 
     public void handleTimeout(T waitObject) {
         String name = waitObject.getName();
         try {
-            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name);
+            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name, waitObject.getAccountId());
             if (stackStatus == null) {
                 throw new TestFailException(String.format("'%s' cluster was not found.", name));
             }
@@ -88,7 +88,7 @@ public class CloudbreakOperationChecker<T extends CloudbreakWaitObject> extends 
     public boolean exitWaiting(T waitObject) {
         String name = waitObject.getName();
         try {
-            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name);
+            StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name, waitObject.getAccountId());
             if (stackStatus == null) {
                 LOGGER.info("'{}' cluster was not found. Exit waiting!", name);
                 return true;
@@ -109,7 +109,8 @@ public class CloudbreakOperationChecker<T extends CloudbreakWaitObject> extends 
 
     @Override
     public Map<String, String> getStatuses(T waitObject) {
-        StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), waitObject.getName());
+        StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), waitObject.getName(),
+                waitObject.getAccountId());
         return Map.of("status", stackStatus.getStatus().name(), "clusterStatus", stackStatus.getClusterStatus().name());
     }
 

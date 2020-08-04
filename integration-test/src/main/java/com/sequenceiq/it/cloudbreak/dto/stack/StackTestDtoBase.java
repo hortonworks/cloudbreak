@@ -47,6 +47,8 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 
 public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends AbstractCloudbreakTestDto<StackV4Request, StackV4Response, T> {
 
+    private static final String STACK_RESOURCE_NAME = "stackName";
+
     public StackTestDtoBase(TestContext testContext) {
         super(new StackV4Request(), testContext);
     }
@@ -145,6 +147,11 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return STACK_RESOURCE_NAME;
     }
 
     public StackTestDtoBase<T> withCluster() {

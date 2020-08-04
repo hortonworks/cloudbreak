@@ -89,7 +89,8 @@ public class SdxRepairService {
     protected void startRepairInCb(SdxCluster sdxCluster, SdxRepairSettings repairRequest) {
         try {
             LOGGER.info("Triggering repair flow for cluster {} with hostgroups {}", sdxCluster.getClusterName(), repairRequest.getHostGroupNames());
-            FlowIdentifier flowIdentifier = stackV4Endpoint.repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest));
+            FlowIdentifier flowIdentifier = stackV4Endpoint.repairCluster(0L, sdxCluster.getClusterName(),
+                    createRepairRequest(repairRequest), sdxCluster.getAccountId());
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", sdxCluster);
         } catch (NotFoundException e) {
@@ -143,7 +144,7 @@ public class SdxRepairService {
     }
 
     private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster, FlowState flowState) throws JsonProcessingException {
-        StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
+        StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId());
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();
         if (stackAndClusterAvailable(stackV4Response, cluster)) {

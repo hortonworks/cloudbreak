@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.v4;
 
 import java.util.Collections;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
@@ -17,7 +18,8 @@ public class DatalakeClusterV4Action {
         DatalakeCluster datalake = (DatalakeCluster) entity;
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-        datalake.setResponse(client.getCloudbreakClient().stackV4Endpoint().get(workspaceId, name, Collections.emptySet()));
+        datalake.setResponse(client.getCloudbreakClient().stackV4Endpoint().get(workspaceId, name, Collections.emptySet(),
+                Crn.fromString(datalake.getResponse().getCrn()).getAccountId()));
     }
 
 }

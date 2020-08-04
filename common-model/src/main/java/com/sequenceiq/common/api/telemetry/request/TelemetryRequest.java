@@ -43,4 +43,13 @@ public class TelemetryRequest extends TelemetryBase {
     public void setFeatures(FeaturesRequest features) {
         this.features = features;
     }
+
+    @Override
+    public String toString() {
+        return "TelemetryRequest{" +
+                "logging=" + logging +
+                ", workloadAnalytics=" + workloadAnalytics +
+                ", features=" + features +
+                '}';
+    }
 }

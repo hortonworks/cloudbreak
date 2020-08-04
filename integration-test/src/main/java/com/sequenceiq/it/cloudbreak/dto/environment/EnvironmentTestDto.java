@@ -51,6 +51,8 @@ public class EnvironmentTestDto
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
+    private static final String ENVIRONMENT_RESOURCE_NAME = "environmentName";
+
     private static final int ORDER = 600;
 
     @Inject
@@ -120,6 +122,11 @@ public class EnvironmentTestDto
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    @Override
+    public String getResourceNameType() {
+        return ENVIRONMENT_RESOURCE_NAME;
     }
 
     public EnvironmentTestDto withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
@@ -295,7 +302,7 @@ public class EnvironmentTestDto
     public void cleanUp(TestContext context, CloudbreakClient client) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         if (getResponse() != null) {
-            when(environmentTestClient.forceDelete(), key("delete-environment-" + getName()).withSkipOnFail(false));
+            when(environmentTestClient.cascadingDelete(), key("delete-environment-" + getName()).withSkipOnFail(false));
             await(ARCHIVED, new RunningParameter().withSkipOnFail(true));
         } else {
             LOGGER.info("Response field is null for env: {}", getName());

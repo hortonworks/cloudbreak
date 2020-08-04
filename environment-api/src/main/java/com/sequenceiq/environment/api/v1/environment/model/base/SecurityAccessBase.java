@@ -51,6 +51,15 @@ public abstract class SecurityAccessBase {
         this.cidr = cidr;
     }
 
+    @Override
+    public String toString() {
+        return "SecurityAccessBase{" +
+                "securityGroupIdForKnox='" + securityGroupIdForKnox + '\'' +
+                ", defaultSecurityGroupId='" + defaultSecurityGroupId + '\'' +
+                ", cidr='" + cidr + '\'' +
+                '}';
+    }
+
     public static class Builder<T extends SecurityAccessBase> {
 
         private final Class<T> baseClass;

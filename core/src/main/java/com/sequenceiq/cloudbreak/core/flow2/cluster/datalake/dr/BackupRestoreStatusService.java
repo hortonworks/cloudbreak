@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class BackupRestoreStatusService {
 
+    private static final String ERRORS_STRING = "Error(s): ";
+
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
 
@@ -43,7 +45,7 @@ public class BackupRestoreStatusService {
 
     public void handleDatabaseBackupFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus) {
         clusterService.updateClusterStatusByStackId(stackId, Status.BACKUP_FAILED, errorReason);
-        stackUpdater.updateStackStatus(stackId, detailedStatus);
+        stackUpdater.updateStackStatus(stackId, detailedStatus, extractSaltErrorIfAvailable(errorReason));
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), DATALAKE_DATABASE_BACKUP_FAILED, errorReason);
     }
 
@@ -61,7 +63,14 @@ public class BackupRestoreStatusService {
 
     public void handleDatabaseRestoreFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus) {
         clusterService.updateClusterStatusByStackId(stackId, Status.RESTORE_FAILED, errorReason);
-        stackUpdater.updateStackStatus(stackId, detailedStatus);
+        stackUpdater.updateStackStatus(stackId, detailedStatus, extractSaltErrorIfAvailable(errorReason));
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), DATALAKE_DATABASE_RESTORE_FAILED, errorReason);
+    }
+
+    private String extractSaltErrorIfAvailable(String errorReason) {
+        if (errorReason.contains(ERRORS_STRING)) {
+            return errorReason.substring(errorReason.indexOf(ERRORS_STRING) + ERRORS_STRING.length()).replaceAll("\n", "; ");
+        }
+        return errorReason;
     }
 }

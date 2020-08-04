@@ -31,6 +31,14 @@ public class EnvironmentNetworkYarnParams {
         this.lifetime = lifetime;
     }
 
+    @Override
+    public String toString() {
+        return "EnvironmentNetworkYarnParams{" +
+                "queue='" + queue + '\'' +
+                ", lifetime=" + lifetime +
+                '}';
+    }
+
     public static final class EnvironmentNetworkYarnParamsBuilder {
 
         private String queue;

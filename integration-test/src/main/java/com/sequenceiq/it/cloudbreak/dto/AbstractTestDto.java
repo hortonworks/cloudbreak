@@ -85,6 +85,10 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         this.name = name;
     }
 
+    public String getResourceNameType() {
+        return null;
+    }
+
     public R getRequest() {
         return request;
     }

@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.action.v4.clustertemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -29,7 +30,8 @@ public class DeleteClusterFromClusterTemplateAction implements Action<ClusterTem
         StackTemplateTestDto stackEntity = testContext.get(stackTemplateKey);
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .delete(client.getWorkspaceId(), stackEntity.getName(), false);
+                .delete(client.getWorkspaceId(), stackEntity.getName(), false,
+                        Crn.fromString(testDto.getResponse().getEnvironmentCrn()).getAccountId());
         Log.whenJson(LOGGER, " Stack from template created  successfully:\n", testDto.getResponse());
         return testDto;
     }

@@ -8,15 +8,19 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -33,7 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.common.api.type.CdpResourceType;
-import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceEndpoint;
+import com.sequenceiq.environment.api.v1.platformresource.CredentialPlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDisksResponse;
@@ -55,9 +59,9 @@ import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 @Controller
 @AuthorizationResource
 @Transactional(TxType.NEVER)
-public class PlatformResourceController implements PlatformResourceEndpoint {
+public class CredentialPlatformResourceController implements CredentialPlatformResourceEndpoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PlatformResourceController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialPlatformResourceController.class);
 
     @Inject
     @Named("conversionService")
@@ -66,8 +70,11 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     @Inject
     private PlatformParameterService platformParameterService;
 
+    @Inject
+    private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
+
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CustomPermissionCheck
     public PlatformVmtypesResponse getVmTypesByCredential(
             String credentialName,
             String credentialCrn,
@@ -75,6 +82,7 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
             String platformVariant,
             String availabilityZone,
             CdpResourceType cdpResourceType) {
+        customPermissionCheckByCredential(credentialName, credentialCrn);
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -93,7 +101,7 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CustomPermissionCheck
     public RegionResponse getRegionsByCredential(
             String credentialName,
             String credentialCrn,
@@ -101,6 +109,7 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
             String platformVariant,
             String availabilityZone,
             boolean availabilityZonesNeeded) {
+        customPermissionCheckByCredential(credentialName, credentialCrn);
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -117,7 +126,7 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @DisableCheckPermissions
     public PlatformDisksResponse getDisktypes() {
         LOGGER.info("Get /platform_resources/disk_types");
         PlatformDisks disks = platformParameterService.getDiskTypes();
@@ -127,13 +136,14 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CustomPermissionCheck
     public PlatformNetworksResponse getCloudNetworks(
             String credentialName,
             String credentialCrn,
             String region,
             String platformVariant,
             String availabilityZone) {
+        customPermissionCheckByCredential(credentialName, credentialCrn);
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -151,13 +161,14 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CustomPermissionCheck
     public PlatformIpPoolsResponse getIpPoolsCredentialId(
             String credentialName,
             String credentialCrn,
             String region,
             String platformVariant,
             String availabilityZone) {
+        customPermissionCheckByCredential(credentialName, credentialCrn);
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -174,13 +185,14 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CustomPermissionCheck
     public PlatformGatewaysResponse getGatewaysCredentialId(
             String credentialName,
             String credentialCrn,
             String region,
             String platformVariant,
             String availabilityZone) {
+        customPermissionCheckByCredential(credentialName, credentialCrn);
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -198,13 +210,14 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CustomPermissionCheck
     public PlatformEncryptionKeysResponse getEncryptionKeys(
             String credentialName,
             String credentialCrn,
             String region,
             String platformVariant,
             String availabilityZone) {
+        customPermissionCheckByCredential(credentialName, credentialCrn);
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -221,13 +234,14 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CustomPermissionCheck
     public PlatformSecurityGroupsResponse getSecurityGroups(
             String credentialName,
             String credentialCrn,
             String region,
             String platformVariant,
             String availabilityZone) {
+        customPermissionCheckByCredential(credentialName, credentialCrn);
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -244,13 +258,14 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CustomPermissionCheck
     public PlatformSshKeysResponse getCloudSshKeys(
             String credentialName,
             String credentialCrn,
             String region,
             String platformVariant,
             String availabilityZone) {
+        customPermissionCheckByCredential(credentialName, credentialCrn);
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -267,7 +282,7 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CustomPermissionCheck
     public PlatformAccessConfigsResponse getAccessConfigs(
             String credentialName,
             String credentialCrn,
@@ -275,6 +290,7 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
             String platformVariant,
             String availabilityZone,
             AccessConfigTypeQueryParam accessConfigType) {
+        customPermissionCheckByCredential(credentialName, credentialCrn);
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -292,7 +308,7 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @DisableCheckPermissions
     public TagSpecificationsResponse getTagSpecifications() {
         LOGGER.info("Get /platform_resources/tag_specifications");
         Map<Platform, PlatformParameters> platformParameters = platformParameterService.getPlatformParameters();
@@ -302,13 +318,14 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CustomPermissionCheck
     public PlatformNoSqlTablesResponse getNoSqlTables(
             String credentialName,
             String credentialCrn,
             String region,
             String platformVariant,
             String availabilityZone) {
+        customPermissionCheckByCredential(credentialName, credentialCrn);
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -325,13 +342,14 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CustomPermissionCheck
     public PlatformResourceGroupsResponse getResourceGroups(
             String credentialName,
             String credentialCrn,
             String region,
             String platformVariant,
             String availabilityZone) {
+        customPermissionCheckByCredential(credentialName, credentialCrn);
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -353,4 +371,17 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     private String getAccountId() {
         return ThreadBasedUserCrnProvider.getAccountId();
     }
+
+    private void customPermissionCheckByCredential(String credentialName, String credentialCrn) {
+        if (!Strings.isNullOrEmpty(credentialName)) {
+            commonPermissionCheckingUtils.checkPermissionForUserOnResource(AuthorizationResourceAction.DESCRIBE_CREDENTIAL,
+                    ThreadBasedUserCrnProvider.getUserCrn(), platformParameterService.getCredentialCrnByName(credentialName));
+        } else if (!Strings.isNullOrEmpty(credentialCrn)) {
+            commonPermissionCheckingUtils.checkPermissionForUserOnResource(AuthorizationResourceAction.DESCRIBE_CREDENTIAL,
+                    ThreadBasedUserCrnProvider.getUserCrn(), credentialCrn);
+        } else {
+            throw new BadRequestException("The credentialCrn or the credentialName must be specified in the request");
+        }
+    }
+
 }
