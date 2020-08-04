@@ -178,8 +178,7 @@ public class ImageService {
         ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(workspaceId, imageSettings, user);
         ImageFilter imageFilter = new ImageFilter(imageCatalog, ImmutableSet.of(platformString), null, baseImageEnabled, operatingSystems, clusterVersion);
         LOGGER.info("Image id is not specified for the stack.");
-        if (baseImageEnabled && useBaseImage)
-        {
+        if (baseImageEnabled && useBaseImage) {
             LOGGER.info("Trying to select a base image.");
             return imageCatalogService.getLatestBaseImageDefaultPreferred(imageFilter, imagePredicate);
         }
