@@ -1,5 +1,19 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -12,18 +26,6 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class SharedServiceConfigProvider {
@@ -61,22 +63,14 @@ public class SharedServiceConfigProvider {
             if (publicStack.getDatalakeResourceId() != null || (!CollectionUtils.isEmpty(datalakeResources) && datalakeResources.size() == 1)) {
                 Long datalakeResourceId = getDatalakeResourceIdFromEnvOrStack(publicStack, datalakeResources);
                 datalakeResource = datalakeResourcesService.findById(datalakeResourceId);
-            } else {
-                if (publicStack.getDatalakeResourceId() == null) {
-                    LOGGER.debug("Datalake resource id was null, therefore unable to fetch resource(s)!");
-                }
-                if (CollectionUtils.isEmpty(datalakeResources)) {
-                    LOGGER.debug("No datalake resource(s) has been found for environment: {}", publicStack.getEnvironmentCrn());
-                }
             }
             if (decorateStackWithConfigs(publicStack, datalakeResource)) {
                 return stackService.save(publicStack);
             }
             return publicStack;
         } catch (IOException e) {
-            String baseMessage = "Could not propagate cluster input parameters";
-            LOGGER.warn(baseMessage);
-            throw new BadRequestException(baseMessage + ": " + e.getMessage(), e);
+            LOGGER.warn("Could not propagate cluster input parameters");
+            throw new BadRequestException("Could not propagate cluster input parameters: " + e.getMessage(), e);
         }
     }
 
@@ -112,5 +106,4 @@ public class SharedServiceConfigProvider {
         FileSystem fileSystem = remoteDataContextWorkaroundService.prepareFilesytem(requestedCluster, datalakeResources);
         requestedCluster.setFileSystem(fileSystem);
     }
-
 }

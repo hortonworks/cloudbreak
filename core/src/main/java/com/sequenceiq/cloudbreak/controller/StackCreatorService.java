@@ -383,7 +383,6 @@ public class StackCreatorService {
         if (stack.getDatalakeResourceId() != null) {
             return sharedServiceConfigProvider.prepareDatalakeConfigs(stack);
         }
-        LOGGER.debug("No datalake resource id has been given for stack! (crn: {})", stack.getResourceCrn());
         return stack;
     }
 

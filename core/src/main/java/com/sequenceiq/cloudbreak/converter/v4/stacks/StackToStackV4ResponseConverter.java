@@ -1,5 +1,19 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
@@ -40,18 +54,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 @Component
 public class StackToStackV4ResponseConverter extends AbstractConversionServiceAwareConverter<Stack, StackV4Response> {
@@ -223,32 +225,22 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
 
     private void addSharedServiceResponse(Stack stack, StackV4Response stackResponse) {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
-        LOGGER.debug("Checking wheter the datalake resource id is null or not for the cluster: " + stack.getResourceCrn());
         if (stack.getDatalakeResourceId() != null) {
             Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findById(stack.getDatalakeResourceId());
             if (datalakeResources.isPresent()) {
                 DatalakeResources datalakeResource = datalakeResources.get();
                 sharedServiceResponse.setSharedClusterId(datalakeResource.getDatalakeStackId());
                 sharedServiceResponse.setSharedClusterName(datalakeResource.getName());
-                LOGGER.debug("DatalakeResources (datalake stack id: {} ,name: {}) has found for stack: {}",
-                        datalakeResource.getDatalakeStackId(), datalakeResource.getName(), stack.getResourceCrn());
-            } else {
-                LOGGER.debug("Unable to find DatalakeResources for datalake resource id: " + stack.getDatalakeResourceId());
             }
         } else {
-            LOGGER.debug("Datalake resource ID was null! Going to search it by the given stack's id (id: {})", stack.getId());
             Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findByDatalakeStackId(stack.getId());
             if (datalakeResources.isPresent()) {
-                LOGGER.debug("DatalakeResources (datalake stack id: {} ,name: {}) has found for stack: {}",
-                        datalakeResources.get().getDatalakeStackId(), datalakeResources.get().getName(), stack.getResourceCrn());
                 for (StackIdView connectedStacks : stackService.findClustersConnectedToDatalakeByDatalakeResourceId(datalakeResources.get().getId())) {
                     AttachedClusterInfoV4Response attachedClusterInfoResponse = new AttachedClusterInfoV4Response();
                     attachedClusterInfoResponse.setId(connectedStacks.getId());
                     attachedClusterInfoResponse.setName(connectedStacks.getName());
                     sharedServiceResponse.getAttachedClusters().add(attachedClusterInfoResponse);
                 }
-            } else {
-                LOGGER.debug("Unable to find DatalakeResources by the stack's id: {}", stack.getId());
             }
         }
         stackResponse.setSharedService(sharedServiceResponse);
