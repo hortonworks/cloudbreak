@@ -8,6 +8,7 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.cert.RevokeCertsRespons
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.dns.RemoveDnsResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesResponse;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateDnsSoaRecordsResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHostsFromOrchestrationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryResponse;
@@ -33,6 +34,8 @@ public enum DownscaleFlowEvent implements FlowEvent {
     REVOKE_CERTS_FAILED_EVENT(EventSelectorUtil.failureSelector(RevokeCertsResponse.class)),
     REMOVE_DNS_ENTRIES_FINISHED_EVENT(EventSelectorUtil.selector(RemoveDnsResponse.class)),
     REMOVE_DNS_FAILED_EVENT(EventSelectorUtil.failureSelector(RemoveDnsResponse.class)),
+    DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FINISHED_EVENT(EventSelectorUtil.selector(UpdateDnsSoaRecordsResponse.class)),
+    DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FAILED_EVENT("DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FAILED_EVENT"),
     UPDATE_METADATA_FINISHED_EVENT("UPDATE_METADATA_FINISHED_EVENT"),
     REMOVE_HOSTS_FROM_ORCHESTRATION_FINISHED_EVENT(EventSelectorUtil.selector(RemoveHostsFromOrchestrationSuccess.class)),
     REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_EVENT(EventSelectorUtil.selector(DownscaleFailureEvent.class)),

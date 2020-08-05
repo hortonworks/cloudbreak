@@ -20,7 +20,7 @@ import javax.inject.Inject;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesResponse;
-
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateDnsSoaRecordsRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -51,6 +51,7 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateDnsSoaRecordsResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHostsFromOrchestrationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHostsFromOrchestrationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersRequest;
@@ -255,11 +256,24 @@ public class FreeIpaDownscaleActions {
         };
     }
 
-    @Bean(name = "DOWNSCALE_REMOVE_HOSTS_FROM_ORCHESTRATION_STATE")
-    public Action<?, ?> removeHostsFromOrchestrationAction() {
+    @Bean(name = "DOWNSCALE_UPDATE_DNS_SOA_RECORDS_STATE")
+    public Action<?, ?> updateDnsSoaRecordsAction() {
         return new AbstractDownscaleAction<>(RemoveDnsResponse.class) {
             @Override
             protected void doExecute(StackContext context, RemoveDnsResponse payload, Map<Object, Object> variables) {
+                stackUpdater.updateStackStatus(context.getStack().getId(), getInProgressStatus(variables), "Update DNS SOA records");
+                CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
+                UpdateDnsSoaRecordsRequest request = new UpdateDnsSoaRecordsRequest(cleanupEvent);
+                sendEvent(context, request);
+            }
+        };
+    }
+
+    @Bean(name = "DOWNSCALE_REMOVE_HOSTS_FROM_ORCHESTRATION_STATE")
+    public Action<?, ?> removeHostsFromOrchestrationAction() {
+        return new AbstractDownscaleAction<>(UpdateDnsSoaRecordsResponse.class) {
+            @Override
+            protected void doExecute(StackContext context, UpdateDnsSoaRecordsResponse payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStack().getId(), getInProgressStatus(variables), "Removing hosts from orchestration");
                 CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
                 RemoveHostsFromOrchestrationRequest request = new RemoveHostsFromOrchestrationRequest(cleanupEvent);

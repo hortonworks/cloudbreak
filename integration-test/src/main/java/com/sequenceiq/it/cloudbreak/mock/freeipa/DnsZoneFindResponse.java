@@ -4,20 +4,20 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.freeipa.client.model.DnsZoneList;
+import com.sequenceiq.freeipa.client.model.DnsZone;
 
 import spark.Request;
 import spark.Response;
 
 @Component
-public class DnsZoneFindResponse extends AbstractFreeIpaResponse<Set<DnsZoneList>> {
+public class DnsZoneFindResponse extends AbstractFreeIpaResponse<Set<DnsZone>> {
     @Override
     public String method() {
         return "dnszone_find";
     }
 
     @Override
-    protected Set<DnsZoneList> handleInternal(Request request, Response response) {
+    protected Set<DnsZone> handleInternal(Request request, Response response) {
         return Set.of();
     }
 }

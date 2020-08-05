@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.freeipa.client.model.DnsZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
-import com.sequenceiq.freeipa.client.model.DnsZoneList;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
@@ -38,7 +38,7 @@ public class DnsRecordService {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(environmentCrn, accountId);
-        for (DnsZoneList dnsZone : freeIpaClient.findAllDnsZone()) {
+        for (DnsZone dnsZone : freeIpaClient.findAllDnsZone()) {
             LOGGER.debug("Looking for records in zone [{}]", dnsZone.getIdnsname());
             Set<DnsRecord> allDnsRecordsInZone = freeIpaClient.findAllDnsRecordInZone(dnsZone.getIdnsname());
             deleteRegularRecords(freeIpaClient, dnsZone, allDnsRecordsInZone, fqdns, freeIpa.getDomain());
@@ -46,7 +46,7 @@ public class DnsRecordService {
         }
     }
 
-    private void deleteRegularRecords(FreeIpaClient freeIpaClient, DnsZoneList dnsZone, Set<DnsRecord> allDnsRecordsInZone, List<String> fqdns, String domain)
+    private void deleteRegularRecords(FreeIpaClient freeIpaClient, DnsZone dnsZone, Set<DnsRecord> allDnsRecordsInZone, List<String> fqdns, String domain)
             throws FreeIpaClientException {
         Set<DnsRecord> recordsToDelete = allDnsRecordsInZone.stream()
                 .filter(record -> fqdns.stream().anyMatch(fqdn -> record.isHostRelatedRecord(fqdn, domain)))
@@ -57,7 +57,7 @@ public class DnsRecordService {
         }
     }
 
-    private void deleteSrvRecords(FreeIpaClient freeIpaClient, DnsZoneList dnsZone, Set<DnsRecord> allDnsRecordsInZone, List<String> fqdns)
+    private void deleteSrvRecords(FreeIpaClient freeIpaClient, DnsZone dnsZone, Set<DnsRecord> allDnsRecordsInZone, List<String> fqdns)
             throws FreeIpaClientException {
         Set<DnsRecord> srvRecordsToDelete = allDnsRecordsInZone.stream()
                 .filter(record -> fqdns.stream().anyMatch(fqdn -> record.isHostRelatedSrvRecord(fqdn)))

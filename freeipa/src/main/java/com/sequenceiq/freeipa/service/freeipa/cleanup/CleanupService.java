@@ -30,7 +30,7 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
-import com.sequenceiq.freeipa.client.model.DnsZoneList;
+import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.client.model.Role;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
@@ -123,7 +123,7 @@ public class CleanupService {
         FreeIpaClient client = getFreeIpaClient(stackId);
         Set<String> dnsCleanupSuccess = new HashSet<>();
         Map<String, String> dnsCleanupFailed = new HashMap<>();
-        Set<String> allDnsZoneName = client.findAllDnsZone().stream().map(DnsZoneList::getIdnsname).collect(Collectors.toSet());
+        Set<String> allDnsZoneName = client.findAllDnsZone().stream().map(DnsZone::getIdnsname).collect(Collectors.toSet());
         for (String zone : allDnsZoneName) {
             removeHostNameRelatedDnsRecords(hosts, domain, client, dnsCleanupSuccess, dnsCleanupFailed, zone);
             removeIpRelatedRecords(ips, client, dnsCleanupSuccess, dnsCleanupFailed, zone);
