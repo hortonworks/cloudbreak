@@ -71,6 +71,7 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
         getRequest().setFeatures(featuresRequest);
         Map<String, Object> fluentAttributes = new HashMap<>();
         fluentAttributes.put("dbusIncludeSaltLogs", true);
+        fluentAttributes.put("dbusClusterLogsCollectionDisableStop", true);
         getRequest().setFluentAttributes(fluentAttributes);
         return this;
     }
