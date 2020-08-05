@@ -10,22 +10,22 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.stack.provision.DisableKerberosResultToStackFailureEventConverter;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesResult;
-import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.DisableKerberosResultToStackEventConverter;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.DisableKerberosResultToStackFailureEventConverter;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DisableKerberosRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTerminationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
+import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.statuschecker.service.JobService;
 
 @Configuration
@@ -131,6 +131,7 @@ public class ClusterTerminationActions {
 
             @Override
             protected void initPayloadConverterMap(List<PayloadConverter<StackFailureEvent>> payloadConverters) {
+                super.initPayloadConverterMap(payloadConverters);
                 payloadConverters.add(new DisableKerberosResultToStackFailureEventConverter());
             }
 
