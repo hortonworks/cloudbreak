@@ -63,14 +63,22 @@ public class SharedServiceConfigProvider {
             if (publicStack.getDatalakeResourceId() != null || (!CollectionUtils.isEmpty(datalakeResources) && datalakeResources.size() == 1)) {
                 Long datalakeResourceId = getDatalakeResourceIdFromEnvOrStack(publicStack, datalakeResources);
                 datalakeResource = datalakeResourcesService.findById(datalakeResourceId);
+            } else {
+                if (publicStack.getDatalakeResourceId() == null) {
+                    LOGGER.debug("Datalake resource id was null, therefore unable to fetch resource(s)!");
+                }
+                if (CollectionUtils.isEmpty(datalakeResources)) {
+                    LOGGER.debug("No datalake resource(s) has been found for environment: {}", publicStack.getEnvironmentCrn());
+                }
             }
             if (decorateStackWithConfigs(publicStack, datalakeResource)) {
                 return stackService.save(publicStack);
             }
             return publicStack;
         } catch (IOException e) {
-            LOGGER.warn("Could not propagate cluster input parameters");
-            throw new BadRequestException("Could not propagate cluster input parameters: " + e.getMessage(), e);
+            String baseMessage = "Could not propagate cluster input parameters";
+            LOGGER.warn(baseMessage);
+            throw new BadRequestException(baseMessage + ": " + e.getMessage(), e);
         }
     }
 
@@ -106,4 +114,5 @@ public class SharedServiceConfigProvider {
         FileSystem fileSystem = remoteDataContextWorkaroundService.prepareFilesytem(requestedCluster, datalakeResources);
         requestedCluster.setFileSystem(fileSystem);
     }
+
 }
