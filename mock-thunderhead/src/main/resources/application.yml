@@ -24,3 +24,4 @@ auth:
     azure.single.resourcegroup.enable: false
     fastebsencryption.enable: true
     cloudidentitymappinng.enable: true
+    mediumdutysdx.enable: true

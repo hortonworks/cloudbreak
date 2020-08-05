@@ -42,6 +42,9 @@ public class EntitlementService {
     static final String CDP_RAZ = "CDP_RAZ";
 
     @VisibleForTesting
+    static final String CDP_MEDIUM_DUTY_SDX = "CDP_MEDIUM_DUTY_SDX";
+
+    @VisibleForTesting
     static final String CDP_RUNTIME_UPGRADE = "CDP_RUNTIME_UPGRADE";
 
     @VisibleForTesting
@@ -100,6 +103,10 @@ public class EntitlementService {
 
     public boolean razEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_RAZ);
+    }
+
+    public boolean mediumDutySdxEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_MEDIUM_DUTY_SDX);
     }
 
     public boolean runtimeUpgradeEnabled(String actorCrn, String accountId) {

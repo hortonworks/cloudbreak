@@ -185,6 +185,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest.getClusterShape());
         validateEnv(environment);
         validateRazEnablement(sdxClusterRequest, environment);
+        validateMediumDutySdxEnablement(sdxClusterRequest, environment);
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setInitiatorUserCrn(userCrn);
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
@@ -443,7 +444,26 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
                 validationBuilder.error("Provisioning Ranger Raz is only valid for Microsoft Azure.");
             }
             if (!isRazSupported(sdxClusterRequest.getRuntime())) {
-                validationBuilder.error("Provisioning Ranger Raz is only valid for CM version > 7.2.1 and not " + sdxClusterRequest.getRuntime());
+                validationBuilder.error("Provisioning Ranger Raz is only valid for CM version >= 7.2.1 and not " + sdxClusterRequest.getRuntime());
+            }
+        }
+        ValidationResult validationResult = validationBuilder.build();
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
+    private void validateMediumDutySdxEnablement(SdxClusterRequest sdxClusterRequest, DetailedEnvironmentResponse environment) {
+        ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
+        if (SdxClusterShape.MEDIUM_DUTY_HA.equals(sdxClusterRequest.getClusterShape())) {
+            boolean mediumDutySdxEntitlementEnabled = entitlementService.mediumDutySdxEnabled(environment.getCreator(),
+                    Crn.safeFromString(environment.getCreator()).getAccountId());
+            if (!mediumDutySdxEntitlementEnabled) {
+                validationBuilder.error("Provisioning a medium duty data lake cluster is not enabled for this account. " +
+                        "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.");
+            }
+            if (!isMediumDutySdxSupported(sdxClusterRequest.getRuntime())) {
+                validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version >= 7.2.2 and not " + sdxClusterRequest.getRuntime());
             }
         }
         ValidationResult validationResult = validationBuilder.build();
@@ -461,6 +481,17 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         }
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(() -> runtime, () -> "7.2.1") > -1;
+    }
+
+    /**
+     * Medium Duty HA is only on 7.2.2 and later.  If runtime is empty, then sdx-internal call was used.
+     */
+    private boolean isMediumDutySdxSupported(String runtime) {
+        if (StringUtils.isEmpty(runtime)) {
+            return true;
+        }
+        Comparator<Versioned> versionComparator = new VersionComparator();
+        return versionComparator.compare(() -> runtime, () -> "7.2.2") > -1;
     }
 
     private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
