@@ -64,6 +64,13 @@ public class GrpcUmsClient {
     @Inject
     private UmsClientConfig umsClientConfig;
 
+    public static GrpcUmsClient createClient(UmsConfig config, UmsClientConfig clientConfig) {
+        GrpcUmsClient client = new GrpcUmsClient();
+        client.setUmsConfig(config);
+        client.setUmsClientConfig(clientConfig);
+        return client;
+    }
+
     /**
      * Retrieves list of all groups from UMS.
      *
@@ -322,9 +329,9 @@ public class GrpcUmsClient {
     /**
      * Lists the workload administration groups a member belongs to.
      *
-     * @param actorCrn       the CRN of the actor
-     * @param memberCrn      the CRN of the user or machine user
-     * @param requestId      request id for getting rights
+     * @param actorCrn  the CRN of the actor
+     * @param memberCrn the CRN of the user or machine user
+     * @param requestId request id for getting rights
      * @return the workload administration groups associated with this user or machine user
      */
     public List<String> listWorkloadAdministrationGroupsForMember(
@@ -410,10 +417,10 @@ public class GrpcUmsClient {
     /**
      * Retrieves whether the member has the specified rights.
      *
-     * @param actorCrn the CRN of the actor
-     * @param memberCrn the CRN of the member
+     * @param actorCrn    the CRN of the actor
+     * @param memberCrn   the CRN of the member
      * @param rightChecks the rights to check
-     * @param requestId an optional request id
+     * @param requestId   an optional request id
      * @return a list of booleans indicating whether the member has the specified rights
      */
     public List<Boolean> hasRights(String actorCrn, String memberCrn, List<AuthorizationProto.RightCheck> rightChecks, Optional<String> requestId) {
@@ -446,9 +453,9 @@ public class GrpcUmsClient {
     public Map<String, Boolean> hasRights(String actorCrn, String memberCrn, List<String> resources, String right, Optional<String> requestId) {
         List<AuthorizationProto.RightCheck> rightChecks = resources.stream()
                 .map(resource -> AuthorizationProto.RightCheck.newBuilder()
-                    .setResource(resource)
-                    .setRight(right)
-                    .build())
+                        .setResource(resource)
+                        .setRight(right)
+                        .build())
                 .collect(Collectors.toList());
         List<Boolean> result = hasRights(actorCrn, memberCrn, rightChecks, requestId);
         return resources.stream().collect(
@@ -595,8 +602,9 @@ public class GrpcUmsClient {
     /**
      * Gather anonymization rules for a specific account
      * NOTE: not supported yet on UMS side
+     *
      * @param accountId account that owns the anonymization rules
-     * @param actorCrn actor that requests to gather the anonymization rules
+     * @param actorCrn  actor that requests to gather the anonymization rules
      * @return a list of anonymization rules for an UMS account
      */
     public List<AnonymizationRule> getAnonymizationRules(String accountId, String actorCrn) {
@@ -776,5 +784,13 @@ public class GrpcUmsClient {
                 .setPartition(Crn.Partition.ALTUS)
                 .setAccountId(ACCOUNT_IN_IAM_CRNS)
                 .setService(Crn.Service.IAM);
+    }
+
+    private void setUmsConfig(UmsConfig umsConfig) {
+        this.umsConfig = umsConfig;
+    }
+
+    private void setUmsClientConfig(UmsClientConfig umsClientConfig) {
+        this.umsClientConfig = umsClientConfig;
     }
 }

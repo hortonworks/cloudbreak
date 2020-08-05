@@ -34,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
+import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -47,7 +48,7 @@ import com.sequenceiq.it.cloudbreak.search.Searchable;
 @Prototype
 public class EnvironmentTestDto
         extends DeletableEnvironmentTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse>
-        implements Searchable {
+        implements Searchable, Assignable {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
@@ -370,4 +371,11 @@ public class EnvironmentTestDto
         return getTestParameter().get(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE);
     }
 
+    @Override
+    public String getCrn() {
+        if (getResponse() == null) {
+            throw new IllegalStateException("You have tried to assign to a Dto that hasn't been created and therefore has no Response object.");
+        }
+        return getResponse().getCrn();
+    }
 }
