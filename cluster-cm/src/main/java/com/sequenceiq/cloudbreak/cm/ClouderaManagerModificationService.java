@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -101,6 +100,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Inject
     private ClouderaManagerConfigService configService;
+
+    @Inject
+    private ClouderaManagerParcelService clouderaManagerParcelService;
 
     private final Stack stack;
 
@@ -507,6 +509,16 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         return null;
     }
 
+    @Override
+    public Map<String, String> gatherInstalledComponents(String stackName) {
+        try {
+        return clouderaManagerParcelService.getActivatedParcels(apiClient, stackName);
+        } catch (ApiException e) {
+            LOGGER.info("Unable to fetch the list of activated parcels", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
     private int startServices(Stack stack, ApiClient client) throws ApiException, CloudbreakException {
         Cluster cluster = stack.getCluster();
         ClustersResourceApi apiInstance = clouderaManagerApiFactory.getClustersResourceApi(client);
@@ -566,7 +578,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClient, apiCommand.getId());
         } catch (ApiException e) {
             LOGGER.info("Unable to refresh parcel repo", e);
-            throw new CloudbreakServiceException(e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }
 }

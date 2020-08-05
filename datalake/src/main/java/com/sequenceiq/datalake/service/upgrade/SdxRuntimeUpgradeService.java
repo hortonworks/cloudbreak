@@ -201,8 +201,14 @@ public class SdxRuntimeUpgradeService {
                     .map(ImageComponentVersions::getCdp)
                     .distinct()
                     .collect(Collectors.joining(","));
-            throw new BadRequestException(String.format("There is no image eligible for upgrading the cluster with runtime: %s. "
-                    + "Please choose a runtime from the following image(s): %s", runtime, availableRuntimes));
+            String errorMessage;
+            if (StringUtils.isEmpty(availableRuntimes)) {
+                errorMessage = String.format("There is no image eligible for the cluster upgrade with runtime: %s.", runtime);
+            } else {
+                errorMessage = String.format("There is no image eligible for the cluster upgrade with runtime: %s. "
+                        + "Please choose a runtime from the following: %s", runtime, availableRuntimes);
+            }
+            throw new BadRequestException(errorMessage);
         } else {
             ImageInfoV4Response imageInfoV4Response = imagesWithMatchingRuntime.get().max(getComparator()).orElseThrow();
             imageId = imageInfoV4Response.getImageId();
@@ -213,8 +219,8 @@ public class SdxRuntimeUpgradeService {
     private String validateImageId(List<ImageInfoV4Response> upgradeCandidates, String requestImageId) {
         if (upgradeCandidates.stream().noneMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equalsIgnoreCase(requestImageId))) {
             String candidates = upgradeCandidates.stream().map(ImageInfoV4Response::getImageId).collect(Collectors.joining(","));
-            throw new BadRequestException(String.format("The given image (%s) is not eligible for upgrading the cluster. "
-                    + "Please choose an id from the following image(s): %s", requestImageId, candidates));
+            throw new BadRequestException(String.format("The given image (%s) is not eligible for the cluster upgrade. "
+                    + "Please choose an id from the following: %s", requestImageId, candidates));
         }
         return requestImageId;
     }

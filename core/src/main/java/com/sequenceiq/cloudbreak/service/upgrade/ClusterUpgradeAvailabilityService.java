@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -75,6 +77,9 @@ public class ClusterUpgradeAvailabilityService {
 
     @Inject
     private GatewayConfigService gatewayConfigService;
+
+    @Inject
+    private ClusterApiConnectors clusterApiConnectors;
 
     public UpgradeV4Response checkForUpgradesByName(Long workspaceId, String stackName, boolean lockComponents) {
         Stack stack = stackService.getByNameInWorkspace(stackName, workspaceId);
@@ -152,7 +157,9 @@ public class ClusterUpgradeAvailabilityService {
             com.sequenceiq.cloudbreak.cloud.model.Image currentImage = getImage(stack);
             CloudbreakImageCatalogV3 imageCatalog = getImagesFromCatalog(currentImage.getImageCatalogUrl());
             Image image = getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
-            ImageFilterResult filteredImages = filterImages(imageCatalog, image, stack.cloudPlatform(), lockComponents);
+            ClusterApi connector = clusterApiConnectors.getConnector(stack);
+            Map<String, String> activatedParcels = connector.gatherInstalledComponents(stack.getName());
+            ImageFilterResult filteredImages = filterImages(imageCatalog, image, stack.cloudPlatform(), lockComponents, activatedParcels);
             LOGGER.info(String.format("%d possible image found for stack upgrade.", filteredImages.getAvailableImages().getCdhImages().size()));
             upgradeOptions = createResponse(image, filteredImages, stack.getCloudPlatform(), stack.getRegion(), currentImage.getImageCatalogName());
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException | NotFoundException e) {
@@ -174,8 +181,10 @@ public class ClusterUpgradeAvailabilityService {
         return imageCatalogProvider.getImageCatalogV3(imageCatalogUrl);
     }
 
-    private ImageFilterResult filterImages(CloudbreakImageCatalogV3 imageCatalog, Image currentImage, String cloudPlatform, boolean lockComponents) {
-        return clusterUpgradeImageFilter.filter(getCdhImages(imageCatalog), imageCatalog.getVersions(), currentImage, cloudPlatform, lockComponents);
+    private ImageFilterResult filterImages(CloudbreakImageCatalogV3 imageCatalog, Image currentImage, String cloudPlatform,
+            boolean lockComponents, Map<String, String> activatedParcels) {
+        return clusterUpgradeImageFilter.filter(
+                getCdhImages(imageCatalog), imageCatalog.getVersions(), currentImage, cloudPlatform, lockComponents, activatedParcels);
     }
 
     private List<Image> getCdhImages(CloudbreakImageCatalogV3 imageCatalog) {
@@ -198,8 +207,8 @@ public class ClusterUpgradeAvailabilityService {
                     .map(ImageComponentVersions::getCdp)
                     .distinct()
                     .collect(Collectors.joining(","));
-            throw new BadRequestException(String.format("There is no image eligible for upgrading the cluster with runtime: %s. "
-                    + "Please choose a runtime from the following image(s): %s", runtime, availableRuntimes));
+            throw new BadRequestException(String.format("There is no image eligible for the cluster upgrade with runtime: %s. "
+                    + "Please choose a runtime from the following: %s", runtime, availableRuntimes));
         } else {
             return imagesWithMatchingRuntime.get().collect(Collectors.toList());
         }
@@ -211,7 +220,7 @@ public class ClusterUpgradeAvailabilityService {
             String candidates = upgradeCandidates.stream()
                     .map(ImageInfoV4Response::getImageId)
                     .collect(Collectors.joining(","));
-            throw new BadRequestException(String.format("The given image (%s) is not eligible for upgrading the cluster. "
+            throw new BadRequestException(String.format("The given image (%s) is not eligible for the cluster upgrade. "
                     + "Please choose an id from the following image(s): %s", requestImageId, candidates));
         } else {
             return upgradeCandidates.stream()

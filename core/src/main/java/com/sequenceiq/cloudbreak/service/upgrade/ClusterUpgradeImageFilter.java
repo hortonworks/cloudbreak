@@ -5,19 +5,26 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
 import com.sequenceiq.cloudbreak.service.image.VersionBasedImageFilter;
 
 @Component
@@ -43,29 +50,34 @@ public class ClusterUpgradeImageFilter {
     @Inject
     private UpgradePermissionProvider upgradePermissionProvider;
 
+    @Inject
+    private PreWarmParcelParser preWarmParcelParser;
+
     private String reason;
 
-    ImageFilterResult filter(List<Image> images, Versions versions, Image currentImage, String cloudPlatform, boolean lockComponents) {
+    ImageFilterResult filter(List<Image> images, Versions versions, Image currentImage, String cloudPlatform, boolean lockComponents,
+            Map<String, String> activatedParcels) {
         ImageFilterResult imagesForCbVersion = getImagesForCbVersion(versions, images);
         List<Image> imageList = imagesForCbVersion.getAvailableImages().getCdhImages();
         if (CollectionUtils.isEmpty(imageList)) {
             return imagesForCbVersion;
         }
         LOGGER.debug("{} image(s) found for the given CB version", imageList.size());
-        return filterImages(imageList, currentImage, cloudPlatform, lockComponents);
+        return filterImages(imageList, currentImage, cloudPlatform, lockComponents, activatedParcels);
     }
 
     private ImageFilterResult getImagesForCbVersion(Versions supportedVersions, List<Image> availableImages) {
         return versionBasedImageFilter.getCdhImagesForCbVersion(supportedVersions, availableImages);
     }
 
-    private ImageFilterResult filterImages(List<Image> availableImages, Image currentImage, String cloudPlatform, boolean lockComponents) {
+    private ImageFilterResult filterImages(List<Image> availableImages, Image currentImage, String cloudPlatform,
+            boolean lockComponents, Map<String, String> activatedParcels) {
         List<Image> images = availableImages.stream()
                 .filter(filterCurrentImage(currentImage))
                 .filter(filterNonCmImages())
                 .filter(filterIgnoredCmVersion())
                 .filter(filterPreviousImagesForOsUpgrades(currentImage, lockComponents))
-                .filter(validateCmAndStackVersion(currentImage, lockComponents))
+                .filter(validateCmAndStackVersion(currentImage, lockComponents, activatedParcels))
                 .filter(validateCloudPlatform(cloudPlatform))
                 .filter(validateOsVersion(currentImage))
                 .filter(validateSaltVersion(currentImage))
@@ -113,21 +125,48 @@ public class ClusterUpgradeImageFilter {
         };
     }
 
-    private Predicate<Image> validateCmAndStackVersion(Image currentImage, boolean lockComponents) {
+    private Predicate<Image> validateCmAndStackVersion(Image currentImage, boolean lockComponents, Map<String, String> activatedParcels) {
         return image -> {
-            boolean result = lockComponents ? (permitLockedComponentsUpgrade(currentImage, image))
+            boolean result = lockComponents ? (permitLockedComponentsUpgrade(image, activatedParcels))
                     : (permitCmAndStackUpgrade(currentImage, image, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY)
                             || permitCmAndStackUpgrade(currentImage, image, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY));
 
-            setReason(result, "There is no proper Cloudera Manager or CDP version to upgrade.");
+            if (lockComponents) {
+                setReason(result, "There is at least one activated parcel for which we cannot find image with matching version. "
+                        + "Activated parcel(s): " + activatedParcels);
+            } else {
+                setReason(result, "There is no proper Cloudera Manager or CDP version to upgrade.");
+            }
             return result;
         };
     }
 
-    private boolean permitLockedComponentsUpgrade(Image currentImage, Image image) {
-        Map<String, String> currentImagePackageVersions = currentImage.getPackageVersions();
-        Map<String, String> imagePackageVersions = image.getPackageVersions();
-        return currentImagePackageVersions.equals(imagePackageVersions);
+    // Only compares the versions of the activated parcels
+    private boolean permitLockedComponentsUpgrade(Image image, Map<String, String> activatedParcels) {
+
+        Map<String, String> prewarmedParcels = getParcels(image);
+        String stackVersion = activatedParcels.get(StackType.CDH.name());
+
+        boolean parcelsMatch = activatedParcels.entrySet()
+                .stream()
+                .filter(entry -> !StackType.CDH.name().equals(entry.getKey()))
+                .allMatch(entry -> entry.getValue().equals(prewarmedParcels.get(entry.getKey())));
+
+        boolean stackVersionMatches = StringUtils.isEmpty(stackVersion) || stackVersion.equals(
+                Optional.ofNullable(image.getStackDetails())
+                        .map(StackDetails::getRepo)
+                        .map(StackRepoDetails::getStack)
+                        .map(stackRepoDetails -> stackRepoDetails.get(com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPOSITORY_VERSION))
+                        .orElse(stackVersion));
+        return parcelsMatch && stackVersionMatches;
+    }
+
+    private Map<String, String> getParcels(Image image) {
+        return image.getPreWarmParcels()
+                .stream()
+                .map(parcel -> preWarmParcelParser.parseProductFromParcel(parcel))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toMap(ClouderaManagerProduct::getName, ClouderaManagerProduct::getVersion));
     }
 
     private boolean permitCmAndStackUpgrade(Image currentImage, Image image, String versionKey, String buildNumberKey) {

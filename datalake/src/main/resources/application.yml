@@ -88,7 +88,7 @@ datalake:
       cert.file: database.crt
       ssl: false
   runtimes:
-    default: "7.2.0"
+    default: "7.2.1"
     advertised: "7.1.0,7.2.0,7.2.1,7.2.2"
     supported: "7.0.2,7.1.0,7.2.0,7.2.1,7.2.2"
 
