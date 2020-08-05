@@ -201,15 +201,15 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
                         instanceGroupResponse.getMetadata().stream()
                                 .filter(md -> md.getDiscoveryFQDN() != null)
                                 .forEach(md -> {
-                            instanceGroup.getInstanceMetaDataSet().stream()
-                                    .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null
-                                            && instanceMetaData.getDiscoveryFQDN().equals(md.getDiscoveryFQDN()))
-                                    .findFirst()
-                                    .ifPresent(instanceMetaData -> {
-                                        md.setState(instanceMetaData.getInstanceStatus().getAsHostState());
-                                        md.setStatusReason(instanceMetaData.getStatusReason());
-                                    });
-                        });
+                                    instanceGroup.getInstanceMetaDataSet().stream()
+                                            .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null
+                                                    && instanceMetaData.getDiscoveryFQDN().equals(md.getDiscoveryFQDN()))
+                                            .findFirst()
+                                            .ifPresent(instanceMetaData -> {
+                                                md.setState(instanceMetaData.getInstanceStatus().getAsHostState());
+                                                md.setStatusReason(instanceMetaData.getStatusReason());
+                                            });
+                                });
                     });
         }
     }
@@ -225,22 +225,32 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
 
     private void addSharedServiceResponse(Stack stack, StackV4Response stackResponse) {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
+        LOGGER.debug("Checking whether the datalake resource id is null or not for the cluster: " + stack.getResourceCrn());
         if (stack.getDatalakeResourceId() != null) {
             Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findById(stack.getDatalakeResourceId());
             if (datalakeResources.isPresent()) {
                 DatalakeResources datalakeResource = datalakeResources.get();
                 sharedServiceResponse.setSharedClusterId(datalakeResource.getDatalakeStackId());
                 sharedServiceResponse.setSharedClusterName(datalakeResource.getName());
+                LOGGER.debug("DatalakeResources (datalake stack id: {} ,name: {}) has found for stack: {}",
+                        datalakeResource.getDatalakeStackId(), datalakeResource.getName(), stack.getResourceCrn());
+            } else {
+                LOGGER.debug("Unable to find DatalakeResources for datalake resource id: " + stack.getDatalakeResourceId());
             }
         } else {
+            LOGGER.debug("Datalake resource ID was null! Going to search it by the given stack's id (id: {})", stack.getId());
             Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findByDatalakeStackId(stack.getId());
             if (datalakeResources.isPresent()) {
+                LOGGER.debug("DatalakeResources (datalake stack id: {} ,name: {}) has found for stack: {}",
+                        datalakeResources.get().getDatalakeStackId(), datalakeResources.get().getName(), stack.getResourceCrn());
                 for (StackIdView connectedStacks : stackService.findClustersConnectedToDatalakeByDatalakeResourceId(datalakeResources.get().getId())) {
                     AttachedClusterInfoV4Response attachedClusterInfoResponse = new AttachedClusterInfoV4Response();
                     attachedClusterInfoResponse.setId(connectedStacks.getId());
                     attachedClusterInfoResponse.setName(connectedStacks.getName());
                     sharedServiceResponse.getAttachedClusters().add(attachedClusterInfoResponse);
                 }
+            } else {
+                LOGGER.debug("Unable to find DatalakeResources by the stack's id: {}", stack.getId());
             }
         }
         stackResponse.setSharedService(sharedServiceResponse);
