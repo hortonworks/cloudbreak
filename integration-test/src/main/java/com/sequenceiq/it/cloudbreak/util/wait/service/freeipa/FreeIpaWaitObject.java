@@ -29,8 +29,4 @@ public class FreeIpaWaitObject {
     public Status getDesiredStatus() {
         return desiredStatus;
     }
-
-    public String getFreeIpaCrn() {
-        return client.getFreeIpaClient().getFreeIpaV1Endpoint().describe(getEnvironmentCrn()).getCrn();
-    }
 }
