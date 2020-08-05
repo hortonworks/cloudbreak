@@ -45,6 +45,7 @@ public class TelemetryCommonConfigService {
                 .withPlatform(platform)
                 .withVersion(version)
                 .build();
+        resolveLogPathReferences(telemetry, logs);
         return new TelemetryCommonConfigView.Builder()
                 .withClusterDetails(clusterDetails)
                 .withRules(anonymizationRuleResolver.decodeRules(telemetry.getRules()))
