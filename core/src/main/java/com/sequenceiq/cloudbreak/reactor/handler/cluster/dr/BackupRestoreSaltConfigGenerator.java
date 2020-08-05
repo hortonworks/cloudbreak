@@ -24,7 +24,7 @@ public class BackupRestoreSaltConfigGenerator {
 
     public static final String OBJECT_STORAGE_URL_KEY = "object_storage_url";
 
-    public static final String AWS_REGION_KEY = "aws_region";
+    public static final String DATABASE_BACKUP_POSTFIX = "_database_backup";
 
     public static final String RANGER_ADMIN_GROUP_KEY = "ranger_admin_group";
 
@@ -35,7 +35,6 @@ public class BackupRestoreSaltConfigGenerator {
 
         Map<String, String> disasterRecoveryValues = new HashMap<>();
         disasterRecoveryValues.put(OBJECT_STORAGE_URL_KEY, fullLocation);
-        disasterRecoveryValues.put(AWS_REGION_KEY, stack.getRegion());
         disasterRecoveryValues.put(RANGER_ADMIN_GROUP_KEY, rangerAdminGroup);
 
         servicePillar.put("disaster-recovery", new SaltPillarProperties(POSTGRESQL_DISASTER_RECOVERY_PILLAR_PATH,
@@ -46,10 +45,10 @@ public class BackupRestoreSaltConfigGenerator {
 
     private String buildFullLocation(String location, String backupId, String cloudPlatform) throws URISyntaxException {
         URI uri = new URI(location);
-        String suffix = '/' + backupId + "_database_backup";
+        String suffix = '/' + backupId + DATABASE_BACKUP_POSTFIX;
         String fullLocation;
         if (AWS.equalsIgnoreCase(cloudPlatform)) {
-            fullLocation = "s3://" + uri.getSchemeSpecificPart().replaceAll("^/+", "");
+            fullLocation = "s3a://" + uri.getSchemeSpecificPart().replaceAll("^/+", "");
         } else if (AZURE.equalsIgnoreCase(cloudPlatform)) {
             fullLocation = "abfs://" + uri.getSchemeSpecificPart().replaceAll("^/+", "");
         } else {
