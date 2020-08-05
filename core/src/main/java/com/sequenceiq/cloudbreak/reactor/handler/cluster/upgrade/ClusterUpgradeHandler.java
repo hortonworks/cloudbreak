@@ -47,7 +47,7 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         LOGGER.debug("Accepting Cluster upgrade event..");
         ClusterUpgradeRequest request = event.getData();
         Long stackId = request.getResourceId();
@@ -63,6 +63,6 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
             LOGGER.info("Cluster upgrade event failed", e);
             result = new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
         }
-        sendEvent(result, event);
+        return result;
     }
 }

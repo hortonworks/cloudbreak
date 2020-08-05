@@ -45,7 +45,7 @@ public class StackDeletionHandler extends ExceptionCatcherEventHandler<StackDele
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         StackDeletionWaitRequest stackDeletionWaitRequest = event.getData();
         Long sdxId = stackDeletionWaitRequest.getResourceId();
         String userId = stackDeletionWaitRequest.getUserId();
@@ -66,6 +66,6 @@ public class StackDeletionHandler extends ExceptionCatcherEventHandler<StackDele
             LOGGER.error("Deletion polling failed for stack: {}", sdxId);
             response = new SdxDeletionFailedEvent(sdxId, userId, exception);
         }
-        sendEvent(response, event);
+        return response;
     }
 }

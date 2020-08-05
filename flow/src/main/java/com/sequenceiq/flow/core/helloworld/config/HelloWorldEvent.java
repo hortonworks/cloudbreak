@@ -1,26 +1,20 @@
 package com.sequenceiq.flow.core.helloworld.config;
 
 import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.flow.core.helloworld.HelloWorldSelectableEvent;
-import com.sequenceiq.flow.core.helloworld.flowevents.HelloWorldLongLastingTaskFailureResponse;
-import com.sequenceiq.flow.core.helloworld.flowevents.HelloWorldLongLastingTaskSuccessResponse;
-import com.sequenceiq.flow.core.helloworld.flowevents.HelloWorldFlowTriggerEvent;
 
 public enum HelloWorldEvent implements FlowEvent {
-    HELLOWORLD_TRIGGER_EVENT(HelloWorldSelectableEvent.selector(HelloWorldFlowTriggerEvent.class)),
-    HELLOWORLD_FINISHED_EVENT(HelloWorldSelectableEvent.selector(HelloWorldLongLastingTaskSuccessResponse.class)),
+    HELLOWORLD_TRIGGER_EVENT,
+    HELLOWORLD_FIRST_STEP_FINISHED_EVENT,
+    HELLOWORLD_FIRST_STEP_WENT_WRONG_EVENT,
+    HELLOWORLD_SECOND_STEP_FINISHED_EVENT,
     FINALIZE_HELLOWORLD_EVENT,
-    HELLOWORLD_SOMETHING_WENT_WRONG(HelloWorldSelectableEvent.failureSelector(HelloWorldLongLastingTaskFailureResponse.class)),
+    HELLOWORLD_SOMETHING_WENT_WRONG,
     HELLOWORLD_FAILHANDLED_EVENT;
 
     private String selector;
 
     HelloWorldEvent() {
         this.selector = name();
-    }
-
-    HelloWorldEvent(String selector) {
-        this.selector = selector;
     }
 
     @Override

@@ -31,7 +31,7 @@ public class PillarConfigUpdateHandler extends ExceptionCatcherEventHandler<Pill
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         PillarConfigUpdateRequest request = event.getData();
         Selectable response;
         try {
@@ -41,6 +41,6 @@ public class PillarConfigUpdateHandler extends ExceptionCatcherEventHandler<Pill
             LOGGER.warn("Pillar configuration update failed.", e);
             response = new PillarConfigUpdateFailed(request.getResourceId(), e);
         }
-        sendEvent(response, event);
+        return response;
     }
 }

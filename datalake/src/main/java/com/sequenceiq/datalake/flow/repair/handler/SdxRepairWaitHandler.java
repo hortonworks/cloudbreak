@@ -42,7 +42,7 @@ public class SdxRepairWaitHandler extends ExceptionCatcherEventHandler<SdxRepair
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         SdxRepairWaitRequest sdxRepairWaitRequest = event.getData();
         Long sdxId = sdxRepairWaitRequest.getResourceId();
         String userId = sdxRepairWaitRequest.getUserId();
@@ -63,6 +63,6 @@ public class SdxRepairWaitHandler extends ExceptionCatcherEventHandler<SdxRepair
             LOGGER.error("Repair polling failed for stack: {}", sdxId);
             response = new SdxRepairFailedEvent(sdxId, userId, exception);
         }
-        sendEvent(response, event);
+        return response;
     }
 }

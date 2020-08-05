@@ -42,7 +42,7 @@ public class DatalakeUpgradeWaitHandler extends ExceptionCatcherEventHandler<Dat
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         DatalakeUpgradeWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
@@ -63,6 +63,6 @@ public class DatalakeUpgradeWaitHandler extends ExceptionCatcherEventHandler<Dat
             LOGGER.error("Upgrade polling failed for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId, exception);
         }
-        sendEvent(response, event);
+        return response;
     }
 }

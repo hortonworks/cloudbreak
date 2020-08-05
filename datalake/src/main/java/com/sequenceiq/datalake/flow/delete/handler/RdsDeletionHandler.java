@@ -53,7 +53,7 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         RdsDeletionWaitRequest rdsWaitRequest = event.getData();
         Long sdxId = rdsWaitRequest.getResourceId();
         String userId = rdsWaitRequest.getUserId();
@@ -83,7 +83,7 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
             LOGGER.error("Something wrong happened in sdx database deletion wait phase", anotherException);
             response = new SdxDeletionFailedEvent(sdxId, userId, anotherException);
         }
-        sendEvent(response, event);
+        return response;
     }
 
     private void setDeletedStatus(SdxCluster cluster) {

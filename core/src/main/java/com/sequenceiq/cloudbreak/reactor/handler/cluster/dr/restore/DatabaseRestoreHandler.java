@@ -59,7 +59,7 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         DatabaseRestoreRequest request = event.getData();
         Selectable result;
         Long stackId = request.getResourceId();
@@ -79,6 +79,6 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
             LOGGER.error("Database restore event failed", e);
             result = new DatabaseRestoreFailedEvent(stackId, e, DetailedStackStatus.DATABASE_RESTORE_FAILED);
         }
-        sendEvent(result, event);
+        return result;
     }
 }

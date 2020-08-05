@@ -42,7 +42,7 @@ public class DatalakeVmReplaceWaitHandler extends ExceptionCatcherEventHandler<D
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         DatalakeVmReplaceWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
@@ -67,6 +67,6 @@ public class DatalakeVmReplaceWaitHandler extends ExceptionCatcherEventHandler<D
             response = new DatalakeUpgradeFailedEvent(sdxId, userId, anotherException);
         }
 
-        sendEvent(response, event);
+        return response;
     }
 }

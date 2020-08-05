@@ -46,7 +46,7 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         DatalakeDatabaseRestoreWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
@@ -67,6 +67,6 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
             LOGGER.info("Database restore polling failed for cluster: {}", sdxId);
             response = new DatalakeDatabaseRestoreFailedEvent(sdxId, userId, exception);
         }
-        sendEvent(response, event);
+        return response;
     }
 }

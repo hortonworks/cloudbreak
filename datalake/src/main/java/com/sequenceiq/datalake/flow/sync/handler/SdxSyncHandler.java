@@ -70,7 +70,7 @@ public class SdxSyncHandler extends ExceptionCatcherEventHandler<SdxSyncWaitRequ
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         SdxSyncWaitRequest waitRequest = event.getData();
         Long sdxId = waitRequest.getResourceId();
         String userId = waitRequest.getUserId();
@@ -94,7 +94,7 @@ public class SdxSyncHandler extends ExceptionCatcherEventHandler<SdxSyncWaitRequ
             LOGGER.error("Sync polling failed for stack: {}", sdxId);
             response = new SdxSyncFailedEvent(sdxId, userId, exception);
         }
-        sendEvent(response, event);
+        return response;
     }
 
     private StackV4Response pollingSync(SdxCluster sdxCluster) {

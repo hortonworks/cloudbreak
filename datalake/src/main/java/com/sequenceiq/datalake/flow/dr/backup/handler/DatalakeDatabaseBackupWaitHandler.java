@@ -46,7 +46,7 @@ public class DatalakeDatabaseBackupWaitHandler extends ExceptionCatcherEventHand
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         DatalakeDatabaseBackupWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
@@ -67,6 +67,6 @@ public class DatalakeDatabaseBackupWaitHandler extends ExceptionCatcherEventHand
             LOGGER.info("Database backup polling failed for cluster: {}", sdxId);
             response = new DatalakeDatabaseBackupFailedEvent(sdxId, userId, exception);
         }
-        sendEvent(response, event);
+        return response;
     }
 }

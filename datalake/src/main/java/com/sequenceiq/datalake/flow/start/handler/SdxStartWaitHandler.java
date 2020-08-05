@@ -42,7 +42,7 @@ public class SdxStartWaitHandler extends ExceptionCatcherEventHandler<SdxStartWa
     }
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         SdxStartWaitRequest waitRequest = event.getData();
         Long sdxId = waitRequest.getResourceId();
         String userId = waitRequest.getUserId();
@@ -63,6 +63,6 @@ public class SdxStartWaitHandler extends ExceptionCatcherEventHandler<SdxStartWa
             LOGGER.error("Start polling failed for stack: {}", sdxId);
             response = new SdxStartFailedEvent(sdxId, userId, exception);
         }
-        sendEvent(response, event);
+        return response;
     }
 }

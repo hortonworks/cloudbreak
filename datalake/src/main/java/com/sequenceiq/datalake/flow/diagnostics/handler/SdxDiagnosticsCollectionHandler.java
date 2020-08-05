@@ -36,7 +36,7 @@ public class SdxDiagnosticsCollectionHandler extends ExceptionCatcherEventHandle
     private SdxDiagnosticsFlowService diagnosticsFlowService;
 
     @Override
-    protected void doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent event) {
         SdxDiagnosticsWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
@@ -61,7 +61,7 @@ public class SdxDiagnosticsCollectionHandler extends ExceptionCatcherEventHandle
             LOGGER.error("Something wrong happened in diagnostic collection wait phase", anotherException);
             response = new SdxDiagnosticsFailedEvent(sdxId, userId, properties, anotherException);
         }
-        sendEvent(response, event);
+        return response;
     }
 
     @Override
