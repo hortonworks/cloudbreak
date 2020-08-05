@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.freeipa.client.model.DnsZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,6 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
-import com.sequenceiq.freeipa.client.model.DnsZoneList;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
@@ -62,8 +62,8 @@ public class DnsZoneService {
 
     public Set<String> listDnsZones(String environmentCrn, String accountId) throws FreeIpaClientException {
         FreeIpaClient freeIpaClient = getFreeIpaClient(environmentCrn, accountId);
-        Set<DnsZoneList> allDnsZone = freeIpaClient.findAllDnsZone();
-        return allDnsZone.stream().map(DnsZoneList::getIdnsname).collect(Collectors.toSet());
+        Set<DnsZone> allDnsZone = freeIpaClient.findAllDnsZone();
+        return allDnsZone.stream().map(DnsZone::getIdnsname).collect(Collectors.toSet());
 
     }
 
@@ -89,8 +89,8 @@ public class DnsZoneService {
             try {
                 LOGGER.info("Add subnet's [{}] reverse DNS zone", subnet);
                 String subnetCidr = subnet.getValue();
-                Set<DnsZoneList> dnsZone = client.findDnsZone(subnetCidr);
-                if (dnsZone.isEmpty()) {
+                Set<DnsZone> dnsZones = client.findDnsZone(subnetCidr);
+                if (dnsZones.isEmpty()) {
                     LOGGER.debug("Subnet reverse DNS zone does not exists [{}], add it now", subnet);
                     client.addReverseDnsZone(subnetCidr);
                     response.getSuccess().add(subnet.getKey());

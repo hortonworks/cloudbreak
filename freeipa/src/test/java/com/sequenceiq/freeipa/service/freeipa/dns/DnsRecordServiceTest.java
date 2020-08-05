@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
-import com.sequenceiq.freeipa.client.model.DnsZoneList;
+import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
@@ -76,10 +76,10 @@ public class DnsRecordServiceTest {
         return freeIpa;
     }
 
-    private Set<DnsZoneList> createDnsZones() {
-        DnsZoneList dnsZoneList = new DnsZoneList();
-        dnsZoneList.setIdnsname(DOMAIN);
-        return Set.of(dnsZoneList);
+    private Set<DnsZone> createDnsZones() {
+        DnsZone dnsZone = new DnsZone();
+        dnsZone.setIdnsname(DOMAIN);
+        return Set.of(dnsZone);
     }
 
     private Set<DnsRecord> createDnsRecords() {
