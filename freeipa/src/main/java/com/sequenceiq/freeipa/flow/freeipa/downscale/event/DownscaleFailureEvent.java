@@ -17,7 +17,12 @@ public class DownscaleFailureEvent extends StackEvent {
 
     public DownscaleFailureEvent(Long stackId, String failedPhase, Set<String> success, Map<String, String> failureDetails,
             Exception exception) {
-        super(null, stackId);
+        this(null, stackId, failedPhase, success, failureDetails, exception);
+    }
+
+    public DownscaleFailureEvent(String selector, Long stackId, String failedPhase, Set<String> success, Map<String, String> failureDetails,
+            Exception exception) {
+        super(selector, stackId);
         this.exception = exception;
         this.failedPhase = failedPhase;
         this.success = success;
