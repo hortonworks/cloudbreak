@@ -11,6 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
@@ -36,6 +37,18 @@ public class NetworkRequestToDtoConverterTest {
 
         assertEquals(network.getAws().getVpcId(), actual.getAws().getVpcId());
         assertEquals(network.getAws().getVpcId(), actual.getNetworkId());
+        assertCommonFields(network, actual);
+    }
+
+    @Test
+    void testConvertGcp() {
+        EnvironmentNetworkRequest network = createNetworkRequest();
+        network.setGcp(createGcpParams());
+
+        NetworkDto actual = underTest.convert(network);
+
+        assertEquals(network.getGcp().getNetworkId(), actual.getGcp().getNetworkId());
+        assertEquals(network.getGcp().getNetworkId(), actual.getNetworkId());
         assertCommonFields(network, actual);
     }
 
@@ -90,6 +103,12 @@ public class NetworkRequestToDtoConverterTest {
         EnvironmentNetworkAwsParams awsParams = new EnvironmentNetworkAwsParams();
         awsParams.setVpcId(NETWORK_ID);
         return awsParams;
+    }
+
+    private EnvironmentNetworkGcpParams createGcpParams() {
+        EnvironmentNetworkGcpParams gcpParams = new EnvironmentNetworkGcpParams();
+        gcpParams.setNetworkId(NETWORK_ID);
+        return gcpParams;
     }
 
     private EnvironmentNetworkMockParams createMockParams() {
