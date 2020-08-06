@@ -20,12 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -43,7 +40,7 @@ import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.security.SecurityConfigService;
 
 @Service
-public class ClusterService implements ResourceBasedCrnProvider {
+public class ClusterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterService.class);
 
@@ -137,10 +134,6 @@ public class ClusterService implements ResourceBasedCrnProvider {
         return cluster;
     }
 
-    public List<Cluster> findAllByUser(CloudbreakUser user) {
-        return clusterRepository.findByUserId(user.getUserId());
-    }
-
     public List<Cluster> findDistroXByTenant(String tenant) {
         return clusterRepository.findByTenantAndStackType(tenant, StackType.WORKLOAD);
     }
@@ -155,10 +148,6 @@ public class ClusterService implements ResourceBasedCrnProvider {
 
     public Optional<Cluster> findOneByStackNameAndTenant(String stackName, String tenant) {
         return  clusterRepository.findByStackNameAndTenant(stackName, tenant);
-    }
-
-    public Optional<Cluster> findOneByClusterIdAndTenant(Long clusterId, String tenant) {
-        return  clusterRepository.findByClusterIdAndTenant(clusterId, tenant);
     }
 
     public Cluster save(Cluster cluster) {
@@ -210,11 +199,6 @@ public class ClusterService implements ResourceBasedCrnProvider {
         cluster = clusterRepository.save(cluster);
         calculateClusterStateMetrics();
         return cluster;
-    }
-
-    @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.DATAHUB;
     }
 
     public List<Cluster> findAllByPeriscopeNodeId(String nodeId) {
