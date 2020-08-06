@@ -102,6 +102,10 @@
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
              </param>
              <param>
+                <name>{{ aclsauthz_prefix ~ "livy_for_spark3.acl" }}</name>
+                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
                  <name>{{ aclsauthz_prefix ~ "nifi.acl" }}</name>
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
              </param>
@@ -220,6 +224,12 @@
              {% if 'LIVYSERVER1' in exposed and 'LIVY_SERVER' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>LIVYSERVER</name>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+             </param>
+             {%- endif %}
+             {% if 'LIVY_FOR_SPARK3' in exposed and 'LIVY_FOR_SPARK3' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>LIVY_FOR_SPARK3</name>
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
              {%- endif %}
@@ -564,6 +574,17 @@
         <role>LIVYSERVER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_SERVER'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['LIVYSERVER1'] }}</url>
+        {%- endfor %}
+   </service>
+   {%- endif %}
+   {%- endif %}
+
+   {% if 'LIVY_FOR_SPARK3' in salt['pillar.get']('gateway:location') -%}
+   {% if 'LIVY_FOR_SPARK3' in exposed -%}
+   <service>
+        <role>LIVY_FOR_SPARK3</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_FOR_SPARK3'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['LIVY_FOR_SPARK3'] }}</url>
         {%- endfor %}
    </service>
    {%- endif %}
