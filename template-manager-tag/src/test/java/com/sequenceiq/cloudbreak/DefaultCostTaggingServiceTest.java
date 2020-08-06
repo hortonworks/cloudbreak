@@ -59,8 +59,10 @@ public class DefaultCostTaggingServiceTest {
 
         Assert.assertEquals(3L, result.size());
         Assert.assertEquals("12474ddc-6e44-4f4c-806a-b197ef12cbb8", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key().toLowerCase()));
-        Assert.assertEquals("5d7-b645-7ccf9edbb73d-user-05ca1026-c028-466b-8943-b04f765fa3f6", result.get(DefaultApplicationTag.CREATOR_CRN.key().toLowerCase()));
-        Assert.assertEquals("-b645-7ccf9edbb73d-freeipa-8111d534-8c7e-4a68-a8ba-7ebb389a3a20", result.get(DefaultApplicationTag.RESOURCE_CRN.key().toLowerCase()));
+        Assert.assertEquals("5d7-b645-7ccf9edbb73d-user-05ca1026-c028-466b-8943-b04f765fa3f6",
+                result.get(DefaultApplicationTag.CREATOR_CRN.key().toLowerCase()));
+        Assert.assertEquals("-b645-7ccf9edbb73d-freeipa-8111d534-8c7e-4a68-a8ba-7ebb389a3a20",
+                result.get(DefaultApplicationTag.RESOURCE_CRN.key().toLowerCase()));
     }
 
     @Test
