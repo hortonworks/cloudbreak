@@ -61,6 +61,10 @@
       "version": "2.4.0"
     },
     {
+      "name": "LIVY_FOR_SPARK3",
+      "version": "0.6.0"
+    },
+    {
       "name": "LIVY",
       "version": "0.6.0"
     },
