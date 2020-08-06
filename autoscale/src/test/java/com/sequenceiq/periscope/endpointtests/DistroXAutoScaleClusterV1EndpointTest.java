@@ -1,11 +1,13 @@
 package com.sequenceiq.periscope.endpointtests;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.SCALE_DATAHUB;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.LOAD_BASED;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.NODE_COUNT;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 
@@ -29,7 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
+import com.sequenceiq.authorization.service.UmsResourceAuthorizationService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsClient;
@@ -89,7 +91,7 @@ public class DistroXAutoScaleClusterV1EndpointTest {
     private int port;
 
     @MockBean
-    private UmsAccountAuthorizationService umsAccountAuthorizationService;
+    private UmsResourceAuthorizationService umsResourceAuthorizationService;
 
     @MockBean
     private ClusterProxyConfigurationService clusterProxyConfigurationService;
@@ -141,7 +143,8 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         clusterRepository.save(testCluster);
 
         when(grpcUmsClient.getUserDetails(anyString(), anyString(), any())).thenReturn(user);
-        when(umsAccountAuthorizationService.hasRightOfUser(anyString(), anyString())).thenReturn(true);
+        doNothing().when(umsResourceAuthorizationService).checkRightOfUserOnResource(TEST_USER_CRN, SCALE_DATAHUB,
+                "crn:cdp:iam:us-west-1:accid:cluster:mockuser@cloudera.com");
         when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("http://clusterproxy"));
         when(recommendationService.getAutoscaleRecommendations(TEST_CLUSTER_CRN))
                 .thenReturn(new AutoscaleRecommendationV4Response(Set.of("compute"), Set.of("compute")));

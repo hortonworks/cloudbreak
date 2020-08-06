@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceClient;
 import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.periscope.api.AutoscaleApi;
-import com.sequenceiq.periscope.api.endpoint.v1.AlertEndpoint;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
 
@@ -30,10 +29,6 @@ public class AutoscaleUserCrnClient extends AbstractUserCrnServiceClient<Autosca
 
         public AutoscaleEndpoint(WebTarget webTarget, String crn) {
             super(webTarget, crn);
-        }
-
-        public AlertEndpoint alertEndpoint() {
-            return getEndpoint(AlertEndpoint.class);
         }
 
         public DistroXAutoScaleClusterV1Endpoint distroXAutoScaleClusterV1Endpoint() {
