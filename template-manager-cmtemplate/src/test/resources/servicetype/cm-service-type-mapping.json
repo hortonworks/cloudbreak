@@ -1,0 +1,14 @@
+[
+  {
+    "type" : "NIFI",
+    "relatedServices": ["NIFI"]
+  },
+  {
+    "type": "OpDB",
+    "relatedServices": ["HBASE"]
+  },
+  {
+    "type": "Custom",
+    "relatedServices": ["NIFI"]
+  }
+]
