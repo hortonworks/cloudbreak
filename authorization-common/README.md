@@ -19,13 +19,15 @@ Every user who would like to do something regarding a resource should get an Res
 2. Add `@AuthorizationResource` to the Controller class
 3. Add the related UMS right to the UMS code
 4. Add the related action to the `AuthorizationResourceAction` enum list
-5. Fill in the necessary information about the action in [actions.json](src/main/resources/actions.json)
-   - key should be the new value of the enum
-   - `right` should be the same value for the desired right as in UMS code
-   - `resourceType` should be a value from `AuthorizationResourceType` which controls, what logic should be called during authorization check to find out the CRN of the resource
-   - `legacyRight` should be the right (defined in UMS) used in the legacy authorization (where everything were checked on account level with read or write rights)
-6. Annotate your API method in Controller class with desired annotation, detailed explanation below.
-7. If necessary, implement logics needed to find out resource CRNs, detailed explanation below.
+5. For the new enum value, please define
+   - the right (used in UMS)
+   - the resourceType, which should be a value from `AuthorizationResourceType` which controls, what logic should be called during authorization check to find out the CRN of the resource
+6. Fill in the necessary information about the action in [legacyRights.json](src/main/resources/legacyRights.json)
+   - add new entry to the map
+   - key should be the same value used for the desired right as in UMS code
+   - value should be the right (defined in UMS) used in the legacy authorization (where everything were checked on account level with read or write rights)
+7. Annotate your API method in Controller class with desired annotation, detailed explanation below.
+8. If necessary, implement logics needed to find out resource CRNs, detailed explanation below.
 
 ### How can I add resource based authorization for my new API endpoint?
 
