@@ -35,14 +35,12 @@ public class InternalCrnModifier {
                     && Crn.isCrn((String) tenantAwareCrn.get())) {
                 String accountId = Crn.fromString((String) tenantAwareCrn.get()).getAccountId();
                 String newUserCrn = getAccountIdModifiedCrn(userCrnString, accountId);
-                return ThreadBasedUserCrnProvider.doAs(newUserCrn.toString(),
-                        () -> reflectionUtil.proceed(proceedingJoinPoint, methodSignature));
+                return ThreadBasedUserCrnProvider.doAs(newUserCrn, () -> reflectionUtil.proceed(proceedingJoinPoint, methodSignature));
             }
             Optional<Object> accountId = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, AccountId.class);
             if (accountId.isPresent() && accountId.get() instanceof String) {
                 String newUserCrn = getAccountIdModifiedCrn(userCrnString, (String) accountId.get());
-                return ThreadBasedUserCrnProvider.doAs(newUserCrn.toString(),
-                        () -> reflectionUtil.proceed(proceedingJoinPoint, methodSignature));
+                return ThreadBasedUserCrnProvider.doAs(newUserCrn, () -> reflectionUtil.proceed(proceedingJoinPoint, methodSignature));
             }
         }
         return reflectionUtil.proceed(proceedingJoinPoint, methodSignature);
