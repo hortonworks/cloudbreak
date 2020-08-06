@@ -223,7 +223,6 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
@@ -249,7 +248,6 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);

@@ -101,7 +101,7 @@ public class SdxRuntimeUpgradeService {
 
     private SdxUpgradeResponse checkForSdxUpgradeResponse(String userCrn, SdxUpgradeRequest upgradeSdxClusterRequest,
             String clusterName, String accountId) {
-        verifyRuntimeUpgradeEntitlement(userCrn);
+        verifyRuntimeUpgradeEntitlement(userCrn, upgradeSdxClusterRequest);
         UpgradeV4Response upgradeV4Response = stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, clusterName,
                 sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest), accountId);
         filterSdxUpgradeResponse(upgradeSdxClusterRequest, upgradeV4Response);
@@ -139,8 +139,8 @@ public class SdxRuntimeUpgradeService {
         return new SdxUpgradeResponse(message, flowIdentifier);
     }
 
-    private void verifyRuntimeUpgradeEntitlement(String userCrn) {
-        if (!isRuntimeUpgradeEnabled(userCrn)) {
+    private void verifyRuntimeUpgradeEntitlement(String userCrn, SdxUpgradeRequest upgradeSdxClusterRequest) {
+        if (upgradeSdxClusterRequest != null && !Boolean.TRUE.equals(upgradeSdxClusterRequest.getLockComponents()) && !isRuntimeUpgradeEnabled(userCrn)) {
             throw new BadRequestException("Runtime upgrade feature is not enabled");
         }
     }
