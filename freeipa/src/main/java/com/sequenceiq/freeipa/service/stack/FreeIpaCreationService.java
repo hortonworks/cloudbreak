@@ -128,7 +128,7 @@ public class FreeIpaCreationService {
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack, credential);
         Telemetry telemetry = stack.getTelemetry();
         if (telemetry != null) {
-            telemetry.setRules(accountTelemetryService.getAnonymizationRules());
+            telemetry.setRules(accountTelemetryService.getAnonymizationRules(accountId));
         }
         cloudStorageFolderResolverService.updateStorageLocation(telemetry,
                 FluentClusterType.FREEIPA.value(), stack.getName(), stack.getResourceCrn());

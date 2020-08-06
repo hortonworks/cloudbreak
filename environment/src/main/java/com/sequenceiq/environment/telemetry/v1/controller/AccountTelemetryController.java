@@ -40,14 +40,14 @@ public class AccountTelemetryController extends NotificationController implement
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public AccountTelemetryResponse get() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return accountTelemetryConverter.convert(accountTelemetryService.getOrDefault(accountId));
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public AccountTelemetryResponse update(AccountTelemetryRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         AccountTelemetry telemetry = accountTelemetryConverter.convert(request);
@@ -55,20 +55,20 @@ public class AccountTelemetryController extends NotificationController implement
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public AccountTelemetryResponse getDefault() {
         return accountTelemetryConverter.convert(accountTelemetryService.createDefaultAccuontTelemetry());
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FeaturesResponse listFeatures() {
         AccountTelemetryResponse response = get();
         return response.getFeatures();
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FeaturesResponse updateFeatures(FeaturesRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return accountTelemetryConverter.convertFeatures(
@@ -77,7 +77,7 @@ public class AccountTelemetryController extends NotificationController implement
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public List<AnonymizationRule> listRules() {
         AccountTelemetryResponse response = get();
         return response.getRules();
@@ -91,7 +91,7 @@ public class AccountTelemetryController extends NotificationController implement
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public TestAnonymizationRuleResponse testRulePattern(TestAnonymizationRuleRequest request) {
         TestAnonymizationRuleResponse response = new TestAnonymizationRuleResponse();
         response.setOutput(accountTelemetryService.testRulePatterns(request.getRules(), request.getInput()));

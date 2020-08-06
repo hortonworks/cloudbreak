@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.doc.proxy;
 public class ProxyConfigDescription {
     public static final String LIST = "list proxy configurations";
     public static final String GET_BY_NAME = "get proxy configuration ";
+    public static final String GET_CRN_BY_NAME = "get crn by Name";
     public static final String GET_BY_CRN = "get proxy configuration ";
     public static final String CREATE = "create proxy configuration";
     public static final String DELETE_BY_NAME = "delete proxy configuration by name";

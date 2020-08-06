@@ -69,7 +69,8 @@ import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
 import com.sequenceiq.environment.service.integration.testconfiguration.TestConfigurationForServiceIntegration;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        classes = TestConfigurationForServiceIntegration.class)
+        classes = TestConfigurationForServiceIntegration.class,
+        properties = "spring.main.allow-bean-definition-overriding=true")
 @ActiveProfiles("test")
 public class EnvironmentServiceIntegrationTest {
 
