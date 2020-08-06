@@ -31,9 +31,7 @@ import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
-import com.sequenceiq.periscope.service.StackCollectorService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
-import com.sequenceiq.periscope.service.evaluator.ClusterCreationEvaluatorService;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.security.SecurityConfigService;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
@@ -51,10 +49,8 @@ public class StackCollectorContext {
                             RejectedThreadService.class,
                             RequestLogging.class,
                             PeriscopeNodeConfig.class,
-                            StackCollectorService.class,
                             ExecutorServiceWithRegistry.class,
                             EvaluatorExecutorRegistry.class,
-                            ClusterCreationEvaluatorService.class,
                             Clock.class
                     })
     )

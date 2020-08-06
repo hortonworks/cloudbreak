@@ -18,9 +18,13 @@ import com.sequenceiq.periscope.doc.ApiDescription.ClusterOpDescription;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+/**
+ * @deprecated Database ID based endpoints are deprecated for removal.
+ */
 @Path("/v2/clusters")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(hidden = true, value = "/v2/clusters", description = CLUSTERS_DESCRIPTION, protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Deprecated(since = "CB 2.26.0", forRemoval = true)
 public interface AutoScaleClusterV2Endpoint {
 
     @GET
