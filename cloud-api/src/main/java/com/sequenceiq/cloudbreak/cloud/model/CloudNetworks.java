@@ -22,4 +22,11 @@ public class CloudNetworks {
     public void setCloudNetworkResponses(Map<String, Set<CloudNetwork>> cloudNetworkResponses) {
         this.cloudNetworkResponses = cloudNetworkResponses;
     }
+
+    @Override
+    public String toString() {
+        return "CloudNetworks{" +
+                "cloudNetworkResponses=" + cloudNetworkResponses +
+                '}';
+    }
 }

@@ -134,4 +134,17 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.GCP;
     }
+
+    @Override
+    public Network convertToNetwork(BaseNetwork baseNetwork) {
+        GcpNetwork gcpNetwork = (GcpNetwork) baseNetwork;
+        Map<String, Object> param = new HashMap<>();
+        param.put(GcpStackUtil.NETWORK_ID, gcpNetwork.getNetworkId());
+        param.put(GcpStackUtil.SHARED_PROJECT_ID, gcpNetwork.getSharedProjectId());
+        param.put(GcpStackUtil.NO_PUBLIC_IP, gcpNetwork.getNoPublicIp());
+        param.put(GcpStackUtil.NO_FIREWALL_RULES, gcpNetwork.getNoFirewallRules());
+        param.put(GcpStackUtil.SUBNET_ID, baseNetwork.getSubnetMetas().entrySet().stream().findFirst().get().getKey());
+        param.put(GcpStackUtil.REGION, baseNetwork.getEnvironments().stream().findFirst().get().getLocation());
+        return new Network(null, param);
+    }
 }
