@@ -7,6 +7,10 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.C
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_DISABLE_STATUS_CHECKER_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_DISABLE_STATUS_CHECKER_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FAILED_EVENT;
@@ -29,6 +33,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.U
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_COLLECT_RESOURCES_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_DISABLE_STATUS_CHECKER_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_ENABLE_STATUS_CHECKER_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_DNS_ENTRIES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_HOSTS_FROM_ORCHESTRATION_STATE;
@@ -60,9 +66,13 @@ public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleStat
                     .event(DOWNSCALE_EVENT)
                     .defaultFailureEvent()
 
-                    .from(STARTING_DOWNSCALE_STATE).to(DOWNSCALE_CLUSTERPROXY_REGISTRATION_STATE)
+                    .from(STARTING_DOWNSCALE_STATE).to(DOWNSCALE_DISABLE_STATUS_CHECKER_STATE)
                     .event(STARTING_DOWNSCALE_FINISHED_EVENT)
                     .defaultFailureEvent()
+
+                    .from(DOWNSCALE_DISABLE_STATUS_CHECKER_STATE).to(DOWNSCALE_CLUSTERPROXY_REGISTRATION_STATE)
+                    .event(DOWNSCALE_DISABLE_STATUS_CHECKER_FINISHED_EVENT)
+                    .failureEvent(DOWNSCALE_DISABLE_STATUS_CHECKER_FAILED_EVENT)
 
                     .from(DOWNSCALE_CLUSTERPROXY_REGISTRATION_STATE).to(DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_STATE)
                     .event(CLUSTERPROXY_REGISTRATION_FINISHED_EVENT)
@@ -108,9 +118,13 @@ public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleStat
                     .event(REMOVE_HOSTS_FROM_ORCHESTRATION_FINISHED_EVENT)
                     .failureEvent(REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_EVENT)
 
-                    .from(DOWNSCALE_UPDATE_METADATA_STATE).to(DOWNSCALE_FINISHED_STATE)
+                    .from(DOWNSCALE_UPDATE_METADATA_STATE).to(DOWNSCALE_ENABLE_STATUS_CHECKER_STATE)
                     .event(UPDATE_METADATA_FINISHED_EVENT)
                     .defaultFailureEvent()
+
+                    .from(DOWNSCALE_ENABLE_STATUS_CHECKER_STATE).to(DOWNSCALE_FINISHED_STATE)
+                    .event(DOWNSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT)
+                    .failureEvent(DOWNSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT)
 
                     .from(DOWNSCALE_FINISHED_STATE).to(FINAL_STATE)
                     .event(DOWNSCALE_FINISHED_EVENT)
