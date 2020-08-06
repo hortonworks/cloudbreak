@@ -159,11 +159,27 @@
             "roleType": "GATEWAY",
             "base": true,
             "configs": [
-              { 
+              {
                 "name": "spark3-conf/spark-defaults.conf_client_config_safety_valve",
                 "value": "spark.hadoop.fs.s3a.ssl.channel.mode=openssl"
               }
             ]
+          }
+        ]
+      },
+      {
+        "refName": "livy_for_spark3",
+        "serviceType": "LIVY_FOR_SPARK3",
+        "roleConfigGroups": [
+          {
+            "refName": "livy_for_spark3-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "livy_for_spark3-LIVY_SERVER-BASE",
+            "roleType": "LIVY_SERVER_FOR_SPARK3",
+            "base": true
           }
         ]
       },
@@ -220,6 +236,8 @@
           "hms-HIVEMETASTORE-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
           "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "livy_for_spark3-GATEWAY-BASE",
+          "livy_for_spark3-LIVY_SERVER-BASE",
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
           "yarn-QUEUEMANAGER_WEBAPP-BASE",
@@ -235,6 +253,7 @@
           "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
+          "livy_for_spark3-GATEWAY-BASE",
           "yarn-NODEMANAGER-WORKER",
           "zookeeper-SERVER-BASE",
           "yarn-GATEWAY-BASE"
@@ -247,6 +266,7 @@
           "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
+          "livy_for_spark3-GATEWAY-BASE",
           "yarn-NODEMANAGER-COMPUTE",
           "yarn-GATEWAY-BASE"
         ]
