@@ -18,4 +18,11 @@ public class GetPlatformNetworksResult extends CloudPlatformResult {
     public CloudNetworks getCloudNetworks() {
         return cloudNetworks;
     }
+
+    @Override
+    public String toString() {
+        return "GetPlatformNetworksResult{" +
+                "cloudNetworks=" + cloudNetworks +
+                '}';
+    }
 }
