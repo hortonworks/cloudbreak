@@ -14,11 +14,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 
 @Service
 public class DefaultCostTaggingService implements CostTagging {
+
+    public static final int GCP_MAX_TAG_LEN = 63;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCostTaggingService.class);
 
@@ -59,7 +62,7 @@ public class DefaultCostTaggingService implements CostTagging {
             LOGGER.debug("The tag template is: {}", entry.getValue());
             String generatedValue = centralTagUpdater.getTagText(preparationObject, entry.getValue());
             LOGGER.debug("The generated tag value is: {}", generatedValue);
-            result.put(entry.getKey(), generatedValue);
+            addTagToResult(result, entry.getKey(), generatedValue, request.getPlatform());
         }
         return result;
     }
@@ -70,7 +73,7 @@ public class DefaultCostTaggingService implements CostTagging {
         Map<String, String> result = new HashMap<>();
         for (Map.Entry<String, String> entry : request.getRequestTags().entrySet()) {
             if (!keyOrValueIsEmpty(entry.getKey(), entry.getValue())) {
-                result.put(entry.getKey(), entry.getValue());
+                addTagToResult(result, entry.getKey(), entry.getValue(), request.getPlatform());
             }
         }
         for (Map.Entry<String, String> entry : request.getEnvironmentTags().entrySet()) {
@@ -89,14 +92,14 @@ public class DefaultCostTaggingService implements CostTagging {
     private void addTagIfNotPresented(Map<String, String> result, CDPTagMergeRequest request, String key) {
         if (request.isKeyNotPresented(key)) {
             LOGGER.debug("Adding {} tag to default tags.", key);
-            result.put(transform(key, request.getPlatform()), transform(request.getEnvironmentTags().get(key), request.getPlatform()));
+            addTagToResult(result, key, request.getEnvironmentTags().get(key), request.getPlatform());
         }
     }
 
     private void addCDPCrnIfPresent(Map<String, String> result, DefaultApplicationTag tag, String crn, String platform) {
         if (StringUtils.isNotEmpty(crn)) {
             LOGGER.debug("Adding  crn {} tag to default tags.", crn);
-            result.put(transform(tag.key(), platform), transform(crn, platform));
+            addTagToResult(result, tag.key(), crn, platform);
         } else {
             LOGGER.debug("Unable to add \"{}\" - cost - tag to the resource's default tags because it's value is empty or null!", tag.key());
         }
@@ -105,25 +108,31 @@ public class DefaultCostTaggingService implements CostTagging {
     private void addAccountTag(Map<String, String> result, String key, String value, String platform) {
         LOGGER.debug("Adding account tag with key {} and value {}.", key, value);
         if (!keyOrValueIsEmpty(key, value)) {
-            result.put(transform(key, platform), transform(value, platform));
+            addTagToResult(result, key, value, platform);
         }
+    }
+
+    private void addTagToResult(Map<String, String> result, String key, String value, String platform) {
+        result.put(transform(key, platform), transform(value, platform));
     }
 
     private String transform(String value, String platform) {
         String valueAfterCheck = Strings.isNullOrEmpty(value) ? "unknown" : value;
-        return "GCP".equalsIgnoreCase(platform)
-                ? getGcpString(value)
-                : valueAfterCheck;
-    }
-
-    private String getGcpString(String value) {
-        String transformedString = value.split("@")[0].toLowerCase()
-                .replaceAll("[^\\w]", "-");
-        transformedString = transformedString.substring(0, Math.min(transformedString.length(), 63));
-        if (transformedString.endsWith("-")){
-            transformedString = transformedString.substring(0, transformedString.length() - 1);
+        // GCP labels have strict rules https://cloud.google.com/compute/docs/labeling-resources
+        if ("GCP".equalsIgnoreCase(platform)) {
+            LOGGER.debug("Transforming tag key/value for GCP.");
+            if (Crn.isCrn(valueAfterCheck)) {
+                try {
+                    Crn crn = Crn.fromString(valueAfterCheck);
+                    valueAfterCheck = crn == null ? valueAfterCheck : crn.getResource();
+                } catch (Exception e) {
+                    LOGGER.debug("Ignoring CRN ({}) parse error during tag value generation : {}", valueAfterCheck, e.getMessage());
+                }
+            }
+            String sanitized = valueAfterCheck.split("@")[0].toLowerCase().replaceAll("[^\\w]", "-");
+            return StringUtils.right(sanitized, GCP_MAX_TAG_LEN);
         }
-        return transformedString;
+        return valueAfterCheck;
     }
 
     private void validateResourceTagsNotContainTheSameTag(Map<String, String> userDefinedResourceTags, Map<String, String> accountTags) {

@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -42,6 +43,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRe
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -94,7 +96,7 @@ public class EnvironmentApiConverterTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE"})
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
     void testInitCreationDto(CloudPlatform cloudPlatform) {
         EnvironmentRequest request = createEnvironmentRequest(cloudPlatform);
         FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
@@ -245,7 +247,7 @@ public class EnvironmentApiConverterTest {
     private void assertParameters(EnvironmentRequest request, ParametersDto actual, CloudPlatform cloudPlatform) {
         if (AWS.equals(cloudPlatform)) {
             assertAwsParameters(request, actual);
-        } else {
+        } else if (AZURE.equals(cloudPlatform)) {
             assertAzureParameters(request, actual);
         }
     }
@@ -294,6 +296,8 @@ public class EnvironmentApiConverterTest {
             request.setAws(createAwsRequest());
         } else if (AZURE.equals(cloudPlatform)) {
             request.setAzure(createAzureRequest());
+        } else if (GCP.equals(cloudPlatform)) {
+            request.setGcp(createGcpRequest());
         } else {
             throw new RuntimeException("Unexpected cloudplatform: " + cloudPlatform);
         }
@@ -330,6 +334,10 @@ public class EnvironmentApiConverterTest {
                         .build()
         );
         return azureEnvironmentParameters;
+    }
+
+    private GcpEnvironmentParameters createGcpRequest() {
+        return GcpEnvironmentParameters.builder().build();
     }
 
     private AttachedFreeIpaRequest createFreeIpaRequest() {

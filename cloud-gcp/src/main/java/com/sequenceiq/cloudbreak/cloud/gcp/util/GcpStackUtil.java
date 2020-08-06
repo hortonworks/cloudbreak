@@ -72,6 +72,8 @@ public final class GcpStackUtil {
 
     public static final String NO_FIREWALL_RULES = "noFirewallRules";
 
+    public static final String REGION = "region";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpStackUtil.class);
 
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();

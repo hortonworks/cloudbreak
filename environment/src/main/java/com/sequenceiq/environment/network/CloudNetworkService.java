@@ -58,6 +58,7 @@ public class CloudNetworkService {
             filter.put(GcpStackUtil.SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
             filter.put(GcpStackUtil.NO_FIREWALL_RULES, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoFirewallRules())));
             filter.put(GcpStackUtil.NO_PUBLIC_IP, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoPublicIp())));
+            buildSubnetIdFilter(network, filter);
             return fetchCloudNetwork(environmentDto.getRegions(), environmentDto.getCredential(), environmentDto.getCloudPlatform(), network, filter);
         } else {
             return network.getSubnetIds().stream().collect(toMap(Function.identity(), id -> new CloudSubnet(id, null)));
@@ -84,9 +85,17 @@ public class CloudNetworkService {
             filter.put(GcpStackUtil.SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
             filter.put(GcpStackUtil.NO_FIREWALL_RULES, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoFirewallRules())));
             filter.put(GcpStackUtil.NO_PUBLIC_IP, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoPublicIp())));
+            buildSubnetIdFilter(network, filter);
             return fetchCloudNetwork(environment.getRegionSet(), environment.getCredential(), environment.getCloudPlatform(), network, filter);
         } else {
             return network.getSubnetIds().stream().collect(toMap(Function.identity(), id -> new CloudSubnet(id, null)));
+        }
+    }
+
+    private void buildSubnetIdFilter(NetworkDto network, Map<String, String> filter) {
+        Optional<String> subnet = network.getSubnetIds().stream().findFirst();
+        if (subnet.isPresent()) {
+            filter.put("subnetId", subnet.get());
         }
     }
 
