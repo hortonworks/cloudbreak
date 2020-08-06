@@ -48,7 +48,7 @@ public class OpenStackImageImageImporterTest {
         when(osClient.imagesV2()).thenReturn(imageService);
         when(imageService.tasks()).thenReturn(taskService);
 
-        when(urlAccessValidationService.isAccessible("https://myimage.img")).thenReturn(true);
+        when(urlAccessValidationService.isAccessible("https://myimage.img", null)).thenReturn(true);
         when(openStackImageImportTaskParameters.getImportLocation("myimage")).thenReturn("https://myimage.img");
         when(openStackImageImportTaskParameters.buildInput(any())).thenReturn(new HashMap<>());
     }
@@ -64,7 +64,7 @@ public class OpenStackImageImageImporterTest {
     @Test(expected = CloudConnectorException.class)
     public void testImportNotExsist() {
         try {
-            when(urlAccessValidationService.isAccessible("https://not-exist.img")).thenReturn(false);
+            when(urlAccessValidationService.isAccessible("https://not-exist.img", null)).thenReturn(false);
             when(openStackImageImportTaskParameters.getImportLocation("not-exist")).thenReturn("https://not-exist.img");
             underTest.importImage(osClient, "not-exist");
         } catch (CloudConnectorException e) {
