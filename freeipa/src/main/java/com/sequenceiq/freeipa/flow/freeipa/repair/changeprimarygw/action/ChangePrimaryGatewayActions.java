@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_DISABLE_STATUS_CHECKER_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_DISABLE_STATUS_CHECKER_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_ENABLE_STATUS_CHECKER_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_ENABLE_STATUS_CHECKER_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_METADATA_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_METADATA_FINISHED_EVENT;
@@ -67,6 +71,27 @@ public class ChangePrimaryGatewayActions {
                 LOGGER.info("Starting to change the primary gateway {}", payload);
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS, "Starting to change the primary gateway");
                 sendEvent(context, CHANGE_PRIMARY_GATEWAY_STARTING_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+            }
+        };
+    }
+
+    @Bean(name = "CHANGE_PRIMARY_GATEWAY_DISABLE_STATUS_CHECKER_STATE")
+    public Action<?, ?> disableStatusCheckerAction() {
+        return new AbstractChangePrimaryGatewayAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(ChangePrimaryGatewayContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS, "Disabling the status checker while repairing");
+                try {
+                    if (!isFinalChain(variables)) {
+                        disableStatusChecker(stack, "Repairing FreeIPA");
+                    }
+                    sendEvent(context, CHANGE_PRIMARY_GATEWAY_DISABLE_STATUS_CHECKER_FINISHED_EVENT.event(), new StackEvent(stack.getId()));
+                } catch (Exception e) {
+                    LOGGER.error("Failed to disable the status checker", e);
+                    sendEvent(context, CHANGE_PRIMARY_GATEWAY_DISABLE_STATUS_CHECKER_FAILED_EVENT.event(),
+                            new ChangePrimaryGatewayFailureEvent(stack.getId(), "disable status checker", Set.of(), Map.of(), e));
+                }
             }
         };
     }
@@ -139,6 +164,26 @@ public class ChangePrimaryGatewayActions {
         };
     }
 
+    @Bean(name = "CHANGE_PRIMARY_GATEWAY_ENABLE_STATUS_CHECKER_STATE")
+    public Action<?, ?> enableStatusCheckerAction() {
+        return new AbstractChangePrimaryGatewayAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(ChangePrimaryGatewayContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS, "Enabling the status checker after repairing");
+                try {
+                    if (isFinalChain(variables)) {
+                        enableStatusChecker(stack, "Finished repairing FreeIPA");
+                    }
+                    sendEvent(context, CHANGE_PRIMARY_GATEWAY_ENABLE_STATUS_CHECKER_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+                } catch (Exception e) {
+                    sendEvent(context, CHANGE_PRIMARY_GATEWAY_ENABLE_STATUS_CHECKER_FAILED_EVENT.event(),
+                            new ChangePrimaryGatewayFailureEvent(stack.getId(), "enable status checker", Set.of(), Map.of(), e));
+                }
+            }
+        };
+    }
+
     @Bean(name = "CHANGE_PRIMARY_GATEWAY_FINISHED_STATE")
     public Action<?, ?> finsihedAction() {
         return new AbstractChangePrimaryGatewayAction<>(StackEvent.class) {
@@ -165,7 +210,6 @@ public class ChangePrimaryGatewayActions {
     @Bean(name = "CHANGE_PRIMARY_GATEWAY_FAIL_STATE")
     public Action<?, ?> failureAction() {
         return new AbstractChangePrimaryGatewayAction<>(ChangePrimaryGatewayFailureEvent.class) {
-
             @Inject
             private OperationService operationService;
 
@@ -198,6 +242,8 @@ public class ChangePrimaryGatewayActions {
                 String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.REPAIR_FAILED, errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
+                LOGGER.info("Enabling the status checker for stack ID {} after failing repairing", stack.getId());
+                enableStatusChecker(stack, "Failed to repair FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }
 

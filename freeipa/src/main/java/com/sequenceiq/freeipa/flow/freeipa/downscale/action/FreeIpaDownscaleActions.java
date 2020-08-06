@@ -1,5 +1,10 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_DISABLE_STATUS_CHECKER_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_DISABLE_STATUS_CHECKER_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.STARTING_DOWNSCALE_FINISHED_EVENT;
@@ -17,10 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT;
-import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesRequest;
-import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesResponse;
-import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateDnsSoaRecordsRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -51,6 +52,9 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesRequest;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesResponse;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateDnsSoaRecordsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateDnsSoaRecordsResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHostsFromOrchestrationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHostsFromOrchestrationSuccess;
@@ -60,9 +64,9 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTel
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.failure.ClusterProxyUpdateRegistrationFailedToDownscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.failure.DownscaleStackCollectResourcesResultToDownscaleFailureEventConverter;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.failure.DownscaleStackResultToDownscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.failure.RemoveDnsResponseToDownscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.failure.RemoveHostsResponseToDownscaleFailureEventConverter;
-import com.sequenceiq.freeipa.flow.freeipa.downscale.failure.DownscaleStackResultToDownscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.failure.RemoveServersResponseToDownscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.failure.RevokeCertsResponseToDownscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationRequest;
@@ -108,6 +112,27 @@ public class FreeIpaDownscaleActions {
                 LOGGER.info("Starting downscale {}", payload);
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Starting downscale");
                 sendEvent(context, STARTING_DOWNSCALE_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+            }
+        };
+    }
+
+    @Bean(name = "DOWNSCALE_DISABLE_STATUS_CHECKER_STATE")
+    public Action<?, ?> disableStatusCheckerAction() {
+        return new AbstractDownscaleAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Disabling the status checker while downscaling");
+                try {
+                    if (!isRepair(variables)) {
+                        disableStatusChecker(stack, "Downscaling FreeIPA");
+                    }
+                    sendEvent(context, DOWNSCALE_DISABLE_STATUS_CHECKER_FINISHED_EVENT.event(), new StackEvent(stack.getId()));
+                } catch (Exception e) {
+                    LOGGER.error("Failed to disable the status checker", e);
+                    sendEvent(context, DOWNSCALE_DISABLE_STATUS_CHECKER_FAILED_EVENT.event(),
+                            new DownscaleFailureEvent(stack.getId(), "disable status checker", Set.of(), Map.of(), e));
+                }
             }
         };
     }
@@ -303,6 +328,27 @@ public class FreeIpaDownscaleActions {
         };
     }
 
+    @Bean(name = "DOWNSCALE_ENABLE_STATUS_CHECKER_STATE")
+    public Action<?, ?> enableStatusCheckerAction() {
+        return new AbstractDownscaleAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Enabling the status checker after downscaling");
+                try {
+                    if (!isRepair(variables)) {
+                        enableStatusChecker(stack, "Finished downscaling FreeIPA");
+                    }
+                    sendEvent(context, DOWNSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT.event(), new StackEvent(stack.getId()));
+                } catch (Exception e) {
+                    LOGGER.error("Failed to enable the status checker", e);
+                    sendEvent(context, DOWNSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT.event(),
+                            new DownscaleFailureEvent(stack.getId(), "enable status checker", Set.of(), Map.of(), e));
+                }
+            }
+        };
+    }
+
     @Bean(name = "DOWNSCALE_FINISHED_STATE")
     public Action<?, ?> downscaleFinsihedAction() {
         return new AbstractDownscaleAction<>(StackEvent.class) {
@@ -359,6 +405,7 @@ public class FreeIpaDownscaleActions {
                 String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
                 stackUpdater.updateStackStatus(context.getStack().getId(), getFailedStatus(variables), errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
+                enableStatusChecker(stack, "Failed downscaling FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }
 

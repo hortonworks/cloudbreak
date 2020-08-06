@@ -2,6 +2,10 @@ package com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw;
 
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_CLUSTERPROXY_REGISTRATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_CLUSTERPROXY_REGISTRATION_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_DISABLE_STATUS_CHECKER_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_DISABLE_STATUS_CHECKER_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_ENABLE_STATUS_CHECKER_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_ENABLE_STATUS_CHECKER_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_METADATA_FAILED_EVENT;
@@ -12,6 +16,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangeP
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_CLUSTERPROXY_REGISTRATION_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_DISABLE_STATUS_CHECKER_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_ENABLE_STATUS_CHECKER_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_FAIL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState.CHANGE_PRIMARY_GATEWAY_METADATA_STATE;
@@ -36,9 +42,13 @@ public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<Ch
                     .event(CHANGE_PRIMARY_GATEWAY_EVENT)
                     .defaultFailureEvent()
 
-                    .from(CHANGE_PRIMARY_GATEWAY_STATE_STARTING).to(CHANGE_PRIMARY_GATEWAY_SELECTION)
+                    .from(CHANGE_PRIMARY_GATEWAY_STATE_STARTING).to(CHANGE_PRIMARY_GATEWAY_DISABLE_STATUS_CHECKER_STATE)
                     .event(CHANGE_PRIMARY_GATEWAY_STARTING_FINISHED_EVENT)
                     .defaultFailureEvent()
+
+                    .from(CHANGE_PRIMARY_GATEWAY_DISABLE_STATUS_CHECKER_STATE).to(CHANGE_PRIMARY_GATEWAY_SELECTION)
+                    .event(CHANGE_PRIMARY_GATEWAY_DISABLE_STATUS_CHECKER_FINISHED_EVENT)
+                    .failureEvent(CHANGE_PRIMARY_GATEWAY_DISABLE_STATUS_CHECKER_FAILED_EVENT)
 
                     .from(CHANGE_PRIMARY_GATEWAY_SELECTION).to(CHANGE_PRIMARY_GATEWAY_METADATA_STATE)
                     .event(CHANGE_PRIMARY_GATEWAY_SELECTION_FINISHED_EVENT)
@@ -48,9 +58,13 @@ public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<Ch
                     .event(CHANGE_PRIMARY_GATEWAY_METADATA_FINISHED_EVENT)
                     .failureEvent(CHANGE_PRIMARY_GATEWAY_METADATA_FAILED_EVENT)
 
-                    .from(CHANGE_PRIMARY_GATEWAY_CLUSTERPROXY_REGISTRATION_STATE).to(CHANGE_PRIMARY_GATEWAY_FINISHED_STATE)
+                    .from(CHANGE_PRIMARY_GATEWAY_CLUSTERPROXY_REGISTRATION_STATE).to(CHANGE_PRIMARY_GATEWAY_ENABLE_STATUS_CHECKER_STATE)
                     .event(CHANGE_PRIMARY_GATEWAY_CLUSTERPROXY_REGISTRATION_FINISHED_EVENT)
                     .failureEvent(CHANGE_PRIMARY_GATEWAY_CLUSTERPROXY_REGISTRATION_FAILED_EVENT)
+
+                    .from(CHANGE_PRIMARY_GATEWAY_ENABLE_STATUS_CHECKER_STATE).to(CHANGE_PRIMARY_GATEWAY_FINISHED_STATE)
+                    .event(CHANGE_PRIMARY_GATEWAY_ENABLE_STATUS_CHECKER_FINISHED_EVENT)
+                    .failureEvent(CHANGE_PRIMARY_GATEWAY_ENABLE_STATUS_CHECKER_FAILED_EVENT)
 
                     .from(CHANGE_PRIMARY_GATEWAY_FINISHED_STATE).to(FINAL_STATE)
                     .event(CHANGE_PRIMARY_GATEWAY_FINISHED_EVENT)

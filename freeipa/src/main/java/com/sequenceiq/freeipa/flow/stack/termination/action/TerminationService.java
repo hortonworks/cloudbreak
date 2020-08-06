@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.termination.action;
 
+import static java.util.function.Predicate.not;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -99,7 +101,8 @@ public class TerminationService {
 
     private void terminateMetaDataInstances(Stack stack, List<String> instanceIds) {
         List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
-        stack.getNotDeletedInstanceMetaDataList().stream()
+        stack.getAllInstanceMetaDataList().stream()
+                .filter(not(InstanceMetaData::isTerminated))
                 .filter(metaData -> Objects.isNull(instanceIds) || instanceIds.contains(metaData.getInstanceId()))
                 .forEach(metaData -> {
                     metaData.setTerminationDate(clock.getCurrentTimeMillis());
