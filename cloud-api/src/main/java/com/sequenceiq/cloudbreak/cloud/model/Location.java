@@ -45,4 +45,11 @@ public class Location {
         return Objects.hash(region, availabilityZone);
     }
 
+    @Override
+    public String toString() {
+        return "Location{" +
+                "region=" + region +
+                ", availabilityZone=" + availabilityZone +
+                '}';
+    }
 }

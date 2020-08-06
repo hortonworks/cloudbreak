@@ -58,9 +58,11 @@ public class DefaultCostTaggingServiceTest {
         Map<String, String> result = underTest.prepareDefaultTags(tagRequest("GCP"));
 
         Assert.assertEquals(3L, result.size());
-        Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key().toLowerCase()));
-        Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key().toLowerCase()));
-        Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key().toLowerCase()));
+        Assert.assertEquals("12474ddc-6e44-4f4c-806a-b197ef12cbb8", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key().toLowerCase()));
+        Assert.assertEquals("5d7-b645-7ccf9edbb73d-user-05ca1026-c028-466b-8943-b04f765fa3f6",
+                result.get(DefaultApplicationTag.CREATOR_CRN.key().toLowerCase()));
+        Assert.assertEquals("-b645-7ccf9edbb73d-freeipa-8111d534-8c7e-4a68-a8ba-7ebb389a3a20",
+                result.get(DefaultApplicationTag.RESOURCE_CRN.key().toLowerCase()));
     }
 
     @Test
@@ -137,6 +139,9 @@ public class DefaultCostTaggingServiceTest {
     }
 
     private CDPTagGenerationRequest tagRequest(String platform, Map<String, String> sourceMap, Map<String, String> accountTags) {
+        if ("GCP".equalsIgnoreCase(platform)) {
+            return tagRequestForGcp(sourceMap, accountTags, new HashMap<>());
+        }
         return tagRequest(platform, sourceMap, accountTags, new HashMap<>());
     }
 
@@ -148,6 +153,22 @@ public class DefaultCostTaggingServiceTest {
             .withResourceCrn("resource-crn")
             .withUserName("apache1@apache.com")
             .withPlatform(platform)
+            .withAccountId("pepsi")
+            .withIsInternalTenant(true)
+            .withSourceMap(sourceMap)
+            .withAccountTags(accountTags)
+            .withUserDefinedTags(userTags)
+            .build();
+    }
+
+    private CDPTagGenerationRequest tagRequestForGcp(Map<String, String> sourceMap,
+            Map<String, String> accountTags, Map<String, String> userTags) {
+        return CDPTagGenerationRequest.Builder.builder()
+            .withEnvironmentCrn("crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:12474ddc-6e44-4f4c-806a-b197ef12cbb8")
+            .withCreatorCrn("crn:altus:timbuk2:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:05ca1026-c028-466b-8943-b04f765fa3f6")
+            .withResourceCrn("crn:cdp:freeipa:us-west-2:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:freeipa:8111d534-8c7e-4a68-a8ba-7ebb389a3a20")
+            .withUserName("apache1@apache.com")
+            .withPlatform("GCP")
             .withAccountId("pepsi")
             .withIsInternalTenant(true)
             .withSourceMap(sourceMap)

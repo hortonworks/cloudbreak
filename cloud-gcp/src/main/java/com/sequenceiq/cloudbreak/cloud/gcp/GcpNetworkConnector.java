@@ -6,7 +6,6 @@ import static com.sequenceiq.common.api.type.ResourceType.GCP_NETWORK;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_SUBNET;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.api.services.compute.Compute;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
@@ -129,9 +129,17 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements N
 
     @Override
     public NetworkCidr getNetworkCidr(Network network, CloudCredential credential) {
-        List<String> vpcCidrs = new ArrayList<>();
-        vpcCidrs.add("10.0.0.0/16");
-        return new NetworkCidr(vpcCidrs.get(0), vpcCidrs);
+        String subnetId = network.getStringParameter(GcpStackUtil.SUBNET_ID);
+        String region = network.getStringParameter(GcpStackUtil.REGION);
+        LOGGER.debug("Getting network cidrs for subnet {} in region {}", subnetId, region);
+        Compute compute = GcpStackUtil.buildCompute(credential);
+        String projectId = GcpStackUtil.getProjectId(credential);
+        try {
+            String ipCidrRange = compute.subnetworks().get(projectId, region, subnetId).execute().getIpCidrRange();
+            return new NetworkCidr(ipCidrRange, Collections.singletonList(ipCidrRange));
+        } catch (IOException e) {
+            throw new GcpResourceException("Describe subnets failed due to IO exception", GCP_NETWORK, subnetId);
+        }
     }
 
     @Override
