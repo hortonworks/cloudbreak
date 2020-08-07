@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCheckForOsUpgradeAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCreateAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCreateInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDeleteAction;
@@ -22,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncInternalAction;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 
@@ -98,5 +100,9 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> upgradeOs() {
         return new SdxOsUpgradeAction();
+    }
+
+    public Action<SdxDiagnosticsTestDto, SdxClient> collectDiagnostics() {
+        return new SdxCollectDiagnosticsAction();
     }
 }

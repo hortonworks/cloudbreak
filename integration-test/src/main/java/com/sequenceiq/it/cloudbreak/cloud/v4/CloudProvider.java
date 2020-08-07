@@ -29,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -118,6 +119,8 @@ public interface CloudProvider {
     EnvironmentAuthenticationTestDto environmentAuthentication(EnvironmentAuthenticationTestDto environmentAuthenticationEntity);
 
     EnvironmentSecurityAccessTestDto environmentSecurityAccess(EnvironmentSecurityAccessTestDto environmentSecurityAccessTestDto);
+
+    SdxDiagnosticsTestDto sdxDiagnosticsTestDto(SdxDiagnosticsTestDto sdxDiagnosticsTestDto);
 
     Integer gatewayPort(StackTestDtoBase stackEntity);
 

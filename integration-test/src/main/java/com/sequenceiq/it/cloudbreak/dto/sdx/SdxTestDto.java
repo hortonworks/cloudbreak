@@ -173,6 +173,11 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return this;
     }
 
+    public SdxTestDto withSdxDiagnostics(SdxCloudStorageRequest cloudStorage) {
+        getRequest().setCloudStorage(cloudStorage);
+        return this;
+    }
+
     public SdxTestDto withTags(Map<String, String> tags) {
         getRequest().addTags(tags);
         return this;
