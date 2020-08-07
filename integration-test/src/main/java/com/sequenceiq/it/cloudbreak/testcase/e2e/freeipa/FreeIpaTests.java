@@ -11,6 +11,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
@@ -31,6 +32,7 @@ public class FreeIpaTests extends AbstractE2ETest {
             then = "the stack should be available AND deletable")
     public void testCreateStopStartFreeIpa(TestContext testContext) {
         String freeIpa = resourcePropertyProvider().getName();
+        String diagnostics = resourcePropertyProvider().getName();
 
         testContext
                 .given("telemetry", TelemetryTestDto.class)
@@ -40,6 +42,10 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .withTelemetry("telemetry")
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
+                .given(diagnostics, FreeIpaDiagnosticsTestDto.class)
+                .when(freeIpaTestClient.collectDiagnostics(), key(diagnostics))
+                .awaitForFlow(key(diagnostics))
+                .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.stop())
                 .await(Status.STOPPED)
                 .when(freeIpaTestClient.start())
