@@ -10,6 +10,8 @@ public class CloudCredentialStatus {
 
     private final Exception exception;
 
+    private final boolean defaultRegionChanged;
+
     public CloudCredentialStatus(CloudCredential cloudResource, CredentialStatus status) {
         this(cloudResource, status, null, null);
     }
@@ -19,6 +21,15 @@ public class CloudCredentialStatus {
         this.status = status;
         this.statusReason = statusReason;
         this.exception = exception;
+        this.defaultRegionChanged = false;
+    }
+
+    public CloudCredentialStatus(CloudCredentialStatus cloudCredentialStatus, boolean defaultRegionChanged) {
+        this.cloudCredential = cloudCredentialStatus.getCloudCredential();
+        this.status = cloudCredentialStatus.getStatus();
+        this.statusReason = cloudCredentialStatus.getStatusReason();
+        this.exception = cloudCredentialStatus.getException();
+        this.defaultRegionChanged = defaultRegionChanged;
     }
 
     public CloudCredential getCloudCredential() {
@@ -37,6 +48,10 @@ public class CloudCredentialStatus {
         return exception;
     }
 
+    public boolean isDefaultRegionChanged() {
+        return defaultRegionChanged;
+    }
+
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
@@ -44,6 +59,7 @@ public class CloudCredentialStatus {
                 + "cloudCredential=" + cloudCredential
                 + ", status=" + status
                 + ", statusReason='" + statusReason + '\''
+                + ", defaultRegionChanged='" + defaultRegionChanged + '\''
                 + '}';
     }
     //END GENERATED CODE
