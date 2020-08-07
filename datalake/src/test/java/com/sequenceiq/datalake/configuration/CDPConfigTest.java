@@ -90,7 +90,7 @@ class CDPConfigTest {
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(rt("7.0.2", false), rt("7.1.0", true));
+        List<AdvertisedRuntime> expected = List.of(rt("7.1.0", true), rt("7.0.2", false));
         List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes();
 
         assertArrayEquals(expected.toArray(), actual.toArray());
