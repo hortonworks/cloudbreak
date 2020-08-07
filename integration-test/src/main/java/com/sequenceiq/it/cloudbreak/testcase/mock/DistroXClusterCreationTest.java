@@ -111,6 +111,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .then(DistroXClusterCreationTest::distroxClusterGeneratedBlueprintCheck)
                 .when(distroXClient.create())
                 .await(STACK_AVAILABLE)
+                .then(DistroXClusterCreationTest::distroxServiceTypeTagExists)
                 .then(auditGrpcServiceAssertion::distroxCreate)
                 .when(distroXClient.forceDelete(), withoutLogError())
                 .await(STACK_DELETED)
@@ -420,6 +421,16 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         if (testDto.getResponse().getCluster().getCloudStorage() == null) {
             throw new TestFailException("Cloud storage should be set on DistroX");
         }
+    }
+
+    private static DistroXTestDto distroxServiceTypeTagExists(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
+        if (testDto.getResponse().getTags() == null || testDto.getResponse().getTags().getApplication() == null) {
+            throw new TestFailException("Application tags cannot be empty for DistroX cluster");
+        }
+        if (!testDto.getResponse().getTags().getApplication().containsKey("Cloudera-Service-Type")) {
+            throw new TestFailException("Application tag 'Cloudera-Service-Type' needs to exist for DistroX cluster");
+        }
+        return testDto;
     }
 
     private SdxCloudStorageRequest testStorage() {
