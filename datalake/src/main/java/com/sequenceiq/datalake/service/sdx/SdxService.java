@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -76,6 +77,7 @@ import com.sequenceiq.sdx.api.model.SdxAwsBase;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
@@ -576,6 +578,19 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         return sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name)
                 .map(sdxCluster -> deleteSdxCluster(sdxCluster, forced))
                 .orElseThrow(() -> notFound("SDX cluster", name).get());
+    }
+
+    public void setAdditionalClusterResponseFields(SdxClusterResponse sdxClusterResponse, SdxCluster sdxCluster) {
+        setCloudPlatform(sdxClusterResponse, sdxCluster);
+    }
+
+    private void setCloudPlatform(SdxClusterResponse sdxClusterResponse, SdxCluster sdxCluster) {
+        StackV4Response stackV4Response = getDetail(sdxClusterResponse.getCrn(), Collections.emptySet(), sdxCluster.getAccountId());
+        if (stackV4Response == null || stackV4Response.getCloudPlatform() == null) {
+            LOGGER.info("Failed to retrieve cloud platform attribute from cloudbreak.");
+            return;
+        }
+        sdxClusterResponse.setCloudPlatform(stackV4Response.getCloudPlatform());
     }
 
     private FlowIdentifier deleteSdxCluster(SdxCluster sdxCluster, boolean forced) {

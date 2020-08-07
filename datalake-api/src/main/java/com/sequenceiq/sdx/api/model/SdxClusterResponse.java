@@ -2,6 +2,7 @@ package com.sequenceiq.sdx.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -36,6 +37,8 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
     private FlowIdentifier flowIdentifier;
 
     private boolean rangerRazEnabled;
+
+    private CloudPlatform cloudPlatform;
 
     public SdxClusterResponse() {
     }
@@ -177,6 +180,14 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
 
     public boolean getRangerRazEnabled() {
         return rangerRazEnabled;
+    }
+
+    public CloudPlatform getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 
     @JsonIgnore
