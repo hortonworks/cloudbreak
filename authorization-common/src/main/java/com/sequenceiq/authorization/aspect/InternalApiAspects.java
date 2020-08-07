@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.auth.security.internal;
+package com.sequenceiq.authorization.aspect;
 
 import javax.inject.Inject;
 
@@ -9,6 +9,8 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
+
 @Component
 @Aspect
 @Order(0)
@@ -17,7 +19,7 @@ public class InternalApiAspects {
     @Inject
     private InternalCrnModifier internalCrnModifier;
 
-    @Pointcut("within(@com.sequenceiq.cloudbreak.auth.security.internal.InternalReady *)")
+    @Pointcut("within(@com.sequenceiq.authorization.annotation.InternalReady *)")
     public void allEndpoints() {
     }
 
