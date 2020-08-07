@@ -33,6 +33,10 @@ public interface ClusterModificationService {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
+    default void deactivateUnusedComponents(Set<ClusterComponent> usedComponents) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
     default void stopComponents(Map<String, String> components, String hostname) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }

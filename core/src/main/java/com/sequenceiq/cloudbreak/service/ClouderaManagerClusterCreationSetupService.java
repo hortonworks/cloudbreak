@@ -193,18 +193,18 @@ public class ClouderaManagerClusterCreationSetupService {
                     ? Sets.newHashSet(defaultCDHInfo.getParcels()) : new HashSet<>();
             products.add(cmProduct);
             LOGGER.info("Product list before filter out products by blueprint: {}", products);
-            Set<ClouderaManagerProduct> filteredProducts = parcelService.filterParcelsByBlueprint(products, cluster.getBlueprint());
-            LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
-            return filteredProducts;
+//            Set<ClouderaManagerProduct> filteredProducts = parcelService.filterParcelsByBlueprint(products, cluster.getBlueprint());
+//            LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
+            return products;
         } else {
             Set<ClouderaManagerProduct> products = stackCdhRepoConfig.stream()
                     .map(Component::getAttributes)
                     .map(json -> json.getSilent(ClouderaManagerProduct.class))
                     .collect(Collectors.toSet());
             LOGGER.info("Product list before filter out products by blueprint: {}", products);
-            Set<ClouderaManagerProduct> filteredProducts = parcelService.filterParcelsByBlueprint(products, cluster.getBlueprint());
-            LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
-            return filteredProducts;
+//            Set<ClouderaManagerProduct> filteredProducts = parcelService.filterParcelsByBlueprint(products, cluster.getBlueprint());
+//            LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
+            return products;
         }
     }
 

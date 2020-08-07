@@ -7,6 +7,10 @@
     "domainName": "cloudera.site",
     "hostgroupNameAsHostname": true
   },
+  "image": {
+    "catalog": "cdp-default",
+    "id": "9cdcf579-beb1-4d5f-4e15-0fb985298bbe"
+  },
   "instanceGroups": [
     {
       "name": "idbroker",

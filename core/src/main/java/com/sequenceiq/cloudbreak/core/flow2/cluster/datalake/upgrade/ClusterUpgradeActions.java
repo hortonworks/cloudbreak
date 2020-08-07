@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.core.flow2.event.DatalakeClusterUpgradeTriggerE
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManagerUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManagerUpgradeSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
@@ -43,8 +45,8 @@ public class ClusterUpgradeActions {
     @Inject
     private ClusterUpgradeService clusterUpgradeService;
 
-    @Bean(name = "CLUSTER_MANAGER_UPGRADE_STATE")
-    public Action<?, ?> upgradeClusterManager() {
+    @Bean(name = "CLUSTER_UPGRADE_INIT_STATE")
+    public Action<?, ?> initClusterUpgrade() {
         return new AbstractClusterUpgradeAction<>(DatalakeClusterUpgradeTriggerEvent.class) {
 
             @Override
@@ -62,8 +64,32 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, DatalakeClusterUpgradeTriggerEvent payload, Map<Object, Object> variables) {
+                Selectable event = new ClusterUpgradeInitRequest(context.getStackId());
+                sendEvent(context, event.selector(), event);
+            }
+
+            @Override
+            protected Object getFailurePayload(DatalakeClusterUpgradeTriggerEvent payload, Optional<ClusterUpgradeContext> flowContext, Exception ex) {
+                return ClusterUpgradeFailedEvent.from(payload, ex, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED);
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_MANAGER_UPGRADE_STATE")
+    public Action<?, ?> upgradeClusterManager() {
+        return new AbstractClusterUpgradeAction<>(ClusterUpgradeInitSuccess.class) {
+            @Override
+            protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    ClusterUpgradeInitSuccess payload) {
+                return ClusterUpgradeContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeInitSuccess payload, Map<Object, Object> variables) {
+                StatedImage currentImage = (StatedImage) variables.get(CURRENT_IMAGE);
+                StatedImage targetImage = (StatedImage) variables.get(TARGET_IMAGE);
                 boolean clusterManagerUpdateNeeded =
-                        clusterUpgradeService.upgradeClusterManager(context.getStackId(), payload.getCurrentImage(), payload.getTargetImage());
+                        clusterUpgradeService.upgradeClusterManager(context.getStackId(), currentImage, targetImage);
                 Selectable event;
                 if (clusterManagerUpdateNeeded) {
                     event = new ClusterManagerUpgradeRequest(context.getStackId());
@@ -74,7 +100,7 @@ public class ClusterUpgradeActions {
             }
 
             @Override
-            protected Object getFailurePayload(DatalakeClusterUpgradeTriggerEvent payload, Optional<ClusterUpgradeContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ClusterUpgradeInitSuccess payload, Optional<ClusterUpgradeContext> flowContext, Exception ex) {
                 return ClusterUpgradeFailedEvent.from(payload, ex, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED);
             }
         };

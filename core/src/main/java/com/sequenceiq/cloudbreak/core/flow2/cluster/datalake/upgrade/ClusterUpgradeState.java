@@ -6,6 +6,7 @@ public enum ClusterUpgradeState implements FlowState {
     INIT_STATE,
     CLUSTER_UPGRADE_FAILED_STATE,
 
+    CLUSTER_UPGRADE_INIT_STATE,
     CLUSTER_MANAGER_UPGRADE_STATE,
 
     CLUSTER_UPGRADE_STATE,

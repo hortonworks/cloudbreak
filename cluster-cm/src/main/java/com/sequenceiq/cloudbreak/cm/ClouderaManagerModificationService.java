@@ -9,6 +9,8 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -512,10 +514,36 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Override
     public Map<String, String> gatherInstalledComponents(String stackName) {
         try {
-        return clouderaManagerParcelService.getActivatedParcels(apiClient, stackName);
+            return clouderaManagerParcelService.getActivatedParcels(apiClient, stackName);
         } catch (ApiException e) {
             LOGGER.info("Unable to fetch the list of activated parcels", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void deactivateUnusedComponents(Set<ClusterComponent> usedComponents) {
+        ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
+        Map<String, ClouderaManagerProduct> cmProducts = new HashMap<>();
+        for (ClusterComponent clusterComponent : usedComponents) {
+            ClouderaManagerProduct product = clusterComponent.getAttributes().getSilent(ClouderaManagerProduct.class);
+            cmProducts.put(product.getName(), product);
+        }
+        Map<String, String> installedComponents = gatherInstalledComponents(stack.getName());
+        Set<String> failedDeactivations = new HashSet<>();
+        for (Map.Entry<String, String> installedComp : installedComponents.entrySet()) {
+            if (!cmProducts.containsKey(installedComp.getKey())) {
+                try {
+                    parcelResourceApi.deactivateCommand(stack.getName(), installedComp.getKey(), installedComp.getValue());
+                } catch (ApiException e) {
+                    String product = "[" + installedComp.getKey() + ":" + installedComp.getValue() + "]";
+                    LOGGER.info(String.format("Unable to deactivate product: %s", product), e);
+                    failedDeactivations.add(product);
+                }
+            }
+        }
+        if (!failedDeactivations.isEmpty()) {
+            throw new ClouderaManagerOperationFailedException(String.format("Deactivation failed on the following products: %s", failedDeactivations));
         }
     }
 

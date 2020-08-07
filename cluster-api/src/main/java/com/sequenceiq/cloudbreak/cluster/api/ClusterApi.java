@@ -76,6 +76,10 @@ public interface ClusterApi {
         return clusterModificationService().gatherInstalledComponents(hostname);
     }
 
+    default void deactivateUnUsedComponents(Set<ClusterComponent> usedComponents) {
+        clusterModificationService().deactivateUnusedComponents(usedComponents);
+    }
+
     default void ensureComponentsAreStopped(Map<String, String> components, String hostname) throws CloudbreakException {
         clusterModificationService().ensureComponentsAreStopped(components, hostname);
     }
