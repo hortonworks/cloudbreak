@@ -123,10 +123,6 @@ public class ClouderaManagerClusterCreationSetupService {
             Set<ClouderaManagerProduct> filteredProducts = determineCdhRepoConfig(cluster, stackCdhRepoConfig, osType,
                     blueprintCdhVersion, imageCatalogName);
             components.addAll(convertParcelsToClusterComponents(cluster, filteredProducts));
-        } else if (isCdhParcelOnly(products)) {
-            Set<ClouderaManagerProduct> filteredProducts = addDefaultProducts(cluster, blueprintCdhVersion, osType,
-                    cluster.getStack().getCloudPlatform(), imageCatalogName);
-            components.addAll(convertParcelsToClusterComponents(cluster, filteredProducts));
         }
         if (isCdhParcelMissing(products, components)) {
             throw new BadRequestException("CDH parcel is missing from the cluster. "
@@ -226,10 +222,6 @@ public class ClouderaManagerClusterCreationSetupService {
         return defaultCDHInfo;
     }
 
-    private boolean isCdhParcelOnly(List<ClouderaManagerProductV4Request> products) {
-        return products.size() == 1 && CDH.equals(products.get(0).getName());
-    }
-
     private boolean isCdhParcelMissing(List<ClouderaManagerProductV4Request> products, List<ClusterComponent> components) {
         boolean missingFromProducts = products.stream()
                 .noneMatch(product -> CDH.equals(product.getName()));
@@ -240,19 +232,5 @@ public class ClouderaManagerClusterCreationSetupService {
                 .noneMatch(product -> CDH.equals(product.getName()));
 
         return missingFromProducts && missingFromComponents;
-    }
-
-    private Set<ClouderaManagerProduct>  addDefaultProducts(Cluster cluster, String blueprintCdhVersion, String osType, String cloudPlatform,
-            String imageCatalogName) throws CloudbreakImageCatalogException {
-        DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(cluster.getWorkspace().getId(), blueprintCdhVersion, osType, cloudPlatform, imageCatalogName);
-        Set<ClouderaManagerProduct> filteredProducts = new HashSet<>();
-        if (defaultCDHInfo != null) {
-            filteredProducts = parcelService.filterParcelsByBlueprint(Sets.newHashSet(defaultCDHInfo.getParcels()), cluster.getBlueprint());
-            if (CollectionUtils.isNotEmpty(filteredProducts)) {
-                LOGGER.info("Adding default products to CDH cluster with name '{}'.", cluster.getName());
-                return filteredProducts;
-            }
-        }
-        return filteredProducts;
     }
 }
