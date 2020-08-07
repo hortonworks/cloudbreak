@@ -266,7 +266,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         }
 
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
-                getTestContext().getCloudbreakClient(),
+                getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
                 null,
                 getResponse().getCrn());

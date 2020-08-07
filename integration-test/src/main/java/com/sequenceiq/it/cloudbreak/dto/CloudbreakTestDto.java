@@ -8,11 +8,12 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.context.Orderable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 
-public interface CloudbreakTestDto extends Orderable {
+public interface CloudbreakTestDto extends Orderable, Assignable {
 
     Logger LOGGER = LoggerFactory.getLogger(CloudbreakTestDto.class);
 
@@ -45,4 +46,9 @@ public interface CloudbreakTestDto extends Orderable {
     default void setCloudPlatform(CloudPlatform cloudPlatform) {
         LOGGER.warn("Did not set up cloud platform ({}): name={}", getClass().getSimpleName(), getName());
     }
+
+    default String getCrn() {
+        throw new IllegalStateException(String.format("Error happened, getCrn() is not implemented for TestDto: %s", this));
+    }
+
 }

@@ -34,8 +34,7 @@ public class EnvironmentAwait implements Await<EnvironmentTestDto, EnvironmentSt
                 throw new RuntimeException("Environment key has been provided but no result in resource map!");
             }
             Log.await(LOGGER, String.format("%s for %s", entity.getResponse().getName(), desiredStatus));
-            EnvironmentClient client = testContext.getMicroserviceClient(EnvironmentClient.class, testContext.getWho(runningParameter)
-                    .getAccessKey());
+            EnvironmentClient client = testContext.getAdminMicroserviceClient(EnvironmentClient.class);
             String crn = entity.getResponse().getCrn();
             if (desiredStatus.equals(ARCHIVED)) {
                 waitForEnvironmentStatus(new EnvironmentTerminationChecker<>(), client, crn, testContext, desiredStatus,

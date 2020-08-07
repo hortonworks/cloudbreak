@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.api.FlowEndpoint;
+import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
@@ -42,21 +42,24 @@ public class FlowUtil {
     }
 
     public WaitResult waitBasedOnLastKnownFlow(SdxTestDto sdxTestDto, SdxClient sdxClient) {
-        FlowEndpoint flowEndpoint = sdxClient.getSdxClient().flowEndpoint();
-        return isFlowRunning(flowEndpoint, sdxTestDto.getLastKnownFlowChainId(), sdxTestDto.getLastKnownFlowId());
+        FlowPublicEndpoint flowEndpoint = sdxClient.getSdxClient().flowPublicEndpoint();
+        return isFlowRunning(flowEndpoint, sdxTestDto.getResponse().getCrn(), sdxTestDto.getLastKnownFlowChainId(), sdxTestDto.getLastKnownFlowId());
     }
 
     public WaitResult waitBasedOnLastKnownFlow(SdxInternalTestDto sdxInternalTestDto, SdxClient sdxClient) {
-        FlowEndpoint flowEndpoint = sdxClient.getSdxClient().flowEndpoint();
-        return isFlowRunning(flowEndpoint, sdxInternalTestDto.getLastKnownFlowChainId(), sdxInternalTestDto.getLastKnownFlowId());
+        FlowPublicEndpoint flowEndpoint = sdxClient.getSdxClient().flowPublicEndpoint();
+        return isFlowRunning(flowEndpoint,
+                sdxInternalTestDto.getResponse().getCrn(),
+                sdxInternalTestDto.getLastKnownFlowChainId(),
+                sdxInternalTestDto.getLastKnownFlowId());
     }
 
     public WaitResult waitBasedOnLastKnownFlow(CloudbreakTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
-        FlowEndpoint flowEndpoint = cloudbreakClient.getCloudbreakClient().flowEndpoint();
-        return isFlowRunning(flowEndpoint, distroXTestDto.getLastKnownFlowChainId(), distroXTestDto.getLastKnownFlowId());
+        FlowPublicEndpoint flowEndpoint = cloudbreakClient.getCloudbreakClient().flowPublicEndpoint();
+        return isFlowRunning(flowEndpoint, distroXTestDto.getCrn(), distroXTestDto.getLastKnownFlowChainId(), distroXTestDto.getLastKnownFlowId());
     }
 
-    private WaitResult isFlowRunning(FlowEndpoint flowEndpoint, String flowChainId, String flowId) {
+    private WaitResult isFlowRunning(FlowPublicEndpoint flowEndpoint, String crn, String flowChainId, String flowId) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         boolean flowRunning = true;
         int retryCount = 0;
@@ -65,10 +68,10 @@ public class FlowUtil {
             try {
                 if (StringUtils.isNotBlank(flowChainId)) {
                     LOGGER.info("Waiting for flow chain {}, retry count {}", flowChainId, retryCount);
-                    flowRunning = flowEndpoint.hasFlowRunningByChainId(flowChainId).getHasActiveFlow();
+                    flowRunning = flowEndpoint.hasFlowRunningByChainId(flowChainId, crn).getHasActiveFlow();
                 } else if (StringUtils.isNoneBlank(flowId)) {
                     LOGGER.info("Waiting for flow {}, retry count {}", flowId, retryCount);
-                    flowRunning = flowEndpoint.hasFlowRunningByFlowId(flowId).getHasActiveFlow();
+                    flowRunning = flowEndpoint.hasFlowRunningByFlowId(flowChainId, crn).getHasActiveFlow();
                 } else {
                     LOGGER.info("Flow id and flow chain id are empty so flow is not running");
                     flowRunning = false;

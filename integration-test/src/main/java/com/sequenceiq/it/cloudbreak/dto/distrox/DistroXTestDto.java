@@ -119,7 +119,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
-        return when(distroXTestClient.refresh(), key("refresh-distrox-" + getName()));
+        return when(distroXTestClient.refresh(), RunningParameter.key("refresh-distrox-" + getName()).switchToAdmin());
     }
 
     @Override
@@ -199,9 +199,10 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private boolean hasFlow() {
         try {
-            return getTestContext().getCloudbreakClient().getCloudbreakClient()
-                    .flowEndpoint()
-                    .getFlowLogsByResourceName(getName()).stream().anyMatch(flowentry -> !flowentry.getFinalized());
+            return ((CloudbreakClient) getTestContext().getAdminMicroserviceClient(CloudbreakClient.class))
+                    .getCloudbreakClient()
+                    .flowPublicEndpoint()
+                    .hasFlowRunningByChainId(getLastKnownFlowChainId(), getCrn()).getHasActiveFlow();
         } catch (NotFoundException e) {
             return false;
         }
@@ -268,7 +269,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
             return null;
         }
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
-                getTestContext().getCloudbreakClient(),
+                getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
                 getResponse().getId(),
                 null);
@@ -281,5 +282,10 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public String getSearchId() {
         return getName();
+    }
+
+    @Override
+    public String getCrn() {
+        return getResponse().getCrn();
     }
 }
