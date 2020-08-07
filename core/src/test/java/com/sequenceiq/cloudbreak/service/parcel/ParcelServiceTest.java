@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.service.parcel;
 
+import static javax.ws.rs.core.Response.Status.OK;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,9 +18,9 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,7 +34,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @ExtendWith(MockitoExtension.class)
-class ParcelServiceTest {
+public class ParcelServiceTest {
 
     @Mock
     private CmTemplateGeneratorService clusterTemplateGeneratorService;
@@ -41,83 +45,74 @@ class ParcelServiceTest {
     @InjectMocks
     private ParcelService underTest;
 
-    @Test
-    void testFilterParcelsByBlueprintWhenNoParcelForServiceName() {
-        Client client = mock(Client.class);
-        WebTarget webTarget = mock(WebTarget.class);
-        Invocation.Builder request = mock(Invocation.Builder.class);
-        Response response = mock(Response.class);
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                {"Trying to download the parcel manifest in case of BASE image, when we can reach the file which is a standard " +
+                        "manifest file and it DOES NOT contains the component then DO NOT assign the parcel.",
+                        "http://parcel1.com/", OK, "NIFI", Optional.of(getManifestJson("otherService1")), true, 0},
 
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText("bpText");
+                {"Trying to download the parcel manifest in case of BASE image, when we can reach the file which is a standard " +
+                        "manifest file and it DOES contains the component then assign the parcel. (NIFI usecase)",
+                        "http://parcel1.com/", OK, "NIFI", Optional.of(getManifestJson("NIFI")), true, 1},
 
-        SupportedServices supportedServices = getSupportedServices("serv1");
+                {"Trying to download the parcel manifest in case of BASE image, when we can reach the file which is a standard " +
+                        "manifest file then it should assign the parcel, because we dont know that it is required, or not. (PROFILER usecase)",
+                        "http://parcel1.com/", OK, "NIFI", Optional.of("{..ewwer"), true, 1},
 
-        when(clusterTemplateGeneratorService.getServicesByBlueprint("bpText")).thenReturn(supportedServices);
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
-        when(client.target("http://parcel1.com/manifest.json")).thenReturn(webTarget);
-        when(webTarget.request()).thenReturn(request);
-        when(request.get()).thenReturn(response);
-        when(response.getStatusInfo()).thenReturn(Response.Status.OK);
-        when(response.readEntity(String.class)).thenReturn(getManifestJson("otherService1"));
+                {"Trying to download the parcel manifest in case of BASE image, when we can NOT reach the manifest file " +
+                        "then it should NOT assign the parcel because probably not available anymore. (RELENG deleted a released artifact usecase)",
+                        "http://parcel1.com/", NOT_FOUND, "NIFI", Optional.empty(), true, 0},
 
-        Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(getParcels("http://parcel1.com/"), blueprint);
+                {"Trying to download the parcel manifest in case of PREWARMED image, when we can reach the file which is a standard " +
+                        "manifest file and it DOES NOT contains the component then DO NOT assign the parcel.",
+                        "http://parcel1.com/", OK, "NIFI", Optional.of(getManifestJson("otherService1")), false, 0},
 
-        Assertions.assertEquals(0, actual.size());
+                {"Trying to download the parcel manifest in case of PREWARMED image when we can reach the file which is a standard " +
+                        "manifest file and it DOES contains the component then assign the parcel. (NIFI usecase)",
+                        "http://parcel1.com/", OK, "NIFI", Optional.of(getManifestJson("NIFI")), false, 1},
+
+                {"Trying to download the parcel manifest in case of PREWARMED image, when we can reach the file which is a standard " +
+                        "manifest file then it should assign the parcel, because we dont know that it is required, or not. (PROFILER usecase)",
+                        "http://parcel1.com/", OK, "NIFI", Optional.of("{..ewwer"), false, 1},
+
+                {"Trying to download the parcel manifest in case of PREWARMED image, when we can NOT reach the manifest file " +
+                        "then it should assign the parcel because probably that is not available anymore but the PREWARMED image contains it. " +
+                        "(RELENG deleted a released artifact usecase)",
+                        "http://parcel1.com/", NOT_FOUND, "NIFI", Optional.empty(), false, 1},
+        });
     }
 
-    @Test
-    void testFilterParcelsByBlueprintWhenAllParcelsNeed() {
-        Client client = mock(Client.class);
-        WebTarget webTarget = mock(WebTarget.class);
-        Invocation.Builder request = mock(Invocation.Builder.class);
-        Response response = mock(Response.class);
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void test(String description, String parcelUrl, Response.Status status, String serviceNameInTheBlueprint, Optional<String> manifest,
+        boolean baseImage, int parcelCount) {
+        when(clusterTemplateGeneratorService.getServicesByBlueprint("bpText"))
+                .thenReturn(getSupportedServices(serviceNameInTheBlueprint));
 
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText("bpText");
+        mockManifestResponse(parcelUrl, status, manifest);
 
-        SupportedServices supportedServices = getSupportedServices("serv1");
-
-        when(clusterTemplateGeneratorService.getServicesByBlueprint("bpText")).thenReturn(supportedServices);
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
-        when(client.target("http://parcel1.com/manifest.json")).thenReturn(webTarget);
-        when(webTarget.request()).thenReturn(request);
-        when(request.get()).thenReturn(response);
-        when(response.getStatusInfo()).thenReturn(Response.Status.OK);
-        when(response.readEntity(String.class)).thenReturn(getManifestJson("serv1"));
-
-        Set<ClouderaManagerProduct> parcels = getParcels("http://parcel1.com/");
-        Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(parcels, blueprint);
-
-        Assertions.assertEquals(1, actual.size());
-        Assertions.assertEquals(actual, new HashSet<>(parcels));
+        assertEquals(parcelCount, underTest.filterParcelsByBlueprint(getParcels(parcelUrl), getBlueprint(), baseImage).size());
     }
 
-    @Test
-    void testFilterParcelsByBlueprintWhenNoManifest() {
+    public Blueprint getBlueprint() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText("bpText");
+        return blueprint;
+    }
+
+    public void mockManifestResponse(String parcelUrl, Response.Status status, Optional<String> manifest) {
         Client client = mock(Client.class);
         WebTarget webTarget = mock(WebTarget.class);
         Invocation.Builder request = mock(Invocation.Builder.class);
         Response response = mock(Response.class);
-
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText("bpText");
-
-        SupportedServices supportedServices = getSupportedServices("serv1");
-
-        when(clusterTemplateGeneratorService.getServicesByBlueprint("bpText")).thenReturn(supportedServices);
         when(restClientFactory.getOrCreateDefault()).thenReturn(client);
-        when(client.target("http://parcel1.com/manifest.json")).thenReturn(webTarget);
+        when(client.target(parcelUrl + "manifest.json")).thenReturn(webTarget);
         when(webTarget.request()).thenReturn(request);
         when(request.get()).thenReturn(response);
-        when(response.getStatusInfo()).thenReturn(Response.Status.OK);
-        when(response.readEntity(String.class)).thenReturn(null);
-
-        Set<ClouderaManagerProduct> parcels = getParcels("http://parcel1.com/", "http://parcel2.com/");
-        Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(parcels, blueprint);
-
-        Assertions.assertEquals(2, actual.size());
-        Assertions.assertEquals(actual, new HashSet<>(parcels));
+        when(response.getStatusInfo()).thenReturn(status);
+        if (manifest.isPresent()) {
+            when(response.readEntity(String.class)).thenReturn(manifest.get());
+        }
     }
 
     private Set<ClouderaManagerProduct> getParcels(String... parcelUrls) {
@@ -139,7 +134,7 @@ class ParcelServiceTest {
         return supportedServices;
     }
 
-    private String getManifestJson(String... componentNames) {
+    public static String getManifestJson(String... componentNames) {
         Manifest manifest = new Manifest();
         manifest.setLastUpdated(System.currentTimeMillis());
         Parcel parcel = new Parcel();
