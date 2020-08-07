@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
@@ -445,11 +446,14 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
             if (!razEntitlementEnabled) {
                 validationBuilder.error("Provisioning Ranger Raz is not enabled for this account.");
             }
-            if (!AZURE.name().equalsIgnoreCase(environment.getCloudPlatform())) {
-                validationBuilder.error("Provisioning Ranger Raz is only valid for Microsoft Azure.");
+            if (!(AWS.name().equalsIgnoreCase(environment.getCloudPlatform()) || AZURE.name().equalsIgnoreCase(environment.getCloudPlatform()))) {
+                validationBuilder.error("Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.");
             }
-            if (!isRazSupported(sdxClusterRequest.getRuntime())) {
-                validationBuilder.error("Provisioning Ranger Raz is only valid for CM version >= 7.2.1 and not " + sdxClusterRequest.getRuntime());
+            if (!isRazSupported(sdxClusterRequest.getRuntime(), environment.getCloudPlatform())) {
+                boolean aws = AWS.name().equalsIgnoreCase(environment.getCloudPlatform());
+                String errorMsg = aws ? "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not " :
+                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not ";
+                validationBuilder.error(errorMsg + sdxClusterRequest.getRuntime());
             }
         }
         ValidationResult validationResult = validationBuilder.build();
@@ -478,14 +482,16 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     /**
-     * Ranger Raz is only on 7.2.1 and later.  If runtime is empty, then sdx-internal call was used.
+     * Ranger Raz is only on 7.2.1 and later on Microsoft Azure, and only on 7.2.2 and later on Amazon Web Services.
+     * If runtime is empty, then sdx-internal call was used.
      */
-    private boolean isRazSupported(String runtime) {
+    private boolean isRazSupported(String runtime, String cloudPlatform) {
         if (StringUtils.isEmpty(runtime)) {
             return true;
         }
         Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> runtime, () -> "7.2.1") > -1;
+        boolean aws = AWS.name().equalsIgnoreCase(cloudPlatform);
+        return versionComparator.compare(() -> runtime, () -> aws ? "7.2.2" : "7.2.1") > -1;
     }
 
     /**
