@@ -13,9 +13,10 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -55,7 +56,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public ProxyResponses list() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Set<ProxyConfig> listInAccount = proxyConfigService.listInAccount(accountId);
@@ -63,7 +64,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public ProxyResponse getByName(String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ProxyConfig config = proxyConfigService.getByNameForAccountId(name, accountId);
@@ -71,23 +72,29 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
-    public ProxyResponse getByEnvironmentCrn(@ResourceCrn @TenantAwareParam String environmentCrn) {
+    @InternalOnly
+    public String getCrnByAccountIdAndName(@AccountId String accountId, String name) {
+        return proxyConfigService.getByNameForAccountId(name, accountId).getResourceCrn();
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public ProxyResponse getByEnvironmentCrn(@TenantAwareParam String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ProxyConfig proxyConfig = proxyConfigService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         return proxyConfigToProxyResponseConverter.convert(proxyConfig);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
-    public ProxyResponse getByResourceCrn(String crn) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public ProxyResponse getByResourceCrn(@TenantAwareParam String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ProxyConfig config = proxyConfigService.getByCrnForAccountId(crn, accountId);
         return proxyConfigToProxyResponseConverter.convert(config);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public ProxyResponse post(ProxyRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
@@ -98,7 +105,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public ProxyResponse deleteByName(String name) {
         ProxyResponse proxyResponse = proxyConfigToProxyResponseConverter.convert(
                 proxyConfigService.deleteByNameInAccount(name, ThreadBasedUserCrnProvider.getAccountId()));
@@ -107,7 +114,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public ProxyResponse deleteByCrn(String crn) {
         ProxyResponse proxyResponse = proxyConfigToProxyResponseConverter.convert(
                 proxyConfigService.deleteByCrnInAccount(crn, ThreadBasedUserCrnProvider.getAccountId()));
@@ -116,7 +123,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public ProxyResponses deleteMultiple(Set<String> names) {
         notify(ResourceEvent.PROXY_CONFIG_DELETED);
         Set<ProxyConfig> responses = proxyConfigService.deleteMultipleInAccount(names, ThreadBasedUserCrnProvider.getAccountId());
@@ -127,7 +134,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public ProxyRequest getRequest(String name) {
         ProxyConfig proxyConfig = proxyConfigService.getByNameForAccountId(name, TEMP_ACCOUNT_ID);
         return proxyConfigToProxyRequestConverter.convert(proxyConfig);
