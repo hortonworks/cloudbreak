@@ -21,6 +21,7 @@ import com.sequenceiq.datalake.controller.sdx.SdxInternalController;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeController;
 import com.sequenceiq.datalake.controller.util.UtilController;
 import com.sequenceiq.flow.controller.FlowController;
+import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.sdx.api.SdxApi;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
@@ -34,7 +35,7 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = Arrays.asList(SdxController.class, SdxUpgradeController.class, SdxInternalController.class,
-            UtilController.class, FlowController.class, AuthorizationInfoController.class, DiagnosticsController.class);
+            UtilController.class, FlowController.class, FlowPublicController.class, AuthorizationInfoController.class, DiagnosticsController.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;

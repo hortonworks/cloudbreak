@@ -92,6 +92,11 @@ public class FlowService {
         return flowLogs.stream().map(flowLog -> conversionService.convert(flowLog, FlowLogResponse.class)).collect(Collectors.toList());
     }
 
+    public FlowCheckResponse getFlowChainStateByResourceCrn(String chainId, String resourceCrn) {
+        Long resourceId = flowLogDBService.getResourceIdByCrnOrName(resourceCrn);
+        return getFlowChainStateSafe(resourceId, chainId);
+    }
+
     public FlowCheckResponse getFlowChainState(String chainId) {
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setFlowChainId(chainId);
@@ -107,6 +112,31 @@ public class FlowService {
         } else {
             flowCheckResponse.setHasActiveFlow(Boolean.FALSE);
             return flowCheckResponse;
+        }
+    }
+
+    public FlowCheckResponse getFlowChainStateSafe(Long resourceId, String chainId) {
+        FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
+        flowCheckResponse.setFlowChainId(chainId);
+        List<FlowChainLog> flowChains = flowChainLogService.findByFlowChainIdOrderByCreatedDesc(chainId);
+        if (!flowChains.isEmpty()) {
+            LOGGER.info("Checking if there is an active flow based on flow chain id {}", chainId);
+            List<FlowChainLog> relatedChains = getRelatedFlowChainLogs(flowChains);
+            Set<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
+            Set<String> relatedFlowIds = flowLogDBService.getFlowIdsByChainIds(relatedChainIds);
+            List<FlowLog> relatedFlowLogs = flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(relatedFlowIds);
+            validateResourceId(relatedFlowLogs, resourceId);
+            flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
+            return flowCheckResponse;
+        } else {
+            flowCheckResponse.setHasActiveFlow(Boolean.FALSE);
+            return flowCheckResponse;
+        }
+    }
+
+    private void validateResourceId(List<FlowLog> flowlogs, Long resourceId) {
+        if (flowlogs.stream().anyMatch(l -> !l.getResourceId().equals(resourceId))) {
+            throw new BadRequestException(String.format("The requested chain id %s does not belong to that resource", resourceId));
         }
     }
 

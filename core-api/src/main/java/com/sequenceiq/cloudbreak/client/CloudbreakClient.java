@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
+import com.sequenceiq.flow.api.FlowPublicEndpoint;
 
 public interface CloudbreakClient {
 
@@ -53,4 +54,6 @@ public interface CloudbreakClient {
     CloudProviderServicesV4Endopint cloudProviderServicesEndpoint();
 
     FlowEndpoint flowEndpoint();
+
+    FlowPublicEndpoint flowPublicEndpoint();
 }

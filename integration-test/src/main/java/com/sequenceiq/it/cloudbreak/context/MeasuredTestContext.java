@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
@@ -217,18 +216,13 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public CloudbreakClient getCloudbreakClient(String who) {
-        return wrappedTestContext.getCloudbreakClient(who);
+    public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends MicroserviceClient> msClientClass) {
+        return wrappedTestContext.getAdminMicroserviceClient(msClientClass);
     }
 
     @Override
     public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends MicroserviceClient> msClientClass, String who) {
         return wrappedTestContext.getMicroserviceClient(msClientClass, who);
-    }
-
-    @Override
-    public CloudbreakClient getCloudbreakClient() {
-        return wrappedTestContext.getCloudbreakClient();
     }
 
     @Override

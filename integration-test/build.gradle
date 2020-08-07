@@ -88,7 +88,9 @@ dependencies {
   compile (project(':redbeams-api')) {
     transitive = false;
   }
-  compile project(':audit-connector')
+  compile (project(':audit-connector')) {
+    transitive = false;
+  }
 
   compile group: 'xerces',              name: 'xercesImpl',            version: xerces
 

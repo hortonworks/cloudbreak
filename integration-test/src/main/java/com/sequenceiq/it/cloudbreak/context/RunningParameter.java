@@ -4,12 +4,16 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import com.sequenceiq.it.cloudbreak.actor.Actor;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakUserCache;
+import com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys;
 
 public class RunningParameter {
 
     private Actor who;
 
     private boolean skipOnFail = true;
+
+    private boolean doAsAdmin;
 
     private String key;
 
@@ -22,6 +26,11 @@ public class RunningParameter {
     private Method urlMethod;
 
     public Actor getWho() {
+        if (doAsAdmin) {
+            if (CloudbreakUserCache.getInstance().isInitialized()) {
+                return Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN);
+            }
+        }
         return who;
     }
 
@@ -87,6 +96,16 @@ public class RunningParameter {
                 .filter(m -> m.getName().equals(method))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(urlClass + "does not have method " + method));
+        return this;
+    }
+
+    public RunningParameter switchToAdmin() {
+        this.doAsAdmin = true;
+        return this;
+    }
+
+    public RunningParameter swithcToActor() {
+        this.doAsAdmin = false;
         return this;
     }
 

@@ -21,6 +21,7 @@ import com.sequenceiq.environment.tags.v1.controller.AccountTagController;
 import com.sequenceiq.environment.telemetry.v1.controller.AccountTelemetryController;
 import com.sequenceiq.environment.util.v1.UtilController;
 import com.sequenceiq.flow.controller.FlowController;
+import com.sequenceiq.flow.controller.FlowPublicController;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
@@ -43,6 +44,7 @@ public class EndpointConfig extends ResourceConfig {
             EnvironmentPlatformResourceController.class,
             UtilController.class,
             FlowController.class,
+            FlowPublicController.class,
             AuthorizationInfoController.class);
 
     private final String applicationVersion;

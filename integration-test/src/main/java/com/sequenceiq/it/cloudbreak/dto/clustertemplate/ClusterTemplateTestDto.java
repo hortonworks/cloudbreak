@@ -114,7 +114,7 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
     }
 
     public Long count() {
-        CloudbreakClient client = getTestContext().getCloudbreakClient();
+        CloudbreakClient client = getTestContext().getMicroserviceClient(CloudbreakClient.class);
         return (long) client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()
                 .list(client.getWorkspaceId()).getResponses().size();

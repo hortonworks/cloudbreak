@@ -22,9 +22,9 @@ public class RecipeTest extends AbstractIntegrationTest {
     @Override
     protected void setupTest(TestContext testContext) {
         useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
-        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_B);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_B);
         useRealUmsUser(testContext, AuthUserKeys.ZERO_RIGHTS);
-        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -33,7 +33,7 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "a valid recipe create request sent",
             then = "only owner of the recipe and account admin should be able to describe or delete it")
     public void testRecipeActions(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         testContext.given(RecipeTestDto.class)
                 .when(recipeTestClient.createV4())
                 .when(recipeTestClient.getV4())
@@ -47,15 +47,15 @@ public class RecipeTest extends AbstractIntegrationTest {
                     Assertions.assertThat(dto.getSimpleResponses().getResponses()).isNotEmpty();
                     return dto;
                 })
-                .when(recipeTestClient.getV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
+                .when(recipeTestClient.getV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform environments/describeRecipe on resource crn:cdp.*")
+                        RunningParameter.expectedMessage("You have no right to perform environments/useSharedResource on resource crn:cdp.*")
                                 .withKey("RecipeGetAction"))
                 .when(recipeTestClient.getV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform environments/describeRecipe on resource crn:cdp.*")
+                        RunningParameter.expectedMessage("You have no right to perform environments/useSharedResource on resource crn:cdp.*")
                                 .withKey("RecipeGetAction"))
-                .when(recipeTestClient.deleteV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
+                .when(recipeTestClient.deleteV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("You have no right to perform environments/deleteRecipe on resource crn:cdp.*")
                                 .withKey("RecipeDeleteAction"))
