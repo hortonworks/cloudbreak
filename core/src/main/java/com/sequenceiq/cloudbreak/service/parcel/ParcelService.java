@@ -12,6 +12,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,7 @@ public class ParcelService {
     @Inject
     private RestClientFactory restClientFactory;
 
-    public Set<ClouderaManagerProduct> filterParcelsByBlueprint(Set<ClouderaManagerProduct> parcels, Blueprint blueprint) {
+    public Set<ClouderaManagerProduct> filterParcelsByBlueprint(Set<ClouderaManagerProduct> parcels, Blueprint blueprint, boolean baseImage) {
         Set<String> serviceNamesInBlueprint = getAllServiceNameInBlueprint(blueprint);
         Set<ClouderaManagerProduct> ret = new HashSet<>();
         if (serviceNamesInBlueprint.contains(null)) {
@@ -42,13 +43,15 @@ public class ParcelService {
             return parcels;
         }
         parcels.forEach(parcel -> {
-            Manifest manifest = readRepoManifest(parcel.getParcel());
-            if (manifest != null) {
-                Set<String> componentNamesInParcel = getAllComponentNameInParcel(manifest);
+            ImmutablePair<ManifestStatus, Manifest> manifest = readRepoManifest(parcel.getParcel());
+            if (manifest.right != null && ManifestStatus.SUCCESS.equals(manifest.left)) {
+                Set<String> componentNamesInParcel = getAllComponentNameInParcel(manifest.right);
                 if (componentNamesInParcel.stream().anyMatch(serviceNamesInBlueprint::contains)) {
                     ret.add(parcel);
                 }
-            } else {
+            } else if (ManifestStatus.COULD_NOT_PARSE.equals(manifest.left)) {
+                ret.add(parcel);
+            } else if (ManifestStatus.FAILED.equals(manifest.left) && !baseImage) {
                 ret.add(parcel);
             }
         });
@@ -71,20 +74,21 @@ public class ParcelService {
                 .collect(Collectors.toSet());
     }
 
-    private Manifest readRepoManifest(String baseUrl) {
+    private ImmutablePair<ManifestStatus, Manifest> readRepoManifest(String baseUrl) {
         String content = null;
         try {
             Client client = restClientFactory.getOrCreateDefault();
             WebTarget target = client.target(StringUtils.stripEnd(baseUrl, "/") + "/manifest.json");
             Response response = target.request().get();
             content = readResponse(target, response);
-            return JsonUtil.readValue(content, Manifest.class);
+            return ImmutablePair.of(ManifestStatus.SUCCESS, JsonUtil.readValue(content, Manifest.class));
         } catch (IOException e) {
             LOGGER.info("Could not parse manifest.json: {}, message: {}", content, e.getMessage());
+            return ImmutablePair.of(ManifestStatus.COULD_NOT_PARSE, null);
         } catch (Exception e) {
             LOGGER.info("Could not read manifest.json from parcel repo: {}, message: {}", baseUrl, e.getMessage());
+            return ImmutablePair.of(ManifestStatus.FAILED, null);
         }
-        return null;
     }
 
     private String readResponse(WebTarget target, Response response) {
