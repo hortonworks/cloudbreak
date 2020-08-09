@@ -17,6 +17,7 @@ public class TimeAlertResponseConverter extends AbstractConverter<TimeAlertRespo
     public TimeAlertResponse convert(TimeAlert source) {
         TimeAlertResponse json = new TimeAlertResponse();
         json.setId(source.getId());
+        json.setCrn(source.getAlertCrn());
         json.setAlertName(source.getName());
         json.setCron(source.getCron());
         json.setTimeZone(source.getTimeZone());

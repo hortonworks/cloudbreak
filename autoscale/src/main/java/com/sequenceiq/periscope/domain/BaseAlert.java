@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.domain;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -30,6 +31,9 @@ public abstract class BaseAlert implements Clustered {
     private String name;
 
     private String description;
+
+    @Column(name = "alert_crn")
+    private String alertCrn;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private ScalingPolicy scalingPolicy;
@@ -79,4 +83,12 @@ public abstract class BaseAlert implements Clustered {
     }
 
     public abstract AlertType getAlertType();
+
+    public String getAlertCrn() {
+        return alertCrn;
+    }
+
+    public void setAlertCrn(String alertCrn) {
+        this.alertCrn = alertCrn;
+    }
 }

@@ -141,6 +141,7 @@ public class AutoScaleClusterCommonService  implements ResourceBasedCrnProvider 
     }
 
     @Override
+    @Retryable(value = NotFoundException.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
     public String getResourceCrnByResourceName(String clusterName) {
         return getClusterByCrnOrName(NameOrCrn.ofName(clusterName)).getStackCrn();
     }
