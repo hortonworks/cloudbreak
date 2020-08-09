@@ -1,22 +1,26 @@
 package com.sequenceiq.periscope.service;
 
+import static com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType.DATAHUB_AUTOSCALE_CONFIG;
+
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.repository.LoadAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
-
-import freemarker.template.Configuration;
 
 @Service
 public class AlertService {
@@ -33,17 +37,12 @@ public class AlertService {
     private ClusterService clusterService;
 
     @Inject
-    private Configuration freemarkerConfiguration;
-
-    @Inject
-    private PrometheusAlertTemplateService prometheusAlertService;
-
-    @Inject
     private ScalingService scalingPolicyService;
 
     public TimeAlert createTimeAlert(Long clusterId, TimeAlert alert) {
         Cluster cluster = clusterService.findById(clusterId);
         alert.setCluster(cluster);
+        alert.setAlertCrn(createAlertCrn(ThreadBasedUserCrnProvider.getAccountId()));
         alert = (TimeAlert) save(alert);
         cluster.addTimeAlert(alert);
         clusterService.save(cluster);
@@ -60,6 +59,11 @@ public class AlertService {
         alert.setCron(timeAlertForUpdate.getCron());
         alert.setTimeZone(timeAlertForUpdate.getTimeZone());
         alert.setName(timeAlertForUpdate.getName());
+
+        if (StringUtils.isEmpty(alert.getAlertCrn())) {
+            alert.setAlertCrn(createAlertCrn(ThreadBasedUserCrnProvider.getAccountId()));
+        }
+
         if (timeAlertForUpdate.getScalingPolicy() != null) {
             alert.getScalingPolicy().setName(timeAlertForUpdate.getScalingPolicy().getName());
             alert.getScalingPolicy().setAdjustmentType(timeAlertForUpdate.getScalingPolicy().getAdjustmentType());
@@ -103,7 +107,6 @@ public class AlertService {
 
     public BaseAlert save(BaseAlert alert) {
         BaseAlert res = alert;
-
         if (alert instanceof TimeAlert) {
             res = timeAlertRepository.save((TimeAlert) alert);
         } else if (alert instanceof LoadAlert) {
@@ -115,6 +118,7 @@ public class AlertService {
     public LoadAlert createLoadAlert(Long clusterId, LoadAlert loadAlert) {
         Cluster cluster = clusterService.findById(clusterId);
         loadAlert.setCluster(cluster);
+        loadAlert.setAlertCrn(createAlertCrn(ThreadBasedUserCrnProvider.getAccountId()));
         loadAlert = (LoadAlert) save(loadAlert);
         cluster.addLoadAlert(loadAlert);
         clusterService.save(cluster);
@@ -125,6 +129,9 @@ public class AlertService {
         LoadAlert alert = loadAlertRepository.findByCluster(alertId, clusterId);
         alert.setName(loadAlertForUpdate.getName());
         alert.setDescription(loadAlertForUpdate.getDescription());
+        if (StringUtils.isEmpty(alert.getAlertCrn())) {
+            alert.setAlertCrn(createAlertCrn(ThreadBasedUserCrnProvider.getAccountId()));
+        }
         if (loadAlertForUpdate.getLoadAlertConfiguration() != null) {
             alert.setLoadAlertConfiguration(loadAlertForUpdate.getLoadAlertConfiguration());
         }
@@ -162,5 +169,14 @@ public class AlertService {
     public Set<LoadAlert> getLoadAlerts(Long clusterId) {
         Cluster cluster = clusterService.findById(clusterId);
         return cluster.getLoadAlerts();
+    }
+
+    private String createAlertCrn(String accountId) {
+        return Crn.builder()
+                .setService(Crn.Service.AUTOSCALE)
+                .setAccountId(accountId)
+                .setResourceType(DATAHUB_AUTOSCALE_CONFIG)
+                .setResource(UUID.randomUUID().toString())
+                .build().toString();
     }
 }

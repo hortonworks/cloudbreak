@@ -172,6 +172,7 @@ public class ApiDescription {
 
     public static class BaseAlertJsonProperties {
         public static final String ID = "Id of the alert";
+        public static final String CRN = "Crn of the alert";
         public static final String ALERTNAME = "Name of the alert";
         public static final String DESCRIPTION = "Description of the alert";
         public static final String SCALINGPOLICYID = "Id of the scaling ploicy";

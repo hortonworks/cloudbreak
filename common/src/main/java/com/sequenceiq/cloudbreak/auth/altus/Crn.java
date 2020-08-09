@@ -326,6 +326,7 @@ public class Crn {
         DATALAKE("datalake"),
         ACCOUNT_TAG("accountTag"),
         ACCOUNT_TELEMETRY("accountTelemetry"),
+        DATAHUB_AUTOSCALE_CONFIG("datahubAutoscaleConfig"),
         PROXY_CONIFG("proxyConfig");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
