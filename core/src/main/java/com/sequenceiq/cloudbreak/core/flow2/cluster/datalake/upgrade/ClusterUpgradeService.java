@@ -38,11 +38,14 @@ public class ClusterUpgradeService {
     @Inject
     private StackUpdater stackUpdater;
 
+    public void initUpgradeCluster(long stackId, StatedImage targetImage) {
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_UPGRADE, targetImage.getImage().getUuid());
+        clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
+    }
+
     public boolean upgradeClusterManager(long stackId, StatedImage currentImage, StatedImage targetImage) {
         String currentCmBuildNumber = currentImage.getImage().getCmBuildNumber();
         boolean clusterManagerUpdateNeeded = isUpdateNeeded(currentCmBuildNumber, targetImage.getImage().getCmBuildNumber());
-        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_UPGRADE, targetImage.getImage().getUuid());
-        clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
         if (clusterManagerUpdateNeeded) {
             flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE);
         } else {

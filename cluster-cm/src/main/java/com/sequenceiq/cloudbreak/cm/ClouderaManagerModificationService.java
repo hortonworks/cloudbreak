@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,6 +31,7 @@ import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
+import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -56,6 +58,7 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
+import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -179,6 +182,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             String product = com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH.name();
 
             ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
+            ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiClient);
             ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
             MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient);
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
@@ -191,7 +195,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             distributeParcel(stackProductVersion, parcelResourceApi, product);
             callUpgradeCdhCommand(stackProductVersion, clustersResourceApi);
             restartStaleServices(mgmtServiceResourceApi, clustersResourceApi);
-
+            clouderaManagerParcelService.removeUnusedParcelVersions(apiClient, parcelsResourceApi, parcelResourceApi, stack, product, stackProductVersion);
             configService.enableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClient, stack.getName());
         } catch (ApiException | IOException e) {
             LOGGER.info("Could not upgrade Cloudera Runtime services", e);
@@ -510,13 +514,23 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public Map<String, String> gatherInstalledComponents(String stackName) {
-        try {
-            return clouderaManagerParcelService.getActivatedParcels(apiClient, stackName);
-        } catch (ApiException e) {
-            LOGGER.info("Unable to fetch the list of activated parcels", e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+    public Map<String, String> gatherInstalledParcels(String stackName) {
+        return clouderaManagerParcelService.getParcelsInStatus(clouderaManagerApiFactory.getParcelsResourceApi(apiClient), stackName,
+                ParcelStatus.ACTIVATED);
+    }
+
+    @Override
+    public void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
+        ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiClient);
+        ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
+        Map<String, ClouderaManagerProduct> cmProducts = new HashMap<>();
+        for (ClusterComponent clusterComponent : usedParcelComponents) {
+            ClouderaManagerProduct product = clusterComponent.getAttributes().getSilent(ClouderaManagerProduct.class);
+            cmProducts.put(product.getName(), product);
         }
+        clouderaManagerParcelService.deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(), cmProducts);
+        clouderaManagerParcelService.undistributeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, cmProducts);
+        clouderaManagerParcelService.removeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, cmProducts);
     }
 
     private int startServices(Stack stack, ApiClient client) throws ApiException, CloudbreakException {

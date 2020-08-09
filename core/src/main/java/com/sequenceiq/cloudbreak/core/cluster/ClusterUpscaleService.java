@@ -118,9 +118,8 @@ public class ClusterUpscaleService {
     }
 
     public Map<String, String> gatherInstalledComponents(Long stackId, String hostname) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        LOGGER.info("Start gathering installed components from ambari on host {}", hostname);
-        return getClusterConnector(stack).gatherInstalledComponents(hostname);
+        // TODO: Dead code, will be removed with https://jira.cloudera.com/browse/CB-8349
+        return Map.of();
     }
 
     public void ensureComponentsAreStopped(Long stackId, Map<String, String> components, String hostname) throws CloudbreakException {

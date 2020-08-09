@@ -72,8 +72,12 @@ public interface ClusterApi {
         return clusterModificationService().startCluster(hostsInCluster);
     }
 
-    default Map<String, String> gatherInstalledComponents(String hostname) {
-        return clusterModificationService().gatherInstalledComponents(hostname);
+    default Map<String, String> gatherInstalledParcels(String stackName) {
+        return clusterModificationService().gatherInstalledParcels(stackName);
+    }
+
+    default void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
+        clusterModificationService().removeUnusedParcels(usedParcelComponents);
     }
 
     default void ensureComponentsAreStopped(Map<String, String> components, String hostname) throws CloudbreakException {
