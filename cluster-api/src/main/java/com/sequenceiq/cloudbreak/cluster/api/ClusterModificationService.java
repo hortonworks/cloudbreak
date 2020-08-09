@@ -29,7 +29,9 @@ public interface ClusterModificationService {
 
     void upgradeClusterRuntime(Set<ClusterComponent> components) throws CloudbreakException;
 
-    default Map<String, String> gatherInstalledComponents(String hostname) {
+    Map<String, String> gatherInstalledParcels(String stackName);
+
+    default void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 

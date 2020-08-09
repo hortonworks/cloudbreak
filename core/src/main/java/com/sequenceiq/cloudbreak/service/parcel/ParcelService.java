@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.parcel;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,10 +21,17 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 
 @Service
 public class ParcelService {
@@ -34,6 +43,32 @@ public class ParcelService {
 
     @Inject
     private RestClientFactory restClientFactory;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    public Set<ClusterComponent> getParcelComponentsByBlueprint(Stack stack) {
+        Cluster cluster = stack.getCluster();
+        Set<ClusterComponent> components = getParcelComponents(cluster);
+        if (stack.isDatalake()) {
+            ClusterComponent stackComponent = components.stream()
+                    .filter(clusterComponent -> clusterComponent.getName().equals(StackType.CDH.name()))
+                    .findFirst().orElseThrow(() -> new NotFoundException("Runtime component not found!"));
+            LOGGER.debug("For datalake clusters only the CDH parcel is used in CM: {}", stackComponent);
+            return Set.of(stackComponent);
+        } else {
+            Map<String, ClusterComponent> cmProductMap = new HashMap<>();
+            Set<ClouderaManagerProduct> cmProducts = new HashSet<>();
+            for (ClusterComponent clusterComponent : components) {
+                ClouderaManagerProduct product = clusterComponent.getAttributes().getSilent(ClouderaManagerProduct.class);
+                cmProductMap.put(product.getName(), clusterComponent);
+                cmProducts.add(product);
+            }
+            cmProducts = filterParcelsByBlueprint(cmProducts, cluster.getBlueprint(), false);
+            LOGGER.debug("The following parcels are used in CM based on blueprint: {}", cmProducts);
+            return cmProducts.stream().map(cmp -> cmProductMap.get(cmp.getName())).collect(Collectors.toSet());
+        }
+    }
 
     public Set<ClouderaManagerProduct> filterParcelsByBlueprint(Set<ClouderaManagerProduct> parcels, Blueprint blueprint, boolean baseImage) {
         Set<String> serviceNamesInBlueprint = getAllServiceNameInBlueprint(blueprint);
@@ -70,7 +105,7 @@ public class ParcelService {
         return manifest.getParcels().stream()
                 .flatMap(it -> it.getComponents().stream())
                 .map(Component::getName)
-                .map(String :: trim)
+                .map(String::trim)
                 .collect(Collectors.toSet());
     }
 
@@ -102,5 +137,11 @@ public class ParcelService {
             throw new RuntimeException(String.format("Failed to process manifest.json from '%s' due to: '%s'",
                     target.getUri().toString(), e.getMessage()));
         }
+    }
+
+    private Set<ClusterComponent> getParcelComponents(Cluster cluster) {
+        return clusterComponentConfigProvider.getComponentsByClusterId(cluster.getId()).stream()
+                .filter(clusterComponent -> ComponentType.CDH_PRODUCT_DETAILS == clusterComponent.getComponentType())
+                .collect(Collectors.toSet());
     }
 }
