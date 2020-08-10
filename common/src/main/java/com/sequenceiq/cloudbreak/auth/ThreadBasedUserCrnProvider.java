@@ -97,10 +97,6 @@ public class ThreadBasedUserCrnProvider {
     }
 
     public static <T> T doAsInternalActor(Supplier<T> callable) {
-        String originalUserCrn = getUserCrn();
-        if (originalUserCrn != null && InternalCrnBuilder.isInternalCrn(originalUserCrn)) {
-            return doAs(originalUserCrn, callable);
-        }
         return doAs(INTERNAL_ACTOR_CRN, callable);
     }
 
@@ -119,11 +115,6 @@ public class ThreadBasedUserCrnProvider {
     }
 
     public static void doAsInternalActor(Runnable runnable) {
-        String originalUserCrn = getUserCrn();
-        if (originalUserCrn != null && InternalCrnBuilder.isInternalCrn(originalUserCrn)) {
-            doAs(originalUserCrn, runnable);
-        } else {
-            doAs(INTERNAL_ACTOR_CRN, runnable);
-        }
+        doAs(INTERNAL_ACTOR_CRN, runnable);
     }
 }

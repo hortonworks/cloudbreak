@@ -116,13 +116,6 @@ public class UserService extends InternalUserModifier {
     public void persistModifiedInternalUser(CrnUser newUser) {
         getOrCreate(newUser);
         restRequestThreadLocalService.setCloudbreakUser(newUser);
-        Optional<Tenant> tenant = tenantService.findByName(newUser.getTenant());
-        if (tenant.isPresent()) {
-            Optional<Workspace> tenantDefaultWorkspace = workspaceService.getByNameForTenant(newUser.getTenant(), tenant.get());
-            if (tenantDefaultWorkspace.isPresent()) {
-                restRequestThreadLocalService.setRequestedWorkspaceId(tenantDefaultWorkspace.get().getId());
-            }
-        }
     }
 
     private User findUserAndSetCrnIfExists(CloudbreakUser cloudbreakUser) {

@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowRetryUtil;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -48,8 +47,7 @@ public class SdxRetryService {
                     if (SDX_STACK_CREATION_IN_PROGRESS_EVENT.name().equals(lastSuccessfulStateLog.getNextEvent())) {
                         LOGGER.info("Last successful state was " + SDX_STACK_CREATION_IN_PROGRESS_STATE + ", so try a retry on stack");
                         try {
-                            ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                                    stackV4Endpoint.retry(0L, sdxCluster.getClusterName(), sdxCluster.getAccountId()));
+                            stackV4Endpoint.retry(0L, sdxCluster.getClusterName(), sdxCluster.getAccountId());
                         } catch (BadRequestException e) {
                             LOGGER.info("Sdx retry failed on cloudbreak side, but try to restart the flow. Related exception: ", e);
                         }

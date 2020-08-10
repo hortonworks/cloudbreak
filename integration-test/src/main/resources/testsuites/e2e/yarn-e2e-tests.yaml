@@ -4,3 +4,4 @@ tests:
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxDistroxTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.BasicEnvironmentTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.stack.StackCreateTests

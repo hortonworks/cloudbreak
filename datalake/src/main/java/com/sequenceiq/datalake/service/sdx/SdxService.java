@@ -147,7 +147,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     public StackV4Response getDetail(String name, Set<String> entries, String accountId) {
         try {
             LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", name);
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.get(0L, name, entries, accountId));
+            return stackV4Endpoint.get(0L, name, entries, accountId);
         } catch (javax.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);
             return null;
@@ -298,13 +298,12 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     public FlowIdentifier sync(String name, String accountId) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.sync(0L, name, accountId));
+        return stackV4Endpoint.sync(0L, name, accountId);
     }
 
     public void syncByCrn(String userCrn, String crn) {
         SdxCluster sdxCluster = getByCrn(userCrn, crn);
-        ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                stackV4Endpoint.sync(0L, sdxCluster.getClusterName(), Crn.fromString(crn).getAccountId()));
+        stackV4Endpoint.sync(0L, sdxCluster.getClusterName(), Crn.fromString(crn).getAccountId());
     }
 
     protected StackV4Request prepareDefaultSecurityConfigs(StackV4Request internalRequest, StackV4Request stackV4Request, CloudPlatform cloudPlatform) {

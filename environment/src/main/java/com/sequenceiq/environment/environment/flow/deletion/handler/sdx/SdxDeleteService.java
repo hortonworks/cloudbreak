@@ -11,7 +11,6 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceDeletionService;
@@ -61,8 +60,8 @@ public class SdxDeleteService {
         LOGGER.debug("Calling sdxEndpoint.deleteByCrn for all data lakes [{}]", String.join(", ", sdxCrnsOrDatalakeName));
 
         if (legacySdxEndpoint) {
-            sdxCrnsOrDatalakeName.forEach(name -> ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.delete(0L, name, force,
-                    Crn.fromString(environment.getResourceCrn()).getAccountId())));
+            sdxCrnsOrDatalakeName.forEach(name -> stackV4Endpoint.delete(0L, name, force,
+                    Crn.fromString(environment.getResourceCrn()).getAccountId()));
         } else {
             sdxCrnsOrDatalakeName.forEach(crn -> sdxEndpoint.deleteByCrn(crn, force));
         }

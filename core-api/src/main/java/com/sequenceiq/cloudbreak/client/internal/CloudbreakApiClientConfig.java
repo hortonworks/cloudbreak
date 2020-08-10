@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderS
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
+import com.sequenceiq.cloudbreak.client.ApiInternalClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
@@ -26,11 +27,15 @@ public class CloudbreakApiClientConfig {
 
     private final ApiClientRequestFilter apiClientRequestFilter;
 
+    private final ApiInternalClientRequestFilter apiInternalClientRequestFilter;
+
     private final ClientTracingFeature clientTracingFeature;
 
-    public CloudbreakApiClientConfig(ApiClientRequestFilter apiClientRequestFilter, ClientTracingFeature clientTracingFeature) {
+    public CloudbreakApiClientConfig(ApiClientRequestFilter apiClientRequestFilter, ClientTracingFeature clientTracingFeature,
+            ApiInternalClientRequestFilter apiInternalClientRequestFilter) {
         this.apiClientRequestFilter = apiClientRequestFilter;
         this.clientTracingFeature = clientTracingFeature;
+        this.apiInternalClientRequestFilter = apiInternalClientRequestFilter;
     }
 
     @Bean
@@ -41,6 +46,19 @@ public class CloudbreakApiClientConfig {
                 .withIgnorePreValidation(cloudbreakApiClientParams.isIgnorePreValidation())
                 .withDebug(cloudbreakApiClientParams.isRestDebug())
                 .withClientRequestFilter(apiClientRequestFilter)
+                .withApiRoot(CoreApi.API_ROOT_CONTEXT)
+                .withTracer(clientTracingFeature)
+                .build();
+    }
+
+    @Bean
+    @ConditionalOnBean(CloudbreakApiClientParams.class)
+    public WebTarget cloudbreakApiInternalClientWebTarget(CloudbreakApiClientParams cloudbreakApiClientParams) {
+        return new ThreadLocalUserCrnWebTargetBuilder(cloudbreakApiClientParams.getServiceUrl())
+                .withCertificateValidation(cloudbreakApiClientParams.isCertificateValidation())
+                .withIgnorePreValidation(cloudbreakApiClientParams.isIgnorePreValidation())
+                .withDebug(cloudbreakApiClientParams.isRestDebug())
+                .withClientRequestFilter(apiInternalClientRequestFilter)
                 .withApiRoot(CoreApi.API_ROOT_CONTEXT)
                 .withTracer(clientTracingFeature)
                 .build();
@@ -59,13 +77,13 @@ public class CloudbreakApiClientConfig {
     }
 
     @Bean
-    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    @ConditionalOnBean(name = "cloudbreakApiInternalClientWebTarget")
     StackV4Endpoint stackV4Endpoint(WebTarget cloudbreakApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, StackV4Endpoint.class);
     }
 
     @Bean
-    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    @ConditionalOnBean(name = "cloudbreakApiInternalClientWebTarget")
     CloudProviderServicesV4Endopint cloudProviderServicesV4Endopint(WebTarget cloudbreakApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, CloudProviderServicesV4Endopint.class);
     }
@@ -77,13 +95,13 @@ public class CloudbreakApiClientConfig {
     }
 
     @Bean
-    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    @ConditionalOnBean(name = "cloudbreakApiInternalClientWebTarget")
     DatalakeV4Endpoint datalakeV4Endpoint(WebTarget cloudbreakApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, DatalakeV4Endpoint.class);
     }
 
     @Bean
-    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    @ConditionalOnBean(name = "cloudbreakApiInternalClientWebTarget")
     FlowEndpoint flowEndpoint(WebTarget cloudbreakApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, FlowEndpoint.class);
     }
