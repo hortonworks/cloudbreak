@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -55,13 +54,13 @@ public class SdxUpgradeServiceTest {
     @DisplayName("Test if the runtime is properly updated")
     public void testUpdateRuntimeVersionFromCloudbreak() {
         when(sdxService.getById(1L)).thenReturn(sdxCluster);
+        StackV4Response stackV4Response = getStackV4Response();
         when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
-                .thenReturn(getStackV4Response());
+                .thenReturn(stackV4Response);
 
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
-        verify(sdxService, times(1)).save(sdxClusterArgumentCaptor.capture());
-        assertEquals("7.2.1", sdxClusterArgumentCaptor.getValue().getRuntime());
+        verify(sdxService, times(1)).updateRuntimeVersionFromStackResponse(eq(sdxCluster), eq(stackV4Response));
     }
 
     @Test
