@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -867,6 +868,7 @@ public abstract class TestContext implements ApplicationContextAware {
                     .filter(Investigable.class::isInstance)
                     .map(Investigable.class::cast)
                     .map(Investigable::investigate)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
             String errorMessage = errorLogMessageProvider.getMessage(exceptionMap, clues);
             testErrorLog.report(LOGGER, errorMessage);
