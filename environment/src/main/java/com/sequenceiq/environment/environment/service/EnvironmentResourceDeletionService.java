@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -85,12 +86,12 @@ public class EnvironmentResourceDeletionService {
         Set<String> clusterNames = new HashSet<>();
         LOGGER.debug("Get Datalake clusters of the environment: '{}'", environment.getName());
         try {
-            Set<String> datalakeClusterNames = datalakeV4Endpoint
+            Set<String> datalakeClusterNames = ThreadBasedUserCrnProvider.doAsInternalActor(() -> datalakeV4Endpoint
                     .list(null, environment.getResourceCrn())
                     .getResponses()
                     .stream()
                     .map(StackViewV4Response::getName)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toSet()));
             clusterNames.addAll(datalakeClusterNames);
         } catch (WebApplicationException e) {
             propagateException("Failed to get Datalake clusters from Cloudbreak service due to:", e);
