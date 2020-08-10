@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers;
+package com.sequenceiq.cloudbreak.structuredevent.rest.urlparser;
 
 import java.util.List;
 import java.util.Map;
@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import javax.ws.rs.container.ContainerRequestContext;
 
-public abstract class RestUrlParser {
+public abstract class LegacyRestUrlParser {
 
     public static final String RESOURCE_TYPE = "RESOURCE_TYPE";
 

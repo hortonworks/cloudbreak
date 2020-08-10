@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.cloudbreak.structuredevent;
 
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 

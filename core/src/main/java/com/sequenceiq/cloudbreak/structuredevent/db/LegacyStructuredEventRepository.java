@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 
 @EntityType(entityClass = StructuredEventEntity.class)
 @Transactional(TxType.REQUIRED)
-public interface StructuredEventRepository extends WorkspaceResourceRepository<StructuredEventEntity, Long> {
+public interface LegacyStructuredEventRepository extends WorkspaceResourceRepository<StructuredEventEntity, Long> {
 
     @Override
     StructuredEventEntity save(StructuredEventEntity entity);

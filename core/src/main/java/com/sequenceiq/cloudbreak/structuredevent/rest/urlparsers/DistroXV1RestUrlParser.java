@@ -7,9 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
 
 @Component
-public class DistroXV1RestUrlParser extends RestUrlParser {
+public class DistroXV1RestUrlParser extends LegacyRestUrlParser {
 
     private static final String NAME = "name";
 

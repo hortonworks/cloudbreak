@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import reactor.bus.Event;
 
 @Component
-public class StructuredEventHandler<T extends StructuredEvent> implements EventHandler<T> {
+public class LegacyStructuredEventHandler<T extends StructuredEvent> implements EventHandler<T> {
     @Inject
     private StructuredEventService structuredEventService;
 

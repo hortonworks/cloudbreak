@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
 @EntityType(entityClass = StructuredEventEntity.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface PagingStructuredEventRepository extends PagingAndSortingRepository<StructuredEventEntity, Long> {
+public interface LegacyPagingStructuredEventRepository extends PagingAndSortingRepository<StructuredEventEntity, Long> {
 
     Page<StructuredEventEntity> findByEventTypeAndResourceTypeAndResourceId(StructuredEventType eventType, String resourceType, Long resourceId,
             Pageable pageable);

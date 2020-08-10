@@ -24,13 +24,13 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredFlowEventFactory;
+import com.sequenceiq.cloudbreak.structuredevent.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -75,7 +75,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private StackService stackService;
 
     @Inject
-    private StructuredFlowEventFactory structuredFlowEventFactory;
+    private LegacyStructuredFlowEventFactory legacyStructuredFlowEventFactory;
 
     @Inject
     private StackToStackV4ResponseConverter stackV4ResponseConverter;
@@ -145,7 +145,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
             String eventMessage, String instanceGroupName) {
 
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        StructuredNotificationEvent structuredNotificationEvent = structuredFlowEventFactory.createStructuredNotificationEvent(
+        StructuredNotificationEvent structuredNotificationEvent = legacyStructuredFlowEventFactory.createStructuredNotificationEvent(
                 stack,
                 eventType,
                 eventMessage,

@@ -37,18 +37,18 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @Component
-public class StructuredEventDBService extends AbstractWorkspaceAwareResourceService<StructuredEventEntity> implements StructuredEventService {
+public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResourceService<StructuredEventEntity> implements StructuredEventService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StructuredEventDBService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LegacyStructuredEventDBService.class);
 
     @Inject
     private ConversionService conversionService;
 
     @Inject
-    private StructuredEventRepository structuredEventRepository;
+    private LegacyStructuredEventRepository legacyStructuredEventRepository;
 
     @Inject
-    private PagingStructuredEventRepository pagingStructuredEventRepository;
+    private LegacyPagingStructuredEventRepository legacyPagingStructuredEventRepository;
 
     @Inject
     private StackService stackService;
@@ -79,7 +79,7 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
 
     @Override
     public <T extends StructuredEvent> List<T> getEventsForWorkspaceWithType(Workspace workspace, Class<T> eventClass) {
-        List<StructuredEventEntity> events = structuredEventRepository.findByWorkspaceAndEventType(workspace, StructuredEventType.getByClass(eventClass));
+        List<StructuredEventEntity> events = legacyStructuredEventRepository.findByWorkspaceAndEventType(workspace, StructuredEventType.getByClass(eventClass));
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
@@ -87,7 +87,7 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
 
     @Override
     public <T extends StructuredEvent> List<T> getEventsForWorkspaceWithTypeSince(Workspace workspace, Class<T> eventClass, Long since) {
-        List<StructuredEventEntity> events = structuredEventRepository.findByWorkspaceIdAndEventTypeSince(workspace.getId(),
+        List<StructuredEventEntity> events = legacyStructuredEventRepository.findByWorkspaceIdAndEventTypeSince(workspace.getId(),
                 StructuredEventType.getByClass(eventClass), since);
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
@@ -96,7 +96,7 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
 
     @Override
     public <T extends StructuredEvent> List<T> getEventsWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId) {
-        List<StructuredEventEntity> events = structuredEventRepository
+        List<StructuredEventEntity> events = legacyStructuredEventRepository
                 .findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByClass(eventClass), resourceType, resourceId);
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
@@ -106,7 +106,7 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
     @Override
     public <T extends StructuredEvent> Page<T> getEventsLimitedWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId,
             Pageable pageable) {
-        Page<StructuredEventEntity> events = pagingStructuredEventRepository
+        Page<StructuredEventEntity> events = legacyPagingStructuredEventRepository
                 .findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByClass(eventClass), resourceType, resourceId, pageable);
         return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> conversionService.convert(event, StructuredEvent.class));
     }
@@ -122,7 +122,7 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
 
     @Override
     public WorkspaceResourceRepository<StructuredEventEntity, Long> repository() {
-        return structuredEventRepository;
+        return legacyStructuredEventRepository;
     }
 
     @Override
@@ -142,15 +142,15 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
     }
 
     public StructuredEventEntity findByWorkspaceIdAndId(Long workspaceId, Long id) {
-        return structuredEventRepository.findByWorkspaceIdAndId(workspaceId, id);
+        return legacyStructuredEventRepository.findByWorkspaceIdAndId(workspaceId, id);
     }
 
     public List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceCrn(Workspace workspace, String resourceType, String resourceCrn) {
-        return structuredEventRepository.findByWorkspaceAndResourceTypeAndResourceCrn(workspace, resourceType, resourceCrn);
+        return legacyStructuredEventRepository.findByWorkspaceAndResourceTypeAndResourceCrn(workspace, resourceType, resourceCrn);
     }
 
     public List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceId(Workspace workspace, String resourceType, Long resourceId) {
-        return structuredEventRepository.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
+        return legacyStructuredEventRepository.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
     }
 
     private Stack getStackIfAvailable(Long workspaceId, String name, StackType stackType) {

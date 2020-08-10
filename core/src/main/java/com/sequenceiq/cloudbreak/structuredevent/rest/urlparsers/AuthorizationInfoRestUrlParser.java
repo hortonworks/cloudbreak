@@ -5,8 +5,10 @@ import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
+
 @Component
-public class AuthorizationInfoRestUrlParser extends RestUrlParser {
+public class AuthorizationInfoRestUrlParser extends LegacyRestUrlParser {
 
     @Override
     public Pattern getPattern() {
