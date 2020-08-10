@@ -7,6 +7,7 @@
 set -o errexit
 set -o nounset
 set -o pipefail
+set -o xtrace
 
 if [[ $# -ne 6 && $# -ne 7 ]]; then
   echo "Invalid inputs provided"
@@ -57,9 +58,8 @@ errorExit() {
 }
 
 replace_ranger_group_before_import() {
-  doLog "INFO Replacing RANGER_WAG with "$1" in the dump before import"
-  echo "sed --in-place="original" 's/RANGER_WAG/"$1"/g' $2"
-  ret_code=$(sed --in-place="original" -e s/RANGER_WAG/"$1"/g "$2" || echo $?)
+  doLog "INFO Replacing _RANGER_WAG_2f0264fa-0a04-462b-af85-7c09891568ef with "$1" in the dump before import"
+  ret_code=$(sed --in-place="original" -e s/_RANGER_WAG_2f0264fa-0a04-462b-af85-7c09891568ef/"$1"/g "$2" || echo $?)
   if [[ -n "$ret_code" ]] && [[ "$ret_code" -ne 0 ]]; then
     errorExit "Unable to re-write file $2"
   fi

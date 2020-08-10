@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster.dr;
 import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator.AWS_REGION_KEY;
 import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator.DISASTER_RECOVERY_KEY;
 import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator.OBJECT_STORAGE_URL_KEY;
-import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator.RANGER_ADMIN_GROUP;
+import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator.RANGER_ADMIN_GROUP_KEY;
 import static org.junit.Assert.assertEquals;
 
 import java.net.URISyntaxException;
@@ -46,6 +46,6 @@ public class BackupRestoreSaltConfigGeneratorTest {
 
         assertEquals("s3://test/backups/backupId_database_backup", disasterRecoveryKeyValuePairs.get(OBJECT_STORAGE_URL_KEY));
         assertEquals(US_WEST_2, disasterRecoveryKeyValuePairs.get(AWS_REGION_KEY));
-        assertEquals(rangerAdminGroup, disasterRecoveryKeyValuePairs.get(RANGER_ADMIN_GROUP));
+        assertEquals(rangerAdminGroup, disasterRecoveryKeyValuePairs.get(RANGER_ADMIN_GROUP_KEY));
     }
 }
