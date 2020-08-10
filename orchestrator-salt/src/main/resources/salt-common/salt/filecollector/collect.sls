@@ -10,13 +10,7 @@
   {% set extra_params = extra_params + " --end-time " + endTimeStr %}
 {% endif %}
 {% if filecollector.labelFilter %}
-  {% set labels_str = "" %}
-  {% for label in filecollector.labelFilter.items() %}
-    {% set labels_str = label_str + " --label " + label %}
-  {% endfor %}
-  {% if labels_str %}
-    {% set extra_params = extra_params + labels_str %}
-  {% endif %}
+  {% set extra_params = extra_params + " --label " + " --label ".join(filecollector.labelFilter) %}
 {% endif %}
 
 filecollector_collect_start:
