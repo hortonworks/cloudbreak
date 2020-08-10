@@ -121,6 +121,7 @@ public class CloudContext {
         .append(", platform='").append(platform).append('\'')
         .append(", userId='").append(userId).append('\'')
         .append(", workspaceId='").append(accountId).append('\'')
+        .append(", location='").append(location).append('\'')
         .append('}');
         return sb.toString();
     }
