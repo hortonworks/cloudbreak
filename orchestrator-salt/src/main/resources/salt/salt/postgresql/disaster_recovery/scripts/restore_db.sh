@@ -8,7 +8,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-if [[ $# -ne 5 && $# -ne 6 ]]; then
+if [[ $# -ne 6 && $# -ne 7 ]]; then
   echo "Invalid inputs provided"
   echo "Script accepts 5 inputs:"
   echo "  1. Cloud Provider (azure | aws)"
@@ -17,7 +17,8 @@ if [[ $# -ne 5 && $# -ne 6 ]]; then
   echo "  4. PostgreSQL port."
   echo "  5. PostgreSQL user name."
   echo "  6. AWS Region option."
-  echo "  7. (optional) Log file location."
+  echo "  7. ranger admin group"
+  echo "  8. (optional) Log file location."
   exit 1
 fi
 
@@ -33,7 +34,8 @@ if [[ -n $REGION_OPTION ]]; then
   REGION_OPTION="--region ${REGION_OPTION}"
 fi
 
-LOGFILE=${7:-/var/log/}/dl_postgres_restore.log
+RANGERGROUP="$7"
+LOGFILE=${8:-/var/log/}/dl_postgres_restore.log
 echo "Logs at ${LOGFILE}"
 
 BACKUPS_DIR="/var/tmp/postgres_restore_staging"
@@ -54,10 +56,22 @@ errorExit() {
   exit 1
 }
 
+replace_ranger_group_before_import() {
+  doLog "INFO Replacing RANGER_WAG with "$1" in the dump before import"
+  echo "sed --in-place="original" 's/RANGER_WAG/"$1"/g' $2"
+  ret_code=$(sed --in-place="original" -e s/RANGER_WAG/"$1"/g "$2" || echo $?)
+  if [[ -n "$ret_code" ]] && [[ "$ret_code" -ne 0 ]]; then
+    errorExit "Unable to re-write file $2"
+  fi
+}
+
 restore_db_from_local() {
   SERVICE=$1
   BACKUP="${BACKUPS_DIR}/${SERVICE}_backup"
 
+  if [[ "$SERVICE" == "ranger" ]]; then
+    replace_ranger_group_before_import $RANGERGROUP $BACKUP
+  fi  
   doLog "INFO Restoring $SERVICE"
 
   psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to drop database ${SERVICE}"
@@ -85,6 +99,7 @@ run_aws_restore () {
   rm -rfv "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 }
 
+doLog "Info Ranger admin group is $7"
 doLog "INFO Initiating restore"
 if [[ "$CLOUD_PROVIDER" == "azure" ]]; then
   run_azure_restore
