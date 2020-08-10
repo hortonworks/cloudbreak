@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # backup_db.sh
 # This script uses the 'pg_dump' utility to dump the contents of hive and ranger PostgreSQL databases as plain SQL.
 # After PostgreSQL contents are dumped, the SQL is uploaded to AWS or Azure using their CLI clients, 'aws s3 cp' and 'azcopy copy' respectively.
@@ -8,6 +8,7 @@
 set -o errexit
 set -o nounset
 set -o pipefail
+set -o xtrace
 
 if [[ $# -ne 6 && $# -ne 7 ]]; then
   echo "Invalid inputs provided"
@@ -88,9 +89,8 @@ run_azure_backup() {
 }
 
 replace_ranger_group_before_export() {
-  doLog "INFO Replacing "$1" with RANGER_WAG in the dump before export"
-  echo "sed --in-place="original" 's/"$1"/RANGER_WAG/g' $2"
-  ret_code=$(sed --in-place="original" -e s/"$1"/RANGER_WAG/g "$2" || echo $?)
+  doLog "INFO Replacing "$1" with _RANGER_WAG_2f0264fa-0a04-462b-af85-7c09891568ef in the dump before export"
+  ret_code=$(sed --in-place="original" -e s/"$1"/_RANGER_WAG_2f0264fa-0a04-462b-af85-7c09891568ef/g "$2" || echo $?)
   if [[ -n "$ret_code" ]] && [[ "$ret_code" -ne 0 ]]; then
     errorExit "Unable to re-write file $2"
   fi

@@ -26,7 +26,7 @@ public class BackupRestoreSaltConfigGenerator {
 
     public static final String AWS_REGION_KEY = "aws_region";
 
-    public static final String RANGER_ADMIN_GROUP = "ranger_admin_group";
+    public static final String RANGER_ADMIN_GROUP_KEY = "ranger_admin_group";
 
     public SaltConfig createSaltConfig(String location, String backupId, String rangerAdminGroup, Stack stack) throws URISyntaxException {
         String fullLocation = buildFullLocation(location, backupId, stack.getCloudPlatform());
@@ -36,7 +36,7 @@ public class BackupRestoreSaltConfigGenerator {
         Map<String, String> disasterRecoveryValues = new HashMap<>();
         disasterRecoveryValues.put(OBJECT_STORAGE_URL_KEY, fullLocation);
         disasterRecoveryValues.put(AWS_REGION_KEY, stack.getRegion());
-        disasterRecoveryValues.put(RANGER_ADMIN_GROUP, rangerAdminGroup);
+        disasterRecoveryValues.put(RANGER_ADMIN_GROUP_KEY, rangerAdminGroup);
 
         servicePillar.put("disaster-recovery", new SaltPillarProperties(POSTGRESQL_DISASTER_RECOVERY_PILLAR_PATH,
             singletonMap(DISASTER_RECOVERY_KEY, disasterRecoveryValues)));
