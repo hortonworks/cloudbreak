@@ -66,6 +66,7 @@
   "environments/describeAuditCredential": "environments/read",
   "environments/modifyAuditCredential": "environments/write",
   "cloudbreak/allowPowerUserOnly": "datahub/read",
+  "environments/useSharedResource": "datahub/read",
   "environments/read": "environments/read",
   "environments/write": "environments/write",
   "datalake/read": "datalake/read",
