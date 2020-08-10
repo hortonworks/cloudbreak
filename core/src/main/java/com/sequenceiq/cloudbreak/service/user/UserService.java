@@ -14,6 +14,9 @@ import org.springframework.retry.RetryException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
@@ -116,6 +119,20 @@ public class UserService extends InternalUserModifier {
     public void persistModifiedInternalUser(CrnUser newUser) {
         getOrCreate(newUser);
         restRequestThreadLocalService.setCloudbreakUser(newUser);
+        updateSecurityContext(newUser);
+        updateWorkspaceIdInThreadLocal(newUser);
+    }
+
+    private void updateSecurityContext(CrnUser newUser) {
+        Authentication original = SecurityContextHolder.getContext().getAuthentication();
+        if (original != null && original instanceof PreAuthenticatedAuthenticationToken) {
+            PreAuthenticatedAuthenticationToken originalToken = (PreAuthenticatedAuthenticationToken) original;
+            SecurityContextHolder.getContext().setAuthentication(
+                    new PreAuthenticatedAuthenticationToken(newUser, originalToken.getCredentials(), originalToken.getAuthorities()));
+        }
+    }
+
+    private void updateWorkspaceIdInThreadLocal(CrnUser newUser) {
         Optional<Tenant> tenant = tenantService.findByName(newUser.getTenant());
         if (tenant.isPresent()) {
             Optional<Workspace> tenantDefaultWorkspace = workspaceService.getByNameForTenant(newUser.getTenant(), tenant.get());
